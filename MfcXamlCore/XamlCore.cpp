@@ -1476,19 +1476,22 @@ namespace
     };
 
     // ===================================================================
-    // 文本基线（简化版）
-    // 盒顶到文字基线 = 内边距 + 该字号的 ascent。
-    // 字号取元素 FontSize（未声明按 9pt，与控件默认字体一致）；
-    // ascent 用 GDI 按屏幕 DPI 量一次并按字号缓存 — 设计器画布与运行时
-    // 都走这一个函数，两边算出的基线必然一致。
+    // 文本基线
+    // 盒顶到文字基线 = 内边距 + ascent（文字垂直居中的控件再让出居中偏移）。
+    // 字号/字体族/字重/斜体都参与度量，按「字体族|字号|字重|斜体」缓存；
+    // 设计器画布与运行时窗口都调这一处，两边算出的基线必然一致。
     // ===================================================================
-    int TextAscentFor(const XamlElement& el)
+    struct TextMetrics
+    {
+        int ascent = 0;
+        int descent = 0;
+    };
+
+    TextMetrics TextMetricsOf(const XamlElement& el)
     {
         int pt = _wtoi(el.get(L"FontSize").c_str());
         if (pt <= 0)
             pt = 9;
-        // 字体族与字重也参与度量：同字号下不同字体/粗体的 ascent 可能差 1~3px，
-        // 用固定字体量会把这点误差带进布局
         std::wstring face = el.get(L"FontFamily");
         if (face.empty())
             face = L"Microsoft YaHei UI";
@@ -1501,18 +1504,23 @@ namespace
             weight = FW_SEMIBOLD;
         else if (_wcsicmp(fw.c_str(), L"Light") == 0)
             weight = FW_LIGHT;
+        // 斜体：FontStyle="Italic" 或 Italic="true"
+        const bool italic = _wcsicmp(el.get(L"FontStyle").c_str(), L"Italic") == 0 ||
+                            _wcsicmp(el.get(L"Italic").c_str(), L"true") == 0;
 
-        static std::map<std::wstring, int> s_cache;
-        std::wstring key = face + L"|" + std::to_wstring(pt) + L"|" + std::to_wstring(weight);
+        static std::map<std::wstring, TextMetrics> s_cache;
+        std::wstring key = face + L"|" + std::to_wstring(pt) + L"|" +
+                           std::to_wstring(weight) + (italic ? L"|i" : L"|n");
         auto it = s_cache.find(key);
         if (it != s_cache.end())
             return it->second;
-        int ascent = 0;
+
+        TextMetrics m;
         HDC dc = ::GetDC(nullptr);
         if (dc != nullptr)
         {
             const int hpx = -::MulDiv(pt, ::GetDeviceCaps(dc, LOGPIXELSY), 72);
-            HFONT f = ::CreateFontW(hpx, 0, 0, 0, weight, FALSE, FALSE, FALSE,
+            HFONT f = ::CreateFontW(hpx, 0, 0, 0, weight, italic ? TRUE : FALSE, FALSE, FALSE,
                                     DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
                                     CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
                                     face.c_str());
@@ -1521,22 +1529,50 @@ namespace
                 HFONT old = static_cast<HFONT>(::SelectObject(dc, f));
                 TEXTMETRICW tm = {};
                 ::GetTextMetricsW(dc, &tm);
-                ascent = static_cast<int>(tm.tmAscent);
+                m.ascent = static_cast<int>(tm.tmAscent);
+                m.descent = static_cast<int>(tm.tmDescent);
                 ::SelectObject(dc, old);
                 ::DeleteObject(f);
             }
             ::ReleaseDC(nullptr, dc);
         }
-        if (ascent <= 0)
-            ascent = (std::max)(1, pt * 4 / 3);   // 量不到就按 4/3 估，至少不是 0
-        s_cache[key] = ascent;
-        return ascent;
+        if (m.ascent <= 0)
+            m.ascent = (std::max)(1, pt * 4 / 3);     // 量不到就按 4/3 估，至少不是 0
+        if (m.descent <= 0)
+            m.descent = (std::max)(1, pt / 3);
+        s_cache[key] = m;
+        return m;
     }
 
-    // 元素盒顶到其文字基线的距离
-    int BaselineFromTop(const XamlElement& el)
+    // 文字在控件盒里垂直居中绘制的类型：按钮族、勾选族、输入框族。
+    // 这类控件的基线在盒子中线附近，不能按"贴顶 + ascent"算。
+    bool TextVerticallyCentered(const std::wstring& kind)
     {
-        return el.padT + TextAscentFor(el);
+        static const wchar_t* k[] = {
+            L"button", L"roundbutton", L"toolbutton", L"delaybutton", L"togglebutton",
+            L"iconbutton", L"checkbox", L"radio", L"edit", L"textfield", L"combo",
+            L"choice", L"datepicker", L"spinbox", L"pushbutton"
+        };
+        for (const wchar_t* t : k)
+            if (_wcsicmp(kind.c_str(), t) == 0)
+                return true;
+        return false;
+    }
+
+    // 元素盒顶到其文字基线的距离；boxH<=0 时按元素自身声明或该类缺省高度算
+    int BaselineFromTop(const XamlElement& el, int boxH = 0)
+    {
+        const std::wstring kind = KindOf(el.tag);
+        const TextMetrics m = TextMetricsOf(el);
+        const int h = boxH > 0 ? boxH
+                               : (el.hasH ? el.h : (el.previewH > 0 ? el.previewH : DefaultHeight(kind)));
+        if (TextVerticallyCentered(kind))
+        {
+            const int textH = m.ascent + m.descent;
+            const int innerH = (std::max)(0, h - el.padT - el.padB);
+            return el.padT + (std::max)(0, (innerH - textH) / 2) + m.ascent;
+        }
+        return el.padT + m.ascent;
     }
 
     void LayoutNode(XamlElement& node, XamlFlow& flow)
@@ -1664,7 +1700,7 @@ namespace
                     else
                         localX = child.hasX ? child.x : availL + m;
                     if (!child.anchorBaselineRaw.empty() && AnchorIsParent(child.anchorBaselineRaw))
-                        localY = availT + m + TextAscentFor(node) - BaselineFromTop(child);
+                        localY = availT + m + BaselineFromTop(node) - BaselineFromTop(child, h);
                     else if (child.anchorCenterIn || child.anchorVCenter)
                         localY = availT + m + (boxH - h) / 2;
                     else if (child.anchorTop)
@@ -1810,7 +1846,7 @@ namespace
                     {
                         // 基线对齐：让本项文字基线与行内基线（最大 ascent 那条）齐平
                         localY = flow.paddingY +
-                                 (std::max)(0, rowMaxAsc - BaselineFromTop(child));
+                                 (std::max)(0, rowMaxAsc - BaselineFromTop(child, h));
                     }
                     else if (child.alignY == 3)
                     {
@@ -2049,7 +2085,7 @@ namespace
                     const int se = sp + (horiz ? sib->previewW : sib->previewH);
                     const bool useEnd = _wcsicmp(edge.c_str(), horiz ? L"right" : L"bottom") == 0;
                     if (_wcsicmp(edge.c_str(), L"baseline") == 0)
-                        v = sp + BaselineFromTop(*sib);      // A.baseline：兄弟的文字基线
+                        v = sp + BaselineFromTop(*sib, sib->previewH);   // A.baseline：兄弟文字基线
                     else
                         v = useEnd ? se : sp;
                 }
@@ -2119,8 +2155,8 @@ namespace
                 SplitAnchor(child.anchorBaselineRaw, id, edge);
                 if (const XamlElement* sib = findSibling(id))
                 {
-                    yPos = (sib->previewY - flow.offsetY) + BaselineFromTop(*sib) -
-                           BaselineFromTop(child);
+                    yPos = (sib->previewY - flow.offsetY) + BaselineFromTop(*sib, sib->previewH) -
+                           BaselineFromTop(child, child.previewH);
                     hasY = true;
                 }
             }

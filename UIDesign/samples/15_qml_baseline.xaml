@@ -8,7 +8,7 @@
     3) anchors.top="T3.baseline"            —— 本控件顶边落在兄弟控件的基线上
 -->
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="15 基线对齐" Width="440" Height="260" Background="#F4F6F8">
+        Title="15 基线对齐" Width="440" Height="340" Background="#F4F6F8">
 
   <XPane x:Name="Root" Padding="12" Spacing="16">
 
@@ -43,5 +43,22 @@
               Layout.alignment="Qt.AlignBaseline"/>
     </XStackPanel>
 
+    <!-- 5) 文字垂直居中的控件（按钮/输入框）：基线在盒子中线附近 -->
+    <XStackPanel x:Name="Row5" Orientation="Horizontal" Spacing="8" Height="44">
+      <XButton x:Name="Btn5" text="确定" width="80" height="32"/>
+      <XLabel x:Name="Lbl5" text="说明" FontSize="9" width="100" height="20"
+              anchors.left="Btn5.right" anchors.baseline="Btn5"/>
+    </XStackPanel>
+
+    <!-- 6) 多行文本取首行基线：折行的说明与单行标签同基线 -->
+    <XStackPanel x:Name="Row6" Orientation="Horizontal" Spacing="8" Height="52">
+      <XLabel x:Name="Multi6" text="第一行较长需要折行的说明文字，会占两行高度" FontSize="9"
+              width="160" height="44" TextWrapping="Wrap"
+              Layout.alignment="Qt.AlignBaseline"/>
+      <XLabel x:Name="Single6" text="单行" FontSize="9" width="60" height="44"
+              Layout.alignment="Qt.AlignBaseline"/>
+    </XStackPanel>
+
   </XPane>
 </XWindow>
+

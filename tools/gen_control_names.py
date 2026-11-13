@@ -587,6 +587,7 @@ def qml_usage_section():
             "| `anchors.baseline: A` | `anchors.baseline=\"A\"`，本控件文字基线压到 A 的基线（字体度量走 GDI ascent，设计器与运行时同源） |",
             "| `anchors.top: A.baseline` | `anchors.top=\"A.baseline\"`，顶边落在 A 的文字基线 |",
             "| `Layout.alignment: Qt.AlignBaseline` | 同一行不同字号文字基线齐平（按行内最大 ascent 落位） |",
+            "| 基线怎么算 | 贴顶文字控件 = 内边距 + ascent；按钮/勾选/输入框族（文字垂直居中）= 内边距 + 居中偏移 + ascent；字体族/字重/斜体/字号都参与度量 |",
             "| `modelData` / `index` | 模板里写 `{modelData}` / `{index}` / `{0}` `{1}` 取字段 |",
             "| `ListView` 行高 | `ItemHeight` |",
             "| `currentIndex` | `SelectedIndex` |",

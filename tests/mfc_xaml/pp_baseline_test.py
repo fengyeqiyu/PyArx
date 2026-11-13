@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 # 基线对齐：Layout.alignment=Qt.AlignBaseline / anchors.baseline=A / anchors.top=A.baseline
 # 用 xamlLayout 直接量算好的矩形（不开窗口，纯布局数学）
 import sys
@@ -64,6 +64,15 @@ check("P3 在 T3 右侧", x("P3") >= x("T3") + w("T3"), "x=%d" % x("P3"))
 dy4 = y("Bold4") - y("Mono4")
 check("不同字体族/字重的基线对齐", 0 <= dy4 <= 18, "dy=%d" % dy4)
 check("字体差异不算进同一行外的其它行", abs(y("Mono4") - y("Small1")) > 0, "mono_y=%d" % y("Mono4"))
+
+# 5) 文字垂直居中的控件（按钮 32 高）：基线在盒中线附近，不是贴顶
+dy5 = y("Lbl5") - y("Btn5")
+check("居中控件的基线落到盒中线", 3 <= dy5 <= 14, "dy=%d" % dy5)
+check("居中规则生效（不再按贴顶算）", dy5 >= 2, "dy=%d" % dy5)
+
+# 6) 多行文本取首行基线：折行标签与单行标签同高、同基线
+dy6 = y("Single6") - y("Multi6")
+check("多行文本按首行基线对齐", -1 <= dy6 <= 1, "dy=%d" % dy6)
 
 print("=== %d/%d PASS ===" % (ok, ok + fail))
 sys.exit(0 if fail == 0 else 1)
