@@ -9,6 +9,7 @@
 #include <cwctype>
 #include <fstream>
 #include <locale>
+#include <map>
 #include <set>
 #include <string>
 #include <typeindex>
@@ -1042,6 +1043,8 @@ namespace
                         node.alignY = 1;
                     if (pick(L"AlignFill"))
                         node.alignY = 3;
+                    if (pick(L"AlignBaseline"))
+                        node.alignY = 4;   // 基线对齐：按行内最大 ascent 落位
                 }
                 const std::wstring fw = node.get(L"Layout.fillWidth");
                 const std::wstring fh = node.get(L"Layout.fillHeight");
@@ -1055,11 +1058,13 @@ namespace
             node.anchorBottomRaw = node.get(L"anchors.bottom");
             node.anchorHCenterRaw = node.get(L"anchors.horizontalCenter");
             node.anchorVCenterRaw = node.get(L"anchors.verticalCenter");
+            node.anchorBaselineRaw = node.get(L"anchors.baseline");
             const std::wstring mg = node.get(L"anchors.margins");
             node.anchorMargin = mg.empty() ? 0 : (std::max)(0, IntAttr(mg, 0));
             node.hasAnchors = node.anchorFill || node.anchorCenterIn || node.anchorLeft ||
                               node.anchorRight || node.anchorTop || node.anchorBottom ||
-                              node.anchorHCenter || node.anchorVCenter;
+                              node.anchorHCenter || node.anchorVCenter ||
+                              !node.anchorBaselineRaw.empty();
         }
 
         if (_wcsicmp(xamlmfc::BareTag(node.tag).c_str(), L"Grid") == 0)
@@ -1273,7 +1278,7 @@ namespace
         return !AnchorIsParent(el.anchorFillRaw) || !AnchorIsParent(el.anchorLeftRaw) ||
                !AnchorIsParent(el.anchorRightRaw) || !AnchorIsParent(el.anchorTopRaw) ||
                !AnchorIsParent(el.anchorBottomRaw) || !AnchorIsParent(el.anchorHCenterRaw) ||
-               !AnchorIsParent(el.anchorVCenterRaw);
+               !AnchorIsParent(el.anchorVCenterRaw) || !AnchorIsParent(el.anchorBaselineRaw);
     }
 
     // "A.right" -> id=A, edge=right
@@ -1470,6 +1475,54 @@ namespace
         std::vector<int> gridCols;
     };
 
+    // ===================================================================
+    // 文本基线（简化版）
+    // 盒顶到文字基线 = 内边距 + 该字号的 ascent。
+    // 字号取元素 FontSize（未声明按 9pt，与控件默认字体一致）；
+    // ascent 用 GDI 按屏幕 DPI 量一次并按字号缓存 — 设计器画布与运行时
+    // 都走这一个函数，两边算出的基线必然一致。
+    // ===================================================================
+    int TextAscentFor(const XamlElement& el)
+    {
+        int pt = _wtoi(el.get(L"FontSize").c_str());
+        if (pt <= 0)
+            pt = 9;
+        static std::map<int, int> s_cache;
+        auto it = s_cache.find(pt);
+        if (it != s_cache.end())
+            return it->second;
+        int ascent = 0;
+        HDC dc = ::GetDC(nullptr);
+        if (dc != nullptr)
+        {
+            const int hpx = -::MulDiv(pt, ::GetDeviceCaps(dc, LOGPIXELSY), 72);
+            HFONT f = ::CreateFontW(hpx, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                                    DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                                    CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
+                                    L"Microsoft YaHei UI");
+            if (f != nullptr)
+            {
+                HFONT old = static_cast<HFONT>(::SelectObject(dc, f));
+                TEXTMETRICW tm = {};
+                ::GetTextMetricsW(dc, &tm);
+                ascent = static_cast<int>(tm.tmAscent);
+                ::SelectObject(dc, old);
+                ::DeleteObject(f);
+            }
+            ::ReleaseDC(nullptr, dc);
+        }
+        if (ascent <= 0)
+            ascent = (std::max)(1, pt * 4 / 3);   // 量不到就按 4/3 估，至少不是 0
+        s_cache[pt] = ascent;
+        return ascent;
+    }
+
+    // 元素盒顶到其文字基线的距离
+    int BaselineFromTop(const XamlElement& el)
+    {
+        return el.padT + TextAscentFor(el);
+    }
+
     void LayoutNode(XamlElement& node, XamlFlow& flow)
     {
         // ItemView 行定位：delegate 行按 ItemHeight 逐行堆叠，行内再走普通布局
@@ -1516,6 +1569,16 @@ namespace
                 break;
             }
         }
+        // 基线对齐（Qt.AlignBaseline）用：本层子项里最大的"盒顶到基线"距离
+        int rowMaxAsc = 0;
+        for (const auto& c : node.children)
+        {
+            const std::wstring ct = KindOf(c.tag);
+            if (ct == L"page" || ct == L"rowdefinition" || ct == L"columndefinition")
+                continue;
+            rowMaxAsc = (std::max)(rowMaxAsc, BaselineFromTop(c));
+        }
+
         int dockL = flow.padding, dockT = flow.paddingY;
         int dockR = (std::max)(dockL + 1, flow.width);
         int dockB = flow.height > 0 ? flow.height : (dockT + 1);
@@ -1579,7 +1642,9 @@ namespace
                         localX = (std::max)(availL, availR - m - w);
                     else
                         localX = child.hasX ? child.x : availL + m;
-                    if (child.anchorCenterIn || child.anchorVCenter)
+                    if (!child.anchorBaselineRaw.empty() && AnchorIsParent(child.anchorBaselineRaw))
+                        localY = availT + m + TextAscentFor(node) - BaselineFromTop(child);
+                    else if (child.anchorCenterIn || child.anchorVCenter)
                         localY = availT + m + (boxH - h) / 2;
                     else if (child.anchorTop)
                         localY = availT + m;
@@ -1720,7 +1785,13 @@ namespace
                 }
                 else if (flow.horizontal && child.alignY != 0)
                 {
-                    if (child.alignY == 3)
+                    if (child.alignY == 4)
+                    {
+                        // 基线对齐：让本项文字基线与行内基线（最大 ascent 那条）齐平
+                        localY = flow.paddingY +
+                                 (std::max)(0, rowMaxAsc - BaselineFromTop(child));
+                    }
+                    else if (child.alignY == 3)
                     {
                         h = (std::max)(1, availH - child.marginT - child.marginB);
                         localY = flow.paddingY + child.marginT;
@@ -1956,7 +2027,10 @@ namespace
                                          : (sib->previewY - flow.offsetY);
                     const int se = sp + (horiz ? sib->previewW : sib->previewH);
                     const bool useEnd = _wcsicmp(edge.c_str(), horiz ? L"right" : L"bottom") == 0;
-                    v = useEnd ? se : sp;
+                    if (_wcsicmp(edge.c_str(), L"baseline") == 0)
+                        v = sp + BaselineFromTop(*sib);      // A.baseline：兄弟的文字基线
+                    else
+                        v = useEnd ? se : sp;
                 }
                 if (horiz)
                 {
@@ -2016,6 +2090,19 @@ namespace
             };
             pickCenter(child.anchorHCenterRaw, true);
             pickCenter(child.anchorVCenterRaw, false);
+
+            // anchors.baseline="A"：本控件文字基线压到兄弟 A 的基线上
+            if (!child.anchorBaselineRaw.empty() && !AnchorIsParent(child.anchorBaselineRaw))
+            {
+                std::wstring id, edge;
+                SplitAnchor(child.anchorBaselineRaw, id, edge);
+                if (const XamlElement* sib = findSibling(id))
+                {
+                    yPos = (sib->previewY - flow.offsetY) + BaselineFromTop(*sib) -
+                           BaselineFromTop(child);
+                    hasY = true;
+                }
+            }
 
             // 两边都锚定 → 两点之间拉宽/拉高；单边锚定只挪位置，不改显式尺寸
             if (hasX && hasR)

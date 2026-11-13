@@ -93,7 +93,7 @@ public:
     int anchorMargin = 0;
     // Layout.fillWidth / Layout.fillHeight：占满容器，或在同类项之间均分剩余空间
     bool fillW = false, fillH = false;
-    // Layout.alignment：0=左/上（默认） 1=右/下 2=居中 3=填满
+    // Layout.alignment：0=左/上（默认） 1=右/下 2=居中 3=填满 4=基线(Qt.AlignBaseline)
     int alignX = 0, alignY = 0;
     // delegate 行模板（XItemView）：模板节点留一份拷贝，children 里是按行实例化出来的副本
     bool delegateRow = false;
@@ -101,6 +101,8 @@ public:
     // 原始写法（支持锚到兄弟对象："A.right" / "A"）；值为 parent 时用上面几个 bool 快判
     std::wstring anchorFillRaw, anchorLeftRaw, anchorRightRaw, anchorTopRaw, anchorBottomRaw;
     std::wstring anchorHCenterRaw, anchorVCenterRaw;
+    // anchors.baseline：对齐文字基线（"A" / "parent"）；anchors.top="A.baseline" 也认这条边
+    std::wstring anchorBaselineRaw;
 
     // 布局结果（运行时计算）
     int previewX = 0, previewY = 0, previewW = 0, previewH = 0;

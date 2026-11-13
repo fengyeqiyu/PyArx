@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Continue'
 $tests = @(
   'pp_test_all','pp_split_test','pp_cell_test','pp_event_test','pp_grid_test',
   'pp_select_test','pp_real_test','pp_cursor_test','pp_click_test',
-  'pp_runtime_test','pp_plugin_test','pp_model_list_test','pp_delegate_swap_test'
+  'pp_runtime_test','pp_plugin_test','pp_model_list_test','pp_delegate_swap_test','pp_baseline_test'
 )
 $env:PYARX_D2D_RT = 'software'
 $py = 'D:\Program Files\Python314\python.exe'
@@ -22,5 +22,6 @@ foreach ($t in $tests) {
 }
 Write-Output ("TOTAL PASS={0} FAIL={1}" -f $grandOk, $grandBad)
 $summary | Format-Table -AutoSize
+
 
 
