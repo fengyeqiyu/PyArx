@@ -21,6 +21,7 @@
 #include "XamlDraw.h"
 #include "XamlControls.h"
 #include "XamlTheme.h"
+#include "PyMfcSkin.h"   // 运行时那套自绘（开关/数值/表盘/滚筒等直接复用）
 
 namespace xamlleaf
 {
@@ -43,6 +44,20 @@ inline std::wstring resolveIconPath(const std::wstring& base, const std::wstring
     if (p.empty()) return std::wstring();
     if (p.size() > 2 && p[1] == L':') return p;
     if (!base.empty() && p[0] != L'\\') return base + L"\\" + p;
+    return p;
+}
+
+// 浅色主题喂给 pymfcskin 那套自绘：几何沿用运行时，配色跟随 XamlTheme
+inline pymfcskin::Palette lightPalette()
+{
+    pymfcskin::Palette p;
+    p.back   = xamlmfc::theme::field;
+    p.fore   = xamlmfc::theme::ink;
+    p.border = xamlmfc::theme::border;
+    p.accent = xamlmfc::theme::accent;
+    p.muted  = xamlmfc::theme::track;
+    p.ptSize = 9;
+    p.face   = L"Microsoft YaHei UI";
     return p;
 }
 
@@ -273,6 +288,61 @@ inline void drawLeaf(XamlCanvas& cv, XamlElement* el, const RECT& rc,
         cv.fillRect(rc, xamlmfc::theme::button);
         xamlDrawText(cv, rc, el->text, ap, styled, xamlmfc::theme::muted, DT_LEFT, 6);
         return;
+    }
+
+    // ---- 开关 / 数值 / 滑块组 / 日期 / 表盘 / 滚筒 / 滚动条 / 等待环 ----
+    // 直接复用运行时那套 pymfcskin 自绘（几何一致），配色换成主题浅色，
+    // 于是设计器画布与预览器不会再各画一版。
+    {
+        const pymfcskin::Palette pal = lightPalette();
+        const int v = _wtoi(el->get(L"Value").c_str());
+        if (isAnyTag(tag, {L"Switch"}))
+        {
+            const bool on = truthy(el->get(L"Checked")) || truthy(el->get(L"IsChecked")) ||
+                            truthy(el->get(L"On")) || truthy(el->get(L"Value"));
+            pymfcskin::drawSwitch(cv, rc, on, pal, false);
+            return;
+        }
+        if (isAnyTag(tag, {L"SpinBox"}))
+        {
+            pymfcskin::drawSpinBox(cv, rc, v, pal, false, false);
+            return;
+        }
+        if (isAnyTag(tag, {L"RangeSlider"}))
+        {
+            const int lo = _wtoi(el->get(L"LowerValue").c_str());
+            const int hi = _wtoi(el->get(L"UpperValue").c_str());
+            pymfcskin::drawRangeSlider(cv, rc, lo, hi, 0, 100, pal);
+            return;
+        }
+        if (isAnyTag(tag, {L"DatePicker"}))
+        {
+            pymfcskin::drawDatePicker(cv, rc, el->text.empty() ? el->get(L"Value") : el->text, pal);
+            return;
+        }
+        if (isAnyTag(tag, {L"Dial"}))
+        {
+            pymfcskin::drawDial(cv, rc, v, 0, 100, pal, false);
+            return;
+        }
+        if (isAnyTag(tag, {L"Tumbler"}))
+        {
+            int count = _wtoi(el->get(L"Count").c_str());
+            if (count <= 0) count = 12;
+            pymfcskin::drawTumbler(cv, rc, v, count, pal, false);
+            return;
+        }
+        if (isAnyTag(tag, {L"ScrollBar"}))
+        {
+            const bool vertical = rc.bottom - rc.top >= rc.right - rc.left;
+            pymfcskin::drawScrollBar(cv, rc, v, 0, 100, 20, vertical, pal, false);
+            return;
+        }
+        if (isAnyTag(tag, {L"BusyIndicator"}))
+        {
+            pymfcskin::drawBusyRing(cv, rc, 0, pal);
+            return;
+        }
     }
 
     // 其它：有文字就按文字画，避免出现调试标注

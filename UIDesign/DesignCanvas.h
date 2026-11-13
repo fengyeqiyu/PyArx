@@ -1488,7 +1488,12 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             // 预览器调的是同一个函数，所以画布与预览的圆角、边框、配色不会再分叉。
             else if (tagIs(node, L"Button") || tagIs(node, L"Label") || tagIs(node, L"TextField") ||
                      tagIs(node, L"CheckBox") || tagIs(node, L"RadioButton") ||
-                     tagIs(node, L"ComboBox") || tagIs(node, L"ProgressBar"))
+                     tagIs(node, L"ComboBox") || tagIs(node, L"ProgressBar") ||
+                     tagIs(node, L"Slider") || tagIs(node, L"RangeSlider") ||
+                     tagIs(node, L"Switch") || tagIs(node, L"SpinBox") ||
+                     tagIs(node, L"DatePicker") || tagIs(node, L"Dial") ||
+                     tagIs(node, L"Tumbler") || tagIs(node, L"ScrollBar") ||
+                     tagIs(node, L"BusyIndicator"))
             {
                 xamlapp::XamlAppearance ap;
                 ap.backColor = node->get(L"Background");
