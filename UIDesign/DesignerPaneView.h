@@ -43,6 +43,11 @@ namespace uidesign
 
         bool openFile(const CString& path);
 
+        // 关窗/退出前确认：有未保存修改时弹“保存 / 不保存 / 取消”，返回 false 表示用户取消
+        bool confirmClose();
+        bool isModified() const { return m_modified; }
+        void markModified() { m_modified = true; }
+
         // 新建空白文档（宿主启动时没有文件参数也走这里，保证有根 Window 可编辑）
         void newDocument() { onNew(); }
 
@@ -276,6 +281,7 @@ namespace uidesign
         int m_surfHotTab = -1;
         std::vector<RECT>        m_surfTabRects;
         CString m_docPath;            // 当前文档路径（文档标签与状态栏显示）
+        bool m_modified = false;      // 文档是否有未保存的修改（关闭时据此提示）
         CString m_widgetFilter;       // 控件箱分类过滤（空 = 全部）
         bool m_codeCollapsed = false; // XAML 代码坞是否收起
         void toggleCodeDock();

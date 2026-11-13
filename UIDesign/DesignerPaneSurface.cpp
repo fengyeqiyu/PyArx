@@ -908,6 +908,40 @@ void DesignerPaneView::buildWidgetRows(std::vector<xamlctl::TreeRow>& rows)
     rows.clear();
     m_surfWidgetTags.clear();
     int idx = 0;
+
+    // Draw 图元并进控件箱树：放在最前面一组（直线/矩形/圆/圆弧），
+    // 选中即进入"待放置"状态，拖画布即按矩形落下，与控件放置同一条路径。
+    {
+        xamlctl::TreeRow r;
+        r.text = L"Draw";
+        r.level = 0;
+        r.hasChildren = true;
+        r.expanded = (m_collapsedCats.find(CString(L"Draw")) == m_collapsedCats.end());
+        r.selected = (idx == m_surfSelWidgetRow);
+        rows.push_back(r);
+        m_surfWidgetTags.push_back(CString());
+        m_surfWidgetCats.push_back(CString(L"Draw"));
+        m_surfWidgetLevels.push_back(0);
+        ++idx;
+        if (r.expanded)
+        {
+            static const wchar_t* const kNames[4] = { L"直线", L"矩形", L"圆", L"圆弧" };
+            static const wchar_t* const kTags[4]  = { L"Line", L"Rectangle", L"Ellipse", L"Arc" };
+            for (int k = 0; k < 4; ++k)
+            {
+                xamlctl::TreeRow c;
+                c.text = kNames[k];
+                c.level = 1;
+                c.selected = (idx == m_surfSelWidgetRow);
+                rows.push_back(c);
+                m_surfWidgetTags.push_back(CString(kTags[k]));
+                m_surfWidgetCats.push_back(CString());
+                m_surfWidgetLevels.push_back(1);
+                ++idx;
+            }
+        }
+    }
+
     for (auto& cat : m_catalog.categories())
     {
         const CString catName(cat);

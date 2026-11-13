@@ -27,6 +27,7 @@ namespace uidesign
         afx_msg BOOL OnEraseBkgnd(CDC* pDC);
         afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
         afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+        afx_msg void OnClose();
         DECLARE_MESSAGE_MAP()
 
     private:

@@ -34,6 +34,7 @@ BEGIN_MESSAGE_MAP(DesignerFrame, CFrameWndEx)
     ON_WM_ERASEBKGND()
     ON_WM_NCCALCSIZE()
     ON_WM_GETMINMAXINFO()
+    ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 BOOL DesignerFrame::PreTranslateMessage(MSG* pMsg)
@@ -193,6 +194,14 @@ int DesignerFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
     // 浮动/自动隐藏/停靠仍然保留，停靠位置由 DockPane 决定。
     ModifyStyle(0, WS_CLIPCHILDREN);
     return 0;
+}
+
+void DesignerFrame::OnClose()
+{
+    // 编辑器关窗先问一句：有未保存修改时弹“保存 / 不保存 / 取消”
+    if (!m_pane.view().confirmClose())
+        return;                       // 用户取消，窗口保持打开
+    CFrameWndEx::OnClose();
 }
 
 BOOL DesignerFrame::OnEraseBkgnd(CDC* pDC)

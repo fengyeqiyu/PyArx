@@ -159,7 +159,6 @@
       <XGrid.ColumnDefinitions>
         <ColumnDefinition Width="260"/>   <!-- 控件箱 -->
         <ColumnDefinition Width="5"/>     <!-- 垂直 Splitter -->
-        <ColumnDefinition Width="46"/>    <!-- Draw 竖条 -->
         <ColumnDefinition Width="*"/>     <!-- 画布 -->
         <ColumnDefinition Width="5"/>     <!-- 垂直 Splitter -->
         <ColumnDefinition Width="320"/>   <!-- 对象检查器 + 属性编辑器 -->
@@ -187,6 +186,11 @@
 
         <XTreeView Name="widgetBox" Grid.Row="2" FontSize="9" LineHeight="22"
                     Background="#1C2027" Foreground="#E4E9F0" SelectionColor="#2A4A7A">
+          <TreeRow Text="Draw" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="直线" Level="1"/>
+          <TreeRow Text="矩形" Level="1"/>
+          <TreeRow Text="圆" Level="1"/>
+          <TreeRow Text="圆弧" Level="1"/>
           <TreeRow Text="Buttons" Level="0" HasChildren="True" Expanded="True"/>
           <TreeRow Text="Button" Level="1"/>
           <TreeRow Text="CheckBox" Level="1"/>
@@ -272,18 +276,9 @@
       <XSplitView Grid.Row="2" Grid.Column="1"/>
 
       <!-- ========== Draw 竖条（左侧工具栏，外观由本 XAML 决定） ========== -->
-      <DrawBar Name="drawBar" Grid.Row="2" Grid.Column="2" Title="DRAW"
-             Background="#1C2027" Foreground="#E4E9F0" MutedColor="#8E9AAB"
-             BorderColor="#39404B" AccentColor="#4C8DFF"
-             CaptionHeight="24" CaptionFontSize="8" ItemHeight="32" ItemPadding="6" ItemSpacing="4">
-        <XButton Name="shapeLine"    Tool="Line"      Width="34" Height="32"/>
-        <XButton Name="shapeRect"    Tool="Rectangle" Width="34" Height="32"/>
-        <XButton Name="shapeEllipse" Tool="Ellipse"   Width="34" Height="32"/>
-        <XButton Name="shapeArc"     Tool="Arc"       Width="34" Height="32"/>
-      </DrawBar>
 
       <!-- ========== 中间：文档标签条 + 画布舞台 ========== -->
-      <XGrid Grid.Column="3" Background="#15181D">
+      <XGrid Grid.Column="2" Background="#15181D">
         <XGrid.RowDefinitions>
           <RowDefinition Height="36"/>
           <RowDefinition Height="*"/>
@@ -302,10 +297,10 @@
         </XStage>
       </XGrid>
 
-      <XSplitView Grid.Row="2" Grid.Column="4"/>
+      <XSplitView Grid.Row="2" Grid.Column="3"/>
 
       <!-- ========== 右栏：对象检查器 + 属性编辑器 ========== -->
-      <XGrid Grid.Column="5" Background="#1C2027">
+      <XGrid Grid.Column="4" Background="#1C2027">
         <XGrid.RowDefinitions>
           <RowDefinition Height="32"/>    <!-- 对象检查器标题 -->
           <RowDefinition Height="150"/>   <!-- 对象树 -->

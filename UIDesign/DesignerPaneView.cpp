@@ -522,7 +522,8 @@ void DesignerPaneView::applyResponsiveLayout(int width)
         }
     }
     // 列布局：0=控件箱 1=Splitter 2=画布 3=Splitter 4=对象检查器+属性
-    if (grid == nullptr || grid->gridCols.size() < 5) return;
+    // （Draw 已并入控件箱树，中间那根 46px 竖条列已取消，列数由 6 变 5）
+    if (grid == nullptr || grid->gridCols.size() < 4) return;
 
     int left = 248, right = 308;
     if (width >= 1200)      { left = 248; right = 308; }
@@ -536,7 +537,7 @@ void DesignerPaneView::applyResponsiveLayout(int width)
     m_respRight = right;
 
     grid->gridCols[0].second = std::to_wstring(left);
-    grid->gridCols[4].second = std::to_wstring(right);
+    grid->gridCols[grid->gridCols.size() - 1].second = std::to_wstring(right);
 }
 
 // 以子窗口方式创建。用 AfxRegisterWndClass 注册带 CS_DBLCLKS 的类：
@@ -747,6 +748,7 @@ bool DesignerPaneView::openFile(const CString& path)
         m_doc.layout(0, 0, root->w, root->h);
     m_selected.clear();
     m_docPath = path;
+    m_modified = false;                 // 刚打开的文档视为未修改
     // 画布节点在 rebuildTree 里创建，先建树再灌文档（首帧 openFile 时 m_canvas 可能还是空）
     rebuildTree();
     if (m_canvas != nullptr) m_canvas->setDocument(&m_doc);
@@ -785,6 +787,7 @@ void DesignerPaneView::onSave()
     }
 
     m_docPath = path;
+    m_modified = false;                 // 落盘即干净，关闭时不再提示
 
     // 路径变了（新建→保存），状态栏与标题（updateStatus 里统一写）跟着换
     updateStatus();
@@ -1354,8 +1357,26 @@ LRESULT DesignerPaneView::OnDocChanged(WPARAM, LPARAM)
 {
     // 画布上直接改了文档（就地编辑文本框 / 下拉选中 / 勾选切换）：
     // 重排 + 重设画布 + 属性表 + 代码区 + 状态栏都要跟上
+    m_modified = true;
     refreshAfterDocChange();
     return 0;
+}
+
+// 关闭前的保存确认：有改动才问，用户点“取消”则中止关闭
+bool DesignerPaneView::confirmClose()
+{
+    if (!m_modified) return true;
+    CString file = m_docPath;
+    const int slash = file.ReverseFind(L'\\');
+    if (slash >= 0) file = file.Mid(slash + 1);
+    if (file.IsEmpty()) file = L"未命名.xaml";
+    CString msg;
+    msg.Format(L"%s 有未保存的修改，是否保存？", (LPCWSTR)file);
+    const int r = AfxMessageBox(msg, MB_YESNOCANCEL | MB_ICONQUESTION);
+    if (r == IDCANCEL) return false;
+    if (r == IDNO) return true;          // 放弃修改直接关
+    onSave();
+    return !m_modified;                  // 保存对话框被取消时不允许关窗
 }
 
 void DesignerPaneView::onAbout()

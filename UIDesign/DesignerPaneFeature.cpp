@@ -594,6 +594,7 @@ void DesignerPaneView::notImpl(const CString& what)
 void DesignerPaneView::pushUndo()
 {
     if (m_doc.root() == nullptr) return;
+    m_modified = true;                       // 所有修改都先 pushUndo，脏标记集中在这里
     m_undoStack.push_back(*m_doc.root());   // XamlElement 深拷贝（值语义树）
     m_redoStack.clear();
     if (m_undoStack.size() > 64) m_undoStack.erase(m_undoStack.begin());
