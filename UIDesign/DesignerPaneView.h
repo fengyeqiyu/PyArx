@@ -352,7 +352,7 @@ namespace uidesign
         int m_dragSplit = -1;             // 正在拖动的分割条索引，-1=无
         // 无边框窗体自己实现的拖动/缩放（不进系统模态循环，才不会闪白圈）
         int m_frameEdges = 0;             // 0=未拖动，否则为 1/2/4/8 的位或
-        CPoint m_frameStart = CPoint(0, 0);
+        CPoint m_frameStart = CPoint(0, 0);   // 屏幕坐标起点
         CRect m_frameRect = CRect(0, 0, 0, 0);
         HWND m_frameRoot = nullptr;
         DWORD m_splitDragLastMove = 0;    // 拖动节流时间戳

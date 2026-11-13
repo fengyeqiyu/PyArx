@@ -173,7 +173,11 @@ void DesignerPaneView::startFrameDrag(CPoint pt, int edges)
         return;
     m_frameRoot = root;
     m_frameEdges = edges;
-    m_frameStart = pt;
+    // 起点存屏幕坐标，拖动中也用屏幕坐标求位移：不再假设 pane 客户区原点和根窗一致，
+    // 避免子窗口命中时客户区偏移被算进 dx/dy（左边缘一跳就到最小宽度的根因）
+    POINT sp = pt;
+    ::ClientToScreen(m_hWnd, &sp);
+    m_frameStart = CPoint(sp.x, sp.y);
     ::GetWindowRect(root, &m_frameRect);
     ::SetCapture(m_hWnd);
     beginSizeMovePreview();     // 拖动/缩放期间只贴拉伸预览，松手再全量重画
@@ -424,8 +428,8 @@ void DesignerPaneView::surfaceMouseMove(CPoint pt, UINT flags)
     {
         POINT sp = pt;
         ::ClientToScreen(m_hWnd, &sp);
-        const int dx = sp.x - (m_frameRect.left + m_frameStart.x);
-        const int dy = sp.y - (m_frameRect.top + m_frameStart.y);
+        const int dx = sp.x - m_frameStart.x;
+        const int dy = sp.y - m_frameStart.y;
         CRect r = m_frameRect;
         if (m_frameEdges == 0)
         {
