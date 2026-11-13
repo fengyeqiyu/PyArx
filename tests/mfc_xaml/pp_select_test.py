@@ -89,6 +89,9 @@ chk('点空白清空选中', app.win.getPlanSelection(pp_app.CV) == '',
     repr(app.win.getPlanSelection(pp_app.CV)))
 
 # --- 3. 点连线：取某条线的中点（模型坐标按当前 view 折算成客户区） ---
+# 详情浮层若还在屏上会吃掉这一下（planHit 先判 detailHit），先显式收起再取视口参数。
+app.hideDetail()
+M.pump(150)
 view = app.win.getPlanView(pp_app.CV)
 zoom, ox, oy = view[0], view[1], view[2]
 hit = None
@@ -96,9 +99,24 @@ for l in app.view.get('links', [])[:6]:
     print('link', l, flush=True)
     mid_x = (l['bezier'][0] + l['bezier'][6]) / 2.0
     mid_y = (l['bezier'][1] + l['bezier'][7]) / 2.0
-    # 取贝塞尔真中点（t=0.5）
-    px = (l['bezier'][0] + 3 * l['bezier'][2] + 3 * l['bezier'][4] + l['bezier'][6]) / 8.0
-    py = (l['bezier'][1] + 3 * l['bezier'][3] + 3 * l['bezier'][5] + l['bezier'][7]) / 8.0
+    # 取折线（不是贝塞尔）中点：C++ 绘制与命中都按 bezier 的 4 个拐点连成正交折线，
+    # 用三次贝塞尔 t=0.5 的点算出来会偏离 8px 命中容差，导致偶发选不中。
+    pts = [(l['bezier'][q * 2], l['bezier'][q * 2 + 1]) for q in range(4)]
+    segs = []
+    total = 0.0
+    for a, b in zip(pts, pts[1:]):
+        ln = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+        segs.append((a, b, ln))
+        total += ln
+    want, acc = total / 2.0, 0.0
+    px, py = pts[0]
+    for a, b, ln in segs:
+        if ln > 0 and acc + ln >= want:
+            t = (want - acc) / ln
+            px = a[0] + (b[0] - a[0]) * t
+            py = a[1] + (b[1] - a[1]) * t
+            break
+        acc += ln
     hit = (int(ox + px * zoom), int(oy + py * zoom), l['to'])
     break
 if hit:
