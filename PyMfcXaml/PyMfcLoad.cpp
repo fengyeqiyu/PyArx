@@ -855,6 +855,74 @@ namespace
         }
     }
 
+    // ItemView 的 model 改变：按新行数重建行控件。
+    // 行控件的生命周期不能交给 runtime（它只认元素树，不知道 HWND），所以三步走：
+    //   1) 收旧行全部 x:Name→id，销毁 HWND 并从名字表摘掉（同名残留会挡住新 id）
+    //   2) 让 runtime 按新 Model 重新展开行元素
+    //   3) 走与加载时同一条 LoadControlsFromElement 通路重建行内控件
+    bool RebuildItemViewRows(PyMfcHost* host, const std::wstring& name)
+    {
+        if (host == nullptr)
+            return false;
+        std::shared_ptr<XamlRuntime> rt = host->xamlRuntime();
+        if (!rt)
+            return false;
+        XamlElement* root = rt->elementByName(name);
+        if (root == nullptr)
+            return false;
+
+        auto* ownerWindow = static_cast<PyMfcWindow*>(host->xamlOwnerWindow());
+        auto* ownerPage = static_cast<PyMfcPanel*>(host->xamlOwnerPage());
+        if (ownerWindow == nullptr && ownerPage == nullptr)
+            return false;
+
+        py::dict& names = host->xamlNames();
+
+        std::vector<std::wstring> oldNames;
+        std::function<void(XamlElement&)> collect = [&](XamlElement& el) {
+            if (!el.name.empty())
+                oldNames.push_back(el.name);
+            for (auto& c : el.children)
+                collect(c);
+        };
+        for (auto& c : root->children)
+            collect(c);
+
+        for (const std::wstring& n : oldNames)
+        {
+            const std::string key = Utf8Of(n);
+            if (!names.contains(key.c_str()))
+                continue;
+            int id = 0;
+            try
+            {
+                id = names[key.c_str()].cast<int>();
+            }
+            catch (...)
+            {
+                PyErr_Clear();
+            }
+            if (id != 0)
+                host->removeControlById(id);
+            names.attr("pop")(py::str(key), py::none());
+        }
+
+        if (!rt->refreshItemView(name))
+            return false;
+
+        // 先重排：行元素的新坐标要算出来，后面建控件才知道自己该在哪一行
+        host->reflowXaml();
+
+        int nextId = host->xamlNextId();
+        LoadControlsFromElement(*root, ownerWindow, ownerPage, host->xamlContext(),
+                                &nextId, &names);
+        host->xamlNextId() = nextId;
+        host->applyLevelsAndTabs();
+        if (HWND h = host->GetSafeHwnd())
+            ::InvalidateRect(h, nullptr, TRUE);
+        return true;
+    }
+
     void LoadControlsInto(py::handle node, PyMfcWindow* window, PyMfcPanel* page,
                          const py::dict& context, GuiFlow& flow)
     {
@@ -1356,6 +1424,12 @@ namespace
 
 }
 
+// 供 PyMfcHost 在 ItemView 的 model 改变时调用（同一 DLL，不能留在匿名命名空间里）
+bool PyMfcRebuildItemView(PyMfcHost* host, const std::wstring& name)
+{
+    return RebuildItemViewRows(host, name);
+}
+
     py::dict XamlLayoutRects(const std::string& path, int width, int height,
                              py::object overrides)
     {
@@ -1548,7 +1622,8 @@ namespace
                         PyErr_Clear();
                     }
                 }
-                window->Host()->attachXaml(runtimeOwned, ids);
+                window->Host()->attachXaml(runtimeOwned, ids, nameMap, ctx, nextId,
+                                           static_cast<void*>(window), nullptr);
                 // 层次与 Tab 序：等整棵树建完再统一排一次，避免边建边动 z 序
                 window->Host()->applyLevelsAndTabs();
                 // 控件树齐了再一次性亮相（Embedded 窗口创建时是隐藏的）

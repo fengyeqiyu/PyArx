@@ -3826,10 +3826,36 @@ void PyMfcHost::drawPaintNodes(XamlCanvas& cv)
     }
 }
 
-void PyMfcHost::attachXaml(std::shared_ptr<XamlRuntime> rt, const std::map<std::wstring, int>& ids)
+void PyMfcHost::attachXaml(std::shared_ptr<XamlRuntime> rt, const std::map<std::wstring, int>& ids,
+                           py::dict names, py::dict context, int nextId,
+                           void* ownerWindow, void* ownerPage)
 {
         m_xaml = std::move(rt);
         m_xamlIds = ids;
+        m_xamlNames = std::move(names);
+        m_xamlContext = std::move(context);
+        m_xamlNextId = nextId;
+        m_xamlOwnerWindow = ownerWindow;
+        m_xamlOwnerPage = ownerPage;
+    }
+
+void PyMfcHost::removeControlById(int id)
+{
+        if (m_hWnd != nullptr)
+        {
+            if (HWND h = ::GetDlgItem(m_hWnd, id))
+            {
+                ::SetWindowLongPtrW(h, GWLP_ID, 0);
+                ::DestroyWindow(h);
+            }
+        }
+        for (auto it = m_xamlIds.begin(); it != m_xamlIds.end();)
+        {
+            if (it->second == id)
+                it = m_xamlIds.erase(it);
+            else
+                ++it;
+        }
     }
 
 bool PyMfcHost::reflowXaml()
@@ -3877,9 +3903,20 @@ bool PyMfcHost::setXamlProperty(const std::wstring& name, const std::wstring& pr
             return false;
         if (!m_xaml->setProperty(name, prop, value))
             return false;
+        const bool isModelProp = _wcsicmp(prop.c_str(), L"Items") == 0 ||
+                                 _wcsicmp(prop.c_str(), L"items") == 0 ||
+                                 _wcsicmp(prop.c_str(), L"model") == 0 ||
+                                 _wcsicmp(prop.c_str(), L"Model") == 0;
+        // ItemView 的行是"普通控件"：只改元素树上的 Model 不会长出新行，
+        // 必须按新行数销毁旧行控件、重建行控件（与加载时同一条建控件通路）。
+        if (isModelProp && _wcsicmp(m_xaml->kindOfElement(name).c_str(), L"itemview") == 0)
+        {
+            extern bool PyMfcRebuildItemView(PyMfcHost*, const std::wstring&);
+            PyMfcRebuildItemView(this, name);
+            return reflowXaml();
+        }
         // QML 语义：改 model / items 要立刻重建列表项（走与加载时同一条字符串表通路）
-        if (_wcsicmp(prop.c_str(), L"Items") == 0 || _wcsicmp(prop.c_str(), L"items") == 0 ||
-            _wcsicmp(prop.c_str(), L"model") == 0 || _wcsicmp(prop.c_str(), L"Model") == 0)
+        if (isModelProp)
         {
             auto it = m_xamlIds.find(name);
             if (it != m_xamlIds.end())

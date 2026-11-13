@@ -457,8 +457,23 @@ void moveMany(py::list items);
     // 复用 OnDrawItem 的外观/底色/图标/文字/焦点环分支，节点帧直接喂表面画布。
     void drawOwnerNode(XamlCanvas& cv, const XamlPaintNode& n, bool isStatic) const;
 
-    // XAML 运行时交接：加载完成后由宿主托管，表达式才能在"改值"后重新布局
-void attachXaml(std::shared_ptr<XamlRuntime> rt, const std::map<std::wstring, int>& ids);
+    // XAML 运行时交接：加载完成后由宿主托管，表达式才能在"改值"后重新布局。
+    // names/context 一并留存：ItemView 的 model 变了要按新行数重建行控件，
+    // 重建时同样要登记 x:Name→id、按回调名在 context 里解析事件处理函数。
+void attachXaml(std::shared_ptr<XamlRuntime> rt, const std::map<std::wstring, int>& ids,
+                py::dict names, py::dict context, int nextId,
+                void* ownerWindow, void* ownerPage);
+
+    // 运行时改 model 时用：行控件的销毁/重建要拿到 runtime、名字表与回调上下文
+std::shared_ptr<XamlRuntime> xamlRuntime() const { return m_xaml; }
+py::dict& xamlNames() { return m_xamlNames; }
+py::dict& xamlContext() { return m_xamlContext; }
+int& xamlNextId() { return m_xamlNextId; }
+void* xamlOwnerWindow() const { return m_xamlOwnerWindow; }
+void* xamlOwnerPage() const { return m_xamlOwnerPage; }
+
+    // 销毁一个控件并从 x:Name 映射里摘掉（ItemView 重建行前清旧行用）
+void removeControlById(int id);
 
     // 表达式重算 → 重新布局 → 把新矩形推给各控件
 bool reflowXaml();
@@ -1215,6 +1230,11 @@ bool m_anyCtlEvent = false;                          // 有控件级事件登记
     // 改了 Width 也不会重排。
     std::shared_ptr<XamlRuntime> m_xaml;
     std::map<std::wstring, int> m_xamlIds;   // x:Name → 控件 id
+    py::dict m_xamlNames;                    // 与加载时同一份 x:Name → id 字典
+    py::dict m_xamlContext;                  // 加载时的回调上下文（重建行时解析事件用）
+    int m_xamlNextId = 1000;                 // 重建行时继续分配的 id
+    void* m_xamlOwnerWindow = nullptr;       // 加载时用的 PyMfcWindow*（无则空）
+    void* m_xamlOwnerPage = nullptr;         // 加载时用的 PyMfcPanel*（无则空）
     // 容器（Canvas/Grid 等）声明的底色：按矩形存，OnEraseBkgnd 里先铺窗口底色再逐块覆盖
     std::vector<std::pair<CRect, xamlapp::XamlAppearance>> m_backdrops;
     bool m_dark = true;

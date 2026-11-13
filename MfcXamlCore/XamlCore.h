@@ -269,6 +269,14 @@ public:
     XAML_CORE_API bool setProperty(const std::wstring& name, const std::wstring& prop,
                                    const std::wstring& value);
 
+    // 按 x:Name 取节点（空 name = 根），找不到返回 nullptr
+    XAML_CORE_API XamlElement* elementByName(const std::wstring& name);
+    // 节点标签归一后的本意名（小写，如 button / itemview）
+    XAML_CORE_API std::wstring kindOfElement(const std::wstring& name);
+    // QML delegate 重展开：Model 改变后按新行数重建行元素。
+    // 只动元素树，行控件的销毁/重建由宿主负责（宿主知道 HWND 与 id 的对应）
+    XAML_CORE_API bool refreshItemView(const std::wstring& name);
+
     // 布局：按根矩形计算所有节点 preview 矩形
     XAML_CORE_API void layout(int rootX, int rootY, int rootW, int rootH);
     // 实例化：对文档树每个节点调用注册表 create + 属性/布局。

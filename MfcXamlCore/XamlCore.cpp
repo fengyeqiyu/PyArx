@@ -2792,6 +2792,74 @@ void XamlRuntime::applyStyles()
     walk(*m_root);
 }
 
+// QML delegate 行展开：XItemView 的唯一子节点是行模板，按 Model 行数实例化。
+// Model 两种写法：
+//   XAML     —— `AT1-1|回路一;AT1-2|回路二`（; 或换行分行，竖线分字段）
+//   Python   —— 绑定层把 list 拼成 `AT1-1<TAB>回路一|AT1-2<TAB>回路二`（竖线分行，制表符分字段）
+// 所以先看串里有没有制表符来决定分行/分字段符号，两种写法都落到同一个 rows。
+static void ExpandDelegate(XamlElement& el)
+{
+    if (el.delegateTemplate.empty() && !el.children.empty())
+    {
+        el.delegateTemplate.push_back(el.children.front());
+        el.children.clear();
+    }
+    el.children.erase(
+        std::remove_if(el.children.begin(), el.children.end(),
+                       [](const XamlElement& c) { return c.delegateRow; }),
+        el.children.end());
+    if (el.delegateTemplate.empty())
+        return;
+
+    const std::wstring model = el.get(L"Model");
+    const bool tabFormat = model.find(L'\t') != std::wstring::npos;
+    const wchar_t fieldSep = tabFormat ? L'\t' : L'|';
+    auto isRowBreak = [&](wchar_t ch) {
+        if (ch == L'\n' || ch == L'\r')
+            return true;
+        return tabFormat ? ch == L'|' : ch == L';';
+    };
+
+    std::vector<std::vector<std::wstring>> rows;
+    std::wstring cur;
+    for (size_t i = 0; i <= model.size(); ++i)
+    {
+        const wchar_t ch = i < model.size() ? model[i] : L'\n';
+        if (!isRowBreak(ch))
+        {
+            cur.push_back(ch);
+            continue;
+        }
+        const std::wstring line = TrimWs(cur);
+        if (!line.empty())
+        {
+            std::vector<std::wstring> fields;
+            std::wstring f;
+            for (size_t k = 0; k <= line.size(); ++k)
+            {
+                const wchar_t fc = k < line.size() ? line[k] : fieldSep;
+                if (fc == fieldSep)
+                {
+                    fields.push_back(TrimWs(f));
+                    f.clear();
+                }
+                else
+                    f.push_back(fc);
+            }
+            rows.push_back(fields);
+        }
+        cur.clear();
+    }
+
+    for (size_t r = 0; r < rows.size(); ++r)
+    {
+        std::vector<XamlElement> copy = el.delegateTemplate;
+        ApplyRowFields(copy[0], rows[r], (int)r);
+        MarkDelegateRow(copy[0]);
+        el.children.push_back(std::move(copy[0]));
+    }
+}
+
 void XamlRuntime::applyTemplates()
 {
     if (!m_root)
@@ -2800,61 +2868,7 @@ void XamlRuntime::applyTemplates()
     std::function<void(XamlElement&)> walk = [&](XamlElement& el) {
         // QML delegate：XItemView 的唯一子节点是行模板，按 Model 的行数实例化
         if (_wcsicmp(KindOf(el.tag).c_str(), L"itemview") == 0)
-        {
-            if (el.delegateTemplate.empty() && !el.children.empty())
-            {
-                el.delegateTemplate.push_back(el.children.front());
-                el.children.clear();
-            }
-            el.children.erase(
-                std::remove_if(el.children.begin(), el.children.end(),
-                               [](const XamlElement& c) { return c.delegateRow; }),
-                el.children.end());
-            if (!el.delegateTemplate.empty())
-            {
-                int rowH = _wtoi(el.get(L"ItemHeight").c_str());
-                if (rowH <= 0)
-                    rowH = 44;
-                const std::wstring model = el.get(L"Model");
-                std::vector<std::vector<std::wstring>> rows;
-                std::wstring cur;
-                for (size_t i = 0; i <= model.size(); ++i)
-                {
-                    const wchar_t ch = i < model.size() ? model[i] : L'\n';
-                    if (ch == L'\n' || ch == L';' || ch == L'\r')
-                    {
-                        const std::wstring line = TrimWs(cur);
-                        if (!line.empty())
-                        {
-                            std::vector<std::wstring> fields;
-                            std::wstring f;
-                            for (size_t k = 0; k <= line.size(); ++k)
-                            {
-                                const wchar_t fc = k < line.size() ? line[k] : L'|';
-                                if (fc == L'|')
-                                {
-                                    fields.push_back(TrimWs(f));
-                                    f.clear();
-                                }
-                                else
-                                    f.push_back(fc);
-                            }
-                            rows.push_back(fields);
-                        }
-                        cur.clear();
-                    }
-                    else
-                        cur.push_back(ch);
-                }
-                for (size_t r = 0; r < rows.size(); ++r)
-                {
-                    std::vector<XamlElement> copy = el.delegateTemplate;
-                    ApplyRowFields(copy[0], rows[r], (int)r);
-                    MarkDelegateRow(copy[0]);
-                    el.children.push_back(std::move(copy[0]));
-                }
-            }
-        }
+            ExpandDelegate(el);
         // 先清掉上一次实体化的模板子树，再递归真实子节点
         el.children.erase(
             std::remove_if(el.children.begin(), el.children.end(),
@@ -3405,6 +3419,32 @@ bool XamlRuntime::setProperty(const std::wstring& name, const std::wstring& prop
     }
     applyBindings();   // 双向或单向都重算一次，保证依赖该值的元素同步
     (void)twoWayHit;
+    return true;
+}
+
+XamlElement* XamlRuntime::elementByName(const std::wstring& name)
+{
+    if (!m_root)
+        return nullptr;
+    if (name.empty())
+        return m_root.get();
+    return FindByName(*m_root, name);
+}
+
+std::wstring XamlRuntime::kindOfElement(const std::wstring& name)
+{
+    XamlElement* el = elementByName(name);
+    return el == nullptr ? std::wstring() : KindOf(el->tag);
+}
+
+bool XamlRuntime::refreshItemView(const std::wstring& name)
+{
+    XamlElement* el = elementByName(name);
+    if (el == nullptr)
+        return false;
+    if (_wcsicmp(KindOf(el->tag).c_str(), L"itemview") != 0)
+        return false;
+    ExpandDelegate(*el);
     return true;
 }
 
