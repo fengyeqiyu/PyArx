@@ -2790,10 +2790,8 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
             // 网格点画在缩放到之前，保持 8px 固定间距（缩放只作用于文档内容）
             if (m_showGrid)
             {
-                const COLORREF dot = RGB(148, 148, 148);
-                for (int gy = 8; gy < h; gy += 8)
-                    for (int gx = 8; gx < w; gx += 8)
-                        cv.fillRect(RECT{ x + gx, y + gy, x + gx + 1, y + gy + 1 }, dot);
+                // 一次图案填充（D2D 后端走位图画刷），不再逐点 fillRect
+                cv.dotPattern(bg, 8, RGB(148, 148, 148));
             }
 
             // 画布内容必须夹在自己的矩形里（此处尚未设缩放变换，clip 走设备像素）：

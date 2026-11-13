@@ -1,4 +1,4 @@
-// XmlDraw.h —— 三端共用的"声明 → 绘制命令"层
+﻿// XmlDraw.h —— 三端共用的"声明 → 绘制命令"层
 //
 // 设计器画布、预览器、CAD 运行时（PyMfc owner-draw）都走这一份代码：
 //   XmlAppearance（XML 属性语义）
@@ -22,6 +22,17 @@ struct XmlCanvas
     virtual void end() = 0;
 
     virtual void fillRect(const RECT& rc, COLORREF c) = 0;
+
+    // 点阵平铺：整块区域一次填满（相当于 Qt 画刷的 pattern fill）。
+    // 设计器工作台的网格点以前是逐点 fillRect，981x623 @8px 就是上万次调用；
+    // D2D 后端重写为"一张 8x8 图块 + 位图画刷"，一次 FillRectangle 完成。
+    virtual void dotPattern(const RECT& rc, int cell, COLORREF c)
+    {
+        if (cell < 2) return;
+        for (int gy = rc.top + 8; gy < rc.bottom; gy += cell)
+            for (int gx = rc.left + 8; gx < rc.right; gx += cell)
+                fillRect(RECT{ gx, gy, gx + 1, gy + 1 }, c);
+    }
     // 半透明填充（alpha 0..255）。阴影、渐隐、半透明叠层都靠它。
     // 默认退化成不透明填充：GDI 这类不支持逐像素混合的后端可以直接用，
     // 想要真效果的（D2D）覆写即可。

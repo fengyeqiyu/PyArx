@@ -1,4 +1,4 @@
-// XmlD2D.h —— Direct2D 后端（两种渲染目标，三端共用）
+﻿// XmlD2D.h —— Direct2D 后端（两种渲染目标，三端共用）
 //
 //   D2DHwndCanvas ：ID2D1HwndRenderTarget，给独占窗口用（预览器、设计器画布）
 //   D2DDcCanvas   ：ID2D1DCRenderTarget，给"只有一个 HDC"的绘制路径用
@@ -229,6 +229,48 @@ public:
         if (m_rt == nullptr) return;
         const D2D1_RECT_F r = rectf(rc);
         m_rt->FillRectangle(&r, brush(c));
+    }
+
+    // 点阵平铺：8x8 图块（左上角一个点，其余透明）+ 位图画刷，一次填充整块区域。
+    // 头文件里默认实现是逐点 fillRect，这里换成图案填充，网格开销从上万次降到 1 次。
+    void dotPattern(const RECT& rc, int cell, COLORREF c) override
+    {
+        if (m_rt == nullptr || cell < 2) return;
+        if (m_dotBmp == nullptr || m_dotCell != cell || m_dotColor != c)
+        {
+            if (m_dotBrush != nullptr) { m_dotBrush->Release(); m_dotBrush = nullptr; }
+            if (m_dotBmp != nullptr) { m_dotBmp->Release(); m_dotBmp = nullptr; }
+            std::vector<unsigned int> px(static_cast<size_t>(cell) * cell, 0u);
+            const unsigned int dot = 0xFF000000u | (static_cast<unsigned int>(GetBValue(c)) << 16)
+                                   | (static_cast<unsigned int>(GetGValue(c)) << 8)
+                                   | static_cast<unsigned int>(GetRValue(c));
+            px[0] = dot;
+            D2D1_BITMAP_PROPERTIES bp = D2D1::BitmapProperties(
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
+            if (FAILED(m_rt->CreateBitmap(D2D1::SizeU(static_cast<UINT32>(cell), static_cast<UINT32>(cell)),
+                                          px.data(), static_cast<UINT32>(cell) * 4, bp, &m_dotBmp)))
+            {
+                m_dotBmp = nullptr;
+                return;
+            }
+            m_dotCell = cell;
+            m_dotColor = c;
+        }
+        if (m_dotBmp == nullptr) return;
+        if (m_dotBrush == nullptr)
+        {
+            D2D1_BITMAP_BRUSH_PROPERTIES bbp = D2D1::BitmapBrushProperties(
+                D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP,
+                D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR);
+            if (FAILED(m_rt->CreateBitmapBrush(m_dotBmp, bbp, D2D1::BrushProperties(),
+                                               &m_dotBrush)))
+            {
+                m_dotBrush = nullptr;
+                return;
+            }
+        }
+        const D2D1_RECT_F r = rectf(rc);
+        m_rt->FillRectangle(&r, m_dotBrush);
     }
 
     void fillRectAlpha(const RECT& rc, COLORREF c, int alpha) override
@@ -916,6 +958,9 @@ protected:
 
     void releaseTarget()
     {
+        if (m_dotBrush != nullptr) { m_dotBrush->Release(); m_dotBrush = nullptr; }
+        if (m_dotBmp != nullptr) { m_dotBmp->Release(); m_dotBmp = nullptr; }
+        m_dotCell = 0;
         for (auto& e : m_brushes)
             if (e.second != nullptr) e.second->Release();
         m_brushes.clear();
@@ -946,6 +991,10 @@ protected:
     }
 
     ID2D1RenderTarget* m_rt = nullptr;
+    ID2D1Bitmap*     m_dotBmp = nullptr;      // 点阵图块（cell x cell，左上角一个点）
+    ID2D1BitmapBrush* m_dotBrush = nullptr;    // 平铺画刷
+    int              m_dotCell = 0;
+    COLORREF         m_dotColor = 0;
     bool m_ownsTarget = true;                            // 外部目标置 false，析构不释放
     ID2D1StrokeStyle* m_roundStroke = nullptr;          // 圆头笔帽（strokePath 用）
     std::vector<std::pair<COLORREF, ID2D1SolidColorBrush*>> m_brushes;
