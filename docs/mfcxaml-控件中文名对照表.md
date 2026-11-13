@@ -169,3 +169,81 @@
 另外两条工程差异：QML 默认按 96 DPI 的像素单位布局，MFC 是物理像素，尺寸要按 `devicePixelRatio` 折算；QML 的焦点与 Tab 顺序靠 `activeFocusOnTab` + `KeyNavigation`，不像 XAML 有 `TabIndex`。
 
 不在本表的旧别名（已淘汰，勿再使用）：`TrackBar`（Slider 的旧名）、`Label`（TextBlock）、`Edit`（TextBox）、`Progress`（ProgressBar）、`TreeView`（TreeCtrl）、`ListView`（ListCtrl）。
+
+
+## QML 写法对照（属性名）
+
+XAML 里可以直接按 QML 的属性名写，渲染仍是 MFC 自绘；旧的 WinForms 写法继续可用。
+
+| QML 写法 | 等价旧写法 |
+|---|---|
+| `text` | `Text` |
+| `color` | `Foreground` |
+| `background` | `BackColor` |
+| `foreground` | `FrontColor` |
+| `radius` | `Radius` |
+| `opacity` | `Opacity` |
+| `z` | `Level` |
+| `border.color` | `BorderColor` |
+| `border.width` | `BorderThickness` |
+| `border.style` | `BorderStyle` |
+| `font.pixelSize` | `FontSize` |
+| `font.family` | `FontFamily` |
+| `font.weight` | `FontWeight` |
+| `font.style` | `FontStyle` |
+| `horizontalAlignment` | `TextAlign` |
+| `verticalAlignment` | `VerticalAlignment` |
+| `wrapMode` | `TextWrapping` |
+| `padding` | `Padding` |
+| `checked` | `Checked` |
+| `checkable` | `Checkable` |
+| `value` | `Value` |
+| `from` | `Minimum` |
+| `to` | `Maximum` |
+| `currentIndex` | `SelectedIndex` |
+| `model` | `Items` |
+| `readOnly` | `IsReadOnly` |
+| `placeholderText` | `Placeholder` |
+| `maximumLength` | `MaxLength` |
+| `icon.source` | `IconSource` |
+| `icon.name` | `IconSource` |
+| `display` | `Display` |
+| `modal` | `Modal` |
+| `orientation` | `Orientation` |
+| `delay` | `Delay` |
+| `position` | `Position` |
+| `size` | `Size` |
+| `columns` | `Columns` |
+| `rows` | `Rows` |
+| `count` | `Count` |
+| `title` | `Title` |
+| `source` | `Image` |
+| `link` | `Url` |
+| `selectionMode` | `SelectionMode` |
+| `header` | `Header` |
+| `rowCount` | `RowCount` |
+| `pageCount` | `PageCount` |
+| `contentX` | `OffsetX` |
+| `contentY` | `OffsetY` |
+| `firstValue` | `LowValue` |
+| `secondValue` | `HighValue` |
+| `itemHeight` | `ItemHeight` |
+| `cellWidth` | `CellWidth` |
+| `cellHeight` | `CellHeight` |
+
+## QML 写法对照（事件名）
+
+事件名同样接受 QML 的信号处理器写法（`onClicked="on_run"`）。
+
+| QML 写法 | 等价旧写法 | 说明 |
+|---|---|---|
+| `onClicked` | `Click` | 单击 |
+| `onDoubleClicked` | `DoubleClick` | 双击 |
+| `onTextChanged` | `TextChanged` | 文本变化 |
+| `onCheckedChanged` | `CheckedChanged` | 勾选变化 |
+| `onValueChanged` | `ValueChanged` | 取值变化 |
+| `onSelectionChanged` | `SelectionChanged` | 选中项变化 |
+| `onPressed` / `onReleased` | `MouseDown` / `MouseUp` | 按下 / 松开 |
+| `onPositionChanged` | `MouseMove` | 移动 |
+| `onActivated` / `onDeactivated` | `GotFocus` / `LostFocus` | 获得 / 失去焦点 |
+| `onWheel` | `Scroll` | 滚轮 |

@@ -204,8 +204,10 @@ bool XamlMfcControlBase::setProperty(const wchar_t* name, const std::wstring& va
     if (name == nullptr)
         return false;
 
+    // 0) QML 写法归一：text / color / font.pixelSize / currentIndex …
+    const std::wstring key = xamlmfc::QmlPropName(name);
+
     // 1) 统一外观：任何控件都认
-    const std::wstring key = name;
     if (xamlapp::SetProperty(m_ap, key, value))
     {
         pushAppearance();
@@ -267,7 +269,7 @@ std::wstring XamlMfcControlBase::getProperty(const wchar_t* name) const
 {
     if (name == nullptr)
         return {};
-    const std::wstring key = name;
+    const std::wstring key = xamlmfc::QmlPropName(name);
 
     std::wstring ap = xamlapp::GetProperty(m_ap, key);
     if (!ap.empty())

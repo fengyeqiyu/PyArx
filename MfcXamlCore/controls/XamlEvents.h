@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // XamlEvents —— 控件事件契约（唯一来源）。
 //
 // 前端（XAML）只声明事件名：<Button Click="onOk" />、<ComboBox SelectionChanged="onSel" />；
@@ -103,6 +103,20 @@ inline bool xamlEventFromProperty(const std::wstring& name, XamlEventKind& out)
     if (t == L"keyup" || t == L"onkeyup") { out = XamlEventKind::KeyUp; return true; }
     if (t == L"gotfocus" || t == L"onfocus") { out = XamlEventKind::GotFocus; return true; }
     if (t == L"lostfocus" || t == L"onblur") { out = XamlEventKind::LostFocus; return true; }
+    // QML 写法（信号处理器）：onClicked / onCheckedChanged / onTextChanged …
+    if (t == L"onclicked") { out = XamlEventKind::Click; return true; }
+    if (t == L"ondoubleclicked" || t == L"ondoubletap") { out = XamlEventKind::DoubleClick; return true; }
+    if (t == L"oncheckedchanged") { out = XamlEventKind::CheckedChanged; return true; }
+    if (t == L"ontextchanged") { out = XamlEventKind::TextChanged; return true; }
+    if (t == L"onvaluechanged") { out = XamlEventKind::ValueChanged; return true; }
+    if (t == L"onselectionchanged") { out = XamlEventKind::SelectionChanged; return true; }
+    if (t == L"onpressed") { out = XamlEventKind::MouseDown; return true; }
+    if (t == L"onreleased") { out = XamlEventKind::MouseUp; return true; }
+    if (t == L"onpositionchanged") { out = XamlEventKind::MouseMove; return true; }
+    if (t == L"onactivated") { out = XamlEventKind::GotFocus; return true; }
+    if (t == L"ondeactivated") { out = XamlEventKind::LostFocus; return true; }
+    if (t == L"onwheel") { out = XamlEventKind::Scroll; return true; }
+
     return false;
 }
 
@@ -150,12 +164,12 @@ inline const std::vector<XamlEventKind>& xamlDefaultEvents(const std::wstring& t
     // 键 = 控件契约名（= 注册标签的小写形式），一个控件一个名字，不写别名
     static const std::map<std::wstring, std::vector<XamlEventKind>> kTable = {
         // 按钮族
-        {L"button", kPointer}, {L"togglebutton", kCheck}, {L"bitmapbutton", kPointer},
+        {L"button", kPointer}, {L"togglebutton", kCheck}, {L"iconbutton", kPointer},
         {L"checkbox", kCheck},
         {L"radiobutton", {XamlEventKind::Click, XamlEventKind::CheckedChanged,
                           XamlEventKind::GotFocus, XamlEventKind::LostFocus}},
         // 文本族
-        {L"textbox", kText}, {L"richtext", kText}, {L"codeeditor", kText},
+        {L"textfield", kText}, {L"textarea", kText}, {L"codeeditor", kText},
         // 选择族
         {L"combobox", {XamlEventKind::SelectionChanged, XamlEventKind::TextChanged,
                        XamlEventKind::DropDown, XamlEventKind::DoubleClick,
@@ -165,9 +179,9 @@ inline const std::vector<XamlEventKind>& xamlDefaultEvents(const std::wstring& t
                      XamlEventKind::DoubleClick, XamlEventKind::KeyDown,
                      XamlEventKind::KeyUp, XamlEventKind::GotFocus,
                      XamlEventKind::LostFocus}},
-        {L"listbox", kSelect}, {L"listctrl", kSelect}, {L"treectrl", kSelect},
-        {L"tabcontrol", kFairly}, {L"tableview", kSelect}, {L"treetable", kSelect},
-        {L"gridctrl", kSelect}, {L"gridview", kSelect}, {L"pathview", kSelect},
+        {L"listbox", kSelect}, {L"listctrl", kSelect}, {L"treeview", kSelect},
+        {L"tabbar", kFairly}, {L"tableview", kSelect}, {L"treetable", kSelect},
+        {L"gridlayout", kSelect}, {L"gridview", kSelect}, {L"pathview", kSelect},
         {L"virtuallist", kSelect}, {L"stackview", kFairly}, {L"swipeview", kFairly},
         {L"page", kFairly}, {L"pageindicator", kFairly},
         // 取值族
@@ -179,16 +193,16 @@ inline const std::vector<XamlEventKind>& xamlDefaultEvents(const std::wstring& t
                      XamlEventKind::ValueChanged, XamlEventKind::GotFocus,
                      XamlEventKind::LostFocus}},
         // 静态/容器
-        {L"textblock", kPointer}, {L"groupbox", kPointer},
-        {L"staticline", kPointer}, {L"staticbitmap", kPointer},
+        {L"label", kPointer}, {L"groupbox", kPointer},
+        {L"divider", kPointer}, {L"image", kPointer},
         {L"hyperlink", {XamlEventKind::Click, XamlEventKind::DoubleClick,
                         XamlEventKind::GotFocus, XamlEventKind::LostFocus}},
-        {L"panel", {XamlEventKind::Click, XamlEventKind::DoubleClick,
+        {L"pane", {XamlEventKind::Click, XamlEventKind::DoubleClick,
                     XamlEventKind::MouseDown, XamlEventKind::MouseUp,
                     XamlEventKind::MouseMove}},
-        {L"splitter", {XamlEventKind::MouseDown, XamlEventKind::MouseUp,
+        {L"splitview", {XamlEventKind::MouseDown, XamlEventKind::MouseUp,
                        XamlEventKind::MouseMove, XamlEventKind::DoubleClick}},
-        {L"scrolledwindow", {XamlEventKind::Scroll, XamlEventKind::Click,
+        {L"scrollview", {XamlEventKind::Scroll, XamlEventKind::Click,
                              XamlEventKind::GotFocus, XamlEventKind::LostFocus}},
         {L"flickable", {XamlEventKind::Scroll, XamlEventKind::Click,
                         XamlEventKind::MouseDown, XamlEventKind::MouseUp,
@@ -197,14 +211,14 @@ inline const std::vector<XamlEventKind>& xamlDefaultEvents(const std::wstring& t
         {L"powercanvas", kCanvas}, {L"qcanvas", kCanvas},
         // 浮层/菜单/工具栏
         {L"menu", {XamlEventKind::Click, XamlEventKind::SelectionChanged}},
-        {L"menustrip", {XamlEventKind::Click, XamlEventKind::SelectionChanged}},
-        {L"toolstrip", {XamlEventKind::Click, XamlEventKind::SelectionChanged,
+        {L"menubar", {XamlEventKind::Click, XamlEventKind::SelectionChanged}},
+        {L"toolbar", {XamlEventKind::Click, XamlEventKind::SelectionChanged,
                         XamlEventKind::DropDown}},
         {L"tooltip", {XamlEventKind::Click}},
         {L"popup", {XamlEventKind::Click, XamlEventKind::GotFocus,
                     XamlEventKind::LostFocus}},
         // 日期
-        {L"calendarctrl", {XamlEventKind::SelectionChanged, XamlEventKind::ValueChanged,
+        {L"monthgrid", {XamlEventKind::SelectionChanged, XamlEventKind::ValueChanged,
                            XamlEventKind::DoubleClick, XamlEventKind::GotFocus,
                            XamlEventKind::LostFocus}},
         {L"datepicker", {XamlEventKind::SelectionChanged, XamlEventKind::ValueChanged,
@@ -213,6 +227,14 @@ inline const std::vector<XamlEventKind>& xamlDefaultEvents(const std::wstring& t
         // 指示
         {L"busyindicator", {XamlEventKind::Click, XamlEventKind::GotFocus,
                             XamlEventKind::LostFocus}},
+        // QML Controls 2 对齐补齐
+        {L"frame", kPointer}, {L"dialog", kPointer}, {L"drawer", kPointer},
+        {L"roundbutton", kPointer}, {L"delaybutton", kCheck}, {L"toolbutton", kPointer},
+        {L"toolseparator", kPointer}, {L"tabbutton", kCheck},
+        {L"scrollindicator", {XamlEventKind::Scroll, XamlEventKind::Click}},
+        {L"menuitem", {XamlEventKind::Click, XamlEventKind::CheckedChanged}},
+        {L"menuseparator", kPointer},
+
     };
 
     std::wstring t = type;

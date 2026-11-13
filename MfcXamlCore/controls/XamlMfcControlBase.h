@@ -19,6 +19,7 @@
 #include "XamlEvents.h"       // 事件契约唯一来源（前端声明 ↔ 后端派发）
 #include "XamlTypes.h"        // 属性表（S1）：一个属性只定义一次
 #include "XamlAppearance.h"   // 外观基元在运行时核心（PyMfcXaml），三端共用
+#include "XamlQmlNames.h"      // QML 属性名 -> 内部属性名
 
 #include <string>
 #include <utility>

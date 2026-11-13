@@ -9,6 +9,7 @@
 用法：python tools\\gen_control_names.py
 输出：docs\\mfcxaml-控件中文名对照表.md
 """
+import io
 import json
 import os
 import re
@@ -501,9 +502,52 @@ def main():
                  '`Edit`（TextBox）、`Progress`（ProgressBar）、`TreeView`（TreeCtrl）、`ListView`（ListCtrl）。')
     lines.append('')
 
+    lines.append(qml_usage_section())
+
     with open(OUT, 'w', encoding='utf-8', newline='\n') as f:
         f.write('\n'.join(lines))
     print('写出 %s，共 %d 行控件；对应方式 %s' % (OUT, total, kind_count))
+
+
+# ---------------------------------------------------------------------------
+# QML 写法对照（数据源：MfcXamlCore/controls/XamlQmlNames.h，单一来源）
+# ---------------------------------------------------------------------------
+QMLHDR = os.path.join(ROOT, "MfcXamlCore", "controls", "XamlQmlNames.h")
+
+
+def parse_qml_aliases():
+    rows = []
+    try:
+        text = io.open(QMLHDR, encoding="utf-8-sig").read()
+    except Exception:
+        return rows
+    for qml, internal in re.findall(r'L"([^"]+)",\s*L"([^"]+)"\s*\}', text):
+        rows.append((qml, internal))
+    return rows
+
+
+def qml_usage_section():
+    rows = parse_qml_aliases()
+    out = ["", "## QML 写法对照（属性名）", "",
+           "XAML 里可以直接按 QML 的属性名写，渲染仍是 MFC 自绘；旧的 WinForms 写法继续可用。", ""]
+    if rows:
+        out += ["| QML 写法 | 等价旧写法 |", "|---|---|"]
+        for qml, internal in rows:
+            out.append("| `%s` | `%s` |" % (qml, internal))
+    out += ["", "## QML 写法对照（事件名）", "",
+            "事件名同样接受 QML 的信号处理器写法（`onClicked=\"on_run\"`）。", "",
+            "| QML 写法 | 等价旧写法 | 说明 |", "|---|---|---|",
+            "| `onClicked` | `Click` | 单击 |",
+            "| `onDoubleClicked` | `DoubleClick` | 双击 |",
+            "| `onTextChanged` | `TextChanged` | 文本变化 |",
+            "| `onCheckedChanged` | `CheckedChanged` | 勾选变化 |",
+            "| `onValueChanged` | `ValueChanged` | 取值变化 |",
+            "| `onSelectionChanged` | `SelectionChanged` | 选中项变化 |",
+            "| `onPressed` / `onReleased` | `MouseDown` / `MouseUp` | 按下 / 松开 |",
+            "| `onPositionChanged` | `MouseMove` | 移动 |",
+            "| `onActivated` / `onDeactivated` | `GotFocus` / `LostFocus` | 获得 / 失去焦点 |",
+            "| `onWheel` | `Scroll` | 滚轮 |"]
+    return "\n".join(out)
 
 
 if __name__ == '__main__':
