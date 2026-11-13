@@ -1,4 +1,4 @@
-# PyArx —— 只跟踪源码与工程配置，构建产物/依赖/临时产物一律不入库
+﻿# PyArx —— 只跟踪源码与工程配置，构建产物/依赖/临时产物一律不入库
 
 # 构建输出
 X64/
@@ -37,7 +37,6 @@ pylibs/
 # 临时脚本产物与调试痕迹
 _com_*.txt
 _pump_stats*.txt
-aqtinstall.log
 docs/_*.png
 docs/**/_*.png
 docs/_*
@@ -63,4 +62,3 @@ GITEE令牌/
 __pycache__/
 *.pyc
 docs/_probe_profile/
-docs/_qt_baseline/
