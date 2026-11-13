@@ -520,6 +520,9 @@ void DesignerPaneView::beginSizeMovePreview()
     // 画布是真实子窗口，会自己再画一次文档树；拖动期间先藏起来，交给拉伸预览
     if (m_canvas != nullptr && ::IsWindow(m_canvas->m_hWnd))
         m_canvas->ShowWindow(SW_HIDE);
+    // XML 代码坞同样是真实子窗口：不藏的话它停在旧位置，会盖住分区贴图的底栏
+    if (m_codeEditor != nullptr && m_codeEditor->hwnd() != nullptr)
+        ::ShowWindow(m_codeEditor->hwnd(), SW_HIDE);
 }
 
 void DesignerPaneView::endSizeMovePreview()
@@ -529,6 +532,8 @@ void DesignerPaneView::endSizeMovePreview()
     diagLog("[sizeMove] end\n");
     if (m_canvas != nullptr && ::IsWindow(m_canvas->m_hWnd))
         m_canvas->ShowWindow(SW_SHOW);
+    if (m_codeEditor != nullptr && m_codeEditor->hwnd() != nullptr)
+        ::ShowWindow(m_codeEditor->hwnd(), SW_SHOW);
     m_backSize = CSize(0, 0);       // 尺寸已变，缓存位图作废，下一次全量重画
     // 期间没做布局，这里补一次：先按新尺寸重排，再整块重画
     CRect client;
