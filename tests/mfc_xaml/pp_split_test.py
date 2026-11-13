@@ -67,10 +67,11 @@ chk('画布跟着变窄', app.cvW < cv_w0 - 40, 'cv %d -> %d' % (cv_w0, app.cvW)
 sx2 = rect(sp)[0]
 chk('分割条跟着左移', sx2 < sx, '%d -> %d' % (sx, sx2))
 
-# 向右拖回 → 变窄
+# 向右拖回 → 变窄（120px 位移只能收窄 120px，判据随起点走，不写死绝对值）
+ed_w_before = app._edW
 E.drag(sp, 3, 200, 3 + 120, 200, steps=3)
 M.pump(150)
-chk('向右拖侧板变窄', app._edW < 640, 'edW=%d' % app._edW)
+chk('向右拖侧板变窄', app._edW < ed_w_before, 'edW %d -> %d' % (ed_w_before, app._edW))
 
 # 极值 clamp
 E.drag(sp, 3, 200, 3 + 2000, 200, steps=3)

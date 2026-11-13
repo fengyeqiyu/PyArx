@@ -104,7 +104,7 @@ ok('表格控件是原生 SysListView32' if not new_tbl else '表格控件是新
    cls.value == exp_cls, cls.value)
 row_count = app.win.getTableRowCount(pp_app.TBL)
 ok('行数 = 节点数 39', row_count == 39, str(row_count))
-exp_cols = 7 if new_tbl else 8
+exp_cols = len(pp_app.FIELDS) if new_tbl else 8
 if new_tbl:
     col_count = len(pp_app.FIELDS)
 else:
@@ -139,14 +139,17 @@ M.pump(80)
 ok('F2 进入原地编辑', bool(app._ce) and app._ce[0] == 3, repr(app._ce))
 r0 = app._ce[0] if app._ce else 3
 eid0 = app._ce[2] if app._ce else pp_app.E_F0
+ce_col = app._ce[1] if app._ce else 0
+ce_field = pp_app.FIELDS[ce_col]
 oldCode = app.win.getText(eid0)
 app.win.setText(eid0, 'X1-TEST')
 app._cellEnd(commit=True)
 M.pump(80)
-ok('F2 改编号后写回表格', app.tblGet(r0, 0) == 'X1-TEST',
-   app.tblGet(r0, 0))
-ok('节点数据同步更新', app.nodes[r0]['code'] == 'X1-TEST', app.nodes[r0]['code'])
-app._cellBegin(r0, 0)
+ok('F2 改单元格后写回表格', app.tblGet(r0, ce_col) == 'X1-TEST',
+   'col=%d %r' % (ce_col, app.tblGet(r0, ce_col)))
+ok('节点数据同步更新', app.nodes[r0][ce_field] == 'X1-TEST',
+   '%s=%r' % (ce_field, app.nodes[r0][ce_field]))
+app._cellBegin(r0, ce_col)
 app.win.setText(pp_app.E_F0, oldCode)
 app._cellEnd(commit=True)
 M.pump(60)
@@ -178,9 +181,11 @@ user32.SendMessageW(lv, WM_KEYDOWN, 0x43, 0x001D0001)   # C（Ctrl 组合，直�
 user32.SendMessageW(lv, WM_KEYUP, 0x43, 0xC01D0001)
 M.pump(120)
 txt = clip_text()
-exp_tabs = 6 if new_tbl else 7
+exp_tabs = len(pp_app.FIELDS) - 1 if new_tbl else 7
 ok('Ctrl+C 把选中行写入剪贴板', txt.count('\t') == exp_tabs, repr(txt[:80]))
-ok('剪贴板首格 = 该行编号', txt.split('\t')[0].strip() != '', txt.split('\t')[0])
+# 列顺序即 FIELDS 顺序，编号不在首格（首格是"起点"，顶层柜为空）
+code_cell = txt.split('\t')[pp_app.FIELDS.index('code')].strip()
+ok('剪贴板含该行编号', code_cell == app.nodes[0]['code'], repr(code_cell))
 
 before = len(app.nodes)
 user32.SendMessageW(lv, WM_KEYDOWN, 0x56, 0x001D0001)   # V
@@ -191,9 +196,9 @@ ok('Ctrl+V 触发粘贴（重复编号被跳过）', len(app.nodes) == before,
 
 # --- 列头排序 -----------------------------------------------------------
 old_first = app.nodes[0]['code']
-app.gridSort(4)                           # 按负载排
+app.gridSort(pp_app.FIELDS.index('loadKw'))   # 按"功率"列排序
 M.pump(100)
-first_code = app.tblGet(0, 0)
+first_code = app.tblGet(0, pp_app.FIELDS.index('code'))
 loads = [float(n.get('loadKw') or 0) for n in app.nodes]
 ok('按负载排序生效', loads == sorted(loads), 'min=%.2f 首行=%s' % (loads[0], first_code))
 ok('排序后表格与数据一致', first_code == app.nodes[0]['code'])

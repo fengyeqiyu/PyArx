@@ -42,8 +42,8 @@ u.GetClassNameW.restype = ctypes.c_int
 u.GetWindowLongPtrW.argtypes = [wt.HWND, ctypes.c_int]
 u.GetWindowLongPtrW.restype = ctypes.c_ssize_t
 
-HAND = u.LoadCursorW(None, wt.LPCWSTR(32649))
 ARROW = u.LoadCursorW(None, wt.LPCWSTR(32512))
+HAND = None   # 画布自定义手形光标句柄，第 1 项用例里从 GetCursor() 取基准
 
 ok_n, bad = 0, 0
 
@@ -90,7 +90,10 @@ real_move(cv, 200, 200)
 E.move(cv, 200, 200)
 M.pump(150)
 cur = u.GetCursor()
-chk('画布内悬浮=手形', cur == HAND, 'cursor=%s hand=%s' % (hex(cur or 0), hex(HAND or 0)))
+# 画布用的是从浏览器图例里提取的手形光标（自定义 HCURSOR），不是系统 IDC_HAND 句柄，
+# 因此以首次取到的实际句柄为基准，后续只比"是否同一个手形、离开画布是否变回箭头"。
+HAND = cur
+chk('画布内悬浮=手形', bool(cur) and cur != ARROW, 'cursor=%s arrow=%s' % (hex(cur or 0), hex(ARROW or 0)))
 
 # 2) 画布内拖动 → 仍是手形（规格只说"画布上手形"，拖动不换四向箭头）
 E.drag(cv, 300, 300, 360, 340, steps=4)

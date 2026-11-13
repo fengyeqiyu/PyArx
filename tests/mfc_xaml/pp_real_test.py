@@ -185,18 +185,26 @@ chk('真实点击后详情浮层打开', bool(app._detailVisible),
     'visible=%s cur=%s' % (app._detailVisible, app.curSel))
 
 # 2. 真实滚轮缩放
+# 上一步点击已弹出详情浮层，浮层盖在卡片上会吃掉滚轮/拖动；先收起，再取画布空白点。
+app.hideDetail()
+M.pump(150)
+rcv = wt.RECT()
+user32.GetClientRect.argtypes = [wt.HWND, ctypes.POINTER(wt.RECT)]
+user32.GetClientRect(cv, ctypes.byref(rcv))
+pvb = wt.POINT(rcv.right - 12, rcv.bottom // 2)
+user32.ClientToScreen(cv, ctypes.byref(pvb))
 z0 = app.win.getPlanView(pp_app.CV)[0]
-real_wheel(pt.x, pt.y, 120)
+real_wheel(pvb.x, pvb.y, 120)
 z1 = app.win.getPlanView(pp_app.CV)[0]
 chk('真实滚轮放大画布', z1 > z0 + 1e-4, '%.4f -> %.4f' % (z0, z1))
-real_wheel(pt.x, pt.y, -120)
+real_wheel(pvb.x, pvb.y, -120)
 z2 = app.win.getPlanView(pp_app.CV)[0]
 chk('真实滚轮缩回画布', abs(z2 - z0) < 1e-3, '%.4f' % z2)
 
 # 3. 真实左键拖动平移：屏幕坐标轨迹，每步 SetCursorPos 绝对定位，
 #    再按当下客户原点补一条带 MK_LBUTTON 的 WM_MOUSEMOVE（与 pp_events.drag 同法）。
 v0 = app.win.getPlanView(pp_app.CV)
-sx0, sy0 = pt.x, pt.y
+sx0, sy0 = pvb.x, pvb.y
 user32.SetCursorPos(sx0, sy0)
 time.sleep(0.15)
 send(MOUSEEVENTF_LEFTDOWN)

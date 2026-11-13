@@ -42,8 +42,9 @@ app.showEditor()
 M.pump(400)
 
 tbl = E.find_control(app.win.hwnd, pp_app.TBL)
-row, col = 5, 1                     # 第 6 行「名称」列
-name_before = app.nodes[row]['name']
+row, col = 5, pp_app.FIELDS.index('circuit')      # 第 6 行「回路」列
+field = pp_app.FIELDS[col]
+name_before = app.tblGet(row, col) or ''
 
 rc = app.tblCellRect(row, col)
 chk('能取到单元格矩形', bool(rc) and rc[2] > 30 and rc[3] > 10, str(rc))
@@ -83,13 +84,14 @@ if ce:
         E.key(eh, 0x0D)             # VK_RETURN
         M.pump(200)
         chk('回车后退出编辑态', getattr(app, '_ce', None) is None, repr(app._ce))
-        chk('回车后数据已写回', app.nodes[row]['name'] == 'INPLACE-1',
-            repr(app.nodes[row]['name']))
+        chk('回车后数据已写回', app.nodes[row][field] == 'INPLACE-1',
+            repr(app.nodes[row][field]))
         chk('回车后表格格已刷新',
             (app.tblGet(row, col) or '') == 'INPLACE-1',
             repr(app.tblGet(row, col)))
 
         # 再双击，Esc 取消
+        val_before_esc = app.tblGet(row, col) or ''
         rc2 = app.tblCellRect(row, col)
         E.double_click(tbl, rc2[0] + rc2[2] // 2, rc2[1] + rc2[3] // 2)
         M.pump(200)
@@ -102,10 +104,10 @@ if ce:
             M.pump(80)
             E.key(eh2, 0x1B)        # VK_ESCAPE
             M.pump(200)
-            chk('Esc 取消不写回', app.nodes[row]['name'] == 'INPLACE-1',
-                repr(app.nodes[row]['name']))
+            chk('Esc 取消不写回', (app.nodes[row][field] or '') == val_before_esc,
+                repr(app.nodes[row][field]))
             chk('Esc 后表格值未被改',
-                (app.tblGet(row, col) or '') == 'INPLACE-1',
+                (app.tblGet(row, col) or '') == val_before_esc,
                 repr(app.tblGet(row, col)))
 
         # 双击另一列 → 编辑框跟着换
