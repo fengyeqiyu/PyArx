@@ -17,6 +17,21 @@
 
 namespace uidesign
 {
+    // 画布上控件用的浅色调色板：与运行时原生控件一致（深色外壳只用于设计器自身 chrome）
+    namespace cvdoc
+    {
+        const COLORREF kSurface = RGB(250, 250, 250);   // 容器 / 空壳
+        const COLORREF kButton  = RGB(240, 240, 240);   // 按钮底
+        const COLORREF kField   = RGB(255, 255, 255);   // 输入、列表、表格
+        const COLORREF kBorder  = RGB(173, 178, 186);   // 边框
+        const COLORREF kInk     = RGB(32, 36, 42);      // 正文
+        const COLORREF kMuted   = RGB(118, 124, 132);   // 次要文字、占位
+        const COLORREF kAccent  = RGB(0, 120, 212);     // 进度、勾选
+        const COLORREF kTrack   = RGB(235, 237, 240);   // 轨道、空槽
+        const COLORREF kHead    = RGB(238, 241, 245);   // 表头
+        const COLORREF kGrid    = RGB(214, 218, 224);   // 表格线
+    }
+
     // 画布消息：选中节点（lParam 为 new Path*，由接收方拷贝/释放）
     constexpr UINT WM_CANVAS_SELECT = WM_APP + 1;
     // 多选：lParam 为 std::vector<Path>*（首项是主选中，其余是附加选择）
@@ -1231,7 +1246,11 @@ namespace uidesign
             return lum > 140 ? RGB(32, 36, 42) : RGB(228, 231, 236);
         }
 
-        void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = false,
+        // 画布上控件的外观取"运行时原生控件"的浅色，不再用设计器外壳的深色：
+        // 之前画布是深色卡片、预览器是浅色原生控件，同一个文档两边看起来不像一个东西，
+        // 调色板统一放在 uidesign::cvdoc（文件头部），这里直接用。
+
+void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = false,
                       COLORREF inheritBg = RGB(255, 255, 255))
         {
             // 统一坐标系：屏幕/客户坐标 = 文档坐标 + 画布原点(origin)
@@ -1362,15 +1381,15 @@ namespace uidesign
                 if (!layoutOnly)
                 {
                     drawRoundedCv(cv, rc,
-                                  bgC == (COLORREF)-1 ? RGB(44, 48, 58) : bgC,
-                                  bdC == (COLORREF)-1 ? RGB(120, 130, 150) : bdC, 4);
+                                  bgC == (COLORREF)-1 ? cvdoc::kSurface : bgC,
+                                  bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC, 4);
                     // 容器名用小字标在左上角，不压住子控件（模板视觉层不标名字）
                     if (!node->templateChild)
                     {
                         CRect lr = rc;
                         lr.left += 6;
                         lr.bottom = lr.top + 16;
-                        drawTextCv(cv, lr, node->tag, RGB(150, 158, 170),
+                        drawTextCv(cv, lr, node->tag, cvdoc::kMuted,
                                    DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
                     }
                 }
@@ -1400,11 +1419,11 @@ namespace uidesign
                 }
                 if (node->tag == L"GroupBox")
                 {
-                    drawRoundedCv(cv, rc, RGB(42, 45, 50), RGB(80, 86, 96), 4);
+                    drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
                     CRect title = rc;
                     title.bottom = title.top + 22;
                     title.left += 8;
-                    drawTextCv(cv, title, node->text, RGB(210, 214, 220),
+                    drawTextCv(cv, title, node->text, cvdoc::kInk,
                                DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
                 }
             }
@@ -1431,9 +1450,9 @@ namespace uidesign
                 }
                 else
                 {
-                    const COLORREF btnBg = bgC == (COLORREF)-1 ? RGB(62, 70, 80) : bgC;
+                    const COLORREF btnBg = bgC == (COLORREF)-1 ? cvdoc::kButton : bgC;
                     drawRoundedCv(cv, rc, btnBg,
-                                  bdC == (COLORREF)-1 ? RGB(100, 110, 124) : bdC);
+                                  bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC);
                     if (!hasTemplateChild(node))
                     {
                         const UINT flags = node->has(L"TextAlign") ? txtFlags : DT_CENTER;
@@ -1453,8 +1472,8 @@ namespace uidesign
             }
             else if (node->tag == L"TextBox")
             {
-                const COLORREF boxBg = bgC == (COLORREF)-1 ? RGB(36, 38, 43) : bgC;
-                drawRoundedCv(cv, rc, boxBg, bdC == (COLORREF)-1 ? RGB(90, 96, 106) : bdC, 4);
+                const COLORREF boxBg = bgC == (COLORREF)-1 ? cvdoc::kField : bgC;
+                drawRoundedCv(cv, rc, boxBg, bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC, 4);
                 CRect textRect = rc; textRect.DeflateRect(8, 0);
                 const std::wstring shown = (node == m_liveNode) ? m_liveBuf : node->text;
                 drawTextCv(cv, textRect, shown, fgC == (COLORREF)-1 ? textOn(boxBg) : fgC,
@@ -1487,15 +1506,15 @@ namespace uidesign
             {
                 CRect box(rc.left, rc.top + (rc.Height() - 14) / 2,
                           rc.left + 14, rc.top + (rc.Height() + 14) / 2);
-                cv.fillRect(box, RGB(36, 38, 43));
-                cv.strokeRect(box, RGB(110, 116, 128), 1);
+                cv.fillRect(box, cvdoc::kField);
+                cv.strokeRect(box, cvdoc::kBorder, 1);
 
                 // 勾选态：CheckBox 画勾，RadioButton 画实心圆点
                 const std::wstring ck = node->get(L"Checked");
                 const bool on = (_wcsicmp(ck.c_str(), L"true") == 0 || ck == L"1");
                 if (on)
                 {
-                    const COLORREF mark = RGB(120, 190, 255);
+                    const COLORREF mark = cvdoc::kAccent;
                     if (node->tag == L"CheckBox")
                     {
                         cv.strokeLine(POINT{ box.left + 3, box.top + 7 }, POINT{ box.left + 6, box.bottom - 4 }, mark, 2);
@@ -1514,20 +1533,21 @@ namespace uidesign
             }
             else if (node->tag == L"ComboBox")
             {
-                drawRoundedCv(cv, rc, RGB(36, 38, 43), RGB(90, 96, 106), 3);
-                cv.fillRect(CRect(rc.right - 18, rc.top, rc.right, rc.bottom), RGB(60, 66, 76));
+                drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
+                cv.fillRect(CRect(rc.right - 18, rc.top, rc.right, rc.bottom), cvdoc::kTrack);
                 CRect tr = rc; tr.DeflateRect(6, 0); tr.right -= 18;
-                drawTextCv(cv, tr, node->text, RGB(220, 224, 230),
+                drawTextCv(cv, tr, node->text, cvdoc::kInk,
                            DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
             }
             else if (node->tag == L"ListBox")
             {
-                drawRoundedCv(cv, rc, RGB(36, 38, 43), RGB(90, 96, 106), 3);
+                drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
                 for (int r = 0; r < 3; ++r)
                 {
                     CRect row = rc; row.DeflateRect(6, 4); row.bottom = row.top + 16;
                     row.OffsetRect(0, r * 18);
-                    drawTextCv(cv, row, (r == 0) ? node->text : std::wstring(), RGB(190, 196, 205),
+                    drawTextCv(cv, row, (r == 0) ? node->text : std::wstring(),
+                               (r == 0) ? cvdoc::kInk : cvdoc::kMuted,
                                DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
                 }
             }
@@ -1541,13 +1561,13 @@ namespace uidesign
                 const std::wstring rowsAttr = node->get(L"Rows");
                 const std::wstring sortAttr = node->get(L"Sort");
 
-                const COLORREF tbg = bgC == (COLORREF)-1 ? RGB(36, 38, 43) : bgC;
+                const COLORREF tbg = bgC == (COLORREF)-1 ? cvdoc::kField : bgC;
                 const int lum = (GetRValue(tbg) * 30 + GetGValue(tbg) * 59 + GetBValue(tbg) * 11) / 100;
                 const bool dark = lum < 128;
-                const COLORREF tink = fgC == (COLORREF)-1 ? (dark ? RGB(226, 231, 238) : RGB(32, 36, 42)) : fgC;
-                const COLORREF headBg = dark ? RGB(52, 58, 70) : RGB(238, 241, 245);
-                const COLORREF gridC = dark ? RGB(72, 79, 92) : RGB(214, 218, 224);
-                drawRoundedCv(cv, rc, tbg, bdC == (COLORREF)-1 ? RGB(90, 96, 106) : bdC, 3);
+                const COLORREF tink = fgC == (COLORREF)-1 ? (dark ? RGB(226, 231, 238) : cvdoc::kInk) : fgC;
+                const COLORREF headBg = dark ? RGB(52, 58, 70) : cvdoc::kHead;
+                const COLORREF gridC = dark ? RGB(72, 79, 92) : cvdoc::kGrid;
+                drawRoundedCv(cv, rc, tbg, bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC, 3);
 
                 auto splitBy = [](const std::wstring& s, wchar_t sep) {
                     std::vector<std::wstring> out;
@@ -1586,9 +1606,9 @@ namespace uidesign
                 if (cols.empty())
                 {
                     // 没声明列就仍是"空表格"，但标出控件类型，避免看起来像坏掉的空框
-                    drawRoundedCv(cv, rc, RGB(44, 48, 58), RGB(120, 130, 150), 4);
+                    drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
                     drawTextCv(cv, rc, std::wstring(L"[") + node->tag + std::wstring(L"]"),
-                               RGB(180, 195, 220), DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
+                               cvdoc::kMuted, DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
                 }
                 else
                 {
@@ -1736,9 +1756,9 @@ namespace uidesign
                      node->tag == L"Arc")
             {
                 // 绘图图元：Background 填面、BorderColor/Foreground 描边、BorderThickness 线宽
-                const COLORREF fill = bgC != (COLORREF)-1 ? bgC : RGB(52, 56, 62);
+                const COLORREF fill = bgC != (COLORREF)-1 ? bgC : cvdoc::kSurface;
                 const COLORREF stroke = fgC != (COLORREF)-1 ? fgC
-                                       : (bdC != (COLORREF)-1 ? bdC : RGB(150, 160, 176));
+                                       : (bdC != (COLORREF)-1 ? bdC : cvdoc::kBorder);
                 const int thick = bdThick > 0 ? bdThick : 1;
                 if (node->tag == L"Arc")
                 {
@@ -1783,17 +1803,90 @@ namespace uidesign
             }
             else if (node->tag == L"ProgressBar")
             {
-                cv.fillRect(rc, RGB(48, 51, 56));
+                cv.fillRect(rc, cvdoc::kTrack);
                 CRect fill = rc; fill.right = fill.left + rc.Width() / 2;
-                cv.fillRect(fill, RGB(0, 120, 212));
-                cv.strokeRect(rc, RGB(90, 96, 106), 1);
+                cv.fillRect(fill, cvdoc::kAccent);
+                cv.strokeRect(rc, cvdoc::kBorder, 1);
             }
             else if (node->tag == L"Image" || node->tag == L"ListView" ||
                      node->tag == L"TabControl" || node->tag == L"Border")
             {
-                drawRoundedCv(cv, rc, RGB(44, 48, 58), RGB(120, 130, 150), 4);
+                drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
                 drawTextCv(cv, rc, std::wstring(L"[") + node->tag + std::wstring(L"]"),
-                           RGB(180, 195, 220), DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
+                           cvdoc::kMuted, DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
+            }
+            else if (node->tag == L"StaticLine")
+            {
+                // 分隔线：一条横线，不再画成"文字卡片"
+                const int midY = (rc.top + rc.bottom) / 2;
+                cv.strokeLine(POINT{ rc.left, midY }, POINT{ rc.right, midY }, cvdoc::kBorder, 1);
+            }
+            else if (node->tag == L"StaticBitmap")
+            {
+                // 画布不加载图片文件，用浅底 + 图元标记表示"这里有一张位图"；
+                // 运行时（预览器/正式界面）按 Image 属性真画图
+                drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 2);
+                drawTextCv(cv, rc, std::wstring(L"\u25A3"), cvdoc::kMuted,
+                           DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
+            }
+            else if (node->tag == L"Switch")
+            {
+                const std::wstring ck = node->get(L"Checked");
+                const bool on = (_wcsicmp(ck.c_str(), L"true") == 0 || ck == L"1");
+                CRect pill = rc;
+                const int h = (std::min)(rc.Height(), 22);
+                pill.top = (rc.top + rc.bottom - h) / 2;
+                pill.bottom = pill.top + h;
+                pill.right = (std::min)(rc.right, pill.left + 44);
+                cv.fillRoundRect(pill, on ? cvdoc::kAccent : cvdoc::kTrack,
+                                 on ? cvdoc::kAccent : cvdoc::kBorder, h / 2);
+                CRect knob(0, 0, h - 4, h - 4);
+                knob.OffsetRect(on ? pill.right - h + 2 : pill.left + 2, pill.top + 2);
+                cv.fillRoundRect(knob, RGB(255, 255, 255), RGB(255, 255, 255), (h - 4) / 2);
+                if (!node->text.empty())
+                {
+                    CRect tr = rc; tr.left = pill.right + 8;
+                    drawTextCv(cv, tr, node->text, cvdoc::kInk,
+                               DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
+                }
+            }
+            else if (node->tag == L"SpinBox")
+            {
+                drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
+                CRect step(rc.right - 18, rc.top + 1, rc.right - 1, rc.bottom - 1);
+                cv.fillRect(step, cvdoc::kTrack);
+                cv.strokeLine(POINT{ step.left, (step.top + step.bottom) / 2 },
+                              POINT{ step.right, (step.top + step.bottom) / 2 }, cvdoc::kBorder, 1);
+                CRect tr = rc; tr.DeflateRect(6, 0); tr.right -= 20;
+                std::wstring val = node->get(L"Value");
+                if (val.empty()) val = node->text;
+                drawTextCv(cv, tr, val, cvdoc::kInk, DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
+            }
+            else if (node->tag == L"ScrollBar")
+            {
+                const bool vert = node->get(L"Orientation") != L"Horizontal";
+                cv.fillRect(rc, cvdoc::kTrack);
+                if (vert)
+                {
+                    const int th = (std::max)(12, rc.Height() / 3);
+                    cv.fillRoundRect(CRect(rc.left, rc.top + 2, rc.right, rc.top + 2 + th),
+                                     cvdoc::kButton, cvdoc::kBorder, 4);
+                }
+                else
+                {
+                    const int tw = (std::max)(12, rc.Width() / 3);
+                    cv.fillRoundRect(CRect(rc.left + 2, rc.top, rc.left + 2 + tw, rc.bottom),
+                                     cvdoc::kButton, cvdoc::kBorder, 4);
+                }
+            }
+            else if (node->tag == L"BusyIndicator")
+            {
+                const int d = (std::min)(rc.Width(), rc.Height());
+                CRect c(0, 0, d, d);
+                c.OffsetRect(rc.left + (rc.Width() - d) / 2, rc.top + (rc.Height() - d) / 2);
+                cv.fillRoundRect(c, RGB(255, 255, 255), cvdoc::kBorder, d / 2);
+                cv.strokeLine(POINT{ c.CenterPoint().x, c.top + 6 },
+                              POINT{ c.left + d / 4, c.top + d / 4 }, cvdoc::kAccent, 2);
             }
             else
             {
@@ -1801,15 +1894,15 @@ namespace uidesign
                 std::wstring cap = node->get(L"Header");
                 if (cap.empty()) cap = node->text;
                 if (cap.empty()) cap = node->tag;
-                drawRoundedCv(cv, rc, RGB(52, 56, 62), RGB(90, 96, 106), 4);
-                drawTextCv(cv, rc, cap, RGB(200, 205, 215),
+                drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
+                drawTextCv(cv, rc, cap, cvdoc::kInk,
                            DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
             }
 
             // XAML BorderStyle / ScrollStyle 生效（未声明则保持控件默认外观）
             if (!isRoot && !bdStyle.empty())
-                applyBorderStyleCv(cv, rc, bdC == (COLORREF)-1 ? RGB(120, 130, 150) : bdC,
-                                   bgC == (COLORREF)-1 ? RGB(45, 48, 55) : bgC, bdStyle, bdThick);
+                applyBorderStyleCv(cv, rc, bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC,
+                                   bgC == (COLORREF)-1 ? cvdoc::kSurface : bgC, bdStyle, bdThick);
             if (!isRoot && !scrollStyle.empty())
                 drawScrollBarsCv(cv, rc, scrollStyle);
 
