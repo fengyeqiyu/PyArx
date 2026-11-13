@@ -808,7 +808,13 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
             else
             {
                 const int si = i - 1;
-                if (si < 4 && !m_surfStatus[si].IsEmpty())
+                if (si == 3 && m_canvas != nullptr)
+                {
+                    // 缩放格直接取画布实时倍率，避免状态栏和画布对不上
+                    CString z; z.Format(L"%d%%", (int)(m_canvas->zoom() * 100.0f + 0.5f));
+                    cell.text = std::wstring(z.GetString());
+                }
+                else if (si < 4 && !m_surfStatus[si].IsEmpty())
                     cell.text = std::wstring(m_surfStatus[si].GetString());
                 else
                     cell.text = std::wstring(uiNodeText(&c).GetString());

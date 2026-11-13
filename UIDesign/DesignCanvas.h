@@ -120,22 +120,7 @@ namespace uidesign
             m_doc = doc;
             m_sel.clear();
             m_selPath = nullptr;
-            if (m_doc != nullptr && m_doc->root() != nullptr)
-            {
-                // 文档比视口大时自动缩放到可见：外壳版式（1440x900）在 1360 屏幕上不再被裁
-                XamlElement* r = m_doc->root();
-                CRect cr{ 0, 0, 0, 0 };
-                GetClientRect(&cr);
-                if (cr.Width() > 64 && cr.Height() > 64 && r->w > 0 && r->h > 0)
-                {
-                    const float fx = static_cast<float>(cr.Width() - 32) / static_cast<float>(r->w);
-                    const float fy = static_cast<float>(cr.Height() - 32) / static_cast<float>(r->h);
-                    float fit = fx < fy ? fx : fy;
-                    if (fit > 1.0f) fit = 1.0f;
-                    if (fit < 0.2f) fit = 0.2f;
-                    if (fit < 0.999f) m_zoom = fit;
-                }
-            }
+            fitToView();
             Invalidate();
             // 启动路径（InitInstance 里 openFile）时消息泵还没跑到 WM_PAINT，
             // 单靠 Invalidate 标记的无效区会被吞掉：画布一直停在"首帧空文档"的样子。
@@ -270,7 +255,27 @@ namespace uidesign
             CWnd::OnSize(nType, cx, cy);
             // 画布是直呈窗口，宿主改尺寸（停靠面板拖动、窗口最大化）后必须自己重画，
             // 否则旧一帧的像素留在客户区，看起来就是"画布整块变黑"。
-            if (cx > 0 && cy > 0) Invalidate(FALSE);
+            if (cx > 0 && cy > 0)
+            {
+                if (m_autoFit) fitToView();
+                Invalidate(FALSE);
+            }
+        }
+
+        // 文档比视口大时按视口等比缩小：外壳版式（1440x900）在 1360 屏幕上也能整幅可见
+        void fitToView()
+        {
+            if (!m_autoFit || m_doc == nullptr || m_doc->root() == nullptr) return;
+            XamlElement* r = m_doc->root();
+            CRect cr{ 0, 0, 0, 0 };
+            GetClientRect(&cr);
+            if (cr.Width() <= 64 || cr.Height() <= 64 || r->w <= 0 || r->h <= 0) return;
+            const float fx = static_cast<float>(cr.Width() - 32) / static_cast<float>(r->w);
+            const float fy = static_cast<float>(cr.Height() - 32) / static_cast<float>(r->h);
+            float fit = fx < fy ? fx : fy;
+            if (fit > 1.0f) fit = 1.0f;
+            if (fit < 0.2f) fit = 0.2f;
+            m_zoom = fit;
         }
 
         afx_msg void OnPaint()
@@ -3025,7 +3030,8 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         std::vector<Path> m_selSet;       // 多选集合（对齐/分布用，首项=主选中）
         std::vector<XamlElement*> m_selNodes;
         bool m_showGrid = true;
-        float m_zoom = 1.0f;                 // 画布缩放倍率（0.25 ~ 4.0）
+        float m_zoom = 1.0f;
+        bool m_autoFit = true;                // 打开文档时按视口自动缩放到可见                 // 画布缩放倍率（0.25 ~ 4.0）
         bool m_showRuler = false;            // 标尺开关（顶部/左侧刻度条）
         ID2D1Bitmap* m_bgD2DBmp = nullptr;   // 背景（白底+网格）烘成的 D2D 位图
         int m_bgD2DW = 0, m_bgD2DH = 0;
