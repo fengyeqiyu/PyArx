@@ -152,39 +152,63 @@ chk('点空白清空选中', cleared_at is not None,
 app.hideDetail()
 M.pump(150)
 view = app.win.getPlanView(pp_app.CV)
-zoom, ox, oy = view[0], view[1], view[2]
-hit = None
 for l in app.view.get('links', [])[:6]:
     print('link', l, flush=True)
-    mid_x = (l['bezier'][0] + l['bezier'][6]) / 2.0
-    mid_y = (l['bezier'][1] + l['bezier'][7]) / 2.0
-    # 取折线（不是贝塞尔）中点：C++ 绘制与命中都按 bezier 的 4 个拐点连成正交折线，
-    # 用三次贝塞尔 t=0.5 的点算出来会偏离 8px 命中容差，导致偶发选不中。
-    pts = [(l['bezier'][q * 2], l['bezier'][q * 2 + 1]) for q in range(4)]
-    segs = []
-    total = 0.0
-    for a, b in zip(pts, pts[1:]):
-        ln = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
-        segs.append((a, b, ln))
-        total += ln
-    want, acc = total / 2.0, 0.0
-    px, py = pts[0]
-    for a, b, ln in segs:
-        if ln > 0 and acc + ln >= want:
-            t = (want - acc) / ln
-            px = a[0] + (b[0] - a[0]) * t
-            py = a[1] + (b[1] - a[1]) * t
-            break
-        acc += ln
-    hit = (int(ox + px * zoom), int(oy + py * zoom), l['to'])
     break
-if hit:
-    click(cv, hit[0], hit[1])
-    sel2 = app.win.getPlanSelection(pp_app.CV)
+
+
+def click_link(tries=5):
+    """点连线选下游节点：每轮重新取视口参数再算点击点。
+
+    批跑时画布首次绘制晚于取视口参数，zoom/ox/oy 可能还是默认值，
+    按旧值折算出来的点会离线 8px 命中容差之外，表现为偶发选不中。
+    """
+    last = None
+    for _ in range(tries):
+        view = app.win.getPlanView(pp_app.CV)
+        zoom, ox, oy = view[0], view[1], view[2]
+        if zoom <= 0:
+            M.pump(120)
+            continue
+        links = app.view.get('links', [])[:6]
+        if not links:
+            return None
+        l = links[0]
+        # 取折线（不是贝塞尔）中点：C++ 绘制与命中都按 bezier 的 4 个拐点连成正交折线，
+        # 用三次贝塞尔 t=0.5 的点算出来会偏离命中容差。
+        pts = [(l['bezier'][q * 2], l['bezier'][q * 2 + 1]) for q in range(4)]
+        segs, total = [], 0.0
+        for a, b in zip(pts, pts[1:]):
+            ln = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+            segs.append((a, b, ln))
+            total += ln
+        want, acc = total / 2.0, 0.0
+        px, py = pts[0]
+        for a, b, ln in segs:
+            if ln > 0 and acc + ln >= want:
+                t = (want - acc) / ln
+                px = a[0] + (b[0] - a[0]) * t
+                py = a[1] + (b[1] - a[1]) * t
+                break
+            acc += ln
+        hit = (int(ox + px * zoom), int(oy + py * zoom), l['to'])
+        click(cv, hit[0], hit[1])
+        M.pump(60)
+        sel2 = app.win.getPlanSelection(pp_app.CV)
+        last = (hit, sel2)
+        if sel2 == hit[2]:
+            return last
+        M.pump(140)
+    return last
+
+
+link_hit = click_link()
+if link_hit:
+    hit, sel2 = link_hit
     chk('单击连线选中下游节点', sel2 == hit[2], '%s (期望 %s, 点击 %d,%d)'
         % (sel2, hit[2], hit[0], hit[1]))
 else:
-    chk('单击连线选中下游节点', False, 'view 里没有 links')
+    chk('单击连线选中下游节点', False, 'view 里没有 links 或视口尚未就绪')
 
 # --- 4. 控件级导出 PNG ---
 p1 = r'G:\PyArx\docs\_ctl_canvas.png'
