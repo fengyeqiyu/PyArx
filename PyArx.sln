@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.0.0
@@ -15,11 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Viewer", "Viewer\Viewer.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MfcXamlCore", "MfcXamlCore\MfcXamlCore.vcxproj", "{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MFCWebView", "MFCWebView\MFCWebView.vcxproj", "{C4D8E1A2-7B3F-4C59-8E6D-2A9B0C1D3E4F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MFCWebViewDemo", "MFCWebViewDemo\MFCWebViewDemo.vcxproj", "{E5B9F2C3-8D41-4A67-9C2B-3F1D5E7A9B0C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyMfcWebView", "PyMfcWebView\PyMfcWebView.vcxproj", "{F1A7C3D5-9B2E-4F61-8C3A-5D7E9B1F2A3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,12 +35,6 @@ Global
 		{5B0F7E44-8C41-4A36-9F1D-2B0C7A8D9E10}.Release|x64.Build.0 = Release|x64
 		{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}.Release|x64.ActiveCfg = Release|x64
 		{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}.Release|x64.Build.0 = Release|x64
-		{C4D8E1A2-7B3F-4C59-8E6D-2A9B0C1D3E4F}.Release|x64.ActiveCfg = Release|x64
-		{C4D8E1A2-7B3F-4C59-8E6D-2A9B0C1D3E4F}.Release|x64.Build.0 = Release|x64
-		{E5B9F2C3-8D41-4A67-9C2B-3F1D5E7A9B0C}.Release|x64.ActiveCfg = Release|x64
-		{E5B9F2C3-8D41-4A67-9C2B-3F1D5E7A9B0C}.Release|x64.Build.0 = Release|x64
-		{F1A7C3D5-9B2E-4F61-8C3A-5D7E9B1F2A3C}.Release|x64.ActiveCfg = Release|x64
-		{F1A7C3D5-9B2E-4F61-8C3A-5D7E9B1F2A3C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

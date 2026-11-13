@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -38,7 +38,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;PyEdModule;PYARX_GUI;Py_ENABLE_SHARED;_AFXEXT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);G:\ObjectArx\2024\inc;G:\ObjectArx\2024\inc-x64;G:\ObjectArx\2024\utils\brep\inc;G:\PyArx\third_party\python314\Include;G:\PyArx\third_party\python314\PC;G:\PyArx\third_party\pybind11\include;G:\PyArx\third_party\webview2\include;G:\PyArx\MFCWebView;G:\PyArx\common\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);G:\ObjectArx\2024\inc;G:\ObjectArx\2024\inc-x64;G:\ObjectArx\2024\utils\brep\inc;G:\PyArx\third_party\python314\Include;G:\PyArx\third_party\python314\PC;G:\PyArx\third_party\pybind11\include;G:\PyArx\common\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)stdafx.pch</PrecompiledHeaderOutputFile>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
@@ -54,14 +54,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>G:\ObjectArx\2024\lib-x64;G:\ObjectArx\2024\utils\brep\lib-x64;G:\PyArx\third_party\python314\PCbuild\amd64;G:\PyArx\third_party\webview2\lib\x64;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>MFCWebView.lib;WebView2Loader.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>G:\ObjectArx\2024\lib-x64;G:\ObjectArx\2024\utils\brep\lib-x64;G:\PyArx\third_party\python314\PCbuild\amd64;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/MANIFEST:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
-    <PostBuildEvent>
-      <Command>if not exist "$(OutDir)WebView2Loader.dll" copy /Y "G:\PyArx\third_party\webview2\bin\x64\WebView2Loader.dll" "$(OutDir)"</Command>
-      <Message>拷贝 WebView2Loader.dll（MFCWebView 的运行时依赖）</Message>
-    </PostBuildEvent>
+
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="PyAcadDatabase.cpp" />
@@ -82,9 +79,7 @@
     <ClCompile Include="PyPaletteSet.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="PyPaletteWeb.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+
     <ClCompile Include="dllmain.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -385,7 +380,7 @@
     <ClInclude Include="PyApDocument.h" />
     <ClInclude Include="PyApp.h" />
     <ClInclude Include="PyPaletteSet.h" />
-    <ClInclude Include="PyPaletteWeb.h" />
+
     <ClInclude Include="PyArrayCaster.h" />
     <ClInclude Include="PyClipBoard.h" />
     <ClInclude Include="PyColor.h" />
