@@ -55,3 +55,7 @@ MFCXaml 此文件夹项目暂停修改/
 *.bmp
 tests/**/_*.png
 tests/**/_*.gif
+
+# 本地凭据/令牌目录一律不入库
+GITEE令牌/
+*令牌*
