@@ -233,8 +233,10 @@ static void drawCodeLine(XamlCanvas& cv, HDC hdc, HFONT font, const RECT& lr, in
 // ===========================================================================
 void DesignerPaneView::paintMenuBar(XamlCanvas& cv, const RECT& rc, XamlElement* node)
 {
-    cv.fillRect(rc, xamlctl::shell().header);
-    cv.fillRect(RECT{ rc.left, rc.bottom - 1, rc.right, rc.bottom }, xamlctl::shell().line);
+    // 外观全部取 MenuBar 节点自身属性（与画布、预览器同源），外壳不再自己定颜色/字号
+    const xamlctl::ShellLook lk = xamlctl::shellLookOf(*node);
+    cv.fillRect(rc, lk.back);
+    cv.fillRect(RECT{ rc.left, rc.bottom - 1, rc.right, rc.bottom }, lk.line);
     m_surfTitleStrip = rc.bottom;      // 这一行就是无边框窗体的拖动区
 
     HDC hdc = ::GetDC(nullptr);
@@ -254,19 +256,15 @@ void DesignerPaneView::paintMenuBar(XamlCanvas& cv, const RECT& rc, XamlElement*
         // 固定占一列宽度并省略号收尾，长路径不会把菜单挤到屏幕外。
         if (_wcsicmp(bare.c_str(), L"ShellTitle") == 0)
         {
-            std::wstring t = c.get(L"Text");
+            // 所见即所得：标题文案与宽度都按 XAML 声明，不再换成窗口路径
+            std::wstring t = c.get(L"Title");
+            if (t.empty()) t = c.get(L"Text");
             if (t.empty()) t = c.text;
-            HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
-            if (root != nullptr)
-            {
-                wchar_t wt[512] = {};
-                if (::GetWindowTextW(root, wt, 511) > 0)
-                    t = wt;
-            }
-            const int w = 230;
+            int w = (c.previewW > 0) ? c.previewW : lk.titleW;
+            if (w <= 0 || w > (rc.right - rc.left) / 2) w = lk.titleW;   // 标题只占固定一列，不能吃掉整条菜单
             RECT tr = { x, rc.top, x + w, rc.bottom };
-            cv.text(tr, t, RGB(236, 240, 246),
-                    DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, 10, L"");
+            cv.text(tr, t, lk.fore,
+                    DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, lk.fontPt, L"");
             x += w;
             continue;
         }
@@ -311,7 +309,7 @@ void DesignerPaneView::paintMenuBar(XamlCanvas& cv, const RECT& rc, XamlElement*
         ::GetTextExtentPoint32W(hdc, hdr.c_str(), (int)hdr.size(), &sz);
         const int w = sz.cx + 26;
         RECT ir = { x, rc.top, x + w, rc.bottom };
-        cv.text(ir, hdr, RGB(214, 219, 226), DT_CENTER | DT_VCENTER | DT_SINGLELINE, fontPtOf(node, 0), L"");
+        cv.text(ir, hdr, lk.fore, DT_CENTER | DT_VCENTER | DT_SINGLELINE, lk.fontPt, L"");
         m_surfMenuRects.push_back(ir);
         m_surfMenuNodes.push_back(&c);
         x += w;
@@ -444,8 +442,9 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // ---- 工具栏 ----
     if (_wcsicmp(bareTag.c_str(), L"ToolBar") == 0)
     {
-        cv.fillRect(rc, xamlctl::shell().header);
-        cv.fillRect(RECT{ rc.left, rc.bottom - 1, rc.right, rc.bottom }, xamlctl::shell().line);
+        const xamlctl::ShellLook tl = xamlctl::shellLookOf(*node);
+        cv.fillRect(rc, tl.back);
+        cv.fillRect(RECT{ rc.left, rc.bottom - 1, rc.right, rc.bottom }, tl.line);
         const int savedPt = m_surfInheritPt;
         m_surfInheritPt = fontPtOf(node, 0);       // 工具栏声明的字号传给每个按钮
         for (auto& c : node->children)
