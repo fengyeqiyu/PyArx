@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  示例 09：QML anchors 锚到兄弟对象
+
+  QML 里：
+      anchors.left: A.right ; anchors.top: A.top
+      anchors.top: A.bottom ; anchors.left: A.left
+      anchors.left: B.right ; anchors.right: parent.right   // 左右两点拉宽
+  这里照写；锚兄弟时用兄弟的 x:Name。
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="09 兄弟锚定" Width="520" Height="320" Background="#F4F6F8">
+
+  <XPane x:Name="Host">
+    <XButton x:Name="A" text="A 左上固定" anchors.left="parent" anchors.top="parent"
+             width="140" height="32"/>
+    <XButton x:Name="B" text="B 贴 A 右侧" anchors.left="A.right" anchors.top="A.top"
+             anchors.margins="8" width="140" height="32"/>
+    <XButton x:Name="C" text="C 贴 A 下方同宽" anchors.left="A.left" anchors.top="A.bottom"
+             anchors.margins="8" width="140" height="32"/>
+    <XLabel x:Name="D" text="D 从 B 右侧一直接到父容器右边（上下贴边）"
+           anchors.left="B.right" anchors.right="parent" anchors.top="parent"
+           anchors.bottom="parent" anchors.margins="8"/>
+  </XPane>
+</XWindow>

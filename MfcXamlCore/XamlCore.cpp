@@ -1019,6 +1019,13 @@ namespace
                                  !node.get(L"anchors.centering").empty();
             node.anchorVCenter = !node.get(L"anchors.verticalCenter").empty() ||
                                  !node.get(L"anchors.centering").empty();
+            node.anchorFillRaw = node.get(L"anchors.fill");
+            node.anchorLeftRaw = node.get(L"anchors.left");
+            node.anchorRightRaw = node.get(L"anchors.right");
+            node.anchorTopRaw = node.get(L"anchors.top");
+            node.anchorBottomRaw = node.get(L"anchors.bottom");
+            node.anchorHCenterRaw = node.get(L"anchors.horizontalCenter");
+            node.anchorVCenterRaw = node.get(L"anchors.verticalCenter");
             const std::wstring mg = node.get(L"anchors.margins");
             node.anchorMargin = mg.empty() ? 0 : (std::max)(0, IntAttr(mg, 0));
             node.hasAnchors = node.anchorFill || node.anchorCenterIn || node.anchorLeft ||
@@ -1225,6 +1232,36 @@ namespace
                tag == L"progress" || tag == L"slider";
     }
 
+    // anchors 的值写着 parent（或空）就是锚父容器，否则是锚兄弟对象
+    bool AnchorIsParent(const std::wstring& raw)
+    {
+        return raw.empty() || _wcsicmp(raw.c_str(), L"parent") == 0;
+    }
+
+    bool HasSiblingAnchor(const XamlElement& el)
+    {
+        return !AnchorIsParent(el.anchorFillRaw) || !AnchorIsParent(el.anchorLeftRaw) ||
+               !AnchorIsParent(el.anchorRightRaw) || !AnchorIsParent(el.anchorTopRaw) ||
+               !AnchorIsParent(el.anchorBottomRaw) || !AnchorIsParent(el.anchorHCenterRaw) ||
+               !AnchorIsParent(el.anchorVCenterRaw);
+    }
+
+    // "A.right" -> id=A, edge=right
+    void SplitAnchor(const std::wstring& raw, std::wstring& id, std::wstring& edge)
+    {
+        const size_t dot = raw.find(L'.');
+        if (dot == std::wstring::npos)
+        {
+            id = raw;
+            edge.clear();
+        }
+        else
+        {
+            id = raw.substr(0, dot);
+            edge = raw.substr(dot + 1);
+        }
+    }
+
     bool IsContainer(const std::wstring& tag)
     {
         // AbsolutePanel 是"绝对定位布局"的正名；Canvas 是它的历史别名（画布另有 DrawCanvas）。
@@ -1402,7 +1439,7 @@ namespace
 
             // QML anchors：直接占父容器内框的一块，不参与流式推进
             bool anchored = false;
-            if (child.hasAnchors)
+            if (child.hasAnchors && !HasSiblingAnchor(child))
             {
                 const int availL = flow.padding;
                 const int availT = flow.paddingY;
@@ -1645,6 +1682,152 @@ namespace
             else if (!child.children.empty())
             {
                 // 控件模板实体化出来的视觉层：当作该控件内部的容器排布
+                XamlFlow inner;
+                inner.margin = 0;
+                inner.spacing = child.spacing;
+                inner.padding = child.padL;
+                inner.paddingY = child.padT;
+                inner.width = w;
+                inner.height = h;
+                inner.offsetX = child.previewX;
+                inner.offsetY = child.previewY;
+                inner.cursorX = child.padL;
+                inner.cursorY = child.padT;
+                inner.horizontal = child.hasOrientation ? child.horizontal : false;
+                LayoutNode(child, inner);
+            }
+        }
+
+        // 兄弟锚定：等所有兄弟的 preview 都算出来之后，再做一次修正
+        for (auto& child : node.children)
+        {
+            if (!HasSiblingAnchor(child))
+                continue;
+
+            auto findSibling = [&](const std::wstring& id) -> const XamlElement* {
+                if (id.empty())
+                    return nullptr;
+                for (const auto& sib : node.children)
+                    if (!sib.name.empty() && _wcsicmp(sib.name.c_str(), id.c_str()) == 0)
+                        return &sib;
+                return nullptr;
+            };
+
+            const int availL = flow.padding;
+            const int availT = flow.paddingY;
+            const int availR = (std::max)(availL + 1, flow.width - flow.padding);
+            const int availB = (std::max)(availT + 1, flow.height - flow.paddingY);
+
+            int w = child.previewW, h = child.previewH;
+            int localX = child.previewX - flow.offsetX;
+            int localY = child.previewY - flow.offsetY;
+            bool hasX = false, hasY = false, hasR = false, hasB = false;
+            int xPos = 0, yPos = 0, rPos = 0, bPos = 0;
+
+            // 一条锚边：写 parent 用父内框，写兄弟用兄弟的边（A.left / A.right / A.bottom / A.top）
+            auto pickEdge = [&](const std::wstring& raw, int parentPos, bool horiz, bool isFar) {
+                if (raw.empty())
+                    return;
+                int v = parentPos;
+                if (!AnchorIsParent(raw))
+                {
+                    std::wstring id, edge;
+                    SplitAnchor(raw, id, edge);
+                    const XamlElement* sib = findSibling(id);
+                    if (sib == nullptr)
+                        return;
+                    const int sp = horiz ? (sib->previewX - flow.offsetX)
+                                         : (sib->previewY - flow.offsetY);
+                    const int se = sp + (horiz ? sib->previewW : sib->previewH);
+                    const bool useEnd = _wcsicmp(edge.c_str(), horiz ? L"right" : L"bottom") == 0;
+                    v = useEnd ? se : sp;
+                }
+                if (horiz)
+                {
+                    if (isFar) { rPos = v; hasR = true; }
+                    else { xPos = v; hasX = true; }
+                }
+                else
+                {
+                    if (isFar) { bPos = v; hasB = true; }
+                    else { yPos = v; hasY = true; }
+                }
+            };
+
+            // fill="A"：位置与尺寸都跟兄弟一致
+            {
+                std::wstring id, edge;
+                SplitAnchor(child.anchorFillRaw, id, edge);
+                if (!AnchorIsParent(child.anchorFillRaw))
+                {
+                    if (const XamlElement* sib = findSibling(id))
+                    {
+                        xPos = sib->previewX - flow.offsetX;
+                        yPos = sib->previewY - flow.offsetY;
+                        rPos = xPos + sib->previewW;
+                        bPos = yPos + sib->previewH;
+                        hasX = hasR = hasY = hasB = true;
+                        if (!child.hasW) w = sib->previewW;
+                        if (!child.hasH) h = sib->previewH;
+                    }
+                }
+            }
+
+            pickEdge(child.anchorLeftRaw, availL, true, false);
+            pickEdge(child.anchorRightRaw, availR, true, true);
+            pickEdge(child.anchorTopRaw, availT, false, false);
+            pickEdge(child.anchorBottomRaw, availB, false, true);
+
+            // 单轴居中：锚兄弟的中心线
+            auto pickCenter = [&](const std::wstring& raw, bool horiz) {
+                if (raw.empty() || AnchorIsParent(raw))
+                    return;
+                std::wstring id, edge;
+                SplitAnchor(raw, id, edge);
+                const XamlElement* sib = findSibling(id);
+                if (sib == nullptr)
+                    return;
+                if (horiz)
+                {
+                    xPos = sib->previewX - flow.offsetX + sib->previewW / 2 - w / 2;
+                    hasX = true;
+                }
+                else
+                {
+                    yPos = sib->previewY - flow.offsetY + sib->previewH / 2 - h / 2;
+                    hasY = true;
+                }
+            };
+            pickCenter(child.anchorHCenterRaw, true);
+            pickCenter(child.anchorVCenterRaw, false);
+
+            // 两边都锚定 → 两点之间拉宽/拉高；单边锚定只挪位置，不改显式尺寸
+            if (hasX && hasR)
+                w = (std::max)(1, rPos - xPos);
+            if (hasY && hasB)
+                h = (std::max)(1, bPos - yPos);
+
+            const int m = child.anchorMargin;
+            if (hasX)
+                localX = xPos + m;
+            else if (hasR)
+                localX = (std::max)(0, rPos - m - w);
+            if (hasY)
+                localY = yPos + m;
+            else if (hasB)
+                localY = (std::max)(0, bPos - m - h);
+            if (hasX && hasR)
+                w = (std::max)(1, w - m * 2);
+            if (hasY && hasB)
+                h = (std::max)(1, h - m * 2);
+
+            child.previewX = flow.offsetX + localX;
+            child.previewY = flow.offsetY + localY;
+            child.previewW = w;
+            child.previewH = h;
+
+            if (!child.children.empty())
+            {
                 XamlFlow inner;
                 inner.margin = 0;
                 inner.spacing = child.spacing;

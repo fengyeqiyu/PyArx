@@ -559,13 +559,18 @@ def qml_usage_section():
             "| `Layout.margins` | `Margin` | 外边距 |",
             "| `x` / `y` | `Left` / `Top` | 绝对定位 |",
             "| `width` / `height` | `Width` / `Height` | 尺寸 |",
-            "", "锚定写法（`anchors.*` 锚到父容器内框，v1 只支持 parent）：", "",
+            "", "锚定写法（`anchors.*` 可锚父容器 `parent`，也可锚兄弟控件（写它的 `x:Name`）：", "",
             "| QML 写法 | 效果 |", "|---|---|",
             "| `anchors.fill=\"parent\"` | 占满父容器内框 |",
             "| `anchors.left` / `right` / `top` / `bottom` | 贴左/右/上/下 |",
             "| `anchors.centerIn=\"parent\"` | 水平垂直居中 |",
             "| `anchors.horizontalCenter` / `verticalCenter` | 单轴居中 |",
-            "| `anchors.margins` | 四边内缩 |",
+            "| `anchors.margins` | 内缩（单边锚定时只偏移该边） |",
+            "", "锚兄弟对象：", "",
+            "| `anchors.left=\"A.right\"` / `right` / `top` / `bottom` | 贴到 A 的左边/右边/上边/下边；"
+            "左右（或上下）两点同时锚定则拉宽（拉高） |",
+            "| `anchors.fill=\"A\"` | 与 A 同位置同尺寸 |",
+            "| `anchors.horizontalCenter=\"A\"` / `verticalCenter` | 与 A 对齐中心线 |",
             "", "`Layout.fillWidth` / `Layout.fillHeight` 仍只做写法兼容，"
             "实际拉伸由容器（StackPanel / Grid / Pane）决定。"]
     return "\n".join(out)

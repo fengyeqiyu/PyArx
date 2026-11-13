@@ -91,6 +91,9 @@ public:
     bool anchorTop = false, anchorBottom = false;
     bool anchorHCenter = false, anchorVCenter = false, anchorCenterIn = false;
     int anchorMargin = 0;
+    // 原始写法（支持锚到兄弟对象："A.right" / "A"）；值为 parent 时用上面几个 bool 快判
+    std::wstring anchorFillRaw, anchorLeftRaw, anchorRightRaw, anchorTopRaw, anchorBottomRaw;
+    std::wstring anchorHCenterRaw, anchorVCenterRaw;
 
     // 布局结果（运行时计算）
     int previewX = 0, previewY = 0, previewW = 0, previewH = 0;
