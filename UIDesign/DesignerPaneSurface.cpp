@@ -358,7 +358,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         return;
     }
 
-    const int rowH = 24;
+    int rowH = 24;                     // 行高可被 XAML 的 LineHeight 覆盖
 
     // ---- 菜单条（单表面自绘：顶层 MenuItem 横排，点击弹系统下拉菜单）----
     if (_wcsicmp(bareTag.c_str(), L"MenuBar") == 0)
@@ -616,12 +616,22 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     if (_wcsicmp(bareTag.c_str(), L"TreeView") == 0)
     {
         // 深色面板里不能再用系统白底（那是"未声明外观"的默认），否则整块泛白刺眼
+        // 底色/文字色/选中色/引导线颜色全部取节点属性：和预览器、画布用同一份 XAML
         xamlctl::TreeStyle st;
         st.back = RGB(23, 27, 33);
         st.fore = RGB(201, 210, 222);
         st.selBack = RGB(44, 74, 121);
         st.selFore = RGB(255, 255, 255);
         st.guide = RGB(80, 92, 106);
+        {
+            COLORREF c;
+            if (xamlctl::shellColor(node->get(L"Background"), c)) st.back = c;
+            if (xamlctl::shellColor(node->get(L"Foreground"), c)) st.fore = c;
+            if (xamlctl::shellColor(node->get(L"SelectionColor"), c)) st.selBack = c;
+            if (xamlctl::shellColor(node->get(L"BorderColor"), c)) st.guide = c;
+            const std::wstring lh = node->get(L"LineHeight");
+            if (!lh.empty()) rowH = _wtoi(lh.c_str());
+        }
         std::vector<xamlctl::TreeRow> rows;
         if (node->name == L"widgetBox")
         {
@@ -681,17 +691,29 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // ---- 属性表 ----
     if (_wcsicmp(bareTag.c_str(), L"PropertyGrid") == 0)
     {
+        // 属性表配色/列宽/行高同样取节点属性
         xamlctl::PropStyle st;
         st.back = RGB(23, 27, 33);
         st.keyBack = RGB(29, 34, 42);
         st.groupBack = RGB(35, 41, 50);
-        st.keyFore = RGB(150, 198, 238);     // 属性名：浅青蓝，和代码里的属性名同一套色
+        st.keyFore = RGB(150, 198, 238);
         st.valFore = RGB(216, 224, 234);
         st.line = RGB(42, 48, 57);
         st.selBack = RGB(44, 74, 121);
         st.editBack = RGB(33, 39, 48);
         st.keyW = 104;
         st.headH = 26;
+        {
+            COLORREF c;
+            if (xamlctl::shellColor(node->get(L"Background"), c)) st.back = c;
+            if (xamlctl::shellColor(node->get(L"Foreground"), c)) st.valFore = c;
+            if (xamlctl::shellColor(node->get(L"KeyColor"), c)) st.keyFore = c;
+            if (xamlctl::shellColor(node->get(L"BorderColor"), c)) st.line = c;
+            if (xamlctl::shellColor(node->get(L"SelectionColor"), c)) st.selBack = c;
+            if (xamlctl::shellColor(node->get(L"GroupColor"), c)) st.groupBack = c;
+            const std::wstring lh = node->get(L"LineHeight");
+            if (!lh.empty()) rowH = _wtoi(lh.c_str());
+        }
         std::vector<xamlctl::PropRow> rows;
         m_surfPropRc = RECT{ rc.left, rc.top, rc.right, rc.bottom };
         buildPropRows(Resolve(m_doc.root(), m_selected), rows);
