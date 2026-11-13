@@ -25,6 +25,7 @@ PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XAML UI 技术桥接到 P
 | `Viewer` / `XamlViewer` | 预览工具 |
 | `plugins` | 用 XAML 组合的复合控件（通用组合下沉到 C++ 基础控件） |
 | `tests` | 回归测试脚本（tests\mfc_xaml 下按控件/交互分类） |
+| `tools` | 维护脚本：`declsplit.py` 类体切分、`git_tag_version.ps1` 打版本号标签 |
 | `docs` | 设计文档、评审记录、执行记录 |
 | `res` | 运行时资源（图标、光标等） |
 
