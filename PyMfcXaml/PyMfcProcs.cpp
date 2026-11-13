@@ -1902,7 +1902,9 @@ LRESULT CALLBACK PyMfcHost::PyMfcSkinWindowProc(HWND hwnd, UINT msg, WPARAM wPar
         {
             wchar_t buf[1024] = {};
             ::GetWindowTextW(hwnd, buf, 1024);
-            host->fireGridAction(::GetDlgCtrlID(hwnd), "cellend", -1, 0, std::wstring(buf));
+            // col 槽位带按键码：13=回车确认、27=Esc 取消，Python 侧据此决定是否写回
+            host->fireGridAction(::GetDlgCtrlID(hwnd), "cellend", -1,
+                                 static_cast<int>(wParam), std::wstring(buf));
             return 0;
         }
     }
