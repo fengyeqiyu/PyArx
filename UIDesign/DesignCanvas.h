@@ -1562,7 +1562,8 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             // ---- 统一渲染器 ----
             // 按钮 / 文字 / 输入框 / 勾选 / 下拉 / 进度条：直接调 MfcXamlCore/XamlLeafPaint.h，
             // 预览器调的是同一个函数，所以画布与预览的圆角、边框、配色不会再分叉。
-            else if (tagIs(node, L"Button") || tagIs(node, L"Label") || tagIs(node, L"TextField") ||
+            else if (tagIs(node, L"Image") ||
+                     tagIs(node, L"Button") || tagIs(node, L"Label") || tagIs(node, L"TextField") ||
                      tagIs(node, L"CheckBox") || tagIs(node, L"RadioButton") ||
                      tagIs(node, L"ComboBox") || tagIs(node, L"ProgressBar") ||
                      tagIs(node, L"Slider") || tagIs(node, L"RangeSlider") ||

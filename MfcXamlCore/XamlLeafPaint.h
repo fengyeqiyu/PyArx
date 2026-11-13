@@ -137,6 +137,21 @@ inline void drawLeaf(XamlCanvas& cv, XamlElement* el, const RECT& rc,
         return;
     }
 
+    // 图片：有 Source 就按比例画出来，没有就画一个统一的占位框（画布与预览器完全一致）
+    if (isAnyTag(tag, {L"Image"}))
+    {
+        const std::wstring src = el->get(L"Source").empty() ? el->get(L"Icon") : el->get(L"Source");
+        const std::wstring imgPath = resolveIconPath(urlBase, src);
+        if (!imgPath.empty() && rc.right > rc.left && rc.bottom > rc.top)
+        {
+            cv.drawImage(rc, imgPath);
+            return;
+        }
+        cv.strokeRect(rc, xamlmfc::theme::border, 1);
+        xamlDrawText(cv, rc, L"XImage", ap, styled, xamlmfc::theme::muted, DT_CENTER, 0);
+        return;
+    }
+
     // 静态文本：运行时 Static 不铺底，只有文字
     if (isAnyTag(tag, {L"Label", L"Static", L"LinkLabel"}))
     {

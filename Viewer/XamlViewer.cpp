@@ -614,10 +614,17 @@ static const COLORREF kFieldCv  = xamlmfc::theme::field;
 
 static const wchar_t* g_backend = L"未初始化";
 
+// 名字比对要同时认 "GroupBox" 与 "XGroupBox"：XAML 里统一是 X 前缀，
+// 绘制分支按本意名分派，两边都要命中（否则预览器会静默漏画一类控件）。
 static bool isAnyTag(const std::wstring& tag, std::initializer_list<const wchar_t*> names)
 {
     for (const wchar_t* n : names)
-        if (_wcsicmp(tag.c_str(), n) == 0) return true;
+    if (!tag.empty() && (tag[0] == L'X' || tag[0] == L'x'))
+    {
+        const std::wstring bare = tag.substr(1);
+        for (const wchar_t* n : names)
+            if (_wcsicmp(bare.c_str(), n) == 0) return true;
+    }
     return false;
 }
 
@@ -648,18 +655,18 @@ static COLORREF drawContainer(XamlCanvas& cv, XamlElement* el, const RECT& rc,
         xamlctl::xamlDrawPanelHeader(cv, rc, el->text, el->get(L"Hint"), 10);
         return xamlctl::shell().header;
     }
-    if (_wcsicmp(el->tag.c_str(), L"Stage") == 0)
+    if (isAnyTag(el->tag, {L"Stage"}))
     {
         xamlctl::xamlDrawStage(cv, rc);
         return xamlctl::shell().stage;
     }
-    if (_wcsicmp(el->tag.c_str(), L"TabStrip") == 0)
+    if (isAnyTag(el->tag, {L"TabStrip"}))
     {
         xamlctl::xamlDrawTabBar(cv, rc);
         return xamlctl::shell().header;
     }
 
-    const bool group = _wcsicmp(el->tag.c_str(), L"GroupBox") == 0;
+    const bool group = isAnyTag(el->tag, {L"GroupBox"});
     const bool bar = isAnyTag(el->tag, {L"MenuBar", L"ToolBar"});
     const bool root = (el == g_root);
 
