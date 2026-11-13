@@ -295,21 +295,25 @@ void DesignerFrame::hideDockSliders()
 
     HWND controlBar = nullptr;
     HWND slider = nullptr;
+    // 递归找：MFC 会把 AFX_SLIDER 挂在停靠条/控制条底下，不再只是框架的直接子窗口。
+    // 那个滑块默认用系统窗口底色（白），贴在最右/最左缘，看起来就是"外框的一条白边"。
     struct Ctx { HWND root; HWND bar; HWND sld; } ctx{ m_hWnd, nullptr, nullptr };
     ::EnumChildWindows(m_hWnd, [](HWND h, LPARAM lp) -> BOOL {
         Ctx* c = reinterpret_cast<Ctx*>(lp);
-        if (::GetParent(h) != c->root) return TRUE;
         wchar_t cls[128] = {0};
         ::GetClassNameW(h, cls, 127);
         if (wcsstr(cls, L"Slider") != nullptr) c->sld = h;
-        else if (wcsstr(cls, L"ControlBar") != nullptr) c->bar = h;
+        else if (::GetParent(h) == c->root && wcsstr(cls, L"ControlBar") != nullptr) c->bar = h;
         return TRUE;
     }, (LPARAM)&ctx);
     controlBar = ctx.bar;
     slider = ctx.sld;
 
-    if (slider != nullptr && ::IsWindowVisible(slider))
-        ::SetWindowPos(slider, nullptr, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+    // 滑块不只隐藏，还要把它挪到屏幕外并压成 0 尺寸：
+    // 停靠体系下一轮 RecalcLayout 会重新 ShowWindow，只隐藏会被它再显示出来。
+    if (slider != nullptr)
+        ::SetWindowPos(slider, nullptr, -10000, -10000, 0, 0,
+                       SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
     // 停靠条自己被 MFC 留出 4px 给滑块：把它铺满客户区，那 4px 就回到画面上。
     // 只在尺寸真的不对时才改 —— 每 300ms 无条件 SetWindowPos 会触发停靠重排，整窗重画，看起来就是抖。
     if (controlBar != nullptr)

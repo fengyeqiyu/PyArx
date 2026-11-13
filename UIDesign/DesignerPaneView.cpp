@@ -517,12 +517,12 @@ void DesignerPaneView::beginSizeMovePreview()
 {
     m_sizeMove = true;
     diagLog("[sizeMove] begin\n");
-    // 画布是真实子窗口，会自己再画一次文档树；拖动期间先藏起来，交给拉伸预览
+    // 系统缩放/移动循环期间：整窗由 DWM 合成旧帧，我们不画。
+    // 子窗口（画布/代码坞）只冻结重绘，不再 SW_HIDE —— 一藏一显就是"画布闪一下"。
     if (m_canvas != nullptr && ::IsWindow(m_canvas->m_hWnd))
-        m_canvas->ShowWindow(SW_HIDE);
-    // XML 代码坞同样是真实子窗口：不藏的话它停在旧位置，会盖住分区贴图的底栏
+        ::SendMessageW(m_canvas->m_hWnd, WM_SETREDRAW, FALSE, 0);
     if (m_codeEditor != nullptr && m_codeEditor->hwnd() != nullptr)
-        ::ShowWindow(m_codeEditor->hwnd(), SW_HIDE);
+        ::SendMessageW(m_codeEditor->hwnd(), WM_SETREDRAW, FALSE, 0);
 }
 
 void DesignerPaneView::endSizeMovePreview()
@@ -531,11 +531,11 @@ void DesignerPaneView::endSizeMovePreview()
     m_sizeMove = false;
     diagLog("[sizeMove] end\n");
     if (m_canvas != nullptr && ::IsWindow(m_canvas->m_hWnd))
-        m_canvas->ShowWindow(SW_SHOW);
+        ::SendMessageW(m_canvas->m_hWnd, WM_SETREDRAW, TRUE, 0);
     if (m_codeEditor != nullptr && m_codeEditor->hwnd() != nullptr)
-        ::ShowWindow(m_codeEditor->hwnd(), SW_SHOW);
+        ::SendMessageW(m_codeEditor->hwnd(), WM_SETREDRAW, TRUE, 0);
     m_backSize = CSize(0, 0);       // 尺寸已变，缓存位图作废，下一次全量重画
-    // 期间没做布局，这里补一次：先按新尺寸重排，再整块重画
+    // 期间没做布局，这里补一次：先按新尺寸重排，再整块重画（一次，不再逐帧）
     CRect client;
     GetClientRect(&client);
     resizeTo(client);
@@ -577,14 +577,11 @@ void DesignerPaneView::computeLayoutZones(const CRect& rc)
 void DesignerPaneView::OnSize(UINT type, int cx, int cy)
 {
     CWnd::OnSize(type, cx, cy);
-    // 拖动/缩放期间不做完整重排：一次 layout 要遍历整棵节点树、重算所有子控件位置，
-    // 鼠标每挪一像素跑一遍，帧率必然掉。期间只拉伸上一帧（OnPaint 的分支），
-    // 松手时 endSizeMovePreview() 再一次性重排 —— 这就是 Qt "resize 期间只合成、不做布局"的路子。
+    // 窗口移动/缩放期间不做完整重排，也不重绘：系统模态循环里 DWM 合成上一帧，
+    // 我们自己每帧 Invalidate 只会插进空 WM_PAINT，反而让边缘闪。
+    // 松手时 endSizeMovePreview() 一次性重排重画 —— Qt 就是这么做的。
     if (m_sizeMove)
-    {
-        Invalidate(FALSE);
         return;
-    }
     resizeTo(CRect(0, 0, cx, cy));
 }
 
@@ -1784,40 +1781,10 @@ void DesignerPaneView::OnPaint()
     GetClientRect(&client);
     if (client.Width() <= 0 || client.Height() <= 0) return;
 
-    // 拖动/缩放窗口期间只贴拉伸预览：整窗重画一次 30~80ms，鼠标消息早跑完了，
-    // 边缘就留下旧像素 —— 这就是拖影。期间显示"上一帧拉伸"，松手再精确重画。
-    if (m_sizeMove && m_backDc.GetSafeHdc() != nullptr && m_backSize.cx > 0 && m_backSize.cy > 0)
-    {
-        const int ow = m_backSize.cx;
-        const int oh = m_backSize.cy;
-        const int nw = client.Width();
-        const int nh = client.Height();
-        ::SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
-
-        // 分区贴图：顶栏/底栏只横向拉伸（高度不变），左右两栏横向 1:1、纵向拉伸，
-        // 中间画布区双向拉伸。宽度不变的区域像素一一对应，文字始终锐利。
-        const int topH = m_zoneTopH;
-        const int botH = m_zoneBottomH;
-        const int lw = m_zoneLeftW;
-        const int rw = m_zoneRightW;
-        const int bodyH0 = oh - topH - botH;
-        const int bodyH1 = nh - topH - botH;
-        const bool canZones = topH > 0 && botH > 0 && lw > 0 && rw > 0 &&
-                              lw + rw < ow && bodyH0 > 0 && bodyH1 > 0 &&
-                              topH + botH < nh;
-        if (canZones)
-        {
-            dc.StretchBlt(0, 0, nw, topH, &m_backDc, 0, 0, ow, topH, SRCCOPY);
-            dc.StretchBlt(0, nh - botH, nw, botH, &m_backDc, 0, oh - botH, ow, botH, SRCCOPY);
-            dc.StretchBlt(0, topH, lw, bodyH1, &m_backDc, 0, topH, lw, bodyH0, SRCCOPY);
-            dc.StretchBlt(nw - rw, topH, rw, bodyH1, &m_backDc, ow - rw, topH, rw, bodyH0, SRCCOPY);
-            dc.StretchBlt(lw, topH, nw - lw - rw, bodyH1, &m_backDc, lw, topH,
-                          ow - lw - rw, bodyH0, SRCCOPY);
-            return;
-        }
-        dc.StretchBlt(0, 0, nw, nh, &m_backDc, 0, 0, ow, oh, SRCCOPY);
+    // 窗口移动/缩放由系统模态循环 + DWM 合成负责（Qt 的做法）。期间我们一律不画：
+    // 自己再贴一次拉伸图，会先糊一帧再等松手重绘，"画布闪一下"就是这么来的。
+    if (m_sizeMove)
         return;
-    }
 
     // 双缓冲：D2D 先画到内存位图，一次 BitBlt 上屏。
     // 位图常驻复用（只在客户区尺寸变化时重建），缩放时不再每帧申请 6MB 位图。

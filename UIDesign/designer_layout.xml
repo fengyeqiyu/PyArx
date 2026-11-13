@@ -303,7 +303,7 @@
       <XGrid Grid.Column="4" Background="#1C2027">
         <XGrid.RowDefinitions>
           <RowDefinition Height="32"/>    <!-- 对象检查器标题 -->
-          <RowDefinition Height="150"/>   <!-- 对象树 -->
+          <RowDefinition Height="*"/>     <!-- 对象树（与属性表均分右栏高度） -->
           <RowDefinition Height="6"/>     <!-- 水平 Splitter -->
           <RowDefinition Height="32"/>    <!-- 属性编辑器标题 -->
           <RowDefinition Height="*"/>     <!-- 属性表 -->

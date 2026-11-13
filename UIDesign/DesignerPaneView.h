@@ -289,7 +289,10 @@ namespace uidesign
         // 无边框窗体：贴边拖拽改尺寸 / 标题行拖拽移动（交给顶层框架按 NC 消息处理）
         bool tryFrameChrome(CPoint pt);
         int  frameEdgesAt(CPoint pt);          // 1=左 2=右 4=上 8=下，0=不在边缘
-        void startFrameDrag(CPoint pt, int edges);  // 自己拖窗/缩放，不进系统 SC_MOVE/SC_SIZE 循环
+        // Qt QWindow::startSystemMove / startSystemResize 的等价实现：
+        // 主动给顶层框架发 WM_NCLBUTTONDOWN(HTCAPTION/HTLEFT...)，由 DefWindowProc 进入
+        // 系统移动/缩放循环，DWM 负责整窗合成，不再自己 SetWindowPos 追鼠标。
+        void startSystemChrome(CPoint pt, int edges);
         void surfaceLButtonUp(CPoint pt);
         void surfaceMouseMove(CPoint pt, UINT flags);
         BOOL surfaceMouseWheel(CPoint pt, short delta);

@@ -142,7 +142,7 @@ bool DesignerPaneView::tryFrameChrome(CPoint pt)
     const int edges = frameEdgesAt(pt);
     if (edges == 0)
         return false;
-    startFrameDrag(pt, edges);
+    startSystemChrome(pt, edges);
     return true;
 }
 
@@ -165,22 +165,41 @@ int DesignerPaneView::frameEdgesAt(CPoint pt)
     return edges;
 }
 
-// 直接 SetWindowPos 跟着鼠标走：系统 SC_MOVE/SC_SIZE 循环会画一圈系统边框（就是"白圈"）
-void DesignerPaneView::startFrameDrag(CPoint pt, int edges)
+// Qt 的 QWindow::startSystemMove / startSystemResize（windows 平台）就是这个动作：
+// ReleaseCapture() 后给自己发 WM_NCLBUTTONDOWN(HTCAPTION / HTLEFT / HTTOP / ...)，
+// DefWindowProc 随即进入系统移动/缩放模态循环，由 DWM 合成整窗。
+// 好处：不占我们的消息循环，不做任何自绘贴图，跟手由系统保证，也就没有拖影和"闪一下"。
+void DesignerPaneView::startSystemChrome(CPoint pt, int edges)
 {
     HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
     if (root == nullptr)
         return;
-    m_frameRoot = root;
-    m_frameEdges = edges;
-    // 起点存屏幕坐标，拖动中也用屏幕坐标求位移：不再假设 pane 客户区原点和根窗一致，
-    // 避免子窗口命中时客户区偏移被算进 dx/dy（左边缘一跳就到最小宽度的根因）
+    // HTCAPTION 不缩放但要能移动；四边/四角按位组合映射成系统命中码
+    int hit = HTCAPTION;
+    switch (edges)
+    {
+    case 1:  hit = HTLEFT; break;
+    case 2:  hit = HTRIGHT; break;
+    case 4:  hit = HTTOP; break;
+    case 8:  hit = HTBOTTOM; break;
+    case 5:  hit = HTTOPLEFT; break;
+    case 6:  hit = HTTOPRIGHT; break;
+    case 9:  hit = HTBOTTOMLEFT; break;
+    case 10: hit = HTBOTTOMRIGHT; break;
+    default: hit = HTCAPTION; break;
+    }
+
     POINT sp = pt;
     ::ClientToScreen(m_hWnd, &sp);
+    m_frameRoot = root;
+    m_frameEdges = edges;
     m_frameStart = CPoint(sp.x, sp.y);
     ::GetWindowRect(root, &m_frameRect);
-    ::SetCapture(m_hWnd);
-    beginSizeMovePreview();     // 拖动/缩放期间只贴拉伸预览，松手再全量重画
+    // 让系统循环自己跑：必须先放开 capture，否则它拿不到鼠标
+    if (::GetCapture() == m_hWnd)
+        ::ReleaseCapture();
+    ::PostMessageW(root, WM_NCLBUTTONDOWN, static_cast<WPARAM>(hit),
+                   MAKELPARAM(sp.x, sp.y));
 }
 
 void DesignerPaneView::surfaceToolClick(int idx)
@@ -225,16 +244,17 @@ void DesignerPaneView::surfaceLButtonDown(CPoint pt)
     if (m_surfPropEditRow != -1) commitPropEditSurface();
     if (m_codeEditing) commitCodeEdit();
 
-    // 无边框窗体：贴边 → 自己缩放；标题行空白 → 自己拖动（都不进系统模态循环）
+    // 无边框窗体（对齐 Qt FramelessWindowHint + startSystemResize/startSystemMove）：
+    // 贴边 → 交给系统缩放循环；标题行空白 → 交给系统移动循环，都是 DWM 合成。
     const int edges = frameEdgesAt(pt);
     if (edges != 0)
     {
-        startFrameDrag(pt, edges);
+        startSystemChrome(pt, edges);
         return;
     }
     if (pt.y < m_surfTitleStrip && surfaceHitTest(pt).kind == SurfaceHit::None)
     {
-        startFrameDrag(pt, 0);
+        startSystemChrome(pt, 0);
         return;
     }
 
@@ -423,34 +443,8 @@ void DesignerPaneView::surfaceLButtonUp(CPoint pt)
 void DesignerPaneView::surfaceMouseMove(CPoint pt, UINT flags)
 {
     (void)flags;
-    // 自己实现的拖动 / 贴边缩放：按屏幕位移直接改窗口矩形
-    if (m_frameRoot != nullptr)
-    {
-        POINT sp = pt;
-        ::ClientToScreen(m_hWnd, &sp);
-        const int dx = sp.x - m_frameStart.x;
-        const int dy = sp.y - m_frameStart.y;
-        CRect r = m_frameRect;
-        if (m_frameEdges == 0)
-        {
-            r.OffsetRect(dx, dy);
-        }
-        else
-        {
-            if (m_frameEdges & 1) r.left += dx;
-            if (m_frameEdges & 2) r.right += dx;
-            if (m_frameEdges & 4) r.top += dy;
-            if (m_frameEdges & 8) r.bottom += dy;
-            if (r.Width() < 720) { if (m_frameEdges & 1) r.left = r.right - 720; else r.right = r.left + 720; }
-            if (r.Height() < 480) { if (m_frameEdges & 4) r.top = r.bottom - 480; else r.bottom = r.top + 480; }
-        }
-        // SWP_NOCOPYBITS：不让系统把旧内容滚动拷贝，新露出的边不会带出"旧像素拖影条"。
-        // 不做同步 UpdateWindow：每帧强刷会和后续鼠标消息互相顶，观感反而抖；
-        // 交给 WM_PAINT 正常排队，帧率由绘制速度自然决定。
-        ::SetWindowPos(m_frameRoot, nullptr, r.left, r.top, r.Width(), r.Height(),
-                       SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOCOPYBITS);
-        return;
-    }
+    // 窗口移动/缩放已交回系统模态循环（Qt startSystemMove/startSystemResize 等价），
+    // 这里不再按位移改窗口矩形：自己 SetWindowPos 追鼠标是拖影和边缘闪烁的来源。
     if (m_dragSplit >= 0)
     {
         splitterDrag(m_dragSplit, pt);
