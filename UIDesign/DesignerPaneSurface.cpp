@@ -369,6 +369,78 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         return;
     }
 
+    // ---- 左侧 Draw 工具条（直线 / 矩形 / 圆 / 弧）----
+    // 外观与命中都在外壳这一侧；画布只保存"待放置图元"的状态
+    if (_wcsicmp(bareTag.c_str(), L"DrawBar") == 0)
+    {
+        const xamlctl::ShellTheme& th = xamlctl::shell();
+        // 布局引擎给外壳自定义容器的矩形可能只按内容高度算，这里按 4 个工具按钮撑开
+        if (rc.bottom - rc.top < 176) rc.bottom = rc.top + 176;
+        cv.fillRect(rc, th.panel);
+        cv.fillRect(RECT{ rc.left, rc.top, rc.left + 1, rc.bottom }, th.line);
+
+        RECT hr{ rc.left, rc.top, rc.right, rc.top + 22 };
+        cv.text(hr, L"Draw", th.textDim, DT_CENTER | DT_VCENTER | DT_SINGLELINE, 8,
+                L"Microsoft YaHei UI");
+
+        const std::wstring pending = (m_canvas != nullptr) ? m_canvas->PendingShapeTag()
+                                                           : std::wstring();
+        int y = rc.top + 24;
+        const int pad = 5;
+        // 工具清单以 XAML 的 DrawBar 子节点为准；子节点缺失时退回四个内置图元
+        std::vector<std::wstring> tools;
+        for (auto& c : node->children)
+        {
+            std::wstring shape = c.get(L"Tool");
+            if (shape.empty()) continue;
+            tools.push_back(shape);
+        }
+        if (tools.empty())
+        {
+            tools.push_back(L"Line");
+            tools.push_back(L"Rectangle");
+            tools.push_back(L"Ellipse");
+            tools.push_back(L"Arc");
+        }
+        for (auto& shape : tools)
+        {
+            RECT b{ rc.left + pad, y, rc.right - pad, y + 30 };
+            if (b.bottom > rc.bottom - pad) break;
+            const bool on = (_wcsicmp(pending.c_str(), shape.c_str()) == 0);
+            cv.fillRect(b, on ? th.accent : th.header);
+            cv.strokeRect(b, on ? th.accent : th.line, 1);
+            const COLORREF ink = on ? RGB(255, 255, 255) : th.text;
+
+            if (_wcsicmp(shape.c_str(), L"Line") == 0)
+                cv.strokeLine(POINT{ b.left + 8, b.bottom - 8 }, POINT{ b.right - 8, b.top + 8 },
+                              ink, 2);
+            else if (_wcsicmp(shape.c_str(), L"Rectangle") == 0)
+                cv.strokeRect(RECT{ b.left + 7, b.top + 6, b.right - 7, b.bottom - 6 }, ink, 1);
+            else if (_wcsicmp(shape.c_str(), L"Ellipse") == 0)
+                cv.fillEllipse(RECT{ b.left + 7, b.top + 6, b.right - 7, b.bottom - 6 },
+                               on ? th.accent : th.header, ink);
+            else
+            {
+                const int cx = (b.left + b.right) / 2;
+                const int cy = b.bottom - 8;
+                const int rx = (b.right - b.left) / 2 - 7;
+                const int ry = b.bottom - b.top - 14;
+                std::vector<POINT> pts;
+                for (int k = 0; k <= 24; ++k)
+                {
+                    const double t = 3.14159265 * (1.0 - k / 24.0);
+                    pts.push_back(POINT{ (LONG)(cx + rx * cos(t)), (LONG)(cy - ry * sin(t)) });
+                }
+                cv.strokePath(pts, ink, 2, false);
+            }
+
+            m_surfToolRects.push_back(RECT{ b.left, b.top, b.right, b.bottom });
+            m_surfToolNames.push_back(std::wstring(L"shape:") + shape);
+            y += 34;
+        }
+        return;
+    }
+
     // ---- 工具栏 ----
     if (_wcsicmp(bareTag.c_str(), L"ToolBar") == 0)
     {
@@ -397,7 +469,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         if (_wcsicmp(role.c_str(), L"Primary") == 0 || _wcsicmp(role.c_str(), L"Ghost") == 0)
         {
             xamlctl::xamlDrawPillButton(cv, rc, std::wstring(uiNodeText(node).GetString()),
-                                        _wcsicmp(role.c_str(), L"Primary") == 0, hot, fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 9));
+                                        _wcsicmp(role.c_str(), L"Primary") == 0, hot, fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 10));
             return;
         }
         if (_wcsicmp(role.c_str(), L"Active") == 0)
@@ -413,7 +485,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         {
             xamlctl::xamlDrawToolButtonCaption(cv, rc, path, content, hot, false, false,
                                                xamlctl::ToolButtonStyle(),
-                                               fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 8));
+                                               fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 10));
             return;
         }
 
@@ -480,6 +552,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     if (_wcsicmp(bareTag.c_str(), L"Label") == 0)
     {
         std::wstring content = node->get(L"Text");
+        if (content.empty()) content = node->get(L"Title");
         if (content.empty()) content = node->get(L"Content");
         if (content.empty()) content = node->text;
         COLORREF bg = ParseColor(CString(node->get(L"Background").c_str()));

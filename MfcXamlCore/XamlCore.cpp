@@ -930,6 +930,8 @@ namespace
             node.name = node.get(L"Name");
         node.text = node.get(L"Text");
         if (node.text.empty())
+            node.text = node.get(L"Title");     // Title = 显示标题（Name 为控件标识）
+        if (node.text.empty())
             node.text = node.get(L"Content");   // Popup 的正文
         if (node.text.empty())
             node.text = node.get(L"Header");
@@ -2532,7 +2534,10 @@ IXamlControl* XamlRuntime::instantiate(void* parent)
             for (const auto& kv : el.attrs)
             {
                 const std::wstring key = LocalName(kv.first);
-                ctrl->setProperty(key.c_str(), kv.second);
+                const bool ok = ctrl->setProperty(key.c_str(), kv.second);
+                // Title 是对外统一的"标题"写法：控件没有独立 Title 时按 Text 落
+                if (!ok && _wcsicmp(key.c_str(), L"Title") == 0)
+                    ctrl->setProperty(L"Text", kv.second);
             }
         }
         if (m_onControl)
@@ -2678,6 +2683,8 @@ namespace
     void SyncText(XamlElement& el)
     {
         el.text = el.get(L"Text");
+        if (el.text.empty())
+            el.text = el.get(L"Title");     // Title 与 Text 同义（Popup/Dialog/容器标题）
         if (el.text.empty())
             el.text = el.get(L"Content");   // Popup 的正文
         if (el.text.empty())

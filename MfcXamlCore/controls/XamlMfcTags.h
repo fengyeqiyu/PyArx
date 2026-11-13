@@ -50,6 +50,8 @@ namespace xamlmfc
             L"MenuBar", L"MenuItem", L"ToolBar", L"StatusBar", L"PropertyGrid", L"ListView",
             L"TreeView", L"PaletteSet", L"PalettePage", L"PaletteSet.Resources",
             L"PanelHeader", L"TabStrip", L"Tab", L"ChipBar", L"Chip", L"Stage",
+            L"ShellTitle", L"DrawBar",
+            L"TreeRow", L"PropRow", L"ListRow",   // 列表/树/属性表的预设行
             // 声明层资源（不参与布局但合法）
             L"Style", L"Setter", L"ControlTemplate", L"DataTemplate", L"Binding",
             L"Trigger", L"Style.Triggers", L"DataTrigger", L"Resources",

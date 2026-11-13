@@ -414,7 +414,6 @@ namespace uidesign
             // 标尺在窗口坐标画，先恢复单位变换
             if (rt != nullptr) rt->SetTransform(D2D1::Matrix3x2F::Identity());
             if (m_showRuler) drawRulerCv(*m_d2dCv, 0, 0, W, H);
-            drawShapeBarCv(*m_d2dCv, 0, 0, W);      // 竖向 Draw 工具条（不随缩放）
 
             m_d2dCv->end();
             const HRESULT hr = m_d2dCv->lastError();
@@ -432,17 +431,6 @@ namespace uidesign
 
         afx_msg void OnLButtonDown(UINT flags, CPoint point)
         {
-            // 左侧 Draw 工具条优先命中（客户坐标、未缩放）：点一下即进入"待放置"状态
-            {
-                const int sbi = shapeBarHit(point);
-                if (sbi >= 0)
-                {
-                    m_pendingShape = shapeToolTags()[sbi];
-                    if (onPickCreate) onPickCreate(m_pendingShape);
-                    Invalidate(FALSE);
-                    return;
-                }
-            }
             point = docPt(point);
             // 绘制 jig：点选控件箱后，在画布按下即定起点、拖动实时预览、松手按尺寸创建
             bool drawMode = false;
@@ -1080,6 +1068,15 @@ namespace uidesign
         DECLARE_MESSAGE_MAP()
 
     public:
+        // ---- Draw 工具条（外壳侧绘制，画布只保存"待放置图元"状态）----
+        void SetPendingShapeTag(const std::wstring& tag, bool notify = true)
+        {
+            m_pendingShape = tag;
+            if (notify && onPickCreate) onPickCreate(m_pendingShape);
+            Invalidate(FALSE);
+        }
+        std::wstring PendingShapeTag() const { return m_pendingShape; }
+
         // 创建回调：点击画布时调用；返回 true 表示已创建（不再进入选中/拖拽）
         std::function<bool(CPoint)> onCreateNode;
         // 绘制 jig 回调：按下画布判定是否开始动态绘制；松手回传最终矩形（画布客户坐标）
@@ -1350,11 +1347,44 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 cv.fillRect(rc, bgC == (COLORREF)-1 ? RGB(255, 255, 255) : bgC);
                 cv.strokeRect(rc, bdC == (COLORREF)-1 ? RGB(200, 204, 210) : bdC, 1);
             }
-            else if (tagIs(node, L"TreeView") || tagIs(node, L"PropertyGrid") ||
-                     tagIs(node, L"ListBox") || tagIs(node, L"ListView"))
+            else if (tagIs(node, L"MenuBar"))
             {
-                // 与预览器 / 运行时同一实现（XamlControls::xamlDrawListLike）：
-                // 文档里的列表类控件未声明外观时就是系统窗口外观，不能自作主张上深色主题。
+                xamlctl::xamlDrawShellMenuBar(cv, rc, *node);
+                return;
+            }
+            else if (tagIs(node, L"StatusBar"))
+            {
+                xamlctl::xamlDrawShellStatusBar(cv, rc, *node);
+                return;
+            }
+            else if (tagIs(node, L"DrawBar"))
+            {
+                xamlctl::xamlDrawShellDrawBar(cv, rc, *node);
+                return;
+            }
+            else if (tagIs(node, L"ChipBar"))
+            {
+                xamlctl::xamlDrawShellChipBar(cv, rc, *node);
+                return;
+            }
+            else if (tagIs(node, L"TabStrip"))
+            {
+                xamlctl::xamlDrawShellTabStrip(cv, rc, *node);
+                return;
+            }
+            else if (tagIs(node, L"Stage"))
+            {
+                xamlctl::xamlDrawShellStage(cv, rc, *node);
+                return;
+            }
+            else if (tagIs(node, L"PanelHeader"))
+            {
+                xamlctl::xamlDrawShellPanelHeader(cv, rc, *node);
+                return;
+            }
+            else if (tagIs(node, L"TreeView"))
+            {
+                // 预设行：XAML 里写 Level/HasChildren/Expanded/Selected 即可在画布上看出行结构
                 xamlapp::XamlAppearance ap;
                 ap.backColor = node->get(L"Background");
                 if (ap.backColor.empty()) ap.backColor = node->get(L"BackColor");
@@ -1362,14 +1392,42 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 ap.borderColor = node->get(L"BorderColor");
                 ap.borderStyle = node->get(L"BorderStyle");
                 ap.fontSize = _wtoi(node->get(L"FontSize").c_str());
-                {
-                    const std::wstring op = node->get(L"Opacity");
-                    ap.opacity = op.empty() ? 255 : _wtoi(op.c_str());
-                }
+                const int lum = GetRValue(bgC == (COLORREF)-1 ? RGB(255, 255, 255) : bgC);
+                xamlctl::xamlDrawTreeLike(cv, rc, *node, node->styled, ap,
+                                          lum > 140 ? RGB(32, 36, 42) : RGB(228, 231, 236),
+                                          RGB(120, 130, 150));
+                return;
+            }
+            else if (tagIs(node, L"PropertyGrid"))
+            {
+                // 预设行：子节点的 Name/Value 即"属性—值"两列
+                xamlapp::XamlAppearance ap;
+                ap.backColor = node->get(L"Background");
+                if (ap.backColor.empty()) ap.backColor = node->get(L"BackColor");
+                ap.foreColor = node->get(L"Foreground");
+                ap.borderColor = node->get(L"BorderColor");
+                ap.borderStyle = node->get(L"BorderStyle");
+                ap.fontSize = _wtoi(node->get(L"FontSize").c_str());
+                const int lum2 = GetRValue(bgC == (COLORREF)-1 ? RGB(255, 255, 255) : bgC);
+                xamlctl::xamlDrawPropRows(cv, rc, *node, node->styled, ap,
+                                          lum2 > 140 ? RGB(32, 36, 42) : RGB(228, 231, 236),
+                                          RGB(120, 130, 150));
+                return;
+            }
+            else if (tagIs(node, L"ListBox") || tagIs(node, L"ListView"))
+            {
+                xamlapp::XamlAppearance ap;
+                ap.backColor = node->get(L"Background");
+                if (ap.backColor.empty()) ap.backColor = node->get(L"BackColor");
+                ap.foreColor = node->get(L"Foreground");
+                ap.borderColor = node->get(L"BorderColor");
+                ap.borderStyle = node->get(L"BorderStyle");
+                ap.fontSize = _wtoi(node->get(L"FontSize").c_str());
                 const int inkLum = GetRValue(bgC == (COLORREF)-1 ? RGB(255, 255, 255) : bgC);
                 xamlctl::xamlDrawListLike(cv, rc, *node, node->styled, ap,
                                           inkLum > 140 ? RGB(32, 36, 42) : RGB(228, 231, 236),
                                           RGB(120, 130, 150));
+                return;
             }
             else if (tagIs(node, L"SplitView"))
             {
@@ -1378,6 +1436,11 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                           ::GetSysColor(COLOR_BTNFACE));
             }
             else if (tagIs(node, L"StatusBar"))
+            {
+                xamlctl::xamlDrawShellStatusBar(cv, rc, *node);
+                return;
+            }
+            else if (false)
             {
                 std::vector<xamlctl::StatusCell> cells;
                 for (auto& c : node->children)
@@ -1399,7 +1462,13 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             }
             else if (tagIs(node, L"TabStrip"))
             {
-                xamlctl::xamlDrawTabBar(cv, rc);
+                xamlctl::xamlDrawShellTabStrip(cv, rc, *node);
+                return;
+            }
+            else if (tagIs(node, L"DrawBar"))
+            {
+                xamlctl::xamlDrawShellDrawBar(cv, rc, *node);
+                return;
             }
             else if (tagIs(node, L"Tab"))
             {
@@ -1415,11 +1484,13 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             }
             else if (tagIs(node, L"Stage"))
             {
-                xamlctl::xamlDrawStage(cv, rc);
+                xamlctl::xamlDrawShellStage(cv, rc, *node);
+                return;
             }
             else if (tagIs(node, L"ChipBar"))
             {
-                // 透明容器：分类胶囊由 Chip 自己画
+                xamlctl::xamlDrawShellChipBar(cv, rc, *node);
+                return;
             }
             else if (IsContainer(node->tag))
             {
@@ -2176,7 +2247,11 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                     }
                 }
             }
-            else if (tagIs(node, L"MenuBar") || tagIs(node, L"ToolBar") || tagIs(node, L"Menu"))
+            else if (tagIs(node, L"MenuBar"))
+            {
+                xamlctl::xamlDrawShellMenuBar(cv, rc, *node);
+            }
+            else if (tagIs(node, L"ToolBar") || tagIs(node, L"Menu"))
             {
                 const bool bar = !tagIs(node, L"Menu");
                 if (bar) cv.fillRect(rc, cvdoc::kHead);
@@ -2500,30 +2575,6 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         // ---- 左侧竖向 Draw 工具条：直线 / 矩形 / 圆 ----
         // 画在画布客户坐标（不跟缩放走）。点中即把待放置的 tag 交给宿主，
         // 之后按下拖动定尺寸 —— 与控件箱那条路径完全一致，只是入口挪到画布边上。
-        static const std::vector<std::wstring>& shapeToolTags()
-        {
-            static const std::vector<std::wstring> t = { L"Line", L"Rectangle", L"Ellipse", L"Arc" };
-            return t;
-        }
-        CRect shapeBarRect(int canvasW) const
-        {
-            const int n = (int)shapeToolTags().size();
-            const int barW = 46, barH = 20 + n * 34 + 4;   // 顶部 20px 是 "Draw" 分组标题
-            // 默认贴在画布右边缘（文档通常从左上排，右侧留白更适合挂工具条）；
-            // 画布太窄时退回左上角，至少还能点。
-            const int x0 = (canvasW >= 160) ? canvasW - barW - 8 : 8;
-            return CRect(x0, 8, x0 + barW, 8 + barH);
-        }
-        int shapeBarHit(CPoint p)                // p = 画布客户坐标（缩放前）
-        {
-            CRect client;
-            GetClientRect(&client);
-            const CRect bar = shapeBarRect(client.Width());
-            if (!bar.PtInRect(p)) return -1;
-            const int idx = (p.y - (bar.top + 20)) / 34;
-            if (idx < 0 || idx >= (int)shapeToolTags().size()) return -1;
-            return idx;
-        }
         // 反过来：给定圆心/半径与角度区间，算出这段弧的外接方框。
         // 与 arcGeom 互为逆运算，因此"圆心+半径不变、只改角度"时框会跟着变，弧始终落在同一个圆上。
         static void arcBoxFromArc(double cx, double cy, double R, int startDeg, int sweepDeg, CRect& rc)
@@ -2579,48 +2630,6 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             v %= 360;
             if (v < 0) v += 360;
             return v;
-        }
-
-        void drawShapeBarCv(XamlCanvas& cv, int ox, int oy, int canvasW)
-        {
-            CRect bar = shapeBarRect(canvasW);
-            bar.OffsetRect(ox, oy);
-            cv.fillRect(bar, RGB(38, 42, 50));
-            cv.strokeRect(bar, RGB(92, 98, 110), 1);
-            // 分组标题：这竖条属于"Draw"（画图元），跟顶部工具栏的功能组分开看
-            {
-                CRect hr = bar;
-                hr.bottom = hr.top + 20;
-                cv.fillRect(hr, RGB(46, 51, 60));
-                RECT tr = { hr.left, hr.top, hr.right, hr.bottom - 1 };
-                cv.text(tr, L"Draw", RGB(150, 168, 190), DT_CENTER | DT_VCENTER | DT_SINGLELINE,
-                        0, L"");
-            }
-            int y = bar.top + 20;
-            for (size_t i = 0; i < shapeToolTags().size(); ++i)
-            {
-                CRect b(bar.left + 6, y, bar.right - 6, y + 28);
-                const bool on = (m_pendingShape == shapeToolTags()[i]);
-                const COLORREF face = on ? RGB(0, 120, 212) : RGB(52, 56, 64);
-                cv.fillRect(b, face);
-                cv.strokeRect(b, on ? RGB(140, 200, 255) : RGB(84, 90, 102), 1);
-                const COLORREF ink = RGB(214, 222, 232);
-                if (shapeToolTags()[i] == L"Line")
-                    cv.strokeLine(POINT{ b.left + 9, b.bottom - 9 },
-                                  POINT{ b.right - 9, b.top + 9 }, ink, 2);
-                else if (shapeToolTags()[i] == L"Rectangle")
-                    cv.strokeRect(CRect(b.left + 8, b.top + 7, b.right - 8, b.bottom - 7), ink, 1);
-                else if (shapeToolTags()[i] == L"Arc")
-                {
-                    // 半圆弧图标：按钮框内画一段上凸的弧
-                    std::vector<POINT> pts = arcPoints(CRect(b.left + 7, b.top + 12, b.right - 7, b.bottom + 6),
-                                                       180, 180, 16);
-                    cv.strokePath(pts, ink, 2, false);
-                }
-                else
-                    cv.fillEllipse(CRect(b.left + 8, b.top + 5, b.right - 8, b.bottom - 5), face, ink);
-                y += 34;
-            }
         }
 
         void drawJigCv(XamlCanvas& cv)
@@ -2758,7 +2767,6 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
 
             if (rt != nullptr) rt->SetTransform(D2D1::Matrix3x2F::Identity());
             if (m_showRuler) drawRulerCv(cv, x, y, w, h);
-            drawShapeBarCv(cv, x, y, w);       // 父表面代画时同样画出来
             cv.clipPop();       // 与开头的 clipPush(bg) 配对，恢复父表面的裁剪深度
         }
 

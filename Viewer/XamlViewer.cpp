@@ -723,6 +723,51 @@ static void drawElement(XamlCanvas& cv, XamlElement* el, int ox, int oy, COLORRE
     }
     const bool styled = !ap.empty();
 
+    // 外壳构件：菜单行 / 状态栏 / Draw 条 / 胶囊条 / 文档标签条 —— 与设计器同一批绘制函数，
+    // 子节点（标题、菜单项、窗口按钮、状态格、形状按钮）已由这些函数整体画出，不再单独绘制
+    {
+        const std::wstring shellTag = xamlmfc::BareTag(el->tag);
+        if (_wcsicmp(shellTag.c_str(), L"MenuBar") == 0)
+        {
+            xamlctl::xamlDrawShellMenuBar(cv, rc, *el);
+            return;
+        }
+        if (_wcsicmp(shellTag.c_str(), L"StatusBar") == 0)
+        {
+            xamlctl::xamlDrawShellStatusBar(cv, rc, *el);
+            return;
+        }
+        if (_wcsicmp(shellTag.c_str(), L"DrawBar") == 0)
+        {
+            xamlctl::xamlDrawShellDrawBar(cv, rc, *el);
+            return;
+        }
+        if (_wcsicmp(shellTag.c_str(), L"ChipBar") == 0)
+        {
+            xamlctl::xamlDrawShellChipBar(cv, rc, *el);
+            return;
+        }
+        if (_wcsicmp(shellTag.c_str(), L"PanelHeader") == 0)
+        {
+            xamlctl::xamlDrawShellPanelHeader(cv, rc, *el);
+            return;
+        }
+        if (_wcsicmp(shellTag.c_str(), L"Stage") == 0)
+        {
+            xamlctl::xamlDrawShellStage(cv, rc, *el);
+            // 舞台自身按 XAML 底色铺满，子节点（画布纸）继续绘制
+            COLORREF back = parentBack;
+            { COLORREF c; if (xamlapp::ParseColor(el->get(L"Background"), c)) back = c; }
+            for (auto& c : el->children) drawElement(cv, &c, ox, oy, back);
+            return;
+        }
+        if (_wcsicmp(shellTag.c_str(), L"TabStrip") == 0)
+        {
+            xamlctl::xamlDrawShellTabStrip(cv, rc, *el);
+            return;
+        }
+    }
+
     if (isContainerTag(el->tag))
     {
         const COLORREF back = drawContainer(cv, el, rc, ap, styled, parentBack);

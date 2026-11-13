@@ -187,6 +187,15 @@ void DesignerPaneView::surfaceToolClick(int idx)
         Invalidate(FALSE);
         return;
     }
+    // Draw 工具条：点一下就把该图元交给画布"待放置"
+    if (name.Left(6).Compare(_T("shape:")) == 0)
+    {
+        if (m_canvas != nullptr)
+            m_canvas->SetPendingShapeTag(std::wstring(name.Mid(6).GetString()));
+        Invalidate(FALSE);
+        return;
+    }
+
     const UINT id = ensureAction(name);   // 复用菜单同一套命令分发
     OnDynamicCmd(id);
     Invalidate(FALSE);

@@ -1,4 +1,4 @@
-// XamlControls.h —— 三端共用的"复合控件绘制"层
+﻿// XamlControls.h —— 三端共用的"复合控件绘制"层
 //
 // 为什么单独一层：TreeView / PropertyGrid / Splitter / StatusBar 这些不是单个
 // 矩形+文字，而是"容器 + 多行 + 选中态 + 分隔线"的组合绘制。设计器画布、
@@ -82,6 +82,97 @@ inline void xamlDrawListLike(XamlCanvas& cv, const RECT& rc, const XamlElement& 
 }
 
 // ---------------------------------------------------------------- 树
+// 预设行：子节点（XItemView / 任意标签）的 Text= 行文本、Level= 缩进层级、
+// HasChildren=True 画展开框、Expanded=True 展开、Selected=True 选中底色。
+inline void xamlDrawTreeLike(XamlCanvas& cv, const RECT& rc, const XamlElement& el,
+                             bool styled, const xamlapp::XamlAppearance& ap,
+                             COLORREF ink, COLORREF edge, int lineH = 20)
+{
+    if (rc.right <= rc.left || rc.bottom <= rc.top) return;
+    // 外观以节点自身属性为第一来源：Background 定底色、Foreground 定文字色
+    COLORREF win = ::GetSysColor(COLOR_WINDOW);
+    COLORREF ink2 = ink;
+    { COLORREF c; if (xamlapp::ParseColor(el.get(L"Background"), c)) win = c; }
+    { COLORREF c; if (xamlapp::ParseColor(el.get(L"Foreground"), c)) ink2 = c; }
+    if (styled) { cv.fillRect(rc, win); cv.strokeRect(rc, edge, 1); }
+    else { cv.fillRect(rc, win); cv.frame3d(rc, edge, true, 2); }
+
+    cv.clipPush(rc);
+    int y = (int)rc.top + 3;
+    for (const auto& c : el.children)
+    {
+        if (y + lineH > (int)rc.bottom) break;
+        const int level = c.get(L"Level").empty() ? 0 : _wtoi(c.get(L"Level").c_str());
+        const std::wstring text = c.get(L"Text").empty() ? c.text : c.get(L"Text");
+        const bool hasKids = _wcsicmp(c.get(L"HasChildren").c_str(), L"True") == 0 ||
+                             _wcsicmp(c.get(L"HasChildren").c_str(), L"1") == 0;
+        const bool sel = _wcsicmp(c.get(L"Selected").c_str(), L"True") == 0;
+        RECT row{ rc.left, y, rc.right, y + lineH };
+        if (sel) cv.fillRect(row, RGB(210, 226, 250));
+        int ax = (int)rc.left + 6 + level * 14;
+        if (hasKids)
+        {
+            RECT box{ ax, y + (lineH - 9) / 2, ax + 9, y + (lineH - 9) / 2 + 9 };
+            cv.strokeRect(box, edge, 1);
+            cv.strokeLine(POINT{ box.left + 2, (box.top + box.bottom) / 2 },
+                          POINT{ box.right - 2, (box.top + box.bottom) / 2 }, ink, 1);
+            const bool exp = _wcsicmp(c.get(L"Expanded").c_str(), L"True") == 0;
+            if (!exp)
+                cv.strokeLine(POINT{ (box.left + box.right) / 2, box.top + 2 },
+                              POINT{ (box.left + box.right) / 2, box.bottom - 2 }, ink, 1);
+            ax += 13;
+        }
+        RECT tr{ ax, y, rc.right - 4, y + lineH };
+        xamlDrawText(cv, tr, text, ap, false, ink2, DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0);
+        y += lineH;
+    }
+    if (el.children.empty() && !el.text.empty())
+    {
+        RECT tr{ rc.left + 6, rc.top + 2, rc.right - 4, rc.bottom - 2 };
+        xamlDrawText(cv, tr, el.text, ap, false, ink2, DT_LEFT, 0);
+    }
+    cv.clipPop();
+}
+
+// ---------------------------------------------------------------- 属性行
+// 预设行：Name= 左列（40%），Value= 右列，Name=True 时画分组标题行。
+inline void xamlDrawPropRows(XamlCanvas& cv, const RECT& rc, const XamlElement& el,
+                             bool styled, const xamlapp::XamlAppearance& ap,
+                             COLORREF ink, COLORREF edge, int lineH = 20)
+{
+    if (rc.right <= rc.left || rc.bottom <= rc.top) return;
+    // 外观以节点自身属性为第一来源：Background 定底色、Foreground 定文字色
+    COLORREF win = ::GetSysColor(COLOR_WINDOW);
+    COLORREF ink2 = ink;
+    { COLORREF c; if (xamlapp::ParseColor(el.get(L"Background"), c)) win = c; }
+    { COLORREF c; if (xamlapp::ParseColor(el.get(L"Foreground"), c)) ink2 = c; }
+    if (styled) { cv.fillRect(rc, win); cv.strokeRect(rc, edge, 1); }
+    else { cv.fillRect(rc, win); cv.frame3d(rc, edge, true, 2); }
+
+    cv.clipPush(rc);
+    const int splitX = (int)rc.left + (int)((rc.right - rc.left) * 0.4);
+    int y = (int)rc.top + 2;
+    for (const auto& c : el.children)
+    {
+        if (y + lineH > (int)rc.bottom) break;
+        const std::wstring name = c.get(L"Name").empty() ? c.get(L"Text") : c.get(L"Name");
+        const std::wstring value = c.get(L"Value");
+        RECT row{ rc.left, y, rc.right, y + lineH };
+        cv.strokeLine(POINT{ rc.left, y + lineH }, POINT{ rc.right, y + lineH },
+                      RGB(226, 230, 236), 1);
+        cv.strokeLine(POINT{ splitX, y }, POINT{ splitX, y + lineH }, RGB(226, 230, 236), 1);
+        RECT nr{ rc.left + 4, y, splitX - 3, y + lineH };
+        xamlDrawText(cv, nr, name, ap, false, ink2, DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0);
+        if (!value.empty())
+        {
+            RECT vr{ splitX + 4, y, rc.right - 3, y + lineH };
+            xamlDrawText(cv, vr, value, ap, false, ink2, DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0);
+        }
+        y += lineH;
+    }
+    cv.clipPop();
+}
+
 struct TreeRow
 {
     std::wstring text;
@@ -249,6 +340,315 @@ inline int xamlDrawPropertyGrid(XamlCanvas& cv, const RECT& rc, const std::vecto
 }
 
 // ---------------------------------------------------------------- 分隔条
+// ---------------------------------------------------------------- 外壳构件
+// 外观全部取自节点自身属性：Background / Foreground / BorderColor / AccentColor /
+// Radius / FontSize / TitleWidth / WinButtonWidth / ItemHeight / IconSize / PaddingLeft，
+// 缺省才回落深色 IDE 主题。预览器、画布、运行时调用同一份实现。
+
+struct ShellLook
+{
+    COLORREF back   = RGB(38, 44, 54);
+    COLORREF fore   = RGB(228, 233, 240);
+    COLORREF dim    = RGB(150, 161, 174);
+    COLORREF line   = RGB(51, 59, 70);
+    COLORREF accent = RGB(76, 141, 255);
+    int radius   = 0;
+    int fontPt   = 9;
+    int titleW   = 230;
+    int btnW     = 38;
+    int itemH    = 30;
+    int iconSize = 24;
+};
+
+inline bool shellColor(const std::wstring& v, COLORREF& out)
+{
+    if (v.size() != 7 || v[0] != L'#') return false;
+    for (size_t i = 1; i < 7; ++i)
+        if (!iswxdigit(v[i])) return false;
+    const int r = wcstol(v.substr(1, 2).c_str(), nullptr, 16);
+    const int g = wcstol(v.substr(3, 2).c_str(), nullptr, 16);
+    const int b = wcstol(v.substr(5, 2).c_str(), nullptr, 16);
+    out = RGB(r, g, b);
+    return true;
+}
+
+inline int shellInt(const XamlElement& el, const wchar_t* name, int def)
+{
+    const std::wstring v = el.get(name);
+    return v.empty() ? def : _wtoi(v.c_str());
+}
+
+// 宽度 / 高度：先读 XAML 的 Width/Height 属性，没有才用布局算出来的宽高
+inline int shellWidth(const XamlElement& el, int fallback)
+{
+    const int w = shellInt(el, L"Width", 0);
+    return w > 0 ? w : fallback;
+}
+
+inline int shellHeight(const XamlElement& el, int fallback)
+{
+    const int h = shellInt(el, L"Height", 0);
+    return h > 0 ? h : fallback;
+}
+
+inline std::wstring shellTextOf(const XamlElement& el)
+{
+    if (!el.text.empty()) return el.text;
+    const std::wstring t = el.get(L"Title");
+    return t.empty() ? el.get(L"Text") : t;
+}
+
+inline ShellLook shellLookOf(const XamlElement& el, const ShellLook& parent = ShellLook())
+{
+    ShellLook lk = parent;
+    COLORREF c;
+    if (shellColor(el.get(L"Background"), c)) lk.back = c;
+    if (shellColor(el.get(L"Foreground"), c)) lk.fore = c;
+    if (shellColor(el.get(L"MutedColor"), c)) lk.dim = c;
+    if (shellColor(el.get(L"BorderColor"), c)) lk.line = c;
+    if (shellColor(el.get(L"AccentColor"), c)) lk.accent = c;
+    lk.radius   = shellInt(el, L"Radius", lk.radius);
+    lk.fontPt   = shellInt(el, L"FontSize", lk.fontPt);
+    lk.titleW   = shellInt(el, L"TitleWidth", lk.titleW);
+    lk.btnW     = shellInt(el, L"WinButtonWidth", lk.btnW);
+    lk.itemH    = shellInt(el, L"ItemHeight", lk.itemH);
+    lk.iconSize = shellInt(el, L"IconSize", lk.iconSize);
+    return lk;
+}
+
+inline void shellDrawText(XamlCanvas& cv, RECT rc, const std::wstring& t, COLORREF ink, int pt,
+                          UINT flags = DT_CENTER | DT_VCENTER | DT_SINGLELINE)
+{
+    xamlapp::XamlAppearance ap;
+    xamlDrawText(cv, rc, t, ap, false, ink, flags, pt);
+}
+
+inline std::wstring shellBareTag(const std::wstring& tag)
+{
+    if (tag.size() > 1 && (tag[0] == L'X' || tag[0] == L'x') && iswupper(static_cast<wint_t>(tag[1])))
+        return tag.substr(1);
+    return tag;
+}
+
+inline void xamlDrawShellPanelHeader(XamlCanvas& cv, const RECT& rc, const XamlElement& el,
+                                      COLORREF fallbackBack = RGB(32, 36, 43))
+{
+    ShellLook lk = shellLookOf(el);
+    COLORREF back = fallbackBack;
+    { COLORREF c; if (shellColor(el.get(L"Background"), c)) back = c; }
+    cv.fillRect(rc, back);
+    cv.strokeLine(POINT{ rc.left, rc.bottom - 1 }, POINT{ rc.right, rc.bottom - 1 }, lk.line, 1);
+
+    RECT tr = rc;
+    tr.left += shellInt(el, L"PaddingLeft", 10);
+    tr.right -= 6;
+    shellDrawText(cv, tr, shellTextOf(el), lk.fore, lk.fontPt,
+                  DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS);
+}
+
+inline void xamlDrawShellStage(XamlCanvas& cv, const RECT& rc, const XamlElement& el,
+                               COLORREF fallback = RGB(16, 18, 22))
+{
+    COLORREF back = fallback;
+    { COLORREF c; if (shellColor(el.get(L"Background"), c)) back = c; }
+    cv.fillRect(rc, back);
+    COLORREF edge;
+    if (shellColor(el.get(L"BorderColor"), edge)) cv.strokeRect(rc, edge, 1);
+}
+
+inline void xamlDrawShellMenuBar(XamlCanvas& cv, const RECT& rc, const XamlElement& el)
+{
+    const ShellLook lk = shellLookOf(el);
+    cv.fillRect(rc, lk.back);
+
+    RECT titleRc{ rc.left, rc.top, rc.left + lk.titleW, rc.bottom };
+    for (const auto& c : el.children)
+    {
+        if (_wcsicmp(shellBareTag(c.tag).c_str(), L"ShellTitle") != 0) continue;
+        const ShellLook cl = shellLookOf(c, lk);
+        RECT tr = titleRc;
+        tr.left += shellInt(c, L"PaddingLeft", 10);
+        shellDrawText(cv, tr, shellTextOf(c), cl.fore, cl.fontPt,
+                      DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS);
+    }
+    cv.strokeLine(POINT{ titleRc.right, rc.top }, POINT{ titleRc.right, rc.bottom }, lk.line, 1);
+
+    int x = titleRc.right + shellInt(el, L"ItemGap", 10);
+    for (const auto& c : el.children)
+    {
+        if (_wcsicmp(shellBareTag(c.tag).c_str(), L"MenuItem") != 0) continue;
+        const ShellLook cl = shellLookOf(c, lk);
+        const int w = shellWidth(c, (int)shellTextOf(c).size() * 13 + 22);
+        RECT ir{ x, rc.top, x + w, rc.bottom };
+        shellDrawText(cv, ir, shellTextOf(c), cl.fore, cl.fontPt);
+        x += w;
+    }
+
+    int bx = (int)rc.right - 12;
+    for (const auto& c : el.children)
+    {
+        const std::wstring role = c.get(L"Role");
+        if (_wcsicmp(role.c_str(), L"WinBtn") != 0 && _wcsicmp(role.c_str(), L"WinClose") != 0)
+            continue;
+        const ShellLook cl = shellLookOf(c, lk);
+        RECT b{ bx - lk.btnW, rc.top + 6, bx, rc.bottom - 6 };
+        const int cx = (b.left + b.right) / 2, cy = (b.top + b.bottom) / 2;
+        const int g = shellInt(c, L"GlyphSize", 5);
+        const std::wstring glyph = c.get(L"Glyph");
+        if (_wcsicmp(glyph.c_str(), L"Close") == 0)
+        {
+            cv.strokeLine(POINT{ cx - g, cy - g }, POINT{ cx + g, cy + g }, cl.fore, 1);
+            cv.strokeLine(POINT{ cx + g, cy - g }, POINT{ cx - g, cy + g }, cl.fore, 1);
+        }
+        else if (_wcsicmp(glyph.c_str(), L"Max") == 0)
+            cv.strokeRect(RECT{ cx - g, cy - g, cx + g, cy + g }, cl.fore, 1);
+        else if (_wcsicmp(glyph.c_str(), L"Min") == 0)
+            cv.strokeLine(POINT{ cx - g, cy }, POINT{ cx + g, cy }, cl.fore, 1);
+        bx -= lk.btnW + shellInt(c, L"WinButtonGap", 2);
+    }
+}
+
+inline void xamlDrawShellStatusBar(XamlCanvas& cv, const RECT& rc, const XamlElement& el)
+{
+    const ShellLook lk = shellLookOf(el);
+    cv.fillRect(rc, lk.back);
+    if (shellInt(el, L"BorderWidth", 1) > 0)
+        cv.strokeLine(POINT{ rc.left, rc.top }, POINT{ rc.right, rc.top }, lk.line, 1);
+
+    int x = (int)rc.left;
+    for (const auto& c : el.children)
+    {
+        const std::wstring tag = shellBareTag(c.tag);
+        const ShellLook cl = shellLookOf(c, lk);
+        if (_wcsicmp(tag.c_str(), L"Divider") == 0)
+        {
+            cv.strokeLine(POINT{ x, rc.top + 4 }, POINT{ x, rc.bottom - 4 }, cl.line, 1);
+            x += shellInt(c, L"Width", 1);
+            continue;
+        }
+        if (_wcsicmp(tag.c_str(), L"Label") != 0 && _wcsicmp(tag.c_str(), L"XLabel") != 0) continue;
+        const int w = shellWidth(c, (int)shellTextOf(c).size() * 12 + 16);
+        RECT cr{ x, rc.top, x + w, rc.bottom };
+        shellDrawText(cv, cr, shellTextOf(c), cl.fore, cl.fontPt,
+                      DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS);
+        x += w;
+    }
+}
+
+inline void xamlDrawShellDrawBar(XamlCanvas& cv, const RECT& rc, const XamlElement& el)
+{
+    const ShellLook lk = shellLookOf(el);
+    cv.fillRect(rc, lk.back);
+    if (shellInt(el, L"DividerWidth", 1) > 0)
+        cv.fillRect(RECT{ rc.left, rc.top, rc.left + 1, rc.bottom }, lk.line);
+
+    const std::wstring caption = shellTextOf(el);
+    const int capH = shellInt(el, L"CaptionHeight", 22);
+    if (!caption.empty() && capH > 0)
+    {
+        RECT hr{ rc.left, rc.top, rc.right, rc.top + capH };
+        shellDrawText(cv, hr, caption, lk.dim, shellInt(el, L"CaptionFontSize", 8));
+    }
+
+    const int gap = shellInt(el, L"ItemGap", 2);
+    const int spacing = shellInt(el, L"ItemSpacing", 4);
+    // 布局给出的矩形可能只按默认控件高算，竖条按条目数量撑开画布区域
+    int bottomLimit = (int)rc.bottom;
+    bottomLimit = (std::max)(bottomLimit,
+        (int)rc.top + capH + gap +
+        (int)el.children.size() * (lk.itemH + spacing) + shellInt(el, L"ItemPadding", 6) + 2);
+    int y = rc.top + capH + gap;
+    const int pad = shellInt(el, L"ItemPadding", 5);
+    for (const auto& c : el.children)
+    {
+        std::wstring tool = c.get(L"Tool");
+        if (tool.empty()) tool = c.get(L"Glyph");
+        if (tool.empty())
+        {
+            // 兜底：按 Name 猜（shapeLine / shapeRect / shapeEllipse / shapeArc）
+            const std::wstring id = c.name.empty() ? c.get(L"Name") : c.name;
+            if (id.find(L"Line") != std::wstring::npos) tool = L"Line";
+            else if (id.find(L"Rect") != std::wstring::npos) tool = L"Rectangle";
+            else if (id.find(L"Ellipse") != std::wstring::npos || id.find(L"Circle") != std::wstring::npos) tool = L"Ellipse";
+            else if (id.find(L"Arc") != std::wstring::npos) tool = L"Arc";
+            else tool = L"Line";
+        }
+        const ShellLook cl = shellLookOf(c, lk);
+        const int h = shellHeight(c, lk.itemH);
+        RECT b{ rc.left + pad, y, rc.right - pad, y + h };
+        if (b.bottom > bottomLimit) break;
+        cv.fillRect(b, cl.back);
+        if (shellInt(c, L"BorderWidth", 1) > 0) cv.strokeRect(b, cl.line, 1);
+
+        const std::wstring glyph = c.get(L"Glyph").empty() ? tool : c.get(L"Glyph");
+        if (_wcsicmp(glyph.c_str(), L"Line") == 0)
+            cv.strokeLine(POINT{ b.left + 8, b.bottom - 8 }, POINT{ b.right - 8, b.top + 8 }, cl.fore, 2);
+        else if (_wcsicmp(glyph.c_str(), L"Rectangle") == 0)
+            cv.strokeRect(RECT{ b.left + 7, b.top + 6, b.right - 7, b.bottom - 6 }, cl.fore, 1);
+        else if (_wcsicmp(glyph.c_str(), L"Ellipse") == 0)
+            cv.fillEllipse(RECT{ b.left + 7, b.top + 6, b.right - 7, b.bottom - 6 }, cl.back, cl.fore);
+        else
+        {
+            const int cx = (b.left + b.right) / 2, cy = b.bottom - 8;
+            const int rx = (b.right - b.left) / 2 - 7, ry = b.bottom - b.top - 14;
+            std::vector<POINT> pts;
+            for (int k = 0; k <= 24; ++k)
+            {
+                const double t = 3.14159265 * (1.0 - k / 24.0);
+                pts.push_back(POINT{ (LONG)(cx + rx * cos(t)), (LONG)(cy - ry * sin(t)) });
+            }
+            cv.strokePath(pts, cl.fore, 2, false);
+        }
+        y += h + shellInt(c, L"ItemSpacing", 4);
+    }
+}
+
+inline void xamlDrawShellChipBar(XamlCanvas& cv, const RECT& rc, const XamlElement& el)
+{
+    const ShellLook lk = shellLookOf(el);
+    cv.fillRect(rc, lk.back);
+    int x = (int)rc.left + shellInt(el, L"PaddingLeft", 8);
+    const int gap = shellInt(el, L"ItemGap", 4);
+    for (const auto& c : el.children)
+    {
+        if (_wcsicmp(shellBareTag(c.tag).c_str(), L"Chip") != 0) continue;
+        const ShellLook cl = shellLookOf(c, lk);
+        const bool on = _wcsicmp(c.get(L"Checked").c_str(), L"True") == 0;
+        const int w = shellWidth(c, (int)shellTextOf(c).size() * 12 + 18);
+        const int h = shellHeight(c, rc.bottom - rc.top - gap * 2);
+        RECT cr{ x, rc.top + gap, x + w, rc.top + gap + h };
+        const int r = cl.radius > 0 ? cl.radius : (h / 2);
+        cv.fillRoundRect(cr, on ? cl.accent : cl.back, on ? cl.accent : cl.line, r);
+        shellDrawText(cv, cr, shellTextOf(c), on ? RGB(255, 255, 255) : cl.fore, cl.fontPt);
+        x += w + shellInt(c, L"Spacing", 6);
+    }
+}
+
+inline void xamlDrawShellTabStrip(XamlCanvas& cv, const RECT& rc, const XamlElement& el)
+{
+    const ShellLook lk = shellLookOf(el);
+    cv.fillRect(rc, lk.back);
+    if (shellInt(el, L"BorderWidth", 1) > 0)
+        cv.strokeLine(POINT{ rc.left, rc.bottom - 1 }, POINT{ rc.right, rc.bottom - 1 }, lk.line, 1);
+    int x = (int)rc.left;
+    for (const auto& c : el.children)
+    {
+        const std::wstring tag = shellBareTag(c.tag);
+        if (_wcsicmp(tag.c_str(), L"Tab") != 0 && _wcsicmp(tag.c_str(), L"TabButton") != 0) continue;
+        const ShellLook cl = shellLookOf(c, lk);
+        const bool on = _wcsicmp(c.get(L"Selected").c_str(), L"True") == 0 ||
+                        _wcsicmp(c.get(L"Checked").c_str(), L"True") == 0 ||
+                        _wcsicmp(c.get(L"Active").c_str(), L"True") == 0;
+        const int w = shellWidth(c, (int)shellTextOf(c).size() * 13 + 34);
+        RECT tr{ x, rc.top, x + w, rc.bottom - 1 };
+        cv.fillRect(tr, on ? cl.back : lk.back);
+        const int barW = shellInt(c, L"AccentWidth", 2);
+        if (on && barW > 0) cv.fillRect(RECT{ tr.left, tr.top, tr.left + barW, tr.bottom }, cl.accent);
+        shellDrawText(cv, tr, shellTextOf(c), on ? cl.fore : cl.dim, cl.fontPt);
+        x += w;
+    }
+}
+
 inline void xamlDrawSplitter(XamlCanvas& cv, const RECT& rc, bool vertical,
                              bool hot = false, bool dragging = false,
                              COLORREF back = RGB(38, 47, 56))

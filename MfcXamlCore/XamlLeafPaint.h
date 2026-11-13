@@ -211,7 +211,17 @@ inline void drawLeaf(XamlCanvas& cv, XamlElement* el, const RECT& rc,
     // 列表类：窗口色 + 凹陷边框 + 逐行条目
     // 与设计器画布 / 运行时共用同一实现（XamlControls::xamlDrawListLike），
     // 否则三端会各自漂移成"这里浅色、那里深色"。
-    if (isAnyTag(tag, {L"ListBox", L"ListView", L"TreeView", L"PropertyGrid"}))
+    if (isAnyTag(tag, {L"TreeView"}))
+    {
+        xamlctl::xamlDrawTreeLike(cv, rc, *el, styled, ap, xamlmfc::theme::ink, xamlmfc::theme::border);
+        return;
+    }
+    if (isAnyTag(tag, {L"PropertyGrid"}))
+    {
+        xamlctl::xamlDrawPropRows(cv, rc, *el, styled, ap, xamlmfc::theme::ink, xamlmfc::theme::border);
+        return;
+    }
+    if (isAnyTag(tag, {L"ListBox", L"ListView"}))
     {
         xamlctl::xamlDrawListLike(cv, rc, *el, styled, ap, xamlmfc::theme::ink, xamlmfc::theme::border);
         return;
