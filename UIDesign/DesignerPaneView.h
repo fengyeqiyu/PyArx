@@ -229,8 +229,15 @@ namespace uidesign
         CBitmap  m_backBmp;
         CBitmap* m_backOld = nullptr;
         CSize    m_backSize = CSize(0, 0);
-        bool     m_sizeMove = false;      // 系统拖动/缩放循环进行中（只贴拉伸预览）                               // 入口：画到 WM_PAINT 的 DC，整窗绘制
+        bool     m_sizeMove = false;      // 系统拖动/缩放循环进行中（只贴拉伸预览）
+        // 上一次完整布局算出来的"分区尺寸"，缩放期间按分区贴图（Qt 的 layer 分块）：
+        // 左右两栏宽度不变 -> 1:1 贴原位，只有中间画布区双向拉伸。
+        int      m_zoneTopH = 0;
+        int      m_zoneBottomH = 0;
+        int      m_zoneLeftW = 0;
+        int      m_zoneRightW = 0;                               // 入口：画到 WM_PAINT 的 DC，整窗绘制
         void paintSurfaceNode(XmlCanvas& cv, XmlElement* node); // 按 tag 分派
+        void computeLayoutZones(const CRect& rc);               // 记录分区尺寸（缩放预览用）
         void buildWidgetRows(std::vector<xmlctl::TreeRow>& rows);  // 控件箱数据
         void buildDocRows(XmlElement* node, int level, std::vector<xmlctl::TreeRow>& rows, XmlElement* sel); // 对象树数据
         void buildPropRows(XmlElement* node, std::vector<xmlctl::PropRow>& rows);          // 属性表数据

@@ -537,6 +537,38 @@ void DesignerPaneView::endSizeMovePreview()
     RedrawWindow(nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
 }
 
+// 记下最后一次完整布局的"分区尺寸"：顶栏高度、底栏高度、左右两栏宽度。
+// 缩放预览按这三条分界线分区贴图，等价于 Qt 里每个 widget 各自有 layer：
+// 左右栏宽度不变 -> 1:1 像素贴原位（文字不糊），只有中间画布区被双向拉伸。
+void DesignerPaneView::computeLayoutZones(const CRect& rc)
+{
+    m_zoneTopH = 0;
+    m_zoneBottomH = 0;
+    m_zoneLeftW = 0;
+    m_zoneRightW = 0;
+    XmlElement* root = m_ui.root();
+    if (root == nullptr)
+        return;
+    XmlElement* grid = nullptr;
+    for (auto& child : root->children)
+    {
+        if (_wcsicmp(child.name.c_str(), L"rootGrid") == 0)
+        {
+            grid = &child;
+            break;
+        }
+    }
+    if (grid == nullptr || grid->children.size() < 6)
+        return;
+    XmlElement* body = &grid->children[2];       // 主体三栏那一行
+    if (body->children.size() < 5)
+        return;
+    m_zoneTopH = body->previewY;
+    m_zoneBottomH = rc.Height() - grid->children[3].previewY;   // 底部分隔条以下（代码坞+状态栏）
+    m_zoneLeftW = body->children.front().previewW;
+    m_zoneRightW = body->children.back().previewW;
+}
+
 void DesignerPaneView::OnSize(UINT type, int cx, int cy)
 {
     CWnd::OnSize(type, cx, cy);
@@ -564,6 +596,7 @@ void DesignerPaneView::resizeTo(const CRect& rc)
     const ULONGLONG t2 = ::GetTickCount64();
     applyLayoutToControls();
     const ULONGLONG t3 = ::GetTickCount64();
+    computeLayoutZones(rc);
     // 尺寸变了以后整块重画一次：只让子窗口自己 Invalidate 的话，画布/代码坞缩小后
     // 腾出来的那块区域不会有人擦，上一帧的表格/控件像素就留在画布工作台上（残留画面）。
     RedrawWindow(nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
@@ -1750,11 +1783,34 @@ void DesignerPaneView::OnPaint()
     // 边缘就留下旧像素 —— 这就是拖影。期间显示"上一帧拉伸"，松手再精确重画。
     if (m_sizeMove && m_backDc.GetSafeHdc() != nullptr && m_backSize.cx > 0 && m_backSize.cy > 0)
     {
-        // COLORONCOLOR（最近邻）：实测每步 6.9ms；HALFTONE 平滑但会周期性冒出 27ms 尖峰，
-        // 帧间隔一抖反而更"不丝滑"，所以这里选稳定的快路径。
+        const int ow = m_backSize.cx;
+        const int oh = m_backSize.cy;
+        const int nw = client.Width();
+        const int nh = client.Height();
         ::SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
-        dc.StretchBlt(0, 0, client.Width(), client.Height(), &m_backDc,
-                      0, 0, m_backSize.cx, m_backSize.cy, SRCCOPY);
+
+        // 分区贴图：顶栏/底栏只横向拉伸（高度不变），左右两栏横向 1:1、纵向拉伸，
+        // 中间画布区双向拉伸。宽度不变的区域像素一一对应，文字始终锐利。
+        const int topH = m_zoneTopH;
+        const int botH = m_zoneBottomH;
+        const int lw = m_zoneLeftW;
+        const int rw = m_zoneRightW;
+        const int bodyH0 = oh - topH - botH;
+        const int bodyH1 = nh - topH - botH;
+        const bool canZones = topH > 0 && botH > 0 && lw > 0 && rw > 0 &&
+                              lw + rw < ow && bodyH0 > 0 && bodyH1 > 0 &&
+                              topH + botH < nh;
+        if (canZones)
+        {
+            dc.StretchBlt(0, 0, nw, topH, &m_backDc, 0, 0, ow, topH, SRCCOPY);
+            dc.StretchBlt(0, nh - botH, nw, botH, &m_backDc, 0, oh - botH, ow, botH, SRCCOPY);
+            dc.StretchBlt(0, topH, lw, bodyH1, &m_backDc, 0, topH, lw, bodyH0, SRCCOPY);
+            dc.StretchBlt(nw - rw, topH, rw, bodyH1, &m_backDc, ow - rw, topH, rw, bodyH0, SRCCOPY);
+            dc.StretchBlt(lw, topH, nw - lw - rw, bodyH1, &m_backDc, lw, topH,
+                          ow - lw - rw, bodyH0, SRCCOPY);
+            return;
+        }
+        dc.StretchBlt(0, 0, nw, nh, &m_backDc, 0, 0, ow, oh, SRCCOPY);
         return;
     }
 
