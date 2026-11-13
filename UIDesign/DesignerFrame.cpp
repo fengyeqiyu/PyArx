@@ -349,6 +349,12 @@ void DesignerFrame::OnTimer(UINT_PTR nIDEvent)
     if (nIDEvent == 7)
     {
         hideDockSliders();
+        // 兜底：系统移动/缩放循环结束时偶发不派 WM_EXITSIZEMOVE（MFC 自己的 NC 处理路径），
+        // 预览态卡住会让整窗停在"不重排、子窗口冻结"的状态 —— 这里按真实按键/捕获状态收尾。
+        DesignerPaneView& view = m_pane.view();
+        if (view.isSizeMoving() && ::GetCapture() == nullptr &&
+            (::GetKeyState(VK_LBUTTON) & 0x8000) == 0)
+            view.endSizeMovePreview();
         return;
     }
     CFrameWndEx::OnTimer(nIDEvent);

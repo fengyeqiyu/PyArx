@@ -219,6 +219,7 @@ namespace uidesign
         // （相当于 Qt Quick 的 layer 缓存 + 视口变换：SC_SIZE 循环里每帧只有一次 BitBlt）
         void beginSizeMovePreview();
         void endSizeMovePreview();
+        bool isSizeMoving() const { return m_sizeMove; }
     private:
 
         void paintSurface(HDC hdc);

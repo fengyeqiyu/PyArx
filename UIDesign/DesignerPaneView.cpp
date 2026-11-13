@@ -446,7 +446,11 @@ void DesignerPaneView::relayoutUi()
 void DesignerPaneView::OnLButtonDown(UINT nFlags, CPoint pt)
 {
     (void)nFlags;
-    // 贴窗口四边 6px：直接起自绘缩放（顶层框架没有非客户区，系统拿不到命中）
+    // 兜底：系统循环因异常没发 WM_EXITSIZEMOVE 时，下一次按下就地解冻，
+    // 不让画布/代码坞停在 WM_SETREDRAW(FALSE) 的冻结态。
+    if (m_sizeMove && ::GetCapture() == nullptr)
+        endSizeMovePreview();
+    // 贴窗口四边 6px：交系统缩放循环（Qt startSystemResize 等价）
     if (tryFrameChrome(pt))
         return;
     surfaceLButtonDown(pt);
@@ -530,16 +534,24 @@ void DesignerPaneView::endSizeMovePreview()
     if (!m_sizeMove) return;
     m_sizeMove = false;
     diagLog("[sizeMove] end\n");
+    // 解冻子窗口后必须显式让它重画一次：WM_SETREDRAW(FALSE) 期间收到的 WM_PAINT 全被丢弃，
+    // 只恢复标志位不会补画（"移动完画布不显示"就是这么来的）。
     if (m_canvas != nullptr && ::IsWindow(m_canvas->m_hWnd))
+    {
         ::SendMessageW(m_canvas->m_hWnd, WM_SETREDRAW, TRUE, 0);
+        ::InvalidateRect(m_canvas->m_hWnd, nullptr, TRUE);
+    }
     if (m_codeEditor != nullptr && m_codeEditor->hwnd() != nullptr)
+    {
         ::SendMessageW(m_codeEditor->hwnd(), WM_SETREDRAW, TRUE, 0);
+        ::InvalidateRect(m_codeEditor->hwnd(), nullptr, TRUE);
+    }
     m_backSize = CSize(0, 0);       // 尺寸已变，缓存位图作废，下一次全量重画
     // 期间没做布局，这里补一次：先按新尺寸重排，再整块重画（一次，不再逐帧）
     CRect client;
     GetClientRect(&client);
     resizeTo(client);
-    RedrawWindow(nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
+    RedrawWindow(nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 }
 
 // 记下最后一次完整布局的"分区尺寸"：顶栏高度、底栏高度、左右两栏宽度。
@@ -1781,10 +1793,9 @@ void DesignerPaneView::OnPaint()
     GetClientRect(&client);
     if (client.Width() <= 0 || client.Height() <= 0) return;
 
-    // 窗口移动/缩放由系统模态循环 + DWM 合成负责（Qt 的做法）。期间我们一律不画：
-    // 自己再贴一次拉伸图，会先糊一帧再等松手重绘，"画布闪一下"就是这么来的。
-    if (m_sizeMove)
-        return;
+    // 系统移动/缩放循环期间本来就不会给我们 WM_PAINT（DWM 合成上一帧），
+    // 这里不再 return：一旦 WM_EXITSIZEMOVE 因故没到，整窗就会永远黑着不画。
+    // 重排只由 OnSize 的 m_sizeMove 分支挡掉，绘制本身随时可以走。
 
     // 双缓冲：D2D 先画到内存位图，一次 BitBlt 上屏。
     // 位图常驻复用（只在客户区尺寸变化时重建），缩放时不再每帧申请 6MB 位图。
