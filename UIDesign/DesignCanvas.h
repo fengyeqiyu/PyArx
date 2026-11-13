@@ -122,9 +122,19 @@ namespace uidesign
             m_selPath = nullptr;
             if (m_doc != nullptr && m_doc->root() != nullptr)
             {
+                // 文档比视口大时自动缩放到可见：外壳版式（1440x900）在 1360 屏幕上不再被裁
                 XamlElement* r = m_doc->root();
-                diagLog("[doc] root w=%d h=%d kids=%d\n", r->w, r->h, (int)r->children.size());
-                dumpDiag(r, 0, 2);
+                CRect cr{ 0, 0, 0, 0 };
+                GetClientRect(&cr);
+                if (cr.Width() > 64 && cr.Height() > 64 && r->w > 0 && r->h > 0)
+                {
+                    const float fx = static_cast<float>(cr.Width() - 32) / static_cast<float>(r->w);
+                    const float fy = static_cast<float>(cr.Height() - 32) / static_cast<float>(r->h);
+                    float fit = fx < fy ? fx : fy;
+                    if (fit > 1.0f) fit = 1.0f;
+                    if (fit < 0.2f) fit = 0.2f;
+                    if (fit < 0.999f) m_zoom = fit;
+                }
             }
             Invalidate();
             // 启动路径（InitInstance 里 openFile）时消息泵还没跑到 WM_PAINT，
