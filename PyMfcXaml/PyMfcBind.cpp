@@ -320,7 +320,7 @@ PYBIND11_MODULE(PyMfcXaml, m)
              "按控件 id + 属性名读值（text/checked/index/value/visible/enabled/外观属性）")
         .def("setFocus", &PyMfcWindow::setFocusTo);
 
-    py::class_<PyMfcPanel, PyMfcHandle<PyMfcPanel>>(m, "Panel")
+    py::class_<PyMfcPanel, PyMfcHandle<PyMfcPanel>>(m, "Pane")
         .def(py::init([](long long parentHwnd) -> PyMfcHandle<PyMfcPanel> {
             HWND parent = reinterpret_cast<HWND>(static_cast<std::intptr_t>(parentHwnd));
             if (parent == nullptr || !::IsWindow(parent))

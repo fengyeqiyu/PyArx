@@ -2,8 +2,8 @@
 
 ## 一、机制
 
-1. **MFCXaml 只提供控件库**：`Button` / `Label` / `TextField` / `ListCtrl` / `ListBox` / `Panel` /
-   `StaticLine` / `Image` 这些基础控件由 C++ 侧创建与绘制，XAML 只管结构与尺寸。
+1. **MFCXaml 只提供控件库**：`Button` / `Label` / `TextField` / `ListCtrl` / `ListBox` / `Pane` /
+   `Divider` / `Image` 这些基础控件由 C++ 侧创建与绘制，XAML 只管结构与尺寸。
 2. **复合控件 = 基础控件 + XAML 布局**，放在本目录，一个 `.xaml` 一个复合控件：
    根 `<XWindow Name="...">` 是控件类型名，里面的 `x:Name` 是子控件名。
    几何全部由 `M.xamlLayout(path, w, h)` 算出，加载方不写任何像素计算。

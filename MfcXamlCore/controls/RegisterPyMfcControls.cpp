@@ -60,7 +60,7 @@ void RegisterPyMfcControls()
                 {L"XSlider"});
     // 扩展控件（对齐 wxFormBuilder 常见控件）
     RegisterOne(reg, []() -> IXamlControl* { return new XamlTabControl(); },
-                {L"XTabControl"});
+                {L"XTabBar"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlTreeCtrl(); },
                 {L"XTreeView"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlListCtrl(); },
@@ -70,11 +70,11 @@ void RegisterPyMfcControls()
     RegisterOne(reg, []() -> IXamlControl* { return new XamlDatePicker(); },
                 {L"XDatePicker"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlPanel(); },
-                {L"XPanel"});
+                {L"XPane"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlSplitter(); },
                 {L"XSplitView"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlStaticLine(); },
-                {L"XStaticLine"});
+                {L"XDivider"});
     // 配电规划图画布（自绘：缩放平移 + 卡片命中）
     RegisterOne(reg, []() -> IXamlControl* { return new XamlPowerCanvas(); },
                 {L"XPowerCanvas"});
@@ -86,15 +86,15 @@ void RegisterPyMfcControls()
     RegisterOne(reg, []() -> IXamlControl* { return new XamlToggleButton(); },
                 {L"XToggleButton"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlBitmapButton(); },
-                {L"XBitmapButton"});
+                {L"XIconButton"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlStaticBitmap(); },
                 {L"XImage"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlGrid(); },
-                {L"XGridCtrl"});
+                {L"XGridLayout"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlScrolledWindow(); },
                 {L"XScrollView"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlCalendarCtrl(); },
-                {L"XCalendarCtrl"});
+                {L"XMonthGrid"});
     // QML 对齐（第三批）：自建画布小控件
     RegisterOne(reg, []() -> IXamlControl* { return new XamlSwitch(); },
                 {L"XSwitch"});

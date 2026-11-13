@@ -16,10 +16,10 @@
     <XCheckBox x:Name="Agree" Text="同意条款" Height="26" CheckedChanged="on_agree"/>
     <XRadioButton x:Name="PlanA" Text="方案 A" Height="26"/>
     <XGroupBox x:Name="Group1" Header="参数组" Height="64"/>
-    <XBitmapButton x:Name="Export" Text="导出" Height="32"/>
+    <XIconButton x:Name="Export" Text="导出" Height="32"/>
     <XImage x:Name="Preview" Height="48"/>
 
-    <XStaticLine x:Name="Sep1" Height="8"/>
+    <XDivider x:Name="Sep1" Height="8"/>
 
     <XLabel x:Name="Hdr2" Text="文本输入" Height="26" FontSize="14" FontWeight="Bold"/>
     <XLabel x:Name="Caption" Text="回路编号" Height="22" Foreground="#64748B"/>
@@ -32,7 +32,7 @@
               Foreground="#1F2937" Height="70"/>
     <XHyperlink x:Name="Help" Text="查看规范" Url="https://example.com/doc" Height="26"/>
 
-    <XStaticLine x:Name="Sep2" Height="8"/>
+    <XDivider x:Name="Sep2" Height="8"/>
 
     <XLabel x:Name="Hdr3" Text="选择与取值" Height="26" FontSize="14" FontWeight="Bold"/>
     <XComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25|VV-3×10" SelectedIndex="0"

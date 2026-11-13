@@ -93,12 +93,12 @@ namespace uidesign
         w = 100; h = 28;
         const std::wstring t = xamlmfc::BareTag(tag);
         if (t == L"ListBox" || t == L"ListCtrl" || t == L"VirtualList") { h = 80; }
-        else if (t == L"TableView" || t == L"TreeTable" || t == L"GridCtrl" || t == L"TreeView") { w = 240; h = 120; }
+        else if (t == L"TableView" || t == L"TreeTable" || t == L"GridLayout" || t == L"TreeView") { w = 240; h = 120; }
         else if (t == L"ComboBox") { h = 24; }
         else if (t == L"GroupBox") { w = 160; h = 80; }
         else if (t == L"Image") { w = 80; h = 80; }
         else if (t == L"ProgressBar") { w = 120; h = 16; }
-        else if (t == L"TabControl") { w = 200; h = 120; }
+        else if (t == L"TabBar") { w = 200; h = 120; }
         else if (t == L"Label") { w = 160; h = 24; }
         // 绘图图元：直线默认水平、矩形/圆给一块像样的初始尺寸
         else if (t == L"Line") { w = 120; h = 2; }

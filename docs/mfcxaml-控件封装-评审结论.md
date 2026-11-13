@@ -267,7 +267,7 @@ struct IHostServices {  // 只留真正通用的能力
   绘制，光标看起来永远偏大——所以只保留 32 一张。
   自绘路线（胶囊 SDF / polygon）已全部废弃，不再使用 `_gen_grab_cursor.py`。
   `pyMfcGrabCursor()` 从 `<pyd 目录>\res\grab.cur` 载入，载不到退回手型（绝不退回箭头）。
-- 容器/空白（`Panel`、`Pager`、`ToolBar`、`BusyIndicator`、`Shadow`、`Label`）仍是箭头；`Edit/RichText` 沿用系统的 I 型。
+- 容器/空白（`Pane`、`Pager`、`ToolBar`、`BusyIndicator`、`Shadow`、`Label`）仍是箭头；`Edit/RichText` 沿用系统的 I 型。
 - 复位：`WM_MOUSELEAVE` 把光标复位成箭头，不会出现"手型挂在窗外"。
 - 部署：`res\grab.cur` 必须跟 pyd 一起发布（已复制到 `X64\Release\res\grab.cur`）。
 
@@ -380,7 +380,7 @@ Windows 版 Chromium 的 `cursor:grab` / `cursor:grabbing` 是运行时用内部
 
 | 控件类 | `type()` | 实际注册标签 |
 |---|---|---|
-| `XamlTabControl` | `tab` | `TabControl` / `tabcontrol` / `TabWidget` / `tabwidget`（无 `Tab`） |
+| `XamlTabControl` | `tab` | `TabBar` / `tabcontrol` / `TabWidget` / `tabwidget`（无 `Tab`） |
 | `XamlToggleButton` | `togglebutton` | `ToggleButton` / `togglebutton` / `ToggleBtn`（无 `Toggle`/`toggle`） |
 | `XamlToolBar` | `toolbar` | `ToolBar` / `toolstrip` / `ToolButtonBar`（`ToolBar` 归布局层） |
 | `XamlMenuBar` | `menubar` | `MenuBar` / `menustrip` / `MenuBarControl` / `TopMenuBar` |

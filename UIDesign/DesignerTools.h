@@ -150,14 +150,14 @@ namespace uidesign
             dc.Rectangle(b);
             dc.Rectangle(b.left + 2, b.top - 3, b.left + 16, b.top + 3);
         }
-        else if (tag == L"TabControl")
+        else if (tag == L"TabBar")
         {
             dc.Rectangle(b);
             dc.Rectangle(b.left + 1, b.top - 4, b.left + 10, b.top + 1);
             dc.Rectangle(b.left + 12, b.top - 4, b.left + 19, b.top + 1);
         }
         else if (tag == L"Border") { dc.Rectangle(b); dc.Rectangle(b.left + 2, b.top + 2, b.right - 2, b.bottom - 2); }
-        else if (tag == L"Panel") { dc.Rectangle(b); dc.Rectangle(b.left + 3, b.top + 3, b.right - 3, b.bottom - 3); }
+        else if (tag == L"Pane") { dc.Rectangle(b); dc.Rectangle(b.left + 3, b.top + 3, b.right - 3, b.bottom - 3); }
         else if (tag == L"SplitContainer")
         {
             dc.Rectangle(b);
@@ -230,10 +230,10 @@ namespace uidesign
         if (name == L"toolProgressBar") return L"XProgressBar";
         if (name == L"toolListView") return L"XListCtrl";
         if (name == L"toolTreeView") return L"XTreeView";
-        if (name == L"toolTabControl") return L"XTabControl";
+        if (name == L"toolTabControl") return L"XTabBar";
         if (name == L"toolBorder") return L"XBorder";
         if (name == L"toolGroupBox") return L"XGroupBox";
-        if (name == L"toolPanel") return L"XPanel";
+        if (name == L"toolPanel") return L"XPane";
         if (name == L"toolSplitContainer") return L"XSplitView";
         if (name == L"toolMenuStrip") return L"XMenuBar";
         if (name == L"toolToolStrip") return L"XToolBar";

@@ -329,7 +329,7 @@ static const std::set<std::wstring>& containerTags()
 {
     static const std::set<std::wstring> kSet = {
         L"Window", L"Page", L"Grid", L"StackPanel", L"DockPanel", L"WrapPanel",
-        L"Canvas", L"Panel", L"Frame", L"GroupBox", L"TabControl", L"TabPage",
+        L"Canvas", L"Pane", L"Frame", L"GroupBox", L"TabBar", L"TabPage",
         L"SplitView", L"ScrollViewer", L"ScrollView", L"MenuBar", L"MenuItem",
         L"Separator", L"ToolBar", L"StatusBar", L"RowDefinition", L"ColumnDefinition",
         L"Grid.RowDefinitions", L"Grid.ColumnDefinitions", L"Grid.Resources",
@@ -571,7 +571,7 @@ static bool isContainerTag(const std::wstring& tag)
     static const std::set<std::wstring> kSet = {
         L"Window", L"Page", L"Grid", L"StackPanel", L"DockPanel", L"WrapPanel",
         L"Canvas", L"Layout", L"LayoutPanel", L"AbsolutePanel", L"AbsPanel", L"CanvasPanel",
-        L"Panel", L"Border", L"Frame", L"GroupBox", L"TabControl",
+        L"Pane", L"Border", L"Frame", L"GroupBox", L"TabBar",
         L"TabPage", L"ScrollView", L"ScrollViewer", L"MenuBar", L"ToolBar", L"StatusBar",
         L"PaletteSet", L"PalettePage", L"page", L"TabItem",
         L"PanelHeader", L"TabStrip", L"ChipBar", L"Stage"

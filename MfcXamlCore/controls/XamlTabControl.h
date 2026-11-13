@@ -7,7 +7,7 @@
 class XAML_CORE_API XamlTabControl : public XamlMfcControlBase
 {
 public:
-    XamlTabControl() : XamlMfcControlBase(L"TabControl") {}
+    XamlTabControl() : XamlMfcControlBase(L"TabBar") {}
 
 protected:
     void createNative(IXamlMfcHost* host, int id, int min, int max, int x, int y, int w, int h) override;

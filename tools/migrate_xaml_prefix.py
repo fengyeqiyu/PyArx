@@ -38,7 +38,7 @@ ALIAS_TO_MAIN = {
     'Label': 'Label', 'Edit': 'TextField', 'Progress': 'ProgressBar',
     'TrackBar': 'Slider', 'TreeView': 'TreeView', 'ListView': 'ListCtrl',
     'Checkbox': 'CheckBox', 'Radio': 'RadioButton', 'Group': 'GroupBox',
-    'Combo': 'ComboBox', 'DataGrid': 'ListCtrl', 'Separator': 'StaticLine',
+    'Combo': 'ComboBox', 'DataGrid': 'ListCtrl', 'Separator': 'Divider',
     'PlanCanvas': 'PowerCanvas', 'Knob': 'Dial', 'Gauge': 'Dial',
     'Spinner': 'BusyIndicator', 'ActivityIndicator': 'BusyIndicator',
     'NumberBox': 'SpinBox', 'NumericUpDown': 'SpinBox',
@@ -53,8 +53,8 @@ ALIAS_TO_MAIN = {
     'FlickArea': 'Flickable', 'ToggleSwitch': 'Switch', 'SliderRange': 'RangeSlider',
     'DatePickerCtrl': 'DatePicker', 'SplitterWindow': 'SplitView',
     'RichEdit': 'TextArea', 'MaskedTextBox': 'TextField', 'LinkLabel': 'Hyperlink',
-    'ToggleBtn': 'ToggleButton', 'BitmapBtn': 'BitmapButton',
-    'TabWidget': 'TabControl', 'MenuBarControl': 'MenuBar',
+    'ToggleBtn': 'ToggleButton', 'BitmapBtn': 'IconButton',
+    'TabWidget': 'TabBar', 'MenuBarControl': 'MenuBar',
     'TopMenuBar': 'MenuBar', 'MessageBoxX': 'Popup', 'SideSheet': 'Popup',
 }
 

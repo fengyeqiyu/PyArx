@@ -34,22 +34,22 @@ CONTROLS = [
     ('ListBox', '列表框', 300, 220, 120, None, None),
     ('ProgressBar', '进度条', 300, 200, 26, None, None),
     ('Slider', '滑块', 300, 200, 40, None, None),
-    ('TabControl', '选项卡', 300, 220, 120, None, None),
+    ('TabBar', '选项卡', 300, 220, 120, None, None),
     ('TreeView', '树形控件', 300, 220, 120, None, None),
     ('ListCtrl', '列表控件', 300, 220, 110, None, None),
     ('Choice', '选择框', 300, 200, 34, None, None),
     ('DatePicker', '日期选择', 300, 200, 34, None, None),
-    ('Panel', '面板容器', 300, 200, 90, None, 'Label'),
+    ('Pane', '面板容器', 300, 200, 90, None, 'Label'),
     ('SplitView', '分隔条', 300, 200, 20, None, None),
-    ('StaticLine', '分隔线', 300, 200, 12, None, None),
+    ('Divider', '分隔线', 300, 200, 12, None, None),
     ('Hyperlink', '超链接', 300, 200, 34, 'Content="打开示例链接"', None),
     ('TextArea', '富文本', 300, 220, 110, None, None),
     ('ToggleButton', '切换按钮', 300, 200, 46, 'Content="切换模式"', None),
-    ('BitmapButton', '位图按钮', 300, 200, 46, 'Content="运行"', None),
+    ('IconButton', '位图按钮', 300, 200, 46, 'Content="运行"', None),
     ('Image', '静态位图', 300, 200, 70, None, None),
-    ('GridCtrl', '表格控件', 300, 220, 110, None, None),
+    ('GridLayout', '表格控件', 300, 220, 110, None, None),
     ('ScrollView', '滚动框', 300, 220, 90, None, 'Label'),
-    ('CalendarCtrl', '日历', 320, 240, 170, None, None),
+    ('MonthGrid', '日历', 320, 240, 170, None, None),
     # QML 对齐（第三批）
     ('Switch', '开关', 300, 200, 30, None, None),
     ('SpinBox', '数字输入', 300, 200, 32, None, None),
@@ -67,11 +67,11 @@ CONTROLS = [
 
 EXPECT_CLASS = {
     'Button': 'Button', 'CheckBox': 'Button', 'RadioButton': 'Button',
-    'GroupBox': 'Button', 'ToggleButton': 'Button', 'BitmapButton': 'Button',
+    'GroupBox': 'Button', 'ToggleButton': 'Button', 'IconButton': 'Button',
     'Label': 'Static', 'TextField': 'Edit', 'ListBox': 'ListBox',
     'ComboBox': 'ComboBox', 'ProgressBar': 'msctls_progress32', 'Slider': 'msctls_trackbar32',
-    'TabControl': 'SysTabControl32', 'TreeView': 'SysTreeView32', 'ListCtrl': 'SysListView32',
-    'DatePicker': 'SysDateTimePick32', 'CalendarCtrl': 'SysMonthCal32',
+    'TabBar': 'SysTabControl32', 'TreeView': 'SysTreeView32', 'ListCtrl': 'SysListView32',
+    'DatePicker': 'SysDateTimePick32', 'MonthGrid': 'SysMonthCal32',
     'Hyperlink': 'SysLink', 'TextArea': 'RICHEDIT50W',
     'Switch': 'PyMfcSkinBox', 'SpinBox': 'PyMfcSkinBox', 'RangeSlider': 'PyMfcSkinBox',
     'BusyIndicator': 'PyMfcSkinBox', 'PageIndicator': 'PyMfcSkinBox',
@@ -160,7 +160,7 @@ def decorate(w, tag, cid):
             w.setToolBarSelected(cid, 2)
         elif tag in ('TextField', 'TextArea'):
             w.setText(cid, '可以在里面输入文字')
-        elif tag == 'TabControl':
+        elif tag == 'TabBar':
             # 上一版这里是 pass，页签里什么都没有，看上去就是一块白板
             w.addTabItem(cid, '常规')
             w.addTabItem(cid, '高级')
@@ -170,7 +170,7 @@ def decorate(w, tag, cid):
             w.addTreeNode(cid, '根节点', -1)
             w.addTreeNode(cid, '子节点 A', 0)
             w.addTreeNode(cid, '子节点 B', 0)
-        elif tag in ('ListCtrl', 'GridCtrl'):
+        elif tag in ('ListCtrl', 'GridLayout'):
             # addString 对 ListView 无效，必须 addColumn + addRow（\t 分列）
             w.addColumn(cid, '名称', 100)
             w.addColumn(cid, '数值', 80)
@@ -180,7 +180,7 @@ def decorate(w, tag, cid):
         elif tag == 'Image':
             # 不装图就是一块空白，看上去和坏掉没区别
             w.setImage(cid, os.path.join(HERE, 'res', 'dot.png'))
-        elif tag in ('Button', 'Label', 'BitmapButton', 'Hyperlink', 'RadioButton'):
+        elif tag in ('Button', 'Label', 'IconButton', 'Hyperlink', 'RadioButton'):
             pass
     except Exception as exc:                      # 装饰失败不该阻断演示
         out(f'    装饰失败（{tag}）：{exc}')

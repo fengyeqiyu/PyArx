@@ -26,7 +26,7 @@
 
 ## 一、按钮与勾选
 
-覆盖：`Button` / `ToggleButton` / `CheckBox` / `RadioButton` / `GroupBox` / `BitmapButton` / `Image`
+覆盖：`Button` / `ToggleButton` / `CheckBox` / `RadioButton` / `GroupBox` / `IconButton` / `Image`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -37,7 +37,7 @@
     <XCheckBox x:Name="Agree" Text="同意条款" Height="26" CheckedChanged="on_agree"/>
     <XRadioButton x:Name="PlanA" Text="方案 A" Height="26"/>
     <XGroupBox x:Name="Group1" Header="参数组" Height="70"/>
-    <XBitmapButton x:Name="Export" Text="导出" Height="32"/>
+    <XIconButton x:Name="Export" Text="导出" Height="32"/>
     <XImage x:Name="Preview" Height="56"/>
   </XStackPanel>
 </XWindow>
@@ -115,7 +115,7 @@
 
 ## 五、列表与表格
 
-覆盖：`ListCtrl` / `TreeView` / `GridCtrl` / `TableView` / `TreeTable` / `VirtualList` / `GridView` / `PathView`
+覆盖：`ListCtrl` / `TreeView` / `GridLayout` / `TableView` / `TreeTable` / `VirtualList` / `GridView` / `PathView`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -123,7 +123,7 @@
   <XStackPanel Margin="12" Spacing="8">
     <XListCtrl x:Name="Files" Columns="名称:140|类型:90" Rows="图框	A3|标注	箭头" Height="90"/>
     <XTreeView x:Name="Tree1" Nodes="项目根|图纸 A|图纸 B|图层组" Height="90"/>
-    <XGridCtrl x:Name="Grid1" Columns="名称:120|数值:80" Rows="甲	12|乙	34" Height="90"/>
+    <XGridLayout x:Name="Grid1" Columns="名称:120|数值:80" Rows="甲	12|乙	34" Height="90"/>
     <XTableView x:Name="Table1" Columns="名称:120|数值:80|状态:70"
                Rows="甲	30	正常|乙	12	警告|丙	21	正常" SelectedIndex="1" Height="110"
                SelectionChanged="on_row"/>
@@ -142,14 +142,14 @@
 
 ## 六、容器与布局件
 
-覆盖：`Panel` / `ScrollView` / `SplitView` / `StaticLine` / `Flickable`
+覆盖：`Pane` / `ScrollView` / `SplitView` / `Divider` / `Flickable`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="容器族" Width="460" Height="420">
   <XStackPanel Margin="12" Spacing="8">
-    <XPanel x:Name="Host" Height="70"/>
-    <XStaticLine x:Name="Sep1" Height="10"/>
+    <XPane x:Name="Host" Height="70"/>
+    <XDivider x:Name="Sep1" Height="10"/>
     <XSplitView x:Name="Split" Height="16"/>
     <XScrollView x:Name="Scroll" ScrollMin="0" ScrollMax="400" Height="90"/>
     <XFlickable x:Name="Flick" OffsetX="0" OffsetY="0" Height="110"/>
@@ -157,18 +157,18 @@
 </XWindow>
 ```
 
-要点：容器子控件写在容器标签内（`<XPanel><XLabel .../></XPanel>`）；
+要点：容器子控件写在容器标签内（`<XPane><XLabel .../></XPane>`）；
 `Flickable.OffsetX/OffsetY` 是 v0.10.17 新增的读写视口偏移。
 
 ## 七、页与导航
 
-覆盖：`TabControl` / `StackView` / `SwipeView` / `Page` / `PageIndicator`
+覆盖：`TabBar` / `StackView` / `SwipeView` / `Page` / `PageIndicator`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页族" Width="460" Height="420">
   <XStackPanel Margin="12" Spacing="8">
-    <XTabControl x:Name="Tabs" Pages="常规|高级|关于" Height="110"/>
+    <XTabBar x:Name="Tabs" Pages="常规|高级|关于" Height="110"/>
     <XStackView x:Name="Stack" SelectedIndex="0" PageCount="3" Height="90"/>
     <XSwipeView x:Name="Swipe" SelectedIndex="1" PageCount="2" Height="90"/>
     <XPage x:Name="Wizard" SelectedIndex="0" PageCount="2" Height="70"/>
@@ -220,14 +220,14 @@
 
 ## 十、日期
 
-覆盖：`DatePicker` / `CalendarCtrl`
+覆盖：`DatePicker` / `MonthGrid`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="日期族" Width="420" Height="320">
   <XStackPanel Margin="12" Spacing="8">
     <XDatePicker x:Name="Day" Value="2026-11-13" Height="30" ValueChanged="on_day"/>
-    <XCalendarCtrl x:Name="Cal" Value="2026-11-13" Height="180" SelectionChanged="on_cal"/>
+    <XMonthGrid x:Name="Cal" Value="2026-11-13" Height="180" SelectionChanged="on_cal"/>
   </XStackPanel>
 </XWindow>
 ```
@@ -253,7 +253,7 @@
 
 ## 十二、组合示例：回路参数卡（含回调）
 
-覆盖落点：`Panel` + `Label` + `TextField` + `ComboBox` + `Slider` + `Switch` +
+覆盖落点：`Pane` + `Label` + `TextField` + `ComboBox` + `Slider` + `Switch` +
 `TableView` + `Button` + `PageIndicator`（组合控件由 XAML 拼，不硬造新类）。
 
 ```xml
@@ -262,11 +262,11 @@
   <XStackPanel Margin="14" Spacing="10">
     <XLabel x:Name="Head" Text="AT1-1 回路参数" Height="28" FontSize="15" FontWeight="Bold"/>
 
-    <XPanel x:Name="Row1" Height="34">
+    <XPane x:Name="Row1" Height="34">
       <XTextField x:Name="Code" Text="WL-AT1-1" Left="0" Top="2" Width="220" Height="30"/>
       <XButton x:Name="Apply" Text="应用" Left="232" Top="2" Width="90" Height="30"
               Click="on_apply"/>
-    </XPanel>
+    </XPane>
 
     <XComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25" SelectedIndex="0" Height="28"/>
     <XSlider x:Name="Load" Minimum="0" Maximum="100" Value="11" Height="34" ValueChanged="on_load"/>
@@ -314,7 +314,7 @@ M.pump(200)
 win.close() if hasattr(win, 'close') else None
 ```
 
-要点：复合卡片走 XAML 组合（`Panel` 内绝对定位），属性都落在子控件上；
+要点：复合卡片走 XAML 组合（`Pane` 内绝对定位），属性都落在子控件上；
 回调统一走 Python（`Click="on_xxx"` 由 `context` 解析，或加载后按控件名绑）。
 
 ## 十三、示例覆盖核对

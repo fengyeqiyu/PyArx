@@ -20,7 +20,7 @@ WL-AT2-1	8kW	正常	桥架"
     <XTreeTable x:Name="Hier" Nodes="项目根>图纸 A|项目根>图层组>墙体" SelectedIndex="1" Height="110"/>
     <XTreeView x:Name="Tree1" Nodes="项目根>图纸 A|项目根>图纸 B" Height="100"/>
     <XListCtrl x:Name="Files" Columns="名称:150|类型:90" Rows="图框	A3|标注	箭头|说明	单行" Height="100"/>
-    <XGridCtrl x:Name="Grid1" Columns="名称:120|数值:80" Rows="甲	12|乙	34|丙	56" Height="100"/>
+    <XGridLayout x:Name="Grid1" Columns="名称:120|数值:80" Rows="甲	12|乙	34|丙	56" Height="100"/>
 
     <XLabel x:Name="Hdr3" Text="虚拟化与磁贴" Height="26" FontSize="14" FontWeight="Bold"/>
     <XVirtualList x:Name="VList" Items="第一行|第二行|第三行|第四行|第五行" ItemHeight="24"
@@ -30,7 +30,7 @@ WL-AT2-1	8kW	正常	桥架"
     <XPathView x:Name="Cover" Items="方案 A|方案 B|方案 C" SelectedIndex="1" Height="110"/>
 
     <XLabel x:Name="Hdr4" Text="分页容器" Height="26" FontSize="14" FontWeight="Bold"/>
-    <XTabControl x:Name="Tabs" Pages="常规|高级|关于" Height="110"/>
+    <XTabBar x:Name="Tabs" Pages="常规|高级|关于" Height="110"/>
     <XStackView x:Name="Stack" SelectedIndex="0" PageCount="3" Height="90"/>
     <XSwipeView x:Name="Swipe" SelectedIndex="1" PageCount="2" Height="90"/>
     <XPage x:Name="Wizard" SelectedIndex="0" PageCount="2" Height="70"/>

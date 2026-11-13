@@ -159,9 +159,9 @@ def build_window():
     <XSplitView x:Name="spl" Height="20"/>
     <XTextField x:Name="below" Text="分隔条下方内容" Height="40"/>
     <XScrollView x:Name="scr" ScrollMin="0" ScrollMax="500" Height="90"/>
-    <XCalendarCtrl x:Name="cal" Height="160"/>
+    <XMonthGrid x:Name="cal" Height="160"/>
     <XTextArea x:Name="rtf" Height="110"/>
-    <XBitmapButton x:Name="bb" Text="运行" Height="46"/>
+    <XIconButton x:Name="bb" Text="运行" Height="46"/>
     <XComboBox x:Name="cmb" Height="30"/>
   </XStackPanel>
 </XWindow>
@@ -234,7 +234,7 @@ def main():
     record('ScrollView', '存在可滚动范围', rng[1] > rng[0], f'min={rng[0]} max={rng[1]}')
 
     # ---- Calendar：真点某天，选中日期是否变 ----
-    sec('CalendarCtrl')
+    sec('MonthGrid')
     st = SYSTEMTIME()
     cur = user32.SendMessageW(cmap['cal'], MCM_GETCURSEL, 0, ctypes.addressof(st))
     setv = SYSTEMTIME(2026, 11, 0, 20, 0, 0, 0, 0)
@@ -242,12 +242,12 @@ def main():
     p.pump(150)
     mid = SYSTEMTIME()
     user32.SendMessageW(cmap['cal'], MCM_GETCURSEL, 0, ctypes.addressof(mid))
-    record('CalendarCtrl', 'MCM_SETCURSEL 可设日期', r_set == 1 and mid.wDay == 20,
+    record('MonthGrid', 'MCM_SETCURSEL 可设日期', r_set == 1 and mid.wDay == 20,
            f'{st.wYear}-{st.wMonth}-{st.wDay} -> {mid.wMonth}-{mid.wDay}')
     click(cmap['cal'], 0.2, 0.75)
     got = SYSTEMTIME()
     r = user32.SendMessageW(cmap['cal'], MCM_GETCURSEL, 0, ctypes.addressof(got))
-    record('CalendarCtrl', '真点击选日生效', r == 1 and got.wDay != mid.wDay,
+    record('MonthGrid', '真点击选日生效', r == 1 and got.wDay != mid.wDay,
            f'{mid.wMonth}-{mid.wDay} -> {got.wMonth}-{got.wDay}')
 
     # ---- RichText：原生格式能力 vs 是否暴露 ----
@@ -279,18 +279,18 @@ def main():
                f'yHeight={got.yHeight} dwEffects=0x{got.dwEffects:X}')
 
     # ---- BitmapButton：到底有位图吗（用 setImage 真装一张）----
-    sec('BitmapButton')
+    sec('IconButton')
     png = os.path.join(HERE, 'res', 'dot.png')
     if hasattr(w, 'setImage'):
         loaded = w.setImage(names['bb'], png)
         p.pump(200)
         img = user32.SendMessageW(cmap['bb'], BM_GETIMAGE, IMAGE_BITMAP, 0)
-        record('BitmapButton', '真装载了位图', loaded and bool(img),
+        record('IconButton', '真装载了位图', loaded and bool(img),
                f'setImage={loaded} BM_GETIMAGE={img}')
     else:
-        record('BitmapButton', '真装载了位图', False, 'Python 侧无 setImage')
+        record('IconButton', '真装载了位图', False, 'Python 侧无 setImage')
     w.setText(names['bb'], '运行')
-    record('BitmapButton', 'setText 后能显示文字', w.getText(names['bb']) == '运行', w.getText(names['bb']))
+    record('IconButton', 'setText 后能显示文字', w.getText(names['bb']) == '运行', w.getText(names['bb']))
 
     # ---- ComboBox 下拉回调 ----
     sec('ComboBox 回调')
@@ -318,10 +318,10 @@ def main():
         p.pump(200)
         h = child_of(w.hwnd, content_id)
         cnt = user32.SendMessageW(h, TCM_GETITEMCOUNT, 0, 0)
-        record('TabControl', '装得进页签', cnt == 2, f'TCM_GETITEMCOUNT={cnt}')
+        record('TabBar', '装得进页签', cnt == 2, f'TCM_GETITEMCOUNT={cnt}')
         user32.DestroyWindow(h)
     else:
-        record('TabControl', '具备内容接口（addTab/addTabItem）', False, 'Python 侧无对应接口')
+        record('TabBar', '具备内容接口（addTab/addTabItem）', False, 'Python 侧无对应接口')
 
     # TreeCtrl：父 + 子两个节点
     if all(hasattr(w, a) for a in ('addTree', 'addTreeNode')):
@@ -339,7 +339,7 @@ def main():
         record('TreeView', '具备内容接口（addTree/addTreeNode）', False, 'Python 侧无对应接口')
 
     # ListCtrl / GridCtrl：列 + 行
-    for label, maker, adder in (('ListCtrl', 'addListCtrl', 'addColumn'), ('GridCtrl', 'addGrid', 'addColumn')):
+    for label, maker, adder in (('ListCtrl', 'addListCtrl', 'addColumn'), ('GridLayout', 'addGrid', 'addColumn')):
         if all(hasattr(w, a) for a in (maker, adder, 'addRow')):
             getattr(w, maker)(content_id, 10, 10, 320, 110)
             w.addColumn(content_id, '名称', 150)
@@ -357,7 +357,7 @@ def main():
 
     # StaticBitmap / BitmapButton：图片接口（这一批还没做）
     for label, exists in (('Image', ('setImage', 'addStaticBitmap')),
-                          ('BitmapButton', ('setImage', 'addBitmapButton'))):
+                          ('IconButton', ('setImage', 'addBitmapButton'))):
         ok = all(hasattr(w, a) for a in exists)
         record(label, '具备图片装载接口（setImage）', ok,
                '有 setImage' if ok else 'Python 侧没有 setImage，装不了图')

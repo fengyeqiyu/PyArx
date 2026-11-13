@@ -1881,9 +1881,9 @@ private:
             static const wchar_t* kTags[] = {
                 L"Button", L"Label", L"TextField", L"Edit", L"ListBox", L"CheckBox",
                 L"RadioButton", L"GroupBox", L"ComboBox", L"ProgressBar", L"Slider",
-                L"TabControl", L"TreeView", L"ListView", L"Calendar", L"DatePicker",
+                L"TabBar", L"TreeView", L"ListView", L"Calendar", L"DatePicker",
                 L"Layout", L"StackPanel", L"Grid", L"Canvas", L"QCanvas", L"ScrollView",
-                L"Flickable", L"PageView", L"CodeEditor", L"StaticLine", L"Hyperlink",
+                L"Flickable", L"PageView", L"CodeEditor", L"Divider", L"Hyperlink",
                 L"ToggleButton", L"Switch", L"Dial", L"Tumbler", L"Table", L"SplitView",
                 L"Window"
             };

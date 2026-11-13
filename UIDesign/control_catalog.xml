@@ -108,7 +108,7 @@
     <property name="Content" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="XBitmapButton" display="BitmapButton" category="Buttons" w="100" h="28">
+  <objectinfo tag="XIconButton" display="IconButton" category="Buttons" w="100" h="28">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -546,7 +546,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="XCalendarCtrl" display="CalendarCtrl" category="Display Widgets" w="180" h="160">
+  <objectinfo tag="XMonthGrid" display="MonthGrid" category="Display Widgets" w="180" h="160">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -814,7 +814,7 @@
     <property name="Caption" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="XTabControl" display="TabControl" category="Containers" w="200" h="120">
+  <objectinfo tag="XTabBar" display="TabBar" category="Containers" w="200" h="120">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -857,7 +857,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="XPanel" display="Panel" category="Containers" w="160" h="100">
+  <objectinfo tag="XPane" display="Pane" category="Containers" w="160" h="100">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -944,7 +944,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="XStaticLine" display="StaticLine" category="Containers" w="120" h="4">
+  <objectinfo tag="XDivider" display="Divider" category="Containers" w="120" h="4">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -965,7 +965,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="XGridCtrl" display="GridCtrl" category="Containers" w="200" h="120">
+  <objectinfo tag="XGridLayout" display="GridLayout" category="Containers" w="200" h="120">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>

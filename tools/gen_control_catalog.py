@@ -42,7 +42,7 @@ CATEGORY = {
     'GridView': 'Data Views',
     'PathView': 'Data Views',
     'PageIndicator': 'Data Views',
-    'TabControl': 'Data Views',
+    'TabBar': 'Data Views',
     'Page': 'Data Views',
     'StackView': 'Data Views',
     'SwipeView': 'Data Views',
@@ -50,7 +50,7 @@ CATEGORY = {
     'QCanvas': 'Canvas',
     'Flickable': 'Containers',
     'BusyIndicator': 'Display Widgets',
-    'CalendarCtrl': 'Input Widgets',
+    'MonthGrid': 'Input Widgets',
     'RangeSlider_': 'Input Widgets',
 }
 # 别名条目清掉：目录只留主标签（TrackBar 是 Slider 的历史别名）
@@ -61,9 +61,9 @@ CAT_ORDER = ['Buttons', 'Input Widgets', 'Display Widgets', 'Data Views', 'Conta
 SIZE = {
     'Table': (320, 140), 'TreeTable': (320, 140), 'VirtualList': (240, 140),
     'GridView': (320, 160), 'PathView': (320, 140), 'PowerCanvas': (420, 260),
-    'QCanvas': (420, 200), 'Flickable': (320, 160), 'TabControl': (360, 160),
+    'QCanvas': (420, 200), 'Flickable': (320, 160), 'TabBar': (360, 160),
     'Page': (360, 160), 'StackView': (360, 160), 'SwipeView': (360, 160),
-    'BusyIndicator': (56, 56), 'CalendarCtrl': (260, 200), 'PageIndicator': (160, 22),
+    'BusyIndicator': (56, 56), 'MonthGrid': (260, 200), 'PageIndicator': (160, 22),
     'MenuBar': (360, 28), 'ToolBar': (360, 32), 'ToolTip': (160, 24),
     'Popup': (320, 160), 'Menu': (200, 120), 'SpinBox': (120, 30),
     'RangeSlider': (200, 34), 'Switch': (64, 28), 'Dial': (88, 88),

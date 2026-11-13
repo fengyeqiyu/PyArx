@@ -11,24 +11,24 @@
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XBorder` | 边框容器 | Rectangle（border.*） | Border | Panel（BorderStyle） | 组合 | — | — |
+| `XDivider` | 分隔线 | Rectangle（height: 1）/ HorizontalDivider | Separator / Rectangle | Label（BorderStyle）/ Panel | 组合 | C 仅布局 | 19 |
 | `XFlickable` | 拖拽视口 | Flickable | ScrollViewer（PanningMode） | Panel（AutoScroll） | 同名 | B 薄 | 21 |
-| `XGridCtrl` | 网格控件 | GridLayout / TableView | DataGrid / Grid | TableLayoutPanel | 组合 | B 薄 | 21 |
+| `XGridLayout` | 网格控件 | GridLayout / TableView | DataGrid / Grid | TableLayoutPanel | 组合 | B 薄 | 21 |
 | `XGroupBox` | 分组框 | GroupBox | GroupBox | GroupBox | 同名 | B 薄 | 20 |
 | `XListCtrl` | 列表控件 | ListView / TableView（单列） | ListView | ListView | 组合 | B 薄 | 21 |
-| `XPanel` | 面板容器 | Item / Pane | Panel | Panel | 组合 | C 仅布局 | 19 |
+| `XPane` | 面板容器 | Item / Pane | Pane | Pane | 组合 | C 仅布局 | 19 |
 | `XScrollView` | 滚动窗口 | ScrollView | ScrollViewer | Panel（AutoScroll） | 组合 | B 薄 | 21 |
 | `XSplitView` | 分隔条 | SplitView | GridSplitter | SplitContainer | 组合 | C 仅布局 | 19 |
-| `XStaticLine` | 分隔线 | Rectangle（height: 1）/ HorizontalDivider | Separator / Rectangle | Label（BorderStyle）/ Panel | 组合 | C 仅布局 | 19 |
-| `XTabControl` | 选项卡 | TabBar + StackLayout | TabControl | TabControl | 组合 | B 薄 | 20 |
+| `XTabBar` | 选项卡 | TabBar + StackLayout | TabBar | TabBar | 组合 | B 薄 | 20 |
 | `XTreeView` | 树形控件 | TreeView | TreeView | TreeView | 组合 | B 薄 | 20 |
 
 ## 按钮（5）
 
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XBitmapButton` | 图标按钮 | Button + icon.source | Button + Image | Button（Image） | 组合 | B 薄 | 21 |
 | `XButton` | 按钮 | Button | Button | Button | 同名 | B 薄 | 20 |
 | `XCheckBox` | 复选框 | CheckBox | CheckBox | CheckBox | 同名 | B 薄 | 21 |
+| `XIconButton` | 图标按钮 | Button + icon.source | Button + Image | Button（Image） | 组合 | B 薄 | 21 |
 | `XRadioButton` | 单选按钮 | RadioButton | RadioButton | RadioButton | 同名 | B 薄 | 21 |
 | `XToggleButton` | 开关按钮 | Button + checkable | ToggleButton | CheckBox（Appearance=Button） | 组合 | B 薄 | 21 |
 
@@ -55,10 +55,10 @@
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XBusyIndicator` | 忙碌指示器 | BusyIndicator | ProgressBar（IsIndeterminate） | ProgressBar（Marquee） | 同名 | C 仅布局 | 19 |
-| `XCalendarCtrl` | 日历 | MonthGrid + DayOfWeekRow | Calendar | MonthCalendar | 组合 | B 薄 | 20 |
 | `XHyperlink` | 超链接 | Label + MouseArea（link 样式） | Hyperlink（TextBlock 内联） | LinkLabel | 组合 | B 薄 | 21 |
 | `XImage` | 图片 | Image | Image | PictureBox | 同名 | B 薄 | 20 |
 | `XLabel` | 文本标签 | Label / Text | Label | Label | 同名 | B 薄 | 20 |
+| `XMonthGrid` | 日历 | MonthGrid + DayOfWeekRow | Calendar | MonthCalendar | 组合 | B 薄 | 20 |
 | `XProgressBar` | 进度条 | ProgressBar | ProgressBar | ProgressBar | 同名 | A 基本 | 22 |
 | `XTextArea` | 富文本 | TextArea（textFormat: RichText） | RichTextBox | RichTextBox | 组合 | A 基本 | 22 |
 

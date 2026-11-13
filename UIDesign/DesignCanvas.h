@@ -1594,7 +1594,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
                 }
             }
-            else if (tagIs(node, L"ListCtrl") || tagIs(node, L"GridCtrl") ||
+            else if (tagIs(node, L"ListCtrl") || tagIs(node, L"GridLayout") ||
                      tagIs(node, L"DataGrid") || tagIs(node, L"TableView"))
             {
                 // 表格类控件：把 XAML 里的 Columns / Rows 真画出来。
@@ -1852,7 +1852,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 cv.strokeRect(rc, cvdoc::kBorder, 1);
             }
             else if (tagIs(node, L"Image") || tagIs(node, L"ListView") ||
-                     tagIs(node, L"TabControl") || tagIs(node, L"Border"))
+                     tagIs(node, L"TabBar") || tagIs(node, L"Border"))
             {
                 drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
                 drawTextCv(cv, rc, std::wstring(L"[") + node->tag + std::wstring(L"]"),
@@ -1917,7 +1917,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 }
                 cv.clipPop();
             }
-            else if (tagIs(node, L"TabControl"))
+            else if (tagIs(node, L"TabBar"))
             {
                 // 页签条 + 内容区，与运行时原生 Tab 一致
                 const std::vector<std::wstring> pages = cvdoc::splitBar(node->get(L"Pages"));
@@ -2108,7 +2108,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 drawTextCv(cv, tr, node->get(L"Value"), cvdoc::kInk,
                            DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
             }
-            else if (tagIs(node, L"CalendarCtrl"))
+            else if (tagIs(node, L"MonthGrid"))
             {
                 drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
                 CRect head = rc; head.bottom = head.top + 24;
@@ -2259,7 +2259,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 drawTextCv(cv, tr, items.empty() ? node->text : items[0], cvdoc::kInk,
                            DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
             }
-            else if (tagIs(node, L"StaticLine"))
+            else if (tagIs(node, L"Divider"))
             {
                 // 分隔线：一条横线，不再画成"文字卡片"
                 const int midY = (rc.top + rc.bottom) / 2;

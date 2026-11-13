@@ -39,15 +39,15 @@ _TAG_SPEC = {
     'Combo': ('addCombo', 'rect'), 'ComboBox': ('addCombo', 'rect'),
     'Progress': ('addProgress', 'rect'), 'ProgressBar': ('addProgress', 'rect'),
     'Slider': ('addSlider', 'slider'),
-    'Tab': ('addTab', 'rect'), 'TabControl': ('addTab', 'rect'),
+    'Tab': ('addTab', 'rect'), 'TabBar': ('addTab', 'rect'),
     'Tree': ('addTree', 'rect'), 'TreeView': ('addTree', 'rect'), 'TreeView': ('addTree', 'rect'),
     'ListCtrl': ('addListCtrl', 'rect'), 'ListBox': ('addListBox', 'rect'),
-    'Table': ('addTable', 'rect'), 'GridCtrl': ('addGrid', 'rect'),
+    'Table': ('addTable', 'rect'), 'GridLayout': ('addGrid', 'rect'),
     'DatePicker': ('addDatePicker', 'rect'), 'Calendar': ('addCalendar', 'rect'),
-    'SplitView': ('addSplitter', 'rect'), 'StaticLine': ('addStaticLine', 'rect'),
+    'SplitView': ('addSplitter', 'rect'), 'Divider': ('addStaticLine', 'rect'),
     'TextArea': ('addRichText', 'rect'),
     'Image': ('addStaticBitmap', 'rect'), 'Image': ('addStaticBitmap', 'rect'),
-    'Panel': ('addPanel', 'rect'), 'ScrollView': ('addScrolledWindow', 'rect'),
+    'Pane': ('addPanel', 'rect'), 'ScrollView': ('addScrolledWindow', 'rect'),
 }
 _TAGS = {k: v[0] for k, v in _TAG_SPEC.items()}     # 兼容按老表引用的地方
 

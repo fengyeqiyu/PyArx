@@ -8,7 +8,7 @@
 class XAML_CORE_API XamlCalendarCtrl : public XamlMfcControlBase
 {
 public:
-    XamlCalendarCtrl() : XamlMfcControlBase(L"CalendarCtrl") {}
+    XamlCalendarCtrl() : XamlMfcControlBase(L"MonthGrid") {}
 
 protected:
     void createNative(IXamlMfcHost* host, int id, int min, int max, int x, int y, int w, int h) override;

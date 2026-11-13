@@ -44,7 +44,7 @@ namespace xamlmfc
             L"AbsPanel", L"CanvasPanel", L"CanvasLayout", L"Canvas",
             L"Grid", L"StackPanel", L"DockPanel", L"WrapPanel",
             // 容器控件
-            L"Panel", L"Border", L"Frame", L"GroupBox", L"TabControl", L"TabPage",
+            L"Pane", L"Border", L"Frame", L"GroupBox", L"TabBar", L"TabPage",
             L"TabItem", L"ScrollViewer", L"ScrollView", L"ContentControl",
             // 外壳构件
             L"MenuBar", L"MenuItem", L"ToolBar", L"StatusBar", L"PropertyGrid", L"ListView",
@@ -72,10 +72,10 @@ namespace xamlmfc
         static const std::set<std::wstring> kSet = {
             L"Button", L"Label", L"TextField", L"ListBox", L"CodeEditor", L"CheckBox",
             L"RadioButton", L"GroupBox", L"ComboBox", L"ProgressBar", L"Slider",
-            L"TabControl", L"TreeView", L"ListCtrl", L"Choice", L"DatePicker", L"Panel",
-            L"SplitView", L"StaticLine", L"PowerCanvas", L"Hyperlink", L"TextArea",
-            L"ToggleButton", L"BitmapButton", L"Image", L"GridCtrl", L"ScrollView",
-            L"CalendarCtrl", L"Switch", L"SpinBox", L"RangeSlider", L"BusyIndicator",
+            L"TabBar", L"TreeView", L"ListCtrl", L"Choice", L"DatePicker", L"Pane",
+            L"SplitView", L"Divider", L"PowerCanvas", L"Hyperlink", L"TextArea",
+            L"ToggleButton", L"IconButton", L"Image", L"GridLayout", L"ScrollView",
+            L"MonthGrid", L"Switch", L"SpinBox", L"RangeSlider", L"BusyIndicator",
             L"PageIndicator", L"Dial", L"Tumbler", L"ScrollBar", L"TableView", L"TreeTable",
             L"ToolBar", L"ToolTip", L"Menu", L"MenuBar", L"Popup", L"VirtualList",
             L"StackView", L"SwipeView", L"GridView", L"PathView", L"QCanvas", L"Page",

@@ -87,11 +87,11 @@ def section(title):
 # ---------------------------------------------------------------------------
 EXPECT_CLASS = {
     'Button': 'Button', 'CheckBox': 'Button', 'RadioButton': 'Button',
-    'GroupBox': 'Button', 'ToggleButton': 'Button', 'BitmapButton': 'Button',
+    'GroupBox': 'Button', 'ToggleButton': 'Button', 'IconButton': 'Button',
     'Label': 'Static', 'TextField': 'Edit', 'ListBox': 'ListBox',
     'ComboBox': 'ComboBox', 'ProgressBar': 'msctls_progress32', 'Slider': 'msctls_trackbar32',
-    'TabControl': 'SysTabControl32', 'TreeView': 'SysTreeView32', 'ListCtrl': 'SysListView32',
-    'DatePicker': 'SysDateTimePick32', 'CalendarCtrl': 'SysMonthCal32',
+    'TabBar': 'SysTabControl32', 'TreeView': 'SysTreeView32', 'ListCtrl': 'SysListView32',
+    'DatePicker': 'SysDateTimePick32', 'MonthGrid': 'SysMonthCal32',
 }
 
 TAG_OF = {
@@ -99,11 +99,11 @@ TAG_OF = {
     'radA': 'RadioButton', 'radB': 'RadioButton', 'grpTest': 'GroupBox', 'cmbCity': 'ComboBox',
     'lstItems': 'ListBox', 'prgWork': 'ProgressBar', 'sldLevel': 'Slider',
     'lblStatus': 'Label', 'btnHidden': 'Button',
-    'tabMain': 'TabControl', 'treeFiles': 'TreeView', 'lstView': 'ListCtrl', 'choPick': 'Choice',
-    'dtpDate': 'DatePicker', 'pnlHost': 'Panel', 'splVert': 'SplitView', 'lnSep': 'StaticLine',
+    'tabMain': 'TabBar', 'treeFiles': 'TreeView', 'lstView': 'ListCtrl', 'choPick': 'Choice',
+    'dtpDate': 'DatePicker', 'pnlHost': 'Pane', 'splVert': 'SplitView', 'lnSep': 'Divider',
     'lnkOpen': 'Hyperlink', 'rtfNote': 'TextArea', 'tglMode': 'ToggleButton',
-    'bbtnRun': 'BitmapButton', 'sbmpPreview': 'Image', 'grdData': 'GridCtrl',
-    'scrArea': 'ScrollView', 'calPick': 'CalendarCtrl',
+    'bbtnRun': 'IconButton', 'sbmpPreview': 'Image', 'grdData': 'GridLayout',
+    'scrArea': 'ScrollView', 'calPick': 'MonthGrid',
 }
 
 
@@ -240,7 +240,7 @@ def test_events(w, cmap, names):
 def test_extended(w, cmap, names):
     section('扩展控件行为')
     for key, label in (('lnkOpen', 'Hyperlink'), ('rtfNote', 'TextArea'),
-                       ('tglMode', 'ToggleButton'), ('bbtnRun', 'BitmapButton')):
+                       ('tglMode', 'ToggleButton'), ('bbtnRun', 'IconButton')):
         cid = names[key]
         w.setText(cid, '文本-' + label)
         record('扩展', f'{label} setText/getText', w.getText(cid) == '文本-' + label, w.getText(cid))
@@ -260,12 +260,12 @@ def test_panel():
     user32.CreateWindowExW.restype = wintypes.HWND
     parent = user32.CreateWindowExW(0, 'STATIC', 'PanelHost', 0x00CF0000, 100, 100, 400, 300,
                                     0, 0, hinst, None)
-    record('Panel', '父窗口创建', bool(parent), hex(parent or 0))
+    record('Pane', '父窗口创建', bool(parent), hex(parent or 0))
     if not parent:
         return
     user32.ShowWindow(parent, SW_SHOW)
     pnl = p.Panel(parent)
-    record('Panel', 'Panel 创建', pnl.hwnd != 0, hex(pnl.hwnd))
+    record('Pane', 'Panel 创建', pnl.hwnd != 0, hex(pnl.hwnd))
     pnl.resize()
     pnl.addLabel(3001, '标签', 10, 10, 120, 24)
     pnl.addButton(3002, '按钮', 10, 40, 100, 30)
@@ -280,19 +280,19 @@ def test_panel():
     for cid, expect in ((3001, 'Static'), (3002, 'Button'), (3003, 'Edit'), (3004, 'Button'),
                         (3005, 'ComboBox'), (3006, 'ListBox'), (3007, 'msctls_progress32')):
         got = kids.get(cid)
-        record('Panel', f'控件 {cid} 类名', bool(got) and got[1] == expect,
+        record('Pane', f'控件 {cid} 类名', bool(got) and got[1] == expect,
                (got[1] if got else '缺失'))
-    record('Panel', 'Slider 类名', kids.get(3008, (None, ''))[1] == 'msctls_trackbar32',
+    record('Pane', 'Slider 类名', kids.get(3008, (None, ''))[1] == 'msctls_trackbar32',
            kids.get(3008, (None, ''))[1])
 
     pnl.setText(3003, '面板内文本')
-    record('Panel', 'setText/getText', pnl.getText(3003) == '面板内文本', pnl.getText(3003))
+    record('Pane', 'setText/getText', pnl.getText(3003) == '面板内文本', pnl.getText(3003))
     pnl.setCheck(3004, True)
-    record('Panel', 'setCheck', pnl.getCheck(3004) == BST_CHECKED, str(pnl.getCheck(3004)))
+    record('Pane', 'setCheck', pnl.getCheck(3004) == BST_CHECKED, str(pnl.getCheck(3004)))
     pnl.setPos(3007, 50)
-    record('Panel', 'setPos(progress)', pnl.getPos(3007) == 50, str(pnl.getPos(3007)))
+    record('Pane', 'setPos(progress)', pnl.getPos(3007) == 50, str(pnl.getPos(3007)))
     pnl.setVisible(3002, False)
-    record('Panel', 'setVisible', pnl.getVisible(3002) is False, str(pnl.getVisible(3002)))
+    record('Pane', 'setVisible', pnl.getVisible(3002) is False, str(pnl.getVisible(3002)))
     user32.DestroyWindow(parent)
 
 
