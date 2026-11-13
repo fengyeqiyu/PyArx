@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  示例 11：QML delegate 行模板（XItemView）
+
+  QML 里：
+      ListView {
+          model: ["..."]
+          delegate: Item { Text { text: modelData } }
+      }
+  这里照写：XItemView 的子节点就是 delegate，按 model 的行数逐行实例化。
+  model 用 ; 或换行分行，行内用 | 分字段；模板里 {modelData} = 首字段，{index} = 行号，{0}/{1}/{2} = 各字段。
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="11 delegate 行模板" Width="520" Height="360" Background="#F4F6F8">
+
+  <XPane x:Name="Host" Padding="8">
+    <XItemView x:Name="LV"
+               Model="AT1-1|回路一|正常;AT1-2|回路二|告警;AT1-3|回路三|正常;AT1-4|回路四|正常"
+               ItemHeight="52"
+               Layout.fillWidth="true" Layout.fillHeight="true">
+
+      <XStackPanel Orientation="Horizontal" Padding="8" Spacing="8">
+        <XLabel x:Name="Txt{index}" text="{modelData}" width="140"/>
+        <XLabel x:Name="Sub{index}" text="第 {index} 行 · {1}" width="180"/>
+        <XButton x:Name="Act{index}" text="{2}" width="80" height="30"/>
+      </XStackPanel>
+
+    </XItemView>
+  </XPane>
+</XWindow>

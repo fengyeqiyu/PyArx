@@ -1216,6 +1216,12 @@
     <property name="BorderThickness" type="int"/>
   </objectinfo>
 
+  <objectinfo tag="XItemView" display="ItemView" category="Item Views" w="320" h="240">
+    <property name="Name" type="text"/>
+    <property name="Model" type="text"/>
+    <property name="ItemHeight" type="int"/>
+    <property name="SelectedIndex" type="int"/>
+  </objectinfo>
   <objectinfo tag="XFrame" display="Frame" category="Containers" w="200" h="120">
     <property name="Name" type="text"/>
     <property name="Padding" type="int"/>

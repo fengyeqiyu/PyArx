@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -95,6 +95,7 @@
     <ClCompile Include="controls\XamlStaticLine.cpp" />
     <ClCompile Include="controls\XamlSwipeView.cpp" />
     <ClCompile Include="controls\XamlSwitch.cpp" />
+    <ClCompile Include="controls\XamlItemView.cpp" />
     <ClCompile Include="controls\XamlFrame.cpp" />
     <ClCompile Include="controls\XamlDialog.cpp" />
     <ClCompile Include="controls\XamlDrawer.cpp" />

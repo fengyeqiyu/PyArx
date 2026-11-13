@@ -82,6 +82,7 @@ namespace xamlmfc
             L"Flickable",
             // QML Controls 2 对齐补齐
             L"Frame", L"Dialog", L"Drawer", L"RoundButton", L"DelayButton", L"ToolButton", L"ToolSeparator", L"TabButton", L"ScrollIndicator", L"MenuItem", L"MenuSeparator",
+            L"ItemView", L"Delegate",
             // 绘制图元
             L"Line", L"Rectangle", L"Ellipse", L"Arc"
         };

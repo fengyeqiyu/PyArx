@@ -1,4 +1,4 @@
-#include "RegisterPyMfcControls.h"
+﻿#include "RegisterPyMfcControls.h"
 
 #include "XamlCore.h"
 #include "XamlMfcControlBase.h"
@@ -25,6 +25,7 @@
 #include "XamlScrollIndicator.h"
 #include "XamlMenuItem.h"
 #include "XamlMenuSeparator.h"
+#include "XamlItemView.h"
 
 #include <functional>
 #include <vector>
@@ -198,4 +199,6 @@ void RegisterPyMfcControls()
                 {L"XMenuItem"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlMenuSeparator(); },
                 {L"XMenuSeparator"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlItemView(); },
+                {L"XItemView"});
 }

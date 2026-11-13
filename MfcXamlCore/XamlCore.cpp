@@ -1268,8 +1268,57 @@ namespace
         }
     }
 
+    void ReplaceToken(std::wstring& s, const std::wstring& from, const std::wstring& to)
+    {
+        if (from.empty() || to.empty())
+            return;
+        size_t p = 0;
+        while ((p = s.find(from, p)) != std::wstring::npos)
+        {
+            s.replace(p, from.size(), to);
+            p += to.size();
+        }
+    }
+
+    // 一行字段：{modelData} = 整行首字段，{index} = 行号，{0}/{1}/… = 各字段
+    void ApplyRowFields(XamlElement& el, const std::vector<std::wstring>& fields, int row)
+    {
+        const std::wstring idx = std::to_wstring(row);
+        const std::wstring first = fields.empty() ? std::wstring() : fields[0];
+        for (auto& kv : el.attrs)
+        {
+            std::wstring v = kv.second;
+            ReplaceToken(v, L"{index}", idx);
+            ReplaceToken(v, L"{modelData}", first);
+            for (size_t i = 0; i < fields.size(); ++i)
+                ReplaceToken(v, L"{" + std::to_wstring(i) + L"}", fields[i]);
+            kv.second = v;
+        }
+        if (!el.name.empty())
+        {
+            std::wstring nm = el.name;
+            ReplaceToken(nm, L"{index}", idx);
+            ReplaceToken(nm, L"{modelData}", first);
+            for (size_t i = 0; i < fields.size(); ++i)
+                ReplaceToken(nm, L"{" + std::to_wstring(i) + L"}", fields[i]);
+            el.name = nm;
+        }
+        for (auto& c : el.children)
+            ApplyRowFields(c, fields, row);
+    }
+
+    void MarkDelegateRow(XamlElement& el)
+    {
+        el.delegateRow = true;
+        for (auto& c : el.children)
+            MarkDelegateRow(c);
+    }
+
     bool IsContainer(const std::wstring& tag)
     {
+        if (_wcsicmp(tag.c_str(), L"itemview") == 0)
+            return true;
+
         // AbsolutePanel 是"绝对定位布局"的正名；Canvas 是它的历史别名（画布另有 DrawCanvas）。
         return tag == L"stackpanel" || tag == L"grid" || tag == L"dockpanel" ||
                tag == L"wrappanel" || tag == L"canvas" || tag == L"absolutepanel" ||
@@ -1399,6 +1448,38 @@ namespace
 
     void LayoutNode(XamlElement& node, XamlFlow& flow)
     {
+        // ItemView 行定位：delegate 行按 ItemHeight 逐行堆叠，行内再走普通布局
+        if (_wcsicmp(KindOf(node.tag).c_str(), L"itemview") == 0)
+        {
+            int rowH = _wtoi(node.get(L"ItemHeight").c_str());
+            if (rowH <= 0)
+                rowH = 44;
+            const int availW = (std::max)(1, flow.width - flow.padding * 2);
+            int i = 0;
+            for (auto& child : node.children)
+            {
+                child.previewX = flow.offsetX + flow.padding;
+                child.previewY = flow.offsetY + flow.paddingY + i * rowH;
+                child.previewW = availW;
+                child.previewH = rowH;
+
+                XamlFlow inner;
+                inner.margin = 0;
+                inner.spacing = child.spacing;
+                inner.padding = 0;
+                inner.paddingY = 0;
+                inner.width = availW;
+                inner.height = rowH;
+                inner.offsetX = child.previewX;
+                inner.offsetY = child.previewY;
+                inner.cursorX = 0;
+                inner.cursorY = 0;
+                inner.horizontal = child.hasOrientation ? child.horizontal : true;   // 行内默认横排
+                LayoutNode(child, inner);
+                ++i;
+            }
+            return;
+        }
         // Dock 布局：容器内任一子元素声明 Dock（非 None）即启用，
         // 该子元素占一块剩余区，其余按声明顺序依次切分（WinForms 语义）
         bool dockMode = false;
@@ -2663,6 +2744,63 @@ void XamlRuntime::applyTemplates()
         return;
 
     std::function<void(XamlElement&)> walk = [&](XamlElement& el) {
+        // QML delegate：XItemView 的唯一子节点是行模板，按 Model 的行数实例化
+        if (_wcsicmp(KindOf(el.tag).c_str(), L"itemview") == 0)
+        {
+            if (el.delegateTemplate.empty() && !el.children.empty())
+            {
+                el.delegateTemplate.push_back(el.children.front());
+                el.children.clear();
+            }
+            el.children.erase(
+                std::remove_if(el.children.begin(), el.children.end(),
+                               [](const XamlElement& c) { return c.delegateRow; }),
+                el.children.end());
+            if (!el.delegateTemplate.empty())
+            {
+                int rowH = _wtoi(el.get(L"ItemHeight").c_str());
+                if (rowH <= 0)
+                    rowH = 44;
+                const std::wstring model = el.get(L"Model");
+                std::vector<std::vector<std::wstring>> rows;
+                std::wstring cur;
+                for (size_t i = 0; i <= model.size(); ++i)
+                {
+                    const wchar_t ch = i < model.size() ? model[i] : L'\n';
+                    if (ch == L'\n' || ch == L';' || ch == L'\r')
+                    {
+                        const std::wstring line = TrimWs(cur);
+                        if (!line.empty())
+                        {
+                            std::vector<std::wstring> fields;
+                            std::wstring f;
+                            for (size_t k = 0; k <= line.size(); ++k)
+                            {
+                                const wchar_t fc = k < line.size() ? line[k] : L'|';
+                                if (fc == L'|')
+                                {
+                                    fields.push_back(TrimWs(f));
+                                    f.clear();
+                                }
+                                else
+                                    f.push_back(fc);
+                            }
+                            rows.push_back(fields);
+                        }
+                        cur.clear();
+                    }
+                    else
+                        cur.push_back(ch);
+                }
+                for (size_t r = 0; r < rows.size(); ++r)
+                {
+                    std::vector<XamlElement> copy = el.delegateTemplate;
+                    ApplyRowFields(copy[0], rows[r], (int)r);
+                    MarkDelegateRow(copy[0]);
+                    el.children.push_back(std::move(copy[0]));
+                }
+            }
+        }
         // 先清掉上一次实体化的模板子树，再递归真实子节点
         el.children.erase(
             std::remove_if(el.children.begin(), el.children.end(),

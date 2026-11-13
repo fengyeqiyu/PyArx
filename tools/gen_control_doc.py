@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """生成《MFCXaml 控件接口清单》——数据来自运行中的 PyMfcXaml.prop_schema() 与控件源码。
 
 用法（构建后执行，schema 变了重跑）：
@@ -20,6 +20,7 @@ COMMON = ['Shape', 'BackColor', 'FrontColor', 'Foreground', 'BorderColor', 'Bord
 
 # 主标签 -> (实现方式, 源文件, 事件键)
 INFO = {
+    'ItemView':       ('属性驱动行模板容器（Model 逐行实例化 delegate 子节点）', 'XamlItemView.cpp', 'select'),
     'Button':         ('原生 MFC Button', 'XamlButton.cpp', 'pointer'),
     'Label':      ('原生 MFC Static', 'XamlTextBlock.cpp', 'pointer'),
     'TextField':        ('原生 MFC Edit', 'XamlTextBox.cpp', 'text'),

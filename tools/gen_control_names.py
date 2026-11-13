@@ -52,6 +52,7 @@ CN = {
     'TableView': '数据表格',
     'TreeTable': '树形表格',
     'VirtualList': '虚拟列表',
+    'ItemView': '行模板列表',
     'StackView': '栈式视图',
     'SwipeView': '滑动视图',
     'GridView': '网格视图',
@@ -142,6 +143,7 @@ QML = {
     'TableView': ('TableView（model + delegate）', '组合'),
     'TreeTable': ('TreeView（6.x）+ 多列 delegate', '组合'),
     'VirtualList': ('ListView（cacheBuffer 虚拟化）', '组合'),
+    'ItemView': ('ListView（delegate 行模板）', '组合'),
     'StackView': ('StackView', '同名'),
     'SwipeView': ('SwipeView', '同名'),
     'GridView': ('GridView', '同名'),
@@ -213,6 +215,7 @@ WPF = {
     'TableView': 'DataGrid',
     'TreeTable': 'TreeView + GridView 列',
     'VirtualList': 'ListView（VirtualizingStackPanel）',
+    'ItemView': 'ListView（DataTemplate）',
     'StackView': '无（ContentControl 切换）',
     'SwipeView': '无（ScrollViewer 分页自绘）',
     'GridView': 'ListView（GridView 视图）',
@@ -284,6 +287,7 @@ WIN = {
     'TableView': 'DataGridView',
     'TreeTable': '无（TreeView + DataGridView 组合）',
     'VirtualList': 'ListView（VirtualMode）',
+    'ItemView': 'ListView（OwnerDraw + 行模板）',
     'StackView': '无（Panel 切换）',
     'SwipeView': '无（自绘）',
     'GridView': 'ListView（LargeIcon）',
@@ -573,7 +577,15 @@ def qml_usage_section():
             "| `anchors.horizontalCenter=\"A\"` / `verticalCenter` | 与 A 对齐中心线 |",
             "", "剩余空间分配（`Layout.fillWidth` / `Layout.fillHeight` = true）：", "",
             "固定尺寸的项先占位，fill 项分剩下的空间；`fillWidth` 拉满可用宽度，"
-            "`fillHeight` 在垂直流里均分剩余高度（水平流里拉满高度）。"]
+            "`fillHeight` 在垂直流里均分剩余高度（水平流里拉满高度）。", "",
+            "delegate 行模板（`XItemView`，对应 QML ListView 的 delegate）：", "",
+            "| QML 写法 | 这里的写法 |", "|---|---|",
+            "| `model: [...]` | `Model=\"a\\|b;c\\|d\"`（`;` 分行，行内竖线分字段） |",
+            "| `delegate: Item { ... }` | `XItemView` 的子节点就是行模板，按行数逐行实例化 |",
+            "| `modelData` / `index` | 模板里写 `{modelData}` / `{index}` / `{0}` `{1}` 取字段 |",
+            "| `ListView` 行高 | `ItemHeight` |",
+            "| `currentIndex` | `SelectedIndex` |",
+            "", "行模板里的控件是普通 XAML 控件，运行时/设计器/预览器三处显示一致。"]
     return "\n".join(out)
 
 

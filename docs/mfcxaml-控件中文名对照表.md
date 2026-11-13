@@ -284,3 +284,15 @@ Grid 里的位置和尺寸可以直接按 QML 的附加属性写，落到的是 
 剩余空间分配（`Layout.fillWidth` / `Layout.fillHeight` = true）：
 
 固定尺寸的项先占位，fill 项分剩下的空间；`fillWidth` 拉满可用宽度，`fillHeight` 在垂直流里均分剩余高度（水平流里拉满高度）。
+
+delegate 行模板（`XItemView`，对应 QML ListView 的 delegate）：
+
+| QML 写法 | 这里的写法 |
+|---|---|
+| `model: [...]` | `Model="a\|b;c\|d"`（`;` 分行，行内竖线分字段） |
+| `delegate: Item { ... }` | `XItemView` 的子节点就是行模板，按行数逐行实例化 |
+| `modelData` / `index` | 模板里写 `{modelData}` / `{index}` / `{0}` `{1}` 取字段 |
+| `ListView` 行高 | `ItemHeight` |
+| `currentIndex` | `SelectedIndex` |
+
+行模板里的控件是普通 XAML 控件，运行时/设计器/预览器三处显示一致。

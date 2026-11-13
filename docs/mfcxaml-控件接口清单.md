@@ -14,14 +14,14 @@
 
 | 项 | 数量 |
 |---|---|
-| 控件（注册主标签） | 61 |
-| 属性条目合计（含通用） | 1288 |
-| 其中通用属性 | 1160（61 控件 × 19） |
-| 其中自有属性 | 128 |
+| 控件（注册主标签） | 62 |
+| 属性条目合计（含通用） | 1310 |
+| 其中通用属性 | 1179（62 控件 × 19） |
+| 其中自有属性 | 131 |
 | 只读属性 | 7 |
 | 事件键（内部名） | 15（click / dblclick / change / select / value / checked / dropdown / scroll / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus） |
 
-档位分布：S 完整 **3** 个 · A 基本 **17** 个 · B 薄 **37** 个 · C 仅布局 **4** 个 · 
+档位分布：S 完整 **3** 个 · A 基本 **18** 个 · B 薄 **37** 个 · C 仅布局 **4** 个 · 
 
 ## 三、逐控件清单
 
@@ -88,12 +88,13 @@
 | **XScrollIndicator** | 自绘细条指示器 | Orientation / Size / Position | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | A 基本 | `XamlScrollIndicator.cpp` |
 | **XMenuItem** | 原生 MFC Button（菜单项） | Text / Checkable / Checked | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | A 基本 | `XamlMenuItem.cpp` |
 | **XMenuSeparator** | 原生 MFC StaticLine | Orientation | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlMenuSeparator.cpp` |
+| **XItemView** | 属性驱动行模板容器（Model 逐行实例化 delegate 子节点） | Model / ItemHeight / SelectedIndex | — | select / click / dblclick / scroll / gotfocus / lostfocus | A 基本 | `XamlItemView.cpp` |
 
 ## 四、分档结论
 
 **S 完整（自有 ≥5，可直接当业务控件用）**：XTextField(5)、XScrollBar(5)、XGridView(5)
 
-**A 基本（3–4，够用但还缺边角能力）**：XListBox(3)、XCodeEditor(3)、XComboBox(4)、XProgressBar(3)、XSlider(3)、XTextArea(3)、XSpinBox(3)、XRangeSlider(4)、XDial(3)、XTableView(4)、XPopup(3)、XVirtualList(4)、XDialog(3)、XDelayButton(3)、XToolButton(3)、XScrollIndicator(3)、XMenuItem(3)
+**A 基本（3–4，够用但还缺边角能力）**：XListBox(3)、XCodeEditor(3)、XComboBox(4)、XProgressBar(3)、XSlider(3)、XTextArea(3)、XSpinBox(3)、XRangeSlider(4)、XDial(3)、XTableView(4)、XPopup(3)、XVirtualList(4)、XDialog(3)、XDelayButton(3)、XToolButton(3)、XScrollIndicator(3)、XMenuItem(3)、XItemView(3)
 
 **B 薄（1–2，只有主语义那一个字段）**：XButton(1)、XLabel(1)、XCheckBox(2)、XRadioButton(2)、XGroupBox(1)、XTabBar(1)、XTreeView(1)、XListCtrl(2)、XChoice(1)、XDatePicker(1)、XPowerCanvas(1)、XHyperlink(2)、XToggleButton(2)、XIconButton(2)、XImage(1)、XGridLayout(2)、XScrollView(2)、XMonthGrid(1)、XSwitch(1)、XPageIndicator(2)、XTumbler(2)、XTreeTable(2)、XToolBar(2)、XToolTip(1)、XMenu(2)、XMenuBar(2)、XStackView(2)、XSwipeView(2)、XPathView(2)、XQCanvas(2)、XPage(2)、XFlickable(2)、XFrame(1)、XRoundButton(1)、XToolSeparator(1)、XTabButton(2)、XMenuSeparator(1)
 

@@ -93,6 +93,9 @@ public:
     int anchorMargin = 0;
     // Layout.fillWidth / Layout.fillHeight：占满容器，或在同类项之间均分剩余空间
     bool fillW = false, fillH = false;
+    // delegate 行模板（XItemView）：模板节点留一份拷贝，children 里是按行实例化出来的副本
+    bool delegateRow = false;
+    std::vector<XamlElement> delegateTemplate;
     // 原始写法（支持锚到兄弟对象："A.right" / "A"）；值为 parent 时用上面几个 bool 快判
     std::wstring anchorFillRaw, anchorLeftRaw, anchorRightRaw, anchorTopRaw, anchorBottomRaw;
     std::wstring anchorHCenterRaw, anchorVCenterRaw;
