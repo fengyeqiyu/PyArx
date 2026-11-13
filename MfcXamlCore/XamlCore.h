@@ -85,6 +85,13 @@ public:
     bool horizontal = false;
     bool hasOrientation = false;                        // 是否显式声明了 Orientation（决定容器排列方向）
 
+    // QML anchors：锚到父容器内框（v1 只支持 parent）
+    bool hasAnchors = false;
+    bool anchorFill = false, anchorLeft = false, anchorRight = false;
+    bool anchorTop = false, anchorBottom = false;
+    bool anchorHCenter = false, anchorVCenter = false, anchorCenterIn = false;
+    int anchorMargin = 0;
+
     // 布局结果（运行时计算）
     int previewX = 0, previewY = 0, previewW = 0, previewH = 0;
 

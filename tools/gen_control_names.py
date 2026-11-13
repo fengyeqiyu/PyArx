@@ -559,8 +559,15 @@ def qml_usage_section():
             "| `Layout.margins` | `Margin` | 外边距 |",
             "| `x` / `y` | `Left` / `Top` | 绝对定位 |",
             "| `width` / `height` | `Width` / `Height` | 尺寸 |",
-            "", "`Layout.fillWidth` / `Layout.fillHeight` / `anchors.*` 目前只做写法兼容（不报未知属性），"
-            "实际拉伸仍由容器（StackPanel / Grid / Pane）决定。"]
+            "", "锚定写法（`anchors.*` 锚到父容器内框，v1 只支持 parent）：", "",
+            "| QML 写法 | 效果 |", "|---|---|",
+            "| `anchors.fill=\"parent\"` | 占满父容器内框 |",
+            "| `anchors.left` / `right` / `top` / `bottom` | 贴左/右/上/下 |",
+            "| `anchors.centerIn=\"parent\"` | 水平垂直居中 |",
+            "| `anchors.horizontalCenter` / `verticalCenter` | 单轴居中 |",
+            "| `anchors.margins` | 四边内缩 |",
+            "", "`Layout.fillWidth` / `Layout.fillHeight` 仍只做写法兼容，"
+            "实际拉伸由容器（StackPanel / Grid / Pane）决定。"]
     return "\n".join(out)
 
 

@@ -1007,6 +1007,25 @@ namespace
             }
         }
 
+        // QML anchors：锚到父容器内框（值写 parent 或任意 id 都按父处理）
+        {
+            node.anchorFill = !node.get(L"anchors.fill").empty();
+            node.anchorCenterIn = !node.get(L"anchors.centerIn").empty();
+            node.anchorLeft = !node.get(L"anchors.left").empty();
+            node.anchorRight = !node.get(L"anchors.right").empty();
+            node.anchorTop = !node.get(L"anchors.top").empty();
+            node.anchorBottom = !node.get(L"anchors.bottom").empty();
+            node.anchorHCenter = !node.get(L"anchors.horizontalCenter").empty() ||
+                                 !node.get(L"anchors.centering").empty();
+            node.anchorVCenter = !node.get(L"anchors.verticalCenter").empty() ||
+                                 !node.get(L"anchors.centering").empty();
+            const std::wstring mg = node.get(L"anchors.margins");
+            node.anchorMargin = mg.empty() ? 0 : (std::max)(0, IntAttr(mg, 0));
+            node.hasAnchors = node.anchorFill || node.anchorCenterIn || node.anchorLeft ||
+                              node.anchorRight || node.anchorTop || node.anchorBottom ||
+                              node.anchorHCenter || node.anchorVCenter;
+        }
+
         if (_wcsicmp(xamlmfc::BareTag(node.tag).c_str(), L"Grid") == 0)
         {
             ParseDefs(element, true, node);
@@ -1214,7 +1233,10 @@ namespace
                tag == L"abspanel" || tag == L"canvaspanel" || tag == L"canvaslayout" ||
                tag == L"layout" || tag == L"layoutpanel" ||
                // 侧栏：<PaletteSet> 是多页宿主，<page> 是一页（内部照样放容器和控件）
-               tag == L"palette" || tag == L"page";
+               tag == L"palette" || tag == L"page" ||
+               // QML 的容器类（Pane / Frame / Dialog / Drawer / GroupBox / TabBar / TabPage）
+               tag == L"pane" || tag == L"frame" || tag == L"dialog" || tag == L"drawer" ||
+               tag == L"groupbox" || tag == L"tabpage" || tag == L"tabbar";
     }
 
     int DefaultHeight(const std::wstring& tag)
@@ -1377,6 +1399,49 @@ namespace
             const bool useGridY = !flow.gridRows.empty();
             int localX = 0, localY = 0;
             bool docked = false;
+
+            // QML anchors：直接占父容器内框的一块，不参与流式推进
+            bool anchored = false;
+            if (child.hasAnchors)
+            {
+                const int availL = flow.padding;
+                const int availT = flow.paddingY;
+                const int availR = (std::max)(availL + 1, flow.width - flow.padding);
+                const int availB = (std::max)(availT + 1, flow.height - flow.paddingY);
+                const int m = child.anchorMargin;
+                const int boxW = (std::max)(1, availR - availL - m * 2);
+                const int boxH = (std::max)(1, availB - availT - m * 2);
+                if (child.anchorFill)
+                {
+                    localX = availL + m;
+                    localY = availT + m;
+                    w = boxW;
+                    h = boxH;
+                    anchored = true;
+                }
+                else
+                {
+                    if (!child.hasW) w = boxW;
+                    if (!child.hasH) h = boxH;
+                    if (child.anchorCenterIn || child.anchorHCenter)
+                        localX = availL + m + (boxW - w) / 2;
+                    else if (child.anchorLeft)
+                        localX = availL + m;
+                    else if (child.anchorRight)
+                        localX = (std::max)(availL, availR - m - w);
+                    else
+                        localX = child.hasX ? child.x : availL + m;
+                    if (child.anchorCenterIn || child.anchorVCenter)
+                        localY = availT + m + (boxH - h) / 2;
+                    else if (child.anchorTop)
+                        localY = availT + m;
+                    else if (child.anchorBottom)
+                        localY = (std::max)(availT, availB - m - h);
+                    else
+                        localY = child.hasY ? child.y : availT + m;
+                    anchored = true;
+                }
+            }
             if (dockMode)
             {
                 const std::wstring d = child.get(L"Dock");
@@ -1422,7 +1487,7 @@ namespace
                 }
             }
 
-            if (!docked)
+            if (!docked && !anchored)
             {
             if (flow.horizontal)
             {
@@ -1479,11 +1544,14 @@ namespace
             }
             }   // if (!docked)
 
-            // Margin
-            localX += child.marginL;
-            localY += child.marginT;
-            w = (std::max)(1, w - child.marginL - child.marginR);
-            h = (std::max)(1, h - child.marginT - child.marginB);
+            // Margin（锚定项由 anchors.margins 负责，不再叠加）
+            if (!anchored)
+            {
+                localX += child.marginL;
+                localY += child.marginT;
+                w = (std::max)(1, w - child.marginL - child.marginR);
+                h = (std::max)(1, h - child.marginT - child.marginB);
+            }
 
             child.previewX = flow.offsetX + localX;
             child.previewY = flow.offsetY + localY;
