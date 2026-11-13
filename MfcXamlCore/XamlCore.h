@@ -93,6 +93,8 @@ public:
     int anchorMargin = 0;
     // Layout.fillWidth / Layout.fillHeight：占满容器，或在同类项之间均分剩余空间
     bool fillW = false, fillH = false;
+    // Layout.alignment：0=左/上（默认） 1=右/下 2=居中 3=填满
+    int alignX = 0, alignY = 0;
     // delegate 行模板（XItemView）：模板节点留一份拷贝，children 里是按行实例化出来的副本
     bool delegateRow = false;
     std::vector<XamlElement> delegateTemplate;

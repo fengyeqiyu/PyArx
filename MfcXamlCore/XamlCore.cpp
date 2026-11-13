@@ -1020,6 +1020,29 @@ namespace
             node.anchorVCenter = !node.get(L"anchors.verticalCenter").empty() ||
                                  !node.get(L"anchors.centering").empty();
             {
+                const std::wstring al = node.get(L"Layout.alignment");
+                if (!al.empty())
+                {
+                    auto pick = [&](const wchar_t* key) {
+                        return al.find(key) != std::wstring::npos;
+                    };
+                    if (pick(L"AlignHCenter"))
+                        node.alignX = 2;
+                    else if (pick(L"AlignLeft"))
+                        node.alignX = 0;
+                    else if (pick(L"AlignRight"))
+                        node.alignX = 1;
+                    if (pick(L"AlignFill"))
+                        node.alignX = 3;
+                    if (pick(L"AlignVCenter"))
+                        node.alignY = 2;
+                    else if (pick(L"AlignTop"))
+                        node.alignY = 0;
+                    else if (pick(L"AlignBottom"))
+                        node.alignY = 1;
+                    if (pick(L"AlignFill"))
+                        node.alignY = 3;
+                }
                 const std::wstring fw = node.get(L"Layout.fillWidth");
                 const std::wstring fh = node.get(L"Layout.fillHeight");
                 node.fillW = _wcsicmp(fw.c_str(), L"true") == 0 || fw == L"1";
@@ -1675,6 +1698,37 @@ namespace
                 localY += child.marginT;
                 w = (std::max)(1, w - child.marginL - child.marginR);
                 h = (std::max)(1, h - child.marginT - child.marginB);
+            }
+
+            // Layout.alignment 落位：垂直流看水平分量，水平流看垂直分量
+            if (!anchored)
+            {
+                const int availW = (std::max)(1, flow.width - flow.padding * 2);
+                const int availH = (std::max)(1, flow.height - flow.paddingY * 2);
+                if (!flow.horizontal && child.alignX != 0)
+                {
+                    if (child.alignX == 3)
+                    {
+                        w = (std::max)(1, availW - child.marginL - child.marginR);
+                        localX = flow.padding + child.marginL;
+                    }
+                    else if (child.alignX == 1)
+                        localX = (std::max)(flow.padding, flow.width - flow.padding - w - child.marginR);
+                    else
+                        localX = flow.padding + (std::max)(0, availW - w) / 2;
+                }
+                else if (flow.horizontal && child.alignY != 0)
+                {
+                    if (child.alignY == 3)
+                    {
+                        h = (std::max)(1, availH - child.marginT - child.marginB);
+                        localY = flow.paddingY + child.marginT;
+                    }
+                    else if (child.alignY == 1)
+                        localY = (std::max)(flow.paddingY, flow.height - flow.paddingY - h - child.marginB);
+                    else
+                        localY = flow.paddingY + (std::max)(0, availH - h) / 2;
+                }
             }
 
             child.previewX = flow.offsetX + localX;

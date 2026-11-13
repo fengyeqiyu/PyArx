@@ -296,3 +296,14 @@ delegate 行模板（`XItemView`，对应 QML ListView 的 delegate）：
 | `currentIndex` | `SelectedIndex` |
 
 行模板里的控件是普通 XAML 控件，运行时/设计器/预览器三处显示一致。
+
+对齐（`Layout.alignment`）：
+
+| QML 写法 | 效果 |
+|---|---|
+| `Qt.AlignLeft` / `Qt.AlignTop` | 贴左 / 贴上（默认） |
+| `Qt.AlignRight` / `Qt.AlignBottom` | 贴右 / 贴下 |
+| `Qt.AlignHCenter` / `Qt.AlignVCenter` | 水平 / 垂直居中 |
+| `Qt.AlignFill` | 撑满可用区（宽或高） |
+
+垂直流看水平分量，水平流看垂直分量；`Qt.AlignBaseline` 引擎没有基线概念，未实现。
