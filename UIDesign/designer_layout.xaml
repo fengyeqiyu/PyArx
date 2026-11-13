@@ -114,19 +114,19 @@
       <XButton Name="btnNew" FontSize="10"  Icon="res/new.png"  Text="新建" Width="46" Height="48"/>
       <XButton Name="btnOpen" FontSize="10" Icon="res/open.png" Text="打开" Width="46" Height="48"/>
       <XButton Name="btnSave" FontSize="10" Icon="res/save.png" Text="保存" Width="46" Height="48"/>
-      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#39404B"/>
+      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#4A5361"/>
 
       <!-- 撤销 / 重做 -->
       <XButton Name="btnUndo" FontSize="10" Icon="res/undo.png" Text="撤销" Width="46" Height="48"/>
       <XButton Name="btnRedo" FontSize="10" Icon="res/redo.png" Text="重做" Width="46" Height="48"/>
-      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#39404B"/>
+      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#4A5361"/>
 
       <!-- 剪贴板 -->
       <XButton Name="btnCut" FontSize="10"    Icon="res/cut.png"   Text="剪切" Width="46" Height="48"/>
       <XButton Name="btnCopy" FontSize="10"   Icon="res/copy.png"  Text="复制" Width="46" Height="48"/>
       <XButton Name="btnPaste" FontSize="10"  Icon="res/paste.png" Text="粘贴" Width="46" Height="48"/>
       <XButton Name="btnDelete" FontSize="10" Icon="res/del.png"   Text="删除" Width="46" Height="48"/>
-      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#39404B"/>
+      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#4A5361"/>
 
       <!-- 对齐 / 均匀分布（Qt Designer 同组语义：多选按选区外接框，单选按父容器） -->
       <XButton Name="btnAlignLeft" FontSize="10"     Icon="res/alignleft.png"    Text="左"     Width="34" Height="48"/>
@@ -137,12 +137,12 @@
       <XButton Name="btnAlignBottom" FontSize="10"   Icon="res/alignbottom.png"  Text="下"     Width="34" Height="48"/>
       <XButton Name="btnDistH" FontSize="10"         Icon="res/disth.png"        Text="横分布" Width="56" Height="48"/>
       <XButton Name="btnDistV" FontSize="10"         Icon="res/distv.png"        Text="纵分布" Width="56" Height="48"/>
-      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#39404B"/>
+      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#4A5361"/>
 
       <!-- 视图 -->
       <XButton Name="btnGrid" FontSize="10"  Icon="res/grid.png"  Text="网格" Width="46" Height="48"/>
       <XButton Name="btnRuler" FontSize="10" Icon="res/ruler.png" Text="标尺" Width="46" Height="48"/>
-      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#39404B"/>
+      <XDivider Width="11" Height="44" Orientation="Vertical" Background="#4A5361"/>
 
       <!-- 缩放 -->
       <XButton Name="btnZoomOut" FontSize="10" Icon="res/zoomout.png" Text="缩小" Width="46" Height="48"/>
@@ -173,7 +173,7 @@
           <RowDefinition Height="*"/>     <!-- 控件箱树 -->
         </XGrid.RowDefinitions>
 
-        <XPanelHeader Name="hdrWidgetBox" Grid.Row="0" Text="控件箱"/>
+        <XPanelHeader Name="hdrWidgetBox" Grid.Row="0" Text="控件箱" Count="69 个控件"/>
 
         <XChipBar Name="widgetChips" Grid.Row="1" Background="#1C2027" Foreground="#C7D0DC"
             BorderColor="#39404B" AccentColor="#4C8DFF"
@@ -187,18 +187,85 @@
 
         <XTreeView Name="widgetBox" Grid.Row="2" FontSize="9" LineHeight="22"
                     Background="#1C2027" Foreground="#E4E9F0" SelectionColor="#2A4A7A">
-          <!-- 预设行：Level 缩进 / HasChildren 展开框 / Expanded 是否展开 -->
-          <TreeRow Text="Buttons"         Level="0" HasChildren="True" Expanded="True" Selected="True"/>
-          <TreeRow Text="Button"          Level="1"/>
-          <TreeRow Text="CheckBox"        Level="1"/>
-          <TreeRow Text="RadioButton"     Level="1"/>
-          <TreeRow Text="Input Widgets"   Level="0" HasChildren="True" Expanded="True"/>
-          <TreeRow Text="TextField"       Level="1"/>
-          <TreeRow Text="ComboBox"        Level="1"/>
-          <TreeRow Text="ListBox"         Level="1"/>
+          <TreeRow Text="Buttons" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="Button" Level="1"/>
+          <TreeRow Text="CheckBox" Level="1"/>
+          <TreeRow Text="RadioButton" Level="1"/>
+          <TreeRow Text="ToggleButton" Level="1"/>
+          <TreeRow Text="IconButton" Level="1"/>
+          <TreeRow Text="RoundButton" Level="1"/>
+          <TreeRow Text="DelayButton" Level="1"/>
+          <TreeRow Text="ToolButton" Level="1"/>
+          <TreeRow Text="Canvas" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="PowerCanvas" Level="1"/>
+          <TreeRow Text="QCanvas" Level="1"/>
+          <TreeRow Text="Containers" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="GroupBox" Level="1"/>
+          <TreeRow Text="TabBar" Level="1"/>
+          <TreeRow Text="Border" Level="1"/>
+          <TreeRow Text="Pane" Level="1"/>
+          <TreeRow Text="SplitView" Level="1"/>
+          <TreeRow Text="TreeView" Level="1"/>
+          <TreeRow Text="ListCtrl" Level="1"/>
+          <TreeRow Text="Divider" Level="1"/>
+          <TreeRow Text="GridLayout" Level="1"/>
+          <TreeRow Text="ScrollView" Level="1"/>
+          <TreeRow Text="Flickable" Level="1"/>
+          <TreeRow Text="Frame" Level="1"/>
+          <TreeRow Text="TabButton" Level="1"/>
+          <TreeRow Text="Data Views" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="PageIndicator" Level="1"/>
+          <TreeRow Text="TableView" Level="1"/>
+          <TreeRow Text="TreeTable" Level="1"/>
+          <TreeRow Text="VirtualList" Level="1"/>
+          <TreeRow Text="StackView" Level="1"/>
+          <TreeRow Text="SwipeView" Level="1"/>
+          <TreeRow Text="GridView" Level="1"/>
+          <TreeRow Text="PathView" Level="1"/>
+          <TreeRow Text="Page" Level="1"/>
           <TreeRow Text="Display Widgets" Level="0" HasChildren="True" Expanded="True"/>
-          <TreeRow Text="Label"           Level="1"/>
-          <TreeRow Text="ProgressBar"     Level="1"/>
+          <TreeRow Text="Label" Level="1"/>
+          <TreeRow Text="ProgressBar" Level="1"/>
+          <TreeRow Text="Hyperlink" Level="1"/>
+          <TreeRow Text="TextArea" Level="1"/>
+          <TreeRow Text="Image" Level="1"/>
+          <TreeRow Text="MonthGrid" Level="1"/>
+          <TreeRow Text="BusyIndicator" Level="1"/>
+          <TreeRow Text="ScrollIndicator" Level="1"/>
+          <TreeRow Text="Draw" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="Line" Level="1"/>
+          <TreeRow Text="Rectangle" Level="1"/>
+          <TreeRow Text="Ellipse" Level="1"/>
+          <TreeRow Text="Arc" Level="1"/>
+          <TreeRow Text="Function Bar" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="ToolBar" Level="1"/>
+          <TreeRow Text="MenuBar" Level="1"/>
+          <TreeRow Text="ToolSeparator" Level="1"/>
+          <TreeRow Text="Input Widgets" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="TextField" Level="1"/>
+          <TreeRow Text="ComboBox" Level="1"/>
+          <TreeRow Text="ListBox" Level="1"/>
+          <TreeRow Text="Choice" Level="1"/>
+          <TreeRow Text="DatePicker" Level="1"/>
+          <TreeRow Text="CodeEditor" Level="1"/>
+          <TreeRow Text="Slider" Level="1"/>
+          <TreeRow Text="Switch" Level="1"/>
+          <TreeRow Text="SpinBox" Level="1"/>
+          <TreeRow Text="RangeSlider" Level="1"/>
+          <TreeRow Text="Dial" Level="1"/>
+          <TreeRow Text="Tumbler" Level="1"/>
+          <TreeRow Text="ScrollBar" Level="1"/>
+          <TreeRow Text="Item Views" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="ItemView" Level="1"/>
+          <TreeRow Text="Overlay" Level="0" HasChildren="True" Expanded="True"/>
+          <TreeRow Text="ToolTip" Level="1"/>
+          <TreeRow Text="Menu" Level="1"/>
+          <TreeRow Text="Popup" Level="1"/>
+          <TreeRow Text="Dialog" Level="1"/>
+          <TreeRow Text="Drawer" Level="1"/>
+          <TreeRow Text="MenuItem" Level="1"/>
+          <TreeRow Text="ShellTitle" Level="1"/>
+          <TreeRow Text="MenuSeparator" Level="1"/>
         </XTreeView>
       </XGrid>
 
@@ -247,7 +314,7 @@
           <RowDefinition Height="*"/>     <!-- 属性表 -->
         </XGrid.RowDefinitions>
 
-        <XPanelHeader Name="hdrInspector" Grid.Row="0" Text="对象检查器" FontSize="10"/>
+        <XPanelHeader Name="hdrInspector" Grid.Row="0" Text="对象检查器" Count="123 节点" FontSize="10"/>
         <XTreeView Name="objInspector" Grid.Row="1" FontSize="9" LineHeight="22"
                       Background="#1C2027" Foreground="#E4E9F0" SelectionColor="#2A4A7A">
           <TreeRow Text="XWindow (unnamed)" Level="0" HasChildren="True" Expanded="True"/>
@@ -256,17 +323,26 @@
           <TreeRow Text="XButton btnSave"   Level="2"/>
         </XTreeView>
         <XSplitView Grid.Row="2"/>
-        <XPanelHeader Name="hdrProps" Grid.Row="3" Text="属性编辑器" FontSize="10"/>
+        <XPanelHeader Name="hdrProps" Grid.Row="3" Text="属性编辑器" Count="btnOpen" FontSize="10"/>
         <PropertyGrid Name="propsHost" Grid.Row="4" FontSize="9" Background="#1C2027" Foreground="#E4E9F0">
-          <PropRow Name="Name"        Value="btnOpen"/>
-          <PropRow Name="Title"       Value="打开"/>
-          <PropRow Name="Text"        Value="打开"/>
-          <PropRow Name="Width"       Value="46"/>
-          <PropRow Name="Height"      Value="48"/>
-          <PropRow Name="Background"  Value="#2E3A44"/>
-          <PropRow Name="Foreground"  Value="#E4E9F0"/>
-          <PropRow Name="FontSize"    Value="10"/>
-          <PropRow Name="Icon"        Value="res/open.png"/>
+          <PropRow Name="通用"/>
+          <PropRow Name="Name"      Value="btnOpen"/>
+          <PropRow Name="Title"     Value="打开"/>
+          <PropRow Name="Text"      Value="打开"/>
+          <PropRow Name="Enabled"   Value="True"/>
+          <PropRow Name="Visible"   Value="True"/>
+          <PropRow Name="布局"/>
+          <PropRow Name="Left"      Value="12"/>
+          <PropRow Name="Top"       Value="8"/>
+          <PropRow Name="Width"     Value="46"/>
+          <PropRow Name="Height"    Value="48"/>
+          <PropRow Name="Margin"    Value="2,0,2,0"/>
+          <PropRow Name="属性"/>
+          <PropRow Name="Background" Value="#2E3A44"/>
+          <PropRow Name="Foreground" Value="#E4E9F0"/>
+          <PropRow Name="BorderColor" Value="#39404B"/>
+          <PropRow Name="FontSize"   Value="10"/>
+          <PropRow Name="Icon"       Value="res/open.png"/>
         </PropertyGrid>
       </XGrid>
     </XGrid>
@@ -281,7 +357,7 @@
         <RowDefinition Height="*"/>
       </XGrid.RowDefinitions>
 
-      <XPanelHeader Name="hdrCode" Grid.Row="0" Text="XAML 源码"/>
+      <XPanelHeader Name="hdrCode" Grid.Row="0" Text="XAML 源码" Count="491 行 · UTF-8"/>
 
       <XCanvas Name="xamlCodeHost" Grid.Row="1" Background="#12151A"/>
     </XGrid>

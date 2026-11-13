@@ -165,12 +165,24 @@ inline void xamlDrawPropRows(XamlCanvas& cv, const RECT& rc, const XamlElement& 
         const std::wstring name = c.get(L"Name").empty() ? c.get(L"Text") : c.get(L"Name");
         const std::wstring value = c.get(L"Value");
         RECT row{ rc.left, y, rc.right, y + lineH };
+        // 分组行：没有 Value 的行按分组标题画（底色与文字色也来自 XAML）
+        if (value.empty())
+        {
+            COLORREF grp = GetRValue(win) > 140 ? RGB(234, 237, 242) : RGB(38, 43, 52);
+            COLORREF grpInk = ink2;
+            { COLORREF gc; if (xamlapp::ParseColor(el.get(L"GroupColor"), gc)) grp = gc; }
+            { COLORREF gc; if (xamlapp::ParseColor(el.get(L"GroupForeground"), gc)) grpInk = gc; }
+            cv.fillRect(row, grp);
+            RECT gr{ rc.left + 6, y, rc.right - 3, y + lineH };
+            xamlDrawText(cv, gr, name, ap, false, grpInk, DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0);
+            y += lineH;
+            continue;
+        }
         cv.strokeLine(POINT{ rc.left, y + lineH }, POINT{ rc.right, y + lineH },
                       RGB(226, 230, 236), 1);
         cv.strokeLine(POINT{ splitX, y }, POINT{ splitX, y + lineH }, RGB(226, 230, 236), 1);
         RECT nr{ rc.left + 4, y, splitX - 3, y + lineH };
         xamlDrawText(cv, nr, name, ap, false, ink2, DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0);
-        if (!value.empty())
         {
             RECT vr{ splitX + 4, y, rc.right - 3, y + lineH };
             xamlDrawText(cv, vr, value, ap, false, ink2, DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0);
@@ -449,6 +461,17 @@ inline void xamlDrawShellPanelHeader(XamlCanvas& cv, const RECT& rc, const XamlE
     RECT tr = rc;
     tr.left += shellInt(el, L"PaddingLeft", 10);
     tr.right -= 6;
+    // 右侧计量文字（如 “69 个控件”“123 节点”）同样来自 XAML
+    const std::wstring count = el.get(L"Count");
+    if (!count.empty())
+    {
+        int cw = static_cast<int>(count.length()) * (lk.fontPt + 2);
+        RECT cr = tr;
+        cr.left = tr.right - cw;
+        shellDrawText(cv, cr, count, lk.dim, lk.fontPt,
+                      DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
+        tr.right = cr.left - 4;
+    }
     shellDrawText(cv, tr, shellTextOf(el), lk.fore, lk.fontPt,
                   DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS);
 }
