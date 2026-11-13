@@ -255,7 +255,17 @@
         </XTreeView>
         <XSplitView Grid.Row="2"/>
         <XPanelHeader Name="hdrProps" Grid.Row="3" Text="属性编辑器" FontSize="10"/>
-        <PropertyGrid Name="propsHost" Grid.Row="4" FontSize="9" Background="#1C2027" Foreground="#E4E9F0"/>
+        <PropertyGrid Name="propsHost" Grid.Row="4" FontSize="9" Background="#1C2027" Foreground="#E4E9F0">
+          <PropRow Name="Name"        Value="btnOpen"/>
+          <PropRow Name="Title"       Value="打开"/>
+          <PropRow Name="Text"        Value="打开"/>
+          <PropRow Name="Width"       Value="46"/>
+          <PropRow Name="Height"      Value="48"/>
+          <PropRow Name="Background"  Value="#2E3A44"/>
+          <PropRow Name="Foreground"  Value="#E4E9F0"/>
+          <PropRow Name="FontSize"    Value="10"/>
+          <PropRow Name="Icon"        Value="res/open.png"/>
+        </PropertyGrid>
       </XGrid>
     </XGrid>
 
