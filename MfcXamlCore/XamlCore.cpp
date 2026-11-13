@@ -1019,6 +1019,12 @@ namespace
                                  !node.get(L"anchors.centering").empty();
             node.anchorVCenter = !node.get(L"anchors.verticalCenter").empty() ||
                                  !node.get(L"anchors.centering").empty();
+            {
+                const std::wstring fw = node.get(L"Layout.fillWidth");
+                const std::wstring fh = node.get(L"Layout.fillHeight");
+                node.fillW = _wcsicmp(fw.c_str(), L"true") == 0 || fw == L"1";
+                node.fillH = _wcsicmp(fh.c_str(), L"true") == 0 || fh == L"1";
+            }
             node.anchorFillRaw = node.get(L"anchors.fill");
             node.anchorLeftRaw = node.get(L"anchors.left");
             node.anchorRightRaw = node.get(L"anchors.right");
@@ -1695,6 +1701,80 @@ namespace
                 inner.cursorY = child.padT;
                 inner.horizontal = child.hasOrientation ? child.horizontal : false;
                 LayoutNode(child, inner);
+            }
+        }
+
+        // Layout.fillWidth / Layout.fillHeight 重排：占满可用宽度，或均分剩余高度/宽度
+        {
+            bool hasFillItem = false;
+            for (const auto& c : node.children)
+                if (c.fillW || c.fillH)
+                {
+                    hasFillItem = true;
+                    break;
+                }
+
+            if (hasFillItem)
+            {
+                std::vector<XamlElement*> flowItems;
+                for (auto& c : node.children)
+                    if (!(c.hasAnchors && !HasSiblingAnchor(c)))
+                        flowItems.push_back(&c);
+
+                const int availW = (std::max)(1, flow.width - flow.padding * 2);
+                const int availH = (std::max)(1, flow.height - flow.paddingY * 2);
+                const int gaps = (int)flowItems.size() - 1;
+                const int gapTotal = gaps > 0 ? gaps * flow.spacing : 0;
+
+                int fixedMain = 0, nFillMain = 0;
+                for (auto* p : flowItems)
+                {
+                    const bool fillMain = flow.horizontal ? p->fillW : p->fillH;
+                    if (fillMain)
+                        nFillMain++;
+                    else
+                        fixedMain += flow.horizontal ? p->previewW : p->previewH;
+                }
+                const int rest = availH - fixedMain - gapTotal;
+                const int eachMain = nFillMain > 0 ? (std::max)(24, rest / nFillMain) : 0;
+
+                int cursor = flow.horizontal ? flow.padding : flow.paddingY;
+                for (auto* p : flowItems)
+                {
+                    const int ww = flow.horizontal ? (p->fillW ? eachMain : p->previewW) : (p->fillW ? availW : p->previewW);
+                    const int hh = flow.horizontal ? (p->fillH ? availH : p->previewH) : (p->fillH ? eachMain : p->previewH);
+                    if (flow.horizontal)
+                    {
+                        p->previewX = flow.offsetX + cursor;
+                        p->previewY = flow.offsetY + flow.paddingY;
+                    }
+                    else
+                    {
+                        p->previewX = flow.offsetX + flow.padding;
+                        p->previewY = flow.offsetY + cursor;
+                    }
+                    p->previewW = ww;
+                    p->previewH = hh;
+
+                    if (!p->children.empty())
+                    {
+                        XamlFlow inner;
+                        inner.margin = 0;
+                        inner.spacing = p->spacing;
+                        inner.padding = p->padL;
+                        inner.paddingY = p->padT;
+                        inner.width = ww;
+                        inner.height = hh;
+                        inner.offsetX = p->previewX;
+                        inner.offsetY = p->previewY;
+                        inner.cursorX = p->padL;
+                        inner.cursorY = p->padT;
+                        inner.horizontal = p->hasOrientation ? p->horizontal : false;
+                        LayoutNode(*p, inner);
+                    }
+
+                    cursor += (flow.horizontal ? ww : hh) + flow.spacing;
+                }
             }
         }
 

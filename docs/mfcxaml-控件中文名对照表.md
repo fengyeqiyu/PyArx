@@ -281,4 +281,6 @@ Grid 里的位置和尺寸可以直接按 QML 的附加属性写，落到的是 
 | `anchors.fill="A"` | 与 A 同位置同尺寸 |
 | `anchors.horizontalCenter="A"` / `verticalCenter` | 与 A 对齐中心线 |
 
-`Layout.fillWidth` / `Layout.fillHeight` 仍只做写法兼容，实际拉伸由容器（StackPanel / Grid / Pane）决定。
+剩余空间分配（`Layout.fillWidth` / `Layout.fillHeight` = true）：
+
+固定尺寸的项先占位，fill 项分剩下的空间；`fillWidth` 拉满可用宽度，`fillHeight` 在垂直流里均分剩余高度（水平流里拉满高度）。

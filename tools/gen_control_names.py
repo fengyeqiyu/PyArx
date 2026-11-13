@@ -571,8 +571,9 @@ def qml_usage_section():
             "左右（或上下）两点同时锚定则拉宽（拉高） |",
             "| `anchors.fill=\"A\"` | 与 A 同位置同尺寸 |",
             "| `anchors.horizontalCenter=\"A\"` / `verticalCenter` | 与 A 对齐中心线 |",
-            "", "`Layout.fillWidth` / `Layout.fillHeight` 仍只做写法兼容，"
-            "实际拉伸由容器（StackPanel / Grid / Pane）决定。"]
+            "", "剩余空间分配（`Layout.fillWidth` / `Layout.fillHeight` = true）：", "",
+            "固定尺寸的项先占位，fill 项分剩下的空间；`fillWidth` 拉满可用宽度，"
+            "`fillHeight` 在垂直流里均分剩余高度（水平流里拉满高度）。"]
     return "\n".join(out)
 
 
