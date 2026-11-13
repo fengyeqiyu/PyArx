@@ -1,43 +1,38 @@
-// XamlRadioButton.cpp —— 实现（从 header-only 拆出，UTF-8 with BOM）
+﻿// XamlRadioButton.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlRadioButton.h"
 
-void XamlRadioButton::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlRadioButton::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addRadio(id, L"", x, y, w, h);
-    }
+    host->addRadio(id, m_text, x, y, w, h);
+    if (m_checked) host->setCheck(id, true);
+}
 
-std::vector<XamlProperty> XamlRadioButton::ownProperties() const
+const std::vector<XamlPropEntry>& XamlRadioButton::PropTableData()
 {
-        return {
-            {L"Text", XamlPropType::String, true, true},
-            {L"Checked", XamlPropType::Bool, true, true},
-        };
-    }
-
-bool XamlRadioButton::setOwnProperty(const wchar_t* name, const std::wstring& value)
-{
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "text"))
-        {
-            m_host->setText(m_id, value);
-            return true;
-        }
-        if (xamlprop::StrEq(key, "checked"))
-        {
-            m_host->setCheck(m_id, xamlprop::ToBool(value));
-            return true;
-        }
-        return false;
-    }
-
-std::wstring XamlRadioButton::getOwnProperty(const wchar_t* name) const
-{
-        if (m_host == nullptr) return {};
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "text"))
-            return m_host->getText(m_id);
-        if (xamlprop::StrEq(key, "checked"))
-            return m_host->getCheck(m_id) ? L"1" : L"0";
-        return {};
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Text", nullptr, XamlPropType::String, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlRadioButton&>(b);
+             c.m_text = v;
+             if (c.m_host != nullptr) c.m_host->setText(c.m_id, v);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlRadioButton&>(b);
+             return c.m_host != nullptr ? c.m_host->getText(c.m_id) : c.m_text;
+         }},
+        {L"Checked", nullptr, XamlPropType::Bool, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlRadioButton&>(b);
+             c.m_checked = xamlprop2::ToBool(v);
+             if (c.m_host != nullptr) c.m_host->setCheck(c.m_id, c.m_checked);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlRadioButton&>(b);
+             const bool on = c.m_host != nullptr ? c.m_host->getCheck(c.m_id) : c.m_checked;
+             return xamlprop2::FromBool(on);
+         }},
+    };
+    return kTable;
+}

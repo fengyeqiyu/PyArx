@@ -1,33 +1,25 @@
-// XamlGroupBox.cpp —— 实现（从 header-only 拆出，UTF-8 with BOM）
+﻿// XamlGroupBox.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlGroupBox.h"
 
-void XamlGroupBox::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlGroupBox::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addGroup(id, L"", x, y, w, h);
-    }
+    host->addGroup(id, m_header, x, y, w, h);
+}
 
-std::vector<XamlProperty> XamlGroupBox::ownProperties() const
+const std::vector<XamlPropEntry>& XamlGroupBox::PropTableData()
 {
-        return {{L"Text", XamlPropType::String, true, true}};
-    }
-
-bool XamlGroupBox::setOwnProperty(const wchar_t* name, const std::wstring& value)
-{
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "header"))
-        {
-            m_host->setText(m_id, value);
-            return true;
-        }
-        return false;
-    }
-
-std::wstring XamlGroupBox::getOwnProperty(const wchar_t* name) const
-{
-        if (m_host == nullptr) return {};
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "header"))
-            return m_host->getText(m_id);
-        return {};
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Header", nullptr, XamlPropType::String, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlGroupBox&>(b);
+             c.m_header = v;
+             if (c.m_host != nullptr) c.m_host->setText(c.m_id, v);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlGroupBox&>(b);
+             return c.m_host != nullptr ? c.m_host->getText(c.m_id) : c.m_header;
+         }},
+    };
+    return kTable;
+}

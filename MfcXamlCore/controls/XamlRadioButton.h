@@ -1,25 +1,28 @@
-#pragma once
+﻿#pragma once
 // XamlRadioButton —— XAML <RadioButton> 的标准 MFC 实现。
-// 属性：Content、IsChecked；事件：Click（宿主绑定）。
+// 属性表驱动：Text、Checked。事件：Click。
 // 编码：本文件 UTF-8 with BOM。
 
 #include "XamlMfcControlBase.h"
 
 class XAML_CORE_API XamlRadioButton : public XamlMfcControlBase
 {
-
 public:
     XamlRadioButton() : XamlMfcControlBase(L"RadioButton") {}
 
 protected:
-        void createNative(IXamlMfcHost* host, int id, int , int , int x, int y, int w, int h) override;
+    void createNative(IXamlMfcHost* host, int id, int min, int max, int x, int y, int w, int h) override;
 
+    const XamlPropEntry* ownPropTable(size_t& count) const override
+    {
+        const std::vector<XamlPropEntry>& t = PropTableData();
+        count = t.size();
+        return t.data();
+    }
 
-        std::vector<XamlProperty> ownProperties() const override;
+private:
+    static const std::vector<XamlPropEntry>& PropTableData();
 
-
-        bool setOwnProperty(const wchar_t* name, const std::wstring& value) override;
-
-
-        std::wstring getOwnProperty(const wchar_t* name) const override;
+    std::wstring m_text;
+    bool m_checked = false;
 };

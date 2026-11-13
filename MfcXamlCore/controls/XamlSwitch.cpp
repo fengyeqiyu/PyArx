@@ -1,36 +1,27 @@
-// XamlSwitch.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlSwitch.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlSwitch.h"
 
-void XamlSwitch::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlSwitch::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addSkinBox(id, 1, x, y, w, h);
-    }
+    host->addSkinBox(id, 1, x, y, w, h);
+    if (m_checked) host->setSwitchValue(id, true);
+}
 
-std::vector<XamlProperty> XamlSwitch::ownProperties() const
+const std::vector<XamlPropEntry>& XamlSwitch::PropTableData()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Checked", XamlPropType::Bool, true, true}};
-    }
-
-bool XamlSwitch::setOwnProperty(const wchar_t* name, const std::wstring& value)
-{
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "checked"))
-        {
-            const std::string v = xamlprop::Lower(xamlprop::WideToUtf8(value));
-            const bool on = xamlprop::StrEq(v, "true") || xamlprop::StrEq(v, "1");
-            m_host->setSwitchValue(m_id, on);
-            return true;
-        }
-        return false;
-    }
-
-std::wstring XamlSwitch::getOwnProperty(const wchar_t* name) const
-{
-        if (m_host == nullptr) return {};
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "checked"))
-            return m_host->getSwitchValue(m_id) ? L"true" : L"false";
-        return {};
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Checked", nullptr, XamlPropType::Bool, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlSwitch&>(b);
+             c.m_checked = xamlprop2::ToBool(v);
+             if (c.m_host != nullptr) c.m_host->setSwitchValue(c.m_id, c.m_checked);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlSwitch&>(b);
+             const bool on = c.m_host != nullptr ? c.m_host->getSwitchValue(c.m_id) : c.m_checked;
+             return xamlprop2::FromBool(on);
+         }},
+    };
+    return kTable;
+}
