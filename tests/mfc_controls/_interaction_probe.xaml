@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="真实交互测试" Width="620" Height="720">
+  <StackPanel Margin="14" Spacing="8">
+    <Button x:Name="btn" Content="点我" Height="40"/>
+    <CheckBox x:Name="chk" Content="勾选项" Height="34"/>
+    <RadioButton x:Name="rad" Content="单选项" Height="34"/>
+    <ToggleButton x:Name="tgl" Content="切换" Height="38"/>
+    <TextBox x:Name="txt" Text="" Height="34"/>
+    <ComboBox x:Name="cmb" Height="30"/>
+    <ListBox x:Name="lst" Height="130"/>
+    <ProgressBar x:Name="prg" Height="26"/>
+    <Slider x:Name="sld" Height="40"/>
+    <DatePicker x:Name="dtp" Height="32"/>
+  </StackPanel>
+</Window>

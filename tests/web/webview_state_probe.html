@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>WebView 状态会话探针</title>
+<style>
+  :root{--bg:#f5f7fa;--card:#fff;--line:#e4eaf2;--ink:#1f2937;--sub:#6b7280;--brand:#2f6fba}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--ink);font:14px/1.7 "Microsoft YaHei","Segoe UI",sans-serif}
+  .wrap{display:flex;flex-direction:column;height:100%}
+  header{padding:16px 20px 12px;background:#fff;border-bottom:1px solid var(--line)}
+  header b{display:block;font-size:18px;color:#123c66}
+  header span{font-size:12px;color:var(--sub)}
+  .body{flex:1;padding:16px 20px;overflow:auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;max-width:820px}
+  .card h3{margin:0 0 10px;font-size:15px;color:#123c66}
+  .kv{font-size:13px;color:#123c66;background:#f7f9fc;border:1px dashed #cfd9e6;border-radius:8px;padding:10px;white-space:pre-wrap}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#2f6fba;margin-right:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <b>WebView 状态会话探针</b>
+    <span>Python 用 eval 发命令，页面把每条回执原样回推给 Python 回调取证</span>
+  </header>
+  <div class="body">
+    <div class="card">
+      <h3><span class="dot"></span>最近一条回执</h3>
+      <div class="kv" id="kv">尚未收到任何事件</div>
+    </div>
+  </div>
+</div>
+<script>
+  const wv = window.chrome && window.chrome.webview;
+  window.__count = 0;
+  window.__last = null;
+
+  function show(obj) {
+    document.getElementById('kv').textContent = JSON.stringify(obj, null, 0);
+  }
+
+  if (wv) {
+    wv.addEventListener('message', (e) => {
+      const d = e.data;
+      window.__last = d;
+      window.__count += 1;
+      show(d);
+      // 回推给 Python：这是本脚本唯一的取证通道（eval 只返回是否执行成功）
+      wv.postMessage({ cmd: 'probe.echo', seq: window.__count, data: d });
+    });
+  }
+
+  // Python 侧 eval 调用：window.ask('shell.info') / window.ask('window.resize', {w:820,h:600})
+  window.ask = function (cmd, args) {
+    if (!wv) return false;
+    wv.postMessage(args ? { cmd: cmd, args: args } : { cmd: cmd });
+    return true;
+  };
+</script>
+</body>
+</html>

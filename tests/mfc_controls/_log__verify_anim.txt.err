@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "G:\PyArx\tests\mfc_controls\_verify_anim.py", line 178, in <module>
+    main()
+    ~~~~^^
+  File "G:\PyArx\tests\mfc_controls\_verify_anim.py", line 159, in main
+    check('颜色动画 起点偏灰', b0[0] <= 40, 'B-R=%d' % b0[0])
+                               ~~^^^
+TypeError: 'NoneType' object is not subscriptable

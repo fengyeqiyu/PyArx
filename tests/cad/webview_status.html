@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>WebView 状态</title>
+<style>
+  /* 深色方案：CAD 深色工作区里浅色侧栏太刺眼，这里按 WebView2 的 dark 走 */
+  :root{
+    --bg:#1e1f22;         /* 页面底色 */
+    --panel:#26282c;      /* 顶栏 / 底栏 */
+    --card:#2b2d31;       /* 卡片 */
+    --line:#3a3d42;       /* 分隔线 */
+    --ink:#e3e5e8;        /* 主文字 */
+    --dim:#9aa0a6;        /* 次要文字 */
+    --accent:#6cb6ff;     /* 键名列 */
+    --ok:#4ec97c;
+    --bad:#ff6b6b;
+    --wait:#e0a33e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font:12px/1.55 "Microsoft YaHei","Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{display:flex;flex-direction:column;height:100%}
+
+  header{padding:11px 14px 9px;background:var(--panel);border-bottom:1px solid var(--line)}
+  header b{display:block;font-size:15px;color:var(--accent);letter-spacing:.2px}
+  header span{display:block;margin-top:2px;font-size:11px;color:var(--dim)}
+
+  .body{flex:1;min-height:0;padding:10px 12px;overflow:auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+
+  .row{display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #323438}
+  .row:last-child{border-bottom:0}
+
+  .dot{flex:0 0 8px;height:8px;border-radius:50%;margin-top:5px;background:var(--wait);
+       box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+  .k{flex:0 0 84px;color:var(--accent);font-weight:600}
+  .v{flex:1;color:var(--ink);word-break:break-all;font-variant-numeric:tabular-nums}
+  .v.dim{color:var(--dim)}
+
+  footer{padding:7px 14px;border-top:1px solid var(--line);background:var(--panel);
+         font-size:11px;color:var(--dim);display:flex;justify-content:space-between;gap:10px}
+  #sum{font-weight:600;color:var(--accent)}
+
+  /* 深色滚动条，避免出现一条亮白 */
+  .body::-webkit-scrollbar{width:10px}
+  .body::-webkit-scrollbar-track{background:var(--bg)}
+  .body::-webkit-scrollbar-thumb{background:#45484d;border-radius:5px}
+  .body::-webkit-scrollbar-thumb:hover{background:#55595f}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><b>MFCWebView 状态</b><span>CAD 侧栏内实测：运行时 / 宿主 / 双向桥</span></header>
+  <div class="body"><div class="card" id="list"></div></div>
+  <footer><span id="foot">未就绪</span><span id="sum"></span></footer>
+</div>
+<script>
+const wv = window.chrome && window.chrome.webview;
+const list = document.getElementById('list');
+const foot = document.getElementById('foot');
+const rows = {};
+let pass = 0, fail = 0;
+
+function mk(key, label, init) {
+  const r = document.createElement('div');
+  r.className = 'row';
+  r.innerHTML = '<i class="dot"></i><div class="k"></div><div class="v"></div>';
+  r.querySelector('.k').textContent = label;
+  r.querySelector('.v').textContent = init || '等待…';
+  list.appendChild(r);
+  rows[key] = { dot: r.querySelector('.dot'), v: r.querySelector('.v'), state: 0 };
+}
+function set(key, text, state) {
+  const r = rows[key];
+  if (!r) return;
+  r.v.textContent = text;
+  const c = getComputedStyle(document.documentElement);
+  r.dot.style.background = state === 1 ? c.getPropertyValue('--ok')
+                          : state === -1 ? c.getPropertyValue('--bad')
+                          : c.getPropertyValue('--wait');
+  if (state && !r.state) { r.state = state; if (state === 1) pass++; else fail++; }
+  foot.textContent = '通过 ' + pass + ' / 失败 ' + fail;
+  const s = document.getElementById('sum');
+  if (s) s.textContent = pass + '/' + (pass + fail);
+}
+function finish() {
+  foot.textContent = '通过 ' + pass + ' / 失败 ' + fail + (fail === 0 ? '　✔ 全链路正常' : '　✘ 有失败项');
+  const s = document.getElementById('sum');
+  if (s) s.textContent = pass + '/' + (pass + fail);
+}
+
+// 宿主 → 页面 的 eval 入口（由 CAD 侧通过 palette eval 调用）
+window.__hostPing = function (v) { set('eval', '收到宿主 eval 推送：' + v, 1); };
+
+mk('rt', '运行时', wv ? 'chrome.webview 已注入' : '没有 chrome.webview');
+set('rt', wv ? 'chrome.webview 已注入' : '没有 chrome.webview', wv ? 1 : -1);
+mk('ua', '内核版本', navigator.userAgent.replace(/^.*?Edg\/([\d.]+).*$/, 'Edge WebView2 $1').slice(0, 70));
+mk('size', '宿主尺寸', '等待 shell.ready');
+mk('count', '桥 cad.count', '等待');
+mk('info', '桥 cad.info', '等待');
+mk('py', '桥 py.exec', '等待');
+mk('eval', '宿主 eval', '等待');
+mk('doc', '页面路径', location.href.split('/').pop());
+
+function send(obj) { try { wv.postMessage(obj); return true; } catch (e) { return false; } }
+
+function run() {
+  set('count', '已发出 cad.count…', 0);
+  send({ cmd: 'cad.count' });
+  setTimeout(() => send({ cmd: 'cad.info' }), 900);
+  setTimeout(() => send({
+    cmd: 'py.exec',
+    code: [
+      'import sys',
+      'print("状态页 py.exec 到达解释器")',
+      'result = "py.exec OK, python=" + sys.version.split()[0]',
+    ].join('\n'),
+    args: { 来源: '状态页', 阶段: 'status' },
+  }), 1800);
+  setTimeout(finish, 6000);
+}
+
+if (wv) {
+  wv.addEventListener('message', (e) => {
+    const d = e.data || {};
+    if (d.event === 'shell.ready') {
+      set('size', d.width + ' × ' + d.height + '，dpi=' + d.dpi, 1);
+      setTimeout(run, 400);
+    } else if (d.event === 'shell.error') {
+      foot.textContent = 'shell.error：' + (d.text || '');
+    } else if (d.event === 'window.resized') {
+      // 停靠/拖动后宿主尺寸变了，同步刷新这一行
+      set('size', d.width + ' × ' + d.height + '（resize 后）', 1);
+    } else if (d.event === 'cad.result') {
+      const text = (d.ok ? '✔ ' : '✘ ') + d.text;
+      if (d.text && d.text.indexOf('实体数') >= 0 && d.text.indexOf('已接') < 0) set('count', text, d.ok ? 1 : -1);
+      else if (d.text && d.text.indexOf('已接 ObjectARX') >= 0) set('info', text, d.ok ? 1 : -1);
+      else set('py', text, d.ok ? 1 : -1);
+    }
+  });
+} else {
+  foot.textContent = '没有 chrome.webview';
+}
+</script>
+</body>
+</html>

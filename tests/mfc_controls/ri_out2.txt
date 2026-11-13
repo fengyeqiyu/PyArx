@@ -1,0 +1,33 @@
+PyMfcCore 控件真实交互测试
+解释器: G:\PyArx\X64\Release\python.exe
+
+== 真鼠标点击 ==
+ok    [鼠标] Button 真点击命中  onClick=1
+ok    [鼠标] CheckBox 点击翻转状态  0 -> 1
+ok    [鼠标] CheckBox 勾选标记可见  像素变化 6.7%
+ok    [视觉] setCheck() 后立即重绘  像素变化 0.84%
+ok    [鼠标] RadioButton 点击选中  0 -> 1
+ok    [鼠标] ToggleButton 点击翻转  0 -> 1
+ok    [鼠标] ToggleButton 选中态可见  像素变化 6.03%
+ok    [鼠标] ComboBox 箭头真展开下拉  CB_GETDROPPEDSTATE=1
+ok    [鼠标] ListBox 点击选中条目  -1 -> 1
+ok    [鼠标] Slider 点击轨道改变位置  0 -> 20
+ok    [视觉] Slider 位置变化可见  像素变化 1.64%
+ok    [视觉] ProgressBar 进度变化可见  像素变化 33.33%
+
+== 真键盘输入 ==
+ok    [键盘] TextBox 抢到键盘焦点  0xbe0180
+ok    [键盘] TextBox 逐字符键入  'AB1'
+ok    [键盘] onChange 跟随键入触发  count=4
+ok    [键盘] TextBox 退格删除  'AB'
+ok    [键盘] ListBox 方向键移动选中  1 -> 2
+ok    [键盘] Tab 键切换焦点  0xbe0180 -> 0x16c0ade
+
+== 滚轮 ==
+ok    [滚轮] ListBox 滚轮改变首行  top 0 -> 3
+
+== 日期 ==
+ok    [日期] DatePicker 设置/回读一致  2027-3-15
+
+合计 20 项：通过 20，失败 0，信息 0
+CONTROLS REAL INTERACTION PASSED

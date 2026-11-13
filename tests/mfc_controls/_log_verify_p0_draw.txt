@@ -1,0 +1,23 @@
+ok    7 个 QCanvas 都建出了真实子窗口  ids=[('c1', 1000), ('c2', 1001), ('c3', 1002), ('c4', 1003), ('c5', 1004), ('c6', 1005), ('c7', 1006)]
+ok    Grad 左端接近起始色 #00A8E8  px=(13, 160, 234)
+ok    Grad 右端接近结束色 #7A5AF8  px=(116, 94, 247)
+ok    Grad 两端颜色真的不同（不是单色填充）  (13, 160, 234) vs (116, 94, 247)
+ok    GradRR 纵向渐变上端 #57C84D  px=(73, 188, 82)
+ok    GradRR 纵向渐变下端 #0E8A6A  px=(18, 141, 104)
+ok    Fill 多边形内部是 #E8A030  px=(232, 160, 48)
+ok    Fill 只填多边形、包围盒角落不被填  corner=(35, 42, 51)
+ok    Path 折线经过顶点处是白色  px=(255, 255, 255)
+ok    Path 没画到的角落仍是底色  px=(35, 42, 51)
+ok    Shadow 在矩形外侧投出了暗部  shadow=(12, 15, 18) bg=(35, 42, 51)
+ok    Shadow 只在矩形一侧（左上外侧仍是底色）  px=(35, 42, 51)
+ok    Alpha 图层里的矩形按 alpha 与底色混合  px=(16, 111, 150) expect=(15, 111, 150)
+ok    Alpha 图层不是"整块乘 alpha"（底色不该被一起压暗）  layer 外 px=(35, 42, 51)
+ok    Rot 后旋转位置出现 #FF5C7A  px=(255, 92, 122)
+ok    Rot 后未旋转的原始角度位置已被转走  px=(35, 42, 51)
+ok    setLayerOpacity 可调用并回读  alpha=120
+ok    控件级 opacity 让画布整体变暗  faded=(177, 126, 49) 原色=(232,160,48)
+ok    setLayerOpacity 复位回 255
+ok    复位后画布恢复原色  px=(232, 160, 48)
+
+合计 20 项：通过 20，失败 0
+saved G:\PyArx\tests\mfc_controls\p0_draw.png

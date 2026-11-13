@@ -1,0 +1,34 @@
+
+== 事件矩阵（控件 / 原生类 / 被点亮的通道）==
+  bbtnRun        Button                  596x32    click,dblclick
+  btnHidden      Button                  516x30    click,dblclick
+  btnOk          Button                  516x32    click,dblclick
+  calPick        SysMonthCal32           596x150   （无）
+  chkAgree       Button                  516x26    checked,click
+  choPick        ComboBox                596x25    checked,click,dropdown
+  cmbCity        ComboBox                516x25    dropdown
+  dtpDate        SysDateTimePick32       596x30    checked,click
+  grdData        SysListView32           596x110   click,dblclick
+  grpTest        Button                  516x70    click
+  lblHead        Static                  596x40    （无）
+  lblStatus      Static                  516x26    （无）
+  lnSep          Static                  596x10    dblclick
+  lnkOpen        SysLink                 596x26    click
+  lstItems       ListBox                 516x119   dblclick
+  lstView        SysListView32           596x110   checked,click,dblclick
+  pnlHost        Static                  596x60    click
+  prgWork        msctls_progress32       516x22    （无）
+  radA           Button                  516x26    checked,click
+  radB           Button                  516x26    checked,click
+  rtfNote        RICHEDIT50W             596x90    value
+  sbmpPreview    Static                  596x50    （无）
+  scrArea        Static                  596x80    （无）
+  sldLevel       msctls_trackbar32       516x32    value
+  splVert        Static                  596x18    dropdown
+  tabMain        SysTabControl32         596x130   change,click
+  tglMode        Button                  596x30    checked,click
+  treeFiles      SysTreeView32           596x120   click,dblclick
+  txtInput       Edit                    516x30    change
+
+一个通道都没点亮的控件：['lblHead', 'prgWork', 'lblStatus', 'sbmpPreview', 'scrArea', 'calPick']
+总计 29 个控件；有事件响应的 23 个

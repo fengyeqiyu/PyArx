@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>MFCWebView 演示</title>
+<style>
+  :root{
+    --bg:#f3f5f8; --panel:#ffffff; --ink:#1f2a37; --ink2:#5b6675; --line:#e2e7ee;
+    --accent:#2f6fba; --accent-weak:#eaf2fb; --ok:#2e8b57; --warn:#c9772a;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    display:flex; background:var(--bg); color:var(--ink);
+    font:14px/1.5 "Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;
+    overflow:hidden;
+  }
+
+  /* 侧栏已由独立 WebView 承载，主区页面只剩内容区 */
+  aside{display:none}
+
+  /* 主区 */
+  main{flex:1; display:flex; flex-direction:column; min-width:0}
+  .topbar{
+    height:56px; flex:0 0 56px; background:var(--panel); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:12px; padding:0 18px;
+  }
+  .crumb{font-size:13px; color:var(--ink2)}
+  .crumb b{color:var(--ink); font-weight:600}
+  .spacer{flex:1}
+
+  button{
+    font:inherit; font-size:13px; height:32px; padding:0 14px; border-radius:8px;
+    border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer;
+  }
+  button:hover{border-color:#c8d3e2; background:#f8fafd}
+  button.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  button.primary:hover{background:#2a63a6; border-color:#2a63a6}
+  button.ghost{background:transparent; border-color:transparent; color:var(--ink2)}
+
+  .content{flex:1; overflow:auto; padding:18px}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px;
+    margin-bottom:14px;
+  }
+  .card h2{margin:0 0 4px; font-size:15px}
+  .card .sub{margin:0 0 14px; font-size:12px; color:var(--ink2)}
+  .chips{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px;
+    background:#f7f9fc; border:1px solid var(--line); font-size:12px; color:var(--ink2);
+  }
+  .chip b{color:var(--ink); font-weight:600}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .field{margin-bottom:12px}
+  .field label{display:block; font-size:12px; color:var(--ink2); margin-bottom:5px}
+  input[type=text], select{
+    width:100%; height:34px; padding:0 10px; font:inherit; font-size:13px; color:var(--ink);
+    border:1px solid var(--line); border-radius:8px; background:#fff; outline:none;
+  }
+  input[type=text]:focus, select:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-weak)}
+  .row{display:flex; align-items:center; gap:10px}
+  .switch{position:relative; width:42px; height:22px; flex:0 0 42px}
+  /* input 透明铺满整块开关：点哪儿都能切，视觉由 .slider 画（它自身不吃鼠标） */
+  .switch input{
+    position:absolute; inset:0; width:100%; height:100%; margin:0;
+    opacity:0; cursor:pointer; z-index:2;
+  }
+  .slider{position:absolute; inset:0; background:#d7dee9; border-radius:999px; transition:.18s; pointer-events:none}
+  .slider:before{
+    content:""; position:absolute; width:18px; height:18px; left:2px; top:2px;
+    background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(16,24,40,.24); transition:.18s;
+  }
+  .switch input:checked + .slider{background:var(--accent)}
+  .switch input:checked + .slider:before{transform:translateX(20px)}
+  input[type=range]{width:100%; accent-color:var(--accent)}
+
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line)}
+  th{font-size:12px; color:var(--ink2); font-weight:600; background:#fafbfd}
+  tbody tr:hover{background:#f8fafd}
+  .tag{display:inline-block; padding:1px 8px; border-radius:999px; font-size:11px}
+  .tag.on{background:#e8f5ee; color:var(--ok)}
+  .tag.off{background:#fdecec; color:#b4453f}
+
+  .statusbar{
+    height:30px; flex:0 0 30px; border-top:1px solid var(--line); background:var(--panel);
+    display:flex; align-items:center; gap:14px; padding:0 18px; font-size:11px; color:#8492a6;
+    white-space:nowrap; overflow:hidden;
+  }
+  .statusbar b{color:var(--ink2); font-weight:600}
+  .hint{font-size:11px; color:#93a0b1}
+</style>
+</head>
+<body>
+  <main>
+    <div class="topbar">
+      <div class="crumb">工作台 / <b id="pageName">总览</b></div>
+      <div class="spacer"></div>
+      <button id="btnSide">显示侧栏</button>
+      <button id="btnOpen">打开文件…</button>
+      <button id="btnMsg">消息框</button>
+      <button id="btnCopy" class="ghost">复制诊断</button>
+      <button id="btnMax" class="primary">最大化</button>
+    </div>
+
+    <div class="content">
+      <div class="card">
+        <h2>这张页面的所有控件都由 Web 渲染</h2>
+        <p class="sub">MFC 只提供窗口外壳与原生能力（文件对话框 / 消息框 / 剪贴板 / 窗口状态），布局与交互全在 HTML 里。</p>
+        <div class="chips">
+          <span class="chip">DPI 缩放 <b id="mDpi">—</b></span>
+          <span class="chip">主区尺寸 <b id="mSize">—</b></span>
+          <span class="chip">主题 <b id="mTheme">—</b></span>
+          <span class="chip">窗口状态 <b id="mState">—</b></span>
+          <span class="chip">侧栏 <b id="mSide">展开</b></span>
+          <span class="chip">最近动作 <b id="mLast">等待页面就绪</b></span>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2>表单控件</h2>
+          <p class="sub">输入框、下拉、开关、滑块都是原生 HTML 元素，没有一个是 MFC 控件。</p>
+          <div class="field">
+            <label>工程名称</label>
+            <input type="text" id="fProject" value="1号配电室 配电干线图">
+          </div>
+          <div class="field">
+            <label>电压等级</label>
+            <select id="fVolt">
+              <option>10 kV</option>
+              <option selected>0.4 kV</option>
+              <option>0.22 kV</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>只显示带电回路</label>
+            <div class="row">
+              <div class="switch">
+                <input type="checkbox" id="fOnlyOn" checked>
+                <span class="slider"></span>
+              </div>
+              <span class="hint" id="fOnlyOnHint">已开启</span>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>图纸缩放</label>
+            <input type="range" id="fZoom" min="20" max="400" value="100">
+            <span class="hint" id="fZoomHint">100%</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>设备台账</h2>
+          <p class="sub">表格同样由 HTML 绘制，后续接数据接口即可。</p>
+          <table>
+            <thead>
+              <tr><th>编号</th><th>名称</th><th>电缆型号</th><th>状态</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>AT1</td><td>总配电柜</td><td>YJV22-4×95+1×50</td><td><span class="tag on">运行</span></td></tr>
+              <tr><td>AP1</td><td>1号照明配电箱</td><td>YJV22-4×35+1×16</td><td><span class="tag on">运行</span></td></tr>
+              <tr><td>AP2</td><td>2号动力配电箱</td><td>YJV22-4×50+1×25</td><td><span class="tag on">运行</span></td></tr>
+              <tr><td>AP3</td><td>3号空调配电箱</td><td>YJV22-4×25+1×16</td><td><span class="tag off">停运</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <span>桥接：<b id="sBridge">检测中…</b></span>
+      <span>页面坐标 = CSS px = DIP</span>
+      <span id="sMsg" style="color:#5b6675"></span>
+    </div>
+  </main>
+
+<script>
+(function () {
+  const wv = (window.chrome && window.chrome.webview) ? window.chrome.webview : null;
+  const $ = (id) => document.getElementById(id);
+
+  function send(obj) {
+    if (wv) { wv.postMessage(obj); return; }
+    setLast('浏览器模式（无 MFC 桥）：' + obj.cmd);
+  }
+  function setLast(t) { $('mLast').textContent = t; }
+  function setMsg(t) { $('sMsg').textContent = t; }
+
+  $('sBridge').textContent = wv ? '已连接 chrome.webview' : '未连接（直接浏览器打开）';
+
+  if (wv) {
+    wv.addEventListener('message', (e) => {
+      const d = e.data || {};
+      switch (d.event) {
+        case 'shell.ready':
+        case 'shell.info':
+          $('mDpi').textContent = '×' + (d.dpi != null ? d.dpi : '—');
+          $('mSize').textContent = (d.width || '—') + ' × ' + (d.height || '—');
+          $('mTheme').textContent = d.theme === 'dark' ? '深色' : '浅色';
+          $('mState').textContent = stateText(d.state);
+          setLast('宿主已就绪');
+          break;
+        case 'window.resized':
+          $('mSize').textContent = d.width + ' × ' + d.height;
+          if (d.state) {
+            $('mState').textContent = stateText(d.state);
+            $('btnMax').textContent = d.state === 'max' ? '还原' : '最大化';
+          }
+          break;
+        case 'window.state':
+          $('mState').textContent = stateText(d.state);
+          $('btnMax').textContent = d.state === 'max' ? '还原' : '最大化';
+          if (d.width) $('mSize').textContent = d.width + ' × ' + d.height;
+          break;
+        case 'dialog.open':
+          setMsg(d.canceled ? '已取消选择' : ('已选择：' + d.path));
+          setLast(d.canceled ? '取消打开' : '打开文件');
+          break;
+        case 'clipboard.set':
+          setMsg(d.ok ? '诊断信息已复制到剪贴板' : '复制失败');
+          setLast('复制诊断');
+          break;
+        case 'shell.error':
+          setMsg('错误：' + d.text);
+          setLast('宿主错误');
+          break;
+        case 'nav.change':
+          $('pageName').textContent = d.title || '总览';
+          setLast('切换到「' + (d.title || '总览') + '」');
+          break;
+        case 'pane.state':
+          $('mSide').textContent = d.collapsed ? '已收起' : ('展开 ' + d.width + 'px');
+          $('btnSide').textContent = d.collapsed ? '显示侧栏' : '收起侧栏';
+          break;
+      }
+    });
+  }
+
+  function stateText(s) {
+    return s === 'max' ? '最大化' : s === 'min' ? '最小化' : s === 'hidden' ? '隐藏' : '正常';
+  }
+
+  /* 侧栏是独立 WebView，收起/展开由 MFC 转 pane.toggle */
+  $('btnSide').addEventListener('click', () => send({ cmd: 'pane.toggle' }));
+
+  /* 顶部按钮 → 原生能力 */
+  $('btnOpen').addEventListener('click', () => {
+    send({ cmd: 'dialog.open', id: 'open1', title: '选择配电数据', filter: 'CSV|*.csv|JSON|*.json' });
+  });
+  $('btnMsg').addEventListener('click', () => {
+    send({ cmd: 'dialog.message', id: 'msg1', level: 'info', title: 'MFCWebView',
+           text: '这个对话框是原生 MessageBox，由 HTML 按钮触发。' });
+  });
+  $('btnCopy').addEventListener('click', () => {
+    const text = 'MFCWebView 诊断\n页面=' + $('pageName').textContent
+      + '\nDPI=' + $('mDpi').textContent + '\n尺寸=' + $('mSize').textContent;
+    send({ cmd: 'clipboard.set', text });
+  });
+  $('btnMax').addEventListener('click', () => {
+    const isMax = $('mState').textContent === '最大化';
+    send({ cmd: isMax ? 'window.restore' : 'window.max' });
+  });
+
+  /* 表单联动 */
+  $('fOnlyOn').addEventListener('change', () => {
+    $('fOnlyOnHint').textContent = $('fOnlyOn').checked ? '已开启' : '已关闭';
+  });
+  $('fZoom').addEventListener('input', () => {
+    $('fZoomHint').textContent = $('fZoom').value + '%';
+  });
+
+  /* 页面加载完向宿主索取一次环境信息 */
+  setTimeout(() => send({ cmd: 'shell.info' }), 60);
+})();
+</script>
+</body>
+</html>

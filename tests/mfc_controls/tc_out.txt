@@ -1,0 +1,139 @@
+PyMfcCore 控件全量测试
+解释器: G:\PyArx\X64\Release\python.exe
+模块: G:\PyArx\X64\Release\PyMfcCore.pyd
+
+== 基础窗口 ==
+ok    [基础窗口] XAML 加载  13 个命名控件
+ok    [基础窗口] 窗口句柄有效  0xf40a82
+ok    [基础窗口] 窗口可见
+ok    [基础窗口] 控件 ID 分配  {'lblHead': 1000, 'txtInput': 1001, 'btnOk': 1002, 'chkAgree': 1003, 'radA': 1004, 'radB': 1005, 'grpTest': 1006, 'cmbCity': 1007, 'lstItems': 1008, 'prgWork': 1009, 'sldLevel': 1010, 'lblStatus': 1011, 'btnHidden': 1012}
+ok    [基础窗口] lblHead (TextBlock) 类名  实际 Static / 期望 Static
+ok    [基础窗口] lblHead 尺寸非零  516x40
+ok    [基础窗口] txtInput (TextBox) 类名  实际 Edit / 期望 Edit
+ok    [基础窗口] txtInput 尺寸非零  516x30
+ok    [基础窗口] btnOk (Button) 类名  实际 Button / 期望 Button
+ok    [基础窗口] btnOk 尺寸非零  516x32
+ok    [基础窗口] chkAgree (CheckBox) 类名  实际 Button / 期望 Button
+ok    [基础窗口] chkAgree 尺寸非零  516x26
+ok    [基础窗口] radA (RadioButton) 类名  实际 Button / 期望 Button
+ok    [基础窗口] radA 尺寸非零  516x26
+ok    [基础窗口] radB (RadioButton) 类名  实际 Button / 期望 Button
+ok    [基础窗口] radB 尺寸非零  516x26
+ok    [基础窗口] grpTest (GroupBox) 类名  实际 Button / 期望 Button
+ok    [基础窗口] grpTest 尺寸非零  516x70
+ok    [基础窗口] cmbCity (ComboBox) 类名  实际 ComboBox / 期望 ComboBox
+ok    [基础窗口] cmbCity 尺寸非零  516x25
+ok    [基础窗口] lstItems (ListBox) 类名  实际 ListBox / 期望 ListBox
+ok    [基础窗口] lstItems 尺寸非零  516x119
+ok    [基础窗口] prgWork (ProgressBar) 类名  实际 msctls_progress32 / 期望 msctls_progress32
+ok    [基础窗口] prgWork 尺寸非零  516x22
+ok    [基础窗口] sldLevel (Slider) 类名  实际 msctls_trackbar32 / 期望 msctls_trackbar32
+ok    [基础窗口] sldLevel 尺寸非零  516x32
+ok    [基础窗口] lblStatus (TextBlock) 类名  实际 Static / 期望 Static
+ok    [基础窗口] lblStatus 尺寸非零  516x26
+ok    [基础窗口] btnHidden (Button) 类名  实际 Button / 期望 Button
+ok    [基础窗口] btnHidden 尺寸非零  516x30
+
+== 基础控件行为 ==
+ok    [文本] TextBox setText/getText  测试文本 ABC
+ok    [文本] TextBox setReadOnly/getReadOnly  True
+ok    [文本] Button setText/getText  按钮新标题
+ok    [文本] TextBlock setText/getText  标签新文本
+ok    [勾选] CheckBox setCheck(True)  1
+ok    [勾选] CheckBox setCheck(False)  0
+ok    [勾选] RadioButton setCheck(True)  1
+ok    [文本] GroupBox getText  分组框
+ok    [ComboBox] ComboBox countStrings=3  3
+ok    [ComboBox] ComboBox getString(1)  乙
+ok    [ComboBox] ComboBox setCurSel/getCurSel  2
+ok    [ListBox] ListBox countStrings=3  3
+ok    [ListBox] ListBox getString(1)  乙
+ok    [ListBox] ListBox setCurSel/getCurSel  2
+ok    [ListBox] deleteString 后 count=2  2
+ok    [数值] ProgressBar setRange/setPos/getPos  120
+ok    [数值] Slider setRange/setPos/getPos  42
+ok    [状态] setVisible(False)  False
+ok    [状态] setVisible(True)  True
+ok    [状态] setEnabled(False)  False
+ok    [状态] setEnabled(True)  True
+ok    [布局] move() 生效  128,691 180x30
+ok    [窗口] clientSize()  (544, 781)
+ok    [窗口] setTheme(dark)
+ok    [窗口] setTheme(light)
+
+== 事件：通知消息路径 ==
+ok    [事件] onChange 触发（模拟键入）  count=1 text=Z测试文本 ABC
+ok    [事件] onSelect 触发（LBN_SELCHANGE）  1
+ok    [事件] onValue 触发（WM_HSCROLL）  1
+
+== 事件回调 ==
+ok    [事件] onClick 触发  1
+ok    [事件] onChecked 触发  1
+ok    [事件] 点击后勾选态反转  1
+
+== 扩展窗口 ==
+ok    [扩展窗口] XAML 加载  17 个命名控件
+ok    [扩展窗口] 窗口句柄有效  0xf50a82
+ok    [扩展窗口] 窗口可见
+ok    [扩展窗口] 控件 ID 分配  {'lblHead': 1000, 'tabMain': 1001, 'treeFiles': 1002, 'lstView': 1003, 'choPick': 1004, 'dtpDate': 1005, 'pnlHost': 1006, 'splVert': 1007, 'lnSep': 1008, 'lnkOpen': 1009, 'rtfNote': 1010, 'tglMode': 1011, 'bbtnRun': 1012, 'sbmpPreview': 1013, 'grdData': 1014, 'scrArea': 1015, 'calPick': 1016}
+ok    [扩展窗口] lblHead (TextBlock) 类名  实际 Static / 期望 Static
+ok    [扩展窗口] lblHead 尺寸非零  596x40
+ok    [扩展窗口] tabMain (TabControl) 类名  实际 SysTabControl32 / 期望 SysTabControl32
+ok    [扩展窗口] tabMain 尺寸非零  596x130
+ok    [扩展窗口] treeFiles (TreeCtrl) 类名  实际 SysTreeView32 / 期望 SysTreeView32
+ok    [扩展窗口] treeFiles 尺寸非零  596x120
+ok    [扩展窗口] lstView (ListCtrl) 类名  实际 SysListView32 / 期望 SysListView32
+ok    [扩展窗口] lstView 尺寸非零  596x110
+info  [扩展窗口] choPick (Choice)  class=ComboBox id=1004
+ok    [扩展窗口] choPick 尺寸非零  596x25
+ok    [扩展窗口] dtpDate (DatePicker) 类名  实际 SysDateTimePick32 / 期望 SysDateTimePick32
+ok    [扩展窗口] dtpDate 尺寸非零  596x30
+info  [扩展窗口] pnlHost (Panel)  class=Static id=1006
+ok    [扩展窗口] pnlHost 尺寸非零  596x60
+info  [扩展窗口] splVert (Splitter)  class=Static id=1007
+ok    [扩展窗口] splVert 尺寸非零  596x18
+info  [扩展窗口] lnSep (StaticLine)  class=Static id=1008
+ok    [扩展窗口] lnSep 尺寸非零  596x10
+info  [扩展窗口] lnkOpen (Hyperlink)  class=SysLink id=1009
+ok    [扩展窗口] lnkOpen 尺寸非零  596x26
+info  [扩展窗口] rtfNote (RichText)  class=RICHEDIT50W id=1010
+ok    [扩展窗口] rtfNote 尺寸非零  596x90
+ok    [扩展窗口] tglMode (ToggleButton) 类名  实际 Button / 期望 Button
+ok    [扩展窗口] tglMode 尺寸非零  596x30
+ok    [扩展窗口] bbtnRun (BitmapButton) 类名  实际 Button / 期望 Button
+ok    [扩展窗口] bbtnRun 尺寸非零  596x32
+info  [扩展窗口] sbmpPreview (StaticBitmap)  class=Static id=1013
+ok    [扩展窗口] sbmpPreview 尺寸非零  596x50
+info  [扩展窗口] grdData (GridCtrl)  class=SysListView32 id=1014
+ok    [扩展窗口] grdData 尺寸非零  596x110
+info  [扩展窗口] scrArea (ScrolledWindow)  class=Static id=1015
+ok    [扩展窗口] scrArea 尺寸非零  596x80
+ok    [扩展窗口] calPick (CalendarCtrl) 类名  实际 SysMonthCal32 / 期望 SysMonthCal32
+ok    [扩展窗口] calPick 尺寸非零  596x150
+
+== 扩展控件行为 ==
+ok    [扩展] Hyperlink setText/getText  文本-Hyperlink
+ok    [扩展] RichText setText/getText  文本-RichText
+ok    [扩展] ToggleButton setText/getText  文本-ToggleButton
+ok    [扩展] BitmapButton setText/getText  文本-BitmapButton
+ok    [扩展] ToggleButton setCheck  1
+ok    [扩展] StaticLine setVisible  False
+
+== Panel 容器（外部 HWND 宿主） ==
+ok    [Panel] 父窗口创建  0xf60a82
+ok    [Panel] Panel 创建  0x3003b2
+ok    [Panel] 控件 3001 类名  Static
+ok    [Panel] 控件 3002 类名  Button
+ok    [Panel] 控件 3003 类名  Edit
+ok    [Panel] 控件 3004 类名  Button
+ok    [Panel] 控件 3005 类名  ComboBox
+ok    [Panel] 控件 3006 类名  ListBox
+ok    [Panel] 控件 3007 类名  msctls_progress32
+ok    [Panel] Slider 类名  msctls_trackbar32
+ok    [Panel] setText/getText  面板内文本
+ok    [Panel] setCheck  1
+ok    [Panel] setPos(progress)  50
+ok    [Panel] setVisible  False
+
+合计 119 项：通过 110，失败 0，信息 9
+CONTROLS TEST PASSED

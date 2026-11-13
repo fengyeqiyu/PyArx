@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>SUM-DEMO</title>
+<style>
+  :root{--bg:#1e1f22;--panel:#26282c;--card:#2b2d31;--line:#3a3d42;--ink:#e3e5e8;--dim:#9aa0a6;--accent:#6cb6ff;--ok:#4ec97c}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--ink);font:12px/1.6 "Microsoft YaHei","Segoe UI",sans-serif}
+  .wrap{display:flex;flex-direction:column;height:100%}
+  header{padding:10px 14px 8px;background:var(--panel);border-bottom:1px solid var(--line)}
+  header b{display:block;font-size:14px;color:var(--accent)}
+  header span{display:block;margin-top:2px;font-size:11px;color:var(--dim)}
+  .body{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
+        gap:10px;padding:16px;text-align:center}
+  .label{font-size:11px;color:var(--dim);letter-spacing:.5px}
+  #out{font:600 22px/1.35 "Consolas","Microsoft YaHei",monospace;color:var(--ink);
+       background:var(--card);border:1px solid var(--line);border-radius:10px;
+       padding:14px 18px;width:100%;word-break:break-all}
+  #out.done{color:var(--ok);border-color:#3d5c47}
+  footer{padding:6px 14px;border-top:1px solid var(--line);background:var(--panel);font-size:11px;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><b>Python 计算 → 页面文本</b><span>Python 算 a+b，结果回传到下面这个静态文本</span></header>
+  <div class="body">
+    <div class="label">来自 Python 的结果</div>
+    <div id="out">等待 Python 结果…</div>
+  </div>
+  <footer id="foot">未收到消息</footer>
+</div>
+<script>
+const wv = window.chrome && window.chrome.webview;
+const out = document.getElementById('out');
+const foot = document.getElementById('foot');
+
+if (wv) {
+  wv.addEventListener('message', (e) => {
+    const d = e.data || {};
+    if (d.cmd === 'sum.result') {
+      // 静态文本里换成 Python 传来的结果
+      out.textContent = d.text;
+      out.classList.add('done');
+      foot.textContent = '已收到 Python 回传：' + d.text;
+    }
+  });
+} else {
+  foot.textContent = '没有 chrome.webview';
+}
+</script>
+</body>
+</html>

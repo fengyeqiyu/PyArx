@@ -1,0 +1,18 @@
+ok    Hyperlink 能读出设置的 URL  url=https://www.autodesk.com
+ok    Hyperlink 控件文本里带 href 标记  text=<a href="https://www.autodesk.com">https://www.autodesk.com<
+ok    Hyperlink 真点击触发 onClick  onClick=1
+ok    StaticBitmap 真装载了位图  STM_GETIMAGE=0x1F0534B3
+ok    setImage 接口存在且可重复设置
+ok    BitmapButton 真装载了位图  BM_GETIMAGE=0x-56FAC7F8
+ok    RichText 加粗生效  dwEffects=0x1 yHeight=280
+ok    RichText 字号生效（14pt=280 twips）  yHeight=280
+ok    setRichFormat 接口能改斜体并关掉加粗  dwEffects=0x2
+ok    ScrolledWindow 自绘滚动条（不挂系统滚动条样式）  style=0x5000000D
+ok    ScrolledWindow 有真实滚动范围  min=0 max=500
+ok    Python 侧读得到滚动范围  (0, 500)
+ok    Splitter 拖动时自己真的移动  位移=40px
+ok    Splitter 拖动带动相邻控件  邻居位移=40px 高度 68->102
+ok    Tab 键把焦点移到下一个控件（且焦点没跑出本窗口）  0xF1102A -> 0x521A20 在窗口内=True
+ok    Tab 键能连续往后切换焦点  0x521A20 -> 0x3419D8
+
+合计 16 项：通过 16，失败 0

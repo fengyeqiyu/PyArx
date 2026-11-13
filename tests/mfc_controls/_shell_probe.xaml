@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="壳探针" Width="420" Height="420">
+ <StackPanel Margin="8">
+  <ProgressBar x:Name="prg" Height="26"/>
+  <ListBox x:Name="lst" Height="110"/>
+  <CheckBox x:Name="chk" Content="同意条款" Height="30"/>
+  <TreeCtrl x:Name="trv" Height="110"/>
+ </StackPanel>
+</Window>

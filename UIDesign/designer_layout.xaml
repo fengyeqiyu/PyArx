@@ -1,0 +1,241 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PyMfc UI Designer 主界面
+
+  结构：单 Grid 五行 == 菜单栏 / 工具栏 / 主体三栏 / XAML 代码坞 / 状态栏
+
+  这一版是"设计器自身的深化设计"，整体走深色 IDE 外壳：
+    · 工具栏按功能分组，按钮为"图标 + 标题"，右端是预览/校验的胶囊动作按钮
+    · 左栏 = 标题条 + 分类过滤胶囊 + 控件箱树
+    · 中间 = 文档标签条 + 画布舞台（Stage 台面 + 白纸画布）
+    · 右栏 = 对象检查器 + 属性编辑器（标题条右侧实时显示节点数/选中标签）
+    · 底部 = XAML 源码坞（行号 + 语法着色），框选后右键复制 / Ctrl+C 取文本
+    · 状态栏 = 品牌格 + 就绪信息 + 坐标 + 尺寸 + 缩放
+
+  以下 Name 被 DesignerPaneView.cpp 按名字查找，改名会导致画布不出图、树不建、状态栏不更新：
+    canvasHost / xamlCodeHost / widgetBox / objInspector / propsHost
+    statusText / statusPos / statusSize / statusZoom
+  另外 hdrWidgetBox / hdrInspector / hdrProps / hdrCode / tabDoc
+  被绘制分支用来填动态提示，改名会退化成静态文案（不会崩，但会失去信息）。
+
+  本仓库的自研 XAML 语义（与 WPF 的差异，务必按这里写）：
+    · 单趟布局，不做 measure/arrange；要一行拉伸必须显式 Height="*"
+    · 容器只有 StackPanel / Grid / DockPanel / WrapPanel / Canvas / PaletteSet / Page
+    · Canvas 是流式容器（不是绝对定位画布）；Dock 在任何容器里都生效
+    · 未知标签不报错，按透明容器递归渲染；未登记属性静默放行（不校验拼写）
+    · 没有 {Binding} / 属性元素语法 / DataTemplate
+
+  本文新增的结构标签（设计器外壳构件，三端共用同一批绘制函数）：
+    PanelHeader  Text=标题 Hint=右侧提示，子元素常为 Dock="Right" 的小按钮
+    TabStrip     文档标签条；Tab Active="True" 表示当前文档
+    ChipBar      分类过滤条；Chip Category="分类名" 空=全部
+    Stage        画布舞台（深色台面 + 四角定位标）
+-->
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PyMfc UI Designer"
+        Width="1440"
+        Height="900"
+        Background="#15181D">
+
+  <Grid Name="rootGrid" Background="#15181D">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="28"/>     <!-- 菜单栏（单表面自绘，点击弹系统下拉菜单） -->
+      <RowDefinition Height="48"/>     <!-- 工具栏 -->
+      <RowDefinition Height="*"/>      <!-- 主体三栏 -->
+      <RowDefinition Height="6"/>      <!-- 水平 Splitter（拖动调整代码坞高度） -->
+      <RowDefinition Height="160"/>    <!-- XAML 源码坞 -->
+      <RowDefinition Height="26"/>     <!-- 状态栏 -->
+    </Grid.RowDefinitions>
+
+    <!-- ==================== 菜单栏 ==================== -->
+    <MenuBar Grid.Row="0">
+
+      <MenuItem Name="mnuFile" Header="文件">
+        <MenuItem Name="mnuNew"     Header="新建"/>
+        <MenuItem Name="mnuOpen"    Header="打开 XAML…"/>
+        <MenuItem Name="mnuSave"    Header="保存"/>
+        <MenuItem Name="mnuSaveAs"  Header="另存为…"/>
+        <MenuItem Name="mnuExit"    Header="退出"/>
+      </MenuItem>
+
+      <MenuItem Name="mnuEdit" Header="编辑">
+        <MenuItem Name="mnuUndo"    Header="撤销"/>
+        <MenuItem Name="mnuRedo"    Header="重做"/>
+        <MenuItem Name="mnuCut"     Header="剪切"/>
+        <MenuItem Name="mnuCopy"    Header="复制"/>
+        <MenuItem Name="mnuPaste"   Header="粘贴"/>
+        <MenuItem Name="mnuDelete"  Header="删除"/>
+      </MenuItem>
+
+      <MenuItem Name="mnuView" Header="视图">
+        <MenuItem Name="mnuGrid"    Header="网格线"/>
+        <MenuItem Name="mnuRuler"   Header="标尺"/>
+        <MenuItem Name="mnuZoomIn"  Header="放大"/>
+        <MenuItem Name="mnuZoomOut" Header="缩小"/>
+        <MenuItem Name="mnuZoomFit" Header="适应窗口"/>
+      </MenuItem>
+
+      <MenuItem Name="mnuFormat" Header="格式">
+        <MenuItem Name="mnuAlignLeft"    Header="左对齐"/>
+        <MenuItem Name="mnuAlignHCenter" Header="水平居中"/>
+        <MenuItem Name="mnuAlignRight"   Header="右对齐"/>
+        <MenuItem Name="mnuAlignTop"     Header="顶对齐"/>
+        <MenuItem Name="mnuAlignVCenter" Header="垂直居中"/>
+        <MenuItem Name="mnuAlignBottom"  Header="底对齐"/>
+        <Separator/>
+        <MenuItem Name="mnuDistH"        Header="横向均匀分布"/>
+        <MenuItem Name="mnuDistV"        Header="纵向均匀分布"/>
+      </MenuItem>
+
+      <MenuItem Name="mnuHelp" Header="帮助">
+        <MenuItem Name="mnuPreview" Header="在预览器中打开"/>
+        <MenuItem Name="mnuCheck"   Header="校验当前 XAML"/>
+        <MenuItem Name="mnuAbout"   Header="关于 PyMfc UI Designer"/>
+      </MenuItem>
+
+    </MenuBar>
+
+    <!-- ==================== 工具栏（分组 + 图标标题 + 右侧动作） ==================== -->
+    <ToolBar Grid.Row="1" Spacing="2" Padding="10,2,10,0" FontSize="8">
+
+      <!-- 文件 -->
+      <Button Name="btnNew"  Icon="res/new.png"  Content="新建" Width="46" Height="44"/>
+      <Button Name="btnOpen" Icon="res/open.png" Content="打开" Width="46" Height="44"/>
+      <Button Name="btnSave" Icon="res/save.png" Content="保存" Width="46" Height="44"/>
+      <Separator Width="9"/>
+
+      <!-- 撤销 / 重做 -->
+      <Button Name="btnUndo" Icon="res/undo.png" Content="撤销" Width="46" Height="44"/>
+      <Button Name="btnRedo" Icon="res/redo.png" Content="重做" Width="46" Height="44"/>
+      <Separator Width="9"/>
+
+      <!-- 剪贴板 -->
+      <Button Name="btnCut"    Icon="res/cut.png"   Content="剪切" Width="46" Height="44"/>
+      <Button Name="btnCopy"   Icon="res/copy.png"  Content="复制" Width="46" Height="44"/>
+      <Button Name="btnPaste"  Icon="res/paste.png" Content="粘贴" Width="46" Height="44"/>
+      <Button Name="btnDelete" Icon="res/del.png"   Content="删除" Width="46" Height="44"/>
+      <Separator Width="9"/>
+
+      <!-- 对齐 / 均匀分布（Qt Designer 同组语义：多选按选区外接框，单选按父容器） -->
+      <Button Name="btnAlignLeft"     Icon="res/alignleft.png"    Content="左"     Width="34" Height="44"/>
+      <Button Name="btnAlignHCenter"  Icon="res/alignhcenter.png" Content="居中" Width="34" Height="44"/>
+      <Button Name="btnAlignRight"    Icon="res/alignright.png"   Content="右"     Width="34" Height="44"/>
+      <Button Name="btnAlignTop"      Icon="res/aligntop.png"     Content="上"     Width="34" Height="44"/>
+      <Button Name="btnAlignVCenter"  Icon="res/alignvcenter.png" Content="居中" Width="34" Height="44"/>
+      <Button Name="btnAlignBottom"   Icon="res/alignbottom.png"  Content="下"     Width="34" Height="44"/>
+      <Button Name="btnDistH"         Icon="res/disth.png"        Content="横分布" Width="56" Height="44"/>
+      <Button Name="btnDistV"         Icon="res/distv.png"        Content="纵分布" Width="56" Height="44"/>
+      <Separator Width="9"/>
+
+      <!-- 视图 -->
+      <Button Name="btnGrid"  Icon="res/grid.png"  Content="网格" Width="46" Height="44"/>
+      <Button Name="btnRuler" Icon="res/ruler.png" Content="标尺" Width="46" Height="44"/>
+      <Separator Width="9"/>
+
+      <!-- 缩放 -->
+      <Button Name="btnZoomOut" Icon="res/zoomout.png" Content="缩小" Width="46" Height="44"/>
+      <Button Name="btnZoomIn"  Icon="res/zoomin.png"  Content="放大" Width="46" Height="44"/>
+
+      <!-- 右端动作：预览 / 校验（胶囊按钮，Dock 靠右） -->
+      <Button Name="btnCheck"   Role="Ghost"   Content="校验" Dock="Right" Width="68" Height="26" Margin="0,10,10,10"/>
+      <Button Name="btnPreview" Role="Primary" Content="预览" Dock="Right" Width="80" Height="26" Margin="0,10,16,10"/>
+
+    </ToolBar>
+
+    <!-- ==================== 主体三栏 ==================== -->
+    <Grid Grid.Row="2" Background="#15181D">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="248"/>   <!-- 控件箱 -->
+        <ColumnDefinition Width="6"/>     <!-- 垂直 Splitter -->
+        <ColumnDefinition Width="*"/>     <!-- 画布 -->
+        <ColumnDefinition Width="6"/>     <!-- 垂直 Splitter -->
+        <ColumnDefinition Width="308"/>   <!-- 对象检查器 + 属性编辑器 -->
+      </Grid.ColumnDefinitions>
+
+      <!-- ========== 左栏：控件箱 ========== -->
+      <Grid Grid.Column="0" Background="#1C2027">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="34"/>    <!-- 标题条 -->
+          <RowDefinition Height="36"/>    <!-- 分类过滤 -->
+          <RowDefinition Height="*"/>     <!-- 控件箱树 -->
+        </Grid.RowDefinitions>
+
+        <PanelHeader Name="hdrWidgetBox" Grid.Row="0" Text="控件箱"/>
+
+        <ChipBar Name="widgetChips" Grid.Row="1" Orientation="Horizontal" Spacing="4" Padding="8,7,6,0">
+          <Chip Name="chipAll"    Text="全部" Category=""                 Checked="True" Width="42" Height="22"/>
+          <Chip Name="chipLayout" Text="容器" Category="Containers"       Width="42" Height="22"/>
+          <Chip Name="chipButton" Text="按钮" Category="Buttons"          Width="42" Height="22"/>
+          <Chip Name="chipInput"  Text="输入" Category="Input Widgets"    Width="42" Height="22"/>
+          <Chip Name="chipShow"   Text="显示" Category="Display Widgets"  Width="42" Height="22"/>
+        </ChipBar>
+
+        <TreeView Name="widgetBox" Grid.Row="2" FontSize="8"/>
+      </Grid>
+
+      <Splitter Grid.Column="1"/>
+
+      <!-- ========== 中间：文档标签条 + 画布舞台 ========== -->
+      <Grid Grid.Column="2" Background="#15181D">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="36"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TabStrip Name="docTabs" Grid.Row="0" Orientation="Horizontal" Padding="8,6,0,0" Spacing="6">
+          <Tab Name="tabDoc" Text="designer_layout.xaml" Active="True" Width="300" Height="28"/>
+        </TabStrip>
+
+        <Stage Grid.Row="1">
+          <Grid Margin="14,12,14,14">
+            <Canvas Name="canvasHost" Background="#FFFFFF"/>
+          </Grid>
+        </Stage>
+      </Grid>
+
+      <Splitter Grid.Column="3"/>
+
+      <!-- ========== 右栏：对象检查器 + 属性编辑器 ========== -->
+      <Grid Grid.Column="4" Background="#1C2027">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="34"/>    <!-- 对象检查器标题 -->
+          <RowDefinition Height="130"/>   <!-- 对象树 -->
+          <RowDefinition Height="6"/>     <!-- 水平 Splitter -->
+          <RowDefinition Height="34"/>    <!-- 属性编辑器标题 -->
+          <RowDefinition Height="*"/>     <!-- 属性表 -->
+        </Grid.RowDefinitions>
+
+        <PanelHeader Name="hdrInspector" Grid.Row="0" Text="对象检查器" FontSize="9"/>
+        <TreeView Name="objInspector" Grid.Row="1" FontSize="8"/>
+        <Splitter Grid.Row="2"/>
+        <PanelHeader Name="hdrProps" Grid.Row="3" Text="属性编辑器" FontSize="9"/>
+        <PropertyGrid Name="propsHost" Grid.Row="4" FontSize="8"/>
+      </Grid>
+    </Grid>
+
+    <!-- 主体与代码坞之间的水平分隔条（上下拖动改变代码坞高度） -->
+    <Splitter Grid.Row="3"/>
+
+    <!-- ==================== XAML 源码坞 ==================== -->
+    <Grid Name="codeDock" Grid.Row="4" Background="#14171C">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="34"/>
+        <RowDefinition Height="*"/>
+      </Grid.RowDefinitions>
+
+      <PanelHeader Name="hdrCode" Grid.Row="0" Text="XAML 源码"/>
+
+      <Canvas Name="xamlCodeHost" Grid.Row="1" Background="#12151A"/>
+    </Grid>
+
+    <!-- ==================== 状态栏 ==================== -->
+    <StatusBar Grid.Row="5" Spacing="0">
+      <TextBlock Name="statusBrand" Text="PyMfc Studio" Width="112"/>
+      <TextBlock Name="statusText"  Text="就绪"        Width="620"/>
+      <TextBlock Name="statusPos"   Text="X:0 Y:0"     Width="112"/>
+      <TextBlock Name="statusSize"  Text="W:0 H:0"     Width="112"/>
+      <TextBlock Name="statusZoom"  Text="100%"        Width="72"/>
+    </StatusBar>
+
+  </Grid>
+</Window>

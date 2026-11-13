@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="P0 绘制原语" Width="660" Height="480">
+  <StackPanel Orientation="Vertical" Spacing="4">
+    <QCanvas x:Name="c1" Width="630" Height="52" Commands="Clear #232A33; Grad 8,8,600,36,#00A8E8,#7A5AF8,0" />
+    <QCanvas x:Name="c2" Width="630" Height="52" Commands="Clear #232A33; GradRR 8,8,600,36,14,#57C84D,#0E8A6A,90" />
+    <QCanvas x:Name="c3" Width="630" Height="52" Commands="Clear #232A33; Fill 30,44,330,4,600,44,#E8A030" />
+    <QCanvas x:Name="c4" Width="630" Height="52" Commands="Clear #232A33; Path 10,44,160,6,320,44,470,6,610,44,#FFFFFF,3" />
+    <QCanvas x:Name="c5" Width="630" Height="52" Commands="Clear #232A33; Shadow 20,4,560,24,12,#000000,150,6,10,12" />
+    <QCanvas x:Name="c6" Width="630" Height="52" Commands="Clear #232A33; Alpha 140; Rect 20,6,280,32,#00A8E8; AlphaEnd; Rect 330,6,280,32,#FFFFFF" />
+    <QCanvas x:Name="c7" Width="630" Height="52" Commands="Clear #232A33; Rot 12,315,26; Rect 90,8,450,30,#FF5C7A; RotEnd" />
+    <QCanvas x:Name="c8" Width="630" Height="52" Commands="Clear #232A33; Alpha 90; Rect 20,6,180,32,#FF5C7A; AlphaEnd; Alpha 190; Rect 220,6,180,32,#FF5C7A; AlphaEnd; Rect 420,6,180,32,#FF5C7A" />
+  </StackPanel>
+</Window>

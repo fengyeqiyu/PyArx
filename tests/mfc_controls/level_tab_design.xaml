@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="设计器 · Level 命中顺序" Width="560" Height="440">
+  <Layout x:Name="root">
+    <TextBlock x:Name="a" Width="170" Height="90" Canvas.Left="30" Canvas.Top="30"
+               Text="A 块 Level=1" Level="1" TabIndex="10" />
+    <TextBlock x:Name="b" Width="170" Height="90" Canvas.Left="70" Canvas.Top="60"
+               Text="B 块 Level=0" Level="0" TabIndex="20" />
+  </Layout>
+</Window>

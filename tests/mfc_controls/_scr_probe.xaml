@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="t" Width="420" Height="260">
+ <StackPanel Margin="10">
+  <ScrolledWindow x:Name="scr" ScrollMin="0" ScrollMax="500" Width="300" Height="120"/>
+ </StackPanel>
+</Window>

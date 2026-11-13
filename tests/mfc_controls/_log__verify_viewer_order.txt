@@ -1,0 +1,8 @@
+PASS Level：B 压在 A 上（重叠区像素）  {'A': 0, 'B': 81, 'other': 0}
+  A rect=(78, 101, 248, 191)  B rect=(118, 131, 288, 221)
+PASS 点中 e1 拿到焦点  focus id=1002
+PASS Tab 序 e1→btnTop→btnBottom→btnSwap  [1005, 1006, 1007]
+PASS Shift+Tab：e1→e3  focus id=1004
+PASS 窗口属性 PyMfcSeq/TabIndex 已写入  {'e1': (3, 3), 'btnTop': (6, 4)}
+
+VIEWER ORDER TEST PASSED

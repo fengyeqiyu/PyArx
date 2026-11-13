@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  复合控件：编辑侧板（SidePanel）
+  这里只用基础控件的组合 + XAML 的 Grid 定位，不写任何像素计算的逻辑。
+  回调也写在 XAML 里：属性 on_click / on_dblclick / on_change / on_grid 写的是 Python 函数名，
+  加载时按名字在调用方作用域里找函数并绑定，Python 侧不用再 on(...) 挂一遍。
+
+  加载方（pp_plugin.Composite）用 xamlLayout(path, w, h) 拿到每个 x:Name 的矩形，
+  再按矩形创建对应的基础控件，最后把子控件的事件统一回调给 Python。
+
+  行：0 标题 40 / 1 表格 * / 2 底部按钮条 34
+  列：0 左边距 12 / 1 按钮 * / 2 按钮 * / 3 按钮 * / 4 右边距 12
+-->
+<Window Name="SidePanel" Width="640" Height="755">
+  <Grid Name="Root">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="40"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="34"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="12"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="12"/>
+    </Grid.ColumnDefinitions>
+
+    <Label Name="Title" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Text="配电规划表"/>
+    <ListCtrl Name="Table" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5"/>
+    <Button Name="BtnApply" Grid.Row="2" Grid.Column="1" Text="应用" on_click="on_apply"/>
+    <Button Name="BtnLoad" Grid.Row="2" Grid.Column="2" Text="载入" on_click="on_load"/>
+    <Button Name="BtnClose" Grid.Row="2" Grid.Column="3" Text="关闭" on_click="on_close"/>
+  </Grid>
+</Window>

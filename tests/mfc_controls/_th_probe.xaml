@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="主题对照" Width="440" Height="330">
+ <StackPanel Margin="8">
+  <ProgressBar x:Name="prg" Height="26"/>
+  <ListBox x:Name="lst" Height="110"/>
+  <TabControl x:Name="tab" Height="80"/>
+ </StackPanel>
+</Window>

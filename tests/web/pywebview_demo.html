@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>PyMfcWebView 独立窗体</title>
+<style>
+  :root{--bg:#f4f6f9;--card:#fff;--line:#e3e9f1;--ink:#1f2937;--sub:#6b7280;--brand:#2f6fba}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--ink);font:14px/1.7 "Microsoft YaHei","Segoe UI",sans-serif}
+  .wrap{display:flex;flex-direction:column;height:100%}
+  header{padding:16px 20px 12px;background:#fff;border-bottom:1px solid var(--line)}
+  header b{font-size:18px;color:#123c66;display:block}
+  header span{font-size:12px;color:var(--sub)}
+  .body{flex:1;padding:16px 20px;overflow:auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;max-width:760px}
+  .card h3{margin:0 0 12px;font-size:15px;color:#123c66}
+  button{appearance:none;border:1px solid #cfd9e6;background:#fff;color:var(--ink);border-radius:8px;
+         padding:10px 14px;font:inherit;cursor:pointer;margin:0 8px 8px 0}
+  button.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+  #out{margin-top:12px;min-height:70px;background:#f7f9fc;border:1px dashed #cfd9e6;border-radius:8px;
+       padding:10px;font-size:13px;color:#123c66;white-space:pre-wrap}
+  footer{padding:8px 20px;border-top:1px solid var(--line);background:#fff;font-size:12px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <b>PyMfcWebView 独立窗体</b>
+    <span>MFC 只做窗口外壳，页面上的控件全部来自这个 HTML（没有一行原生控件代码）</span>
+  </header>
+  <div class="body">
+    <div class="card">
+      <h3>页面 → Python</h3>
+      <button class="pri" id="btnPing">① 调 Python 函数</button>
+      <button id="btnInfo">② 问窗口信息（原生能力）</button>
+      <button id="btnClose">③ 关闭窗口</button>
+      <div id="out">点一下上面的按钮</div>
+    </div>
+  </div>
+  <footer id="foot">等待 Python 回执…</footer>
+</div>
+<script>
+  const wv = window.chrome && window.chrome.webview;
+  const out = document.getElementById('out');
+  document.getElementById('foot').textContent =
+    wv ? '已接 chrome.webview' : '没有 chrome.webview（不是 WebView2 环境）';
+
+  function post(payload, label) {
+    out.textContent = label + ' …（等 Python 回执）';
+    if (wv) wv.postMessage(payload);
+  }
+
+  document.getElementById('btnPing').onclick = () => post({ cmd: 'py.ping', args: { seq: 1, text: '页面传来的中文' } }, '调 Python');
+  document.getElementById('btnInfo').onclick = () => post({ cmd: 'shell.info' }, '问信息');
+  document.getElementById('btnClose').onclick = () => post({ cmd: 'window.close' }, '关闭');
+
+  if (wv) {
+    wv.addEventListener('message', (e) => {
+      const d = e.data;
+      if (d && d.event === 'py.result') {
+        out.textContent = (d.ok ? '✔ ' : '✘ ') + d.text;
+        // 回推一条，证明"Python → 页面"这条线也真的到了页面 DOM
+        wv.postMessage({ cmd: 'py.resultReceived', text: out.textContent });
+      }
+      else if (d && d.event === 'shell.info') out.textContent = '窗口 ' + d.width + ' × ' + d.height + '，DPI ' + d.dpi;
+      else if (d && d.event === 'shell.ready') out.textContent = 'WebView 就绪：' + d.width + ' × ' + d.height;
+    });
+  }
+</script>
+</body>
+</html>

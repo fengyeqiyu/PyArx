@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="扩展控件测试" Width="640" Height="900">
+  <StackPanel Margin="14" Spacing="8">
+
+    <TextBlock x:Name="lblHead" Content="扩展控件（Tab / Tree / ListCtrl / Choice / DatePicker / Panel / Splitter / StaticLine / Hyperlink / RichText / Toggle / BitmapButton / StaticBitmap / GridCtrl / ScrolledWindow / Calendar）"
+               Height="40"/>
+
+    <TabControl x:Name="tabMain" Height="130"/>
+    <TreeCtrl x:Name="treeFiles" Height="120"/>
+    <ListCtrl x:Name="lstView" Height="110"/>
+    <Choice x:Name="choPick" Height="30"/>
+    <DatePicker x:Name="dtpDate" Height="30"/>
+    <Panel x:Name="pnlHost" Height="60"/>
+    <Splitter x:Name="splVert" Height="18"/>
+    <StaticLine x:Name="lnSep" Height="10"/>
+    <Hyperlink x:Name="lnkOpen" Content="打开示例链接" Height="26"/>
+    <RichText x:Name="rtfNote" Height="90"/>
+    <ToggleButton x:Name="tglMode" Content="切换模式" Height="30"/>
+    <BitmapButton x:Name="bbtnRun" Content="运行" Height="32"/>
+    <StaticBitmap x:Name="sbmpPreview" Height="50"/>
+    <GridCtrl x:Name="grdData" Height="110"/>
+    <ScrolledWindow x:Name="scrArea" Height="80"/>
+    <CalendarCtrl x:Name="calPick" Height="150"/>
+
+  </StackPanel>
+</Window>

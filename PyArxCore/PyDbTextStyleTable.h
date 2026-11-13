@@ -1,0 +1,14 @@
+﻿#pragma once
+#include "stdafx.h"
+#include "PyDbSymbolTable.h"
+#include "PyDbSymbolTableRecord.h"
+
+class PyDbTextStyleTable : public PyDbSymbolTable {
+public:
+	PyWrapper_H(DbTextStyleTable)
+	PyDbTextStyleTable(AcDbTextStyleTable* ptr) : PyDbSymbolTable(ptr) {}
+	bool has(const AcString& name) const;
+	PyDbSymbolTableRecord getAt(const AcString& name) const;
+};
+
+void bind_PyDbTextStyleTable(pym& m);

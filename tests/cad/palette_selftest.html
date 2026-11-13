@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>PyArx 自检页</title>
+<style>
+  :root{--bg:#f4f6f9;--card:#fff;--line:#e3e9f1;--ink:#1f2937;--sub:#6b7280;--brand:#2f6fba}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--ink);font:13px/1.6 "Microsoft YaHei","Segoe UI",sans-serif}
+  .wrap{display:flex;flex-direction:column;height:100%}
+  header{padding:12px 16px 10px;background:#fff;border-bottom:1px solid var(--line)}
+  header b{display:block;font-size:16px;color:#123c66}
+  header span{font-size:12px;color:var(--sub)}
+  .body{flex:1;padding:12px 16px;overflow:auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+  #out{background:#f7f9fc;border:1px dashed #cfd9e6;border-radius:8px;padding:10px;
+       white-space:pre-wrap;color:#123c66;font-size:12px;min-height:120px}
+  footer{padding:6px 16px;border-top:1px solid var(--line);background:#fff;font-size:12px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <b>PyArx 自检页</b>
+    <span>收到 shell.ready 后自动发一条 py.exec，验证 print 走引擎重定向</span>
+  </header>
+  <div class="body">
+    <div class="card">
+      <div id="out">等待自动触发…</div>
+    </div>
+  </div>
+  <footer id="foot">未就绪</footer>
+</div>
+<script>
+  const wv = window.chrome && window.chrome.webview;
+  const out = document.getElementById('out');
+  const foot = document.getElementById('foot');
+
+  function fireCount() {
+    if (!wv) { out.textContent = '没有 chrome.webview'; return; }
+    out.textContent = '先发一条最短的 cad.count…';
+    wv.postMessage({ cmd: 'cad.count' });
+  }
+
+  function fire() {
+    if (!wv) { out.textContent = '没有 chrome.webview'; return; }
+    out.textContent = '已自动发出 py.exec，等回执…';
+    wv.postMessage({
+      cmd: 'py.exec',
+      code: [
+        'import sys',
+        'f = open(r"G:\\PyArx\\docs\\_selftest_exec.log", "a", encoding="utf-8")',
+        'f.write("自检页触发的 py.exec 执行了\\n")',
+        'f.write("sys.stdout=%s.%s\\n" % (type(sys.stdout).__module__, type(sys.stdout).__name__))',
+        'print("页面自检：这一行来自 Python 的 print")',
+        'print("页面自检：第二行 print")',
+        'f.write("print 已调用\\n")',
+        'f.close()',
+        'result = "自检完成：脚本在 CAD 里跑完了"',
+      ].join('\n'),
+      args: { 来源: '自检页自动触发', 序号: 1 },
+    });
+  }
+
+  if (wv) {
+    wv.addEventListener('message', (e) => {
+      const d = e.data;
+      if (d && d.event === 'shell.ready') {
+        foot.textContent = 'WebView 就绪：' + d.width + ' × ' + d.height;
+        setTimeout(fireCount, 300);
+        setTimeout(fire, 1800);
+      } else if (d && d.event === 'cad.result') {
+        out.textContent = (d.ok ? '✔ ' : '✘ ') + d.text;
+        foot.textContent = '已收到回执';
+      }
+    });
+  }
+</script>
+</body>
+</html>

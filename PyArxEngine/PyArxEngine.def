@@ -1,0 +1,9 @@
+LIBRARY PyArxEngine
+EXPORTS
+    acrxEntryPoint
+    PyEngine_Init
+    PyEngine_RunScript
+    PyEngine_ExecString
+    PyEngine_PipRun
+    PyEngine_Release
+    PyEngine_SetArxHandle

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="修复验证" Width="640" Height="900">
+  <StackPanel Margin="14" Spacing="8">
+
+    <TabControl x:Name="tabMain" Height="130" Pages="常规|高级|关于"/>
+    <TreeCtrl x:Name="treeFiles" Height="120" Nodes="项目>源码|项目>文档|发布"/>
+    <ListCtrl x:Name="lstView" Height="110" Columns="名称:180|状态:100" Rows="a.txt	完成|b.txt	进行中|c.txt	待办"/>
+    <GridCtrl x:Name="grdData" Height="110" Columns="编号:70|名称:180|数量:90" Rows="1	螺栓	120|2	螺母	240"/>
+    <Panel x:Name="pnlHost" Height="90" Background="#FF2B3641">
+      <TextBlock x:Name="pnlTitle" Content="面板里的标题" Height="24"/>
+      <Button x:Name="pnlBtn" Content="面板里的按钮" Height="30"/>
+    </Panel>
+    <CheckBox x:Name="chkFlag" Content="勾选我" Height="28"/>
+    <ProgressBar x:Name="prgLoad" Height="26" Value="72"/>
+    <Slider x:Name="sldZoom" Height="40" Value="68"/>
+
+  </StackPanel>
+</Window>

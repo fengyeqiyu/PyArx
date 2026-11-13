@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PagerRepro" Width="400" Height="320">
+  <Canvas>
+    <StackView x:Name="sv" Width="360" Height="200" Canvas.Left="14" Canvas.Top="14" />
+    <TextBlock x:Name="pg1" Text="第一页：文字" Width="360" Height="150" Canvas.Left="14" Canvas.Top="14" />
+    <Button x:Name="pb1" Content="页内按钮" Width="120" Height="36" Canvas.Left="40" Canvas.Top="60" />
+    <QCanvas x:Name="pg2" Width="360" Height="150" Canvas.Left="14" Canvas.Top="14"
+             Commands="Clear #313842; Rect 12,12,90,40,#00A8E8; Text 12,96,第二页:画命令,9,#FFFFFF" />
+    <TextBlock x:Name="hint" Text="hint" Width="120" Height="20" Canvas.Left="14" Canvas.Top="240" />
+  </Canvas>
+</Window>

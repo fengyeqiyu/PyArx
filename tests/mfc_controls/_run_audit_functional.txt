@@ -1,0 +1,42 @@
+PyMfcCore 控件功能齐全度审计
+== 接口面 ==
+info  [接口] pybind 暴露的方法数  73
+info  [接口] 内容构造类接口  addBitmapButton, addButton, addCalendar, addCheckBox, addChoice, addColumn, addCombo, addDatePicker, addEdit, addGrid, addGroup, addHyperlink, addLabel, addListBox, addListCtrl, addPanel, addProgress, addRadio, addRichText, addRow, addScrolledWindow, addSlider, addSplitter, addStaticBitmap, addStaticLine, addString, addTab, addTabItem, addToggle, addTree, addTreeNode
+info  [接口] 缺失的内容/样式接口  addTreeItem, addImage, addBitmap, setBitmap, setIcon, setFont, setStyle, addGridCtrl, addScrolled, addCalendarCtrl
+
+== Hyperlink ==
+ok    [Hyperlink] 真点击触发 onClick  onClick=1
+ok    [Hyperlink] 可设置链接地址（URL）接口  setUrl=True getUrl=https://example.com
+
+== Splitter ==
+ok    [Splitter] 拖拽改变相邻控件布局  下方控件 (52, 141, 516, 40) -> (52, 147, 516, 34)
+
+== ScrolledWindow ==
+ok    [ScrolledWindow] 自绘滚动条（不挂系统滚动条）  style=0x5000000D
+ok    [ScrolledWindow] 存在可滚动范围  min=0 max=500
+
+== CalendarCtrl ==
+ok    [CalendarCtrl] MCM_SETCURSEL 可设日期  2026-11-7 -> 11-20
+ok    [CalendarCtrl] 真点击选日生效  11-20 -> 11-24
+
+== RichText ==
+ok    [RichText] 控件原生支持加粗（Bold）  dwEffects=0x44000001
+ok    [RichText] Python 接口暴露格式设置  setRichFormat=True
+ok    [RichText] 格式真落到文本（14pt + 加粗）  yHeight=280 dwEffects=0x4000001
+
+== BitmapButton ==
+ok    [BitmapButton] 真装载了位图  setImage=True BM_GETIMAGE=1258634453
+ok    [BitmapButton] setText 后能显示文字  运行
+
+== ComboBox 回调 ==
+ok    [ComboBox] 真展开下拉并触发 onDropDown  onDropDown=1
+
+== 结构性控件 ==
+ok    [TabControl] 装得进页签  TCM_GETITEMCOUNT=2
+ok    [TreeCtrl] 装得进节点且层级正确  root=1529100166816 child=1529100166144
+ok    [ListCtrl] 装得进列与行  columns=2 rows=2
+ok    [GridCtrl] 装得进列与行  columns=2 rows=2
+ok    [StaticBitmap] 具备图片装载接口（setImage）  有 setImage
+ok    [BitmapButton] 具备图片装载接口（setImage）  有 setImage
+
+合计 22 项：通过 19，失败 0，信息 3

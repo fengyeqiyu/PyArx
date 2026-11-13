@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{28504A60-C45D-411E-8052-EBD0D225C657}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>PyArxEngine</ProjectName>
+    <RootNamespace>PyArxEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>G:\PyArx\X64\Release\</OutDir>
+    <IntDir>G:\PyArx\X64\Release\obj\PyArxEngine\</IntDir>
+    <TargetName>PyArxEngine</TargetName>
+    <TargetExt>.dll</TargetExt>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateDebugInformation>false</GenerateDebugInformation>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;Py_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);G:\ObjectArx\2024\inc;G:\ObjectArx\2024\inc-x64;G:\ObjectArx\2024\utils\brep\inc;G:\PyArx\third_party\python314\Include;G:\PyArx\third_party\python314\PC;G:\PyArx\third_party\pybind11\include;G:\PyArx\common\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)stdafx.pch</PrecompiledHeaderOutputFile>
+      <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <DisableSpecificWarnings>4244;4267;4305;4838</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 /FS %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>G:\ObjectArx\2024\lib-x64;G:\ObjectArx\2024\utils\brep\lib-x64;G:\PyArx\third_party\python314\PCbuild\amd64;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>PyArxEngine.def</ModuleDefinitionFile>
+      <AdditionalOptions>/MANIFEST:NO %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(OutDir)PyArxEngine.dll" "$(OutDir)PyArxEngine.arx"
+copy /Y "$(OutDir)PyArxEngine.dll" "$(OutDir)PyArxEngine.crx"
+copy /Y "G:\vcpkg\installed\x64-windows\tools\python3\python314.dll" "$(OutDir)"
+copy /Y "G:\vcpkg\installed\x64-windows\bin\python3.dll" "$(OutDir)"
+if not exist "$(OutDir)DLLs" mkdir "$(OutDir)DLLs"
+xcopy /Y /D "G:\vcpkg\installed\x64-windows\tools\python3\DLLs\*.pyd" "$(OutDir)DLLs\"
+xcopy /Y /D "G:\vcpkg\installed\x64-windows\tools\python3\DLLs\*.dll" "$(OutDir)DLLs\"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="acrxEntryPoint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="PyEngine.cpp" />
+    <ClCompile Include="PyEngineC.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="PyCmdBinder.cpp" />
+    <ClCompile Include="PyAppDispatcher.cpp" />
+    <ClCompile Include="PyDispatchBinder.cpp" />
+    <ClCompile Include="PyRedir.cpp" />
+    <ClCompile Include="PyRxCmd.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ItemGroup>
+    <ClInclude Include="PyCmdBinder.h" />
+    <ClInclude Include="PyAppDispatcher.h" />
+    <ClInclude Include="PyDispatchBinder.h" />
+    <ClInclude Include="PyEngine.h" />
+    <ClInclude Include="PyEngineC.h" />
+    <ClInclude Include="PyRedir.h" />
+    <ClInclude Include="PyRxCmd.h" />
+    <ClInclude Include="singleinstance.h" />
+    <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+</Project>

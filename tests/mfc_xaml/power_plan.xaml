@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  power-plan 界面布局（对应 docs/_ref/power-plan.html / G:\配电规划设计\power-plan.html）
+  分工：本文件负责"界面结构与尺寸"，Python 只按这里算出的矩形摆放控件、写业务逻辑。
+  控件本身仍由 C++ 控件库创建（PowerCanvas / SysListView32 等 guiload 不支持的类型也能用）。
+  改动布局 = 改这个文件，不改 pp_app.py。
+
+  行：0 顶部工具栏 78 / 1 主内容 * / 2 底部留白 8
+  列：0 左边距 8 / 1 画布 * / 2 分割条 6 / 3 侧板 640 / 4 右边距 8
+-->
+<Window Name="PowerPlan" Width="1340" Height="881">
+  <Grid Name="Root">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="78"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="8"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="8"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="6"/>
+      <ColumnDefinition Width="640"/>
+      <ColumnDefinition Width="8"/>
+    </Grid.ColumnDefinitions>
+
+    <!-- 画布：主内容左列 -->
+    <Label Name="CV" Grid.Row="1" Grid.Column="1"/>
+
+    <!-- 分割条：画布与侧板之间，拖动它改第 3 列宽度（Python 传 overrides） -->
+    <Label Name="SPLIT" Grid.Row="1" Grid.Column="2"/>
+
+    <!-- 侧板（表格编辑器）：主内容右列 -->
+    <Label Name="Side" Grid.Row="1" Grid.Column="3"/>
+  </Grid>
+</Window>

@@ -1,0 +1,21 @@
+import os, sys
+sys.path.insert(0, r'G:\PyArx\X64\Release'); os.add_dll_directory(r'G:\PyArx\X64\Release')
+sys.path.insert(0, r'G:\PyArx\tests\mfc_xaml')
+import PyMfcXaml as M, ppApp
+app = ppApp.App(); app.win.show(); M.pump(200); w=app.win
+app.fitView(); M.pump(20)
+app.collapsed.add('AT1'); app.rebuild(fit=False); M.pump(30)
+print('折叠后可见', len(app.layoutNodes()))
+app.collapsed.discard('AT1'); app.rebuild(fit=True); M.pump(30)
+w.setText(ppApp.E_SEARCH, 'AT2-1-3'); app.onSearchChange(); M.pump(30)
+print('搜索后 curSel', app.curSel, 'sel=', w.getPlanSelection(ppApp.CV))
+w.setText(ppApp.E_SEARCH, ''); M.pump(10)
+w.selectPlan(ppApp.CV, 'AT1-1'); M.pump(20)
+print('selectPlan 后 getPlanSelection =', repr(w.getPlanSelection(ppApp.CV)))
+app.onCanvasClick(); M.pump(20)
+print('click 后 curSel =', repr(app.curSel), 'DT_TITLE', w.getText(ppApp.DT_TITLE), 'D_F0', repr(w.getText(ppApp.D_F0)))
+w.setText(ppApp.D_F0+1, 'X-NAME'); M.pump(20)
+print('_detailValues', app._detailValues())
+app.onDetailSave(); M.pump(30)
+print('save 后', repr((app.nodeOf('AT1-1') or {}).get('name')))
+os._exit(0)

@@ -1,0 +1,365 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="controls">
+      <UniqueIdentifier>{3936C871-DD5B-5929-92F6-2F05CA71182E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="XamlSurface.cpp" />
+    <ClCompile Include="controls\RegisterPyMfcControls.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlBitmapButton.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlBusyIndicator.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlButton.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlCalendarCtrl.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlCheckBox.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlChoice.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlCodeEditor.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlComboBox.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlDatePicker.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlDial.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlFlickable.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlGrid.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlGridView.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlGroupBox.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlHyperlink.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlListBox.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlListCtrl.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlListView.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlMenu.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlMenuBar.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlMfcControlBase.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlPage.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlPageIndicator.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlPageView.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlPanel.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlPathView.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlPopup.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlPowerCanvas.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlProgressBar.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlQCanvas.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlRadioButton.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlRangeSlider.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlRichText.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlScrollBar.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlScrolledWindow.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlSlider.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlSpinBox.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlSplitter.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlStackView.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlStaticBitmap.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlStaticLine.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlSwipeView.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlSwitch.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlTabControl.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlTableView.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlTextBlock.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlTextBox.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlToggleButton.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlToolBar.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlToolTip.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlTreeCtrl.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlTreeView.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XamlTumbler.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="XamlSurface.h" />
+    <ClInclude Include="controls\CodeEditor.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\RegisterPyMfcControls.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlBitmapButton.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlBusyIndicator.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlButton.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlCalendarCtrl.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlCheckBox.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlChoice.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlCodeEditor.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlComboBox.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlContentParse.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlDatePicker.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlDial.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlEvents.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlExtraControls.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlExtraControls.orig.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlFlickable.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlGrid.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlGridView.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlGroupBox.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlHyperlink.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlListBox.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlListCtrl.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlListView.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlMenu.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlMenuBar.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlMfcControlBase.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlMfcHost.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlMfcOrder.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlMfcTags.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlPage.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlPageIndicator.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlPageView.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlPanel.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlPathView.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlPopup.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlPowerCanvas.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlProgressBar.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlPropUtil.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlQCanvas.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlRadioButton.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlRangeSlider.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlRichText.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlScrollBar.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlScrolledWindow.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlSlider.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlSpinBox.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlSplitter.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlStackView.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlStaticBitmap.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlStaticLine.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlSwipeView.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlSwitch.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlTabControl.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlTableView.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlTextBlock.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlTextBox.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlToggleButton.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlToolBar.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlToolTip.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlTreeCtrl.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlTreeView.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XamlTumbler.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="第二批功能验证" Width="640" Height="900" Theme="light">
+  <StackPanel Margin="12">
+    <Hyperlink x:Name="lnkHome" Text="打开官网" Url="https://www.autodesk.com" Width="200" Height="24" />
+    <StaticBitmap x:Name="imgLogo" Image="res/dot.png" Width="64" Height="64" />
+    <BitmapButton x:Name="btnIcon" Image="res/dot.png" Content="带图按钮" Width="140" Height="36" />
+    <RichText x:Name="rtfNote" Text="这行字应该是加粗的" FontSize="14" Bold="true" Foreground="#1565C0" Width="360" Height="90" />
+    <ScrolledWindow x:Name="scrBox" ScrollMin="0" ScrollMax="500" Width="300" Height="120" />
+    <StaticLine x:Name="lineMid" Width="560" Height="6" />
+    <Button x:Name="btnBelow" Content="分隔条下面的按钮" Width="240" Height="60" />
+    <Splitter x:Name="splMain" Width="560" Height="8" />
+    <ListBox x:Name="lstBelow2" Width="240" Height="80" />
+    <TextBox x:Name="edtFirst" Width="240" Height="28" />
+    <CheckBox x:Name="chkSecond" Content="焦点目标" Width="160" Height="28" />
+  </StackPanel>
+</Window>

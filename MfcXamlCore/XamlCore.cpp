@@ -1,0 +1,2840 @@
+﻿#include "XamlCore.h"
+
+#include <msxml6.h>
+#include <algorithm>
+#include <cmath>
+#include <comdef.h>
+#include <cwchar>
+#include <cwctype>
+#include <fstream>
+#include <locale>
+
+#pragma comment(lib, "msxml6.lib")
+
+// ===========================================================================
+// XamlElement
+// ===========================================================================
+namespace
+{
+    // 本地声明是"要算的值"时，读取要落到求值后的有效值。
+    // 包括 {Binding ...} 与内置表达式 {...}；{StaticResource}/{TemplateBinding}
+    // 由样式/模板阶段直接替换进 attrs，不在此列。
+    bool IsBindingExpression(const std::wstring& v)
+    {
+        const size_t b = v.find_first_not_of(L" \t\r\n");
+        if (b == std::wstring::npos)
+            return false;
+        if (_wcsnicmp(v.c_str() + b, L"{Binding", 8) == 0 ||
+            _wcsnicmp(v.c_str() + b, L"{Bind", 5) == 0)
+            return true;
+        if (v.c_str()[b] != L'{' || v.back() != L'}')
+            return false;
+        const wchar_t* p = v.c_str() + b + 1;
+        while (*p == L' ' || *p == L'\t')
+            ++p;
+        return !(_wcsnicmp(p, L"StaticResource", 14) == 0 ||
+                 _wcsnicmp(p, L"TemplateBinding", 15) == 0);
+    }
+
+    bool HasLocal(const XamlElement& el, const std::wstring& key)
+    {
+        for (const auto& kv : el.attrs)
+            if (_wcsicmp(kv.first.c_str(), key.c_str()) == 0)
+                return true;
+        return false;
+    }
+
+    void SetEffective(XamlElement& el, const std::wstring& key, const std::wstring& v)
+    {
+        for (auto& kv : el.styledAttrs)
+            if (_wcsicmp(kv.first.c_str(), key.c_str()) == 0)
+            {
+                kv.second = v;
+                return;
+            }
+        el.styledAttrs.emplace_back(key, v);
+    }
+
+    void ClearEffective(XamlElement& el)
+    {
+        el.styledAttrs.clear();
+        el.styled = false;
+    }
+}
+
+bool XamlElement::has(const wchar_t* key) const
+{
+    for (const auto& kv : attrs)
+        if (_wcsicmp(kv.first.c_str(), key) == 0)
+            return true;
+    for (const auto& kv : styledAttrs)
+        if (_wcsicmp(kv.first.c_str(), key) == 0)
+            return true;
+    return false;
+}
+
+std::wstring XamlElement::get(const wchar_t* key) const
+{
+    const std::wstring* local = nullptr;
+    for (const auto& kv : attrs)
+        if (_wcsicmp(kv.first.c_str(), key) == 0)
+        {
+            local = &kv.second;
+            break;
+        }
+    // 本地值就是绑定表达式时，用求值后的有效值
+    if (local != nullptr && !IsBindingExpression(*local))
+        return *local;
+    for (const auto& kv : styledAttrs)
+        if (_wcsicmp(kv.first.c_str(), key) == 0)
+            return kv.second;
+    return local != nullptr ? *local : std::wstring();
+}
+
+void XamlElement::set(const wchar_t* key, const std::wstring& v)
+{
+    for (auto& kv : attrs)
+    {
+        if (_wcsicmp(kv.first.c_str(), key) == 0)
+        {
+            kv.second = v;
+            return;
+        }
+    }
+    attrs.emplace_back(key, v);
+}
+
+// ===========================================================================
+// 工具
+// ===========================================================================
+namespace
+{
+    std::wstring XmlEscape(const std::wstring& s)
+    {
+        std::wstring out;
+        for (wchar_t c : s)
+        {
+            switch (c)
+            {
+            case L'&': out += L"&amp;"; break;
+            case L'<': out += L"&lt;"; break;
+            case L'>': out += L"&gt;"; break;
+            case L'"': out += L"&quot;"; break;
+            case L'\'': out += L"&apos;"; break;
+            default: out += c; break;
+            }
+        }
+        return out;
+    }
+
+    std::wstring Attr(IXMLDOMElement* element, const wchar_t* name)
+    {
+        VARIANT value;
+        VariantInit(&value);
+        BSTR key = ::SysAllocString(name);
+        element->getAttribute(key, &value);
+        ::SysFreeString(key);
+        std::wstring result;
+        if (value.vt == VT_BSTR && value.bstrVal != nullptr)
+            result = value.bstrVal;
+        ::VariantClear(&value);
+        return result;
+    }
+
+    int IntAttr(const std::wstring& s, int fallback)
+    {
+        if (s.empty())
+            return fallback;
+        return _wtoi(s.c_str());
+    }
+
+    // WPF 惯用写法 → 内部属性名的别名归一化。
+    // 目的：让按 WPF 常识写的 XAML 直接生效，而不是静默失效（我们踩过的坑）。
+    // 只做"名字层"的映射，不改任何语义；值域必须与内部名一致。
+    std::wstring WpfAlias(const std::wstring& a)
+    {
+        static const struct { const wchar_t* from; const wchar_t* to; } k[] = {
+            { L"Canvas.Left",    L"Left" },         // 我们用 Left/Top（画布定位）
+            { L"Canvas.Top",     L"Top" },
+            { L"DockPanel.Dock", L"Dock" },          // 我们用 Dock
+            { L"BorderBrush",    L"BorderColor" },   // WPF 叫 Brush，我们叫 Color
+            // HorizontalAlignment 的值域 Left/Center/Right 与 TextAlign 完全一致，可直接借用；
+            // Stretch 在 TextAlign 语义下无意义，会被当作未识别值（--check 会报）。
+            { L"HorizontalAlignment", L"TextAlign" },
+        };
+        for (const auto& e : k)
+            if (_wcsicmp(a.c_str(), e.from) == 0)
+                return e.to;
+        return a;
+    }
+
+    inline bool AttrIsAuto(const std::wstring& s)
+    {
+        return _wcsicmp(s.c_str(), L"Auto") == 0 || _wcsicmp(s.c_str(), L"NaN") == 0;
+    }
+
+    // ---------------- 布局缺省值（由 catalog 注入，避免 C++ 硬编码） ----------------
+    std::wstring KindOf(const std::wstring& raw);   // 前置声明（定义在布局段）
+
+    struct LayoutDefaults
+    {
+        std::vector<std::pair<std::wstring, std::pair<int, int>>> sizes; // tag -> (w,h)
+        int starMin = 30;      // 星号轨道最小宽度
+        int groupLeft = 12;    // GroupBox 边框物理内区左偏移
+        int groupTop = 24;     // GroupBox 边框物理内区上偏移
+    };
+
+    LayoutDefaults& layoutDefaults()
+    {
+        static LayoutDefaults d;
+        return d;
+    }
+
+    void defaultSizeFor(const std::wstring& tag, int& w, int& h)
+    {
+        const std::wstring key = KindOf(tag);
+        for (const auto& it : layoutDefaults().sizes)
+        {
+            if (it.first == key)
+            {
+                w = it.second.first;
+                h = it.second.second;
+                return;
+            }
+        }
+        w = 120;   // 最终兜底：catalog 未注册该标签
+        h = 28;
+    }
+
+    // 从属性名去掉 XML 命名空间前缀 {uri}Name -> Name
+    std::wstring LocalName(const std::wstring& k)
+    {
+        const size_t pos = k.rfind(L'}');
+        return pos == std::wstring::npos ? k : k.substr(pos + 1);
+    }
+
+    void ParseThickness(const std::wstring& text, XamlElement& node)
+    {
+        int values[4] = {0, 0, 0, 0};
+        int count = 0;
+        std::wstring current;
+        for (wchar_t c : text)
+        {
+            if (c == L',' || c == L' ')
+            {
+                if (!current.empty() && count < 4)
+                {
+                    values[count++] = _wtoi(current.c_str());
+                    current.clear();
+                }
+            }
+            else
+            {
+                current.push_back(c);
+            }
+        }
+        if (!current.empty() && count < 4)
+            values[count++] = _wtoi(current.c_str());
+
+        if (count == 1)
+            node.marginL = node.marginT = node.marginR = node.marginB = values[0];
+        else if (count == 2)
+        {
+            node.marginL = node.marginR = values[0];
+            node.marginT = node.marginB = values[1];
+        }
+        else if (count >= 4)
+        {
+            node.marginL = values[0];
+            node.marginT = values[1];
+            node.marginR = values[2];
+            node.marginB = values[3];
+        }
+    }
+
+    // 解析 Padding（四值/两值/单值），写入 padL/T/R/B
+    void ParsePadding(const std::wstring& text, XamlElement& node)
+    {
+        if (text.empty()) return;
+        int values[4] = {0, 0, 0, 0};
+        int count = 0;
+        std::wstring current;
+        for (wchar_t c : text)
+        {
+            if (c == L',' || c == L' ')
+            {
+                if (!current.empty() && count < 4)
+                {
+                    values[count++] = _wtoi(current.c_str());
+                    current.clear();
+                }
+            }
+            else
+            {
+                current.push_back(c);
+            }
+        }
+        if (!current.empty() && count < 4)
+            values[count++] = _wtoi(current.c_str());
+
+        if (count == 1)
+            node.padL = node.padT = node.padR = node.padB = values[0];
+        else if (count == 2)
+        {
+            node.padL = node.padR = values[0];
+            node.padT = node.padB = values[1];
+        }
+        else if (count >= 4)
+        {
+            node.padL = values[0];
+            node.padT = values[1];
+            node.padR = values[2];
+            node.padB = values[3];
+        }
+    }
+
+    std::wstring TagOf(IXMLDOMElement* e)
+    {
+        if (e == nullptr)
+            return {};
+        BSTR t = nullptr;
+        e->get_tagName(&t);
+        std::wstring s = t != nullptr ? t : L"";
+        ::SysFreeString(t);
+        return s;
+    }
+
+    std::wstring NameTail(const std::wstring& s)
+    {
+        const size_t colon = s.rfind(L':');
+        const size_t brace = s.rfind(L'}');
+        const size_t cut = (std::max)(colon == std::wstring::npos ? 0 : colon + 1,
+                                      brace == std::wstring::npos ? 0 : brace + 1);
+        return cut == 0 ? s : s.substr(cut);
+    }
+
+    // 按名字取属性（兼容 x:Key 这种带命名空间前缀的写法）
+    std::wstring AttrByName(IXMLDOMElement* element, const wchar_t* name)
+    {
+        if (element == nullptr)
+            return {};
+        IXMLDOMNamedNodeMap* attrs = nullptr;
+        element->get_attributes(&attrs);
+        if (attrs == nullptr)
+            return Attr(element, name);
+        std::wstring result;
+        long n = 0;
+        attrs->get_length(&n);
+        for (long i = 0; i < n; ++i)
+        {
+            IXMLDOMNode* an = nullptr;
+            attrs->get_item(i, &an);
+            if (an == nullptr)
+                continue;
+            BSTR nm = nullptr;
+            an->get_nodeName(&nm);
+            const std::wstring key = nm != nullptr ? nm : L"";
+            ::SysFreeString(nm);
+            VARIANT vv;
+            VariantInit(&vv);
+            an->get_nodeValue(&vv);
+            const std::wstring val = (vv.vt == VT_BSTR && vv.bstrVal != nullptr) ? vv.bstrVal : L"";
+            ::VariantClear(&vv);
+            an->Release();
+            if (_wcsicmp(NameTail(key).c_str(), NameTail(name).c_str()) == 0)
+            {
+                result = val;
+                break;
+            }
+        }
+        attrs->Release();
+        return result;
+    }
+
+    void ParseDefs(IXMLDOMElement* element, bool rows, XamlElement& node)
+    {
+        IXMLDOMNodeList* children = nullptr;
+        element->get_childNodes(&children);
+        if (children == nullptr)
+            return;
+
+        const std::wstring defsTag = rows ? L"Grid.RowDefinitions" : L"Grid.ColumnDefinitions";
+        const std::wstring itemTag = rows ? L"RowDefinition" : L"ColumnDefinition";
+        const std::wstring sizeAttr = rows ? L"Height" : L"Width";
+
+        long count = 0;
+        children->get_length(&count);
+        for (long i = 0; i < count; ++i)
+        {
+            IXMLDOMNode* n = nullptr;
+            children->get_item(i, &n);
+            if (n == nullptr)
+                continue;
+            DOMNodeType type = NODE_INVALID;
+            n->get_nodeType(&type);
+            IXMLDOMElement* child = nullptr;
+            n->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&child));
+            n->Release();
+            if (type != NODE_ELEMENT || child == nullptr)
+                continue;
+
+            BSTR tagB = nullptr;
+            child->get_tagName(&tagB);
+            std::wstring childTag = tagB != nullptr ? tagB : L"";
+            ::SysFreeString(tagB);
+            if (childTag != defsTag)
+            {
+                child->Release();
+                continue;
+            }
+
+            IXMLDOMNodeList* defs = nullptr;
+            child->get_childNodes(&defs);
+            child->Release();
+            if (defs == nullptr)
+                continue;
+
+            long defCount = 0;
+            defs->get_length(&defCount);
+            auto& target = rows ? node.gridRows : node.gridCols;
+            for (long d = 0; d < defCount; ++d)
+            {
+                IXMLDOMNode* dn = nullptr;
+                defs->get_item(d, &dn);
+                if (dn == nullptr)
+                    continue;
+                IXMLDOMElement* def = nullptr;
+                dn->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&def));
+                dn->Release();
+                if (def == nullptr)
+                    continue;
+                BSTR dt = nullptr;
+                def->get_tagName(&dt);
+                std::wstring defTag = dt != nullptr ? dt : L"";
+                ::SysFreeString(dt);
+                if (defTag == itemTag)
+                    target.emplace_back(sizeAttr, Attr(def, sizeAttr.c_str()));
+                def->Release();
+            }
+            defs->Release();
+        }
+        children->Release();
+    }
+
+    using TemplateTable = std::vector<std::pair<std::wstring, std::vector<XamlElement>>>;
+
+    // ---------- 资源字典跨文件合并（ResourceDictionary Source） 路径工具 ----------
+    std::wstring PathDirOf(const std::wstring& path)
+    {
+        const size_t p = path.find_last_of(L"\\/");
+        return p == std::wstring::npos ? std::wstring() : path.substr(0, p);
+    }
+
+    // 规范化绝对路径：统一分隔符、去掉末尾反斜杠
+    std::wstring NormPath(const std::wstring& path)
+    {
+        wchar_t buf[MAX_PATH * 2] = {0};
+        if (::GetFullPathNameW(path.c_str(), MAX_PATH * 2, buf, nullptr) == 0)
+            return path;
+        std::wstring s = buf;
+        for (wchar_t& c : s)
+            if (c == L'/')
+                c = L'\\';
+        while (s.size() > 3 && s.back() == L'\\')
+            s.pop_back();
+        return s;
+    }
+
+    // Source 解析：相对路径基于当前文档目录；绝对路径原样；pack:// 之类的 URI 不支持
+    bool ResolveRefPath(const std::wstring& src, const std::wstring& baseDir, std::wstring& out)
+    {
+        if (src.empty())
+            return false;
+        if (src.rfind(L"pack:", 0) == 0 || src.rfind(L"ms-appx:", 0) == 0 ||
+            src.find(L"://") != std::wstring::npos)
+            return false;
+        std::wstring s = src;
+        for (wchar_t& c : s)
+            if (c == L'/')
+                c = L'\\';
+        if (s.size() >= 2 && s[1] == L':' && (s[0] >= L'A' && s[0] <= L'Z' || s[0] >= L'a' && s[0] <= L'z'))
+        {
+            out = s;   // C:\...
+            return true;
+        }
+        if (!s.empty() && s[0] == L'\\')
+        {
+            out = s;   // \server\share
+            return true;
+        }
+        if (baseDir.empty())
+            return false;
+        out = baseDir + L"\\" + s;
+        return true;
+    }
+
+    bool IsResourceContainerTag(const std::wstring& tag)
+    {
+        return tag == L"ResourceDictionary" || tag == L"MergedDictionaries" ||
+               tag.find(L"Resources") != std::wstring::npos;
+    }
+
+    void CollectStyle(IXMLDOMElement* styleEl, std::vector<XamlStyle>& out)
+    {
+        XamlStyle st;
+        st.key = AttrByName(styleEl, L"x:Key");
+        if (st.key.empty())
+            st.key = AttrByName(styleEl, L"Key");
+        st.targetType = AttrByName(styleEl, L"TargetType");
+        const std::wstring basedOn = AttrByName(styleEl, L"BasedOn");
+        std::wstring bk;
+        st.basedOn = xamlIsResourceRef(basedOn, bk) ? bk : basedOn;
+
+        // <Trigger Property=".." Value=".."> 里的 Setter 收集到对应触发器
+        auto collectTrigger = [&](IXMLDOMElement* trigEl) {
+            XamlTrigger trig;
+            trig.prop = AttrByName(trigEl, L"Property");
+            trig.value = AttrByName(trigEl, L"Value");
+            if (trig.prop.empty())
+                return;
+            IXMLDOMNodeList* tn = nullptr;
+            trigEl->get_childNodes(&tn);
+            if (tn != nullptr)
+            {
+                long tc = 0;
+                tn->get_length(&tc);
+                for (long t = 0; t < tc; ++t)
+                {
+                    IXMLDOMNode* tnode = nullptr;
+                    tn->get_item(t, &tnode);
+                    if (tnode == nullptr)
+                        continue;
+                    IXMLDOMElement* tele = nullptr;
+                    tnode->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&tele));
+                    tnode->Release();
+                    if (tele != nullptr)
+                    {
+                        if (TagOf(tele) == L"Setter")
+                        {
+                            XamlSetter s;
+                            s.prop = AttrByName(tele, L"Property");
+                            s.value = AttrByName(tele, L"Value");
+                            if (!s.prop.empty())
+                                trig.setters.push_back(s);
+                        }
+                        tele->Release();
+                    }
+                }
+                tn->Release();
+            }
+            st.triggers.push_back(trig);
+        };
+
+        IXMLDOMNodeList* kids = nullptr;
+        styleEl->get_childNodes(&kids);
+        if (kids != nullptr)
+        {
+            long n = 0;
+            kids->get_length(&n);
+            for (long i = 0; i < n; ++i)
+            {
+                IXMLDOMNode* kn = nullptr;
+                kids->get_item(i, &kn);
+                if (kn == nullptr)
+                    continue;
+                IXMLDOMElement* ke = nullptr;
+                kn->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&ke));
+                kn->Release();
+                if (ke == nullptr)
+                    continue;
+                const std::wstring ktag = TagOf(ke);
+                if (ktag == L"Setter")
+                {
+                    XamlSetter s;
+                    s.prop = Attr(ke, L"Property");
+                    if (s.prop.empty())
+                        s.prop = Attr(ke, L"Name");
+                    s.value = Attr(ke, L"Value");
+                    if (!s.prop.empty())
+                        st.setters.push_back(s);
+                }
+                else if (ktag == L"Trigger")
+                {
+                    collectTrigger(ke);
+                }
+                else if (ktag.find(L"Triggers") != std::wstring::npos)
+                {
+                    // <Style.Triggers> 容器：往里找 Trigger
+                    IXMLDOMNodeList* gk = nullptr;
+                    ke->get_childNodes(&gk);
+                    if (gk != nullptr)
+                    {
+                        long gc = 0;
+                        gk->get_length(&gc);
+                        for (long g = 0; g < gc; ++g)
+                        {
+                            IXMLDOMNode* gnode = nullptr;
+                            gk->get_item(g, &gnode);
+                            if (gnode == nullptr)
+                                continue;
+                            IXMLDOMElement* gele = nullptr;
+                            gnode->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&gele));
+                            gnode->Release();
+                            if (gele != nullptr)
+                            {
+                                if (TagOf(gele) == L"Trigger")
+                                    collectTrigger(gele);
+                                gele->Release();
+                            }
+                        }
+                        gk->Release();
+                    }
+                }
+                ke->Release();
+            }
+            kids->Release();
+        }
+        out.push_back(st);
+    }
+
+
+    // ---------- Repeater 模板克隆时的占位符替换 ----------
+    std::wstring SubstAll(std::wstring s, const std::wstring& key, const std::wstring& val)
+    {
+        size_t p = 0;
+        while ((p = s.find(key, p)) != std::wstring::npos)
+        {
+            s.replace(p, key.size(), val);
+            p += val.size();
+        }
+        return s;
+    }
+
+    void SubstDom(IXMLDOMElement* el, int index, int count, const std::wstring& item, int top)
+    {
+        if (el == nullptr)
+            return;
+        const std::wstring idx = std::to_wstring(index);
+        const std::wstring idx1 = std::to_wstring(index + 1);
+        const std::wstring cnt = std::to_wstring(count);
+        const std::wstring topS = std::to_wstring(top);
+
+        IXMLDOMNamedNodeMap* attrs = nullptr;
+        el->get_attributes(&attrs);
+        if (attrs != nullptr)
+        {
+            long n = 0;
+            attrs->get_length(&n);
+            for (long i = 0; i < n; ++i)
+            {
+                IXMLDOMNode* att = nullptr;
+                attrs->get_item(i, &att);
+                if (att == nullptr)
+                    continue;
+                VARIANT vv;
+                VariantInit(&vv);
+                att->get_nodeValue(&vv);
+                std::wstring val = (vv.vt == VT_BSTR && vv.bstrVal != nullptr) ? vv.bstrVal : L"";
+                ::VariantClear(&vv);
+                std::wstring out = val;
+                out = SubstAll(out, L"{item}", item);
+                out = SubstAll(out, L"{count}", cnt);
+                out = SubstAll(out, L"{index1}", idx1);
+                out = SubstAll(out, L"{index}", idx);
+                out = SubstAll(out, L"{top}", topS);
+                if (out != val)
+                {
+                    VARIANT nv;
+                    VariantInit(&nv);
+                    nv.vt = VT_BSTR;
+                    nv.bstrVal = ::SysAllocString(out.c_str());
+                    att->put_nodeValue(nv);
+                    ::VariantClear(&nv);
+                }
+                att->Release();
+            }
+            attrs->Release();
+        }
+
+        IXMLDOMNodeList* kids = nullptr;
+        el->get_childNodes(&kids);
+        if (kids == nullptr)
+            return;
+        long kc = 0;
+        kids->get_length(&kc);
+        for (long i = 0; i < kc; ++i)
+        {
+            IXMLDOMNode* kid = nullptr;
+            kids->get_item(i, &kid);
+            if (kid == nullptr)
+                continue;
+            IXMLDOMElement* ke = nullptr;
+            kid->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&ke));
+            kid->Release();
+            if (ke != nullptr)
+            {
+                SubstDom(ke, index, count, item, top);
+                ke->Release();
+            }
+        }
+        kids->Release();
+    }
+    void ParseElement(IXMLDOMElement* element, XamlElement& node,
+                      std::vector<XamlStyle>* styles, TemplateTable* templates,
+                      const std::wstring& baseDir,
+                      std::vector<std::wstring>* resStack)
+    {
+        BSTR tagName = nullptr;
+        element->get_tagName(&tagName);
+        node.tag = tagName != nullptr ? tagName : L"";
+        ::SysFreeString(tagName);
+
+        // Loader：整个节点换成 Control 指定的标签；写了子元素时以子模板为准。
+        // 必须放在属性解析之前，否则 Control/Canvas.Left 的语义换算会落在旧标签上。
+        if (_wcsicmp(node.tag.c_str(), L"Loader") == 0)
+        {
+            std::wstring ctl = AttrByName(element, L"Control");
+            if (ctl.empty())
+                ctl = AttrByName(element, L"TargetType");
+            IXMLDOMNodeList* lk = nullptr;
+            element->get_childNodes(&lk);
+            bool usedKid = false;
+            if (lk != nullptr)
+            {
+                long ln = 0;
+                lk->get_length(&ln);
+                for (long li = 0; li < ln && !usedKid; ++li)
+                {
+                    IXMLDOMNode* kn = nullptr;
+                    lk->get_item(li, &kn);
+                    if (kn == nullptr)
+                        continue;
+                    DOMNodeType kt = NODE_INVALID;
+                    kn->get_nodeType(&kt);
+                    IXMLDOMElement* ke = nullptr;
+                    kn->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&ke));
+                    kn->Release();
+                    if (kt != NODE_ELEMENT || ke == nullptr)
+                        continue;
+                    usedKid = true;
+                    ParseElement(ke, node, styles, templates, baseDir, resStack);
+                    ke->Release();
+                }
+                lk->Release();
+            }
+            if (usedKid)
+                return;
+            if (ctl.empty())
+                ctl = L"Button";
+            node.tag = ctl;
+        }
+
+        // 资源扫描：递归收集 <Style> / <ControlTemplate>，可嵌在任意 *Resources 容器里。
+        // 资源容器上写 Source="xxx.xaml" 时，把目标文档的**资源**合并进来（控件节点不合并）。
+        std::function<void(const std::wstring&)> mergeResFile;
+        std::function<void(IXMLDOMElement*)> scanRes = [&](IXMLDOMElement* resEl) {
+            if (resEl == nullptr)
+                return;
+            const std::wstring rtag = TagOf(resEl);
+            if (IsResourceContainerTag(rtag))
+            {
+                const std::wstring src = AttrByName(resEl, L"Source");
+                if (!src.empty())
+                    mergeResFile(src);
+            }
+            if (rtag == L"Style")
+            {
+                if (styles != nullptr)
+                    CollectStyle(resEl, *styles);
+                return;
+            }
+            if (rtag == L"ControlTemplate")
+            {
+                if (templates == nullptr)
+                    return;
+                std::wstring key = AttrByName(resEl, L"x:Key");
+                if (key.empty())
+                    key = AttrByName(resEl, L"Key");
+                if (key.empty())
+                    return;
+                std::vector<XamlElement> nodes;
+                IXMLDOMNodeList* tn = nullptr;
+                resEl->get_childNodes(&tn);
+                if (tn != nullptr)
+                {
+                    long tc = 0;
+                    tn->get_length(&tc);
+                    for (long ti = 0; ti < tc; ++ti)
+                    {
+                        IXMLDOMNode* tnode = nullptr;
+                        tn->get_item(ti, &tnode);
+                        if (tnode == nullptr)
+                            continue;
+                        DOMNodeType ttype = NODE_INVALID;
+                        tnode->get_nodeType(&ttype);
+                        IXMLDOMElement* tele = nullptr;
+                        tnode->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&tele));
+                        tnode->Release();
+                        if (ttype == NODE_ELEMENT && tele != nullptr)
+                        {
+                            nodes.emplace_back();
+                            ParseElement(tele, nodes.back(), styles, templates, baseDir, resStack);
+                            tele->Release();
+                        }
+                    }
+                    tn->Release();
+                }
+                (*templates).emplace_back(key, nodes);
+                return;
+            }
+
+            // 其余（Window.Resources / Resources / 嵌套容器）继续往下扫
+            IXMLDOMNodeList* kids = nullptr;
+            resEl->get_childNodes(&kids);
+            if (kids == nullptr)
+                return;
+            long n = 0;
+            kids->get_length(&n);
+            for (long i = 0; i < n; ++i)
+            {
+                IXMLDOMNode* kn = nullptr;
+                kids->get_item(i, &kn);
+                if (kn == nullptr)
+                    continue;
+                DOMNodeType ktype = NODE_INVALID;
+                kn->get_nodeType(&ktype);
+                IXMLDOMElement* ke = nullptr;
+                kn->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&ke));
+                kn->Release();
+                if (ktype == NODE_ELEMENT && ke != nullptr)
+                {
+                    scanRes(ke);
+                    ke->Release();
+                }
+            }
+            kids->Release();
+        };
+
+        // 合并另一个文件的资源表：只取 Style / ControlTemplate，绝不引入控件节点。
+        // resStack 保存正在加载的文件链，用来挡住循环引用与自引用。
+        mergeResFile = [&](const std::wstring& src) {
+            std::wstring abs;
+            if (!ResolveRefPath(src, baseDir, abs))
+                return;
+            const std::wstring norm = NormPath(abs);
+            if (resStack != nullptr)
+            {
+                for (const auto& s : *resStack)
+                    if (_wcsicmp(s.c_str(), norm.c_str()) == 0)
+                        return;   // 已在本链上：循环引用，直接跳过
+            }
+            IXMLDOMDocument2* doc = nullptr;
+            if (FAILED(::CoCreateInstance(__uuidof(DOMDocument60), nullptr, CLSCTX_INPROC_SERVER,
+                                          IID_IXMLDOMDocument2, reinterpret_cast<void**>(&doc)) ||
+                       doc == nullptr))
+                return;
+            doc->put_async(VARIANT_FALSE);
+            doc->put_validateOnParse(VARIANT_FALSE);
+            VARIANT_BOOL ok = VARIANT_FALSE;
+            doc->load(_variant_t(norm.c_str()), &ok);
+            if (ok != VARIANT_TRUE)
+            {
+                doc->Release();
+                return;
+            }
+            IXMLDOMElement* resRoot = nullptr;
+            doc->get_documentElement(&resRoot);
+            if (resRoot != nullptr)
+            {
+                if (resStack != nullptr)
+                    resStack->push_back(norm);
+
+                if (IsResourceContainerTag(TagOf(resRoot)))
+                {
+                    scanRes(resRoot);   // 纯资源字典文件：整棵扫
+                }
+                else
+                {
+                    // 普通文档（Window / Page / UserControl）：只取其中的 *Resources 容器
+                    IXMLDOMNodeList* rk = nullptr;
+                    resRoot->get_childNodes(&rk);
+                    if (rk != nullptr)
+                    {
+                        long rn = 0;
+                        rk->get_length(&rn);
+                        for (long ri = 0; ri < rn; ++ri)
+                        {
+                            IXMLDOMNode* rnode = nullptr;
+                            rk->get_item(ri, &rnode);
+                            if (rnode == nullptr)
+                                continue;
+                            DOMNodeType rtype = NODE_INVALID;
+                            rnode->get_nodeType(&rtype);
+                            IXMLDOMElement* rel = nullptr;
+                            rnode->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&rel));
+                            rnode->Release();
+                            if (rtype == NODE_ELEMENT && rel != nullptr)
+                            {
+                                if (IsResourceContainerTag(TagOf(rel)))
+                                    scanRes(rel);
+                                rel->Release();
+                            }
+                        }
+                        rk->Release();
+                    }
+                }
+
+                if (resStack != nullptr && !resStack->empty())
+                    resStack->pop_back();
+                resRoot->Release();
+            }
+            doc->Release();
+        };
+
+        // 采集全部属性到 attrs（保留顺序与原始名）
+        IXMLDOMNamedNodeMap* attrs = nullptr;
+        element->get_attributes(&attrs);
+        if (attrs != nullptr)
+        {
+            long ac = 0;
+            attrs->get_length(&ac);
+            for (long ai = 0; ai < ac; ++ai)
+            {
+                IXMLDOMNode* an = nullptr;
+                attrs->get_item(ai, &an);
+                if (an == nullptr)
+                    continue;
+                BSTR aname = nullptr;
+                an->get_nodeName(&aname);
+                std::wstring ak = aname != nullptr ? aname : L"";
+                ::SysFreeString(aname);
+                VARIANT vv;
+                VariantInit(&vv);
+                an->get_nodeValue(&vv);
+                std::wstring v = (vv.vt == VT_BSTR && vv.bstrVal != nullptr) ? vv.bstrVal : L"";
+                ::VariantClear(&vv);
+                node.attrs.emplace_back(WpfAlias(ak), v);
+                an->Release();
+            }
+            attrs->Release();
+        }
+
+        // 语义字段
+        node.name = node.get(L"x:Name");
+        if (node.name.empty())
+            node.name = node.get(L"Name");
+        node.text = node.get(L"Content");
+        if (node.text.empty())
+            node.text = node.get(L"Text");
+        if (node.text.empty())
+            node.text = node.get(L"Header");
+        node.icon = node.get(L"Icon");   // 图标路径（res/xxx.png，相对 exe 目录）
+
+        node.x = IntAttr(node.get(L"Left"), 0);
+        node.y = IntAttr(node.get(L"Top"), 0);
+        node.hasX = node.has(L"Left");
+        node.hasY = node.has(L"Top");
+        {
+            // 缺省尺寸来自 control_catalog.xml（未注册的标签才用最终兜底）
+            int dw = 100, dh = 28;
+            defaultSizeFor(node.tag, dw, dh);
+            // Width/Height="Auto" 按 WPF 语义 = "不声明尺寸，交给布局算"。
+            // 不能让 _wtoi("Auto") 得到 0，否则控件会塌成 0 像素。
+            const std::wstring wAttr = node.get(L"Width");
+            const std::wstring hAttr = node.get(L"Height");
+            const bool wAuto = AttrIsAuto(wAttr);
+            const bool hAuto = AttrIsAuto(hAttr);
+            node.hasW = !wAttr.empty() && !wAuto;
+            node.hasH = !hAttr.empty() && !hAuto;
+            node.w = (wAttr.empty() || wAuto) ? dw : IntAttr(wAttr, dw);
+            node.h = (hAttr.empty() || hAuto) ? dh : IntAttr(hAttr, dh);
+        }
+        if (!node.hasH)
+        {
+            if (_wcsicmp(node.tag.c_str(), L"ToolBar") == 0) node.h = 32;
+            else if (_wcsicmp(node.tag.c_str(), L"MenuBar") == 0) node.h = 24;
+            else if (_wcsicmp(node.tag.c_str(), L"StatusBar") == 0) node.h = 24;
+        }
+        node.row = IntAttr(node.get(L"Grid.Row"), 0);
+        node.col = IntAttr(node.get(L"Grid.Column"), 0);
+        node.rowSpan = (std::max)(1, IntAttr(node.get(L"Grid.RowSpan"), 1));
+        node.colSpan = (std::max)(1, IntAttr(node.get(L"Grid.ColumnSpan"), 1));
+        ParseThickness(node.get(L"Margin"), node);
+        ParsePadding(node.get(L"Padding"), node);
+        node.spacing = IntAttr(node.get(L"Spacing"), 0);
+        node.horizontal = _wcsicmp(node.get(L"Orientation").c_str(), L"Horizontal") == 0;
+        node.hasOrientation = !node.get(L"Orientation").empty();
+
+        if (_wcsicmp(node.tag.c_str(), L"Grid") == 0)
+        {
+            ParseDefs(element, true, node);
+            ParseDefs(element, false, node);
+        }
+
+        // 子元素
+        IXMLDOMNodeList* children = nullptr;
+        element->get_childNodes(&children);
+        if (children != nullptr)
+        {
+            long count = 0;
+            children->get_length(&count);
+            for (long i = 0; i < count; ++i)
+            {
+                IXMLDOMNode* childNode = nullptr;
+                children->get_item(i, &childNode);
+                if (childNode == nullptr)
+                    continue;
+                DOMNodeType type = NODE_INVALID;
+                childNode->get_nodeType(&type);
+                IXMLDOMElement* childElement = nullptr;
+                childNode->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&childElement));
+                childNode->Release();
+                if (type != NODE_ELEMENT || childElement == nullptr)
+                    continue;
+
+                BSTR ct = nullptr;
+                childElement->get_tagName(&ct);
+                std::wstring childTag = ct != nullptr ? ct : L"";
+                ::SysFreeString(ct);
+
+                // 资源类节点：不参与布局，交给 scanRes 采集样式/模板
+                if (childTag == L"Grid.RowDefinitions" ||
+                    childTag == L"Grid.ColumnDefinitions")
+                {
+                    childElement->Release();
+                    continue;
+                }
+                if (IsResourceContainerTag(childTag) ||
+                    childTag == L"Style" ||
+                    childTag == L"ControlTemplate" ||
+                    childTag == L"DataTemplate")
+                {
+                    scanRes(childElement);
+                    childElement->Release();
+                    continue;
+                }
+
+
+                // ---- Repeater：解析期按数据把模板克隆 N 份（本身不建控件） ----
+                if (_wcsicmp(childTag.c_str(), L"Repeater") == 0)
+                {
+                    std::vector<std::wstring> rows;
+                    const std::wstring items = AttrByName(childElement, L"Items");
+                    if (!items.empty())
+                    {
+                        std::wstring cur;
+                        for (wchar_t c : items)
+                        {
+                            if (c == L'\r')
+                                continue;
+                            if (c == L'|' || c == L';' || c == L'\n')
+                            {
+                                rows.push_back(cur);
+                                cur.clear();
+                                continue;
+                            }
+                            cur.push_back(c);
+                        }
+                        rows.push_back(cur);
+                    }
+                    int count = _wtoi(AttrByName(childElement, L"Count").c_str());
+                    if (count <= 0)
+                        count = rows.empty() ? 1 : static_cast<int>(rows.size());
+                    if (count > 400)
+                        count = 400;
+                    const int itemH = _wtoi(AttrByName(childElement, L"ItemHeight").c_str());
+                    const int spacing = _wtoi(AttrByName(childElement, L"Spacing").c_str());
+                    const int stride = (itemH > 0 ? itemH : 0) + spacing;
+
+                    IXMLDOMNodeList* repKids = nullptr;
+                    childElement->get_childNodes(&repKids);
+                    if (repKids != nullptr)
+                    {
+                        long rc = 0;
+                        repKids->get_length(&rc);
+                        for (long ri = 0; ri < rc; ++ri)
+                        {
+                            IXMLDOMNode* rnode = nullptr;
+                            repKids->get_item(ri, &rnode);
+                            if (rnode == nullptr)
+                                continue;
+                            DOMNodeType rtype = NODE_INVALID;
+                            rnode->get_nodeType(&rtype);
+                            IXMLDOMElement* rel = nullptr;
+                            rnode->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&rel));
+                            if (rtype != NODE_ELEMENT || rel == nullptr)
+                            {
+                                rnode->Release();
+                                continue;
+                            }
+                            for (int i = 0; i < count; ++i)
+                            {
+                                const std::wstring row = i < static_cast<int>(rows.size()) ? rows[i] : std::wstring();
+                                IXMLDOMNode* clone = nullptr;
+                                rel->cloneNode(VARIANT_TRUE, &clone);
+                                if (clone == nullptr)
+                                    continue;
+                                IXMLDOMElement* ce = nullptr;
+                                clone->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&ce));
+                                clone->Release();
+                                if (ce == nullptr)
+                                    continue;
+                                SubstDom(ce, i, count, row, stride * i);
+                                node.children.emplace_back();
+                                ParseElement(ce, node.children.back(), styles, templates, baseDir, resStack);
+                                // 克隆出来的控件必须有名（宿主建控件依赖 x:Name 找 id）
+                                {
+                                    XamlElement& made = node.children.back();
+                                    std::wstring base = made.name;
+                                    if (base.empty())
+                                        base = L"item";
+                                    made.name = base + L"_" + std::to_wstring(i);
+                                }
+                                ce->Release();
+                            }
+                            rel->Release();
+                            rnode->Release();
+                        }
+                        repKids->Release();
+                    }
+                    childElement->Release();
+                    continue;
+                }
+
+                node.children.emplace_back();
+                ParseElement(childElement, node.children.back(), styles, templates, baseDir, resStack);
+                childElement->Release();
+            }
+            children->Release();
+        }
+    }
+
+    // ---------- 布局引擎（复刻 guiload 语义） ----------
+    struct Track
+    {
+        int kind = 2;   // 0 fixed, 1 auto, 2 star
+        int value = 1;
+    };
+
+    int Sum(const std::vector<int>& sizes, int start, int count)
+    {
+        int total = 0;
+        for (int i = start; i < start + count && i < (int)sizes.size(); ++i)
+            total += sizes[i];
+        return total;
+    }
+
+    // 标签 -> 内部短名（与 guiload TagKind 一致：小写、去命名空间、控件映射）
+    std::wstring KindOf(const std::wstring& raw)
+    {
+        std::wstring tag = raw;
+        const size_t brace = tag.rfind(L'}');
+        if (brace != std::wstring::npos)
+            tag = tag.substr(brace + 1);
+        for (wchar_t& c : tag)
+            c = (wchar_t)towlower(c);
+        const size_t dot = tag.rfind(L'.');
+        if (dot != std::wstring::npos)
+            tag = tag.substr(dot + 1);
+
+        if (tag == L"textblock") return L"label";
+        if (tag == L"textbox") return L"edit";
+        if (tag == L"radiobutton") return L"radio";
+        if (tag == L"groupbox") return L"group";
+        if (tag == L"stackpanel") return L"stackpanel";
+        if (tag == L"dockpanel") return L"dockpanel";
+        if (tag == L"wrappanel") return L"wrappanel";
+        if (tag == L"layout" || tag == L"layoutpanel" || tag == L"absolutepanel" ||
+            tag == L"abspanel" || tag == L"canvaspanel" || tag == L"canvaslayout")
+            return L"canvas";          // 布局侧统一按 canvas 走
+        if (tag == L"paletteset") return L"palette";
+        if (tag == L"tabitem") return L"page";
+        if (tag == L"rowdefinition") return L"rowdefinition";
+        if (tag == L"columndefinition") return L"columndefinition";
+        return tag; // button/listbox/checkbox/combo/progress/slider/grid/window/toolbar 等原样
+    }
+
+    bool IsKnownControl(const std::wstring& tag)
+    {
+        return tag == L"label" || tag == L"button" || tag == L"edit" || tag == L"listbox" ||
+               tag == L"checkbox" || tag == L"radio" || tag == L"group" || tag == L"combo" ||
+               tag == L"progress" || tag == L"slider";
+    }
+
+    bool IsContainer(const std::wstring& tag)
+    {
+        // AbsolutePanel 是"绝对定位布局"的正名；Canvas 是它的历史别名（画布另有 DrawCanvas）。
+        return tag == L"stackpanel" || tag == L"grid" || tag == L"dockpanel" ||
+               tag == L"wrappanel" || tag == L"canvas" || tag == L"absolutepanel" ||
+               tag == L"abspanel" || tag == L"canvaspanel" || tag == L"canvaslayout" ||
+               tag == L"layout" || tag == L"layoutpanel" ||
+               // 侧栏：<PaletteSet> 是多页宿主，<page> 是一页（内部照样放容器和控件）
+               tag == L"palette" || tag == L"page";
+    }
+
+    int DefaultHeight(const std::wstring& tag)
+    {
+        // 优先取 catalog 注入的缺省尺寸；未注册才用内置兜底
+        int dw = 120, dh = 0;
+        if (xamlGetDefaultSize(tag.c_str(), dw, dh))
+            return dh;
+        if (tag == L"label") return 24;
+        if (tag == L"button") return 32;
+        if (tag == L"edit") return 28;
+        if (tag == L"checkbox" || tag == L"radio") return 24;
+        if (tag == L"group") return 80;
+        if (tag == L"listbox") return 120;
+        if (tag == L"combo") return 120;
+        if (tag == L"progress") return 20;
+        if (tag == L"slider") return 32;
+        return 24;
+    }
+
+    std::vector<int> ResolveTracks(const std::vector<std::pair<std::wstring, std::wstring>>& defs,
+                                   bool rows, const std::vector<XamlElement>& children, int available)
+    {
+        std::vector<Track> tracks;
+        for (const auto& kv : defs)
+        {
+            Track t;
+            std::wstring text = kv.second;
+            std::transform(text.begin(), text.end(), text.begin(), towlower);
+            if (text == L"auto")
+            {
+                t.kind = 1;
+                t.value = 0;
+            }
+            else if (!text.empty() && text.back() == L'*')
+            {
+                t.kind = 2;
+                std::wstring weight = text.substr(0, text.size() - 1);
+                t.value = weight.empty() ? 1 : (std::max)(1, _wtoi(weight.c_str()));
+            }
+            else
+            {
+                t.kind = 0;
+                t.value = (std::max)(0, _wtoi(text.c_str()));
+            }
+            tracks.push_back(t);
+        }
+        if (tracks.empty())
+            tracks.push_back(Track{2, 1});
+
+        int fixedSum = 0, autoSum = 0, starWeight = 0;
+        for (size_t i = 0; i < tracks.size(); ++i)
+        {
+            Track& t = tracks[i];
+            if (t.kind == 0) fixedSum += t.value;
+            else if (t.kind == 1)
+            {
+                int need = rows ? 24 : 100;
+                for (const auto& child : children)
+                {
+                    if ((rows ? child.row : child.col) != (int)i)
+                        continue;
+                    const std::wstring kind = KindOf(child.tag);
+                    if (!IsKnownControl(kind) && !IsContainer(kind))
+                        continue;
+                    need = (std::max)(need, rows ? child.h : child.w);
+                }
+                t.value = need;
+                autoSum += need;
+            }
+            else starWeight += (std::max)(1, t.value);
+        }
+
+        const int remaining = (std::max)(0, available - fixedSum - autoSum);
+        int unit = starWeight > 0 ? remaining / starWeight : 0;
+        if (unit <= 0) unit = layoutDefaults().starMin;
+
+        std::vector<int> result;
+        int lastStar = -1;
+        for (size_t i = 0; i < tracks.size(); ++i)
+        {
+            const Track& t = tracks[i];
+            result.push_back(t.kind == 2 ? (std::max)(1, unit * (std::max)(1, t.value)) : t.value);
+            if (t.kind == 2)
+                lastStar = static_cast<int>(i);
+        }
+        // 取整会丢掉余数：640 宽 12 + 3*star + 12 会算成 639。
+        // 余数补给最后一个 star 轨道，保证各轨道之和正好等于可用宽度。
+        if (lastStar >= 0)
+        {
+            int sum = 0;
+            for (int v : result)
+                sum += v;
+            if (sum > 0 && sum < available)
+                result[lastStar] += (available - sum);
+        }
+        return result;
+    }
+
+    // 流式布局上下文（对应 guiload 的 GuiFlow）
+    struct XamlFlow
+    {
+        int margin = 0;      // 不再有暗默认边距：位置一律来自 XAML 的 Left/Top/Margin
+        int spacing = 0;     // 子元素间距，来自容器 XAML 的 Spacing（缺省 0）
+        int cursorY = 0;     // 相对 offsetY
+        int cursorX = 0;     // 横向排列游标
+        int width = 240;     // 容器内容宽度
+        int offsetX = 0;
+        int offsetY = 0;
+        bool horizontal = false;
+        int height = 0;      // 容器可用高度
+        int padding = 0;     // 左内边距（XAML Padding）
+        int paddingY = 0;    // 上内边距（XAML Padding）
+        std::vector<int> gridRows;
+        std::vector<int> gridCols;
+    };
+
+    void LayoutNode(XamlElement& node, XamlFlow& flow)
+    {
+        // Dock 布局：容器内任一子元素声明 Dock（非 None）即启用，
+        // 该子元素占一块剩余区，其余按声明顺序依次切分（WinForms 语义）
+        bool dockMode = false;
+        for (const auto& c : node.children)
+        {
+            const std::wstring d = c.get(L"Dock");
+            if (!d.empty() && _wcsicmp(d.c_str(), L"None") != 0)
+            {
+                dockMode = true;
+                break;
+            }
+        }
+        int dockL = flow.padding, dockT = flow.paddingY;
+        int dockR = (std::max)(dockL + 1, flow.width);
+        int dockB = flow.height > 0 ? flow.height : (dockT + 1);
+        const bool paletteRoot = KindOf(node.tag) == L"palette";
+        bool firstPage = true;
+
+        for (auto& child : node.children)
+        {
+            const std::wstring tag = KindOf(child.tag);
+            // 侧栏的多页：预览与设计器只画第一页（其余页数据保留，运行时靠 tab 切换）
+            if (tag == L"page")
+            {
+                if (paletteRoot && !firstPage)
+                    continue;
+                firstPage = false;
+            }
+            else if (tag == L"rowdefinition" || tag == L"columndefinition")
+                continue;
+
+            const int defH = IsContainer(tag)
+                ? (flow.height > 0 ? flow.height : 160)
+                : DefaultHeight(tag);
+            int h = child.hasH ? child.h : defH;
+            int w = child.hasW ? child.w
+                               : (std::max)(1, flow.width - flow.margin * 2 - flow.padding * 2);
+
+            // 坐标：默认流式，写全 Left/Top 用绝对
+            const bool useGridX = !flow.gridCols.empty();
+            const bool useGridY = !flow.gridRows.empty();
+            int localX = 0, localY = 0;
+            bool docked = false;
+            if (dockMode)
+            {
+                const std::wstring d = child.get(L"Dock");
+                if (!d.empty() && _wcsicmp(d.c_str(), L"None") != 0)
+                {
+                    docked = true;
+                    const int gap = flow.spacing;
+                    if (_wcsicmp(d.c_str(), L"Fill") == 0)
+                    {
+                        localX = dockL;
+                        localY = dockT;
+                        w = (std::max)(1, dockR - dockL);
+                        h = (std::max)(1, dockB - dockT);
+                    }
+                    else if (_wcsicmp(d.c_str(), L"Top") == 0)
+                    {
+                        localX = dockL;
+                        localY = dockT;
+                        w = (std::max)(1, dockR - dockL);
+                        dockT += h + gap;
+                    }
+                    else if (_wcsicmp(d.c_str(), L"Bottom") == 0)
+                    {
+                        localX = dockL;
+                        localY = (std::max)(dockT, dockB - h);
+                        w = (std::max)(1, dockR - dockL);
+                        dockB -= h + gap;
+                    }
+                    else if (_wcsicmp(d.c_str(), L"Left") == 0)
+                    {
+                        localX = dockL;
+                        localY = dockT;
+                        h = (std::max)(1, dockB - dockT);
+                        dockL += w + gap;
+                    }
+                    else if (_wcsicmp(d.c_str(), L"Right") == 0)
+                    {
+                        localX = (std::max)(dockL, dockR - w);
+                        localY = dockT;
+                        h = (std::max)(1, dockB - dockT);
+                        dockR -= w + gap;
+                    }
+                }
+            }
+
+            if (!docked)
+            {
+            if (flow.horizontal)
+            {
+                localX = child.hasX ? child.x : flow.cursorX;
+                localY = child.hasY ? child.y : flow.cursorY;
+                if (!useGridX && !useGridY)
+                    flow.cursorX = (std::max)(flow.cursorX, localX + w + flow.spacing);
+            }
+            else
+            {
+                localX = child.hasX ? child.x : flow.padding;
+                localY = child.hasY ? child.y : flow.cursorY;
+                if (!useGridX && !useGridY)
+                {
+                    if (child.hasY)
+                        flow.cursorY = (std::max)(flow.cursorY, localY + h + flow.spacing);
+                    else
+                        flow.cursorY += h + flow.spacing;
+                }
+            }
+
+            // Grid 单元格：行、列两个维度各自独立生效，未声明的维度退回 Left/Top
+            if (useGridX || useGridY)
+            {
+                if (useGridX && !useGridY && !child.hasY)
+                    localY = 0;   // 只有列定义时，子元素都在同一行
+                if (useGridY && !useGridX && !child.hasX)
+                    localX = 0;
+                if (useGridX)
+                {
+                    const int col = (std::max)(0, (std::min)(child.col, (int)flow.gridCols.size() - 1));
+                    const int colSpan =
+                        (std::max)(1, (std::min)(child.colSpan, (int)flow.gridCols.size() - col));
+                    localX = flow.padding + Sum(flow.gridCols, 0, col);
+                    const int cellW = Sum(flow.gridCols, col, colSpan);
+                    if (child.hasW)
+                        w = (std::min)(w, cellW);
+                    else
+                        w = cellW;
+                }
+
+                if (useGridY)
+                {
+                    const int row = (std::max)(0, (std::min)(child.row, (int)flow.gridRows.size() - 1));
+                    const int rowSpan =
+                        (std::max)(1, (std::min)(child.rowSpan, (int)flow.gridRows.size() - row));
+                    localY = flow.paddingY + Sum(flow.gridRows, 0, row);
+                    const int cellH = Sum(flow.gridRows, row, rowSpan);
+                    if (child.hasH)
+                        h = (std::min)(h, cellH);
+                    else
+                        h = cellH;
+                }
+            }
+            }   // if (!docked)
+
+            // Margin
+            localX += child.marginL;
+            localY += child.marginT;
+            w = (std::max)(1, w - child.marginL - child.marginR);
+            h = (std::max)(1, h - child.marginT - child.marginB);
+
+            child.previewX = flow.offsetX + localX;
+            child.previewY = flow.offsetY + localY;
+            child.previewW = w;
+            child.previewH = h;
+
+            // 容器递归
+            if (tag == L"stackpanel" || tag == L"page" || tag == L"palette")
+            {
+                XamlFlow inner;
+                inner.margin = 0;
+                inner.spacing = child.spacing;
+                inner.padding = child.padL;
+                inner.paddingY = child.padT;
+                inner.width = w;
+                inner.offsetX = child.previewX;
+                inner.offsetY = child.previewY;
+                inner.cursorX = child.padL;
+                inner.cursorY = child.padT;
+                inner.horizontal = child.horizontal;
+                inner.height = h;
+                LayoutNode(child, inner);
+            }
+            else if (tag == L"grid")
+            {
+                XamlFlow inner;
+                inner.margin = 0;
+                inner.spacing = child.spacing;
+                inner.padding = child.padL;
+                inner.paddingY = child.padT;
+                inner.width = w;
+                inner.height = h;
+                inner.offsetX = child.previewX;
+                inner.offsetY = child.previewY;
+                // 只有 XAML 显式声明了对应维度的轨道时才生成轨道，未声明则保留 Left/Top 绝对定位
+                if (!child.gridCols.empty())
+                    inner.gridCols = ResolveTracks(child.gridCols, false, child.children,
+                                                   (std::max)(1, w));
+                if (!child.gridRows.empty())
+                    inner.gridRows = ResolveTracks(child.gridRows, true, child.children,
+                                                   (std::max)(1, h));
+                LayoutNode(child, inner);
+            }
+            else if (tag == L"dockpanel" || tag == L"wrappanel" || tag == L"canvas" ||
+                     tag == L"absolutepanel" || tag == L"abspanel" || tag == L"canvaspanel" ||
+                     tag == L"canvaslayout")
+            {
+                XamlFlow inner;
+                inner.margin = 0;
+                inner.spacing = child.spacing;
+                inner.padding = child.padL;
+                inner.paddingY = child.padT;
+                inner.width = w;
+                inner.height = h;
+                inner.offsetX = child.previewX;
+                inner.offsetY = child.previewY;
+                inner.cursorX = child.padL;
+                inner.cursorY = child.padT;
+                inner.horizontal = (tag == L"wrappanel");
+                LayoutNode(child, inner);
+            }
+            else if (tag == L"toolbar" || tag == L"menubar" || tag == L"statusbar")
+            {
+                XamlFlow inner;
+                inner.margin = 0;
+                inner.spacing = child.spacing;
+                inner.padding = child.padL;
+                inner.paddingY = child.padT;
+                inner.width = w;
+                inner.height = h;
+                inner.offsetX = child.previewX;
+                inner.offsetY = child.previewY;
+                inner.cursorX = child.padL;
+                inner.cursorY = child.padT;
+                inner.horizontal = child.hasOrientation ? child.horizontal : true;
+                LayoutNode(child, inner);
+            }
+            else if (tag == L"group")
+            {
+                // group 是控件，也是容器：内部坐标相对组内区，独立流式游标
+                // 内区偏移是 GroupBox 边框的物理占位（可经 xamlSetGroupInset 覆盖）
+                XamlFlow inner;
+                inner.margin = layoutDefaults().groupLeft;
+                inner.spacing = child.spacing;
+                inner.cursorY = layoutDefaults().groupTop;
+                inner.width = (std::max)(w - layoutDefaults().groupLeft * 2, 40);
+                inner.offsetX = child.previewX + layoutDefaults().groupLeft;
+                inner.offsetY = child.previewY + layoutDefaults().groupTop;
+                LayoutNode(child, inner);
+            }
+            else if (!child.children.empty())
+            {
+                // 控件模板实体化出来的视觉层：当作该控件内部的容器排布
+                XamlFlow inner;
+                inner.margin = 0;
+                inner.spacing = child.spacing;
+                inner.padding = child.padL;
+                inner.paddingY = child.padT;
+                inner.width = w;
+                inner.height = h;
+                inner.offsetX = child.previewX;
+                inner.offsetY = child.previewY;
+                inner.cursorX = child.padL;
+                inner.cursorY = child.padT;
+                inner.horizontal = child.hasOrientation ? child.horizontal : false;
+                LayoutNode(child, inner);
+            }
+        }
+    }
+}
+
+// ===========================================================================
+// 工具导出
+// ===========================================================================
+namespace
+{
+    // 供 xamlLayoutSubtree 使用的入口
+    void LayoutNodeAt(XamlElement& root, int rootX, int rootY, int rootW, int rootH)
+    {
+        root.previewX = rootX;
+        root.previewY = rootY;
+        root.previewW = (std::max)(1, rootW > 0 ? rootW : root.w);
+        root.previewH = (std::max)(1, rootH > 0 ? rootH : root.h);
+        // 根节点按普通容器处理：根自身无外边距，子元素贴顶贴左
+        XamlFlow flow;
+        flow.width = root.previewW;
+        flow.height = root.previewH;
+        flow.offsetX = root.previewX;
+        flow.offsetY = root.previewY;
+        flow.margin = 0;
+        flow.spacing = root.spacing;
+        flow.padding = root.padL;
+        flow.paddingY = root.padT;
+        flow.cursorX = root.padL;
+        flow.cursorY = root.padT;
+        LayoutNode(root, flow);
+    }
+}
+
+void xamlLayoutSubtree(XamlElement& root, int rootX, int rootY, int rootW, int rootH)
+{
+    LayoutNodeAt(root, rootX, rootY, rootW, rootH);
+}
+
+void xamlSetDefaultSize(const wchar_t* tag, int w, int h)
+{
+    if (tag == nullptr || tag[0] == 0)
+        return;
+    if (w <= 0) w = 120;
+    if (h <= 0) h = 28;
+    const std::wstring key = KindOf(std::wstring(tag));
+    for (auto& it : layoutDefaults().sizes)
+    {
+        if (it.first == key)
+        {
+            it.second.first = w;
+            it.second.second = h;
+            return;
+        }
+    }
+    layoutDefaults().sizes.emplace_back(key, std::make_pair(w, h));
+}
+
+bool xamlGetDefaultSize(const wchar_t* tag, int& w, int& h)
+{
+    const std::wstring key = KindOf(tag != nullptr ? std::wstring(tag) : std::wstring());
+    for (const auto& it : layoutDefaults().sizes)
+    {
+        if (it.first == key)
+        {
+            w = it.second.first;
+            h = it.second.second;
+            return true;
+        }
+    }
+    return false;
+}
+
+void xamlSetStarMinPx(int px)
+{
+    layoutDefaults().starMin = px > 0 ? px : 30;
+}
+
+void xamlSetGroupInset(int left, int top)
+{
+    layoutDefaults().groupLeft = left >= 0 ? left : 12;
+    layoutDefaults().groupTop = top >= 0 ? top : 24;
+}
+
+std::wstring xamlColorToString(COLORREF c)
+{
+    wchar_t buf[16];
+    swprintf_s(buf, L"#%02X%02X%02X", GetRValue(c), GetGValue(c), GetBValue(c));
+    return buf;
+}
+
+bool xamlParseColor(const std::wstring& s, COLORREF& out)
+{
+    std::wstring v = s;
+    // trim
+    size_t b = v.find_first_not_of(L" \t\r\n");
+    if (b == std::wstring::npos) return false;
+    v = v.substr(b);
+    size_t e = v.find_last_not_of(L" \t\r\n");
+    if (e != std::wstring::npos) v = v.substr(0, e + 1);
+
+    if (v.empty()) return false;
+    if (v[0] == L'#')
+    {
+        // #AARRGGBB（8 位）的数值可能是 0xFFxxxxxx，超过 LONG_MAX。
+        // 用有符号 long 接会溢出成 LONG_MAX，颜色整体变白。
+        const unsigned long n = wcstoul(v.c_str() + 1, nullptr, 16);
+        out = RGB((n >> 16) & 0xFF, (n >> 8) & 0xFF, n & 0xFF);
+        return true;
+    }
+    if (v.find(L"RGB") == 0 || v.find(L"rgb") == 0)
+    {
+        int a, b, c;
+        if (swscanf_s(v.c_str(), L"RGB(%d,%d,%d)", &a, &b, &c) == 3 ||
+            swscanf_s(v.c_str(), L"rgb(%d,%d,%d)", &a, &b, &c) == 3)
+        {
+            out = RGB(a, b, c);
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<std::wstring> xamlSplit(const std::wstring& s, wchar_t sep)
+{
+    std::vector<std::wstring> out;
+    std::wstring cur;
+    for (wchar_t c : s)
+    {
+        if (c == sep)
+        {
+            if (!cur.empty()) out.push_back(cur);
+            cur.clear();
+        }
+        else cur.push_back(c);
+    }
+    if (!cur.empty()) out.push_back(cur);
+    return out;
+}
+
+// ===========================================================================
+// XamlControlRegistry
+// ===========================================================================
+XamlControlRegistry& XamlControlRegistry::instance()
+{
+    static XamlControlRegistry s_inst;
+    return s_inst;
+}
+
+bool XamlControlRegistry::registerFactory(const wchar_t* tag, Factory factory)
+{
+    if (tag == nullptr || !factory)
+        return false;
+    for (auto& kv : m_factories)
+        if (_wcsicmp(kv.first.c_str(), tag) == 0)
+        {
+            kv.second = std::move(factory);
+            return true;
+        }
+    m_factories.emplace_back(tag, std::move(factory));
+    return true;
+}
+
+bool XamlControlRegistry::isKnown(const wchar_t* tag) const
+{
+    if (tag == nullptr) return false;
+    for (auto& kv : m_factories)
+        if (_wcsicmp(kv.first.c_str(), tag) == 0)
+            return true;
+    return false;
+}
+
+IXamlControl* XamlControlRegistry::create(const wchar_t* tag) const
+{
+    if (tag == nullptr) return nullptr;
+    for (auto& kv : m_factories)
+        if (_wcsicmp(kv.first.c_str(), tag) == 0)
+            return kv.second ? kv.second() : nullptr;
+    return nullptr;
+}
+
+std::vector<std::wstring> XamlControlRegistry::tags() const
+{
+    std::vector<std::wstring> out;
+    for (auto& kv : m_factories)
+        out.push_back(kv.first);
+    return out;
+}
+
+// ===========================================================================
+// XamlRuntime
+// ===========================================================================
+XamlRuntime::~XamlRuntime()
+{
+    m_controls.clear();
+    m_root.reset();
+}
+
+bool XamlRuntime::loadFile(const wchar_t* path, std::wstring& error)
+{
+    ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    IXMLDOMDocument2* document = nullptr;
+    HRESULT hr = ::CoCreateInstance(__uuidof(DOMDocument60), nullptr, CLSCTX_INPROC_SERVER,
+                                    IID_IXMLDOMDocument2, reinterpret_cast<void**>(&document));
+    if (FAILED(hr) || document == nullptr)
+    {
+        error = L"无法创建 MSXML 文档对象";
+        return false;
+    }
+    document->put_async(VARIANT_FALSE);
+    document->put_validateOnParse(VARIANT_FALSE);
+    VARIANT_BOOL ok = VARIANT_FALSE;
+    document->load(_variant_t(path), &ok);
+    if (ok != VARIANT_TRUE)
+    {
+        error = L"XML 解析失败（文件不存在或格式错误）";
+        document->Release();
+        return false;
+    }
+    IXMLDOMElement* rootElement = nullptr;
+    document->get_documentElement(&rootElement);
+    if (rootElement == nullptr)
+    {
+        error = L"XML 无根元素";
+        document->Release();
+        return false;
+    }
+    m_root = std::make_unique<XamlElement>();
+    m_styles.clear();
+    m_templates.clear();
+    m_bindings.clear();
+    // 资源字典 Source 的相对路径以本文件所在目录为基准；resStack 挡住循环引用
+    const std::wstring baseDir = PathDirOf(NormPath(path));
+    std::vector<std::wstring> resStack;
+    resStack.push_back(NormPath(path));
+    ParseElement(rootElement, *m_root, &m_styles, &m_templates, baseDir, &resStack);
+    rootElement->Release();
+    document->Release();
+    applyDeclarations();
+    return true;
+}
+
+bool XamlRuntime::loadString(const wchar_t* xml, std::wstring& error)
+{
+    if (xml == nullptr)
+    {
+        error = L"XML 字符串为空";
+        return false;
+    }
+    ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    IXMLDOMDocument2* document = nullptr;
+    HRESULT hr = ::CoCreateInstance(__uuidof(DOMDocument60), nullptr, CLSCTX_INPROC_SERVER,
+                                    IID_IXMLDOMDocument2, reinterpret_cast<void**>(&document));
+    if (FAILED(hr) || document == nullptr)
+    {
+        error = L"无法创建 MSXML 文档对象";
+        return false;
+    }
+    document->put_async(VARIANT_FALSE);
+    document->put_validateOnParse(VARIANT_FALSE);
+    BSTR bstrXml = ::SysAllocString(xml);
+    VARIANT_BOOL ok = VARIANT_FALSE;
+    document->loadXML(bstrXml, &ok);
+    ::SysFreeString(bstrXml);
+    if (ok != VARIANT_TRUE)
+    {
+        error = L"XML 解析失败";
+        document->Release();
+        return false;
+    }
+    IXMLDOMElement* rootElement = nullptr;
+    document->get_documentElement(&rootElement);
+    if (rootElement == nullptr)
+    {
+        error = L"XML 无根元素";
+        document->Release();
+        return false;
+    }
+    m_root = std::make_unique<XamlElement>();
+    m_styles.clear();
+    m_templates.clear();
+    m_bindings.clear();
+    ParseElement(rootElement, *m_root, &m_styles, &m_templates, std::wstring(), nullptr);
+    rootElement->Release();
+    document->Release();
+    applyDeclarations();
+    return true;
+}
+
+void XamlRuntime::layout(int rootX, int rootY, int rootW, int rootH)
+{
+    if (!m_root)
+        return;
+    LayoutNodeAt(*m_root, rootX, rootY, rootW, rootH);
+}
+
+void XamlRuntime::setControlCallback(ControlCallback cb)
+{
+    m_onControl = std::move(cb);
+}
+
+IXamlControl* XamlRuntime::instantiate(void* parent)
+{
+    if (!m_root)
+        return nullptr;
+    m_controls.clear();
+
+    // 递归实例化
+    std::function<IXamlControl*(XamlElement&)> build = [&](XamlElement& el) -> IXamlControl* {
+        if (XamlControlRegistry::instance().isKnown(el.tag.c_str()) == false)
+        {
+            // 未注册标签：视为容器或布局元素，不创建控件，但继续处理子树
+            for (auto& child : el.children)
+            {
+                if (child.templateChild)
+                    continue;
+                build(child);
+            }
+            return nullptr;
+        }
+        IXamlControl* ctrl = XamlControlRegistry::instance().create(el.tag.c_str());
+        if (ctrl == nullptr)
+            return nullptr;
+        m_controls.emplace_back(ctrl);
+        if (ctrl->create(parent))
+        {
+            ctrl->setBounds(el.previewX, el.previewY, el.previewW, el.previewH);
+            // 属性：按声明顺序写入（Name/事件名由宿主在回调里处理）
+            for (const auto& kv : el.attrs)
+            {
+                const std::wstring key = LocalName(kv.first);
+                ctrl->setProperty(key.c_str(), kv.second);
+            }
+        }
+        if (m_onControl)
+            m_onControl(el, ctrl);
+        // 子控件（模板实体化出来的视觉层由控件自绘，不进运行时控件树）
+        for (auto& child : el.children)
+        {
+            if (child.templateChild)
+                continue;
+            build(child);
+        }
+        return ctrl;
+    };
+
+    return build(*m_root);
+}
+
+XamlElement* XamlRuntime::root() { return m_root.get(); }
+const XamlElement* XamlRuntime::root() const { return m_root.get(); }
+
+std::wstring XamlRuntime::toXml() const
+{
+    std::wstring out;
+    if (!m_root) return out;
+    out += L"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+
+    std::function<void(const XamlElement&, int)> write = [&](const XamlElement& n, int depth) {
+        std::wstring indent((size_t)depth * 2, L' ');
+        out += indent + L"<" + n.tag;
+        if (n.attrs.size() <= 3)
+        {
+            for (const auto& kv : n.attrs)
+                out += L" " + kv.first + L"=\"" + XmlEscape(kv.second) + L"\"";
+        }
+        else
+        {
+            // 属性多时一个属性一行，避免出现超长的单行
+            const std::wstring ai((size_t)(depth + 1) * 2, L' ');
+            for (const auto& kv : n.attrs)
+                out += L"\n" + ai + kv.first + L"=\"" + XmlEscape(kv.second) + L"\"";
+        }
+        if (n.children.empty())
+        {
+            out += L"/>\n";
+            return;
+        }
+        out += L">\n";
+        if (!n.gridRows.empty())
+        {
+            out += indent + L"  <Grid.RowDefinitions>\n";
+            for (const auto& kv : n.gridRows)
+                out += indent + L"    <RowDefinition Height=\"" + XmlEscape(kv.second) + L"\"/>\n";
+            out += indent + L"  </Grid.RowDefinitions>\n";
+        }
+        if (!n.gridCols.empty())
+        {
+            out += indent + L"  <Grid.ColumnDefinitions>\n";
+            for (const auto& kv : n.gridCols)
+                out += indent + L"    <ColumnDefinition Width=\"" + XmlEscape(kv.second) + L"\"/>\n";
+            out += indent + L"  </Grid.ColumnDefinitions>\n";
+        }
+        for (const auto& c : n.children)
+        {
+            if (c.templateChild)
+                continue;   // 模板实例化出来的视觉层不写回文档
+            write(c, depth + 1);
+        }
+        out += indent + L"</" + n.tag + L">\n";
+    };
+    write(*m_root, 0);
+    return out;
+}
+
+bool XamlRuntime::save(const wchar_t* path, std::wstring& error) const
+{
+    if (!m_root || path == nullptr)
+    {
+        error = L"文档为空或路径无效";
+        return false;
+    }
+    std::wofstream out(path, std::ios::binary);
+    if (!out)
+    {
+        error = L"无法写入文件";
+        return false;
+    }
+    out.imbue(std::locale(".UTF-8"));
+    // 与 toXml 共用同一套序列化：磁盘文件和代码视图格式一致
+    std::wstring xml = toXml();
+    std::wstring crlf;
+    crlf.reserve(xml.size() + 64);
+    for (wchar_t c : xml)
+    {
+        if (c == L'\n')
+        {
+            crlf += L'\r';
+            crlf += L'\n';
+        }
+        else
+            crlf += c;
+    }
+    out << crlf;
+    return true;
+}
+
+void XamlRuntime::reset()
+{
+    m_root.reset();
+    m_controls.clear();
+}
+
+// ===========================================================================
+// 样式 / 控件模板 / 属性绑定
+// ===========================================================================
+namespace
+{
+    std::wstring TrimWs(const std::wstring& s)
+    {
+        size_t b = s.find_first_not_of(L" \t\r\n");
+        if (b == std::wstring::npos)
+            return {};
+        size_t e = s.find_last_not_of(L" \t\r\n");
+        return s.substr(b, e - b + 1);
+    }
+
+    bool StartsNoCase(const std::wstring& s, const wchar_t* prefix)
+    {
+        const size_t n = wcslen(prefix);
+        return s.size() >= n && _wcsnicmp(s.c_str(), prefix, n) == 0;
+    }
+
+    XamlElement* FindByName(XamlElement& node, const std::wstring& name)
+    {
+        if (!name.empty() && node.name == name)
+            return &node;
+        for (auto& c : node.children)
+            if (auto* hit = FindByName(c, name))
+                return hit;
+        return nullptr;
+    }
+
+    // 属性改了文字类属性后，语义字段（el.text）要跟着更新，否则渲染端读到旧值
+    void SyncText(XamlElement& el)
+    {
+        el.text = el.get(L"Content");
+        if (el.text.empty())
+            el.text = el.get(L"Text");
+        if (el.text.empty())
+            el.text = el.get(L"Header");
+    }
+
+    // 模板实体化：深拷贝 + 打标记 + 替换 {TemplateBinding Prop}
+    void StampTemplate(std::vector<XamlElement>& nodes, const XamlElement& owner)
+    {
+        for (auto& n : nodes)
+        {
+            n.templateChild = true;
+            for (auto& kv : n.attrs)
+            {
+                const std::wstring v = TrimWs(kv.second);
+                if (v.size() > 2 && v.front() == L'{' && StartsNoCase(v, L"{TemplateBinding"))
+                {
+                    std::wstring prop = TrimWs(v.substr(wcslen(L"{TemplateBinding")));
+                    if (!prop.empty() && prop.back() == L'}')
+                        prop.pop_back();
+                    prop = TrimWs(prop);
+                    kv.second = owner.get(prop.c_str());
+                }
+            }
+            SyncText(n);
+            StampTemplate(n.children, owner);
+        }
+    }
+}
+
+bool xamlIsResourceRef(const std::wstring& value, std::wstring& key)
+{
+    const std::wstring v = TrimWs(value);
+    if (v.size() < 2 || v.front() != L'{' || v.back() != L'}')
+        return false;
+    const std::wstring inner = TrimWs(v.substr(1, v.size() - 2));
+    if (!StartsNoCase(inner, L"StaticResource"))
+        return false;
+    key = TrimWs(inner.substr(wcslen(L"StaticResource")));
+    return !key.empty();
+}
+
+bool xamlIsBindingExpr(const std::wstring& value, std::wstring& source, std::wstring& prop)
+{
+    const std::wstring v = TrimWs(value);
+    if (v.size() < 2 || v.front() != L'{' || v.back() != L'}')
+        return false;
+    std::wstring inner = TrimWs(v.substr(1, v.size() - 2));
+    if (!StartsNoCase(inner, L"Binding") && !StartsNoCase(inner, L"Bind"))
+        return false;
+    const size_t kw = StartsNoCase(inner, L"Binding") ? wcslen(L"Binding") : wcslen(L"Bind");
+    std::wstring rest = TrimWs(inner.substr(kw));
+
+    // 支持三种写法：{Binding Src.Prop}、{Binding Path=Src.Prop}、
+    // {Binding Src.Prop Mode=TwoWay}（其余 key=value 参数忽略）
+    std::vector<std::wstring> tokens;
+    {
+        std::wstring cur;
+        for (wchar_t c : rest)
+        {
+            if (c == L' ' || c == L'\t')
+            {
+                if (!cur.empty())
+                {
+                    tokens.push_back(cur);
+                    cur.clear();
+                }
+            }
+            else
+                cur += c;
+        }
+        if (!cur.empty())
+            tokens.push_back(cur);
+    }
+
+    std::wstring path;
+    for (const auto& tk : tokens)
+    {
+        const size_t eq = tk.find(L'=');
+        if (eq != std::wstring::npos)
+        {
+            if (_wcsicmp(tk.substr(0, eq).c_str(), L"Path") == 0)
+                path = tk.substr(eq + 1);
+            continue;
+        }
+        if (path.empty())
+            path = tk;
+    }
+    if (path.empty())
+        return false;
+
+    const size_t dot = path.find_last_of(L'.');
+    if (dot == std::wstring::npos)
+    {
+        source.clear();
+        prop = path;
+    }
+    else
+    {
+        source = TrimWs(path.substr(0, dot));
+        prop = TrimWs(path.substr(dot + 1));
+    }
+    return !prop.empty();
+}
+
+void XamlRuntime::clearStyles()
+{
+    m_styles.clear();
+    m_templates.clear();
+    m_bindings.clear();
+}
+
+void XamlRuntime::addStyle(const XamlStyle& style)
+{
+    m_styles.push_back(style);
+}
+
+bool XamlRuntime::getStyle(const std::wstring& key, XamlStyle& out) const
+{
+    if (key.empty())
+        return false;
+    // 后定义的覆盖先定义的（与 ResourceDictionary.MergedDictionaries 的合并顺序一致）
+    for (auto it = m_styles.rbegin(); it != m_styles.rend(); ++it)
+        if (it->key == key)
+        {
+            out = *it;
+            return true;
+        }
+    return false;
+}
+
+std::vector<XamlStyle> XamlRuntime::styles() const
+{
+    return m_styles;
+}
+
+void XamlRuntime::addTemplate(const std::wstring& key, const std::vector<XamlElement>& nodes)
+{
+    if (key.empty())
+        return;
+    for (auto& kv : m_templates)
+        if (kv.first == key)
+        {
+            kv.second = nodes;
+            return;
+        }
+    m_templates.emplace_back(key, nodes);
+}
+
+bool XamlRuntime::getTemplate(const std::wstring& key, std::vector<XamlElement>& out) const
+{
+    // 后定义的覆盖先定义的（同 key 多次合并时，最后一个胜出）
+    for (auto it = m_templates.rbegin(); it != m_templates.rend(); ++it)
+        if (it->first == key)
+        {
+            out = it->second;
+            return true;
+        }
+    return false;
+}
+
+std::vector<std::wstring> XamlRuntime::templateKeys() const
+{
+    std::vector<std::wstring> keys;
+    keys.reserve(m_templates.size());
+    for (const auto& kv : m_templates)
+        keys.push_back(kv.first);
+    return keys;
+}
+
+const std::vector<XamlBinding>& XamlRuntime::bindings() const
+{
+    return m_bindings;
+}
+
+void XamlRuntime::applyStyles()
+{
+    if (!m_root)
+        return;
+
+    std::function<void(const XamlStyle&, std::vector<XamlSetter>&, std::vector<XamlTrigger>&, int)>
+        gather = [&](const XamlStyle& s, std::vector<XamlSetter>& out,
+                     std::vector<XamlTrigger>& trigs, int depth) {
+            if (depth > 8)
+                return;
+            if (!s.basedOn.empty())
+            {
+                XamlStyle base;
+                if (getStyle(s.basedOn, base))
+                    gather(base, out, trigs, depth + 1);
+            }
+            for (const auto& st : s.setters)
+                out.push_back(st);
+            for (const auto& tr : s.triggers)
+                trigs.push_back(tr);
+        };
+
+    std::function<void(XamlElement&)> walk = [&](XamlElement& el) {
+        std::wstring ref = el.get(L"Style");
+        std::wstring key;
+        if (!xamlIsResourceRef(ref, key))
+            key = TrimWs(ref);
+
+        XamlStyle st;
+        bool found = false;
+        if (!key.empty() && getStyle(key, st))
+            found = true;
+        else if (key.empty())
+        {
+            // 隐式样式：无 x:Key 且 TargetType 匹配
+            for (const auto& s : m_styles)
+                if (s.key.empty() && _wcsicmp(s.targetType.c_str(), el.tag.c_str()) == 0)
+                {
+                    st = s;
+                    found = true;
+                    break;
+                }
+        }
+
+        if (found)
+        {
+            std::vector<XamlSetter> setters;
+            std::vector<XamlTrigger> triggers;
+            gather(st, setters, triggers, 0);
+            // 回归可重复调用：先清掉上一轮注入的有效属性，只保留本地声明
+            ClearEffective(el);
+            for (const auto& s : setters)
+            {
+                if (HasLocal(el, s.prop))
+                    continue;   // 本地声明优先
+                SetEffective(el, s.prop, s.value);
+                el.styled = true;
+            }
+            // 触发器：按元素当前（含样式合并后）属性值判定，命中则覆盖同属性
+            for (const auto& tr : triggers)
+            {
+                const std::wstring cur = el.get(tr.prop.c_str());
+                bool hit = _wcsicmp(cur.c_str(), tr.value.c_str()) == 0;
+                if (!hit && !el.has(tr.prop.c_str()) &&
+                    (tr.value.empty() || _wcsicmp(tr.value.c_str(), L"False") == 0))
+                    hit = true;   // 属性未声明 → 取默认 False/空，与 False 触发器匹配
+                if (!hit)
+                    continue;
+                el.styled = true;
+                for (const auto& s : tr.setters)
+                {
+                    if (HasLocal(el, s.prop))
+                        continue;
+                    SetEffective(el, s.prop, s.value);
+                }
+            }
+            SyncText(el);
+        }
+        for (auto& c : el.children)
+            walk(c);
+    };
+    walk(*m_root);
+}
+
+void XamlRuntime::applyTemplates()
+{
+    if (!m_root)
+        return;
+
+    std::function<void(XamlElement&)> walk = [&](XamlElement& el) {
+        // 先清掉上一次实体化的模板子树，再递归真实子节点
+        el.children.erase(
+            std::remove_if(el.children.begin(), el.children.end(),
+                           [](const XamlElement& c) { return c.templateChild; }),
+            el.children.end());
+        for (auto& c : el.children)
+            walk(c);
+
+        std::wstring ref = el.get(L"Template");
+        std::wstring key;
+        if (!xamlIsResourceRef(ref, key))
+            key = TrimWs(ref);
+        if (key.empty())
+            return;
+        std::vector<XamlElement> tpl;
+        if (!getTemplate(key, tpl) || tpl.empty())
+            return;
+        StampTemplate(tpl, el);
+        el.children.insert(el.children.end(), tpl.begin(), tpl.end());
+    };
+    walk(*m_root);
+}
+
+// ===========================================================================
+// 内置表达式
+//   Width="{a.Width / 2 + 8}"     元素属性引用 + 算术
+//   Left="{a.Left + a.Width + 8}" 相对布局
+//   Text="{a.Text + ' px'}"       字符串拼接（任一侧是字符串就走拼接）
+// 语法与 {Binding}/{StaticResource}/{TemplateBinding} 共用花括号，
+// 前缀不是那三个关键字时按表达式求值，结果写进"有效属性"（读取路径与绑定一致）。
+// 求值带深度上限：a.Width="{b.Width}" 与 b.Width="{a.Width}" 这种环会直接失败，
+// 不会把栈打穿。
+// ===========================================================================
+namespace
+{
+    bool IsDataExpression(const std::wstring& v)
+    {
+        const size_t b = v.find_first_not_of(L" \t\r\n");
+        if (b == std::wstring::npos || v[b] != L'{' || v.back() != L'}')
+            return false;
+        const wchar_t* p = v.c_str() + b + 1;
+        while (*p == L' ' || *p == L'\t')
+            ++p;
+        if (*p == L'=')                       // {= expr} 写法也认
+            return true;
+        return !(_wcsnicmp(p, L"Binding", 7) == 0 || _wcsnicmp(p, L"Bind", 4) == 0 ||
+                 _wcsnicmp(p, L"StaticResource", 14) == 0 ||
+                 _wcsnicmp(p, L"TemplateBinding", 15) == 0);
+    }
+
+    std::wstring DataExpressionInner(const std::wstring& v)
+    {
+        size_t b = v.find_first_not_of(L" \t\r\n");
+        size_t e = v.find_last_not_of(L" \t\r\n");
+        if (b == std::wstring::npos || e <= b + 1)
+            return std::wstring();
+        std::wstring inner = v.substr(b + 1, e - b - 1);
+        size_t s = inner.find_first_not_of(L" \t\r\n");
+        if (s != std::wstring::npos && inner[s] == L'=')
+            inner.erase(0, s + 1);
+        return inner;
+    }
+
+    struct ExprValue
+    {
+        bool isStr = false;
+        double num = 0.0;
+        std::wstring str;
+    };
+
+    bool IsIdentStart(wchar_t c) { return iswalpha(c) || c == L'_' || c > 127; }
+    bool IsIdentChar(wchar_t c) { return iswalnum(c) || c == L'_' || c == L'.' || c > 127; }
+
+    bool EvalDataExpression(const std::wstring& raw, XamlElement* self, XamlElement* root,
+                            int depth, std::wstring* out);
+
+    // 标识符取值：Name.Prop 走树查找；裸 Prop 取当前元素；值本身是表达式时继续递归
+    bool ResolveIdent(const std::wstring& ident, XamlElement* self, XamlElement* root,
+                      int depth, ExprValue& out)
+    {
+        std::wstring elemName = ident;
+        std::wstring prop = ident;
+        const size_t dot = ident.rfind(L'.');
+        if (dot != std::wstring::npos && dot > 0)
+        {
+            elemName = ident.substr(0, dot);
+            prop = ident.substr(dot + 1);
+        }
+        else
+        {
+            elemName.clear();
+        }
+
+        XamlElement* el = elemName.empty() ? self : FindByName(*root, elemName);
+        if (el == nullptr)
+            return false;
+
+        const std::wstring v = el->get(prop.c_str());
+        if (v.empty())
+        {
+            out.isStr = false;
+            out.num = 0.0;
+            return true;
+        }
+        if (IsDataExpression(v))
+        {
+            std::wstring ev;
+            if (!EvalDataExpression(v, el, root, depth + 1, &ev))
+                return false;
+            out.str = ev;
+        }
+        else
+            out.str = v;
+        out.isStr = false;
+
+        // 全数字才算数值，其余当字符串（"1.5" 可以，"12px" 不行）
+        wchar_t* endp = nullptr;
+        const double d = wcstod(out.str.c_str(), &endp);
+        if (endp != nullptr && *endp == L'\0' && !out.str.empty())
+        {
+            out.num = d;
+            out.isStr = false;
+        }
+        else
+            out.isStr = true;
+        return true;
+    }
+
+    class ExprParser
+    {
+    public:
+        const wchar_t* p = nullptr;
+        XamlElement* self = nullptr;
+        XamlElement* root = nullptr;
+        int depth = 0;
+        bool ok = true;
+
+        explicit ExprParser(int d) : depth(d) {}
+
+        void skipWs()
+        {
+            while (*p == L' ' || *p == L'\t' || *p == L'\r' || *p == L'\n')
+                ++p;
+        }
+
+        ExprValue parse()
+        {
+            ExprValue v = parseAdd();
+            skipWs();
+            if (*p != L'\0')                 // 有多余字符 = 语法错，宁可不算
+                ok = false;
+            return v;
+        }
+
+        ExprValue parseAdd()
+        {
+            ExprValue a = parseMul();
+            for (;;)
+            {
+                skipWs();
+                if (!ok || *p != L'+' && *p != L'-')
+                    return a;
+                const wchar_t op = *p++;
+                ExprValue b = parseMul();
+                if (!ok)
+                    return a;
+                if (op == L'+' && (a.isStr || b.isStr))
+                {
+                    ExprValue r;
+                    r.isStr = true;
+                    r.str = (a.isStr ? a.str : format(a)) + (b.isStr ? b.str : format(b));
+                    a = r;
+                }
+                else
+                {
+                    a.num = (op == L'+') ? a.num + b.num : a.num - b.num;
+                    a.isStr = false;
+                }
+            }
+        }
+
+        ExprValue parseMul()
+        {
+            ExprValue a = parseUnary();
+            for (;;)
+            {
+                skipWs();
+                if (!ok || (*p != L'*' && *p != L'/' && *p != L'%'))
+                    return a;
+                const wchar_t op = *p++;
+                ExprValue b = parseUnary();
+                if (!ok)
+                    return a;
+                if (op == L'*')
+                    a.num *= b.num;
+                else if (op == L'%')
+                    a.num = (b.num != 0.0) ? fmod(a.num, b.num) : 0.0;
+                else
+                    a.num = (b.num != 0.0) ? a.num / b.num : 0.0;
+                a.isStr = false;
+            }
+        }
+
+        ExprValue parseUnary()
+        {
+            skipWs();
+            if (*p == L'-')
+            {
+                ++p;
+                ExprValue v = parseUnary();
+                v.num = -v.num;
+                v.isStr = false;
+                return v;
+            }
+            if (*p == L'+')
+            {
+                ++p;
+                return parseUnary();
+            }
+            return parsePrimary();
+        }
+
+        ExprValue parsePrimary()
+        {
+            skipWs();
+            ExprValue v;
+            if (*p == L'(')
+            {
+                ++p;
+                v = parseAdd();
+                skipWs();
+                if (*p != L')')
+                    ok = false;
+                else
+                    ++p;
+                return v;
+            }
+            if (*p == L'\'' || *p == L'"')
+            {
+                const wchar_t q = *p++;
+                std::wstring s;
+                while (*p != L'\0' && *p != q)
+                    s += *p++;
+                if (*p != q)
+                    ok = false;
+                else
+                    ++p;
+                v.isStr = true;
+                v.str = s;
+                return v;
+            }
+            if (iswdigit(*p) || *p == L'.')
+            {
+                wchar_t* endp = nullptr;
+                v.num = wcstod(p, &endp);
+                p = endp;
+                v.isStr = false;
+                return v;
+            }
+            if (IsIdentStart(*p))
+            {
+                std::wstring ident;
+                while (IsIdentChar(*p))
+                    ident += *p++;
+                // 函数调用
+                skipWs();
+                if (*p == L'(' && !ident.empty())
+                {
+                    ++p;
+                    std::vector<double> args;
+                    ExprValue sv;
+                    bool hasStr = false;
+                    for (;;)
+                    {
+                        skipWs();
+                        ExprValue a = parseAdd();
+                        if (a.isStr)
+                        {
+                            hasStr = true;
+                            sv = a;
+                        }
+                        args.push_back(a.num);
+                        skipWs();
+                        if (*p == L',')
+                        {
+                            ++p;
+                            continue;
+                        }
+                        break;
+                    }
+                    if (*p != L')')
+                        ok = false;
+                    else
+                        ++p;
+                    v = callFunction(ident, args, hasStr, sv);
+                    return v;
+                }
+                if (!ResolveIdent(ident, self, root, depth, v))
+                    ok = false;
+                return v;
+            }
+            ok = false;
+            return v;
+        }
+
+        ExprValue callFunction(const std::wstring& fn, const std::vector<double>& a, bool hasStr,
+                               const ExprValue& strArg)
+        {
+            ExprValue v;
+            if (hasStr)
+            {
+                v.isStr = true;
+                v.str = (fn == L"len" || fn == L"Len") ? std::to_wstring(strArg.str.size()) : strArg.str;
+                if (fn == L"len" || fn == L"Len")
+                    v.isStr = false, v.num = static_cast<double>(strArg.str.size());
+                return v;
+            }
+            if (fn == L"min" || fn == L"Min")
+                v.num = a.empty() ? 0 : a[0];
+            else if (fn == L"max" || fn == L"Max")
+                v.num = a.empty() ? 0 : a[0];
+            else if (fn == L"abs" || fn == L"Abs")
+                v.num = a.empty() ? 0 : fabs(a[0]);
+            else if (fn == L"round" || fn == L"Round")
+                v.num = a.empty() ? 0 : floor(a[0] + 0.5);
+            else if (fn == L"floor" || fn == L"Floor")
+                v.num = a.empty() ? 0 : floor(a[0]);
+            else if (fn == L"ceil" || fn == L"Ceil")
+                v.num = a.empty() ? 0 : ceil(a[0]);
+            else if (fn == L"int" || fn == L"Int")
+                v.num = a.empty() ? 0 : static_cast<double>(static_cast<long long>(a[0]));
+            else if (fn == L"clamp" || fn == L"Clamp")
+                v.num = a.empty() ? 0 : a[0];
+            else
+            {
+                v.num = 0;
+                ok = false;
+                return v;
+            }
+            if ((fn == L"min" || fn == L"Min" || fn == L"max" || fn == L"Max") && a.size() > 1)
+            {
+                const bool wantMin = (fn == L"min" || fn == L"Min");
+                double acc = a[0];
+                for (size_t i = 1; i < a.size(); ++i)
+                    acc = wantMin ? (std::min)(acc, a[i]) : (std::max)(acc, a[i]);
+                v.num = acc;
+            }
+            if (fn == L"clamp" || fn == L"Clamp")
+            {
+                if (a.size() >= 3)
+                    v.num = (std::max)(a[1], (std::min)(a[2], a[0]));
+                else
+                    v.num = a.empty() ? 0 : a[0];
+            }
+            v.isStr = false;
+            return v;
+        }
+
+        static std::wstring format(const ExprValue& v)        {
+            if (v.isStr)
+                return v.str;
+            if (fabs(v.num - floor(v.num)) < 1e-9 && fabs(v.num) < 1e12)
+            {
+                wchar_t buf[64] = {};
+                swprintf_s(buf, L"%.0f", v.num);
+                return buf;
+            }
+            wchar_t buf[64] = {};
+            swprintf_s(buf, L"%.3f", v.num);
+            std::wstring s = buf;
+            while (!s.empty() && s.back() == L'0')
+                s.pop_back();
+            if (!s.empty() && s.back() == L'.')
+                s.pop_back();
+            return s;
+        }
+    };
+
+    bool EvalDataExpression(const std::wstring& raw, XamlElement* self, XamlElement* root,
+                            int depth, std::wstring* out)
+    {
+        if (depth > 12)                    // 引用环 / 太深的链，直接判失败
+            return false;
+        const std::wstring inner = DataExpressionInner(raw);
+        if (inner.empty())
+            return false;
+        ExprParser ps(depth);
+        ps.p = inner.c_str();
+        ps.self = self;
+        ps.root = root;
+        const ExprValue v = ps.parse();
+        if (!ps.ok)
+            return false;
+        if (out != nullptr)
+            *out = ExprParser::format(v);
+        return true;
+    }
+
+    // 表达式改的是有效属性，几何必须在求值后重新提取一遍，
+    // 否则 Width="{...}" 会被 wtoi 当成 0 塌掉。
+    void RecomputeGeometry(XamlElement& node)
+    {
+        int dw = 100, dh = 28;
+        defaultSizeFor(node.tag, dw, dh);
+        const std::wstring wAttr = node.get(L"Width");
+        const std::wstring hAttr = node.get(L"Height");
+        const bool wAuto = AttrIsAuto(wAttr);
+        const bool hAuto = AttrIsAuto(hAttr);
+        node.hasW = !wAttr.empty() && !wAuto;
+        node.hasH = !hAttr.empty() && !hAuto;
+        node.w = (wAttr.empty() || wAuto) ? dw : IntAttr(wAttr, dw);
+        node.h = (hAttr.empty() || hAuto) ? dh : IntAttr(hAttr, dh);
+        if (!node.hasH)
+        {
+            if (_wcsicmp(node.tag.c_str(), L"ToolBar") == 0) node.h = 32;
+            else if (_wcsicmp(node.tag.c_str(), L"MenuBar") == 0) node.h = 24;
+            else if (_wcsicmp(node.tag.c_str(), L"StatusBar") == 0) node.h = 24;
+        }
+        node.x = IntAttr(node.get(L"Left"), 0);
+        node.y = IntAttr(node.get(L"Top"), 0);
+        node.hasX = node.has(L"Left");
+        node.hasY = node.has(L"Top");
+        ParseThickness(node.get(L"Margin"), node);
+        ParsePadding(node.get(L"Padding"), node);
+        node.spacing = IntAttr(node.get(L"Spacing"), 0);
+        node.horizontal = _wcsicmp(node.get(L"Orientation").c_str(), L"Horizontal") == 0;
+        node.hasOrientation = !node.get(L"Orientation").empty();
+        for (auto& c : node.children)
+            RecomputeGeometry(c);
+    }
+}
+
+bool xamlIsExpression(const std::wstring& value)
+{
+    return IsDataExpression(value);
+}
+
+void XamlRuntime::applyExpressions()
+{
+    if (!m_root)
+        return;
+    std::function<void(XamlElement&)> walk = [&](XamlElement& el) {
+        for (const auto& kv : el.attrs)
+        {
+            if (!IsDataExpression(kv.second))
+                continue;
+            std::wstring v;
+            if (EvalDataExpression(kv.second, &el, m_root.get(), 0, &v))
+                SetEffective(el, kv.first, v);
+        }
+        for (auto& c : el.children)
+            walk(c);
+    };
+    walk(*m_root);
+    RecomputeGeometry(*m_root);
+}
+
+void XamlRuntime::applyBindings()
+{
+    if (!m_root)
+        return;
+
+    // 表达式先落地：绑定与后续读取都站在"求值后的有效值"上
+    applyExpressions();
+
+    // 每次都重新采集：模板实例化后视觉层里也可能带 {Binding}，表要跟着更新。
+    // 求值用"元素指针"直接定位目标——模板里的元素通常没有 Name，按名字找会落到根上。
+    m_bindings.clear();
+    std::vector<std::pair<XamlElement*, XamlBinding>> local;
+    {
+        std::function<void(XamlElement&)> walk = [&](XamlElement& el) {
+            for (const auto& kv : el.attrs)
+            {
+                std::wstring src, prop;
+                if (xamlIsBindingExpr(kv.second, src, prop))
+                {
+                    XamlBinding b;
+                    b.targetName = el.name;
+                    b.targetProp = kv.first;
+                    b.sourceName = src;
+                    b.sourceProp = prop;
+                    const std::wstring& raw = kv.second;
+                    if (raw.find(L"TwoWay") != std::wstring::npos ||
+                        raw.find(L"twoWay") != std::wstring::npos)
+                        b.twoWay = true;
+                    m_bindings.push_back(b);
+                    local.emplace_back(&el, b);
+                }
+            }
+            for (auto& c : el.children)
+                walk(c);
+        };
+        walk(*m_root);
+    }
+
+    for (auto& lb : local)
+    {
+        XamlElement* target = lb.first;
+        if (target == nullptr)
+            continue;
+        XamlElement* source = lb.second.sourceName.empty()
+                                  ? target
+                                  : FindByName(*m_root, lb.second.sourceName);
+        if (source == nullptr)
+            continue;
+        SetEffective(*target, lb.second.targetProp, source->get(lb.second.sourceProp.c_str()));
+        SyncText(*target);
+    }
+}
+
+bool XamlRuntime::setProperty(const std::wstring& name, const std::wstring& prop,
+                              const std::wstring& value)
+{
+    if (!m_root)
+        return false;
+    XamlElement* el = name.empty() ? m_root.get() : FindByName(*m_root, name);
+    if (el == nullptr)
+        return false;
+
+    // 双向绑定：目标被修改时回写源，再由 applyBindings 广播到所有绑定目标
+    if (m_bindings.empty())
+        applyBindings();
+    bool twoWayHit = false;
+    for (const auto& b : m_bindings)
+    {
+        if (!b.twoWay)
+            continue;
+        if (_wcsicmp(b.targetProp.c_str(), prop.c_str()) != 0)
+            continue;
+        if (_wcsicmp(b.targetName.c_str(), name.c_str()) != 0)
+            continue;
+        XamlElement* source = b.sourceName.empty() ? el : FindByName(*m_root, b.sourceName);
+        if (source == nullptr)
+            continue;
+        source->set(b.sourceProp.c_str(), value);
+        SyncText(*source);
+        twoWayHit = true;
+    }
+
+    el->set(prop.c_str(), value);
+    SyncText(*el);
+    applyBindings();   // 双向或单向都重算一次，保证依赖该值的元素同步
+    (void)twoWayHit;
+    return true;
+}
+
+void XamlRuntime::applyDeclarations()
+{
+    applyStyles();
+    applyTemplates();
+    applyBindings();
+}
