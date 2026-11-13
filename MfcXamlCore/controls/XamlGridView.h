@@ -1,24 +1,32 @@
 ﻿#pragma once
-#include "XamlMfcControlBase.h"
-#include "XamlContentParse.h"
+// XamlGridView —— XAML <GridView> 网格委托（kind 18）。
+// 属性表驱动：Items（";"/换行分隔）、SelectedIndex、CellWidth、CellHeight、ItemCount（只读）。
+// 编码：本文件 UTF-8 with BOM。
 
-// ================= 网格委托（第九批）：GridView =================
-// 与 VirtualList 共用一套数据槽位（Items / SelectedIndex），只是布局换成格子。
+#include "XamlMfcControlBase.h"
+
 class XAML_CORE_API XamlGridView : public XamlMfcControlBase
 {
-
 public:
     XamlGridView() : XamlMfcControlBase(L"gridview") {}
 
 protected:
-        void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;
+    void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;
 
-        std::vector<XamlProperty> ownProperties() const override;
+    const XamlPropEntry* ownPropTable(size_t& count) const override
+    {
+        const std::vector<XamlPropEntry>& t = PropTableData();
+        count = t.size();
+        return t.data();
+    }
 
-        bool setOwnProperty(const wchar_t* name, const std::wstring& value) override;
+private:
+    static const std::vector<XamlPropEntry>& PropTableData();
 
-        std::wstring getOwnProperty(const wchar_t* name) const override;
+    void fillItems();
 
+    std::wstring m_items;
+    int m_selectedIndex = 0;
     int m_cellW = 0;
     int m_cellH = 0;
 };

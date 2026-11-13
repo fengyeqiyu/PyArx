@@ -1,45 +1,39 @@
-// XamlPageIndicator.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlPageIndicator.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlPageIndicator.h"
 
-void XamlPageIndicator::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlPageIndicator::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addSkinBox(id, 5, x, y, w, h);
-        host->setPageCount(id, 3);
-    }
+    host->addSkinBox(id, 5, x, y, w, h);
+    host->setPageCount(id, m_count);
+    if (m_selectedIndex > 0)
+        host->setPageIndex(id, m_selectedIndex);
+}
 
-std::vector<XamlProperty> XamlPageIndicator::ownProperties() const
+const std::vector<XamlPropEntry>& XamlPageIndicator::PropTableData()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Count", XamlPropType::Int, true, true},
-                {L"SelectedIndex", XamlPropType::Int, true, true}};
-    }
-
-bool XamlPageIndicator::setOwnProperty(const wchar_t* name, const std::wstring& value)
-{
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        int n = 0;
-        try { n = std::stoi(value); } catch (...) { return false; }
-        if (xamlprop::StrEq(key, "count"))
-        {
-            m_host->setPageCount(m_id, n);
-            return true;
-        }
-        if (xamlprop::StrEq(key, "selectedindex"))
-        {
-            m_host->setPageIndex(m_id, n);
-            return true;
-        }
-        return false;
-    }
-
-std::wstring XamlPageIndicator::getOwnProperty(const wchar_t* name) const
-{
-        if (m_host == nullptr) return {};
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "count"))
-            return std::to_wstring(m_host->getPageCount(m_id));
-        if (xamlprop::StrEq(key, "selectedindex"))
-            return std::to_wstring(m_host->getPageIndex(m_id));
-        return {};
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Count", nullptr, XamlPropType::Int, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlPageIndicator&>(b);
+             c.m_count = xamlprop2::ToInt(v, 3);
+             if (c.m_host != nullptr) c.m_host->setPageCount(c.m_id, c.m_count);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlPageIndicator&>(b);
+             return std::to_wstring(c.m_host != nullptr ? c.m_host->getPageCount(c.m_id) : c.m_count);
+         }},
+        {L"SelectedIndex", nullptr, XamlPropType::Int, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlPageIndicator&>(b);
+             c.m_selectedIndex = xamlprop2::ToInt(v, 0);
+             if (c.m_host != nullptr) c.m_host->setPageIndex(c.m_id, c.m_selectedIndex);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlPageIndicator&>(b);
+             return std::to_wstring(c.m_host != nullptr ? c.m_host->getPageIndex(c.m_id) : c.m_selectedIndex);
+         }},
+    };
+    return kTable;
+}

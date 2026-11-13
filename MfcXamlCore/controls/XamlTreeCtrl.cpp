@@ -1,22 +1,29 @@
-﻿// XamlTreeCtrl.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlTreeCtrl.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlTreeCtrl.h"
 
-void XamlTreeCtrl::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlTreeCtrl::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addTree(id, x, y, w, h);
-    }
+    host->addTree(id, x, y, w, h);
+    applyNodes();
+}
 
-std::vector<XamlProperty> XamlTreeCtrl::ownProperties() const
+void XamlTreeCtrl::applyNodes()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Nodes", XamlPropType::String, true, true}};
-    }
+    if (m_host != nullptr && !m_nodes.empty())
+        xamlextra::addNodes(m_host, m_id, m_nodes);
+}
 
-bool XamlTreeCtrl::setOwnProperty(const wchar_t* name, const std::wstring& value)
+const std::vector<XamlPropEntry>& XamlTreeCtrl::PropTableData()
 {
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (!xamlprop::StrEq(key, "nodes")) return false;
-        xamlextra::addNodes(m_host, m_id, value);
-        return true;
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Nodes", nullptr, XamlPropType::String, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlTreeCtrl&>(b);
+             c.m_nodes = v;
+             c.applyNodes();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return static_cast<const XamlTreeCtrl&>(b).m_nodes; }},
+    };
+    return kTable;
+}

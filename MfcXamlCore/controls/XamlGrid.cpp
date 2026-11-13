@@ -1,31 +1,42 @@
-﻿// XamlGrid.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlGrid.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlGrid.h"
 
-void XamlGrid::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlGrid::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addGrid(id, x, y, w, h);
-    }
+    host->addGrid(id, x, y, w, h);
+    if (!m_columns.empty()) applyColumns();
+    if (!m_rows.empty()) applyRows();
+}
 
-std::vector<XamlProperty> XamlGrid::ownProperties() const
+void XamlGrid::applyColumns()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Columns", XamlPropType::String, true, true},
-                {L"Rows", XamlPropType::String, true, true}};
-    }
+    if (m_host != nullptr) xamlextra::addColumns(m_host, m_id, m_columns);
+}
 
-bool XamlGrid::setOwnProperty(const wchar_t* name, const std::wstring& value)
+void XamlGrid::applyRows()
 {
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "columns"))
-        {
-            xamlextra::addColumns(m_host, m_id, value);
-            return true;
-        }
-        if (xamlprop::StrEq(key, "rows"))
-        {
-            xamlextra::addRows(m_host, m_id, value);
-            return true;
-        }
-        return false;
-    }
+    if (m_host != nullptr) xamlextra::addRows(m_host, m_id, m_rows);
+}
+
+const std::vector<XamlPropEntry>& XamlGrid::PropTableData()
+{
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Columns", nullptr, XamlPropType::Columns, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlGrid&>(b);
+             c.m_columns = v;
+             c.applyColumns();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return static_cast<const XamlGrid&>(b).m_columns; }},
+        {L"Rows", nullptr, XamlPropType::Rows, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlGrid&>(b);
+             c.m_rows = v;
+             c.applyRows();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return static_cast<const XamlGrid&>(b).m_rows; }},
+    };
+    return kTable;
+}

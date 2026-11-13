@@ -1,21 +1,30 @@
 ﻿#pragma once
-#include "XamlMfcControlBase.h"
-#include "XamlContentParse.h"
+// XamlPathView —— XAML <PathView> 路径委托（kind 19）。
+// 属性表驱动：Items（";"/换行分隔）、SelectedIndex。
+// 编码：本文件 UTF-8 with BOM。
 
-// ================= 路径委托（第九批）：PathView =================
-// 选中项居中放大，两侧沿水平弧线收敛；滚轮/点左右半边切换。
+#include "XamlMfcControlBase.h"
+
 class XAML_CORE_API XamlPathView : public XamlMfcControlBase
 {
-
 public:
     XamlPathView() : XamlMfcControlBase(L"pathview") {}
 
 protected:
-        void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;
+    void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;
 
-        std::vector<XamlProperty> ownProperties() const override;
+    const XamlPropEntry* ownPropTable(size_t& count) const override
+    {
+        const std::vector<XamlPropEntry>& t = PropTableData();
+        count = t.size();
+        return t.data();
+    }
 
-        bool setOwnProperty(const wchar_t* name, const std::wstring& value) override;
+private:
+    static const std::vector<XamlPropEntry>& PropTableData();
 
-        std::wstring getOwnProperty(const wchar_t* name) const override;
+    void fillItems();
+
+    std::wstring m_items;
+    int m_selectedIndex = 0;
 };
