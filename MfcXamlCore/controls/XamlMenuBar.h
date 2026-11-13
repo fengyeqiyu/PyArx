@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "XamlMfcControlBase.h"
 #include "XamlContentParse.h"
 
@@ -7,7 +7,7 @@ class XAML_CORE_API XamlMenuBar : public XamlMfcControlBase
 {
 
 public:
-    XamlMenuBar() : XamlMfcControlBase(L"menubar") {}
+    XamlMenuBar() : XamlMfcControlBase(L"MenuStrip") {}
 
 protected:
         void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;

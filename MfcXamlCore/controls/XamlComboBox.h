@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // XamlComboBox —— XAML <ComboBox> 的标准 MFC 实现。
 //
 // 基础功能：下拉项列表（Items="a|b|c"）、当前显示文字（Text）、当前选中项
@@ -16,7 +16,7 @@ class XAML_CORE_API XamlComboBox : public XamlMfcControlBase
 {
 
 public:
-    XamlComboBox() : XamlMfcControlBase(L"combo") {}
+    XamlComboBox() : XamlMfcControlBase(L"ComboBox") {}
 
 protected:
     void createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h) override;

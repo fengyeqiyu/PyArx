@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "XamlMfcControlBase.h"
 #include "XamlContentParse.h"
 
@@ -7,7 +7,7 @@ class XAML_CORE_API XamlTreeCtrl : public XamlMfcControlBase
 {
 
 public:
-    XamlTreeCtrl() : XamlMfcControlBase(L"tree") {}
+    XamlTreeCtrl() : XamlMfcControlBase(L"TreeCtrl") {}
 
 protected:
         void createNative(IXamlMfcHost* host, int id, int , int , int x, int y, int w, int h) override;

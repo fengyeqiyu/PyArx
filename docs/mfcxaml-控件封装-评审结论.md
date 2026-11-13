@@ -463,3 +463,17 @@ Windows 版 Chromium 的 `cursor:grab` / `cursor:grabbing` 是运行时用内部
 | 计数 | Count | ModelCount |
 
 验证：`_smoke_proptable.py` 10/10、`_sim_msgs.py` 15/15、`pp_test_all.py` 27/27；配电图应用截图正常（39 节点、工具条与表头文字完整）。`UIDesign` 源文件 `ClCompile` 无错误（完整链接阶段受本机提权限制未跑，属既有环境问题）。
+## 追加：事件契约名与注册标签对齐
+
+第二轮审计里"一个控件三个名字"的修法：**契约名 = 注册主标签**，`type()` 不再自造短名。
+
+- 12 个控件改了契约名：`combo→ComboBox`、`group→GroupBox`、`progress→ProgressBar`、`radio→RadioButton`、`tab→TabControl`、`label→TextBlock`、`toggle→ToggleButton`、`toolbar→ToolStrip`、`menubar→MenuStrip`、`tree→TreeCtrl`、`treeview→TreeTable`、`calendar→CalendarCtrl`。
+- `XamlEvents.h` 的默认事件表从 51 条混写（含 `edit/combo/radio/group/label/progress/tree/tab/toolbar/menubar/pageview/static/maskedtextbox` 等别名键）收敛为 49 条，一控件一键；查找仍大小写不敏感。
+- 校验脚本 `tests\mfc_xaml\_audit_contract_keys.py`：49 个控件的契约名全部能在表里命中，表内无孤立键（`page/stackview/swipeview` 是 `XamlPageView` 按标签变化的三型）。
+- 回归：`_smoke_proptable` 10/10、`_sim_msgs` 15/15、`pp_test_all` 27/27。
+
+## 追加：标签别名现状（未动，需先解两层注册）
+
+注册表 `RegisterPyMfcControls.cpp` 仍有 54 条标签、大量别名，其中一部分**不能直接删**：`TreeView / ToolBar / MenuBar / ListView / StatusBar / PropertyGrid` 同时属于原生 MFC 标签层（`XamlMfcTags.h`）与设计器控件箱，删掉自绘侧的别名会让同一标签指向另一套实现。仓库实测使用量（`_audit_tags.py`）：`Label=5、Edit=6、Progress=8、DrawCanvas=5、PaintCanvas=3、TreeView=2、ListView=1`，其余别名一律 0 次。
+
+结论：标签去别名必须先把"自绘控件注册"与"原生 MFC 标签"拆成两个命名空间（或给自绘控件统一加前缀），否则改一个名字会静默切换实现。这是复合控件空心化之后的下一个结构性动作，未在本次改动中执行。

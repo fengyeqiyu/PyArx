@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "XamlMfcControlBase.h"
 #include "XamlContentParse.h"
 
@@ -7,7 +7,7 @@ class XAML_CORE_API XamlToolBar : public XamlMfcControlBase
 {
 
 public:
-    XamlToolBar() : XamlMfcControlBase(L"toolbar") {}
+    XamlToolBar() : XamlMfcControlBase(L"ToolStrip") {}
 
 protected:
         void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;
