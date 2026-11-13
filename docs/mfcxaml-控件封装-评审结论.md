@@ -477,3 +477,8 @@ Windows 版 Chromium 的 `cursor:grab` / `cursor:grabbing` 是运行时用内部
 注册表 `RegisterPyMfcControls.cpp` 仍有 54 条标签、大量别名，其中一部分**不能直接删**：`TreeView / ToolBar / MenuBar / ListView / StatusBar / PropertyGrid` 同时属于原生 MFC 标签层（`XamlMfcTags.h`）与设计器控件箱，删掉自绘侧的别名会让同一标签指向另一套实现。仓库实测使用量（`_audit_tags.py`）：`Label=5、Edit=6、Progress=8、DrawCanvas=5、PaintCanvas=3、TreeView=2、ListView=1`，其余别名一律 0 次。
 
 结论：标签去别名必须先把"自绘控件注册"与"原生 MFC 标签"拆成两个命名空间（或给自绘控件统一加前缀），否则改一个名字会静默切换实现。这是复合控件空心化之后的下一个结构性动作，未在本次改动中执行。
+## 属性表迁移收口（S2）
+
+39 个控件已全部改为声明式属性表（`XamlPropEntry`），旧三钩子 `ownProperties / setOwnProperty / getOwnProperty` 归零，`_audit_prop_migration.py` 输出 0 项待迁移。迁移约定：属性只在表里声明一次（名字/类型/枚举/读写），值在 attach 前落成员、在 `createNative` 里下发；`Set == nullptr` 即只读；`Name` 不再作为自有属性（由基类布局属性处理）。
+
+统一导出：`xamlPropertySchemaJson()`（C++）/ `PyMfcXaml.prop_schema()`（JSON 字符串），设计器属性面板与 Python 内省共用一份 schema。顺带修掉基类 `properties()` 把 `writable` 填进 `readable` 槽位的缺陷——此前只读属性在面板里可编辑。

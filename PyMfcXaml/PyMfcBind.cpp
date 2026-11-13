@@ -599,6 +599,10 @@ PYBIND11_MODULE(PyMfcXaml, m)
     m.def("xamlLayout", &XamlLayoutRects, py::arg("path"), py::arg("width"), py::arg("height"),
           py::arg("overrides") = py::none(),
           "读 XAML 按客户区尺寸算布局，返回 {x:Name: (x, y, w, h)}；overrides 可运行时改行列尺寸");
+    m.def("prop_schema", &XamlPropertySchemaJson,
+          "全部已注册控件的属性 schema（JSON 字符串）：设计器属性面板与 Python 内省共用。\n"
+          "  结构：{\"version\":1,\"controls\":[{\"tag\":\"Button\",\"properties\":\n"
+          "        [{\"name\":\"Text\",\"type\":\"String\",\"readOnly\":false,\"enum\":\"\"}]}]}");
     m.def("register_control", &RegisterPythonControl,
           py::arg("tag"), py::arg("factory"),
           "注册自定义控件：register_control('MyControl', factory)。\n"

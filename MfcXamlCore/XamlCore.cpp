@@ -8,6 +8,9 @@
 #include <cwctype>
 #include <fstream>
 #include <locale>
+#include <set>
+#include <string>
+#include <typeindex>
 
 #pragma comment(lib, "msxml6.lib")
 
@@ -2837,4 +2840,109 @@ void XamlRuntime::applyDeclarations()
     applyStyles();
     applyTemplates();
     applyBindings();
+}
+
+// ===========================================================================
+// 属性 schema 导出（S2）：设计器属性面板 / Python 内省共用
+// ===========================================================================
+namespace
+{
+    const char* PropTypeName(XamlPropType t)
+    {
+        switch (t)
+        {
+        case XamlPropType::Int: return "Int";
+        case XamlPropType::String: return "String";
+        case XamlPropType::Bool: return "Bool";
+        case XamlPropType::Color: return "Color";
+        case XamlPropType::Enum: return "Enum";
+        case XamlPropType::Items: return "Items";
+        case XamlPropType::Double: return "Double";
+        case XamlPropType::Point: return "Point";
+        case XamlPropType::Rect: return "Rect";
+        case XamlPropType::Thickness: return "Thickness";
+        case XamlPropType::Image: return "Image";
+        case XamlPropType::Columns: return "Columns";
+        case XamlPropType::Rows: return "Rows";
+        case XamlPropType::Flags: return "Flags";
+        default: return "String";
+        }
+    }
+
+    // 属性名/枚举值都是 ASCII 标识符，这里只做最小转义，避免引入额外依赖
+    std::string JsonAscii(const wchar_t* s)
+    {
+        if (s == nullptr) return std::string();
+        std::string out;
+        for (const wchar_t* p = s; *p != L'\0'; ++p)
+        {
+            const wchar_t ch = *p;
+            if (ch == L'"' || ch == L'\\')
+            {
+                out.push_back('\\');
+                out.push_back(static_cast<char>(ch));
+            }
+            else if (ch < 32 || ch > 126)
+            {
+                out += "\\u";
+                char buf[8];
+                _snprintf_s(buf, _countof(buf), _TRUNCATE, "%04X", static_cast<unsigned>(ch & 0xFFFF));
+                out += buf;
+            }
+            else
+            {
+                out.push_back(static_cast<char>(ch));
+            }
+        }
+        return out;
+    }
+}
+
+std::string XamlPropertySchemaJson()
+{
+    XamlControlRegistry& reg = XamlControlRegistry::instance();
+    std::set<std::type_index> seen;   // 同一实现类只导出一条（主标签）
+    std::string out = "{\"version\":1,\"controls\":[";
+    bool firstControl = true;
+
+    for (const std::wstring& tag : reg.tags())
+    {
+        IXamlControl* control = reg.create(tag.c_str());
+        if (control == nullptr)
+            continue;
+        const std::type_index key(typeid(*control));
+        if (!seen.insert(key).second)
+        {
+            delete control;
+            continue;
+        }
+        const std::vector<XamlProperty> props = control->properties();
+        delete control;
+
+        if (!firstControl) out += ",";
+        firstControl = false;
+        out += "{\"tag\":\"";
+        out += JsonAscii(tag.c_str());
+        out += "\",\"properties\":[";
+        bool firstProp = true;
+        for (const XamlProperty& p : props)
+        {
+            if (p.name == nullptr)
+                continue;
+            if (!firstProp) out += ",";
+            firstProp = false;
+            out += "{\"name\":\"";
+            out += JsonAscii(p.name);
+            out += "\",\"type\":\"";
+            out += PropTypeName(p.type);
+            out += "\",\"readOnly\":";
+            out += (p.writable ? "false" : "true");
+            out += ",\"enum\":\"";
+            out += JsonAscii(p.enumValues);
+            out += "\"}";
+        }
+        out += "]}";
+    }
+    out += "]}";
+    return out;
 }

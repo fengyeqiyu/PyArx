@@ -188,7 +188,8 @@ std::vector<XamlProperty> XamlMfcControlBase::properties() const
         if (e.Name == nullptr)
             continue;
         const bool writable = static_cast<bool>(e.Set);
-        out.push_back({e.Name, e.Type, writable, true, e.EnumValues});
+        // XamlProperty 字段序是 name / type / readable / writable / enumValues
+        out.push_back({e.Name, e.Type, true, writable, e.EnumValues});
     }
 
     for (const auto& p : ownProperties())
