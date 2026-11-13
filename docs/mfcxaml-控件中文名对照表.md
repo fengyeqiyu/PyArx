@@ -6,13 +6,14 @@
 > QML / WPF / WinForms 三列是"同一套界面换引擎时落在哪个类型"，"QML 方式"只说 QML 侧的同名/组合/自绘；
 > 写"无"的表示该平台没有等价内置控件，只能组合或自绘，迁移时是重写而不是换标签。
 
-## 容器（11）
+## 容器（13）
 
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XBorder` | 边框容器 | Rectangle（border.*） | Border | Panel（BorderStyle） | 组合 | — | — |
 | `XDivider` | 分隔线 | Rectangle（height: 1）/ HorizontalDivider | Separator / Rectangle | Label（BorderStyle）/ Panel | 组合 | C 仅布局 | 19 |
 | `XFlickable` | 拖拽视口 | Flickable | ScrollViewer（PanningMode） | Panel（AutoScroll） | 同名 | B 薄 | 21 |
+| `XFrame` | 框架容器 | Frame | Frame / GroupBox | Panel（BorderStyle） | 同名 | B 薄 | 20 |
 | `XGridLayout` | 网格控件 | GridLayout / TableView | DataGrid / Grid | TableLayoutPanel | 组合 | B 薄 | 21 |
 | `XGroupBox` | 分组框 | GroupBox | GroupBox | GroupBox | 同名 | B 薄 | 20 |
 | `XListCtrl` | 列表控件 | ListView / TableView（单列） | ListView | ListView | 组合 | B 薄 | 21 |
@@ -20,17 +21,21 @@
 | `XScrollView` | 滚动窗口 | ScrollView | ScrollViewer | Panel（AutoScroll） | 组合 | B 薄 | 21 |
 | `XSplitView` | 分隔条 | SplitView | GridSplitter | SplitContainer | 组合 | C 仅布局 | 19 |
 | `XTabBar` | 选项卡 | TabBar + StackLayout | TabBar | TabBar | 组合 | B 薄 | 20 |
+| `XTabButton` | 页签按钮 | TabButton | TabItem | TabPage | 同名 | B 薄 | 21 |
 | `XTreeView` | 树形控件 | TreeView | TreeView | TreeView | 组合 | B 薄 | 20 |
 
-## 按钮（5）
+## 按钮（8）
 
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XButton` | 按钮 | Button | Button | Button | 同名 | B 薄 | 20 |
 | `XCheckBox` | 复选框 | CheckBox | CheckBox | CheckBox | 同名 | B 薄 | 21 |
+| `XDelayButton` | 长按按钮 | DelayButton | 无（Button + DispatcherTimer） | 无 | 同名 | A 基本 | 22 |
 | `XIconButton` | 图标按钮 | Button + icon.source | Button + Image | Button（Image） | 组合 | B 薄 | 21 |
 | `XRadioButton` | 单选按钮 | RadioButton | RadioButton | RadioButton | 同名 | B 薄 | 21 |
+| `XRoundButton` | 圆形按钮 | RoundButton | Button（圆角模板） | Button（Region 圆形） | 同名 | B 薄 | 21 |
 | `XToggleButton` | 开关按钮 | Button + checkable | ToggleButton | CheckBox（Appearance=Button） | 组合 | B 薄 | 21 |
+| `XToolButton` | 工具按钮 | ToolButton | Button（ToolBar 内） | ToolStripButton | 同名 | A 基本 | 22 |
 
 ## 输入控件（13）
 
@@ -50,7 +55,7 @@
 | `XTextField` | 文本框 | TextField / TextArea | TextField | TextField | 同名 | S 完整 | 24 |
 | `XTumbler` | 滚轮选择器 | Tumbler | 无（WinUI 有，WPF 需自绘） | 无（自绘） | 同名 | B 薄 | 21 |
 
-## 显示控件（7）
+## 显示控件（8）
 
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
@@ -60,6 +65,7 @@
 | `XLabel` | 文本标签 | Label / Text | Label | Label | 同名 | B 薄 | 20 |
 | `XMonthGrid` | 日历 | MonthGrid + DayOfWeekRow | Calendar | MonthCalendar | 组合 | B 薄 | 20 |
 | `XProgressBar` | 进度条 | ProgressBar | ProgressBar | ProgressBar | 同名 | A 基本 | 22 |
+| `XScrollIndicator` | 滚动指示器 | ScrollIndicator | ScrollBar | 无（Panel 自绘） | 同名 | A 基本 | 22 |
 | `XTextArea` | 富文本 | TextArea（textFormat: RichText） | RichTextBox | RichTextBox | 组合 | A 基本 | 22 |
 
 ## 数据视图（9）
@@ -76,18 +82,23 @@
 | `XTreeTable` | 树形表格 | TreeView（6.x）+ 多列 delegate | TreeView + GridView 列 | 无（TreeView + DataGridView 组合） | 组合 | B 薄 | 21 |
 | `XVirtualList` | 虚拟列表 | ListView（cacheBuffer 虚拟化） | ListView（VirtualizingStackPanel） | ListView（VirtualMode） | 组合 | A 基本 | 23 |
 
-## 功能条（2）
+## 功能条（3）
 
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XMenuBar` | 菜单栏 | MenuBar | Menu | MenuBar | 组合 | B 薄 | 21 |
 | `XToolBar` | 工具栏 | ToolBar | ToolBar | ToolBar | 组合 | B 薄 | 21 |
+| `XToolSeparator` | 工具分隔符 | ToolSeparator | Separator | ToolStripSeparator | 同名 | B 薄 | 20 |
 
-## 浮层（3）
+## 浮层（7）
 
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
+| `XDialog` | 对话框 | Dialog | Window（ShowDialog） | Form（ShowDialog） | 同名 | A 基本 | 22 |
+| `XDrawer` | 抽屉面板 | Drawer | 无（Popup + 动画） | 无（Panel + 动画） | 同名 | — | — |
 | `XMenu` | 弹出菜单 | Menu | ContextMenu | ContextMenuStrip | 同名 | B 薄 | 21 |
+| `XMenuItem` | 菜单项 | MenuItem | MenuItem | ToolStripMenuItem | 同名 | A 基本 | 22 |
+| `XMenuSeparator` | 菜单分隔符 | MenuSeparator | Separator | ToolStripSeparator | 同名 | B 薄 | 20 |
 | `XPopup` | 浮层 | Popup | Popup | ToolStripDropDown | 同名 | A 基本 | 22 |
 | `XToolTip` | 提示气泡 | ToolTip | ToolTip | ToolTip | 同名 | B 薄 | 20 |
 
@@ -141,9 +152,9 @@
 
 ## 合计与对应情况
 
-共 **56** 个标签：51 个主控件 + 5 个绘制图元（Line / Rectangle / Ellipse / Arc / Border）。
+共 **67** 个标签：51 个主控件 + 5 个绘制图元（Line / Rectangle / Ellipse / Arc / Border）。
 
-- **同名**：29 个
+- **同名**：40 个
 - **组合**：22 个
 - **自绘**：5 个
 

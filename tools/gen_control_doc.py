@@ -71,6 +71,17 @@ INFO = {
     'Flickable':      ('自绘 skin #21 Flick', 'XamlFlickable.cpp', 'flick'),
     'StackView':      ('自绘 skin #17 Pager（XamlPageView 子类）', 'XamlStackView.h', 'fairly'),
     'SwipeView':      ('自绘 skin #17 Pager（XamlPageView 子类）', 'XamlSwipeView.h', 'fairly'),
+ 'Frame':          ('原生 MFC Panel + 内边距', 'XamlFrame.cpp', 'pointer'),
+ 'Dialog':         ('原生 MFC Panel（模态标记）', 'XamlDialog.cpp', 'pointer'),
+ 'Drawer':         ('原生 MFC Panel（侧边位置）', 'XamlDrawer.cpp', 'pointer'),
+ 'RoundButton':    ('原生 MFC Button（圆形外观）', 'XamlRoundButton.cpp', 'pointer'),
+ 'DelayButton':    ('原生 MFC Button（长按确认）', 'XamlDelayButton.cpp', 'pointer'),
+ 'ToolButton':     ('原生 MFC Button（图标+文字）', 'XamlToolButton.cpp', 'pointer'),
+ 'ToolSeparator':  ('原生 MFC StaticLine', 'XamlToolSeparator.cpp', 'pointer'),
+ 'TabButton':      ('原生 MFC Button（页签态）', 'XamlTabButton.cpp', 'pointer'),
+ 'ScrollIndicator':('自绘细条指示器', 'XamlScrollIndicator.cpp', 'pointer'),
+ 'MenuItem':       ('原生 MFC Button（菜单项）', 'XamlMenuItem.cpp', 'pointer'),
+ 'MenuSeparator':  ('原生 MFC StaticLine', 'XamlMenuSeparator.cpp', 'pointer'),
 }
 
 EVENTS = {

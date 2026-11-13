@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // XamlMfcTags —— 控件标签的唯一命名来源。
 //
 // 命名规则（2026-11 起统一，不再保留别名）：
@@ -44,7 +44,7 @@ namespace xamlmfc
             L"AbsPanel", L"CanvasPanel", L"CanvasLayout", L"Canvas",
             L"Grid", L"StackPanel", L"DockPanel", L"WrapPanel",
             // 容器控件
-            L"Pane", L"Border", L"Frame", L"GroupBox", L"TabBar", L"TabPage",
+            L"Pane", L"Border", L"Frame", L"Dialog", L"Drawer", L"GroupBox", L"TabBar", L"TabPage",
             L"TabItem", L"ScrollViewer", L"ScrollView", L"ContentControl",
             // 外壳构件
             L"MenuBar", L"MenuItem", L"ToolBar", L"StatusBar", L"PropertyGrid", L"ListView",
@@ -80,6 +80,8 @@ namespace xamlmfc
             L"ToolBar", L"ToolTip", L"Menu", L"MenuBar", L"Popup", L"VirtualList",
             L"StackView", L"SwipeView", L"GridView", L"PathView", L"QCanvas", L"Page",
             L"Flickable",
+            // QML Controls 2 对齐补齐
+            L"Frame", L"Dialog", L"Drawer", L"RoundButton", L"DelayButton", L"ToolButton", L"ToolSeparator", L"TabButton", L"ScrollIndicator", L"MenuItem", L"MenuSeparator",
             // 绘制图元
             L"Line", L"Rectangle", L"Ellipse", L"Arc"
         };

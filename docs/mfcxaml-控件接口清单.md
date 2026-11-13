@@ -14,14 +14,14 @@
 
 | 项 | 数量 |
 |---|---|
-| 控件（注册主标签） | 51 |
-| 属性条目合计（含通用） | 1076 |
-| 其中通用属性 | 969（51 控件 × 19） |
-| 其中自有属性 | 107 |
+| 控件（注册主标签） | 61 |
+| 属性条目合计（含通用） | 1288 |
+| 其中通用属性 | 1160（61 控件 × 19） |
+| 其中自有属性 | 128 |
 | 只读属性 | 7 |
 | 事件键（内部名） | 15（click / dblclick / change / select / value / checked / dropdown / scroll / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus） |
 
-档位分布：S 完整 **3** 个 · A 基本 **12** 个 · B 薄 **32** 个 · C 仅布局 **4** 个 · 
+档位分布：S 完整 **3** 个 · A 基本 **17** 个 · B 薄 **37** 个 · C 仅布局 **4** 个 · 
 
 ## 三、逐控件清单
 
@@ -78,14 +78,24 @@
 | **XQCanvas** | 自绘 skin #20 QCanvas（命令脚本画布） | Commands / Script | — | click / dblclick / mousedown / mouseup / mousemove / scroll / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlQCanvas.cpp` |
 | **XPage** | 自绘 skin #17 Pager（XamlPageView） | SelectedIndex / PageCount | PageCount | click / select / gotfocus / lostfocus | B 薄 | `XamlPage.cpp` |
 | **XFlickable** | 自绘 skin #21 Flick | OffsetX / OffsetY | — | scroll / click / mousedown / mouseup / mousemove | B 薄 | `XamlFlickable.cpp` |
+| **XFrame** | 原生 MFC Panel + 内边距 | Padding | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlFrame.cpp` |
+| **XDialog** | 原生 MFC Panel（模态标记） | Title / Modal / StandardButtons | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | A 基本 | `XamlDialog.cpp` |
+| **XRoundButton** | 原生 MFC Button（圆形外观） | Text | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlRoundButton.cpp` |
+| **XDelayButton** | 原生 MFC Button（长按确认） | Text / Delay / Checked | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | A 基本 | `XamlDelayButton.cpp` |
+| **XToolButton** | 原生 MFC Button（图标+文字） | Text / IconSource / Display | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | A 基本 | `XamlToolButton.cpp` |
+| **XToolSeparator** | 原生 MFC StaticLine | Orientation | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlToolSeparator.cpp` |
+| **XTabButton** | 原生 MFC Button（页签态） | Text / Checked | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlTabButton.cpp` |
+| **XScrollIndicator** | 自绘细条指示器 | Orientation / Size / Position | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | A 基本 | `XamlScrollIndicator.cpp` |
+| **XMenuItem** | 原生 MFC Button（菜单项） | Text / Checkable / Checked | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | A 基本 | `XamlMenuItem.cpp` |
+| **XMenuSeparator** | 原生 MFC StaticLine | Orientation | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlMenuSeparator.cpp` |
 
 ## 四、分档结论
 
 **S 完整（自有 ≥5，可直接当业务控件用）**：XTextField(5)、XScrollBar(5)、XGridView(5)
 
-**A 基本（3–4，够用但还缺边角能力）**：XListBox(3)、XCodeEditor(3)、XComboBox(4)、XProgressBar(3)、XSlider(3)、XTextArea(3)、XSpinBox(3)、XRangeSlider(4)、XDial(3)、XTableView(4)、XPopup(3)、XVirtualList(4)
+**A 基本（3–4，够用但还缺边角能力）**：XListBox(3)、XCodeEditor(3)、XComboBox(4)、XProgressBar(3)、XSlider(3)、XTextArea(3)、XSpinBox(3)、XRangeSlider(4)、XDial(3)、XTableView(4)、XPopup(3)、XVirtualList(4)、XDialog(3)、XDelayButton(3)、XToolButton(3)、XScrollIndicator(3)、XMenuItem(3)
 
-**B 薄（1–2，只有主语义那一个字段）**：XButton(1)、XLabel(1)、XCheckBox(2)、XRadioButton(2)、XGroupBox(1)、XTabBar(1)、XTreeView(1)、XListCtrl(2)、XChoice(1)、XDatePicker(1)、XPowerCanvas(1)、XHyperlink(2)、XToggleButton(2)、XIconButton(2)、XImage(1)、XGridLayout(2)、XScrollView(2)、XMonthGrid(1)、XSwitch(1)、XPageIndicator(2)、XTumbler(2)、XTreeTable(2)、XToolBar(2)、XToolTip(1)、XMenu(2)、XMenuBar(2)、XStackView(2)、XSwipeView(2)、XPathView(2)、XQCanvas(2)、XPage(2)、XFlickable(2)
+**B 薄（1–2，只有主语义那一个字段）**：XButton(1)、XLabel(1)、XCheckBox(2)、XRadioButton(2)、XGroupBox(1)、XTabBar(1)、XTreeView(1)、XListCtrl(2)、XChoice(1)、XDatePicker(1)、XPowerCanvas(1)、XHyperlink(2)、XToggleButton(2)、XIconButton(2)、XImage(1)、XGridLayout(2)、XScrollView(2)、XMonthGrid(1)、XSwitch(1)、XPageIndicator(2)、XTumbler(2)、XTreeTable(2)、XToolBar(2)、XToolTip(1)、XMenu(2)、XMenuBar(2)、XStackView(2)、XSwipeView(2)、XPathView(2)、XQCanvas(2)、XPage(2)、XFlickable(2)、XFrame(1)、XRoundButton(1)、XToolSeparator(1)、XTabButton(2)、XMenuSeparator(1)
 
 **C 仅布局（自有 0，属性面上等同一块带样式的面板）**：XPane、XSplitView、XDivider、XBusyIndicator
 

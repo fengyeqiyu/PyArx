@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <!--
   PyArx 控件目录（参照 wxFormBuilder objectinfo 声明机制）
   每个 <objectinfo> 声明一个可在设计器画布上放置的控件：
@@ -1214,6 +1214,65 @@
     <property name="SweepAngle" type="int"/>
     <property name="Foreground" type="color"/>
     <property name="BorderThickness" type="int"/>
+  </objectinfo>
+
+  <objectinfo tag="XFrame" display="Frame" category="Containers" w="200" h="120">
+    <property name="Name" type="text"/>
+    <property name="Padding" type="int"/>
+  </objectinfo>
+  <objectinfo tag="XDialog" display="Dialog" category="Overlay" w="320" h="200">
+    <property name="Name" type="text"/>
+    <property name="Title" type="text"/>
+    <property name="Modal" type="bool"/>
+    <property name="StandardButtons" type="text"/>
+  </objectinfo>
+  <objectinfo tag="XDrawer" display="Drawer" category="Overlay" w="200" h="360">
+    <property name="Name" type="text"/>
+    <property name="Edge" type="text"/>
+    <property name="Modal" type="bool"/>
+    <property name="Position" type="int"/>
+  </objectinfo>
+  <objectinfo tag="XRoundButton" display="RoundButton" category="Buttons" w="48" h="48">
+    <property name="Name" type="text"/>
+    <property name="Text" type="text"/>
+    <property name="Radius" type="int"/>
+  </objectinfo>
+  <objectinfo tag="XDelayButton" display="DelayButton" category="Buttons" w="120" h="32">
+    <property name="Name" type="text"/>
+    <property name="Text" type="text"/>
+    <property name="Delay" type="int"/>
+    <property name="Checked" type="bool"/>
+  </objectinfo>
+  <objectinfo tag="XToolButton" display="ToolButton" category="Buttons" w="32" h="32">
+    <property name="Name" type="text"/>
+    <property name="Text" type="text"/>
+    <property name="IconSource" type="text"/>
+    <property name="Display" type="text"/>
+  </objectinfo>
+  <objectinfo tag="XToolSeparator" display="ToolSeparator" category="Function Bar" w="8" h="24">
+    <property name="Name" type="text"/>
+    <property name="Orientation" type="text"/>
+  </objectinfo>
+  <objectinfo tag="XTabButton" display="TabButton" category="Containers" w="90" h="30">
+    <property name="Name" type="text"/>
+    <property name="Text" type="text"/>
+    <property name="Checked" type="bool"/>
+  </objectinfo>
+  <objectinfo tag="XScrollIndicator" display="ScrollIndicator" category="Display Widgets" w="8" h="120">
+    <property name="Name" type="text"/>
+    <property name="Orientation" type="text"/>
+    <property name="Size" type="int"/>
+    <property name="Position" type="int"/>
+  </objectinfo>
+  <objectinfo tag="XMenuItem" display="MenuItem" category="Overlay" w="140" h="26">
+    <property name="Name" type="text"/>
+    <property name="Text" type="text"/>
+    <property name="Checkable" type="bool"/>
+    <property name="Checked" type="bool"/>
+  </objectinfo>
+  <objectinfo tag="XMenuSeparator" display="MenuSeparator" category="Overlay" w="140" h="8">
+    <property name="Name" type="text"/>
+    <property name="Orientation" type="text"/>
   </objectinfo>
 
 </package>

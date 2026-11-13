@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -95,6 +95,17 @@
     <ClCompile Include="controls\XamlStaticLine.cpp" />
     <ClCompile Include="controls\XamlSwipeView.cpp" />
     <ClCompile Include="controls\XamlSwitch.cpp" />
+    <ClCompile Include="controls\XamlFrame.cpp" />
+    <ClCompile Include="controls\XamlDialog.cpp" />
+    <ClCompile Include="controls\XamlDrawer.cpp" />
+    <ClCompile Include="controls\XamlRoundButton.cpp" />
+    <ClCompile Include="controls\XamlDelayButton.cpp" />
+    <ClCompile Include="controls\XamlToolButton.cpp" />
+    <ClCompile Include="controls\XamlToolSeparator.cpp" />
+    <ClCompile Include="controls\XamlTabButton.cpp" />
+    <ClCompile Include="controls\XamlScrollIndicator.cpp" />
+    <ClCompile Include="controls\XamlMenuItem.cpp" />
+    <ClCompile Include="controls\XamlMenuSeparator.cpp" />
     <ClCompile Include="controls\XamlTabControl.cpp" />
     <ClCompile Include="controls\XamlTableView.cpp" />
     <ClCompile Include="controls\XamlToggleButton.cpp" />

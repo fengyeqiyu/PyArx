@@ -78,6 +78,17 @@ CN = {
     'Rectangle': '矩形',
     'Ellipse': '椭圆',
     'Arc': '圆弧',
+    'Frame': '框架容器',
+    'Dialog': '对话框',
+    'Drawer': '抽屉面板',
+    'RoundButton': '圆形按钮',
+    'DelayButton': '长按按钮',
+    'ToolButton': '工具按钮',
+    'ToolSeparator': '工具分隔符',
+    'TabButton': '页签按钮',
+    'ScrollIndicator': '滚动指示器',
+    'MenuItem': '菜单项',
+    'MenuSeparator': '菜单分隔符',
 }
 
 # 分类 -> 中文分类（控件箱分组，顺序即控件箱顺序）
@@ -157,6 +168,17 @@ QML = {
     'Rectangle': ('Rectangle', '同名'),
     'Ellipse': ('Shape（PathArc）', '自绘'),
     'Arc': ('Shape + PathAngleArc', '自绘'),
+    'Frame': ('Frame', '同名'),
+    'Dialog': ('Dialog', '同名'),
+    'Drawer': ('Drawer', '同名'),
+    'RoundButton': ('RoundButton', '同名'),
+    'DelayButton': ('DelayButton', '同名'),
+    'ToolButton': ('ToolButton', '同名'),
+    'ToolSeparator': ('ToolSeparator', '同名'),
+    'TabButton': ('TabButton', '同名'),
+    'ScrollIndicator': ('ScrollIndicator', '同名'),
+    'MenuItem': ('MenuItem', '同名'),
+    'MenuSeparator': ('MenuSeparator', '同名'),
 }
 
 # tag -> WPF（.NET）对应类型
@@ -217,6 +239,17 @@ WPF = {
     'Rectangle': 'Rectangle',
     'Ellipse': 'Ellipse',
     'Arc': 'Path（ArcSegment）',
+    'Frame': 'Frame / GroupBox',
+    'Dialog': 'Window（ShowDialog）',
+    'Drawer': '无（Popup + 动画）',
+    'RoundButton': 'Button（圆角模板）',
+    'DelayButton': '无（Button + DispatcherTimer）',
+    'ToolButton': 'Button（ToolBar 内）',
+    'ToolSeparator': 'Separator',
+    'TabButton': 'TabItem',
+    'ScrollIndicator': 'ScrollBar',
+    'MenuItem': 'MenuItem',
+    'MenuSeparator': 'Separator',
 }
 
 # tag -> WinForms（.NET）对应类型
@@ -277,6 +310,17 @@ WIN = {
     'Rectangle': 'Graphics.DrawRectangle（自绘）',
     'Ellipse': 'Graphics.DrawEllipse（自绘）',
     'Arc': 'Graphics.DrawArc（自绘）',
+    'Frame': 'Panel（BorderStyle）',
+    'Dialog': 'Form（ShowDialog）',
+    'Drawer': '无（Panel + 动画）',
+    'RoundButton': 'Button（Region 圆形）',
+    'DelayButton': '无',
+    'ToolButton': 'ToolStripButton',
+    'ToolSeparator': 'ToolStripSeparator',
+    'TabButton': 'TabPage',
+    'ScrollIndicator': '无（Panel 自绘）',
+    'MenuItem': 'ToolStripMenuItem',
+    'MenuSeparator': 'ToolStripSeparator',
 }
 
 # 属性映射：MFCXaml 通用属性 -> QML

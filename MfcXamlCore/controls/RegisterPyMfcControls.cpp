@@ -14,6 +14,17 @@
 #include "XamlProgressBar.h"
 #include "XamlSlider.h"
 #include "XamlExtraControls.h"
+#include "XamlFrame.h"
+#include "XamlDialog.h"
+#include "XamlDrawer.h"
+#include "XamlRoundButton.h"
+#include "XamlDelayButton.h"
+#include "XamlToolButton.h"
+#include "XamlToolSeparator.h"
+#include "XamlTabButton.h"
+#include "XamlScrollIndicator.h"
+#include "XamlMenuItem.h"
+#include "XamlMenuSeparator.h"
 
 #include <functional>
 #include <vector>
@@ -136,8 +147,6 @@ void RegisterPyMfcControls()
     RegisterOne(reg, []() -> IXamlControl* { return new XamlPopup(); },
                 {L"XPopup"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlPopup(); },
-                {L"XDialog"});
-    RegisterOne(reg, []() -> IXamlControl* { return new XamlPopup(); },
                 {L"XDrawer"});
 
     // QML 对齐（第七批）：虚拟化列表（ListModel + delegate）
@@ -165,4 +174,28 @@ void RegisterPyMfcControls()
     // QML 对齐（第十批）：可拖拽内容视口（惯性 + 触边回弹）
     RegisterOne(reg, []() -> IXamlControl* { return new XamlFlickable(); },
                 {L"XFlickable"});
+
+    // ---- QML Controls 2 对齐补齐 ----
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlFrame(); },
+                {L"XFrame"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlDialog(); },
+                {L"XDialog"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlDrawer(); },
+                {L"XDrawer"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlRoundButton(); },
+                {L"XRoundButton"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlDelayButton(); },
+                {L"XDelayButton"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlToolButton(); },
+                {L"XToolButton"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlToolSeparator(); },
+                {L"XToolSeparator"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlTabButton(); },
+                {L"XTabButton"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlScrollIndicator(); },
+                {L"XScrollIndicator"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlMenuItem(); },
+                {L"XMenuItem"});
+    RegisterOne(reg, []() -> IXamlControl* { return new XamlMenuSeparator(); },
+                {L"XMenuSeparator"});
 }
