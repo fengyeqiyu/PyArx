@@ -239,13 +239,11 @@
 
     <!-- ==================== 状态栏 ==================== -->
     <StatusBar Grid.Row="5" Spacing="0">
-      <XLabel Name="statusBrand" Text="PyMfc Studio" Width="128"/>
-      <XDivider Width="1"/>
-      <XLabel Name="statusText"  Text="就绪"        Width="*"/>
-      <XDivider Width="1"/>
-      <XLabel Name="statusPos"   Text="X:0 Y:0"     Width="120"/>
-      <XLabel Name="statusSize"  Text="W:0 H:0"     Width="120"/>
-      <XLabel Name="statusZoom"  Text="100%"        Width="80"/>
+      <XLabel Name="statusBrand" Text="PyMfc Studio" Width="112"/>
+      <XLabel Name="statusText"  Text="就绪"        Width="620"/>
+      <XLabel Name="statusPos"   Text="X:0 Y:0"     Width="112"/>
+      <XLabel Name="statusSize"  Text="W:0 H:0"     Width="112"/>
+      <XLabel Name="statusZoom"  Text="100%"        Width="72"/>
     </StatusBar>
 
   </XGrid>

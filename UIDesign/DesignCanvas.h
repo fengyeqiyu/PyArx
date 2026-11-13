@@ -1493,7 +1493,9 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                      tagIs(node, L"Switch") || tagIs(node, L"SpinBox") ||
                      tagIs(node, L"DatePicker") || tagIs(node, L"Dial") ||
                      tagIs(node, L"Tumbler") || tagIs(node, L"ScrollBar") ||
-                     tagIs(node, L"BusyIndicator"))
+                     tagIs(node, L"BusyIndicator") ||
+                     tagIs(node, L"Rectangle") || tagIs(node, L"Ellipse") || tagIs(node, L"Line") ||
+                     tagIs(node, L"Divider") || tagIs(node, L"Hyperlink") || tagIs(node, L"Choice"))
             {
                 xamlapp::XamlAppearance ap;
                 ap.backColor = node->get(L"Background");

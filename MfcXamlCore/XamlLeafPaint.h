@@ -290,6 +290,67 @@ inline void drawLeaf(XamlCanvas& cv, XamlElement* el, const RECT& rc,
         return;
     }
 
+    // ---- 绘图图元 / 分隔线 / 超链接 / 选择项 ----
+    {
+        COLORREF fill = xamlmfc::theme::surface;
+        COLORREF stroke = xamlmfc::theme::border;
+        int appAlpha = 255;
+        COLORREF c = 0;
+        if (xamlapp::ParseColor(ap.backColor, c)) fill = c;
+        if (!xamlapp::ParseColor(ap.borderColor, c, &appAlpha) &&
+            !xamlapp::ParseColor(ap.foreColor, c))
+            c = xamlmfc::theme::border;
+        stroke = c;
+
+        if (isAnyTag(tag, {L"Rectangle", L"Ellipse", L"Line"}))
+        {
+            const int thick = 1;
+            if (isAnyTag(tag, {L"Ellipse"}))
+                cv.fillEllipse(rc, fill, stroke);
+            else if (isAnyTag(tag, {L"Line"}))
+            {
+                const std::wstring dir = el->get(L"Direction");
+                POINT a{ rc.left, rc.top }, b{ rc.right, rc.bottom };
+                if (_wcsicmp(dir.c_str(), L"Up") == 0) { a.y = rc.bottom; b.y = rc.top; }
+                else if (_wcsicmp(dir.c_str(), L"H") == 0 ||
+                         _wcsicmp(dir.c_str(), L"Horizontal") == 0)
+                    a.y = b.y = rc.top + (rc.bottom - rc.top) / 2;
+                else if (_wcsicmp(dir.c_str(), L"V") == 0 ||
+                         _wcsicmp(dir.c_str(), L"Vertical") == 0)
+                    a.x = b.x = rc.left + (rc.right - rc.left) / 2;
+                cv.strokeLine(a, b, stroke, thick);
+            }
+            else
+                cv.fillRoundRect(rc, fill, stroke, 0);
+            return;
+        }
+        if (isAnyTag(tag, {L"Divider"}))
+        {
+            RECT line = rc;
+            line.top = (rc.top + rc.bottom) / 2;
+            line.bottom = line.top + 1;
+            cv.fillRect(line, xamlmfc::theme::border);
+            return;
+        }
+        if (isAnyTag(tag, {L"Hyperlink"}))
+        {
+            xamlDrawText(cv, rc, el->text, ap, styled, xamlmfc::theme::accent, DT_LEFT, 2);
+            return;
+        }
+        if (isAnyTag(tag, {L"Choice"}))
+        {
+            cv.fillRoundRect(rc, xamlmfc::theme::field, xamlmfc::theme::border, xamlmfc::theme::radius);
+            RECT txt = rc; txt.left += 8; txt.right -= 24;
+            xamlDrawText(cv, txt, el->text.empty() ? el->get(L"Value") : el->text, ap, styled,
+                         xamlmfc::theme::ink, DT_LEFT, 0);
+            // 展开箭头（自绘一个小 V，不依赖按钮标题绘制）
+            const int cx = rc.right - 14, cy = (rc.top + rc.bottom) / 2;
+            cv.strokeLine(POINT{ cx - 4, cy - 3 }, POINT{ cx, cy + 2 }, xamlmfc::theme::muted, 1);
+            cv.strokeLine(POINT{ cx, cy + 2 }, POINT{ cx + 4, cy - 3 }, xamlmfc::theme::muted, 1);
+            return;
+        }
+    }
+
     // ---- 开关 / 数值 / 滑块组 / 日期 / 表盘 / 滚筒 / 滚动条 / 等待环 ----
     // 直接复用运行时那套 pymfcskin 自绘（几何一致），配色换成主题浅色，
     // 于是设计器画布与预览器不会再各画一版。
