@@ -2,38 +2,124 @@
 
 AutoCAD（ObjectArx）+ MFC/XAML 的 Python 绑定与控件库。C++ 侧用 pybind11 暴露成 Python 模块，界面层用 MFC 承载一套自绘控件库，XAML 只做声明式布局与事件绑定。
 
-## 目录
+## 项目简介
 
-| 目录 | 内容 |
-|---|---|
-| `PyArxCore` | ObjectArx 核心封装（Python 模块入口、CAD 交互） |
-| `PyArxEngine` | 几何/业务引擎 |
-| `MfcXamlCore` | XAML 解析、控件库（`controls\Xaml*.h/.cpp`）、属性表 `XamlTypes.h`、事件契约 `XamlEvents.h` |
-| `PyMfcXaml` | MFC 宿主（窗口、皮肤自绘、事件派发，`PyMfcHost` / `PyMfcProcs` / `PyMfcLoad`） |
-| `PyMfcWebView` / `MFCWebView` | WebView 承载 |
-| `PyArxQml` / `UIDesign` / `Viewer` / `XamlViewer` | QML 与设计器/预览工具 |
-| `plugins` | 用 XAML 组合出来的复合控件（不应下沉到 C++ 的通用组合除外） |
-| `tests` | 回归脚本（`tests\mfc_xaml` 下按控件/交互分类，均为可重复运行的模拟消息测试） |
-| `docs` | 设计/评审/执行记录 |
+PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XAML UI 技术桥接到 Python 的开发库。通过 pybind11 实现 C++ 到 Python 的绑定，结合自绘 MFC 控件库和 XAML 声明式 UI，实现 CAD 二次开发中的现代化界面开发能力。
+
+### 核心特性
+
+- **Python 绑定**：使用 pybind11 将 ObjectArx 核心类库暴露为 Python 模块
+- **自绘控件库**：基于 MFC 的完全自绘控件，支持皮肤定制
+- **XAML 布局**：支持 XAML 声明式 UI 定义，配合 Python 事件回调
+- **WebView 集成**：内置 WebView 承载能力，支持混合开发
+- **QML 支持**：可选的 QML 界面开发方式
+
+## 目录结构
+
+| 目录 | 说明 |
+|------|------|
+| `PyArxCore` | ObjectArx 核心封装，包含 Python 模块入口、CAD 数据库交互、实体对象、事务管理等 |
+| `PyArxEngine` | 几何计算与业务逻辑引擎 |
+| `MfcXamlCore` | XAML 解析引擎、控件库（controls\Xaml*.h/.cpp）、属性表（XamlTypes.h）、事件契约（XamlEvents.h） |
+| `PyMfcXaml` | MFC 宿主程序，包含窗口管理、皮肤自绘、事件派发（PyMfcHost / PyMfcProcs / PyMfcLoad） |
+| `PyMfcWebView` | WebView 承载模块 |
+| `MFCWebView` | WebView 核心实现，包含 JSON 解析、WebShell 命令处理 |
+| `PyArxQml` | QML 集成模块 |
+| `UIDesign` | UI 设计器 |
+| `Viewer` / `XamlViewer` | 预览工具 |
+| `plugins` | 用 XAML 组合的复合控件（通用组合下沉到 C++ 基础控件） |
+| `tests` | 回归测试脚本（tests\mfc_xaml 下按控件/交互分类） |
+| `docs` | 设计文档、评审记录、执行记录 |
 | `res` | 运行时资源（图标、光标等） |
 
-`third_party`（pybind11 / zlib / python314 等）与本机构建产物 `X64` 不入库，按需自行准备。
+> **注意**：`third_party`（pybind11 / zlib / python314 等）与构建产物 `X64` 不入库，按需自行准备。
 
-## 构建
+## 构建说明
 
-```
+### 环境要求
+
+- Windows 64 位系统
+- Visual Studio / MSBuild
+- Python 3.14 或兼容版本
+- ObjectArx SDK
+
+### 构建命令
+
+```bash
 MSBuild PyArx.sln /t:PyMfcXaml /p:Configuration=Release /p:Platform=x64 /p:VcpkgApplocalDeps=false
 ```
 
-产物在 `X64\Release`（`PyMfcXaml.pyd`、`MfcXamlCore.dll`）。`res` 目录不随构建自动拷贝，改资源后需手工复制到产物目录。
+### 构建产物
+
+- 输出目录：`X64\Release`
+- 主要产物：
+  - `PyMfcXaml.pyd` - Python 可导入模块
+  - `MfcXamlCore.dll` - 核心控件库
+
+> **注意**：`res` 目录不随构建自动拷贝，修改资源后需手工复制到产物目录。
 
 ## 设计约定
 
-- 控件属性走 `XamlPropEntry` 属性表：名字、类型、只读/只写、读写实现只在一处定义，基类统一分派。
-- 事件走 `XamlEvents.h` 的契约表：XAML 只写事件名，控件申报 `events()`，宿主按契约绑定并派发。
-- 控件回调走 Python：XAML 里写 `on_click="fn"`，或加载后 `child.click = fn`。
-- C++ 只提供基础控件；复合控件用 XAML 组合放在 `plugins`，确认通用后再下沉。
+### 属性系统
+
+控件属性统一走 `XamlPropEntry` 属性表：
+- 名字、类型、只读/只写属性
+- 读写实现只在一处定义
+- 基类统一分派机制
+
+### 事件系统
+
+事件走 `XamlEvents.h` 的契约表：
+- XAML 端只写事件名
+- 控件申报 `events()` 方法
+- 宿主按契约绑定并派发
+
+### 回调机制
+
+- Python 回调：XAML 里写 `on_click="fn"`，或加载后 `child.click = fn`
+- 控件事件通过契约表统一管理
+
+### 控件层级
+
+- **C++ 层**：只提供基础控件
+- **XAML 层**：复合控件用 XAML 组合，放在 `plugins` 目录
+- 确认通用后下沉到 C++ 层
+
+## 核心模块说明
+
+### PyArxCore
+
+ObjectArx 核心 Python 绑定，包含：
+- 数据库操作（PyDbDatabase、事务管理）
+- 实体对象（线、圆、多段线、尺寸标注、块引用等）
+- 符号表（图层、线型、块表等）
+- 选择集与过滤
+- 反应器（数据库反应器、对象反应器）
+
+### MfcXamlCore
+
+XAML 解析与控件系统：
+- XamlCore：XAML 解析、布局、样式、模板、绑定表达式
+- 控件库：Button、TextBox、ListBox、TreeView、GridView、TableView 等
+- 自绘皮肤：ProgressBar、Slider、Combo、Tab、Calendar、Menu 等
+- 几何引擎：基于 Boost.Geometry 的几何计算
+- SVG 支持：nanosvg 实现的 SVG 渲染
+- D3D11 渲染：Direct3D 11 后端渲染
+
+### MFCWebView
+
+WebView 承载方案：
+- 双窗口模式（侧栏 + 主区）
+- JSON 命令协议
+- 双向通信：页面 ↔ C++
+
+### MfcXamlRuntime
+
+复合控件运行框架（Python 实现）：
+- Composite：复合控件容器
+- Runtime：控件运行时管理
+- 自动事件绑定与属性映射
 
 ## 许可
 
-见 `LICENSE`。
+见 `LICENSE` 文件。
