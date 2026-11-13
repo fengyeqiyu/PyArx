@@ -292,6 +292,7 @@ delegate 行模板（`XItemView`，对应 QML ListView 的 delegate）：
 | `model: [...]` | `Model="a\|b;c\|d"`（`;` 分行，行内竖线分字段） |
 | Python 喂 list | `win.setXamlValue("LV", "model", [["AT1-1", "回路一"], ["AT1-2", "回路二"]])`，按新行数重建行控件 |
 | `delegate: Item { ... }` | `XItemView` 的子节点就是行模板，按行数逐行实例化 |
+| 换行模板（换 Component） | 模板写进 `<ControlTemplate x:Key="RowA">`，`Delegate="RowA"` 指定；运行时 `win.setXamlValue("LV", "delegate", "RowB")` 换掉 |
 | `modelData` / `index` | 模板里写 `{modelData}` / `{index}` / `{0}` `{1}` 取字段 |
 | `ListView` 行高 | `ItemHeight` |
 | `currentIndex` | `SelectedIndex` |

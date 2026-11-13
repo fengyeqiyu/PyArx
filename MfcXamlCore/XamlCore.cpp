@@ -739,7 +739,7 @@ namespace
         std::function<void(IXMLDOMElement*)> scanRes = [&](IXMLDOMElement* resEl) {
             if (resEl == nullptr)
                 return;
-            const std::wstring rtag = TagOf(resEl);
+            const std::wstring rtag = xamlmfc::BareTag(TagOf(resEl));
             if (IsResourceContainerTag(rtag))
             {
                 const std::wstring src = AttrByName(resEl, L"Source");
@@ -1093,18 +1093,19 @@ namespace
                 childElement->get_tagName(&ct);
                 std::wstring childTag = ct != nullptr ? ct : L"";
                 ::SysFreeString(ct);
+                const std::wstring childBare = xamlmfc::BareTag(childTag);
 
                 // 资源类节点：不参与布局，交给 scanRes 采集样式/模板
-                if (childTag == L"Grid.RowDefinitions" ||
-                    childTag == L"Grid.ColumnDefinitions")
+                if (childBare == L"Grid.RowDefinitions" ||
+                    childBare == L"Grid.ColumnDefinitions")
                 {
                     childElement->Release();
                     continue;
                 }
-                if (IsResourceContainerTag(childTag) ||
-                    childTag == L"Style" ||
-                    childTag == L"ControlTemplate" ||
-                    childTag == L"DataTemplate")
+                if (IsResourceContainerTag(childBare) ||
+                    childBare == L"Style" ||
+                    childBare == L"ControlTemplate" ||
+                    childBare == L"DataTemplate")
                 {
                     scanRes(childElement);
                     childElement->Release();
@@ -2797,8 +2798,24 @@ void XamlRuntime::applyStyles()
 //   XAML     —— `AT1-1|回路一;AT1-2|回路二`（; 或换行分行，竖线分字段）
 //   Python   —— 绑定层把 list 拼成 `AT1-1<TAB>回路一|AT1-2<TAB>回路二`（竖线分行，制表符分字段）
 // 所以先看串里有没有制表符来决定分行/分字段符号，两种写法都落到同一个 rows。
-static void ExpandDelegate(XamlElement& el)
+static void ExpandDelegate(XamlElement& el,
+                           const std::vector<std::pair<std::wstring, std::vector<XamlElement>>>* tpls)
 {
+    // QML 里 delegate 可以指向外部 Component：这里写 Delegate="模板键"，
+    // 从模板表（<ControlTemplate x:Key="...">）取子树当行模板。
+    // 每次展开都重新拷一份，行内的 {index}/{0} 替换只动副本，模板本体不被污染。
+    const std::wstring dlgKey = TrimWs(el.get(L"Delegate"));
+    if (tpls != nullptr && !dlgKey.empty())
+    {
+        for (const auto& kv : *tpls)
+        {
+            if (_wcsicmp(kv.first.c_str(), dlgKey.c_str()) != 0 || kv.second.empty())
+                continue;
+            el.delegateTemplate = kv.second;
+            el.children.clear();   // 引用了外部模板，就不用内联子节点当模板了
+            break;
+        }
+    }
     if (el.delegateTemplate.empty() && !el.children.empty())
     {
         el.delegateTemplate.push_back(el.children.front());
@@ -2868,7 +2885,7 @@ void XamlRuntime::applyTemplates()
     std::function<void(XamlElement&)> walk = [&](XamlElement& el) {
         // QML delegate：XItemView 的唯一子节点是行模板，按 Model 的行数实例化
         if (_wcsicmp(KindOf(el.tag).c_str(), L"itemview") == 0)
-            ExpandDelegate(el);
+            ExpandDelegate(el, &m_templates);
         // 先清掉上一次实体化的模板子树，再递归真实子节点
         el.children.erase(
             std::remove_if(el.children.begin(), el.children.end(),
@@ -3444,7 +3461,7 @@ bool XamlRuntime::refreshItemView(const std::wstring& name)
         return false;
     if (_wcsicmp(KindOf(el->tag).c_str(), L"itemview") != 0)
         return false;
-    ExpandDelegate(*el);
+    ExpandDelegate(*el, &m_templates);
     return true;
 }
 

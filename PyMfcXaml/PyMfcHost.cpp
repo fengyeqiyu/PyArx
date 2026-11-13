@@ -3909,7 +3909,10 @@ bool PyMfcHost::setXamlProperty(const std::wstring& name, const std::wstring& pr
                                  _wcsicmp(prop.c_str(), L"Model") == 0;
         // ItemView 的行是"普通控件"：只改元素树上的 Model 不会长出新行，
         // 必须按新行数销毁旧行控件、重建行控件（与加载时同一条建控件通路）。
-        if (isModelProp && _wcsicmp(m_xaml->kindOfElement(name).c_str(), L"itemview") == 0)
+        // delegate 同理：Delegate="模板键" 一换，整行模板跟着换（QML 换 Component）。
+        const bool isItemViewProp = isModelProp || _wcsicmp(prop.c_str(), L"delegate") == 0;
+        if (isItemViewProp &&
+            _wcsicmp(m_xaml->kindOfElement(name).c_str(), L"itemview") == 0)
         {
             extern bool PyMfcRebuildItemView(PyMfcHost*, const std::wstring&);
             PyMfcRebuildItemView(this, name);
