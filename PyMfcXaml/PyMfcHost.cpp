@@ -1,4 +1,4 @@
-// PyMfcHost.cpp —— class PyMfcHost 的实现（从 PyMfcHost.h 类体内的内联定义迁出）。
+﻿// PyMfcHost.cpp —— class PyMfcHost 的实现（从 PyMfcHost.h 类体内的内联定义迁出）。
 // 头里只留声明、嵌套类型、数据成员与宏。改实现改这里，改接口改 PyMfcHost.h。
 
 #include "PyMfcHost.h"
@@ -3877,6 +3877,34 @@ bool PyMfcHost::setXamlProperty(const std::wstring& name, const std::wstring& pr
             return false;
         if (!m_xaml->setProperty(name, prop, value))
             return false;
+        // QML 语义：改 model / items 要立刻重建列表项（走与加载时同一条字符串表通路）
+        if (_wcsicmp(prop.c_str(), L"Items") == 0 || _wcsicmp(prop.c_str(), L"items") == 0 ||
+            _wcsicmp(prop.c_str(), L"model") == 0 || _wcsicmp(prop.c_str(), L"Model") == 0)
+        {
+            auto it = m_xamlIds.find(name);
+            if (it != m_xamlIds.end())
+            {
+                clearStrings(it->second);
+                std::wstring cur;
+                auto flush = [&]() {
+                    if (cur.empty())
+                        return;
+                    std::wstring item;
+                    for (wchar_t ch : cur)
+                        item.push_back(ch == L'\t' ? L' ' : ch);   // 单元格分隔在列表里显示成空格
+                    addString(it->second, item);
+                    cur.clear();
+                };
+                for (wchar_t ch : value)
+                {
+                    if (ch == L'|' || ch == L'\n' || ch == L'\r')
+                        flush();
+                    else
+                        cur.push_back(ch);
+                }
+                flush();
+            }
+        }
         return reflowXaml();
     }
 

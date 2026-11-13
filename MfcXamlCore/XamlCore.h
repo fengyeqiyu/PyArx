@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // PyMfcXaml 统一运行时核心（C++，无 MFC 依赖）
 //
 // 原则：
@@ -59,6 +59,8 @@ struct XamlProperty
 // ---------------------------------------------------------------------------
 // XamlElement：统一节点模型（文档树）
 // ---------------------------------------------------------------------------
+#include <map>
+
 class XamlElement
 {
 public:
@@ -276,6 +278,8 @@ private:
     std::unique_ptr<XamlElement> m_root;
     // 实例化时创建的控件（与树节点一一对应，用于销毁）
     std::vector<std::unique_ptr<IXamlControl>> m_controls;
+    // 节点 -> 控件实例：运行时改属性（如 QML 的 model）要同步到控件本身
+    std::map<XamlElement*, IXamlControl*> m_ctrlByElement;
     ControlCallback m_onControl;
     std::vector<XamlStyle> m_styles;
     std::vector<std::pair<std::wstring, std::vector<XamlElement>>> m_templates;

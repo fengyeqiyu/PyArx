@@ -5,6 +5,48 @@
 #include "PyMfcWrap.h"
 #include "PyMfcParts.h"
 
+// ---- QML model 语义：Python 值 -> XAML 属性字符串 ----
+// 一维 list/tuple -> "A|B|C"（对应 QML 的 ListModel）
+// 二维 list[list]  -> 行用 "|"、单元格用 "\t"（对应表格的 model + 多列 delegate）
+static std::wstring xamlPyScalar(py::handle v)
+{
+    if (v.is_none())
+        return L"";
+    if (py::isinstance<py::str>(v))
+        return v.cast<std::wstring>();
+    return py::str(v).cast<std::wstring>();
+}
+
+static std::wstring xamlPyPropValue(py::handle v)
+{
+    if (!py::isinstance<py::list>(v) && !py::isinstance<py::tuple>(v))
+        return xamlPyScalar(v);
+    std::wstring out;
+    bool first = true;
+    for (py::handle item : v)
+    {
+        if (!first)
+            out += L"|";
+        first = false;
+        if (py::isinstance<py::list>(item) || py::isinstance<py::tuple>(item))
+        {
+            bool firstCell = true;
+            for (py::handle cell : item)
+            {
+                if (!firstCell)
+                    out += L"\t";
+                firstCell = false;
+                out += xamlPyScalar(cell);
+            }
+        }
+        else
+        {
+            out += xamlPyScalar(item);
+        }
+    }
+    return out;
+}
+
 PYBIND11_MODULE(PyMfcXaml, m)
 {
     m.doc() = "PyMfcCore — MFC 原生控件最小 Python 接口";
@@ -113,8 +155,11 @@ PYBIND11_MODULE(PyMfcXaml, m)
         .def("moveMany", &PyMfcWindow::moveMany, py::arg("items"),
              "items=[(id,x,y,w,h,visible)]，一次 DeferWindowPos 原子提交，滚动时不再一次一重绘")
         // XAML 表达式：改一个属性值，依赖它的控件按表达式重算并重排
-        .def("setXamlValue", &PyMfcWindow::setXamlValue, py::arg("name"), py::arg("prop"),
-             py::arg("value"))
+        .def("setXamlValue", [](PyMfcWindow& w, const std::wstring& name,
+                                const std::wstring& prop, py::object value) {
+            return w.setXamlValue(name, prop, xamlPyPropValue(value));
+        }, py::arg("name"), py::arg("prop"), py::arg("value"),
+             "value 可为 str，也可为 list（一维 -> model/items，二维 -> 表格行）")
         .def("reflowXaml", &PyMfcWindow::reflowXaml)
         .def("addString", &PyMfcWindow::addString)
         .def("clearStrings", &PyMfcWindow::clearStrings)
@@ -395,8 +440,11 @@ PYBIND11_MODULE(PyMfcXaml, m)
         .def("getText", &PyMfcPanel::getText)
         .def("move", &PyMfcPanel::move)
         .def("moveMany", &PyMfcPanel::moveMany, py::arg("items"))
-        .def("setXamlValue", &PyMfcPanel::setXamlValue, py::arg("name"), py::arg("prop"),
-             py::arg("value"))
+        .def("setXamlValue", [](PyMfcPanel& p, const std::wstring& name,
+                                const std::wstring& prop, py::object value) {
+            return p.setXamlValue(name, prop, xamlPyPropValue(value));
+        }, py::arg("name"), py::arg("prop"), py::arg("value"),
+             "value 可为 str，也可为 list（一维 -> model/items，二维 -> 表格行）")
         .def("reflowXaml", &PyMfcPanel::reflowXaml)
         .def("addString", &PyMfcPanel::addString)
         .def("clearStrings", &PyMfcPanel::clearStrings)

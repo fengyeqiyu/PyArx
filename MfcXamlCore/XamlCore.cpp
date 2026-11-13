@@ -1913,6 +1913,7 @@ IXamlControl* XamlRuntime::instantiate(void* parent)
         if (ctrl == nullptr)
             return nullptr;
         m_controls.emplace_back(ctrl);
+        m_ctrlByElement[&el] = ctrl;
         if (ctrl->create(parent))
         {
             ctrl->setBounds(el.previewX, el.previewY, el.previewW, el.previewH);
@@ -2873,6 +2874,12 @@ bool XamlRuntime::setProperty(const std::wstring& name, const std::wstring& prop
 
     el->set(prop.c_str(), value);
     SyncText(*el);
+    // 同步到控件实例：QML 里改 model / items / text 要立刻反映到界面上
+    {
+        auto it = m_ctrlByElement.find(el);
+        if (it != m_ctrlByElement.end() && it->second != nullptr)
+            it->second->setProperty(prop.c_str(), value);
+    }
     applyBindings();   // 双向或单向都重算一次，保证依赖该值的元素同步
     (void)twoWayHit;
     return true;
