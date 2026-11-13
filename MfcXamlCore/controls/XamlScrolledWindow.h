@@ -1,27 +1,30 @@
 ﻿#pragma once
-#include "XamlMfcControlBase.h"
-#include "XamlContentParse.h"
+// XamlScrolledWindow —— XAML <ScrolledWindow> 滚动面板。
+// 属性表驱动：ScrollMin、ScrollMax。编码：本文件 UTF-8 with BOM。
 
-// <ScrolledWindow> 滚动面板
+#include "XamlMfcControlBase.h"
+
 class XAML_CORE_API XamlScrolledWindow : public XamlMfcControlBase
 {
-
 public:
     XamlScrolledWindow() : XamlMfcControlBase(L"scrolledwindow") {}
 
 protected:
-        void createNative(IXamlMfcHost* host, int id, int , int , int x, int y, int w, int h) override;
+    void createNative(IXamlMfcHost* host, int id, int min, int max, int x, int y, int w, int h) override;
 
-        std::vector<XamlProperty> ownProperties() const override;
-
-        bool setOwnProperty(const wchar_t* name, const std::wstring& value) override;
-
+    const XamlPropEntry* ownPropTable(size_t& count) const override
+    {
+        const std::vector<XamlPropEntry>& t = PropTableData();
+        count = t.size();
+        return t.data();
+    }
 
 private:
+    static const std::vector<XamlPropEntry>& PropTableData();
+
     void applyRange()
     {
-        if (m_host == nullptr || m_maxValue <= m_minValue)
-            return;
+        if (m_host == nullptr || m_maxValue <= m_minValue) return;
         m_host->setScrollRange(m_id, m_minValue, m_maxValue);
     }
 

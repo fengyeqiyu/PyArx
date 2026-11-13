@@ -1,22 +1,27 @@
 ﻿#pragma once
-#include "XamlMfcControlBase.h"
-#include "XamlContentParse.h"
+// XamlPageView —— XAML <Page>/<StackView>/<SwipeView> 页容器（kind 17）。
+// 属性表驱动：SelectedIndex、PageCount（只读）。子控件分组由 Python addPage 完成。
+// 编码：本文件 UTF-8 with BOM。
 
-// ================= 页容器（第八批）：Page / StackView / SwipeView =================
-// 容器自己只画底部页码条（kind 17），页里的子控件是真 HWND，由宿主整组平移切页。
-// 子控件在 XAML 里与容器同级（放在同一个 Canvas 里），再用 Python addPage 分组。
+#include "XamlMfcControlBase.h"
+
 class XAML_CORE_API XamlPageView : public XamlMfcControlBase
 {
-
 public:
     explicit XamlPageView(const wchar_t* tag) : XamlMfcControlBase(tag) {}
 
 protected:
-        void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;
+    void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;
 
-        std::vector<XamlProperty> ownProperties() const override;
+    const XamlPropEntry* ownPropTable(size_t& count) const override
+    {
+        const std::vector<XamlPropEntry>& t = PropTableData();
+        count = t.size();
+        return t.data();
+    }
 
-        bool setOwnProperty(const wchar_t* name, const std::wstring& value) override;
+private:
+    static const std::vector<XamlPropEntry>& PropTableData();
 
-        std::wstring getOwnProperty(const wchar_t* name) const override;
+    int m_selectedIndex = 0;
 };

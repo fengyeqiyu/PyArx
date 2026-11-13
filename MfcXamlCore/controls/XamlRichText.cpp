@@ -1,61 +1,75 @@
-﻿// XamlRichText.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlRichText.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlRichText.h"
 
-bool XamlRichText::setProperty(const wchar_t* name, const std::wstring& value)
+void XamlRichText::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "fontsize") || xamlprop::StrEq(key, "bold") ||
-            xamlprop::StrEq(key, "italic"))
-        {
-            setOwnProperty(name, value);
-            return true;
-        }
-        return XamlMfcControlBase::setProperty(name, value);
-    }
+    host->addRichText(id, x, y, w, h);
+    if (!m_text.empty()) host->setText(id, m_text);
+    applyFormat();
+}
 
-void XamlRichText::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlRichText::applyFormat()
 {
-        host->addRichText(id, x, y, w, h);
-    }
+    if (m_host != nullptr)
+        m_host->setRichFormat(m_id, m_fontPt, m_bold, m_italic, m_color);
+}
 
-std::vector<XamlProperty> XamlRichText::ownProperties() const
+const std::vector<XamlPropEntry>& XamlRichText::PropTableData()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Text", XamlPropType::String, true, true},
-                {L"FontSize", XamlPropType::Int, true, true},
-                {L"Bold", XamlPropType::Bool, true, true},
-                {L"Italic", XamlPropType::Bool, true, true},
-                {L"Foreground", XamlPropType::String, true, true}};
-    }
-
-bool XamlRichText::setOwnProperty(const wchar_t* name, const std::wstring& value)
-{
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "text"))
-        {
-            m_host->setText(m_id, value);
-            return true;
-        }
-        // 字号/粗体/斜体/颜色：原生 RichEdit 一直支持，只是以前没入口，
-        // Python 侧只能拿到一段样式固定的纯文本
-        if (xamlprop::StrEq(key, "fontsize") || xamlprop::StrEq(key, "bold") ||
-            xamlprop::StrEq(key, "italic") || xamlprop::StrEq(key, "foreground"))
-        {
-            if (xamlprop::StrEq(key, "fontsize"))
-                m_fontPt = _wtoi(value.c_str());
-            else if (xamlprop::StrEq(key, "bold"))
-                m_bold = (value == L"true" || value == L"1");
-            else if (xamlprop::StrEq(key, "italic"))
-                m_italic = (value == L"true" || value == L"1");
-            else
-            {
-                COLORREF c = 0;
-                if (xamlapp::ParseColor(value, c))
-                    m_color = (GetRValue(c) << 16) | (GetGValue(c) << 8) | GetBValue(c);
-            }
-            m_host->setRichFormat(m_id, m_fontPt, m_bold, m_italic, m_color);
-            return true;
-        }
-        return false;
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Text", nullptr, XamlPropType::String, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlRichText&>(b);
+             c.m_text = v;
+             if (c.m_host != nullptr) c.m_host->setText(c.m_id, v);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlRichText&>(b);
+             return c.m_host != nullptr ? c.m_host->getText(c.m_id) : c.m_text;
+         }},
+        {L"FontSize", nullptr, XamlPropType::Int, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlRichText&>(b);
+             c.m_fontPt = xamlprop2::ToInt(v, 9);
+             c.applyFormat();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return std::to_wstring(static_cast<const XamlRichText&>(b).m_fontPt); }},
+        {L"Bold", nullptr, XamlPropType::Bool, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlRichText&>(b);
+             c.m_bold = xamlprop2::ToBool(v);
+             c.applyFormat();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return xamlprop2::FromBool(static_cast<const XamlRichText&>(b).m_bold); }},
+        {L"Italic", nullptr, XamlPropType::Bool, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlRichText&>(b);
+             c.m_italic = xamlprop2::ToBool(v);
+             c.applyFormat();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return xamlprop2::FromBool(static_cast<const XamlRichText&>(b).m_italic); }},
+        {L"Foreground", nullptr, XamlPropType::Color, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlRichText&>(b);
+             COLORREF rgb = 0;
+             if (xamlapp::ParseColor(v, rgb))
+             {
+                 c.m_color = (GetRValue(rgb) << 16) | (GetGValue(rgb) << 8) | GetBValue(rgb);
+                 c.applyFormat();
+             }
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const unsigned long rgb = static_cast<const XamlRichText&>(b).m_color;
+             wchar_t buf[16];
+             _snwprintf_s(buf, _countof(buf), _TRUNCATE, L"#%02lX%02lX%02lX",
+                          (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
+             return std::wstring(buf);
+         }},
+    };
+    return kTable;
+}

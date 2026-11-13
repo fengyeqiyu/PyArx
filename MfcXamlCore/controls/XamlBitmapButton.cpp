@@ -1,31 +1,34 @@
-// XamlBitmapButton.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlBitmapButton.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlBitmapButton.h"
 
-void XamlBitmapButton::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlBitmapButton::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addBitmapButton(id, L"", x, y, w, h);
-    }
+    host->addBitmapButton(id, m_text, x, y, w, h);
+    if (!m_image.empty()) host->setImage(id, m_image);
+}
 
-std::vector<XamlProperty> XamlBitmapButton::ownProperties() const
+const std::vector<XamlPropEntry>& XamlBitmapButton::PropTableData()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Text", XamlPropType::String, true, true},
-                {L"Image", XamlPropType::String, true, true}};
-    }
-
-bool XamlBitmapButton::setOwnProperty(const wchar_t* name, const std::wstring& value)
-{
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "text"))
-        {
-            m_host->setText(m_id, value);
-            return true;
-        }
-        if (xamlprop::StrEq(key, "image"))
-        {
-            m_host->setImage(m_id, value);
-            return true;
-        }
-        return false;
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Text", nullptr, XamlPropType::String, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlBitmapButton&>(b);
+             c.m_text = v;
+             if (c.m_host != nullptr) c.m_host->setText(c.m_id, v);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlBitmapButton&>(b);
+             return c.m_host != nullptr ? c.m_host->getText(c.m_id) : c.m_text;
+         }},
+        {L"Image", nullptr, XamlPropType::Image, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlBitmapButton&>(b);
+             c.m_image = v;
+             if (c.m_host != nullptr) c.m_host->setImage(c.m_id, v);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return static_cast<const XamlBitmapButton&>(b).m_image; }},
+    };
+    return kTable;
+}

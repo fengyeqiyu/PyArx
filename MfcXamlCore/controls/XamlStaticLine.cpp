@@ -1,12 +1,7 @@
-﻿// XamlStaticLine.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlStaticLine.cpp —— 无自有属性（UTF-8 with BOM）
 #include "XamlStaticLine.h"
 
-void XamlStaticLine::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlStaticLine::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addStaticLine(id, x, y, w, h);
-    }
-
-std::vector<XamlProperty> XamlStaticLine::ownProperties() const
-{
-        return {{L"Name", XamlPropType::String, true, true}};
-    }
+    host->addStaticLine(id, x, y, w, h);
+}

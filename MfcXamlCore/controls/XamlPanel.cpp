@@ -1,12 +1,7 @@
-﻿// XamlPanel.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlPanel.cpp —— 无自有属性（UTF-8 with BOM）
 #include "XamlPanel.h"
 
-void XamlPanel::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlPanel::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addPanel(id, x, y, w, h);
-    }
-
-std::vector<XamlProperty> XamlPanel::ownProperties() const
-{
-        return {{L"Name", XamlPropType::String, true, true}};
-    }
+    host->addPanel(id, x, y, w, h);
+}

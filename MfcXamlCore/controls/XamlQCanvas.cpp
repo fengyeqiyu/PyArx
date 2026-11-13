@@ -1,37 +1,40 @@
-﻿// XamlQCanvas.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlQCanvas.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlQCanvas.h"
 
-void XamlQCanvas::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
+void XamlQCanvas::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addSkinBox(id, 20, x, y, w, h);
-        (void)minValue;
-        (void)maxValue;
-    }
+    host->addSkinBox(id, 20, x, y, w, h);
+    applyCommands();
+}
 
-std::vector<XamlProperty> XamlQCanvas::ownProperties() const
+void XamlQCanvas::applyCommands()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Commands", XamlPropType::String, true, true},
-                {L"Script", XamlPropType::String, true, true}};
-    }
+    if (m_host != nullptr && !m_commands.empty())
+        m_host->setCanvasCommands(m_id, m_commands);
+}
 
-bool XamlQCanvas::setOwnProperty(const wchar_t* name, const std::wstring& value)
+const std::vector<XamlPropEntry>& XamlQCanvas::PropTableData()
 {
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "commands") || xamlprop::StrEq(key, "script"))
-        {
-            m_host->setCanvasCommands(m_id, value);
-            return true;
-        }
-        return false;
-    }
-
-std::wstring XamlQCanvas::getOwnProperty(const wchar_t* name) const
-{
-        if (m_host == nullptr) return {};
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "commands") || xamlprop::StrEq(key, "script"))
-            return m_host->getCanvasCommands(m_id);
-        return {};
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Commands", nullptr, XamlPropType::String, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlQCanvas&>(b);
+             c.m_commands = v;
+             c.applyCommands();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlQCanvas&>(b);
+             return c.m_host != nullptr ? c.m_host->getCanvasCommands(c.m_id) : c.m_commands;
+         }},
+        {L"Script", nullptr, XamlPropType::String, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlQCanvas&>(b);
+             c.m_commands = v;
+             c.applyCommands();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return static_cast<const XamlQCanvas&>(b).m_commands; }},
+    };
+    return kTable;
+}

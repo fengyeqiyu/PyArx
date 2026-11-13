@@ -1,21 +1,29 @@
 ﻿#pragma once
-#include "XamlMfcControlBase.h"
-#include "XamlContentParse.h"
+// XamlPowerCanvas —— XAML <PowerCanvas> 配电规划图画布。
+// 属性表驱动：Data（形如 SVG 以 '<' 开头、布局 JSON 以 '{' 开头）。只写、可读回缓存值。
+// 编码：本文件 UTF-8 with BOM。
 
-// <PowerCanvas> 配电规划图画布：自绘窗口，内容由 Data 属性驱动
-//   Data="<svg ...>"  → 走 SVG 场景（几何 + 文字）
-//   Data="{...json}"  → 走布局结果（powerplan.toJson 的 JSON）
-// 运行时也可从 Python 侧 loadPowerPlan / loadPowerSvg 换内容（更适合大 JSON）。
+#include "XamlMfcControlBase.h"
+
 class XAML_CORE_API XamlPowerCanvas : public XamlMfcControlBase
 {
-
 public:
     XamlPowerCanvas() : XamlMfcControlBase(L"powercanvas") {}
 
 protected:
-        void createNative(IXamlMfcHost* host, int id, int , int , int x, int y, int w, int h) override;
+    void createNative(IXamlMfcHost* host, int id, int min, int max, int x, int y, int w, int h) override;
 
-        std::vector<XamlProperty> ownProperties() const override;
+    const XamlPropEntry* ownPropTable(size_t& count) const override
+    {
+        const std::vector<XamlPropEntry>& t = PropTableData();
+        count = t.size();
+        return t.data();
+    }
 
-        bool setOwnProperty(const wchar_t* name, const std::wstring& value) override;
+private:
+    static const std::vector<XamlPropEntry>& PropTableData();
+
+    void applyData();
+
+    std::wstring m_data;
 };
