@@ -110,6 +110,16 @@ XAML 解析与控件系统：
 - Runtime：控件运行时管理
 - 自动事件绑定与属性映射
 
+## 版本与分支约定
+
+- `master` 永远是最新代码，所有提交直接落在 `master` 上；历史版本不靠分支保存，靠 **tag** 固定。
+- 每个提交对应一个 `v主.次.补丁` 标签，标签信息即提交主题，随时 `git checkout v0.9.0` 或 `git show v0.9.0` 回看那一版。
+- 递增规则（由脚本自动执行）：
+  - 提交主题以 `feat` / `refactor` 开头，或属于控件封装批次 → 次版本 +1、补丁归零
+  - 其余（`fix` / `chore` / `build` / `docs` / `test`、网页端改 README 等）→ 补丁 +1
+  - 主题含 `BREAKING` → 主版本 +1、次版本与补丁归零
+- 打标签：`.\tools\git_tag_version.ps1`（`-DryRun` 只看版本号，`-Push` 打标并推送，需 `$env:GITEE_TOKEN`）。
+
 ## 许可
 
 见 `LICENSE` 文件。
