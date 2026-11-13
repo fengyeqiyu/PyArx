@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  示例 05：QML 写法（同一个 XML，属性名/事件名按 QML 习惯写）
+
+  「功能与用法对齐 QML，只有渲染核心不同」的落地样例：
+    属性：text / color / font.pixelSize / radius / checked / model / currentIndex / from / to / value
+    事件：onClicked / onTextChanged
+  两种写法等价，旧写法（Text / Foreground / FontSize / Click）继续可用。
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
+        Title="05 QML 写法" Width="520" Height="420" Background="#F4F6F8">
+
+  <XStackPanel Margin="16" Spacing="10">
+
+    <XLabel x:Name="T1" text="QML 写法示例" font.pixelSize="14" color="#1F2937" Height="26"/>
+    <XLabel x:Name="T2" text="属性与事件都按 QML 习惯命名" font.pixelSize="11"
+           color="#64748B" Height="22"/>
+
+    <XTextField x:Name="In1" text="WL-AT1-1" placeholderText="请输入编号"
+               maximumLength="32" Height="30" onTextChanged="on_text"/>
+    <XButton x:Name="B1" text="运行" radius="6" Height="32" onClicked="on_run"/>
+    <XCheckBox x:Name="C1" text="同意条款" checked="true" Height="26"/>
+    <XComboBox x:Name="Cm1" model="A 区|B 区|C 区" currentIndex="1" Height="28"/>
+    <XSlider x:Name="S1" from="0" to="100" value="40" Height="28"/>
+
+  </XStackPanel>
+</XWindow>

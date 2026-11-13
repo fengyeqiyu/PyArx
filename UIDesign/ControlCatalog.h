@@ -17,8 +17,8 @@ namespace uidesign
 
     struct CtrlTemplate
     {
-        CString tag;       // XAML tag（Button/TextBox/...）
-        CString display;   // 控件箱显示名（与 tag 一致：直接用 XAML 标签名，不再用 wx 类名）
+        CString tag;       // XML tag（Button/TextBox/...）
+        CString display;   // 控件箱显示名（与 tag 一致：直接用 XML 标签名，不再用 wx 类名）
         CString category;  // 分类（Buttons/Input Widgets/...）
         int dw = 100;      // 拖入画布默认宽
         int dh = 28;       // 默认高

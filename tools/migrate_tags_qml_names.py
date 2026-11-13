@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""把 XAML 标签的本意名对齐 QML 命名（X 前缀保持不变）。
+"""把 XML 标签的本意名对齐 QML 命名（X 前缀保持不变）。
 
 映射（只改 QML 侧确实有同名控件、且语义一致的）：
     TextBox        -> TextField        （QML TextField）
@@ -40,7 +40,7 @@ MAP = [
     ('MenuBar', 'MenuBar'),
 ]
 
-EXTS = ('.xaml', '.xml', '.h', '.cpp', '.py', '.md', '.ps1', '.json')
+EXTS = ('.xml', '.xml', '.h', '.cpp', '.py', '.md', '.ps1', '.json')
 SKIP_DIRS = {'.git', 'X64', 'third_party', 'build', 'log', '__pycache__'}
 
 

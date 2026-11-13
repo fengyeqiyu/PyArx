@@ -1,0 +1,43 @@
+{
+  "_comment": "配电干线图的规则与参数（对应 power-plan.html 的 CFG / voltClass / voltText / 表头）。界面与算法都从这里读，改口径不用动 XML 或 Python。",
+  "cfg": {
+    "boxW": 132, "boxH": 48, "termW": 120, "termH": 44,
+    "nameH": 8, "gapX": 30, "gapY": 56, "margin": 24, "rootGap": 64, "curveSteps": 16
+  },
+  "zoom": { "min": 0.05, "max": 4, "fitPad": 0.92, "hintBelow": 0.55 },
+  "voltage": {
+    "default": "380",
+    "kvUnits": ["kv", "千伏"],
+    "threePhase": ["380", "三相", "3ph"],
+    "singlePhase": ["220", "单相", "1ph"],
+    "hvMin": 66,
+    "lvBase": ["380", "220"],
+    "labels": { "220": "220V 单相", "380": "380V 三相" },
+    "extraOptions": ["10kV", "35kV", "110kV"],
+    "styles": {
+      "lv220": { "text": "220V", "fg": "#B54708", "bg": "#FEF6E7" },
+      "mv": { "fg": "#0F766E", "bg": "#E6FFFA" },
+      "hv": { "fg": "#A8071A", "bg": "#FEF3F2" },
+      "lv380": { "text": "380V", "fg": "#1F64B0", "bg": "#E8F1FB" }
+    }
+  },
+  "status": {
+    "icon": "节点", "link": "连线", "cross": "交叉", "overlap": "重叠",
+    "item": " · ",
+    "sep": " / ",
+    "tail": "  |  拖动平移 · 滚轮缩放 · 双击折叠",
+    "wideHint": " · 图较宽，滚轮放大看细节，双击电柜可折叠"
+  },
+  "table": {
+    "cols": ["起点", "回路", "终点", "型号规格", "电压等级", "电缆根数",
+             "水平长度", "垂直长度", "余量", "合计", "功率", ""],
+    "widths": [104, 86, 78, 96, 68, 60, 64, 64, 44, 52, 44, 26],
+    "delMark": "✕"
+  },
+  "cable": { "sep": " · ", "loadSuffix": " kW", "lengthSuffix": " m" },
+  "mini": {
+    "w": 180, "h": 126, "pad": 4,
+    "bg": "#FBFCFE", "border": "#E4E7EC", "node": "#CFE0F3", "viewport": "#E15759"
+  },
+  "text": { "codeRoot": 14, "codeChild": 13, "line1": 10.5, "line2": 10.5, "cable": 10, "fold": 9, "volt": 8.5 }
+}

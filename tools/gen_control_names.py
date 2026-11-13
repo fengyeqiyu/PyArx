@@ -3,11 +3,11 @@
 
 数据来源：
   UIDesign/control_catalog.xml          控件箱登记（tag / category / 默认尺寸）
-  docs/mfcxaml-控件接口清单.md          实现方式 / 档位 / 源文件（由 prop_schema() 重算）
+  docs/mfcxml-控件接口清单.md          实现方式 / 档位 / 源文件（由 prop_schema() 重算）
   docs/_schema.json                    属性条数（可选，gen_control_doc.py 的产物）
 
 用法：python tools\\gen_control_names.py
-输出：docs\\mfcxaml-控件中文名对照表.md
+输出：docs\\mfcxml-控件中文名对照表.md
 """
 import io
 import json
@@ -17,9 +17,9 @@ import xml.etree.ElementTree as ET
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CATALOG = os.path.join(ROOT, 'UIDesign', 'control_catalog.xml')
-IFACE = os.path.join(ROOT, 'docs', 'mfcxaml-控件接口清单.md')
+IFACE = os.path.join(ROOT, 'docs', 'mfcxml-控件接口清单.md')
 SCHEMA = os.path.join(ROOT, 'docs', '_schema.json')
-OUT = os.path.join(ROOT, 'docs', 'mfcxaml-控件中文名对照表.md')
+OUT = os.path.join(ROOT, 'docs', 'mfcxml-控件中文名对照表.md')
 
 # tag -> 中文名（与设计器控件箱、文档统一用这一套，不再用别名）
 CN = {
@@ -328,7 +328,7 @@ WIN = {
     'MenuSeparator': 'ToolStripSeparator',
 }
 
-# 属性映射：MFCXaml 通用属性 -> QML
+# 属性映射：MFCXml 通用属性 -> QML
 PROP_MAP = [
     ('BackColor / FrontColor', 'background: Rectangle { color: ... }（QML 无全局底色属性）'),
     ('Foreground / FrontColor(文字)', 'color（Text / Label）或 palette.text'),
@@ -343,7 +343,7 @@ PROP_MAP = [
     ('Theme', '无对应：Qt 用 qtquickcontrols2.conf / 自定义 Style'),
 ]
 
-# 事件映射：XAML 回调键 -> QML 信号处理器
+# 事件映射：XML 回调键 -> QML 信号处理器
 EVENT_MAP = [
     ('click', 'onClicked（Button）/ MouseArea.onClicked'),
     ('dblclick', 'MouseArea.onDoubleClicked'),
@@ -426,11 +426,11 @@ def main():
         raise SystemExit('缺少中文名: %s' % ', '.join(missing_cn))
 
     lines = []
-    lines.append('# MFCXaml 控件类名 / 中文名 / QML / WPF / WinForms 对照表')
+    lines.append('# MFCXml 控件类名 / 中文名 / QML / WPF / WinForms 对照表')
     lines.append('')
     lines.append('> 由 `tools\\gen_control_names.py` 生成，勿手改。')
-    lines.append('> XAML 标签（类名）就是 `guiload` / `xamlload` 里写的标签；中文名只用于界面与文档。')
-    lines.append('> QML 列统一按 Qt Quick Controls 2（Qt 5.15 / Qt 6 通用）对照；纯图元（Rectangle/Ellipse/Line/Arc）按 QtQuick 基础类型，窗口类按 QtQuick.Window。\n> 档位口径见 `docs\\mfcxaml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。')
+    lines.append('> XML 标签（类名）就是 `guiload` / `xmlload` 里写的标签；中文名只用于界面与文档。')
+    lines.append('> QML 列统一按 Qt Quick Controls 2（Qt 5.15 / Qt 6 通用）对照；纯图元（Rectangle/Ellipse/Line/Arc）按 QtQuick 基础类型，窗口类按 QtQuick.Window。\n> 档位口径见 `docs\\mfcxml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。')
     lines.append('> QML / WPF / WinForms 三列是"同一套界面换引擎时落在哪个类型"，"QML 方式"只说 QML 侧的同名/组合/自绘；')
     lines.append('> 写"无"的表示该平台没有等价内置控件，只能组合或自绘，迁移时是重写而不是换标签。')
     lines.append('')
@@ -444,7 +444,7 @@ def main():
         rows.sort(key=lambda kv: kv[0].lower())
         lines.append('## %s（%s）' % (CAT_CN.get(catkey, catkey), len(rows)))
         lines.append('')
-        lines.append('| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |')
+        lines.append('| 类名（XML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |')
         lines.append('|---|---|---|---|---|---|---|---|')
         for tag, (c, w, h) in rows:
             info = iface.get(bare(tag), {})
@@ -462,7 +462,7 @@ def main():
 
     lines.append('## 属性对应')
     lines.append('')
-    lines.append('| MFCXaml 属性 | QML 写法 |')
+    lines.append('| MFCXml 属性 | QML 写法 |')
     lines.append('|---|---|')
     for a, b in PROP_MAP:
         lines.append('| %s | %s |' % (a, b))
@@ -470,7 +470,7 @@ def main():
 
     lines.append('## 事件对应')
     lines.append('')
-    lines.append('| XAML 回调键 | QML 信号处理器 |')
+    lines.append('| XML 回调键 | QML 信号处理器 |')
     lines.append('|---|---|')
     for a, b in EVENT_MAP:
         lines.append('| `%s` | `%s` |' % (a, b))
@@ -491,16 +491,16 @@ def main():
     lines.append('')
     lines.append('三处必须注意的结构差异：')
     lines.append('')
-    lines.append('1. **表格与列表是 model + delegate**：MFCXaml 的 `Rows` / `Items` / `Columns` 是字符串直填，'
+    lines.append('1. **表格与列表是 model + delegate**：MFCXml 的 `Rows` / `Items` / `Columns` 是字符串直填，'
                  'QML 侧要换 `ListModel` 或 `QAbstractTableModel` + delegate，这是迁移时工作量最大的地方。')
     lines.append('2. **没有原生 TreeTable / GridCtrl**：QML 需 TreeView 或多列 delegate 自己组，'
                  '不是换个标签就能完成。')
-    lines.append('3. **自绘控件（PowerCanvas / QCanvas / Line / Ellipse / Arc）**：MFCXaml 走 GDI 自绘，'
+    lines.append('3. **自绘控件（PowerCanvas / QCanvas / Line / Ellipse / Arc）**：MFCXml 走 GDI 自绘，'
                  'QML 侧对应 Canvas 或 Shape，绘制代码要重写而不是映射。')
     lines.append('')
     lines.append('另外两条工程差异：QML 默认按 96 DPI 的像素单位布局，MFC 是物理像素，'
                  '尺寸要按 `devicePixelRatio` 折算；QML 的焦点与 Tab 顺序靠 `activeFocusOnTab` + `KeyNavigation`，'
-                 '不像 XAML 有 `TabIndex`。')
+                 '不像 XML 有 `TabIndex`。')
     lines.append('')
     lines.append('不在本表的旧别名（已淘汰，勿再使用）：`TrackBar`（Slider 的旧名）、`Label`（TextBlock）、'
                  '`Edit`（TextBox）、`Progress`（ProgressBar）、`TreeView`（TreeCtrl）、`ListView`（ListCtrl）。')
@@ -514,9 +514,9 @@ def main():
 
 
 # ---------------------------------------------------------------------------
-# QML 写法对照（数据源：MfcXamlCore/controls/XamlQmlNames.h，单一来源）
+# QML 写法对照（数据源：MfcXmlCore/controls/XmlQmlNames.h，单一来源）
 # ---------------------------------------------------------------------------
-QMLHDR = os.path.join(ROOT, "MfcXamlCore", "controls", "XamlQmlNames.h")
+QMLHDR = os.path.join(ROOT, "MfcXmlCore", "controls", "XmlQmlNames.h")
 
 
 def parse_qml_aliases():
@@ -533,7 +533,7 @@ def parse_qml_aliases():
 def qml_usage_section():
     rows = parse_qml_aliases()
     out = ["", "## QML 写法对照（属性名）", "",
-           "XAML 里可以直接按 QML 的属性名写，渲染仍是 MFC 自绘；旧的 WinForms 写法继续可用。", ""]
+           "XML 里可以直接按 QML 的属性名写，渲染仍是 MFC 自绘；旧的 WinForms 写法继续可用。", ""]
     if rows:
         out += ["| QML 写法 | 等价旧写法 |", "|---|---|"]
         for qml, internal in rows:
@@ -581,9 +581,9 @@ def qml_usage_section():
             "delegate 行模板（`XItemView`，对应 QML ListView 的 delegate）：", "",
             "| QML 写法 | 这里的写法 |", "|---|---|",
             "| `model: [...]` | `Model=\"a\\|b;c\\|d\"`（`;` 分行，行内竖线分字段） |",
-            "| Python 喂 list | `win.setXamlValue(\"LV\", \"model\", [[\"AT1-1\", \"回路一\"], [\"AT1-2\", \"回路二\"]])`，按新行数重建行控件 |",
+            "| Python 喂 list | `win.setXmlValue(\"LV\", \"model\", [[\"AT1-1\", \"回路一\"], [\"AT1-2\", \"回路二\"]])`，按新行数重建行控件 |",
             "| `delegate: Item { ... }` | `XItemView` 的子节点就是行模板，按行数逐行实例化 |",
-            "| 换行模板（换 Component） | 模板写进 `<ControlTemplate x:Key=\"RowA\">`，`Delegate=\"RowA\"` 指定；运行时 `win.setXamlValue(\"LV\", \"delegate\", \"RowB\")` 换掉 |",
+            "| 换行模板（换 Component） | 模板写进 `<ControlTemplate x:Key=\"RowA\">`，`Delegate=\"RowA\"` 指定；运行时 `win.setXmlValue(\"LV\", \"delegate\", \"RowB\")` 换掉 |",
             "| `anchors.baseline: A` | `anchors.baseline=\"A\"`，本控件文字基线压到 A 的基线（字体度量走 GDI ascent，设计器与运行时同源） |",
             "| `anchors.top: A.baseline` | `anchors.top=\"A.baseline\"`，顶边落在 A 的文字基线 |",
             "| `Layout.alignment: Qt.AlignBaseline` | 同一行不同字号文字基线齐平（按行内最大 ascent 落位） |",
@@ -591,7 +591,7 @@ def qml_usage_section():
             "| `modelData` / `index` | 模板里写 `{modelData}` / `{index}` / `{0}` `{1}` 取字段 |",
             "| `ListView` 行高 | `ItemHeight` |",
             "| `currentIndex` | `SelectedIndex` |",
-            "", "行模板里的控件是普通 XAML 控件，运行时/设计器/预览器三处显示一致。", "",
+            "", "行模板里的控件是普通 XML 控件，运行时/设计器/预览器三处显示一致。", "",
             "对齐（`Layout.alignment`）：", "",
             "| QML 写法 | 效果 |", "|---|---|",
             "| `Qt.AlignLeft` / `Qt.AlignTop` | 贴左 / 贴上（默认） |",

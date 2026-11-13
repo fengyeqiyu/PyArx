@@ -3,7 +3,7 @@
 // 依赖 ObjectARX 原生 AcUi 接口（CAdUiPaletteSet / CAdUiPalette），
 // 属 CAD 应用级能力，故收进 PyArxCore（而非 GUI 层 PyMfc）。
 //
-// 页内控件宿主：由 GUI 层（MfcXaml）创建并回填，PyArxCore 只负责把宿主窗口
+// 页内控件宿主：由 GUI 层（MfcXml）创建并回填，PyArxCore 只负责把宿主窗口
 // 挂到 CAdUiPalette 上，自身不创建任何渲染宿主。
 // 编码：UTF-8 带 BOM。
 //-----------------------------------------------------------------------------
@@ -311,7 +311,7 @@ void bind_PyPaletteSet(pym& m)
         .def_property_readonly("title", &pa::PyPaletteImpl::Title)
         .def_property_readonly("hwnd", [](pa::PyPaletteImpl& p) {
             return static_cast<long long>(reinterpret_cast<std::intptr_t>(p.Hwnd()));
-        }, "页窗口句柄：宿主窗口挂到这里（MfcXaml 侧传 host.addXxx 的父窗口）")
+        }, "页窗口句柄：宿主窗口挂到这里（MfcXml 侧传 host.addXxx 的父窗口）")
         .def("setHost", [](pa::PyPaletteImpl& p, long long hwnd) {
             p.SetHost(reinterpret_cast<HWND>(hwnd));
         }, py::arg("hwnd"))

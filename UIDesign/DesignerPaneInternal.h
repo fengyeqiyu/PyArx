@@ -24,7 +24,7 @@ namespace uidesign::detail
     }
 
     // 控件显示文字：优先 Text，其次节点文本
-    inline CString uiNodeText(XamlElement* node)
+    inline CString uiNodeText(XmlElement* node)
     {
         std::wstring content = node->get(L"Text");
         if (content.empty()) content = node->get(L"Content");

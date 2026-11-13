@@ -106,8 +106,8 @@ BOOL DesignerFrame::PreCreateWindow(CREATESTRUCT& cs)
     hostLog(L"[P2] CFrameWndEx::PreCreateWindow -> %d", (int)ok);
 
     // 无边框窗体：去掉系统标题栏与边框，标题、最小化/最大化/关闭全部由
-    // designer_layout.xaml 的 ShellTitle / Role=WinBtn|WinClose 自绘，
-    // 于是"设计器自己的外观"也回到"由 XAML 完全控制"这条线上。
+    // designer_layout.xml 的 ShellTitle / Role=WinBtn|WinClose 自绘，
+    // 于是"设计器自己的外观"也回到"由 XML 完全控制"这条线上。
     // WS_THICKFRAME 保留缩放能力，热区由 DesignerPaneView::tryFrameChrome 处理。
     cs.style = WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN;
     cs.dwExStyle |= WS_EX_APPWINDOW;    // 无边框窗口也要有任务栏按钮

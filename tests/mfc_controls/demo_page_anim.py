@@ -13,10 +13,10 @@ import os
 import tempfile
 import time
 
-import PyMfcXaml as p
+import PyMfcXml as p
 
-XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页容器 + 动画开关" Width="600" Height="440">
+XML = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="页容器 + 动画开关" Width="600" Height="440">
   <XLayout x:Name="root">
     <XStackView x:Name="sv" Width="520" Height="330" Canvas.Left="20" Canvas.Top="20" />
 
@@ -38,14 +38,14 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
   </XLayout>
 </XWindow>'''
 
-PATH = os.path.join(tempfile.mkdtemp(prefix='pymfc_pganim_'), 'pa.xaml')
+PATH = os.path.join(tempfile.mkdtemp(prefix='pymfc_pganim_'), 'pa.xml')
 SEG = 600           # 单程
 CYC = 1200          # 一轮 ping-pong
 
 
 def build():
     with open(PATH, 'w', encoding='utf-8') as f:
-        f.write(XAML)
+        f.write(XML)
     return PATH
 
 

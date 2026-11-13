@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  示例 08：QML anchors 写法
+
+  QML 里：
+      anchors.fill: parent
+      anchors.left: parent.left; anchors.top: parent.top
+      anchors.centerIn: parent
+      anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
+  这里照写，锚到父容器内框；v1 只支持 parent（锚兄弟对象暂不支持）。
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
+        Title="08 QML anchors" Width="520" Height="360" Background="#F4F6F8">
+
+  <XPane x:Name="Host">
+    <XLabel x:Name="TL" text="左上角" anchors.left="parent" anchors.top="parent"
+           width="120" height="28"/>
+    <XLabel x:Name="TR" text="右上角" anchors.right="parent" anchors.top="parent"
+           width="120" height="28"/>
+    <XLabel x:Name="Center" text="居中" anchors.centerIn="parent"
+           width="120" height="32"/>
+    <XLabel x:Name="BottomBar" text="底部左右贴边" anchors.left="parent"
+           anchors.right="parent" anchors.bottom="parent" height="28"/>
+    <XLabel x:Name="FillBox" text="anchors.fill + margins=40" anchors.fill="parent"
+           anchors.margins="40"/>
+  </XPane>
+</XWindow>

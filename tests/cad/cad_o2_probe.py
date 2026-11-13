@@ -12,7 +12,7 @@ import sys
 import traceback
 
 LOG = r"G:\PyArx\log\cad_o2_probe.log"
-XAML = r"G:\PyArx\tests\cad\cad_o2.xaml"
+XML = r"G:\PyArx\tests\cad\cad_o2.xml"
 
 
 def _log(msg):
@@ -26,8 +26,8 @@ def _log(msg):
 
 def main():
     _log("[o2] start python=%s" % sys.version.split()[0])
-    import PyMfcXaml
-    _log("[o2] PyMfcXaml from %s" % getattr(PyMfcXaml, "__file__", "?"))
+    import PyMfcXml
+    _log("[o2] PyMfcXml from %s" % getattr(PyMfcXml, "__file__", "?"))
     try:
         import PyArxCore
         _log("[o2] PyArxCore from %s" % getattr(PyArxCore, "__file__", "?"))
@@ -37,9 +37,9 @@ def main():
     parent = PyArxCore.Ap.PyApp.mainWindow
     _log("[o2] parent_hwnd=0x%X" % (parent or 0))
 
-    w = _keep(PyMfcXaml.create_embedded(parent, "PyArx O2 冒烟", 560, 400))
+    w = _keep(PyMfcXml.create_embedded(parent, "PyArx O2 冒烟", 560, 400))
     names = {}
-    PyMfcXaml.guiload(XAML, w, globals(), names)
+    PyMfcXml.guiload(XML, w, globals(), names)
     _log("[o2] controls=%s" % names)
 
     # 控件级真 opacity 走一遍，确认 /O2 下离屏合成路径没被优化坏

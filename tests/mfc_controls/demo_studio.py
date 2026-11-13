@@ -12,7 +12,7 @@ import os
 import tempfile
 import time
 
-import PyMfcXaml as p
+import PyMfcXml as p
 
 # ---- 设备布置图：底板与通道用 `!` 锁定，只有设备块和文字可选中 ----
 PLAN = (
@@ -41,8 +41,8 @@ PLAN = (
     'Text,324,70,缓存仓 01,12,#E9EEF5'
 )
 
-XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+XML = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
         Title="PyArx 车间监控台 · UIDesign" Width="1200" Height="772" Background="#15181D">
   <XLayout x:Name="root">
 
@@ -174,14 +174,14 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
   </XLayout>
 </XWindow>'''
 
-PATH = os.path.join(tempfile.mkdtemp(prefix='pymfc_studio_'), 'studio.xaml')
+PATH = os.path.join(tempfile.mkdtemp(prefix='pymfc_studio_'), 'studio.xml')
 SEG = 700
 CYC = 1400
 
 
 def build():
     with open(PATH, 'w', encoding='utf-8') as f:
-        f.write(XAML)
+        f.write(XML)
     return PATH
 
 

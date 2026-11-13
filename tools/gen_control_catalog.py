@@ -18,7 +18,7 @@ CATALOG = os.path.join(ROOT, 'UIDesign', 'control_catalog.xml')
 
 sys.path.insert(0, BIN)
 os.add_dll_directory(BIN)
-import PyMfcXaml as M
+import PyMfcXml as M
 
 # 新增控件放哪一栏
 CATEGORY = {

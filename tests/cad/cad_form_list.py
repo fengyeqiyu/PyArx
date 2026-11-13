@@ -7,12 +7,12 @@ import sys as _sys
 _sys.path.insert(0, r'G:\PyArx\tests\cad')
 from _cadkeep import keep as _keep
 import os
-import PyMfcXaml as p
+import PyMfcXml as p
 import PyArxCore
 
 LOG = r"G:\PyArx\log\cad_form_list.log"
-XAML = r'''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PyArx CAD 列表与表格" Width="560" Height="470">
+XML = r'''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="PyArx CAD 列表与表格" Width="560" Height="470">
   <XCanvas>
     <XLabel x:Name="lb" Text="VirtualList 21 行 / TableView 3 行 / 数值控件" Width="490" Height="22" Canvas.Left="14" Canvas.Top="8" />
     <XVirtualList x:Name="lv" Items="%s" ItemHeight="44" Width="260" Height="230" Canvas.Left="14" Canvas.Top="36" />
@@ -40,9 +40,9 @@ def _log(msg):
 
 def main():
     _log("[list] 开始")
-    path = os.path.join(os.path.dirname(LOG), "_cad_form_list.xaml")
+    path = os.path.join(os.path.dirname(LOG), "_cad_form_list.xml")
     with open(path, "w", encoding="utf-8") as f:
-        f.write(XAML)
+        f.write(XML)
 
     parent = PyArxCore.Ap.PyApp.mainWindow
     w = _keep(p.create_embedded(parent, "PyArx CAD 列表与表格", 560, 480))

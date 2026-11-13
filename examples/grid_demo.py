@@ -1,4 +1,4 @@
 ﻿# -*- coding: utf-8 -*-
-import PyMfcXaml
-w = PyMfcXaml.guiload(r"G:\PyArx\examples\grid_demo.xaml")
+import PyMfcXml
+w = PyMfcXml.guiload(r"G:\PyArx\examples\grid_demo.xml")
 print("[grid-demo] loaded", w)

@@ -86,7 +86,7 @@ DesignerPaneView::SurfaceHit DesignerPaneView::surfaceHitTest(CPoint pt) const
     auto rowOf = [&](const RECT& r, int scroll, int headH) {
         return (pt.y - r.top + scroll - headH) / rowH;
     };
-    // 树行的展开/折叠方框命中：与 xamlDrawTree 同一套几何（padLeft 8 / indent 16 / 方框 9px）
+    // 树行的展开/折叠方框命中：与 xmlDrawTree 同一套几何（padLeft 8 / indent 16 / 方框 9px）
     // 判定放宽到方框两侧各 3px，点起来不用那么准
     auto onTreeIcon = [&](const RECT& r, int scroll, int level) {
         const int rowTop = r.top - scroll + (int)((pt.y - (r.top - scroll)) / rowH) * rowH;
@@ -264,7 +264,7 @@ void DesignerPaneView::surfaceLButtonDown(CPoint pt)
     case SurfaceHit::DocRow:
         if (h.onIcon && h.index >= 0 && h.index < (int)m_surfDocNodes.size())
         {
-            XamlElement* node = m_surfDocNodes[h.index];
+            XmlElement* node = m_surfDocNodes[h.index];
             if (node != nullptr && !node->children.empty())
             {
                 if (m_collapsedNodes.find(node) == m_collapsedNodes.end())
@@ -277,12 +277,12 @@ void DesignerPaneView::surfaceLButtonDown(CPoint pt)
         }
         if (h.index >= 0 && h.index < (int)m_surfDocNodes.size())
         {
-            XamlElement* node = m_surfDocNodes[h.index];
+            XmlElement* node = m_surfDocNodes[h.index];
             Path p;
-            XamlElement* root = m_doc.root();
+            XmlElement* root = m_doc.root();
             if (root != nullptr)
             {
-                uidesign::Walk(root, [&](const Path& pp, XamlElement& el) {
+                uidesign::Walk(root, [&](const Path& pp, XmlElement& el) {
                     if (p.empty() && &el == node) p = pp;
                 });
             }
@@ -381,7 +381,7 @@ void DesignerPaneView::surfaceLButtonUp(CPoint pt)
     // 下拉菜单在松开时弹：按下就弹会被随后的 WM_LBUTTONUP 立刻关掉
     if (m_surfPendingMenuNode != nullptr)
     {
-        XamlElement* top = m_surfPendingMenuNode;
+        XmlElement* top = m_surfPendingMenuNode;
         m_surfPendingMenuNode = nullptr;
         surfaceMenuPopup(top, m_surfPendingMenuAnchor);
         return;
@@ -478,7 +478,7 @@ BOOL DesignerPaneView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 void DesignerPaneView::beginRenameDocRow(int row)
 {
     if (row < 0 || row >= (int)m_surfDocNodes.size()) return;
-    XamlElement* node = m_surfDocNodes[row];
+    XmlElement* node = m_surfDocNodes[row];
     if (node == nullptr) return;
     if (m_surfDocRc.right <= m_surfDocRc.left) return;
 
@@ -521,7 +521,7 @@ void DesignerPaneView::beginPropEditSurface(int row)
 
         // 枚举类属性（Shape/BorderStyle/Dock/bool…）弹候选，不让用户手敲字符串。
         // 但候选不能在 mouse-down 里弹：紧接着的 WM_LBUTTONUP 会把它秒关，所以记 pending 交给 up。
-        XamlElement* node = Resolve(m_doc.root(), m_selected);
+        XmlElement* node = Resolve(m_doc.root(), m_selected);
         if (node != nullptr)
         {
             const CString key(m_surfPropRows[row].key.c_str());
@@ -560,7 +560,7 @@ void DesignerPaneView::popupPropEnum(int row)
     if (row < 0 || row >= (int)m_surfPropRows.size()) return;
     if (m_surfPropRows[row].group) return;
 
-    XamlElement* node = Resolve(m_doc.root(), m_selected);
+    XmlElement* node = Resolve(m_doc.root(), m_selected);
     if (node == nullptr) return;
 
     const CString key(m_surfPropRows[row].key.c_str());
@@ -608,7 +608,7 @@ void DesignerPaneView::commitPropEditSurface()
 
     if (row == -3)          // 对象检查器双击改名：直接写 Name
     {
-        XamlElement* node = Resolve(m_doc.root(), m_selected);
+        XmlElement* node = Resolve(m_doc.root(), m_selected);
         if (node != nullptr && node != m_doc.root())
         {
             val.Trim();
@@ -619,7 +619,7 @@ void DesignerPaneView::commitPropEditSurface()
                 node->set(L"Name", node->name);
                 Invalidate(FALSE);
                 updateStatus();
-                updateXamlView();
+                updateXmlView();
             }
         }
         return;
@@ -667,12 +667,12 @@ void DesignerPaneView::OnRButtonDown(UINT nFlags, CPoint point)
         // 对象树右键：复制 / 粘贴 / 上移 / 下移 / 删除
         if (h.index >= 0 && h.index < (int)m_surfDocNodes.size())
         {
-            XamlElement* node = m_surfDocNodes[h.index];
-            XamlElement* root = m_doc.root();
+            XmlElement* node = m_surfDocNodes[h.index];
+            XmlElement* root = m_doc.root();
             if (root != nullptr)
             {
                 Path p;
-                uidesign::Walk(root, [&](const Path& pp, XamlElement& el) {
+                uidesign::Walk(root, [&](const Path& pp, XmlElement& el) {
                     if (p.empty() && &el == node) p = pp;
                 });
                 if (!p.empty())
@@ -764,7 +764,7 @@ void DesignerPaneView::surfacePropMenu(CPoint pt)
     }
     if (cmd == 4)
     {
-        XamlElement* node = Resolve(m_doc.root(), m_selected);
+        XmlElement* node = Resolve(m_doc.root(), m_selected);
         if (node == nullptr) return;
         const CString key(m_surfPropRows[row].key.c_str());
         bool removed = false;
@@ -782,12 +782,12 @@ void DesignerPaneView::surfacePropMenu(CPoint pt)
 
         pushUndo();
         m_doc.applyBindings();
-        XamlElement* root = m_doc.root();
+        XmlElement* root = m_doc.root();
         if (root != nullptr) m_doc.layout(0, 0, root->w, root->h);
         rebuildTree();
         selectNode(m_selected);
         updateStatus();
-        updateXamlView();
+        updateXmlView();
         Invalidate(FALSE);
         return;
     }
@@ -796,13 +796,13 @@ void DesignerPaneView::surfacePropMenu(CPoint pt)
 // "增"走控件箱点选 + 画布落点，这里补的是"复"和"移"。
 void DesignerPaneView::surfaceDocMenu(CPoint pt)
 {
-    XamlElement* root = m_doc.root();
-    XamlElement* node = Resolve(root, m_selected);
+    XmlElement* root = m_doc.root();
+    XmlElement* node = Resolve(root, m_selected);
     if (root == nullptr || node == nullptr) return;
     const bool isRoot = (node == root);
 
     int idx = -1;
-    XamlElement* parent = isRoot ? nullptr : uidesign::ParentOf(root, m_selected, idx);
+    XmlElement* parent = isRoot ? nullptr : uidesign::ParentOf(root, m_selected, idx);
     const bool canMoveUp = (!isRoot && parent != nullptr && idx > 0);
     const bool canMoveDown = (!isRoot && parent != nullptr && idx >= 0 && idx + 1 < (int)parent->children.size());
 
@@ -832,7 +832,7 @@ void DesignerPaneView::surfaceDocMenu(CPoint pt)
 
     if (cmd == 1)
     {
-        m_clipNode = *node;      // XamlElement 是值语义树，整棵拷贝
+        m_clipNode = *node;      // XmlElement 是值语义树，整棵拷贝
         m_hasClipNode = true;
         notImpl(L"已复制节点 " + CString(node->tag.c_str()));
         return;
@@ -845,17 +845,17 @@ void DesignerPaneView::surfaceDocMenu(CPoint pt)
         CString base = m_clipNode.name.empty() ? CString(m_clipNode.tag.c_str())
                                               : CString(m_clipNode.name.c_str());
         CString nm = makeUniqueName(base);
-        XamlElement clip = m_clipNode;
+        XmlElement clip = m_clipNode;
         clip.name = nm.GetString();
         clip.set(L"Name", clip.name);
 
         // 目标不是容器时（右键点在 Button 上）粘到它的父容器里当兄弟，别把按钮塞进按钮
-        XamlElement* target = node;
+        XmlElement* target = node;
         Path targetPath = m_selected;
         if (!uidesign::IsContainer(target->tag))
         {
             int pidx = -1;
-            XamlElement* par = isRoot ? nullptr : uidesign::ParentOf(root, m_selected, pidx);
+            XmlElement* par = isRoot ? nullptr : uidesign::ParentOf(root, m_selected, pidx);
             if (par != nullptr)
             {
                 target = par;
@@ -884,12 +884,12 @@ void DesignerPaneView::surfaceDocMenu(CPoint pt)
     else if (cmd == 7)      // 转为 Grid 布局：按现有摆放位置推断行/列轨道，去掉绝对 Left/Top
     {
         // 目标容器：右键的是容器就转它自己；右键的是按钮等叶子，就转它的父容器
-        XamlElement* target = node;
+        XmlElement* target = node;
         Path targetPath = m_selected;
         if (!uidesign::IsContainer(target->tag))
         {
             int pidx = -1;
-            XamlElement* par = isRoot ? nullptr : uidesign::ParentOf(root, m_selected, pidx);
+            XmlElement* par = isRoot ? nullptr : uidesign::ParentOf(root, m_selected, pidx);
             if (par == nullptr) return;
             target = par;
             targetPath = m_selected;
@@ -963,7 +963,7 @@ void DesignerPaneView::surfaceDocMenu(CPoint pt)
             c.set(L"Grid.Column", std::to_wstring(ci));
         }
 
-        // 容器标签：普通容器改名为 Grid（XAML 与属性面板口径一致）；
+        // 容器标签：普通容器改名为 Grid（XML 与属性面板口径一致）；
         // 文档根必须是 Window（运行时按窗口根解析），只给它挂轨道，标签不动
         if (target != root) target->tag = L"Grid";
         menuDiag(L"[gridconv] target=%s cols=%d rows=%d xs=%d ys=%d kids=%d",
@@ -998,6 +998,6 @@ void DesignerPaneView::surfaceDocMenu(CPoint pt)
     m_selected = newSel;
     selectNode(m_selected);
     updateStatus();
-    updateXamlView();
+    updateXmlView();
     Invalidate(FALSE);
 }

@@ -7,13 +7,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyArxCore", "PyArxCore\PyAr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyArxEngine", "PyArxEngine\PyArxEngine.vcxproj", "{28504A60-C45D-411E-8052-EBD0D225C657}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyMfcXaml", "PyMfcXaml\PyMfcXaml.vcxproj", "{C8D3E4F5-6A7B-4C9D-8E1F-2A3B4C5D6E7F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyMfcXml", "PyMfcXml\PyMfcXml.vcxproj", "{C8D3E4F5-6A7B-4C9D-8E1F-2A3B4C5D6E7F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UIDesign", "UIDesign\UIDesign.vcxproj", "{B7C2D3E4-5F6A-4B8C-9D0E-1F2A3B4C5D6E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Viewer", "Viewer\Viewer.vcxproj", "{5B0F7E44-8C41-4A36-9F1D-2B0C7A8D9E10}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MfcXamlCore", "MfcXamlCore\MfcXamlCore.vcxproj", "{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MfcXmlCore", "MfcXmlCore\MfcXmlCore.vcxproj", "{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}"
 EndProject
 EndProject
 EndProject

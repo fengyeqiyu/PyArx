@@ -11,13 +11,13 @@
 import os
 import tempfile
 
-import PyMfcXaml as p
+import PyMfcXml as p
 
 CANVAS = 420
 HEIGHT = 320
 
-XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="画布图元编辑" Width="480" Height="420">
+XML = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="画布图元编辑" Width="480" Height="420">
   <XLayout x:Name="root">
     <XQCanvas x:Name="cv" Width="%d" Height="%d" Canvas.Left="28" Canvas.Top="28" />
     <XLabel x:Name="hint" Width="420" Height="22" Canvas.Left="28" Canvas.Top="362"
@@ -32,12 +32,12 @@ CMDS = ('Clear,#313842;'
         'Line,20,140,400,140,#8A94A3,2;'
         'Text,20,170,画布里的文字图元，也可以选中,13,#E6E6E6')
 
-PATH = os.path.join(tempfile.mkdtemp(prefix='pymfc_cvedit_'), 'cve.xaml')
+PATH = os.path.join(tempfile.mkdtemp(prefix='pymfc_cvedit_'), 'cve.xml')
 
 
 def build():
     with open(PATH, 'w', encoding='utf-8') as f:
-        f.write(XAML)
+        f.write(XML)
     return PATH
 
 

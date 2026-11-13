@@ -15,7 +15,7 @@ import sys
 
 os.add_dll_directory(r"G:\PyArx\X64\Release")
 sys.path.insert(0, r"G:\PyArx\X64\Release")
-import PyMfcXaml as M  # noqa: E402
+import PyMfcXml as M  # noqa: E402
 
 
 def dump(win, cid):
@@ -24,14 +24,14 @@ def dump(win, cid):
 
 
 names = {}
-win = M.guiload(r"G:\PyArx\UIDesign\samples\06_qml_layout.xaml", names=names)
+win = M.guiload(r"G:\PyArx\UIDesign\samples\06_qml_layout.xml", names=names)
 lid = names["Right"]
 
-win.setXamlValue("Right", "model", ["甲", "乙", "丙"])
+win.setXmlValue("Right", "model", ["甲", "乙", "丙"])
 print("一维 list  ->", dump(win, lid))
 
-win.setXamlValue("Right", "model", [["回路", 1], ["负载", 2]])
+win.setXmlValue("Right", "model", [["回路", 1], ["负载", 2]])
 print("二维 list  ->", dump(win, lid))
 
-win.setXamlValue("Right", "Items", "A|B")
+win.setXmlValue("Right", "Items", "A|B")
 print("字符串写法 ->", dump(win, lid))

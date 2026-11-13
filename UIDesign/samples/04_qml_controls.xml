@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  示例 04：QML Controls 2 对齐补齐（UIDesign 可直接打开）
+
+  这里用的是本轮新增的 11 个标签：
+    Frame / Dialog / Drawer / RoundButton / DelayButton / ToolButton
+    ToolSeparator / TabButton / ScrollIndicator / MenuItem / MenuSeparator
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
+        Title="04 QML 控件补齐" Width="720" Height="600" Background="#F4F6F8">
+
+  <XStackPanel Margin="16" Spacing="10">
+
+    <XLabel x:Name="Hdr1" Text="容器与浮层" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XFrame x:Name="Frame1" Padding="10" Height="72">
+      <XLabel x:Name="FrameTip" Text="Frame：带内边距的边框容器" Height="24"/>
+    </XFrame>
+    <XDrawer x:Name="Drawer1" Edge="Right" Position="0" Width="200" Height="96"/>
+    <XDialog x:Name="Dialog1" Title="确认删除" Modal="true"
+             StandardButtons="Ok|Cancel" Width="260" Height="120"/>
+
+    <XToolSeparator x:Name="SepA" Orientation="Horizontal" Height="8"/>
+
+    <XLabel x:Name="Hdr2" Text="按钮族" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XStackPanel Orientation="Horizontal" Spacing="8" Height="56">
+      <XRoundButton x:Name="Round1" Text="圆" Width="56" Height="56" Radius="28"/>
+      <XToolButton x:Name="Tool1" Text="设置" IconSource="gear"
+                   Display="TextUnderIcon" Width="72" Height="48"/>
+      <XDelayButton x:Name="Delay1" Text="长按删除" Delay="2000" Width="110" Height="48"/>
+      <XTabButton x:Name="Tab1" Text="页签一" Checked="true" Width="90" Height="48"/>
+    </XStackPanel>
+
+    <XToolSeparator x:Name="SepB" Orientation="Vertical" Width="8" Height="40"/>
+
+    <XLabel x:Name="Hdr3" Text="菜单与指示" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XMenuItem x:Name="Item1" Text="打开工程" Checkable="true" Height="26"/>
+    <XMenuSeparator x:Name="SepC" Orientation="Horizontal" Height="8"/>
+    <XScrollIndicator x:Name="Scroll1" Orientation="Vertical" Width="8" Height="80"/>
+
+  </XStackPanel>
+</XWindow>

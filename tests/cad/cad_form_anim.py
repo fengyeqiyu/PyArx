@@ -7,12 +7,12 @@ import sys as _sys
 _sys.path.insert(0, r'G:\PyArx\tests\cad')
 from _cadkeep import keep as _keep
 import os
-import PyMfcXaml as p
+import PyMfcXml as p
 import PyArxCore
 
 LOG = r"G:\PyArx\log\cad_form_anim.log"
-XAML = r'''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PyArx CAD 动画" Width="520" Height="400">
+XML = r'''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="PyArx CAD 动画" Width="520" Height="400">
   <XCanvas>
     <XLabel x:Name="lb" Text="宽度 / 数值 / 颜色动画 + StackView 切页" Width="470" Height="22" Canvas.Left="14" Canvas.Top="8" />
     <XButton x:Name="ab" Text="动画按钮" Width="160" Height="36" Canvas.Left="14" Canvas.Top="40" />
@@ -37,9 +37,9 @@ def _log(msg):
 
 def main():
     _log("[anim] 开始")
-    path = os.path.join(os.path.dirname(LOG), "_cad_form_anim.xaml")
+    path = os.path.join(os.path.dirname(LOG), "_cad_form_anim.xml")
     with open(path, "w", encoding="utf-8") as f:
-        f.write(XAML)
+        f.write(XML)
 
     parent = PyArxCore.Ap.PyApp.mainWindow
     w = _keep(p.create_embedded(parent, "PyArx CAD 动画", 520, 400))

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 控件清单示例（XAML 写法）：覆盖 label/button/edit/listbox/checkbox/radio/group/combo/progress/slider 十类控件。
+<!-- 控件清单示例（XML 写法）：覆盖 label/button/edit/listbox/checkbox/radio/group/combo/progress/slider 十类控件。
      要点：
        1. 控件一律用 x:Name 命名，ID 由 guiload 自动分配并回填到 names
        2. 不写 Top/Left 就按流式纵向排列；写了就按绝对坐标（相对容器内区）
@@ -7,7 +7,7 @@
        4. <XGroupBox> 也可以是容器，内部控件坐标相对分组框内区，高度要自己写够
        5. x: 前缀必须声明，否则 XML 解析报 unbound prefix
 -->
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
         Title="控件演示" Width="460" Height="700" Theme="dark">
 
     <XStackPanel>

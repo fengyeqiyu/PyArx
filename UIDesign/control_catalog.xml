@@ -2,14 +2,14 @@
 <!--
   PyArx 控件目录（参照 wxFormBuilder objectinfo 声明机制）
   每个 <objectinfo> 声明一个可在设计器画布上放置的控件：
-    tag       = XAML 标签（XamlRuntime 实例化用）
+    tag       = XML 标签（XmlRuntime 实例化用）
     display   = 控件箱显示名
     category  = 控件箱分类
     w / h     = 拖入画布时的默认尺寸
   子 <property name type> 声明该控件的属性表（属性面板按此表展示/编辑）。
   新增自定义控件：在此文件加一个 <objectinfo> + 在 C++ 注册实例化即可，无需改硬编码分支。
 -->
-<package name="PyArx" desc="PyArx XAML 控件目录">
+<package name="PyArx" desc="PyArx XML 控件目录">
 
   <objectinfo tag="XButton" display="Button" category="Buttons" w="100" h="28">
     <property name="Name" type="text"/>

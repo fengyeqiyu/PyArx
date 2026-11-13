@@ -13,7 +13,7 @@ import sys
 import time
 from ctypes import wintypes
 
-import PyMfcXaml as p
+import PyMfcXml as p
 
 user32 = ctypes.windll.user32
 gdi32 = ctypes.windll.gdi32
@@ -214,8 +214,8 @@ def sm(hwnd, msg, wp=0, lp=0):
 
 def build_window():
     """一个窗口内放本轮需要的控件。"""
-    xaml = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="真实交互测试" Width="620" Height="720">
+    xml = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="真实交互测试" Width="620" Height="720">
   <XStackPanel Margin="14" Spacing="8">
     <XButton x:Name="btn" Text="点我" Height="40"/>
     <XCheckBox x:Name="chk" Text="勾选项" Height="34"/>
@@ -230,9 +230,9 @@ def build_window():
   </XStackPanel>
 </XWindow>
 '''
-    path = os.path.join(HERE, '_interaction_probe.xaml')
+    path = os.path.join(HERE, '_interaction_probe.xml')
     with open(path, 'w', encoding='utf-8') as fh:
-        fh.write(xaml)
+        fh.write(xml)
     names = {}
     w = p.guiload(path, names=names)
     w.show()
@@ -258,7 +258,7 @@ def child_of(w, cid):
 
 
 def main():
-    print('PyMfcXaml 控件真实交互测试')
+    print('PyMfcXml 控件真实交互测试')
     print('解释器:', sys.executable, flush=True)
 
     w, names = build_window()

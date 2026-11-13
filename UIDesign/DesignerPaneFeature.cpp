@@ -37,7 +37,7 @@ void DesignerPaneView::onNew()
     }
     m_selected.clear();
     m_docPath.Empty();
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root != nullptr)
         m_doc.layout(0, 0, root->w, root->h);
     // 画布本身是控件树里的一个节点：必须先 rebuildTree 把它建出来，再灌文档，
@@ -60,7 +60,7 @@ static bool pathIsPrefix(const Path& a, const Path& b)
 
 void DesignerPaneView::onDelete()
 {
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root == nullptr) return;
 
     // 待删路径：多选集合（>=2 个）走批量，否则就是单个主选中
@@ -91,12 +91,12 @@ void DesignerPaneView::onDelete()
     }
 
     // 兄弟按下标从大到小删，前面的下标才不会因为删除而错位
-    struct Ent { XamlElement* par; int idx; };
+    struct Ent { XmlElement* par; int idx; };
     std::vector<Ent> ents;
     for (const auto& p : real)
     {
         int idx = 0;
-        XamlElement* par = ParentOf(root, p, idx);
+        XmlElement* par = ParentOf(root, p, idx);
         if (par != nullptr && idx >= 0 && idx < (int)par->children.size())
             ents.push_back({ par, idx });
     }
@@ -134,8 +134,8 @@ void DesignerPaneView::onDelete()
 
 // ---- 节点级剪贴板 / 对齐 / 缩放 / 标尺 ----
 
-// 子树序列化：属性按文档顺序原样输出，写进系统剪贴板后可直接粘到别的 XAML 文件
-static void elementToXmlImpl(const XamlElement& el, int depth, std::wstring& out)
+// 子树序列化：属性按文档顺序原样输出，写进系统剪贴板后可直接粘到别的 XML 文件
+static void elementToXmlImpl(const XmlElement& el, int depth, std::wstring& out)
 {
     const std::wstring pad((size_t)(depth * 2), L' ');
     out += pad + L"<" + el.tag;
@@ -159,7 +159,7 @@ static void elementToXmlImpl(const XamlElement& el, int depth, std::wstring& out
     out += pad + L"</" + el.tag + L">\r\n";
 }
 
-static bool childNameTaken(const XamlElement* parent, const std::wstring& nm)
+static bool childNameTaken(const XmlElement* parent, const std::wstring& nm)
 {
     if (parent == nullptr) return false;
     for (const auto& c : parent->children)
@@ -173,12 +173,12 @@ static bool childNameTaken(const XamlElement* parent, const std::wstring& nm)
 void DesignerPaneView::pruneCollapsedNodes()
 {
     if (m_collapsedNodes.empty()) return;
-    std::set<XamlElement*> live;
-    XamlElement* root = m_doc.root();
+    std::set<XmlElement*> live;
+    XmlElement* root = m_doc.root();
     if (root != nullptr)
     {
         live.insert(root);
-        uidesign::Walk(root, [&](const auto&, XamlElement& el) { live.insert(&el); });
+        uidesign::Walk(root, [&](const auto&, XmlElement& el) { live.insert(&el); });
     }
     for (auto it = m_collapsedNodes.begin(); it != m_collapsedNodes.end(); )
     {
@@ -192,7 +192,7 @@ void DesignerPaneView::pruneCollapsedNodes()
 void DesignerPaneView::refreshAfterDocChange()
 {
     pruneCollapsedNodes();
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root != nullptr)
         m_doc.layout(0, 0, root->w, root->h);
     if (m_canvas != nullptr) m_canvas->setDocument(&m_doc);
@@ -204,7 +204,7 @@ void DesignerPaneView::refreshAfterDocChange()
 bool DesignerPaneView::copySelectedToClip()
 {
     if (m_selected.empty()) return false;
-    XamlElement* node = Resolve(m_doc.root(), m_selected);
+    XmlElement* node = Resolve(m_doc.root(), m_selected);
     if (node == nullptr) return false;
     m_clipXml.clear();
     elementToXmlImpl(*node, 0, m_clipXml);
@@ -247,22 +247,22 @@ void DesignerPaneView::onCut()
 
 void DesignerPaneView::onPaste()
 {
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     pasteDiag("[paste] enter clipXml=%d hasClipNode=%d selLen=%d root=%p\n",
               (int)m_clipXml.size(), m_hasClipNode ? 1 : 0, (int)m_selected.size(), (void*)root);
     if (root == nullptr) return;
 
     // 片段来源双通道：代码区/系统剪贴板走 m_clipXml，对象检查器"复制节点"走 m_clipNode。
     // 两个都要认，否则从对象检查器复制完按 Ctrl+V 会提示"内部剪贴板为空"。
-    XamlElement frag;
+    XmlElement frag;
     bool hasFrag = false;
     if (!m_clipXml.empty())
     {
-        XamlRuntime tmp;
+        XmlRuntime tmp;
         std::wstring err;
         if (tmp.loadString(m_clipXml.c_str(), err) && tmp.root() != nullptr)
         {
-            frag = *tmp.root();      // XamlElement 是值语义树，整体深拷贝
+            frag = *tmp.root();      // XmlElement 是值语义树，整体深拷贝
             hasFrag = true;
         }
     }
@@ -276,8 +276,8 @@ void DesignerPaneView::onPaste()
     // 目标容器：选中容器就粘进去；选中叶子粘到它的父容器；
     // 什么都没选（空画布 / 刚启动 / 刚按 Esc）就粘到根窗体
     Path targetPath = m_selected;
-    XamlElement* target = nullptr;
-    XamlElement* sel = Resolve(root, m_selected);
+    XmlElement* target = nullptr;
+    XmlElement* sel = Resolve(root, m_selected);
     if (sel != nullptr && sel != root && uidesign::IsContainer(sel->tag))
     {
         target = sel;
@@ -304,7 +304,7 @@ void DesignerPaneView::onPaste()
         for (int step = 0; step < 40; ++step)
         {
             bool clash = false;
-            for (const XamlElement& c : target->children)
+            for (const XmlElement& c : target->children)
             {
                 if (!c.hasX || !c.hasY) continue;
                 if (_wtoi(c.get(L"Left").c_str()) == ox + dx && _wtoi(c.get(L"Top").c_str()) == oy + dy)
@@ -336,18 +336,18 @@ void DesignerPaneView::onPaste()
 // 撤销快照在这里压（必须早于副本入树），画布那边用 beginMoveDragNoUndo 跳过二次压栈。
 void DesignerPaneView::beginCopyDrag(const Path& p, CPoint pressPt)
 {
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root == nullptr || p.empty()) return;
-    XamlElement* node = Resolve(root, p);
+    XmlElement* node = Resolve(root, p);
     if (node == nullptr || node == root) return;
 
     Path parentPath = p;
     parentPath.pop_back();
-    XamlElement* par = Resolve(root, parentPath);
+    XmlElement* par = Resolve(root, parentPath);
     if (par == nullptr) return;
 
     pushUndo();
-    XamlElement dup = *node;                  // 值语义整棵拷贝
+    XmlElement dup = *node;                  // 值语义整棵拷贝
     CString base = dup.name.empty() ? CString(dup.tag.c_str()) : CString(dup.name.c_str());
     CString nm = makeUniqueName(base);
     dup.name = nm.GetString();
@@ -356,7 +356,7 @@ void DesignerPaneView::beginCopyDrag(const Path& p, CPoint pressPt)
 
     m_selected = parentPath;
     m_selected.push_back((int)par->children.size() - 1);
-    refreshAfterDocChange();                  // 重布局 + 重建对象树 + 刷新 XAML 代码区
+    refreshAfterDocChange();                  // 重布局 + 重建对象树 + 刷新 XML 代码区
     if (m_canvas != nullptr) m_canvas->setSelected(m_selected);
     if (m_canvas != nullptr) m_canvas->beginMoveDragNoUndo(pressPt);
     notImpl(L"已复制 <" + CString(dup.tag.c_str()) + L"> " + CString(nm.GetString()));
@@ -366,9 +366,9 @@ void DesignerPaneView::beginCopyDrag(const Path& p, CPoint pressPt)
 CString DesignerPaneView::makeUniqueName(const CString& base) const
 {
     std::set<std::wstring> used;
-    XamlElement* root = const_cast<DesignerPaneView*>(this)->m_doc.root();
+    XmlElement* root = const_cast<DesignerPaneView*>(this)->m_doc.root();
     if (root != nullptr)
-        uidesign::Walk(root, [&](const Path&, XamlElement& el) { used.insert(el.name); });
+        uidesign::Walk(root, [&](const Path&, XmlElement& el) { used.insert(el.name); });
 
     // 规则：尾部是数字就自动 +1（Button3 → Button4），没有数字才补 1、2、3…
     // 复制出来的名字只保证唯一，叫什么最后由用户自己双击改名。
@@ -395,19 +395,19 @@ CString DesignerPaneView::makeUniqueName(const CString& base) const
 
 void DesignerPaneView::onAlign(const CString& mode)
 {
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root == nullptr || m_selected.empty()) { notImpl(L"未选中节点"); return; }
 
     // 多选（>=2）按选区外接框对齐（Qt Designer 语义）；单选按父容器内容区对齐
-    std::vector<XamlElement*> targets;
+    std::vector<XmlElement*> targets;
     for (auto& p : m_selSet)
     {
-        XamlElement* n = Resolve(root, p);
+        XmlElement* n = Resolve(root, p);
         if (n != nullptr) targets.push_back(n);
     }
     if (targets.empty())
     {
-        XamlElement* node = Resolve(root, m_selected);
+        XmlElement* node = Resolve(root, m_selected);
         if (node == nullptr) return;
         targets.push_back(node);
     }
@@ -428,7 +428,7 @@ void DesignerPaneView::onAlign(const CString& mode)
     else
     {
         int idx = 0;
-        XamlElement* parent = uidesign::ParentOf(root, m_selected, idx);
+        XmlElement* parent = uidesign::ParentOf(root, m_selected, idx);
         if (parent == nullptr) { notImpl(L"根节点没有父容器，无法对齐"); return; }
         px = parent->previewX + parent->padL;
         py = parent->previewY + parent->padT;
@@ -461,7 +461,7 @@ void DesignerPaneView::onAlign(const CString& mode)
 }
 
 // 只改 Left/Top（对齐 / 分布共用），宽高保持不动
-void DesignerPaneView::applyGeomAttrs(XamlElement* n, int x, int y)
+void DesignerPaneView::applyGeomAttrs(XmlElement* n, int x, int y)
 {
     if (n == nullptr) return;
     n->hasX = n->hasY = true;
@@ -473,22 +473,22 @@ void DesignerPaneView::applyGeomAttrs(XamlElement* n, int x, int y)
 // 均匀分布：首尾不动，中间控件等间隔（Qt Designer 的 distribute 语义）
 void DesignerPaneView::onDistribute(bool horizontal)
 {
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root == nullptr || m_selSet.size() < 3)
     {
         notImpl(L"均匀分布需要先框选 / Ctrl 点选 3 个以上控件");
         return;
     }
 
-    std::vector<XamlElement*> v;
+    std::vector<XmlElement*> v;
     for (auto& p : m_selSet)
     {
-        XamlElement* n = Resolve(root, p);
+        XmlElement* n = Resolve(root, p);
         if (n != nullptr) v.push_back(n);
     }
     if (v.size() < 3) { notImpl(L"均匀分布需要 3 个以上控件"); return; }
 
-    std::sort(v.begin(), v.end(), [horizontal](XamlElement* a, XamlElement* b) {
+    std::sort(v.begin(), v.end(), [horizontal](XmlElement* a, XmlElement* b) {
         return horizontal ? (a->previewX < b->previewX) : (a->previewY < b->previewY);
     });
 
@@ -514,7 +514,7 @@ void DesignerPaneView::onDistribute(bool horizontal)
         : (int)v.front()->previewY + (int)v.front()->previewH + gap;
     for (size_t i = 1; i + 1 < v.size(); ++i)
     {
-        XamlElement* n = v[i];
+        XmlElement* n = v[i];
         const int offX = (int)(n->previewX - n->x);
         const int offY = (int)(n->previewY - n->y);
         if (horizontal)
@@ -557,7 +557,7 @@ void DesignerPaneView::zoomBy(float factor)
 void DesignerPaneView::zoomFit()
 {
     if (m_canvas == nullptr) return;
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root == nullptr || root->w <= 0 || root->h <= 0) { notImpl(L"文档尺寸为 0，无法适应窗口"); return; }
     CRect rc;
     m_canvas->GetClientRect(&rc);
@@ -595,14 +595,14 @@ void DesignerPaneView::pushUndo()
 {
     if (m_doc.root() == nullptr) return;
     m_modified = true;                       // 所有修改都先 pushUndo，脏标记集中在这里
-    m_undoStack.push_back(*m_doc.root());   // XamlElement 深拷贝（值语义树）
+    m_undoStack.push_back(*m_doc.root());   // XmlElement 深拷贝（值语义树）
     m_redoStack.clear();
     if (m_undoStack.size() > 64) m_undoStack.erase(m_undoStack.begin());
 }
 
-void DesignerPaneView::restoreSnapshot(XamlElement& snap)
+void DesignerPaneView::restoreSnapshot(XmlElement& snap)
 {
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root != nullptr) *root = snap;       // 深拷贝恢复文档树
     m_selected.clear();
     m_doc.layout(0, 0, root ? root->w : 0, root ? root->h : 0);
@@ -616,7 +616,7 @@ void DesignerPaneView::undo()
 {
     if (m_undoStack.empty() || m_doc.root() == nullptr) return;
     m_redoStack.push_back(*m_doc.root());
-    XamlElement snap = m_undoStack.back();
+    XmlElement snap = m_undoStack.back();
     m_undoStack.pop_back();
     restoreSnapshot(snap);
     m_surfStatus[0] = L"已撤销";
@@ -626,14 +626,14 @@ void DesignerPaneView::redo()
 {
     if (m_redoStack.empty() || m_doc.root() == nullptr) return;
     m_undoStack.push_back(*m_doc.root());
-    XamlElement snap = m_redoStack.back();
+    XmlElement snap = m_redoStack.back();
     m_redoStack.pop_back();
     restoreSnapshot(snap);
     m_surfStatus[0] = L"已重做";
 }
 
 // ===========================================================================
-// XAML 源码区编辑
+// XML 源码区编辑
 // 代码区现在是控件库里的 CodeEditor（自带窗口 + D2D 自绘 + 智能提示），
 // 不再"点进去贴一个 CEdit、走的时候再收掉"：编辑器常驻，焦点进/出就是编辑的开始与落定。
 // ===========================================================================

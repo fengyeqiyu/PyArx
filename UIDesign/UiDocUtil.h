@@ -1,14 +1,14 @@
 #pragma once
-// PyMfcDesigner 辅助：XamlElement 树的编辑/遍历/路径定位
-// 设计器以统一运行时 XamlElement 作为唯一文档模型。
-// XamlElement.children 为值语义（vector<XamlElement>），push_back 可能触发 realloc，
+// PyMfcDesigner 辅助：XmlElement 树的编辑/遍历/路径定位
+// 设计器以统一运行时 XmlElement 作为唯一文档模型。
+// XmlElement.children 为值语义（vector<XmlElement>），push_back 可能触发 realloc，
 // 因此设计器不长期持有裸指针，改用「路径」（根到节点的 child 索引链）寻址。
 #include "stdafx.h"
 #include <vector>
 #include <string>
 #include <deque>
-#include "XamlCore.h"
-#include "../MfcXamlCore/controls/XamlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
+#include "XmlCore.h"
+#include "../MfcXmlCore/controls/XmlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
 
 namespace uidesign
 {
@@ -16,9 +16,9 @@ namespace uidesign
     using Path = std::vector<int>;
 
     // 沿路径定位节点；p 为空或越界返回 nullptr
-    inline XamlElement* Resolve(XamlElement* root, const Path& p)
+    inline XmlElement* Resolve(XmlElement* root, const Path& p)
     {
-        XamlElement* cur = root;
+        XmlElement* cur = root;
         for (int idx : p)
         {
             if (cur == nullptr || idx < 0 || idx >= (int)cur->children.size())
@@ -30,7 +30,7 @@ namespace uidesign
 
     // 深度遍历：对每个节点回调(path, el)；路径即当前节点位置
     template <typename Fn>
-    void Walk(XamlElement* node, Path& path, Fn&& fn)
+    void Walk(XmlElement* node, Path& path, Fn&& fn)
     {
         if (node == nullptr) return;
         fn(path, *node);
@@ -42,14 +42,14 @@ namespace uidesign
         }
     }
     template <typename Fn>
-    void Walk(XamlElement* root, Fn&& fn)
+    void Walk(XmlElement* root, Fn&& fn)
     {
         Path p;
         Walk(root, p, std::forward<Fn>(fn));
     }
 
     // 统计节点数
-    inline int CountNodes(XamlElement* node)
+    inline int CountNodes(XmlElement* node)
     {
         if (node == nullptr) return 0;
         int c = 1;
@@ -61,8 +61,8 @@ namespace uidesign
     // 统一先去掉 X 前缀再按本意名比较（大小写不敏感），不再保留任何别名。
     inline bool IsContainer(const std::wstring& tag)
     {
-        if (xamlmfc::isContainerTag(tag)) return true;
-        const std::wstring t = xamlmfc::BareTag(tag);
+        if (xmlmfc::isContainerTag(tag)) return true;
+        const std::wstring t = xmlmfc::BareTag(tag);
         return _wcsicmp(t.c_str(), L"GridPanel") == 0 ||
                _wcsicmp(t.c_str(), L"Page") == 0 ||
                _wcsicmp(t.c_str(), L"TabPage") == 0;
@@ -71,7 +71,7 @@ namespace uidesign
     // 是否为纯容器（不建 HWND）：Window/Grid/MenuBar/ToolBar/StatusBar/MenuItem/Splitter
     inline bool IsPureContainer(const std::wstring& tag)
     {
-        const std::wstring t = xamlmfc::BareTag(tag);
+        const std::wstring t = xmlmfc::BareTag(tag);
         static const wchar_t* k[] = {
             L"Window", L"Grid", L"MenuBar", L"ToolBar", L"StatusBar", L"MenuItem", L"SplitView"
         };
@@ -82,7 +82,7 @@ namespace uidesign
     // 绘图图元（没有文本内容，只靠尺寸/方向/颜色描述）
     inline bool IsShapeTag(const std::wstring& tag)
     {
-        const std::wstring t = xamlmfc::BareTag(tag);
+        const std::wstring t = xmlmfc::BareTag(tag);
         return _wcsicmp(t.c_str(), L"Line") == 0 || _wcsicmp(t.c_str(), L"Rectangle") == 0 ||
                _wcsicmp(t.c_str(), L"Ellipse") == 0 || _wcsicmp(t.c_str(), L"Arc") == 0;
     }
@@ -91,7 +91,7 @@ namespace uidesign
     inline void DefaultSize(const std::wstring& tag, int& w, int& h)
     {
         w = 100; h = 28;
-        const std::wstring t = xamlmfc::BareTag(tag);
+        const std::wstring t = xmlmfc::BareTag(tag);
         if (t == L"ListBox" || t == L"ListCtrl" || t == L"VirtualList") { h = 80; }
         else if (t == L"TableView" || t == L"TreeTable" || t == L"GridLayout" || t == L"TreeView") { w = 240; h = 120; }
         else if (t == L"ComboBox") { h = 24; }
@@ -108,11 +108,11 @@ namespace uidesign
     }
 
     // 追加子节点并设置布局属性；返回新节点（仅本次调用有效，勿长期持有）
-    inline XamlElement* AddChild(XamlElement* parent, const std::wstring& tag,
+    inline XmlElement* AddChild(XmlElement* parent, const std::wstring& tag,
                                  const std::wstring& name, const std::wstring& text,
                                  int x, int y, int w, int h)
     {
-        XamlElement el;
+        XmlElement el;
         el.tag = tag;
         el.name = name;
         el.text = text;
@@ -127,7 +127,7 @@ namespace uidesign
     }
 
     // 从父节点删除子节点（按 Path 最后一跳）
-    inline bool RemoveChild(XamlElement* parent, int idx)
+    inline bool RemoveChild(XmlElement* parent, int idx)
     {
         if (parent == nullptr || idx < 0 || idx >= (int)parent->children.size())
             return false;
@@ -136,7 +136,7 @@ namespace uidesign
     }
 
     // 定位父节点与子索引（给定完整路径，返回父节点；idx 为该子节点在父中的位置）
-    inline XamlElement* ParentOf(XamlElement* root, const Path& p, int& outIdx)
+    inline XmlElement* ParentOf(XmlElement* root, const Path& p, int& outIdx)
     {
         if (p.empty()) { outIdx = -1; return nullptr; }
         Path pp(p.begin(), p.end() - 1);

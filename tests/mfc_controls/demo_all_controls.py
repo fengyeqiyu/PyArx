@@ -1,5 +1,5 @@
 ﻿# -*- coding: utf-8 -*-
-"""PyMfcXaml 全控件可视演示：每个控件单独一个窗口，全部保持打开、不关闭。
+"""PyMfcXml 全控件可视演示：每个控件单独一个窗口，全部保持打开、不关闭。
 
 用法：python.exe G:\PyArx\tests\mfc_controls\demo_all_controls.py
 - 26 个控件各自一个窗口，按网格排布，标题为「序号 + 控件名」
@@ -12,7 +12,7 @@ import sys
 import tempfile
 from ctypes import wintypes
 
-import PyMfcXaml as p
+import PyMfcXml as p
 
 user32 = ctypes.windll.user32
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +22,7 @@ WM_CLOSE = 0x0010
 SWP_NOSIZE = 0x0001
 SWP_NOZORDER = 0x0004
 
-# tag, 标题, 宽, 高, 控件高度, XAML 额外属性, 可选内嵌子控件
+# tag, 标题, 宽, 高, 控件高度, XML 额外属性, 可选内嵌子控件
 CONTROLS = [
     ('Button', '按钮', 300, 200, 46, 'Content="确定"', None),
     ('Label', '文本块', 300, 200, 60, 'Content="一段说明文字"', None),
@@ -194,7 +194,7 @@ def main():
 
     for index, (tag, label, ww, hh, ch, attrs, inner) in enumerate(CONTROLS, start=1):
         title = f'{index:02d} {tag} - {label}'
-        # 生成该控件的单窗口 XAML
+        # 生成该控件的单窗口 XML
         inner_xml = ''
         if inner:
             inner_xml = f'      <{inner} x:Name="inner1" Content="容器内文本" Height="24" />\n'
@@ -203,18 +203,18 @@ def main():
         else:
             attr_text = (attrs + ' ') if attrs else ''
             body = f'    <{tag} x:Name="ctrl" {attr_text}Height="{ch}" />\n'
-        xaml = (
+        xml = (
             '<?xml version="1.0" encoding="utf-8"?>\n'
-            '<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"\n'
+            '<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"\n'
             f'        Title="{title}" Width="{ww}" Height="{hh}">\n'
             '  <XStackPanel Margin="12" Spacing="6">\n'
             f'{body}'
             '  </XStackPanel>\n'
             '</XWindow>\n'
         )
-        path = os.path.join(tmpdir, f'{index:02d}_{tag}.xaml')
+        path = os.path.join(tmpdir, f'{index:02d}_{tag}.xml')
         with open(path, 'w', encoding='utf-8') as fh:
-            fh.write(xaml)
+            fh.write(xml)
 
         names = {}
         try:

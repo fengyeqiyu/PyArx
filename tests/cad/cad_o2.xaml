@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="O2 冒烟" Width="520" Height="360">
-  <XStackPanel Orientation="Vertical" Spacing="8">
-    <XQCanvas x:Name="qcv" Width="480" Height="230" Commands="Clear #232A33; Shadow 30,20,420,90,18,#000000,160,6,10,14; Grad 30,20,420,90,#00A8E8,#7A5AF8,0; Alpha 150; Rect 40,140,200,60,#57C84D; AlphaEnd; Rot 12,330,170; Rect 250,140,160,50,#FF5C7A; RotEnd" />
-    <XLabel x:Name="tb" Text="O2 构建 · P0 原语在 CAD 内自检" Height="24" />
-  </XStackPanel>
-</XWindow>

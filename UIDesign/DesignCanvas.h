@@ -1,39 +1,39 @@
 ﻿#pragma once
 // CDesignCanvas：设计器预览画布
-// 基于统一运行时 XamlElement 树渲染（GDI 预览 + 命中测试 + 选中控制点 + 网格点阵）。
+// 基于统一运行时 XmlElement 树渲染（GDI 预览 + 命中测试 + 选中控制点 + 网格点阵）。
 // 选中节点用路径（uidesign::Path，根到节点的 child 索引链）表达，避免值语义下指针失效。
 #include "stdafx.h"
-#include "XamlTheme.h"
+#include "XmlTheme.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <algorithm>
-#include "XamlCore.h"
-#include "../MfcXamlCore/controls/XamlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
-#include "XamlGeometry.h"      // 绘制与夹点用的纯几何库（正圆弧、直线端点、各类夹点）
+#include "XmlCore.h"
+#include "../MfcXmlCore/controls/XmlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
+#include "XmlGeometry.h"      // 绘制与夹点用的纯几何库（正圆弧、直线端点、各类夹点）
 #include "UiDocUtil.h"
-#include "XamlDraw.h"
-#include "XamlLeafPaint.h"   // 叶子控件统一渲染器（预览器同一份）
-#include "XamlD2D.h"
-#include "XamlControls.h"
+#include "XmlDraw.h"
+#include "XmlLeafPaint.h"   // 叶子控件统一渲染器（预览器同一份）
+#include "XmlD2D.h"
+#include "XmlControls.h"
 #include "DesignerTools.h"
-#include "../MfcXamlCore/controls/XamlMfcOrder.h"   // Level 排序与运行时/预览器同源
+#include "../MfcXmlCore/controls/XmlMfcOrder.h"   // Level 排序与运行时/预览器同源
 
 namespace uidesign
 {
-    // 画布上控件用的浅色调色板：值统一来自 MfcXamlCore/XamlTheme.h，
+    // 画布上控件用的浅色调色板：值统一来自 MfcXmlCore/XmlTheme.h，
     // 预览器（Viewer）用同一份——这是"预览器与设计器显示不一样"的根因修复。
     namespace cvdoc
     {
-        const COLORREF kSurface = xamlmfc::theme::surface;   // 容器 / 空壳
-        const COLORREF kButton  = xamlmfc::theme::button;    // 按钮底
-        const COLORREF kField   = xamlmfc::theme::field;     // 输入、列表、表格
-        const COLORREF kBorder  = xamlmfc::theme::border;    // 边框
-        const COLORREF kInk     = xamlmfc::theme::ink;       // 正文
-        const COLORREF kMuted   = xamlmfc::theme::muted;     // 次要文字、占位
-        const COLORREF kAccent  = xamlmfc::theme::accent;    // 进度、勾选
-        const COLORREF kTrack   = xamlmfc::theme::track;     // 轨道、空槽
-        const COLORREF kHead    = xamlmfc::theme::head;      // 表头
-        const COLORREF kGrid    = xamlmfc::theme::grid;      // 表格线
+        const COLORREF kSurface = xmlmfc::theme::surface;   // 容器 / 空壳
+        const COLORREF kButton  = xmlmfc::theme::button;    // 按钮底
+        const COLORREF kField   = xmlmfc::theme::field;     // 输入、列表、表格
+        const COLORREF kBorder  = xmlmfc::theme::border;    // 边框
+        const COLORREF kInk     = xmlmfc::theme::ink;       // 正文
+        const COLORREF kMuted   = xmlmfc::theme::muted;     // 次要文字、占位
+        const COLORREF kAccent  = xmlmfc::theme::accent;    // 进度、勾选
+        const COLORREF kTrack   = xmlmfc::theme::track;     // 轨道、空槽
+        const COLORREF kHead    = xmlmfc::theme::head;      // 表头
+        const COLORREF kGrid    = xmlmfc::theme::grid;      // 表格线
 
         // 画布解析 Items / Nodes / Pages 这类"竖线分隔"属性（与运行时同一语法）
         inline std::vector<std::wstring> splitBar(const std::wstring& s)
@@ -113,9 +113,9 @@ namespace uidesign
         friend class DesignerPaneView;   // 画布内容由设计器整窗表面代画（paintInto）
         DesignCanvas() = default;
 
-        // 绑定编辑文档（XamlRuntime 持有 XamlElement 树）；node 为空表示未选中
+        // 绑定编辑文档（XmlRuntime 持有 XmlElement 树）；node 为空表示未选中
 
-        void setDocument(XamlRuntime* doc)
+        void setDocument(XmlRuntime* doc)
         {
             m_doc = doc;
             m_sel.clear();
@@ -141,7 +141,7 @@ namespace uidesign
         {
             m_selSet = v;
             m_selNodes.clear();
-            XamlElement* root = m_doc ? m_doc->root() : nullptr;
+            XmlElement* root = m_doc ? m_doc->root() : nullptr;
             for (auto& p : v) m_selNodes.push_back(Resolve(root, p));
             m_selPath = m_selNodes.empty() ? nullptr : m_selNodes.front();
             if (!v.empty()) m_sel = v.front(); else { m_sel.clear(); }
@@ -150,7 +150,7 @@ namespace uidesign
         const std::vector<Path>& selectionSet() const { return m_selSet; }
         void clearSelection() { m_sel.clear(); m_selPath = nullptr; m_selSet.clear(); m_selNodes.clear(); Invalidate(); }
 
-        void dumpDiag(XamlElement* n, int depth, int maxDepth)
+        void dumpDiag(XmlElement* n, int depth, int maxDepth)
         {
             if (n == nullptr || depth > maxDepth) return;
             const std::string tag = diagNarrow(n->tag);
@@ -216,7 +216,7 @@ namespace uidesign
                 }
                 if (m_selPath != nullptr && (m_doc == nullptr || m_selPath != m_doc->root()))
                 {
-                    XamlElement* hn = nullptr;
+                    XmlElement* hn = nullptr;
                     int h = hitHandleAny(pt, hn);        // 多选时其余成员的夹点同样可拖
                     if (h >= 0)
                     {
@@ -266,7 +266,7 @@ namespace uidesign
         void fitToView()
         {
             if (!m_autoFit || m_doc == nullptr || m_doc->root() == nullptr) return;
-            XamlElement* r = m_doc->root();
+            XmlElement* r = m_doc->root();
             CRect cr{ 0, 0, 0, 0 };
             GetClientRect(&cr);
             if (cr.Width() <= 64 || cr.Height() <= 64 || r->w <= 0 || r->h <= 0) return;
@@ -375,7 +375,7 @@ namespace uidesign
             RECT bindRc = {0, 0, W, H};
             const bool bindOk = m_d2dCv->bind(m_memDC.GetSafeHdc(), bindRc);
             const bool began = bindOk && m_d2dCv->begin(W, H);
-            XamlElement* root = m_doc ? m_doc->root() : nullptr;
+            XmlElement* root = m_doc ? m_doc->root() : nullptr;
             {
                 static int logFrames = 0;
                 if (logFrames < 3)
@@ -405,20 +405,20 @@ namespace uidesign
             if (root != nullptr)
                 drawNode(*m_d2dCv, root, CPoint(0, 0), true);
             else
-                m_d2dCv->text(CRect(0, 0, W, H), L"打开或新建 XAML 后在此预览", RGB(170, 170, 170),
+                m_d2dCv->text(CRect(0, 0, W, H), L"打开或新建 XML 后在此预览", RGB(170, 170, 170),
                              DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, L"");
 
             // 装饰层也走 D2D：若用 GDI 画在窗口 DC 上，下一次呈现会把它盖掉
             // 多选：每个被选中的对象都画自己的 8 个夹点（主选中红色，其余蓝色），
             // 拖任意一个夹点都按选区外接框统一缩放
             {
-                XamlElement* root = (m_doc != nullptr) ? m_doc->root() : nullptr;
+                XmlElement* root = (m_doc != nullptr) ? m_doc->root() : nullptr;
                 drawSelectionCv(*m_d2dCv, m_selPath, CPoint(0, 0),
                                 m_selPath != nullptr && m_selPath != root);
                 const COLORREF multi = RGB(96, 160, 255);
                 for (size_t i = 1; i < m_selNodes.size(); ++i)
                 {
-                    XamlElement* n = m_selNodes[i];
+                    XmlElement* n = m_selNodes[i];
                     if (n == nullptr || n == root) continue;
                     drawSelectionCv(*m_d2dCv, n, CPoint(0, 0), true, multi);
                 }
@@ -464,14 +464,14 @@ namespace uidesign
                 if (onCreateNode(point))
                     return;   // 已创建控件，不进入选中/拖拽
             }
-            XamlElement* root = m_doc ? m_doc->root() : nullptr;
+            XmlElement* root = m_doc ? m_doc->root() : nullptr;
             if (root == nullptr) return;
 
             if (m_selPath != nullptr)
             {
                 // 夹点优先级最高：点中任一已选控件的夹点 → 缩放（多选按选区外接框统一缩放）；
                 // 椭圆圆心夹点 = 整体移动，直线端点 = 拖单端改长度和角度
-                XamlElement* hNode = nullptr;
+                XmlElement* hNode = nullptr;
                 int h = hitHandleAny(point, hNode);
                 if (h >= 0)
                 {
@@ -492,10 +492,10 @@ namespace uidesign
                 // 其内部控件被误判为移动容器而“选不上”。
                 Path hit;
                 bool found = hitTestRoot(root, point, hit);
-                XamlElement* hitN = nullptr;
+                XmlElement* hitN = nullptr;
                 if (found)
                 {
-                    XamlElement* n = root; bool ok = true;
+                    XmlElement* n = root; bool ok = true;
                     for (int i : hit)
                     {
                         if (i < 0 || i >= (int)n->children.size()) { ok = false; break; }
@@ -535,7 +535,7 @@ namespace uidesign
                 // Ctrl+单击不移动仍然是多选/取消多选，见 OnLButtonUp 的 pending 分支
                 if ((::GetKeyState(VK_CONTROL) & 0x8000) != 0 && hit.size() > 0)
                 {
-                    XamlElement* cnode = Resolve(root, hit);
+                    XmlElement* cnode = Resolve(root, hit);
                     if (cnode != nullptr && cnode != root)
                     {
                         m_ctrlCopyPath = hit;
@@ -715,12 +715,12 @@ namespace uidesign
         {
             CPoint cli = point;                 // 弹菜单要用客户坐标；point 之后会被转成文档坐标
             point = docPt(point);
-            XamlElement* root = m_doc ? m_doc->root() : nullptr;
+            XmlElement* root = m_doc ? m_doc->root() : nullptr;
             if (root == nullptr) return;
             Path hit;
             if (!hitTestRoot(root, point, hit) || hit.empty()) return;   // 空白处不弹菜单
 
-            XamlElement* n = root;
+            XmlElement* n = root;
             bool ok = true;
             for (int i : hit)
             {
@@ -782,14 +782,14 @@ namespace uidesign
         //   Arc       → 2 个（弧的两个端点），拖端点改起始角 / 扫掠角
         //   Ellipse   → 5 个（0 圆心 = 整体移动；1 上 / 2 下 / 3 左 / 4 右 = 改尺寸）
         //   其余控件   → 8 个方框夹点（维持原样）
-        static bool isLineNode(const XamlElement* n) { return n != nullptr && tagIs(n, L"Line"); }
-        static bool isEllipseNode(const XamlElement* n) { return n != nullptr && tagIs(n, L"Ellipse"); }
-        static bool isArcNode(const XamlElement* n) { return n != nullptr && tagIs(n, L"Arc"); }
+        static bool isLineNode(const XmlElement* n) { return n != nullptr && tagIs(n, L"Line"); }
+        static bool isEllipseNode(const XmlElement* n) { return n != nullptr && tagIs(n, L"Ellipse"); }
+        static bool isArcNode(const XmlElement* n) { return n != nullptr && tagIs(n, L"Arc"); }
         // 两端口夹点的"开放图元"（直线、圆弧）
-        static bool isOpenShapeNode(const XamlElement* n) { return isLineNode(n) || isArcNode(n); }
+        static bool isOpenShapeNode(const XmlElement* n) { return isLineNode(n) || isArcNode(n); }
 
         // 圆弧两端点：起点角、起始角+扫掠角
-        void arcEndpoints(const XamlElement* n, CPoint& a, CPoint& b) const
+        void arcEndpoints(const XmlElement* n, CPoint& a, CPoint& b) const
         {
             const CRect rc(n->previewX, n->previewY,
                            n->previewX + n->previewW, n->previewY + n->previewH);
@@ -802,37 +802,37 @@ namespace uidesign
         }
 
         // 直线两端点：按 Direction 把外框对角线还原成实际线段
-        void lineEndpoints(const XamlElement* n, CPoint& a, CPoint& b) const
+        void lineEndpoints(const XmlElement* n, CPoint& a, CPoint& b) const
         {
             const CRect rc(n->previewX, n->previewY,
                            n->previewX + n->previewW, n->previewY + n->previewH);
-            const xamlgeom::Rect2 box((double)rc.left, (double)rc.top, (double)rc.right, (double)rc.bottom);
-            const xamlgeom::Line2 line = xamlgeom::lineFromBox(box, xamlgeom::lineDirFromText(n->get(L"Direction")));
+            const xmlgeom::Rect2 box((double)rc.left, (double)rc.top, (double)rc.right, (double)rc.bottom);
+            const xmlgeom::Line2 line = xmlgeom::lineFromBox(box, xmlgeom::lineDirFromText(n->get(L"Direction")));
             a = CPoint((int)floor(line.a.x + 0.5), (int)floor(line.a.y + 0.5));
             b = CPoint((int)floor(line.b.x + 0.5), (int)floor(line.b.y + 0.5));
         }
 
-        // 按图元类型给出夹点位置，返回个数（pts 至少 8 个）；几何全部由 xamlgeom 提供
-        int handlePoints(const XamlElement* n, CPoint pts[8]) const
+        // 按图元类型给出夹点位置，返回个数（pts 至少 8 个）；几何全部由 xmlgeom 提供
+        int handlePoints(const XmlElement* n, CPoint pts[8]) const
         {
             if (n == nullptr) return 0;
             const CRect rc(n->previewX, n->previewY,
                            n->previewX + n->previewW, n->previewY + n->previewH);
-            const xamlgeom::Rect2 box((double)rc.left, (double)rc.top, (double)rc.right, (double)rc.bottom);
-            xamlgeom::Point2 gp[8];
+            const xmlgeom::Rect2 box((double)rc.left, (double)rc.top, (double)rc.right, (double)rc.bottom);
+            xmlgeom::Point2 gp[8];
             int cnt = 0;
             if (isLineNode(n))
-                cnt = xamlgeom::lineHandles(box, xamlgeom::lineDirFromText(n->get(L"Direction")), gp);
+                cnt = xmlgeom::lineHandles(box, xmlgeom::lineDirFromText(n->get(L"Direction")), gp);
             else if (isArcNode(n))
             {
                 int sa = 180, sw = 180;
                 arcParams(n, sa, sw);
-                cnt = xamlgeom::arcHandles(box, (double)sa, (double)sw, gp);
+                cnt = xmlgeom::arcHandles(box, (double)sa, (double)sw, gp);
             }
             else if (isEllipseNode(n))
-                cnt = xamlgeom::ellipseHandles(box, gp);
+                cnt = xmlgeom::ellipseHandles(box, gp);
             else
-                cnt = xamlgeom::boxHandles(box, gp);
+                cnt = xmlgeom::boxHandles(box, gp);
             for (int i = 0; i < cnt; ++i)
                 pts[i] = CPoint((int)floor(gp[i].x + 0.5), (int)floor(gp[i].y + 0.5));
             return cnt;
@@ -840,7 +840,7 @@ namespace uidesign
 
         // 椭圆夹点换算成方框夹点索引（1 上→1 上中，2 下→6 下中，3 左→3 左中，4 右→4 右中）；
         // 圆心返回 -1（圆心不是缩放，是整体移动）
-        static int boxHandleOf(const XamlElement* n, int h)
+        static int boxHandleOf(const XmlElement* n, int h)
         {
             if (isEllipseNode(n))
             {
@@ -852,7 +852,7 @@ namespace uidesign
 
         // 8 个控制点命中（与 drawNode 选中态一致，含画布原点 20,20）
         // 所有被选中对象（主选中 + 多选成员）的夹点命中：多选时每个对象都有自己的一套夹点
-        int hitHandleAny(CPoint p, XamlElement*& outNode)
+        int hitHandleAny(CPoint p, XmlElement*& outNode)
         {
             outNode = nullptr;
             if (m_selPath == nullptr) return -1;
@@ -867,7 +867,7 @@ namespace uidesign
             return -1;
         }
 
-        int hitHandle(XamlElement* n, CPoint p)
+        int hitHandle(XmlElement* n, CPoint p)
         {
             if (n == nullptr) return -1;
             CPoint pts[8];
@@ -925,11 +925,11 @@ namespace uidesign
             if (mode == kResize)
             {
                 m_grpItems.clear();
-                std::vector<XamlElement*> nodes;
+                std::vector<XmlElement*> nodes;
                 nodes.push_back(m_selPath);
                 for (size_t i = 1; i < m_selNodes.size(); ++i)
                 {
-                    XamlElement* n = m_selNodes[i];
+                    XmlElement* n = m_selNodes[i];
                     if (n == nullptr || n == m_selPath) continue;
                     nodes.push_back(n);
                 }
@@ -1013,14 +1013,14 @@ namespace uidesign
                 GetParent()->PostMessage(WM_CANVAS_SELECT, 0, reinterpret_cast<LPARAM>(pp));
                 return;
             }
-            XamlElement* root = m_doc ? m_doc->root() : nullptr;
+            XmlElement* root = m_doc ? m_doc->root() : nullptr;
             if (root == nullptr) return;
             Path found; bool has = false;
             std::vector<Path> hits;
-            std::function<void(XamlElement*, Path)> walk = [&](XamlElement* n, Path p) {
+            std::function<void(XmlElement*, Path)> walk = [&](XmlElement* n, Path p) {
                 for (int i = 0; i < (int)n->children.size(); ++i)
                 {
-                    XamlElement* c = &n->children[i];
+                    XmlElement* c = &n->children[i];
                     CRect rc(c->previewX, c->previewY, c->previewX + c->previewW, c->previewY + c->previewH);
                     bool hit;
                     if (crossing)
@@ -1068,7 +1068,7 @@ namespace uidesign
         // n.x/n.y 是相对父容器的坐标，previewX/previewY 是画布绝对坐标（父偏移 + 自身）。
         // 拖动时鼠标增量来自画布坐标，所以必须把父偏移加回去写 preview，否则控件会整块跳走
         // —— 这就是"鼠标坐标与按钮位置不符、按钮自己跑了"的根因。
-        static void applyGeom(XamlElement* n, int x, int y, int w, int h, int offX, int offY)
+        static void applyGeom(XmlElement* n, int x, int y, int w, int h, int offX, int offY)
         {
             n->hasX = n->hasY = n->hasW = n->hasH = true;
             n->x = x; n->y = y; n->w = w; n->h = h;
@@ -1102,7 +1102,7 @@ namespace uidesign
         // 拖拽结束回调（DesignerPaneView：重布局 + 属性面板 + 状态栏）
         std::function<void()> onEditEnd;
         // 画布上右击某个控件：节点 + 屏幕坐标，由宿主弹菜单（复制/剪切/粘贴/删除）
-        std::function<void(XamlElement*, CPoint)> onContextMenu;
+        std::function<void(XmlElement*, CPoint)> onContextMenu;
         // Ctrl+拖动复制：宿主负责真复制（pushUndo / 唯一命名 / 刷新树和代码区），
         // 画布只负责判定"拖出阈值了"并回传源路径与按下点
         std::function<void(const Path&, CPoint)> onCtrlDragCopy;
@@ -1135,7 +1135,7 @@ namespace uidesign
         int m_offX = 0, m_offY = 0;   // 父容器在画布上的偏移（preview 与 x/y 的差值）
 
         // 多选统一缩放：拖任一夹点时，按选区外接框的比例把这批节点一起缩放
-        struct GrpItem { XamlElement* n; int x, y, w, h, offX, offY; };
+        struct GrpItem { XmlElement* n; int x, y, w, h, offX, offY; };
         std::vector<GrpItem> m_grpItems;
         CRect m_grpBox{ 0, 0, 0, 0 };
 
@@ -1184,13 +1184,13 @@ namespace uidesign
         }
 
         // ---- canvas 版辅助绘制（与 GDI 版语义逐条一致，三端共用同一套外观规则）----
-        static void drawRoundedCv(XamlCanvas& cv, const CRect& rc, COLORREF fill, COLORREF border, int radius = 6)
+        static void drawRoundedCv(XmlCanvas& cv, const CRect& rc, COLORREF fill, COLORREF border, int radius = 6)
         {
             cv.fillRoundRect(rc, fill, border, radius);
         }
 
         // 3D 边框：内凹(上左深/下右亮) 或 外凸(上左亮/下右深)
-        static void clearDarkenCv(XamlCanvas& cv, const CRect& rc, bool sunken, int thick)
+        static void clearDarkenCv(XmlCanvas& cv, const CRect& rc, bool sunken, int thick)
         {
             const COLORREF dark = RGB(52, 56, 62);
             const COLORREF light = RGB(150, 158, 170);
@@ -1207,8 +1207,8 @@ namespace uidesign
             }
         }
 
-        // 按 XAML 的 BorderStyle/BorderThickness 画边框（覆盖控件默认描边）
-        void applyBorderStyleCv(XamlCanvas& cv, const CRect& rc, COLORREF line, COLORREF fill,
+        // 按 XML 的 BorderStyle/BorderThickness 画边框（覆盖控件默认描边）
+        void applyBorderStyleCv(XmlCanvas& cv, const CRect& rc, COLORREF line, COLORREF fill,
                                 const std::wstring& style, int thick)
         {
             if (_wcsicmp(style.c_str(), L"None") == 0)
@@ -1230,8 +1230,8 @@ namespace uidesign
             }
         }
 
-        // 按 XAML 的 ScrollStyle 画滚动条示意
-        void drawScrollBarsCv(XamlCanvas& cv, const CRect& rc, const std::wstring& style)
+        // 按 XML 的 ScrollStyle 画滚动条示意
+        void drawScrollBarsCv(XmlCanvas& cv, const CRect& rc, const std::wstring& style)
         {
             const int bar = 12;
             const bool vert = _wcsicmp(style.c_str(), L"Vertical") == 0 ||
@@ -1259,7 +1259,7 @@ namespace uidesign
         // 只取对齐位：DT_VCENTER/SINGLELINE/END_ELLIPSIS 由 canvas 自己处理
         static UINT alignOnly(UINT f) { return f & (DT_LEFT | DT_CENTER | DT_RIGHT); }
 
-        static void drawTextCv(XamlCanvas& cv, const CRect& rc, const std::wstring& s, COLORREF c,
+        static void drawTextCv(XmlCanvas& cv, const CRect& rc, const std::wstring& s, COLORREF c,
                                UINT flags, int pt, const std::wstring& family)
         {
             if (s.empty()) return;
@@ -1268,7 +1268,7 @@ namespace uidesign
 
         // 从预览矩形绘制单个节点（isRoot 用于根窗口背景）
         // 该节点是否由控件模板实体化出视觉层（此时控件本体不再自画文字）
-        static bool hasTemplateChild(const XamlElement* node)
+        static bool hasTemplateChild(const XmlElement* node)
         {
             for (const auto& c : node->children)
                 if (c.templateChild)
@@ -1276,14 +1276,14 @@ namespace uidesign
             return false;
         }
 
-        // tag 判定一律大小写不敏感：解析器保留 XAML 里的原始大小写，
+        // tag 判定一律大小写不敏感：解析器保留 XML 里的原始大小写，
         // 而 IsContainer 内部按小写比较，两边混用会静默漏掉分支。
-        static bool tagIs(const XamlElement* node, const wchar_t* t)
+        static bool tagIs(const XmlElement* node, const wchar_t* t)
         {
             if (node == nullptr || node->tag.c_str() == nullptr)
                 return false;
             // 统一命名：<XButton> 与旧写法 <Button> 同一判定，去掉 X 前缀再比
-            const std::wstring bare = xamlmfc::BareTag(node->tag);
+            const std::wstring bare = xmlmfc::BareTag(node->tag);
             return _wcsicmp(bare.c_str(), t) == 0;
         }
 
@@ -1318,7 +1318,7 @@ inline std::wstring canvasExeDir()
     return std::wstring(path);
 }
 
-void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = false,
+void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = false,
                       COLORREF inheritBg = RGB(255, 255, 255))
         {
             // 统一坐标系：屏幕/客户坐标 = 文档坐标 + 画布原点(origin)
@@ -1332,7 +1332,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             COLORREF fgC = parseColor(node->get(L"Foreground"), (COLORREF)-1);
             COLORREF bdC = parseColor(node->get(L"BorderColor"), (COLORREF)-1);
             int fontSize = _wtoi(node->get(L"FontSize").c_str());
-            // XAML 枚举属性：文字对齐 / 边框样式 / 滚动样式（未声明则用控件默认外观）
+            // XML 枚举属性：文字对齐 / 边框样式 / 滚动样式（未声明则用控件默认外观）
             const std::wstring bdStyle = node->get(L"BorderStyle");
             const std::wstring scrollStyle = node->get(L"ScrollStyle");
             const int bdThick = _wtoi(node->get(L"BorderThickness").c_str());
@@ -1354,43 +1354,43 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             }
             else if (tagIs(node, L"MenuBar"))
             {
-                xamlctl::xamlDrawShellMenuBar(cv, rc, *node);
+                xmlctl::xmlDrawShellMenuBar(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"StatusBar"))
             {
-                xamlctl::xamlDrawShellStatusBar(cv, rc, *node);
+                xmlctl::xmlDrawShellStatusBar(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"DrawBar"))
             {
-                xamlctl::xamlDrawShellDrawBar(cv, rc, *node);
+                xmlctl::xmlDrawShellDrawBar(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"ChipBar"))
             {
-                xamlctl::xamlDrawShellChipBar(cv, rc, *node);
+                xmlctl::xmlDrawShellChipBar(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"TabStrip"))
             {
-                xamlctl::xamlDrawShellTabStrip(cv, rc, *node);
+                xmlctl::xmlDrawShellTabStrip(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"Stage"))
             {
-                xamlctl::xamlDrawShellStage(cv, rc, *node);
+                xmlctl::xmlDrawShellStage(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"PanelHeader"))
             {
-                xamlctl::xamlDrawShellPanelHeader(cv, rc, *node);
+                xmlctl::xmlDrawShellPanelHeader(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"TreeView"))
             {
-                // 预设行：XAML 里写 Level/HasChildren/Expanded/Selected 即可在画布上看出行结构
-                xamlapp::XamlAppearance ap;
+                // 预设行：XML 里写 Level/HasChildren/Expanded/Selected 即可在画布上看出行结构
+                xmlapp::XmlAppearance ap;
                 ap.backColor = node->get(L"Background");
                 if (ap.backColor.empty()) ap.backColor = node->get(L"BackColor");
                 ap.foreColor = node->get(L"Foreground");
@@ -1398,7 +1398,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 ap.borderStyle = node->get(L"BorderStyle");
                 ap.fontSize = _wtoi(node->get(L"FontSize").c_str());
                 const int lum = GetRValue(bgC == (COLORREF)-1 ? RGB(255, 255, 255) : bgC);
-                xamlctl::xamlDrawTreeLike(cv, rc, *node, node->styled, ap,
+                xmlctl::xmlDrawTreeLike(cv, rc, *node, node->styled, ap,
                                           lum > 140 ? RGB(32, 36, 42) : RGB(228, 231, 236),
                                           RGB(120, 130, 150));
                 return;
@@ -1406,7 +1406,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             else if (tagIs(node, L"PropertyGrid"))
             {
                 // 预设行：子节点的 Name/Value 即"属性—值"两列
-                xamlapp::XamlAppearance ap;
+                xmlapp::XmlAppearance ap;
                 ap.backColor = node->get(L"Background");
                 if (ap.backColor.empty()) ap.backColor = node->get(L"BackColor");
                 ap.foreColor = node->get(L"Foreground");
@@ -1414,14 +1414,14 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 ap.borderStyle = node->get(L"BorderStyle");
                 ap.fontSize = _wtoi(node->get(L"FontSize").c_str());
                 const int lum2 = GetRValue(bgC == (COLORREF)-1 ? RGB(255, 255, 255) : bgC);
-                xamlctl::xamlDrawPropRows(cv, rc, *node, node->styled, ap,
+                xmlctl::xmlDrawPropRows(cv, rc, *node, node->styled, ap,
                                           lum2 > 140 ? RGB(32, 36, 42) : RGB(228, 231, 236),
                                           RGB(120, 130, 150));
                 return;
             }
             else if (tagIs(node, L"ListBox") || tagIs(node, L"ListView"))
             {
-                xamlapp::XamlAppearance ap;
+                xmlapp::XmlAppearance ap;
                 ap.backColor = node->get(L"Background");
                 if (ap.backColor.empty()) ap.backColor = node->get(L"BackColor");
                 ap.foreColor = node->get(L"Foreground");
@@ -1429,7 +1429,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 ap.borderStyle = node->get(L"BorderStyle");
                 ap.fontSize = _wtoi(node->get(L"FontSize").c_str());
                 const int inkLum = GetRValue(bgC == (COLORREF)-1 ? RGB(255, 255, 255) : bgC);
-                xamlctl::xamlDrawListLike(cv, rc, *node, node->styled, ap,
+                xmlctl::xmlDrawListLike(cv, rc, *node, node->styled, ap,
                                           inkLum > 140 ? RGB(32, 36, 42) : RGB(228, 231, 236),
                                           RGB(120, 130, 150));
                 return;
@@ -1437,70 +1437,70 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             else if (tagIs(node, L"SplitView"))
             {
                 const bool vertical = node->previewW <= node->previewH;
-                xamlctl::xamlDrawSplitter(cv, rc, vertical, false, false,
+                xmlctl::xmlDrawSplitter(cv, rc, vertical, false, false,
                                           ::GetSysColor(COLOR_BTNFACE));
             }
             else if (tagIs(node, L"StatusBar"))
             {
-                xamlctl::xamlDrawShellStatusBar(cv, rc, *node);
+                xmlctl::xmlDrawShellStatusBar(cv, rc, *node);
                 return;
             }
             else if (false)
             {
-                std::vector<xamlctl::StatusCell> cells;
+                std::vector<xmlctl::StatusCell> cells;
                 for (auto& c : node->children)
                 {
-                    xamlctl::StatusCell cell;
+                    xmlctl::StatusCell cell;
                     cell.text = c.get(L"Text");
                     if (cell.text.empty()) cell.text = c.get(L"Content");
                     if (cell.text.empty()) cell.text = c.text;
                     cell.width = c.previewW;
                     cells.push_back(cell);
                 }
-                xamlctl::xamlDrawStatusBar(cv, rc, cells, ::GetSysColor(COLOR_BTNFACE),
+                xmlctl::xmlDrawStatusBar(cv, rc, cells, ::GetSysColor(COLOR_BTNFACE),
                                            RGB(32, 36, 42), 8, pt, fam);
             }
             else if (tagIs(node, L"PanelHeader"))
             {
                 // 外壳构件：与设计器表面 / 预览器同一批绘制函数，画布预览才对得上
-                xamlctl::xamlDrawPanelHeader(cv, rc, node->text, node->get(L"Hint"), 8);
+                xmlctl::xmlDrawPanelHeader(cv, rc, node->text, node->get(L"Hint"), 8);
             }
             else if (tagIs(node, L"TabStrip"))
             {
-                xamlctl::xamlDrawShellTabStrip(cv, rc, *node);
+                xmlctl::xmlDrawShellTabStrip(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"DrawBar"))
             {
-                xamlctl::xamlDrawShellDrawBar(cv, rc, *node);
+                xmlctl::xmlDrawShellDrawBar(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"Tab"))
             {
                 const std::wstring act = node->get(L"Active");
-                xamlctl::xamlDrawTab(cv, rc, node->text,
+                xmlctl::xmlDrawTab(cv, rc, node->text,
                                      !act.empty() && _wcsicmp(act.c_str(), L"True") == 0, false, 8);
             }
             else if (tagIs(node, L"Chip"))
             {
                 const std::wstring chk = node->get(L"Checked");
-                xamlctl::xamlDrawChip(cv, rc, node->text,
+                xmlctl::xmlDrawChip(cv, rc, node->text,
                                       !chk.empty() && _wcsicmp(chk.c_str(), L"True") == 0, false, 8);
             }
             else if (tagIs(node, L"Stage"))
             {
-                xamlctl::xamlDrawShellStage(cv, rc, *node);
+                xmlctl::xmlDrawShellStage(cv, rc, *node);
                 return;
             }
             else if (tagIs(node, L"ChipBar"))
             {
-                xamlctl::xamlDrawShellChipBar(cv, rc, *node);
+                xmlctl::xmlDrawShellChipBar(cv, rc, *node);
                 return;
             }
             else if (IsContainer(node->tag))
             {
                 // 可见容器（TabControl/Border/Panel/ToolBar 等）画占位；纯布局容器保持透明，
-                // 除非它在 XAML 里显式声明了 Background / BorderColor（声明了就按声明渲染）
+                // 除非它在 XML 里显式声明了 Background / BorderColor（声明了就按声明渲染）
                 const bool isPalettePage = tagIs(node, L"Page") || tagIs(node, L"page") ||
                                            tagIs(node, L"TabItem");
                 const bool layoutOnly = isPalettePage ||
@@ -1560,7 +1560,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 }
             }
             // ---- 统一渲染器 ----
-            // 按钮 / 文字 / 输入框 / 勾选 / 下拉 / 进度条：直接调 MfcXamlCore/XamlLeafPaint.h，
+            // 按钮 / 文字 / 输入框 / 勾选 / 下拉 / 进度条：直接调 MfcXmlCore/XmlLeafPaint.h，
             // 预览器调的是同一个函数，所以画布与预览的圆角、边框、配色不会再分叉。
             else if (tagIs(node, L"Image") ||
                      tagIs(node, L"Button") || tagIs(node, L"Label") || tagIs(node, L"TextField") ||
@@ -1574,7 +1574,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                      tagIs(node, L"Rectangle") || tagIs(node, L"Ellipse") || tagIs(node, L"Line") ||
                      tagIs(node, L"Divider") || tagIs(node, L"Hyperlink") || tagIs(node, L"Choice"))
             {
-                xamlapp::XamlAppearance ap;
+                xmlapp::XmlAppearance ap;
                 ap.backColor = node->get(L"Background");
                 if (ap.backColor.empty()) ap.backColor = node->get(L"BackColor");
                 ap.foreColor = node->get(L"Foreground");
@@ -1585,7 +1585,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                     const std::wstring op = node->get(L"Opacity");
                     ap.opacity = op.empty() ? 255 : _wtoi(op.c_str());
                 }
-                xamlleaf::drawLeaf(cv, node, rc, ap, node->styled, inheritBg, canvasExeDir());
+                xmlleaf::drawLeaf(cv, node, rc, ap, node->styled, inheritBg, canvasExeDir());
             }
 
             else if (tagIs(node, L"Button"))
@@ -1600,14 +1600,14 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                      node->previewH >= 36;
                 if (pill)
                 {
-                    xamlctl::xamlDrawPillButton(cv, rc, node->text,
+                    xmlctl::xmlDrawPillButton(cv, rc, node->text,
                                                 _wcsicmp(role.c_str(), L"Primary") == 0, false, 8);
                 }
                 else if (caption)
                 {
-                    xamlctl::xamlDrawToolButtonCaption(cv, rc, exeDirForCanvas() + L"\\" + icon,
+                    xmlctl::xmlDrawToolButtonCaption(cv, rc, exeDirForCanvas() + L"\\" + icon,
                                                        node->text, false, false, false,
-                                                       xamlctl::ToolButtonStyle(), 8);
+                                                       xmlctl::ToolButtonStyle(), 8);
                 }
                 else
                 {
@@ -1715,7 +1715,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             else if (tagIs(node, L"ListCtrl") || tagIs(node, L"GridLayout") ||
                      tagIs(node, L"DataGrid") || tagIs(node, L"TableView"))
             {
-                // 表格类控件：把 XAML 里的 Columns / Rows 真画出来。
+                // 表格类控件：把 XML 里的 Columns / Rows 真画出来。
                 // 之前这里只是"空壳 + 控件名"，表头和数据一行都看不到，等于没法做表格界面。
                 // 语法与引擎一致：Columns="名称:180|状态:100"，Rows="甲\t1|乙\t2"
                 const std::wstring colsAttr = node->get(L"Columns");
@@ -2255,7 +2255,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             }
             else if (tagIs(node, L"MenuBar"))
             {
-                xamlctl::xamlDrawShellMenuBar(cv, rc, *node);
+                xmlctl::xmlDrawShellMenuBar(cv, rc, *node);
             }
             else if (tagIs(node, L"ToolBar") || tagIs(node, L"Menu"))
             {
@@ -2465,7 +2465,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                            DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
             }
 
-            // XAML BorderStyle / ScrollStyle 生效（未声明则保持控件默认外观）
+            // XML BorderStyle / ScrollStyle 生效（未声明则保持控件默认外观）
             if (!isRoot && !bdStyle.empty())
                 applyBorderStyleCv(cv, rc, bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC,
                                    bgC == (COLORREF)-1 ? cvdoc::kSurface : bgC, bdStyle, bdThick);
@@ -2499,7 +2499,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         }
 
         // 虚线矩形：用整像素短段拼，三端与 D2D 都不依赖画笔样式
-        void dashedRectCv(XamlCanvas& cv, const CRect& rc, COLORREF c)
+        void dashedRectCv(XmlCanvas& cv, const CRect& rc, COLORREF c)
         {
             const int dash = 3, gap = 3;
             for (int x = rc.left; x < rc.right; x += dash + gap)
@@ -2516,9 +2516,9 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             }
         }
 
-        void selRectOf(XamlElement* node, CPoint origin, CRect& rc)
+        void selRectOf(XmlElement* node, CPoint origin, CRect& rc)
         {
-            XamlElement* root = (m_doc != nullptr) ? m_doc->root() : nullptr;
+            XmlElement* root = (m_doc != nullptr) ? m_doc->root() : nullptr;
             if (node == root)
                 rc = CRect(origin.x, origin.y, origin.x + node->w, origin.y + node->h);
             else
@@ -2528,7 +2528,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         }
 
         // 单个夹点方块（4px 半径）
-        void gripCv(XamlCanvas& cv, CPoint p, bool round = false)
+        void gripCv(XmlCanvas& cv, CPoint p, bool round = false)
         {
             const int h = 4;
             CRect hr(p.x - h, p.y - h, p.x + h + 1, p.y + h + 1);
@@ -2541,7 +2541,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             cv.strokeRect(hr, RGB(60, 110, 200), 1);
         }
 
-        void drawSelectionCv(XamlCanvas& cv, XamlElement* node, CPoint origin, bool handles = true,
+        void drawSelectionCv(XmlCanvas& cv, XmlElement* node, CPoint origin, bool handles = true,
                             COLORREF frame = RGB(255, 90, 90))
         {
             if (node == nullptr) return;
@@ -2585,20 +2585,20 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         // 与 arcGeom 互为逆运算，因此"圆心+半径不变、只改角度"时框会跟着变，弧始终落在同一个圆上。
         static void arcBoxFromArc(double cx, double cy, double R, int startDeg, int sweepDeg, CRect& rc)
         {
-            xamlgeom::Arc2 arc;
+            xmlgeom::Arc2 arc;
             arc.cx = cx; arc.cy = cy; arc.radius = R;
             arc.startDeg = startDeg; arc.sweepDeg = (sweepDeg == 0) ? 180.0 : (double)sweepDeg;
-            const xamlgeom::Rect2 box = xamlgeom::roundToInt(xamlgeom::arcBounds(arc));
+            const xmlgeom::Rect2 box = xmlgeom::roundToInt(xmlgeom::arcBounds(arc));
             rc.SetRect((int)box.left, (int)box.top, (int)box.right, (int)box.bottom);
         }
 
         // 正圆弧几何：由"包围盒 + 起止角"反推圆心与半径，保证画出来是正圆的一段弧
-        // （单一半径 R，弧居中内接于该框）。实现放在纯几何库 xamlgeom 里，绘制/夹点/拖动共用一份。
+        // （单一半径 R，弧居中内接于该框）。实现放在纯几何库 xmlgeom 里，绘制/夹点/拖动共用一份。
         static void arcGeom(const CRect& rc, int startDeg, int sweepDeg,
                             double& cx, double& cy, double& R)
         {
-            const xamlgeom::Rect2 box((double)rc.left, (double)rc.top, (double)rc.right, (double)rc.bottom);
-            const xamlgeom::Arc2 arc = xamlgeom::arcFromBox(box, (double)startDeg, (double)sweepDeg);
+            const xmlgeom::Rect2 box((double)rc.left, (double)rc.top, (double)rc.right, (double)rc.bottom);
+            const xmlgeom::Arc2 arc = xmlgeom::arcFromBox(box, (double)startDeg, (double)sweepDeg);
             cx = arc.cx;
             cy = arc.cy;
             R = arc.radius;
@@ -2607,19 +2607,19 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         // 圆弧采样：rc 是期望弧占据的方框，圆心/半径由 arcGeom 定，弧是正圆的一段。
         static std::vector<POINT> arcPoints(const CRect& rc, int startDeg, int sweepDeg, int steps)
         {
-            const xamlgeom::Rect2 box((double)rc.left, (double)rc.top, (double)rc.right, (double)rc.bottom);
-            const xamlgeom::Arc2 arc = xamlgeom::arcFromBox(box, (double)startDeg, (double)sweepDeg);
-            std::vector<xamlgeom::Point2> pts2;
-            xamlgeom::sampleArc(arc, steps, pts2);
+            const xmlgeom::Rect2 box((double)rc.left, (double)rc.top, (double)rc.right, (double)rc.bottom);
+            const xmlgeom::Arc2 arc = xmlgeom::arcFromBox(box, (double)startDeg, (double)sweepDeg);
+            std::vector<xmlgeom::Point2> pts2;
+            xmlgeom::sampleArc(arc, steps, pts2);
             std::vector<POINT> pts;
             pts.reserve(pts2.size());
-            for (const xamlgeom::Point2& p : pts2)
+            for (const xmlgeom::Point2& p : pts2)
                 pts.push_back(POINT{ (LONG)floor(p.x + 0.5), (LONG)floor(p.y + 0.5) });
             return pts;
         }
 
         // 圆弧角度属性：未声明时给上半圈（180°→360°），与 catalog 的默认一致
-        static void arcParams(const XamlElement* n, int& startDeg, int& sweepDeg)
+        static void arcParams(const XmlElement* n, int& startDeg, int& sweepDeg)
         {
             startDeg = 180;
             sweepDeg = 180;
@@ -2638,7 +2638,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             return v;
         }
 
-        void drawJigCv(XamlCanvas& cv)
+        void drawJigCv(XmlCanvas& cv)
         {
             if (!m_jig) return;
             CRect r = m_jigRect; r.NormalizeRect();
@@ -2655,7 +2655,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             cv.text(tr, std::wstring(s), RGB(0, 120, 212), DT_LEFT, 0, L"");
         }
 
-        void drawBandCv(XamlCanvas& cv)
+        void drawBandCv(XmlCanvas& cv)
         {
             if (!m_banding) return;
             CRect r = m_bandRect; r.NormalizeRect();
@@ -2676,7 +2676,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
 
         // 标尺：窗口坐标下的顶部 / 左侧刻度条，不参与缩放（在单位变换下画）
         // ox/oy 是画布矩形在目标表面上的偏移
-        void drawRulerCv(XamlCanvas& cv, int ox, int oy, int W, int H)
+        void drawRulerCv(XmlCanvas& cv, int ox, int oy, int W, int H)
         {
             const int band = 18;
             const COLORREF bandBg = RGB(238, 240, 243);
@@ -2722,7 +2722,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
 
         // 把画布内容画进外部表面：设计器整窗只有一张 D2D 表面，画布不再自己上屏，
         // 否则父表面的不透明像素会盖住画布子窗口（DWM 直接合成，不受 WS_CLIPCHILDREN 约束）
-        void paintInto(XamlCanvas& cv, int x, int y, int w, int h)
+        void paintInto(XmlCanvas& cv, int x, int y, int w, int h)
         {
             if (w <= 0 || h <= 0) return;
             RECT bg = { x, y, x + w, y + h };
@@ -2748,7 +2748,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 rt->SetTransform(D2D1::Matrix3x2F::Scale(m_zoom, m_zoom) *
                                  D2D1::Matrix3x2F::Translation((float)x, (float)y));
 
-            XamlElement* root = (m_doc != nullptr) ? m_doc->root() : nullptr;
+            XmlElement* root = (m_doc != nullptr) ? m_doc->root() : nullptr;
             if (root != nullptr)
             {
                 drawNode(cv, root, CPoint(0, 0), true);
@@ -2758,7 +2758,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 // 多选其余成员同样带夹点（蓝色），可统一拖拉缩放
                 for (size_t i = 1; i < m_selNodes.size(); ++i)
                 {
-                    XamlElement* n = m_selNodes[i];
+                    XmlElement* n = m_selNodes[i];
                     if (n == nullptr || n == root) continue;
                     drawSelectionCv(cv, n, CPoint(0, 0), true, RGB(96, 160, 255));
                 }
@@ -2767,7 +2767,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             }
             else
             {
-                cv.text(bg, L"打开或新建 XAML 后在此预览", RGB(170, 170, 170),
+                cv.text(bg, L"打开或新建 XML 后在此预览", RGB(170, 170, 170),
                         DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, L"");
             }
 
@@ -2778,7 +2778,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
 
         // 命中测试入口：内部递归产生的索引是"叶子→根"的逆序，这里统一翻成正序，
         // 与 Resolve() 期望的 root→leaf 顺序一致（否则选中后属性表解析失败）
-        bool hitTestRoot(XamlElement* root, CPoint point, Path& out)
+        bool hitTestRoot(XmlElement* root, CPoint point, Path& out)
         {
             out.clear();
             if (root == nullptr) return false;
@@ -2788,8 +2788,8 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         }
 
         // 兄弟绘制先后由 Level 决定（大的后画 = 压在上面），同级保持声明序。
-        // 与运行时 z 序、预览器叠放是同一套规则（见 PyMfcCore/controls/XamlMfcOrder.h）。
-        static std::vector<int> childDrawOrder(XamlElement* node)
+        // 与运行时 z 序、预览器叠放是同一套规则（见 PyMfcCore/controls/XmlMfcOrder.h）。
+        static std::vector<int> childDrawOrder(XmlElement* node)
         {
             std::vector<int> levels;
             levels.reserve(node->children.size());
@@ -2804,11 +2804,11 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 const std::wstring zi = c.get(L"ZIndex");
                 levels.push_back(zi.empty() ? 0 : _wtoi(zi.c_str()));
             }
-            return xamlmfc::sortDrawOrder(levels);
+            return xmlmfc::sortDrawOrder(levels);
         }
 
         // 命中测试：返回命中最深节点的路径
-        bool hitTest(XamlElement* node, CPoint origin, CPoint point, Path& out)
+        bool hitTest(XmlElement* node, CPoint origin, CPoint point, Path& out)
         {
             CRect rc(node->previewX + origin.x, node->previewY + origin.y,
                      node->previewX + origin.x + node->previewW,
@@ -2835,22 +2835,22 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             return false;
         }
 
-        XamlRuntime* m_doc = nullptr;
+        XmlRuntime* m_doc = nullptr;
 
         // ---- 控件基础交互：画布上直接可用，不建子窗口（整窗仍是一张 D2D 表面）----
-        XamlElement* m_liveNode = nullptr;   // 正在就地文本编辑的控件
+        XmlElement* m_liveNode = nullptr;   // 正在就地文本编辑的控件
         std::wstring m_liveBuf;
         int m_liveCaret = 0;
 
-        static bool isTextControl(const XamlElement* n)
+        static bool isTextControl(const XmlElement* n)
         {
             return n != nullptr && (tagIs(n, L"TextField") || tagIs(n, L"Label") || tagIs(n, L"Label"));
         }
-        static bool isToggleControl(const XamlElement* n)
+        static bool isToggleControl(const XmlElement* n)
         {
             return n != nullptr && (tagIs(n, L"CheckBox") || tagIs(n, L"RadioButton") || tagIs(n, L"ToggleButton"));
         }
-        static bool isListControl(const XamlElement* n)
+        static bool isListControl(const XmlElement* n)
         {
             if (n == nullptr) return false;
             return tagIs(n, L"ComboBox") || tagIs(n, L"ListBox") || tagIs(n, L"Choice") || tagIs(n, L"DatePicker");
@@ -2871,7 +2871,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 parent->PostMessage(WM_DOC_CHANGED, 0, 0);
         }
 
-        void beginInlineText(XamlElement* n)
+        void beginInlineText(XmlElement* n)
         {
             m_liveNode = n;
             m_liveBuf = n->text;
@@ -2911,7 +2911,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         }
 
         // 点击可交互控件的语义：下拉 / 勾选 / 就地文本编辑
-        void activateControl(XamlElement* n, CPoint screenPt)
+        void activateControl(XmlElement* n, CPoint screenPt)
         {
             if (n == nullptr) return;
             if (isToggleControl(n))
@@ -3008,13 +3008,13 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         {
             (void)flags;
             point = docPt(point);
-            XamlElement* root = m_doc ? m_doc->root() : nullptr;
+            XmlElement* root = m_doc ? m_doc->root() : nullptr;
             if (root == nullptr) return;
             Path hit;
             const bool found = hitTestRoot(root, point, hit);
             diagLog("[dbl] pt=%d,%d hit=%d pathlen=%d\n", point.x, point.y, found ? 1 : 0, (int)hit.size());
             if (!found || hit.empty()) return;
-            XamlElement* n = root;
+            XmlElement* n = root;
             for (int i : hit)
             {
                 if (i < 0 || i >= (int)n->children.size()) return;
@@ -3027,9 +3027,9 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
         }
 
         Path m_sel;          // 选中路径（供 setSelected 传入）
-        XamlElement* m_selPath = nullptr; // 选中节点指针（重绘时 Resolve 得到）
+        XmlElement* m_selPath = nullptr; // 选中节点指针（重绘时 Resolve 得到）
         std::vector<Path> m_selSet;       // 多选集合（对齐/分布用，首项=主选中）
-        std::vector<XamlElement*> m_selNodes;
+        std::vector<XmlElement*> m_selNodes;
         bool m_showGrid = true;
         float m_zoom = 1.0f;
         bool m_autoFit = true;                // 打开文档时按视口自动缩放到可见                 // 画布缩放倍率（0.25 ~ 4.0）

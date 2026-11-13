@@ -1,7 +1,7 @@
 # 抓 Viewer 预览窗口（按 PID 找窗口，PrintWindow 存 png）
-param([string]$Xaml = "G:\PyArx\UIDesign\samples\15_qml_baseline.xaml", [string]$Out = "G:\PyArx\docs\_viewer_flat.png")
+param([string]$Xml = "G:\PyArx\UIDesign\samples\15_qml_baseline.xml", [string]$Out = "G:\PyArx\docs\_viewer_flat.png")
 $env:PYARX_D2D_RT = "software"
-$p = Start-Process -FilePath "G:\PyArx\X64\Release\Viewer.exe" -ArgumentList "`"$Xaml`"" -PassThru
+$p = Start-Process -FilePath "G:\PyArx\X64\Release\Viewer.exe" -ArgumentList "`"$Xml`"" -PassThru
 Start-Sleep -Milliseconds 1600
 
 Add-Type -Namespace W -Name N -MemberDefinition @'

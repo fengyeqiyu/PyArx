@@ -2,7 +2,7 @@
 """控件功能齐全度审计：区分「只有样子」与「真有功能」。
 
 检查两类事实：
-1) 接口面：PyMfcXaml 对 Python 暴露了哪些内容/交互能力（缺的即“装不进去”）；
+1) 接口面：PyMfcXml 对 Python 暴露了哪些内容/交互能力（缺的即“装不进去”）；
 2) 行为面：链接点击、分隔条拖拽、滚动、日历选日、富文本格式、位图按钮、下拉展开回调。
 
 用法：python.exe 本目录\audit_functional.py
@@ -13,7 +13,7 @@ import sys
 import time
 from ctypes import wintypes
 
-import PyMfcXaml as p
+import PyMfcXml as p
 
 user32 = ctypes.windll.user32
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -152,8 +152,8 @@ def api_surface():
 
 
 def build_window():
-    xaml = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="功能审计" Width="560" Height="760">
+    xml = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="功能审计" Width="560" Height="760">
   <XStackPanel Margin="14" Spacing="8">
     <XHyperlink x:Name="lnk" Text="打开示例链接" Url="https://example.com" Height="30"/>
     <XSplitView x:Name="spl" Height="20"/>
@@ -166,9 +166,9 @@ def build_window():
   </XStackPanel>
 </XWindow>
 '''
-    path = os.path.join(HERE, '_audit_probe.xaml')
+    path = os.path.join(HERE, '_audit_probe.xml')
     with open(path, 'w', encoding='utf-8') as fh:
-        fh.write(xaml)
+        fh.write(xml)
     names = {}
     w = p.guiload(path, names=names)
     w.show()
@@ -190,7 +190,7 @@ def sec(t):
 
 
 def main():
-    print('PyMfcXaml 控件功能齐全度审计')
+    print('PyMfcXml 控件功能齐全度审计')
     api_surface()
 
     w, names = build_window()

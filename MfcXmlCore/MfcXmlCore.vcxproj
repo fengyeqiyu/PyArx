@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{C8D3E4F5-6A7B-4C9D-8E1F-2A3B4C5D6E7F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>MfcXmlCore</ProjectName>
+    <RootNamespace>MfcXmlCore</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>G:\PyArx\X64\Release\</OutDir>
+    <IntDir>G:\PyArx\X64\Release\obj\MfcXmlCore\</IntDir>
+    <TargetName>MfcXmlCore</TargetName>
+    <TargetExt>.dll</TargetExt>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateDebugInformation>false</GenerateDebugInformation>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;PYMFCXML_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\third_party\nanosvg;$(ProjectDir)..\third_party\boost186;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/utf-8 /FS %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>msxml6.lib;ole32.lib;oleaut32.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/MANIFEST:NO %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="XmlCore.cpp" />
+    <ClCompile Include="XmlSurface.cpp" />
+    <ClCompile Include="XmlGeometry.cpp" />
+    <ClCompile Include="XmlPowerPlan.cpp" />
+    <ClCompile Include="XmlSvgScene.cpp" />
+    <ClCompile Include="controls\XmlMfcControlBase.cpp" />
+    <ClCompile Include="controls\RegisterPyMfcControls.cpp" />
+    <ClCompile Include="controls\XmlBitmapButton.cpp" />
+    <ClCompile Include="controls\XmlBusyIndicator.cpp" />
+    <ClCompile Include="controls\XmlCalendarCtrl.cpp" />
+    <ClCompile Include="controls\XmlChoice.cpp" />
+    <ClCompile Include="controls\XmlDatePicker.cpp" />
+    <ClCompile Include="controls\XmlDial.cpp" />
+    <ClCompile Include="controls\XmlFlickable.cpp" />
+    <ClCompile Include="controls\XmlGrid.cpp" />
+    <ClCompile Include="controls\XmlGridView.cpp" />
+    <ClCompile Include="controls\XmlHyperlink.cpp" />
+    <ClCompile Include="controls\XmlListCtrl.cpp" />
+    <ClCompile Include="controls\XmlListView.cpp" />
+    <ClCompile Include="controls\XmlMenu.cpp" />
+    <ClCompile Include="controls\XmlMenuBar.cpp" />
+    <ClCompile Include="controls\XmlPage.cpp" />
+    <ClCompile Include="controls\XmlPageIndicator.cpp" />
+    <ClCompile Include="controls\XmlPageView.cpp" />
+    <ClCompile Include="controls\XmlPanel.cpp" />
+    <ClCompile Include="controls\XmlPathView.cpp" />
+    <ClCompile Include="controls\XmlPopup.cpp" />
+    <ClCompile Include="controls\XmlPowerCanvas.cpp" />
+    <ClCompile Include="controls\XmlQCanvas.cpp" />
+    <ClCompile Include="controls\XmlRangeSlider.cpp" />
+    <ClCompile Include="controls\XmlRichText.cpp" />
+    <ClCompile Include="controls\XmlScrollBar.cpp" />
+    <ClCompile Include="controls\XmlScrolledWindow.cpp" />
+    <ClCompile Include="controls\XmlSpinBox.cpp" />
+    <ClCompile Include="controls\XmlSplitter.cpp" />
+    <ClCompile Include="controls\XmlStackView.cpp" />
+    <ClCompile Include="controls\XmlStaticBitmap.cpp" />
+    <ClCompile Include="controls\XmlStaticLine.cpp" />
+    <ClCompile Include="controls\XmlSwipeView.cpp" />
+    <ClCompile Include="controls\XmlSwitch.cpp" />
+    <ClCompile Include="controls\XmlItemView.cpp" />
+    <ClCompile Include="controls\XmlFrame.cpp" />
+    <ClCompile Include="controls\XmlDialog.cpp" />
+    <ClCompile Include="controls\XmlDrawer.cpp" />
+    <ClCompile Include="controls\XmlRoundButton.cpp" />
+    <ClCompile Include="controls\XmlDelayButton.cpp" />
+    <ClCompile Include="controls\XmlToolButton.cpp" />
+    <ClCompile Include="controls\XmlToolSeparator.cpp" />
+    <ClCompile Include="controls\XmlTabButton.cpp" />
+    <ClCompile Include="controls\XmlScrollIndicator.cpp" />
+    <ClCompile Include="controls\XmlMenuItem.cpp" />
+    <ClCompile Include="controls\XmlMenuSeparator.cpp" />
+    <ClCompile Include="controls\XmlTabControl.cpp" />
+    <ClCompile Include="controls\XmlTableView.cpp" />
+    <ClCompile Include="controls\XmlToggleButton.cpp" />
+    <ClCompile Include="controls\XmlToolBar.cpp" />
+    <ClCompile Include="controls\XmlToolTip.cpp" />
+    <ClCompile Include="controls\XmlTreeCtrl.cpp" />
+    <ClCompile Include="controls\XmlTreeView.cpp" />
+    <ClCompile Include="controls\XmlTumbler.cpp" />
+    <ClCompile Include="controls\XmlButton.cpp" />
+    <ClCompile Include="controls\XmlCheckBox.cpp" />
+    <ClCompile Include="controls\XmlCodeEditor.cpp" />
+    <ClCompile Include="controls\XmlComboBox.cpp" />
+    <ClCompile Include="controls\XmlGroupBox.cpp" />
+    <ClCompile Include="controls\XmlListBox.cpp" />
+    <ClCompile Include="controls\XmlProgressBar.cpp" />
+    <ClCompile Include="controls\XmlRadioButton.cpp" />
+    <ClCompile Include="controls\XmlSlider.cpp" />
+    <ClCompile Include="controls\XmlTextBlock.cpp" />
+    <ClCompile Include="controls\XmlTextBox.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="XmlCore.h" />
+    <ClInclude Include="XmlSurface.h" />
+    <ClInclude Include="XmlGeometry.h" />
+    <ClInclude Include="XmlAppearance.h" />
+    <ClInclude Include="XmlPowerPlan.h" />
+    <ClInclude Include="XmlSvgScene.h" />
+    <ClInclude Include="controls\CodeEditor.h" />
+    <ClInclude Include="controls\RegisterPyMfcControls.h" />
+    <ClInclude Include="controls\XmlBitmapButton.h" />
+    <ClInclude Include="controls\XmlBusyIndicator.h" />
+    <ClInclude Include="controls\XmlButton.h" />
+    <ClInclude Include="controls\XmlCalendarCtrl.h" />
+    <ClInclude Include="controls\XmlCheckBox.h" />
+    <ClInclude Include="controls\XmlChoice.h" />
+    <ClInclude Include="controls\XmlCodeEditor.h" />
+    <ClInclude Include="controls\XmlComboBox.h" />
+    <ClInclude Include="controls\XmlContentParse.h" />
+    <ClInclude Include="controls\XmlDatePicker.h" />
+    <ClInclude Include="controls\XmlDial.h" />
+    <ClInclude Include="controls\XmlEvents.h" />
+    <ClInclude Include="controls\XmlExtraControls.h" />
+    <ClInclude Include="controls\XmlFlickable.h" />
+    <ClInclude Include="controls\XmlGrid.h" />
+    <ClInclude Include="controls\XmlGridView.h" />
+    <ClInclude Include="controls\XmlGroupBox.h" />
+    <ClInclude Include="controls\XmlHyperlink.h" />
+    <ClInclude Include="controls\XmlListBox.h" />
+    <ClInclude Include="controls\XmlListCtrl.h" />
+    <ClInclude Include="controls\XmlListView.h" />
+    <ClInclude Include="controls\XmlMenu.h" />
+    <ClInclude Include="controls\XmlMenuBar.h" />
+    <ClInclude Include="controls\XmlMfcControlBase.h" />
+    <ClInclude Include="controls\XmlMfcHost.h" />
+    <ClInclude Include="controls\XmlMfcOrder.h" />
+    <ClInclude Include="controls\XmlMfcTags.h" />
+    <ClInclude Include="controls\XmlPage.h" />
+    <ClInclude Include="controls\XmlPageIndicator.h" />
+    <ClInclude Include="controls\XmlPageView.h" />
+    <ClInclude Include="controls\XmlPanel.h" />
+    <ClInclude Include="controls\XmlPathView.h" />
+    <ClInclude Include="controls\XmlPopup.h" />
+    <ClInclude Include="controls\XmlPowerCanvas.h" />
+    <ClInclude Include="controls\XmlProgressBar.h" />
+    <ClInclude Include="controls\XmlPropUtil.h" />
+    <ClInclude Include="controls\XmlQCanvas.h" />
+    <ClInclude Include="controls\XmlRadioButton.h" />
+    <ClInclude Include="controls\XmlRangeSlider.h" />
+    <ClInclude Include="controls\XmlRichText.h" />
+    <ClInclude Include="controls\XmlScrollBar.h" />
+    <ClInclude Include="controls\XmlScrolledWindow.h" />
+    <ClInclude Include="controls\XmlSlider.h" />
+    <ClInclude Include="controls\XmlSpinBox.h" />
+    <ClInclude Include="controls\XmlSplitter.h" />
+    <ClInclude Include="controls\XmlStackView.h" />
+    <ClInclude Include="controls\XmlStaticBitmap.h" />
+    <ClInclude Include="controls\XmlStaticLine.h" />
+    <ClInclude Include="controls\XmlSwipeView.h" />
+    <ClInclude Include="controls\XmlSwitch.h" />
+    <ClInclude Include="controls\XmlTabControl.h" />
+    <ClInclude Include="controls\XmlTableView.h" />
+    <ClInclude Include="controls\XmlTextBlock.h" />
+    <ClInclude Include="controls\XmlTextBox.h" />
+    <ClInclude Include="controls\XmlToggleButton.h" />
+    <ClInclude Include="controls\XmlToolBar.h" />
+    <ClInclude Include="controls\XmlToolTip.h" />
+    <ClInclude Include="controls\XmlTreeCtrl.h" />
+    <ClInclude Include="controls\XmlTreeView.h" />
+    <ClInclude Include="controls\XmlTumbler.h" />
+    <ClInclude Include="controls\XmlExtraControls.orig.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

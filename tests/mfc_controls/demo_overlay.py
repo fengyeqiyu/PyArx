@@ -2,15 +2,15 @@
 """浮层族演示：MenuStrip / Menu / ToolTip / Popup。窗口保持打开，按 Ctrl+C 结束。"""
 import ctypes, os, tempfile
 from ctypes import wintypes
-import PyMfcXaml as p
+import PyMfcXml as p
 
 u = ctypes.windll.user32
 u.SetWindowPos.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int,
                            ctypes.c_int, ctypes.c_int, wintypes.UINT]
 u.SetForegroundWindow.argtypes = [ctypes.c_void_p]
 
-XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="浮层族演示" Width="700" Height="500">
+XML = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="浮层族演示" Width="700" Height="500">
   <XCanvas>
     <XMenuBar x:Name="mb" Items="文件|编辑|视图|帮助" Width="420" Height="30" Canvas.Left="12" Canvas.Top="12" />
     <XButton x:Name="bt" Width="160" Height="34" Text="悬停看提示" Canvas.Left="12" Canvas.Top="70" />
@@ -21,8 +21,8 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
   </XCanvas>
 </XWindow>'''
 
-path = os.path.join(tempfile.mkdtemp(prefix='pymfc_overlay_demo_'), 'd.xaml')
-open(path, 'w', encoding='utf-8').write(XAML)
+path = os.path.join(tempfile.mkdtemp(prefix='pymfc_overlay_demo_'), 'd.xml')
+open(path, 'w', encoding='utf-8').write(XML)
 names = {}
 w = p.guiload(path, names=names)
 w.show()

@@ -1,8 +1,8 @@
 ﻿#include "stdafx.h"
-#include "../MfcXamlCore/controls/XamlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
+#include "../MfcXmlCore/controls/XmlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
 #include "DesignerPaneView.h"
 #include "DesignerPaneInternal.h"
-#include "../MfcXamlCore/controls/XamlMfcOrder.h"   // Level 排序规则与运行时/预览器共用
+#include "../MfcXmlCore/controls/XmlMfcOrder.h"   // Level 排序规则与运行时/预览器共用
 #include <algorithm>
 #include <functional>
 #include <unordered_map>
@@ -11,8 +11,8 @@
 using namespace uidesign;
 using namespace uidesign::detail;
 
-// 元素字号：优先读 XAML 的 FontSize 属性，没写就回落到调用方给的默认值
-static int fontPtOf(XamlElement* n, int def)
+// 元素字号：优先读 XML 的 FontSize 属性，没写就回落到调用方给的默认值
+static int fontPtOf(XmlElement* n, int def)
 {
     if (n == nullptr) return def;
     const std::wstring s = n->get(L"FontSize");
@@ -37,7 +37,7 @@ static void propDiag(const wchar_t* fmt, ...)
 
 // 面板内自绘的竖向滚动条：内容超出可视高度时才画，滑块位置与滚动量对应。
 // 只做"看得见 + 能拖动"这一层，滚轮/拖动由 DesignerPaneSurfaceInput 处理。
-static void drawPanelScrollBar(XamlCanvas& cv, const RECT& rc, int total, int viewH, int scroll)
+static void drawPanelScrollBar(XmlCanvas& cv, const RECT& rc, int total, int viewH, int scroll)
 {
     if (total <= viewH || total <= 0) return;
     const int trackW = 10;
@@ -85,7 +85,7 @@ void DesignerPaneView::paintSurface(HDC hdc)
     if (!cv->begin(client.Width(), client.Height()))
         return;   // 硬件与 WARP 都起不来时这里什么都不画（不再回退 GDI 绘制）
 
-    cv->fillRect(client, xamlctl::shell().base);
+    cv->fillRect(client, xmlctl::shell().base);
 
     // 命中表随每帧重建（19 个按钮 + 几个分割条 + 树行指针，成本可忽略）
     m_surfToolRects.clear();
@@ -103,7 +103,7 @@ void DesignerPaneView::paintSurface(HDC hdc)
     m_surfChipCats.clear();
     m_surfTabRects.clear();
 
-    XamlElement* root = m_ui.root();
+    XmlElement* root = m_ui.root();
     if (root != nullptr)
     {
         for (auto& child : root->children)
@@ -113,10 +113,10 @@ void DesignerPaneView::paintSurface(HDC hdc)
     cv->end();
 }
 
-// XAML 代码行：行号栏 + 逐 token 着色。
+// XML 代码行：行号栏 + 逐 token 着色。
 // 共享绘制层只有"整段一个颜色"的文字接口，所以要按量出来的宽度顺次排出多个色段；
 // 量宽用 GDI 的 Consolas 同尺寸字体，与 D2D 的 DWrite 同族，误差在 1px 内。
-static void drawCodeLine(XamlCanvas& cv, HDC hdc, HFONT font, const RECT& lr, int lineNo,
+static void drawCodeLine(XmlCanvas& cv, HDC hdc, HFONT font, const RECT& lr, int lineNo,
                          const std::wstring& code)
 {
     CString num;
@@ -228,13 +228,13 @@ static void drawCodeLine(XamlCanvas& cv, HDC hdc, HFONT font, const RECT& lr, in
 }
 
 // ===========================================================================
-// 菜单条：XAML 的 MenuBar 由这张表面自绘（外壳构件，与 PanelHeader/TabStrip 同类）。
+// 菜单条：XML 的 MenuBar 由这张表面自绘（外壳构件，与 PanelHeader/TabStrip 同类）。
 // 顶层 MenuItem 横排，点击用系统下拉菜单弹出，子项命令复用同一套 ensureAction 分发。
 // ===========================================================================
-void DesignerPaneView::paintMenuBar(XamlCanvas& cv, const RECT& rc, XamlElement* node)
+void DesignerPaneView::paintMenuBar(XmlCanvas& cv, const RECT& rc, XmlElement* node)
 {
     // 外观全部取 MenuBar 节点自身属性（与画布、预览器同源），外壳不再自己定颜色/字号
-    const xamlctl::ShellLook lk = xamlctl::shellLookOf(*node);
+    const xmlctl::ShellLook lk = xmlctl::shellLookOf(*node);
     cv.fillRect(rc, lk.back);
     cv.fillRect(RECT{ rc.left, rc.bottom - 1, rc.right, rc.bottom }, lk.line);
     m_surfTitleStrip = rc.bottom;      // 这一行就是无边框窗体的拖动区
@@ -249,14 +249,14 @@ void DesignerPaneView::paintMenuBar(XamlCanvas& cv, const RECT& rc, XamlElement*
     int rightX = rc.right;          // 窗口按钮从右往左排：文档顺序第一个贴着最右边
     for (auto& c : node->children)
     {
-        const std::wstring bare = xamlmfc::BareTag(c.tag);
+        const std::wstring bare = xmlmfc::BareTag(c.tag);
 
         // ---- 标题：无边框窗体的名字，画在菜单条左端 ----
-        // 文案优先取顶层窗口标题（打开/保存文档时它会被更新），缺省用 XAML 里写的 Text；
+        // 文案优先取顶层窗口标题（打开/保存文档时它会被更新），缺省用 XML 里写的 Text；
         // 固定占一列宽度并省略号收尾，长路径不会把菜单挤到屏幕外。
         if (_wcsicmp(bare.c_str(), L"ShellTitle") == 0)
         {
-            // 所见即所得：标题文案与宽度都按 XAML 声明，不再换成窗口路径
+            // 所见即所得：标题文案与宽度都按 XML 声明，不再换成窗口路径
             std::wstring t = c.get(L"Title");
             if (t.empty()) t = c.get(L"Text");
             if (t.empty()) t = c.text;
@@ -320,7 +320,7 @@ void DesignerPaneView::paintMenuBar(XamlCanvas& cv, const RECT& rc, XamlElement*
     ::ReleaseDC(nullptr, hdc);
 }
 
-void DesignerPaneView::surfaceMenuPopup(XamlElement* top, POINT screenPt)
+void DesignerPaneView::surfaceMenuPopup(XmlElement* top, POINT screenPt)
 {
     if (top == nullptr) return;
 
@@ -338,7 +338,7 @@ void DesignerPaneView::surfaceMenuPopup(XamlElement* top, POINT screenPt)
     Invalidate(FALSE);
 }
 
-void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
+void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
 {
     if (node == nullptr) return;
     CRect rc(node->previewX, node->previewY,
@@ -347,7 +347,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
 
     const std::wstring tag = node->tag;
     // 统一命名：X + 本意名，外壳构件按本意名分派
-    const std::wstring bareTag = xamlmfc::BareTag(tag);
+    const std::wstring bareTag = xmlmfc::BareTag(tag);
 
     // ---- 画布：内容直接画进父表面 ----
     // 父表面的 HwndRenderTarget 不透明呈现会盖住画布子窗口（DWM 合成不受
@@ -358,7 +358,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         return;
     }
 
-    int rowH = 24;                     // 行高可被 XAML 的 LineHeight 覆盖
+    int rowH = 24;                     // 行高可被 XML 的 LineHeight 覆盖
 
     // ---- 菜单条（单表面自绘：顶层 MenuItem 横排，点击弹系统下拉菜单）----
     if (_wcsicmp(bareTag.c_str(), L"MenuBar") == 0)
@@ -371,13 +371,13 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // 外观与命中都在外壳这一侧；画布只保存"待放置图元"的状态
     if (_wcsicmp(bareTag.c_str(), L"DrawBar") == 0)
     {
-        // Draw 竖条外观全部来自 XAML 节点属性，和画布、预览器用同一套数值
-        const xamlctl::ShellLook dl = xamlctl::shellLookOf(*node);
-        const int itemH = xamlctl::shellInt(*node, L"ItemHeight", 32);
-        const int pad = xamlctl::shellInt(*node, L"ItemPadding", 6);
-        const int gap = xamlctl::shellInt(*node, L"ItemSpacing", 4);
-        const int capH = xamlctl::shellInt(*node, L"CaptionHeight", 24);
-        const int capPt = xamlctl::shellInt(*node, L"CaptionFontSize", dl.fontPt);
+        // Draw 竖条外观全部来自 XML 节点属性，和画布、预览器用同一套数值
+        const xmlctl::ShellLook dl = xmlctl::shellLookOf(*node);
+        const int itemH = xmlctl::shellInt(*node, L"ItemHeight", 32);
+        const int pad = xmlctl::shellInt(*node, L"ItemPadding", 6);
+        const int gap = xmlctl::shellInt(*node, L"ItemSpacing", 4);
+        const int capH = xmlctl::shellInt(*node, L"CaptionHeight", 24);
+        const int capPt = xmlctl::shellInt(*node, L"CaptionFontSize", dl.fontPt);
 
         // 布局引擎给外壳自定义容器的矩形可能只按内容高度算，这里按工具数撑开
         const int needH = capH + pad + (int)node->children.size() * (itemH + gap) + pad;
@@ -394,7 +394,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         const std::wstring pending = (m_canvas != nullptr) ? m_canvas->PendingShapeTag()
                                                            : std::wstring();
         int y = rc.top + capH + pad;
-        // 工具清单以 XAML 的 DrawBar 子节点为准；子节点缺失时退回四个内置图元
+        // 工具清单以 XML 的 DrawBar 子节点为准；子节点缺失时退回四个内置图元
         std::vector<std::wstring> tools;
         for (auto& c : node->children)
         {
@@ -451,7 +451,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // ---- 工具栏 ----
     if (_wcsicmp(bareTag.c_str(), L"ToolBar") == 0)
     {
-        const xamlctl::ShellLook tl = xamlctl::shellLookOf(*node);
+        const xmlctl::ShellLook tl = xmlctl::shellLookOf(*node);
         cv.fillRect(rc, tl.back);
         cv.fillRect(RECT{ rc.left, rc.bottom - 1, rc.right, rc.bottom }, tl.line);
         const int savedPt = m_surfInheritPt;
@@ -463,7 +463,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
     if (_wcsicmp(bareTag.c_str(), L"Button") == 0)
     {
-        // 按钮自己登记命中矩形：绘制顺序即 XAML 顺序，不依赖 ToolBar 分支是否先跑
+        // 按钮自己登记命中矩形：绘制顺序即 XML 顺序，不依赖 ToolBar 分支是否先跑
         m_surfToolRects.push_back(RECT{ rc.left, rc.top, rc.right, rc.bottom });
         m_surfToolNames.push_back(node->name);
         int idx = (int)m_surfToolNames.size() - 1;
@@ -476,13 +476,13 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         const bool hot = idx == m_surfHotTool;
         if (_wcsicmp(role.c_str(), L"Primary") == 0 || _wcsicmp(role.c_str(), L"Ghost") == 0)
         {
-            xamlctl::xamlDrawPillButton(cv, rc, std::wstring(uiNodeText(node).GetString()),
+            xmlctl::xmlDrawPillButton(cv, rc, std::wstring(uiNodeText(node).GetString()),
                                         _wcsicmp(role.c_str(), L"Primary") == 0, hot, fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 10));
             return;
         }
         if (_wcsicmp(role.c_str(), L"Active") == 0)
         {
-            xamlctl::xamlDrawPillButton(cv, rc, std::wstring(uiNodeText(node).GetString()), false,
+            xmlctl::xmlDrawPillButton(cv, rc, std::wstring(uiNodeText(node).GetString()), false,
                                         true, 9);
             return;
         }
@@ -491,25 +491,25 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         const std::wstring content = uiNodeText(node).GetString();
         if (!path.empty() && !content.empty() && node->previewH >= 36)
         {
-            xamlctl::xamlDrawToolButtonCaption(cv, rc, path, content, hot, false, false,
-                                               xamlctl::ToolButtonStyle(),
+            xmlctl::xmlDrawToolButtonCaption(cv, rc, path, content, hot, false, false,
+                                               xmlctl::ToolButtonStyle(),
                                                fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 10));
             return;
         }
 
-        xamlctl::ToolButtonStyle tbs;
-        tbs.back = xamlctl::shell().header;   // 常态与工具栏同色，只有悬停才显块
-        tbs.hot = xamlctl::shell().panelAlt;
-        xamlctl::xamlDrawToolButton(cv, rc, path, hot, false, tbs);
+        xmlctl::ToolButtonStyle tbs;
+        tbs.back = xmlctl::shell().header;   // 常态与工具栏同色，只有悬停才显块
+        tbs.hot = xmlctl::shell().panelAlt;
+        xmlctl::xmlDrawToolButton(cv, rc, path, hot, false, tbs);
         return;
     }
     if (_wcsicmp(bareTag.c_str(), L"Separator") == 0)
     {
-        xamlctl::xamlDrawSeparator(cv, rc, node->previewW <= node->previewH);
+        xmlctl::xmlDrawSeparator(cv, rc, node->previewW <= node->previewH);
         return;
     }
 
-    // ---- 面板标题条（XAML 声明的 <PanelHeader Text=".." Hint="..">）----
+    // ---- 面板标题条（XML 声明的 <PanelHeader Text=".." Hint="..">）----
     if (_wcsicmp(bareTag.c_str(), L"PanelHeader") == 0)
     {
         std::wstring hint = node->get(L"Hint");
@@ -527,13 +527,13 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         else if (node->name == L"hdrInspector")
         {
             int n = 0;
-            uidesign::Walk(m_doc.root(), [&](const Path&, XamlElement&) { ++n; });
+            uidesign::Walk(m_doc.root(), [&](const Path&, XmlElement&) { ++n; });
             CString s; s.Format(L"%d 节点", n);
             hint = std::wstring(s.GetString());
         }
         else if (node->name == L"hdrProps")
         {
-            XamlElement* sel = Resolve(m_doc.root(), m_selected);
+            XmlElement* sel = Resolve(m_doc.root(), m_selected);
             hint = (sel != nullptr) ? std::wstring(L"<") + sel->tag + L">"
                                     : std::wstring(L"未选中对象");
         }
@@ -546,7 +546,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
             hint = std::wstring(s.GetString());
         }
 
-        xamlctl::xamlDrawPanelHeader(cv, rc, std::wstring(uiNodeText(node).GetString()), hint, fontPtOf(node, 10));
+        xmlctl::xmlDrawPanelHeader(cv, rc, std::wstring(uiNodeText(node).GetString()), hint, fontPtOf(node, 10));
 
         RECT savedParentH = m_surfParentRc;
         m_surfParentRc = rc;
@@ -565,9 +565,9 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         if (content.empty()) content = node->text;
         COLORREF bg = ParseColor(CString(node->get(L"Background").c_str()));
         COLORREF fg = ParseColor(CString(node->get(L"Foreground").c_str()));
-        if ((int)bg == -1) bg = xamlctl::shell().header;
-        if ((int)fg == -1) fg = xamlctl::shell().text;
-        xamlctl::xamlDrawPanelCaption(cv, rc, content, bg, fg, 6);
+        if ((int)bg == -1) bg = xmlctl::shell().header;
+        if ((int)fg == -1) fg = xmlctl::shell().text;
+        xmlctl::xmlDrawPanelCaption(cv, rc, content, bg, fg, 6);
         return;
     }
 
@@ -605,7 +605,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         }
         else
         {
-            xamlctl::xamlDrawSplitter(cv, dr, vertical,
+            xmlctl::xmlDrawSplitter(cv, dr, vertical,
                                       si >= 0 && si == m_surfHotSplit,
                                       si >= 0 && si == m_dragSplit);
         }
@@ -616,8 +616,8 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     if (_wcsicmp(bareTag.c_str(), L"TreeView") == 0)
     {
         // 深色面板里不能再用系统白底（那是"未声明外观"的默认），否则整块泛白刺眼
-        // 底色/文字色/选中色/引导线颜色全部取节点属性：和预览器、画布用同一份 XAML
-        xamlctl::TreeStyle st;
+        // 底色/文字色/选中色/引导线颜色全部取节点属性：和预览器、画布用同一份 XML
+        xmlctl::TreeStyle st;
         st.back = RGB(23, 27, 33);
         st.fore = RGB(201, 210, 222);
         st.selBack = RGB(44, 74, 121);
@@ -625,14 +625,14 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         st.guide = RGB(80, 92, 106);
         {
             COLORREF c;
-            if (xamlctl::shellColor(node->get(L"Background"), c)) st.back = c;
-            if (xamlctl::shellColor(node->get(L"Foreground"), c)) st.fore = c;
-            if (xamlctl::shellColor(node->get(L"SelectionColor"), c)) st.selBack = c;
-            if (xamlctl::shellColor(node->get(L"BorderColor"), c)) st.guide = c;
+            if (xmlctl::shellColor(node->get(L"Background"), c)) st.back = c;
+            if (xmlctl::shellColor(node->get(L"Foreground"), c)) st.fore = c;
+            if (xmlctl::shellColor(node->get(L"SelectionColor"), c)) st.selBack = c;
+            if (xmlctl::shellColor(node->get(L"BorderColor"), c)) st.guide = c;
             const std::wstring lh = node->get(L"LineHeight");
             if (!lh.empty()) rowH = _wtoi(lh.c_str());
         }
-        std::vector<xamlctl::TreeRow> rows;
+        std::vector<xmlctl::TreeRow> rows;
         if (node->name == L"widgetBox")
         {
             m_surfWidgetRc = RECT{ rc.left, rc.top, rc.right, rc.bottom };
@@ -643,20 +643,20 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
             RECT treeRc = rc;
             const int viewH = (int)(rc.bottom - rc.top);
             if (m_surfWidgetTotal > viewH) treeRc.right -= 10;
-            xamlctl::xamlDrawTree(cv, treeRc, rows, st, m_surfWidgetScroll, fontPtOf(node, 0));
+            xmlctl::xmlDrawTree(cv, treeRc, rows, st, m_surfWidgetScroll, fontPtOf(node, 0));
             drawPanelScrollBar(cv, rc, m_surfWidgetTotal, viewH, m_surfWidgetScroll);
         }
         else
         {
             m_surfDocRc = RECT{ rc.left, rc.top, rc.right, rc.bottom };
-            XamlElement* sel = Resolve(m_doc.root(), m_selected);
+            XmlElement* sel = Resolve(m_doc.root(), m_selected);
             m_surfDocNodes.clear();
             m_surfDocLevels.clear();
             // 多选时对象检查器要把每个被选中的节点都标蓝：先按路径集合展开成节点指针集合
             m_docSelPtrs.clear();
             for (const auto& p : m_selSet)
             {
-                XamlElement* n = Resolve(m_doc.root(), p);
+                XmlElement* n = Resolve(m_doc.root(), p);
                 if (n != nullptr) m_docSelPtrs.insert(n);
             }
             if (sel != nullptr) m_docSelPtrs.insert(sel);
@@ -682,7 +682,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
             RECT treeRc = rc;
             const int viewH = (int)(rc.bottom - rc.top);
             if (m_surfDocTotal > viewH) treeRc.right -= 10;
-            xamlctl::xamlDrawTree(cv, treeRc, rows, st, m_surfDocScroll, fontPtOf(node, 0));
+            xmlctl::xmlDrawTree(cv, treeRc, rows, st, m_surfDocScroll, fontPtOf(node, 0));
             drawPanelScrollBar(cv, rc, m_surfDocTotal, viewH, m_surfDocScroll);
         }
         return;
@@ -692,7 +692,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     if (_wcsicmp(bareTag.c_str(), L"PropertyGrid") == 0)
     {
         // 属性表配色/列宽/行高同样取节点属性
-        xamlctl::PropStyle st;
+        xmlctl::PropStyle st;
         st.back = RGB(23, 27, 33);
         st.keyBack = RGB(29, 34, 42);
         st.groupBack = RGB(35, 41, 50);
@@ -705,16 +705,16 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         st.headH = 26;
         {
             COLORREF c;
-            if (xamlctl::shellColor(node->get(L"Background"), c)) st.back = c;
-            if (xamlctl::shellColor(node->get(L"Foreground"), c)) st.valFore = c;
-            if (xamlctl::shellColor(node->get(L"KeyColor"), c)) st.keyFore = c;
-            if (xamlctl::shellColor(node->get(L"BorderColor"), c)) st.line = c;
-            if (xamlctl::shellColor(node->get(L"SelectionColor"), c)) st.selBack = c;
-            if (xamlctl::shellColor(node->get(L"GroupColor"), c)) st.groupBack = c;
+            if (xmlctl::shellColor(node->get(L"Background"), c)) st.back = c;
+            if (xmlctl::shellColor(node->get(L"Foreground"), c)) st.valFore = c;
+            if (xmlctl::shellColor(node->get(L"KeyColor"), c)) st.keyFore = c;
+            if (xmlctl::shellColor(node->get(L"BorderColor"), c)) st.line = c;
+            if (xmlctl::shellColor(node->get(L"SelectionColor"), c)) st.selBack = c;
+            if (xmlctl::shellColor(node->get(L"GroupColor"), c)) st.groupBack = c;
             const std::wstring lh = node->get(L"LineHeight");
             if (!lh.empty()) rowH = _wtoi(lh.c_str());
         }
-        std::vector<xamlctl::PropRow> rows;
+        std::vector<xmlctl::PropRow> rows;
         m_surfPropRc = RECT{ rc.left, rc.top, rc.right, rc.bottom };
         buildPropRows(Resolve(m_doc.root(), m_selected), rows);
         if (m_surfSelPropRow >= 0 && m_surfSelPropRow < (int)rows.size())
@@ -728,7 +728,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         if (totalH > viewH) gridRc.right -= 12;
         propDiag(L"[prop] rc=%d,%d,%d,%d total=%d viewH=%d scroll=%d rows=%d", rc.left, rc.top, rc.right, rc.bottom,
                  totalH, viewH, m_surfPropScroll, (int)rows.size());
-        xamlctl::xamlDrawPropertyGrid(cv, gridRc, rows, st, m_surfPropScroll, fontPtOf(node, 0));
+        xmlctl::xmlDrawPropertyGrid(cv, gridRc, rows, st, m_surfPropScroll, fontPtOf(node, 0));
         drawPanelScrollBar(cv, rc, totalH, viewH, m_surfPropScroll);
         return;
     }
@@ -736,13 +736,13 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // ---- Canvas：主画布交给真实窗口；代码区交给 CodeEditor 控件 ----
     if (_wcsicmp(bareTag.c_str(), L"Canvas") == 0)
     {
-        if (node->name == L"xamlCodeHost")
+        if (node->name == L"xmlCodeHost")
         {
             m_surfCodeRc = RECT{ rc.left, rc.top, rc.right, rc.bottom };
             // 代码区现在由 CodeEditor 控件自己画（行号槽 / 语法着色 / 光标 / 提示），
             // 父表面这里只铺一层底色，防止控件还没摆好时露出旧像素。
-            cv.fillRect(rc, xamlctl::shell().code);
-            cv.fillRect(RECT{ rc.left, rc.top, rc.right, rc.top + 1 }, xamlctl::shell().lineSoft);
+            cv.fillRect(rc, xmlctl::shell().code);
+            cv.fillRect(RECT{ rc.left, rc.top, rc.right, rc.top + 1 }, xmlctl::shell().lineSoft);
             syncCodeEditor();
         }
         return;
@@ -751,7 +751,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // ---- 文档标签条 ----
     if (_wcsicmp(bareTag.c_str(), L"TabStrip") == 0)
     {
-        xamlctl::xamlDrawTabBar(cv, rc);
+        xmlctl::xmlDrawTabBar(cv, rc);
         int ti = 0;
         for (auto& c : node->children)
         {
@@ -764,9 +764,9 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
                         c.previewY + c.previewH };
             CString title = uiNodeText(&c);
             if (c.name == L"tabDoc")
-                title = m_docPath.IsEmpty() ? CString(L"未命名.xaml") : uiFileName(m_docPath);
+                title = m_docPath.IsEmpty() ? CString(L"未命名.xml") : uiFileName(m_docPath);
             const bool active = (_wcsicmp(c.get(L"Active").c_str(), L"True") == 0);
-            xamlctl::xamlDrawTab(cv, tr, std::wstring(title.GetString()), active,
+            xmlctl::xmlDrawTab(cv, tr, std::wstring(title.GetString()), active,
                                  ti == m_surfHotTab, 9);
             m_surfTabRects.push_back(tr);
             ++ti;
@@ -775,7 +775,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
     if (_wcsicmp(bareTag.c_str(), L"Tab") == 0)
     {
-        xamlctl::xamlDrawTab(cv, rc, std::wstring(uiNodeText(node).GetString()),
+        xmlctl::xmlDrawTab(cv, rc, std::wstring(uiNodeText(node).GetString()),
                              _wcsicmp(node->get(L"Active").c_str(), L"True") == 0, false, 9);
         return;
     }
@@ -794,7 +794,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
             CString cat = CString(c.get(L"Category").c_str());
             const bool checked = (cat == m_widgetFilter);
             const int ci = (int)m_surfChipRects.size();
-            xamlctl::xamlDrawChip(cv, cr, std::wstring(uiNodeText(&c).GetString()), checked,
+            xmlctl::xmlDrawChip(cv, cr, std::wstring(uiNodeText(&c).GetString()), checked,
                                   ci == m_surfHotChip, 9);
             m_surfChipRects.push_back(cr);
             m_surfChipCats.push_back(cat);
@@ -804,7 +804,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     if (_wcsicmp(bareTag.c_str(), L"Chip") == 0)
     {
         const CString cat = CString(node->get(L"Category").c_str());
-        xamlctl::xamlDrawChip(cv, rc, std::wstring(uiNodeText(node).GetString()),
+        xmlctl::xmlDrawChip(cv, rc, std::wstring(uiNodeText(node).GetString()),
                               cat == m_widgetFilter, false, 9);
         return;
     }
@@ -812,7 +812,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // ---- 画布舞台：深色台面 + 四角定位标，画布（真实窗口）叠在上面 ----
     if (_wcsicmp(bareTag.c_str(), L"Stage") == 0)
     {
-        xamlctl::xamlDrawStage(cv, rc);
+        xmlctl::xmlDrawStage(cv, rc);
         RECT savedParentS = m_surfParentRc;
         m_surfParentRc = rc;
         for (auto& c : node->children)
@@ -824,14 +824,14 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // ---- 状态栏 ----
     if (_wcsicmp(bareTag.c_str(), L"StatusBar") == 0)
     {
-        std::vector<xamlctl::StatusCell2> cells;
+        std::vector<xmlctl::StatusCell2> cells;
         int i = 0;
         for (auto& c : node->children)
         {
-            xamlctl::StatusCell2 cell;
+            xmlctl::StatusCell2 cell;
             if (i == 0)
             {
-                // 首格是品牌格：实心强调色块，固定文案（XAML 里写死）
+                // 首格是品牌格：实心强调色块，固定文案（XML 里写死）
                 cell.text = std::wstring(uiNodeText(&c).GetString());
                 cell.accent = true;
             }
@@ -853,12 +853,12 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
             cells.push_back(cell);
             ++i;
         }
-        xamlctl::xamlDrawStatusBarRich(cv, rc, cells, 9);
+        xmlctl::xmlDrawStatusBarRich(cv, rc, cells, 9);
         return;
     }
 
-    // ---- 其余容器：先吃 XAML 声明的 Background，再递归 ----
-    // 单表面模式下容器没有子窗口，底色必须在这里补上；否则 XAML 里写的面板背景
+    // ---- 其余容器：先吃 XML 声明的 Background，再递归 ----
+    // 单表面模式下容器没有子窗口，底色必须在这里补上；否则 XML 里写的面板背景
     // 永远看不见（以前只有 Window Background 生效这一条"看不见的规则"）。
     const bool plainContainer =
         _wcsicmp(bareTag.c_str(), L"Grid") == 0 || _wcsicmp(bareTag.c_str(), L"DockPanel") == 0 ||
@@ -896,14 +896,14 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
                 v = _wtoi(lv.c_str());
             levels.push_back(v);
         }
-        const std::vector<int> order = xamlmfc::sortDrawOrder(levels);
+        const std::vector<int> order = xmlmfc::sortDrawOrder(levels);
         for (int idx : order)
             paintSurfaceNode(cv, &node->children[idx]);
     }
     m_surfParentRc = savedParent;
 }
 
-void DesignerPaneView::buildWidgetRows(std::vector<xamlctl::TreeRow>& rows)
+void DesignerPaneView::buildWidgetRows(std::vector<xmlctl::TreeRow>& rows)
 {
     rows.clear();
     m_surfWidgetTags.clear();
@@ -912,7 +912,7 @@ void DesignerPaneView::buildWidgetRows(std::vector<xamlctl::TreeRow>& rows)
     // Draw 图元并进控件箱树：放在最前面一组（直线/矩形/圆/圆弧），
     // 选中即进入"待放置"状态，拖画布即按矩形落下，与控件放置同一条路径。
     {
-        xamlctl::TreeRow r;
+        xmlctl::TreeRow r;
         r.text = L"Draw";
         r.level = 0;
         r.hasChildren = true;
@@ -929,7 +929,7 @@ void DesignerPaneView::buildWidgetRows(std::vector<xamlctl::TreeRow>& rows)
             static const wchar_t* const kTags[4]  = { L"Line", L"Rectangle", L"Ellipse", L"Arc" };
             for (int k = 0; k < 4; ++k)
             {
-                xamlctl::TreeRow c;
+                xmlctl::TreeRow c;
                 c.text = kNames[k];
                 c.level = 1;
                 c.selected = (idx == m_surfSelWidgetRow);
@@ -949,7 +949,7 @@ void DesignerPaneView::buildWidgetRows(std::vector<xamlctl::TreeRow>& rows)
         auto tpls = m_catalog.templates(cat);
         if (tpls.empty()) continue;
 
-        xamlctl::TreeRow r;
+        xmlctl::TreeRow r;
         r.text = std::wstring(catName.GetString());
         r.level = 0;
         r.hasChildren = true;
@@ -965,7 +965,7 @@ void DesignerPaneView::buildWidgetRows(std::vector<xamlctl::TreeRow>& rows)
 
         for (auto* t : tpls)
         {
-            xamlctl::TreeRow c;
+            xmlctl::TreeRow c;
             c.text = std::wstring(t->display.GetString());
             c.level = 1;
             c.selected = (idx == m_surfSelWidgetRow);
@@ -978,11 +978,11 @@ void DesignerPaneView::buildWidgetRows(std::vector<xamlctl::TreeRow>& rows)
     }
 }
 
-void DesignerPaneView::buildDocRows(XamlElement* node, int level, std::vector<xamlctl::TreeRow>& rows,
-                             XamlElement* sel)
+void DesignerPaneView::buildDocRows(XmlElement* node, int level, std::vector<xmlctl::TreeRow>& rows,
+                             XmlElement* sel)
 {
     if (node == nullptr) return;
-    xamlctl::TreeRow r;
+    xmlctl::TreeRow r;
     r.text = std::wstring(L"<") + node->tag + std::wstring(L"> ") +
              (node->name.empty() ? std::wstring(L"(unnamed)") : node->name);
     r.level = level;
@@ -998,7 +998,7 @@ void DesignerPaneView::buildDocRows(XamlElement* node, int level, std::vector<xa
         buildDocRows(&c, level + 1, rows, sel);
 }
 
-void DesignerPaneView::buildPropRows(XamlElement* node, std::vector<xamlctl::PropRow>& rows)
+void DesignerPaneView::buildPropRows(XmlElement* node, std::vector<xmlctl::PropRow>& rows)
 {
     rows.clear();
     if (node == nullptr) return;
@@ -1007,13 +1007,13 @@ void DesignerPaneView::buildPropRows(XamlElement* node, std::vector<xamlctl::Pro
     auto Add = [&](const CString& grp, const CString& key, const CString& val) {
         if (!grp.IsEmpty())
         {
-            xamlctl::PropRow g;
+            xmlctl::PropRow g;
             g.key = std::wstring(grp.GetString());
             g.val.clear();
             g.group = true;
             rows.push_back(g);
         }
-        xamlctl::PropRow p;
+        xmlctl::PropRow p;
         p.key = std::wstring(key.GetString());
         p.val = std::wstring(val.GetString());
         p.editable = false;
@@ -1026,7 +1026,7 @@ void DesignerPaneView::buildPropRows(XamlElement* node, std::vector<xamlctl::Pro
     if (themeVal.IsEmpty()) themeVal = L"（默认）";
     Add(L"", L"Theme", themeVal);
 
-    // 布局组用 XAML 里的属性名（Left/Top），不再用内部叫法 X/Y
+    // 布局组用 XML 里的属性名（Left/Top），不再用内部叫法 X/Y
     Add(L"布局", L"Left", Int(node->x));
     Add(L"", L"Top", Int(node->y));
     Add(L"", L"Width", Int(node->w));
@@ -1035,10 +1035,10 @@ void DesignerPaneView::buildPropRows(XamlElement* node, std::vector<xamlctl::Pro
     // 挂 Panel / Window / StackPanel / 绝对定位布局上没有任何意义（属性面板是给源码服务的，
     // 那里也读不到这几项），一律不显示，避免"Grid 跟 Panel 挂钩"的错觉。
     {
-        XamlElement* par = nullptr;
+        XmlElement* par = nullptr;
         {
-            XamlElement* r = m_doc.root();
-            std::function<void(XamlElement*)> findPar = [&](XamlElement* cur) {
+            XmlElement* r = m_doc.root();
+            std::function<void(XmlElement*)> findPar = [&](XmlElement* cur) {
                 if (cur == nullptr || par != nullptr) return;
                 for (auto& c : cur->children)
                 {
@@ -1058,7 +1058,7 @@ void DesignerPaneView::buildPropRows(XamlElement* node, std::vector<xamlctl::Pro
         }
     }
 
-    // 文本类属性的真实名字随节点而变：XAML 里写的是 Header（GroupBox）就显示 Header，
+    // 文本类属性的真实名字随节点而变：XML 里写的是 Header（GroupBox）就显示 Header，
     // 其余一律 Text。新建控件写入的也是 Text。
     CString textKey = L"Text";
     if (!node->has(L"Text") && node->has(L"Header")) textKey = L"Header";
@@ -1088,7 +1088,7 @@ void DesignerPaneView::buildPropRows(XamlElement* node, std::vector<xamlctl::Pro
     }
 
     // 补齐：模板属性清单之外，节点上真实存在的属性也全部列出。
-    // 否则 XAML 里写了的属性（Background/FontSize/Icon 之外的自定义项）在面板上看不到，
+    // 否则 XML 里写了的属性（Background/FontSize/Icon 之外的自定义项）在面板上看不到，
     // 用户会以为"属性显示不全"。已在上面展示过的 key 不重复，Left/Top/Width/Height 归布局组。
     {
         std::set<std::wstring> shown;
@@ -1131,7 +1131,7 @@ void DesignerPaneView::buildPropRows(XamlElement* node, std::vector<xamlctl::Pro
         propDiag(L"[rows] tag=%s count=%d", node->tag.c_str(), (int)rows.size());
         for (size_t i = 0; i < rows.size(); ++i)
         {
-            const xamlctl::PropRow& r = rows[i];
+            const xmlctl::PropRow& r = rows[i];
             if (r.group) propDiag(L"[row%d] <%s>", (int)i, r.key.c_str());
             else         propDiag(L"[row%d] %s = %s", (int)i, r.key.c_str(), r.val.c_str());
         }

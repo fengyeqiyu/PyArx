@@ -1,6 +1,6 @@
 import io, re, os
 
-D = 'G:/PyArx/PyMfcXaml'
+D = 'G:/PyArx/PyMfcXml'
 
 
 def scan(lines_):

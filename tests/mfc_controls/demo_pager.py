@@ -1,10 +1,10 @@
 ﻿# -*- coding: utf-8 -*-
 """第八批演示：StackView 三页切换（页内容是真子控件，整组平移），窗口保持打开。"""
 import os, sys, tempfile
-import PyMfcXaml as p
+import PyMfcXml as p
 
-XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页容器演示" Width="460" Height="330">
+XML = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="页容器演示" Width="460" Height="330">
   <XCanvas>
     <XStackView x:Name="sv" Width="360" Height="240" Canvas.Left="20" Canvas.Top="16" />
     <XButton x:Name="b1" Text="第一页：按钮" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
@@ -13,8 +13,8 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
   </XCanvas>
 </XWindow>'''
 
-path = os.path.join(tempfile.mkdtemp(prefix='pymfc_pgdemo_'), 'pg.xaml')
-open(path, 'w', encoding='utf-8').write(XAML)
+path = os.path.join(tempfile.mkdtemp(prefix='pymfc_pgdemo_'), 'pg.xml')
+open(path, 'w', encoding='utf-8').write(XML)
 names = {}
 w = p.guiload(path, names=names)
 w.show()

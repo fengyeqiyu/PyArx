@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 """demo_level_tab.py — 控件通用属性 Level（绘图层次）/ TabIndex（Tab 序号）。
 
-XAML 里两个属性都写在控件上，和 WPF 的 Panel.ZIndex / TabIndex 用法一致：
+XML 里两个属性都写在控件上，和 WPF 的 Panel.ZIndex / TabIndex 用法一致：
   Level="2"   越大越靠上（后画，压住小的）
   TabIndex="1" 只决定 Tab 键的先后，跟谁压着谁无关
 
@@ -13,10 +13,10 @@ XAML 里两个属性都写在控件上，和 WPF 的 Panel.ZIndex / TabIndex 用
 import os
 import tempfile
 
-import PyMfcXaml as p
+import PyMfcXml as p
 
-XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="层次与 Tab 序号" Width="560" Height="440">
+XML = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="层次与 Tab 序号" Width="560" Height="440">
   <XLayout x:Name="root">
     <XLabel x:Name="a" Width="170" Height="90" Canvas.Left="30" Canvas.Top="30"
                Text="A 块" Background="#C0392B" Foreground="#FFFFFF" Level="0" />
@@ -36,9 +36,9 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
 
 
 def build():
-    path = os.path.join(tempfile.mkdtemp(prefix='pymfc_leveltab_'), 'leveltab.xaml')
+    path = os.path.join(tempfile.mkdtemp(prefix='pymfc_leveltab_'), 'leveltab.xml')
     with open(path, 'w', encoding='utf-8') as f:
-        f.write(XAML)
+        f.write(XML)
     return path
 
 

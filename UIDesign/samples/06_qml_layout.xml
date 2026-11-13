@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  示例 06：QML 布局写法（Grid 的附加属性按 QML 习惯写）
+
+  QML 里写：
+      Layout.row: 0; Layout.column: 1; Layout.columnSpan: 2
+      Layout.preferredWidth: 200; Layout.preferredHeight: 32
+  这里直接照写，底层仍落到 Grid 行/列与 Width/Height，渲染是原生布局。
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
+        Title="06 QML 布局" Width="560" Height="360" Background="#F4F6F8">
+
+  <XGrid x:Name="RootGrid" Margin="16" Padding="8">
+    <XGrid.RowDefinitions>
+      <RowDefinition Height="32"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="32"/>
+    </XGrid.RowDefinitions>
+    <XGrid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+    </XGrid.ColumnDefinitions>
+
+    <XLabel x:Name="Title" text="QML 布局写法" font.pixelSize="14" color="#1F2937"
+           Layout.row="0" Layout.column="0" Layout.columnSpan="2"/>
+
+    <XTextField x:Name="Left" text="左边" Layout.row="1" Layout.column="0"
+               Layout.margins="6"/>
+    <XListBox x:Name="Right" Layout.row="1" Layout.column="1" Layout.margins="6"/>
+
+    <XButton x:Name="Bar" text="底部按钮（跨两列）" Layout.row="2" Layout.column="0"
+             Layout.columnSpan="2" Layout.preferredHeight="30" Layout.margins="6"/>
+
+  </XGrid>
+</XWindow>

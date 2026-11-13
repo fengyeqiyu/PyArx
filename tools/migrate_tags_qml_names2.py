@@ -35,7 +35,7 @@ MAP = [
     ('MonthGrid', 'MonthGrid'),
 ]
 
-EXTS = ('.xaml', '.xml', '.h', '.cpp', '.py', '.md', '.ps1', '.json')
+EXTS = ('.xml', '.xml', '.h', '.cpp', '.py', '.md', '.ps1', '.json')
 SKIP_DIRS = {'.git', 'X64', 'third_party', 'build', 'log', '__pycache__'}
 
 

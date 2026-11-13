@@ -1,5 +1,5 @@
 ﻿# -*- coding: utf-8 -*-
-# pymfc_layout.py — PyMfcXaml 的简单自动布局：VBox / HBox。
+# pymfc_layout.py — PyMfcXml 的简单自动布局：VBox / HBox。
 #
 # 用法：
 #   w = PyMfc.Window("test", 420, 300)

@@ -17,7 +17,7 @@ SAMPLES = os.path.join(ROOT, 'UIDesign', 'samples')
 
 sys.path.insert(0, BIN)
 os.add_dll_directory(BIN)
-import PyMfcXaml as M
+import PyMfcXml as M
 
 TAG_RE = re.compile(r'<([A-Za-z][A-Za-z0-9_]*)')
 CB_RE = re.compile(r'"on_[A-Za-z0-9_]+"')
@@ -30,7 +30,7 @@ def main():
     covered = set()
     total = 0
 
-    files = sorted(glob.glob(os.path.join(SAMPLES, '*.xaml')))
+    files = sorted(glob.glob(os.path.join(SAMPLES, '*.xml')))
     if not files:
         print('FAIL  samples 目录为空')
         return 1

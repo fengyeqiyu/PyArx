@@ -6,7 +6,7 @@
 // 绘制、窗口过程、消息循环都不在这里。
 //
 // 后端（控件能力）：PyMfc 控件契约 + MFC 控件类；
-// 前端（界面声明）：XAML 文档。本层只是把两者接起来，不发明任何样式。
+// 前端（界面声明）：XML 文档。本层只是把两者接起来，不发明任何样式。
 //
 // 编码：本文件 UTF-8 with BOM。
 
@@ -18,22 +18,22 @@
 #include <string>
 #include <vector>
 
-#include "XamlCore.h"
-#include "XamlAppearance.h"
-#include "XamlViewerMfcHost.h"
+#include "XmlCore.h"
+#include "XmlAppearance.h"
+#include "XmlViewerMfcHost.h"
 
 // 一个已实体化的叶子控件
 struct ViewerLeafBinding
 {
     int id = 0;
-    XamlElement* element = nullptr;
+    XmlElement* element = nullptr;
     RECT rect = {0, 0, 0, 0};
-    xamlapp::XamlAppearance ap;
+    xmlapp::XmlAppearance ap;
     bool styled = false;
     COLORREF parentBack = RGB(250, 250, 250);
 };
 
-// 控件的构造样式（创建期属性），从 XAML 属性解析
+// 控件的构造样式（创建期属性），从 XML 属性解析
 struct ViewerLeafOptions
 {
     bool multiline = false;
@@ -45,7 +45,7 @@ struct ViewerLeafOptions
 };
 
 // 建控件：递归整棵树，返回全部绑定
-std::vector<ViewerLeafBinding> viewerControlsBuild(ViewerMfcHost& host, XamlElement* root,
+std::vector<ViewerLeafBinding> viewerControlsBuild(ViewerMfcHost& host, XmlElement* root,
                                                    int originX, int originY);
 
 // 销毁全部（宿主负责）

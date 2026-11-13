@@ -8,9 +8,9 @@ import os
 import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, 'MfcXamlCore', 'controls', 'RegisterPyMfcControls.cpp')
+SRC = os.path.join(ROOT, 'MfcXmlCore', 'controls', 'RegisterPyMfcControls.cpp')
 
-CALL_RE = re.compile(r'(RegisterOne\(reg, \[\]\(\) -> IXamlControl\* \{ return new [A-Za-z]+\(\); \},\s*)'
+CALL_RE = re.compile(r'(RegisterOne\(reg, \[\]\(\) -> IXmlControl\* \{ return new [A-Za-z]+\(\); \},\s*)'
                      r'\{([^}]*)\}\);', re.S)
 MAIN_RE = re.compile(r'L"([A-Za-z]+)"')
 

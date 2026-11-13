@@ -7,18 +7,18 @@
 //   * 普通对话框/面板 → 直接 create(parent, rc, id) 即可
 //
 // 统一运行时重做版：
-//   * 编辑文档模型 = XamlRuntime m_doc（XamlElement 树）
-//   * 自身界面（designer_layout.xaml） = XamlRuntime m_ui 加载 + 布局
-//   * 画布/文档树/属性面板全部基于 XamlElement
+//   * 编辑文档模型 = XmlRuntime m_doc（XmlElement 树）
+//   * 自身界面（designer_layout.xml） = XmlRuntime m_ui 加载 + 布局
+//   * 画布/文档树/属性面板全部基于 XmlElement
 // 选中节点用路径（uidesign::Path）表达，避免值语义下指针失效。
 #include "stdafx.h"
 #include <set>
-#include "XamlCore.h"
+#include "XmlCore.h"
 #include "UiDocUtil.h"
 #include "DesignCanvas.h"
 #include "ControlCatalog.h"
-#include "XamlControls.h"
-#include "../MfcXamlCore/controls/CodeEditor.h"   // 源码区用的独立代码编辑器控件
+#include "XmlControls.h"
+#include "../MfcXmlCore/controls/CodeEditor.h"   // 源码区用的独立代码编辑器控件
 
 namespace uidesign
 {
@@ -92,9 +92,9 @@ namespace uidesign
         DECLARE_MESSAGE_MAP()
 
     private:
-        bool loadLayout();                 // 用 XamlRuntime 加载自身界面 + 递归创建控件
-        void createControlForElement(XamlElement* el);   // 按 tag 创建 MFC 控件
-        void applyLayoutToControls();      // 用 XamlElement preview 重排控件
+        bool loadLayout();                 // 用 XmlRuntime 加载自身界面 + 递归创建控件
+        void createControlForElement(XmlElement* el);   // 按 tag 创建 MFC 控件
+        void applyLayoutToControls();      // 用 XmlElement preview 重排控件
         void buildMenu();
         void onOpen();
         void onSave();
@@ -103,13 +103,13 @@ namespace uidesign
         void addControlAt(const CString& tag, const CString& name, int x, int y, int w, int h);
         // 画布左侧 Draw 工具条点了图元：记成"待放置 tag"，下一次在画布上拖动即按矩形创建
         void pickCreateTag(const std::wstring& tag);
-        Path parentPath(XamlElement* root, const Path& selPath, XamlElement* parent, XamlElement* child);
+        Path parentPath(XmlElement* root, const Path& selPath, XmlElement* parent, XmlElement* child);
         void onApply();
 
         void rebuildTree();
         void populateWidgetBox();
         void selectNode(const Path& p);
-        void fillProperties(XamlElement* node);
+        void fillProperties(XmlElement* node);
         void updateStatus();
 
         UINT nextCtrlId() { return m_nextCtrl++; }
@@ -119,14 +119,14 @@ namespace uidesign
         void pushUndo();                 // 修改文档前快照当前树
         void undo();
         void redo();
-        void restoreSnapshot(XamlElement& snap);
-        std::vector<XamlElement> m_undoStack;
-        std::vector<XamlElement> m_redoStack;
+        void restoreSnapshot(XmlElement& snap);
+        std::vector<XmlElement> m_undoStack;
+        std::vector<XmlElement> m_redoStack;
 
-        // 自身界面（designer_layout.xaml）
-        XamlRuntime m_ui;
+        // 自身界面（designer_layout.xml）
+        XmlRuntime m_ui;
         std::map<int, CWnd*> m_ctrlByIndex;
-        std::map<XamlElement*, CWnd*> m_ctrlByNode;   // 节点 -> 控件（自身界面，树稳定不动）
+        std::map<XmlElement*, CWnd*> m_ctrlByNode;   // 节点 -> 控件（自身界面，树稳定不动）
         std::map<CString, UINT> m_actionCmd;
         std::map<UINT, CString> m_cmdAction;
         UINT m_nextCmd = kId_CMD_MIN;
@@ -135,7 +135,7 @@ namespace uidesign
         CToolTipCtrl m_tooltip;
 
         // 编辑文档
-        XamlRuntime m_doc;
+        XmlRuntime m_doc;
         ControlCatalog m_catalog;              // XML 声明式控件目录（参照 wxFormBuilder）
         // Property Editor 值列就地编辑（CListCtrl 本身不可编辑，叠一个 CEdit）
         BOOL PreTranslateMessage(MSG* pMsg) override;
@@ -150,7 +150,7 @@ namespace uidesign
         void syncCodeEditor();                         // 把编辑器贴到代码区矩形并同步文本
         void applyCodeText(const std::wstring& xml);   // 编辑器内容变化 -> 文档模型
         CString propOptions(const CString& tag, const CString& key);  // catalog 里声明的 enum 候选
-        CString widgetTagFor(const CString& display);   // 控件箱显示名 -> XAML tag（catalog 驱动）
+        CString widgetTagFor(const CString& display);   // 控件箱显示名 -> XML tag（catalog 驱动）
         CString m_pendingCreateTag;
         DesignCanvas* m_canvas = nullptr;
         Path m_selected;                       // 选中节点路径
@@ -161,8 +161,8 @@ namespace uidesign
         bool m_showGrid = true;
         int m_respLeft = -1;                 // 上一次应用的左栏宽度档位（-1 = 未应用）
         int m_respRight = -1;                // 上一次应用的右栏宽度档位
-        void setupXamlCodeView();            // 在 xamlCodeHost 内创建只读多行 CEdit
-        void updateXamlView();               // 用当前文档的 XAML 序列化刷新代码视图
+        void setupXmlCodeView();            // 在 xmlCodeHost 内创建只读多行 CEdit
+        void updateXmlView();               // 用当前文档的 XML 序列化刷新代码视图
         CBrush m_brushPanel;
         CBrush m_brushEdit;
         CBrush m_brushGroup;
@@ -197,7 +197,7 @@ namespace uidesign
         void beginCopyDrag(const Path& p, CPoint pressPt);
         void onAlign(const CString& mode);       // left/right/hcenter/top/bottom/vcenter
         void onDistribute(bool horizontal);      // 横向 / 纵向均匀分布
-        static void applyGeomAttrs(XamlElement* n, int x, int y);   // 只写 Left/Top
+        static void applyGeomAttrs(XmlElement* n, int x, int y);   // 只写 Left/Top
         void selectMulti(const std::vector<Path>& v);
         void clearSelection();
         LRESULT OnCanvasSelectMulti(WPARAM wParam, LPARAM lParam);
@@ -206,7 +206,7 @@ namespace uidesign
         void toggleRuler();
         void zoomBy(float factor);
         void zoomFit();
-        std::wstring m_clipXml;                  // 内部剪贴板（XAML 片段）
+        std::wstring m_clipXml;                  // 内部剪贴板（XML 片段）
         bool m_showRuler = false;
         void onAbout();
 
@@ -214,10 +214,10 @@ namespace uidesign
         // 整个客户区由一块 D2D 表面画出来，不再创建任何子 HWND 控件；
         // 唯一保留的真实窗口是画布（DesignCanvas 本身就是 D2D 直呈）。
         void paintSurface(HDC hdc);                               // 入口：画到 WM_PAINT 的 DC，整窗绘制
-        void paintSurfaceNode(XamlCanvas& cv, XamlElement* node); // 按 tag 分派
-        void buildWidgetRows(std::vector<xamlctl::TreeRow>& rows);  // 控件箱数据
-        void buildDocRows(XamlElement* node, int level, std::vector<xamlctl::TreeRow>& rows, XamlElement* sel); // 对象树数据
-        void buildPropRows(XamlElement* node, std::vector<xamlctl::PropRow>& rows);          // 属性表数据
+        void paintSurfaceNode(XmlCanvas& cv, XmlElement* node); // 按 tag 分派
+        void buildWidgetRows(std::vector<xmlctl::TreeRow>& rows);  // 控件箱数据
+        void buildDocRows(XmlElement* node, int level, std::vector<xmlctl::TreeRow>& rows, XmlElement* sel); // 对象树数据
+        void buildPropRows(XmlElement* node, std::vector<xmlctl::PropRow>& rows);          // 属性表数据
 
         // ---- 单表面模式的命中测试与交互 ----
         struct SurfaceHit
@@ -230,23 +230,23 @@ namespace uidesign
         int m_surfTitleStrip = 28;   // 标题/菜单条下沿（无边框窗体的拖动区）
         std::vector<RECT>        m_surfToolRects;       // 工具栏按钮矩形（与 m_surfToolNames 同序）
         std::vector<std::wstring> m_surfToolNames;      // 按钮 Name（交给命令分发）
-        // 菜单条：XAML 里 MenuBar 的顶层 MenuItem 横排，点击弹出系统下拉菜单
+        // 菜单条：XML 里 MenuBar 的顶层 MenuItem 横排，点击弹出系统下拉菜单
         std::vector<RECT>        m_surfMenuRects;
-        std::vector<XamlElement*> m_surfMenuNodes;
-        void paintMenuBar(XamlCanvas& cv, const RECT& rc, XamlElement* node);
-        void surfaceMenuPopup(XamlElement* top, POINT screenPt);
-        XamlElement* m_surfPendingMenuNode = nullptr;   // 按下瞬间锁定，不随重绘失效
+        std::vector<XmlElement*> m_surfMenuNodes;
+        void paintMenuBar(XmlCanvas& cv, const RECT& rc, XmlElement* node);
+        void surfaceMenuPopup(XmlElement* top, POINT screenPt);
+        XmlElement* m_surfPendingMenuNode = nullptr;   // 按下瞬间锁定，不随重绘失效
         POINT m_surfPendingMenuAnchor = { 0, 0 };
         std::vector<RECT>        m_surfSplitterRects;   // 分割条矩形（与 m_surfSplitters 同序）
         std::vector<int>         m_surfSplitterIdx;     // -> m_splitters 下标
-        std::vector<XamlElement*> m_surfDocNodes;       // 对象树每行 -> 节点
-        std::set<XamlElement*>   m_docSelPtrs;          // 对象树里要标蓝的节点（多选集合展开）
+        std::vector<XmlElement*> m_surfDocNodes;       // 对象树每行 -> 节点
+        std::set<XmlElement*>   m_docSelPtrs;          // 对象树里要标蓝的节点（多选集合展开）
         std::vector<int>         m_surfDocLevels;       // 对象树每行 -> 缩进层级（图标命中用）
         std::vector<CString>     m_surfWidgetTags;      // 控件箱每行 -> tag（分类行为空）
         std::vector<CString>     m_surfWidgetCats;      // 控件箱每行 -> 所属分类（叶子行为空）
         std::vector<int>         m_surfWidgetLevels;    // 控件箱每行 -> 缩进层级
         // 展开/折叠状态：按节点指针（文档重载时清空）与分类名保存
-        std::set<XamlElement*>   m_collapsedNodes;
+        std::set<XmlElement*>   m_collapsedNodes;
         std::set<CString>        m_collapsedCats;
         void pruneCollapsedNodes();                     // 文档重建后剔除已失效的折叠节点
         RECT m_surfWidgetRc = { 0, 0, 0, 0 };
@@ -283,16 +283,16 @@ namespace uidesign
         CString m_docPath;            // 当前文档路径（文档标签与状态栏显示）
         bool m_modified = false;      // 文档是否有未保存的修改（关闭时据此提示）
         CString m_widgetFilter;       // 控件箱分类过滤（空 = 全部）
-        bool m_codeCollapsed = false; // XAML 代码坞是否收起
+        bool m_codeCollapsed = false; // XML 代码坞是否收起
         void toggleCodeDock();
         void previewCurrent();
         void checkCurrent();
-        void copyXamlToClipboard();
+        void copyXmlToClipboard();
         std::wstring saveToTemp();    // 把当前文档存到临时文件（预览/校验用）
         std::wstring exeDir() const;
 
         // ---- 属性表就地编辑 / 右键增删复移 ----
-        std::vector<xamlctl::PropRow> m_surfPropRows;  // 上一帧属性表内容（双击时用来取 key/value）
+        std::vector<xmlctl::PropRow> m_surfPropRows;  // 上一帧属性表内容（双击时用来取 key/value）
         static constexpr int kRenameDocRow = -3;   // 对象检查器双击改名用的特殊编辑行
         int m_surfPropEditRow = -1;                    // 正在编辑的行（-1 = 未编辑，-2 新增属性，-3 对象名）
         CString m_surfPropEditKey;                     // 正在编辑的属性名
@@ -306,7 +306,7 @@ namespace uidesign
         void cancelPropEditSurface();
         void surfacePropMenu(CPoint pt);
         void surfaceDocMenu(CPoint pt);          // 对象树右键：复制/粘贴/上移/下移/删除节点
-        XamlElement m_clipNode;                  // 剪贴板里的节点深拷贝
+        XmlElement m_clipNode;                  // 剪贴板里的节点深拷贝
         bool m_hasClipNode = false;
         afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
         afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);   // 吞掉系统右键菜单，只留自绘那套
@@ -315,8 +315,8 @@ namespace uidesign
         struct SplitterInfo
         {
             HWND hwnd = nullptr;          // 分割条窗口（用于定位）
-            XamlElement* el = nullptr;    // 分割条节点（单表面模式按 preview 矩形命中）
-            XamlElement* grid = nullptr;  // 所属 Grid（改其 gridCols/gridRows）
+            XmlElement* el = nullptr;    // 分割条节点（单表面模式按 preview 矩形命中）
+            XmlElement* grid = nullptr;  // 所属 Grid（改其 gridCols/gridRows）
             int index = 0;                // 被调整的列/行索引
             int sign = 1;                 // 方向因子（拖哪一侧变宽）
             bool vertical = false;        // false=调列宽，true=调行高

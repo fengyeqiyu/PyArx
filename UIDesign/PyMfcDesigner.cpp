@@ -1,4 +1,4 @@
-﻿// PyMfcDesigner —— 基于 PyMfcXaml 统一运行时的可视化界面设计器
+﻿// PyMfcDesigner —— 基于 PyMfcXml 统一运行时的可视化界面设计器
 // 入口：CDesignApp（CWinAppEx，为 CFrameWndEx/CDockablePane 提供 MFC Feature Pack 管理器）
 #include "stdafx.h"
 #include "DesignerFrame.h"

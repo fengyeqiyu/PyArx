@@ -14,7 +14,7 @@ public class WinCap {
 '@
 
 $exe = 'G:\PyArx\X64\Release\UIDesign.exe'
-$doc = 'G:\PyArx\UIDesign\samples\01_basic_controls.xaml'
+$doc = 'G:\PyArx\UIDesign\samples\01_basic_controls.xml'
 $out = 'G:\PyArx\docs\_uid_tags.png'
 
 $p = Start-Process -FilePath $exe -ArgumentList $doc -PassThru

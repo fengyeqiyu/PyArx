@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "ControlCatalog.h"
-#include "XamlCore.h"
+#include "XmlCore.h"
 #include <msxml6.h>
 #pragma comment(lib, "msxml6.lib")
 
@@ -66,7 +66,7 @@ namespace uidesign
             if (t.tag.IsEmpty()) continue;
 
             // 控件缺省尺寸由 catalog 管控：注入布局引擎，C++ 不再硬编码 120/28
-            xamlSetDefaultSize(t.tag, t.dw, t.dh);
+            xmlSetDefaultSize(t.tag, t.dw, t.dh);
 
             // 子 <property name type>
             CComPtr<IXMLDOMNodeList> props;

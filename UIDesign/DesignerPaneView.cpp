@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "DesignerPaneView.h"
 #include "ControlCatalog.h"
-#include "../MfcXamlCore/controls/XamlMfcTags.h"   // 统一标签命名（去 X 前缀比较）
+#include "../MfcXmlCore/controls/XmlMfcTags.h"   // 统一标签命名（去 X 前缀比较）
 #include <shellapi.h>
 #include <algorithm>
 #include <unordered_map>
@@ -113,7 +113,7 @@ BOOL DesignerPaneView::OnEraseBkgnd(CDC* pDC)
     return TRUE;
 }
 
-// 用 XamlRuntime 加载设计器自身界面 designer_layout.xaml，并递归创建控件
+// 用 XmlRuntime 加载设计器自身界面 designer_layout.xml，并递归创建控件
 bool DesignerPaneView::loadLayout()
 {
     wchar_t exePath[MAX_PATH] = {0};
@@ -124,9 +124,9 @@ bool DesignerPaneView::loadLayout()
     exeDir += L"\\";
 
     std::vector<std::wstring> candidates = {
-        std::wstring(exeDir + L"designer_layout.xaml"),
+        std::wstring(exeDir + L"designer_layout.xml"),
         // 从输出目录（X64\Release）回到源码目录，换盘/换机仍可用，不再写死 G:\PyArx
-        std::wstring(exeDir + L"..\\..\\UIDesign\\designer_layout.xaml"),
+        std::wstring(exeDir + L"..\\..\\UIDesign\\designer_layout.xml"),
     };
     std::wstring used;
     std::wstring err;
@@ -156,7 +156,7 @@ bool DesignerPaneView::loadLayout()
     m_ui.layout(0, 0, rc.Width(), rc.Height());
 
     // 递归创建控件（Window/Grid 等纯容器不建 HWND）
-    XamlElement* root = m_ui.root();
+    XmlElement* root = m_ui.root();
     if (root == nullptr) return true;
     for (auto& child : root->children)
         createControlForElement(&child);
@@ -176,26 +176,26 @@ bool DesignerPaneView::loadLayout()
         }
     }
     populateWidgetBox();
-    setupXamlCodeView();   // 底部 XAML 代码视图
+    setupXmlCodeView();   // 底部 XML 代码视图
     setupSplitters();      // 面板分割条（画布左右边界可拖调整大小）
     return true;
 }
 
 // 按标签创建单个控件（自身界面）
-void DesignerPaneView::createControlForElement(XamlElement* el)
+void DesignerPaneView::createControlForElement(XmlElement* el)
 {
     if (el == nullptr) return;
 
     // 只有主画布需要真实窗口（DesignCanvas 本身就是 D2D 直呈窗口），
     // 其余全部由 DesignerPaneView 用一块 D2D 表面画出来，不再创建任何子 HWND。
     // 必须递归下去找 canvasHost —— 它藏在 Grid 里，直接 return 会连画布一起丢掉。
-    if (_wcsicmp(xamlmfc::BareTag(el->tag).c_str(), L"Canvas") != 0)
+    if (_wcsicmp(xmlmfc::BareTag(el->tag).c_str(), L"Canvas") != 0)
     {
         for (auto& child : el->children)
             createControlForElement(&child);
         return;
     }
-    if (el->name == L"xamlCodeHost")
+    if (el->name == L"xmlCodeHost")
         return;   // 代码区由表面自绘
 
     CString tag(el->tag.c_str());
@@ -208,10 +208,10 @@ void DesignerPaneView::createControlForElement(XamlElement* el)
              el->previewX + el->previewW, el->previewY + el->previewH);
 
     CWnd* w = nullptr;
-    if (_wcsicmp(xamlmfc::BareTag(el->tag).c_str(), L"Canvas") == 0)
+    if (_wcsicmp(xmlmfc::BareTag(el->tag).c_str(), L"Canvas") == 0)
     {
         // 主画布 canvasHost 用 DesignCanvas（自身即 D2D 直呈窗口）；
-        // xamlCodeHost 已在函数开头 return，走不到这里。
+        // xmlCodeHost 已在函数开头 return，走不到这里。
         {
             auto* c = new DesignCanvas();
             c->create(this, nextCtrlId());
@@ -225,7 +225,7 @@ void DesignerPaneView::createControlForElement(XamlElement* el)
                 if (m_pendingCreateTag.IsEmpty()) return;
                 CRect nr = r; nr.NormalizeRect();
                 int w = nr.Width(), h = nr.Height();
-                // 位置直接取 XAML 的 Left/Top（画布客户坐标 = 文档坐标，不做偏移换算）
+                // 位置直接取 XML 的 Left/Top（画布客户坐标 = 文档坐标，不做偏移换算）
                 int x = nr.left, y = nr.top;
                 if (x < 0) x = 0;
                 if (y < 0) y = 0;
@@ -242,11 +242,11 @@ void DesignerPaneView::createControlForElement(XamlElement* el)
             // 画布拖拽移动/缩放：开始前快照（可撤销），结束后重布局 + 刷新属性面板/状态栏
             c->onEditBegin = [this]() { pushUndo(); };
             // 画布上右击控件：与对象检查器同一套剪贴板动作，只是操作位置在画布
-            c->onContextMenu = [this](XamlElement* n, CPoint scr) {
-                XamlElement* root = m_doc.root();
+            c->onContextMenu = [this](XmlElement* n, CPoint scr) {
+                XmlElement* root = m_doc.root();
                 if (root == nullptr || n == nullptr) return;
                 Path p;
-                uidesign::Walk(root, [&](const Path& pp, XamlElement& el) {
+                uidesign::Walk(root, [&](const Path& pp, XmlElement& el) {
                     if (p.empty() && &el == n) p = pp;
                 });
                 if (p.empty()) return;
@@ -261,9 +261,9 @@ void DesignerPaneView::createControlForElement(XamlElement* el)
                 beginCopyDrag(p, pressPt);
             };
             c->onEditEnd = [this]() {
-                XamlElement* root = m_doc.root();
+                XmlElement* root = m_doc.root();
                 if (root != nullptr) m_doc.layout(0, 0, root->w, root->h);
-                XamlElement* node = Resolve(m_doc.root(), m_selected);
+                XmlElement* node = Resolve(m_doc.root(), m_selected);
                 fillProperties(node);
                 updateStatus();
                 if (m_canvas != nullptr) m_canvas->Invalidate();
@@ -299,11 +299,11 @@ void DesignerPaneView::applyLayoutToControls()
     if (m_ui.root() == nullptr) return;
 
     // 单表面模式：绝大多数节点已不是窗口，但 canvasHost 仍是一块真实子窗口，
-    // 它的位置必须跟着 XAML 算出来的 preview 走，否则会盖住新画出来的邻居。
-    XamlElement* root = m_ui.root();
+    // 它的位置必须跟着 XML 算出来的 preview 走，否则会盖住新画出来的邻居。
+    XmlElement* root = m_ui.root();
     for (auto& kv : m_ctrlByNode)
     {
-        XamlElement* el = kv.first;
+        XmlElement* el = kv.first;
         CRect rc(el->previewX, el->previewY,
                  el->previewX + el->previewW, el->previewY + el->previewH);
         kv.second->MoveWindow(rc);
@@ -318,14 +318,14 @@ void DesignerPaneView::applyLayoutToControls()
 void DesignerPaneView::setupSplitters()
 {
     m_splitters.clear();
-    XamlElement* root = m_ui.root();
+    XmlElement* root = m_ui.root();
     if (root == nullptr) return;
 
-    std::function<void(XamlElement&, XamlElement*)> walk;
-    walk = [&](XamlElement& el, XamlElement* parent)
+    std::function<void(XmlElement&, XmlElement*)> walk;
+    walk = [&](XmlElement& el, XmlElement* parent)
     {
-        if ((_wcsicmp(xamlmfc::BareTag(el.tag).c_str(), L"SplitView") == 0 ||
-             _wcsicmp(xamlmfc::BareTag(el.tag).c_str(), L"Separator") == 0) && parent != nullptr)
+        if ((_wcsicmp(xmlmfc::BareTag(el.tag).c_str(), L"SplitView") == 0 ||
+             _wcsicmp(xmlmfc::BareTag(el.tag).c_str(), L"Separator") == 0) && parent != nullptr)
         {
             // 仅处理竖分割条：属于含 5 列的主体 Grid，col1(左栏-画布)/col3(画布-右栏)
             if (parent->gridCols.size() >= 5)
@@ -509,10 +509,10 @@ void DesignerPaneView::resizeTo(const CRect& rc)
 // 宽度不够时画布会被挤成一条，所以按档位收窄（只在档位变化时改文档模型）。
 void DesignerPaneView::applyResponsiveLayout(int width)
 {
-    XamlElement* root = m_ui.root();
+    XmlElement* root = m_ui.root();
     if (root == nullptr) return;
 
-    XamlElement* grid = nullptr;
+    XmlElement* grid = nullptr;
     for (auto& child : root->children)
     {
         if (_wcsicmp(child.name.c_str(), L"rootGrid") == 0)
@@ -563,12 +563,12 @@ UINT DesignerPaneView::ensureAction(const CString& name)
 namespace
 {
     // MenuBar 位于主 Grid 的 Row 0 内，需在整棵树中递归查找
-    XamlElement* findMenuBar(XamlElement& el)
+    XmlElement* findMenuBar(XmlElement& el)
     {
-        if (_wcsicmp(xamlmfc::BareTag(el.tag).c_str(), L"MenuBar") == 0) return &el;
+        if (_wcsicmp(xmlmfc::BareTag(el.tag).c_str(), L"MenuBar") == 0) return &el;
         for (auto& c : el.children)
         {
-            if (XamlElement* r = findMenuBar(c)) return r;
+            if (XmlElement* r = findMenuBar(c)) return r;
         }
         return nullptr;
     }
@@ -576,9 +576,9 @@ namespace
 
 void DesignerPaneView::buildMenu()
 {
-    XamlElement* root = m_ui.root();
+    XmlElement* root = m_ui.root();
     if (root == nullptr) return;
-    XamlElement* bar = findMenuBar(*root);
+    XmlElement* bar = findMenuBar(*root);
     if (bar == nullptr) return;
     if (m_menu.m_hMenu != nullptr) m_menu.DestroyMenu();
     m_menu.CreateMenu();
@@ -676,7 +676,7 @@ void DesignerPaneView::dispatchAction(Action a, const CString& name)
     case Action::Preview: previewCurrent(); break;
     case Action::Check: checkCurrent(); break;
     case Action::CodeToggle: toggleCodeDock(); break;
-    case Action::CodeCopy: copyXamlToClipboard(); break;
+    case Action::CodeCopy: copyXmlToClipboard(); break;
     case Action::Undo: undo(); break;
     case Action::Redo: redo(); break;
     case Action::Cut: onCut(); break;
@@ -727,8 +727,8 @@ void DesignerPaneView::clipboardAction(UINT vk)
 
 void DesignerPaneView::onOpen()
 {
-    CFileDialog dlg(TRUE, _T("xaml"), nullptr, OFN_FILEMUSTEXIST | OFN_HIDEREADONLY,
-        _T("XAML/XML (*.xaml;*.xml)|*.xaml;*.xml|所有文件 (*.*)|*.*||"), this);
+    CFileDialog dlg(TRUE, _T("xml"), nullptr, OFN_FILEMUSTEXIST | OFN_HIDEREADONLY,
+        _T("XML/XML (*.xml;*.xml)|*.xml;*.xml|所有文件 (*.*)|*.*||"), this);
     if (dlg.DoModal() != IDOK)
         return;
     openFile(dlg.GetPathName());
@@ -743,7 +743,7 @@ bool DesignerPaneView::openFile(const CString& path)
         return false;
     }
     // 布局编辑文档到画布
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root != nullptr)
         m_doc.layout(0, 0, root->w, root->h);
     m_selected.clear();
@@ -769,9 +769,9 @@ void DesignerPaneView::onSave()
     CString path = m_docPath;
     if (isNewDoc)
     {
-        CFileDialog dlg(FALSE, _T("xaml"), _T("ui.xaml"),
+        CFileDialog dlg(FALSE, _T("xml"), _T("ui.xml"),
             OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY,
-            _T("XAML/XML (*.xaml;*.xml)|*.xaml;*.xml|所有文件 (*.*)|*.*||"), this);
+            _T("XML/XML (*.xml;*.xml)|*.xml;*.xml|所有文件 (*.*)|*.*||"), this);
         if (dlg.DoModal() != IDOK)
             return;
         path = dlg.GetPathName();
@@ -824,15 +824,15 @@ void DesignerPaneView::pickCreateTag(const std::wstring& tag)
 
 void DesignerPaneView::addControlAt(const CString& tag, const CString& name, int x, int y, int w, int h)
 {    pushUndo();
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root == nullptr)
     {
         // 新建空文档：根 Window
-        std::wstring xaml =
-            L"<Window xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" "
+        std::wstring xml =
+            L"<Window xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xml\" "
             L"Name=\"MainWindow\" Width=\"640\" Height=\"420\"></Window>";
         std::wstring err;
-        if (!m_doc.loadString(xaml.c_str(), err))
+        if (!m_doc.loadString(xml.c_str(), err))
         {
             AfxMessageBox(CString(err.c_str()), MB_ICONERROR);
             return;
@@ -841,12 +841,12 @@ void DesignerPaneView::addControlAt(const CString& tag, const CString& name, int
     }
 
     // 选中容器
-    XamlElement* parent = Resolve(root, m_selected);
+    XmlElement* parent = Resolve(root, m_selected);
     if (parent == nullptr) parent = root;
     if (!IsContainer(parent->tag))
     {
         int idx;
-        XamlElement* p = ParentOf(root, m_selected, idx);
+        XmlElement* p = ParentOf(root, m_selected, idx);
         if (p != nullptr) parent = p;
     }
 
@@ -860,16 +860,16 @@ void DesignerPaneView::addControlAt(const CString& tag, const CString& name, int
         if (y < 0) y = 0;
     }
 
-    // 图元没有文本：别把 tag 名塞进 Content，否则 XAML 里多一条无意义的 Content="Rectangle"
+    // 图元没有文本：别把 tag 名塞进 Content，否则 XML 里多一条无意义的 Content="Rectangle"
     const std::wstring addText = uidesign::IsShapeTag(std::wstring(tag.GetString()))
                                  ? std::wstring() : std::wstring(tag.GetString());
-    XamlElement* node = AddChild(parent, tag.GetString(), name.GetString(),
+    XmlElement* node = AddChild(parent, tag.GetString(), name.GetString(),
                                  addText, x, y, w, h);
-    // 几何必须写进 XAML 的 Left/Top/Width/Height，否则只活在内存里，存盘重开就没了。
+    // 几何必须写进 XML 的 Left/Top/Width/Height，否则只活在内存里，存盘重开就没了。
     // Grid 子节点按 Row/Column 占格，不写 Left/Top（写了会与网格冲突）。
     if (node != nullptr)
     {
-        const bool gridParent = _wcsicmp(xamlmfc::BareTag(parent->tag).c_str(), L"Grid") == 0;
+        const bool gridParent = _wcsicmp(xmlmfc::BareTag(parent->tag).c_str(), L"Grid") == 0;
         if (gridParent)
         {
             node->hasX = false;
@@ -894,11 +894,11 @@ void DesignerPaneView::addControlAt(const CString& tag, const CString& name, int
 }
 
 // 计算 child 在 parent 下的路径（parent 的路径 + child 的索引）
-Path DesignerPaneView::parentPath(XamlElement* root, const Path& selPath, XamlElement* parent, XamlElement* child)
+Path DesignerPaneView::parentPath(XmlElement* root, const Path& selPath, XmlElement* parent, XmlElement* child)
 {
     Path p;
     // 找 parent 的路径
-    uidesign::Walk(root, [&](const Path& pp, XamlElement& el) {
+    uidesign::Walk(root, [&](const Path& pp, XmlElement& el) {
         if (p.empty() && &el == parent) p = pp;
     });
     for (int i = 0; i < (int)parent->children.size(); ++i)
@@ -987,18 +987,18 @@ void DesignerPaneView::selectMulti(const std::vector<Path>& v)
 // 只选一层——设计器里"全选"指当前这一排控件，把整棵树的子孙全选上既看不见也没法用。
 void DesignerPaneView::selectAllChildren()
 {
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root == nullptr) return;
 
     Path container;
-    XamlElement* node = Resolve(root, m_selected);
+    XmlElement* node = Resolve(root, m_selected);
     if (node != nullptr && node != root && uidesign::IsContainer(node->tag))
         container = m_selected;
     else if (node != nullptr && node != root)
     {
         // 叶子：取它所在的容器（与粘贴的落点口径一致）
         int idx = 0;
-        XamlElement* par = uidesign::ParentOf(root, m_selected, idx);
+        XmlElement* par = uidesign::ParentOf(root, m_selected, idx);
         if (par != nullptr)
         {
             container = m_selected;
@@ -1006,7 +1006,7 @@ void DesignerPaneView::selectAllChildren()
         }
     }
 
-    XamlElement* box = Resolve(root, container);
+    XmlElement* box = Resolve(root, container);
     if (box == nullptr) return;
 
     std::vector<Path> sel;
@@ -1054,7 +1054,7 @@ LRESULT DesignerPaneView::OnCanvasSelectMulti(WPARAM, LPARAM lParam)
 void DesignerPaneView::revealCodeForSelected()
 {
     if (m_codeEditor == nullptr || m_codeEditor->hwnd() == nullptr) return;
-    XamlElement* node = Resolve(m_doc.root(), m_selected);
+    XmlElement* node = Resolve(m_doc.root(), m_selected);
     if (node == nullptr) return;
 
     std::wstring text = m_codeEditor->text();
@@ -1091,7 +1091,7 @@ void DesignerPaneView::revealCodeForSelected()
 
 
 
-void DesignerPaneView::fillProperties(XamlElement* node)
+void DesignerPaneView::fillProperties(XmlElement* node)
 {
     // 属性表由表面每帧按 buildPropRows 自绘，这里只需要触发重画
     (void)node;
@@ -1267,7 +1267,7 @@ bool DesignerPaneView::handleDeleteKey(HWND hwnd)
 
 void DesignerPaneView::applyPropVal(const CString& key, const CString& val)
 {
-    XamlElement* node = Resolve(m_doc.root(), m_selected);
+    XmlElement* node = Resolve(m_doc.root(), m_selected);
     if (node == nullptr) return;
 
     pushUndo();
@@ -1276,7 +1276,7 @@ void DesignerPaneView::applyPropVal(const CString& key, const CString& val)
     else if (key == L"Y" || key == L"Top") node->y = (int)iv;
     else if (key == L"Width") node->w = (iv > 0) ? (int)iv : 1;
     else if (key == L"Height") node->h = (iv > 0) ? (int)iv : 1;
-    // Row/Column 必须写回 XAML 的 Grid.Row / Grid.Column，否则只改内存，存盘后重开就丢
+    // Row/Column 必须写回 XML 的 Grid.Row / Grid.Column，否则只改内存，存盘后重开就丢
     else if (key == L"Row") { node->row = (std::max)(0, (int)iv); node->set(L"Grid.Row", std::to_wstring(node->row)); }
     else if (key == L"Column") { node->col = (std::max)(0, (int)iv); node->set(L"Grid.Column", std::to_wstring(node->col)); }
     else if (key == L"RowSpan") { node->rowSpan = (iv > 0) ? (int)iv : 1; node->set(L"Grid.RowSpan", std::to_wstring(node->rowSpan)); }
@@ -1296,7 +1296,7 @@ void DesignerPaneView::applyPropVal(const CString& key, const CString& val)
     if (node->hasW) node->set(L"Width", std::to_wstring(node->w));
     if (node->hasH) node->set(L"Height", std::to_wstring(node->h));
 
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     // 属性改动后重算绑定：改 src.Text 会让所有 {Binding src.Text} 的目标同步刷新
     m_doc.applyBindings();
     if (root != nullptr) m_doc.layout(0, 0, root->w, root->h);
@@ -1305,7 +1305,7 @@ void DesignerPaneView::applyPropVal(const CString& key, const CString& val)
     selectNode(m_selected);
     fillProperties(Resolve(m_doc.root(), m_selected));
     updateStatus();
-    updateXamlView();
+    updateXmlView();
     Invalidate(FALSE);   // 没有子窗口会自己重绘，整窗表面要主动重画
 }
 
@@ -1333,7 +1333,7 @@ void DesignerPaneView::onApply()
 {
     // 属性编辑已由表面内联编辑提交（commitPropEditSurface），这里只重算布局并重画
     pushUndo();
-    XamlElement* root = m_doc.root();
+    XmlElement* root = m_doc.root();
     if (root != nullptr)
         m_doc.layout(0, 0, root->w, root->h);
     m_doc.applyBindings();
@@ -1369,7 +1369,7 @@ bool DesignerPaneView::confirmClose()
     CString file = m_docPath;
     const int slash = file.ReverseFind(L'\\');
     if (slash >= 0) file = file.Mid(slash + 1);
-    if (file.IsEmpty()) file = L"未命名.xaml";
+    if (file.IsEmpty()) file = L"未命名.xml";
     CString msg;
     msg.Format(L"%s 有未保存的修改，是否保存？", (LPCWSTR)file);
     const int r = AfxMessageBox(msg, MB_YESNOCANCEL | MB_ICONQUESTION);
@@ -1381,7 +1381,7 @@ bool DesignerPaneView::confirmClose()
 
 void DesignerPaneView::onAbout()
 {
-    AfxMessageBox(_T("PyMfc UI Designer\n基于 PyMfcXaml 的可视化界面设计器\n输出 XAML 供 PyMfc 运行时加载"),
+    AfxMessageBox(_T("PyMfc UI Designer\n基于 PyMfcXml 的可视化界面设计器\n输出 XML 供 PyMfc 运行时加载"),
                   MB_ICONINFORMATION | MB_OK);
 }
 
@@ -1405,7 +1405,7 @@ std::wstring DesignerPaneView::saveToTemp()
     }
     TCHAR dir[MAX_PATH] = { 0 };
     ::GetTempPath(MAX_PATH, dir);
-    const std::wstring file = std::wstring(dir) + L"pyarx_designer_preview.xaml";
+    const std::wstring file = std::wstring(dir) + L"pyarx_designer_preview.xml";
     std::wstring err;
     if (!m_doc.save(file.c_str(), err))
     {
@@ -1420,15 +1420,15 @@ void DesignerPaneView::previewCurrent()
 {
     const std::wstring file = saveToTemp();
     if (file.empty()) return;
-    // 预览器工程改名叫 Viewer（窗口类仍是 XamlViewer），两个名字都试；
-    // 只认 XamlViewer.exe 会让"预览"按钮在真机上一个都不存在时彻底失效。
-    std::wstring exe = exeDir() + L"\\XamlViewer.exe";
+    // 预览器工程改名叫 Viewer（窗口类仍是 XmlViewer），两个名字都试；
+    // 只认 XmlViewer.exe 会让"预览"按钮在真机上一个都不存在时彻底失效。
+    std::wstring exe = exeDir() + L"\\XmlViewer.exe";
     if (::GetFileAttributesW(exe.c_str()) == INVALID_FILE_ATTRIBUTES)
     {
         const std::wstring alt = exeDir() + L"\\Viewer.exe";
         if (::GetFileAttributesW(alt.c_str()) == INVALID_FILE_ATTRIBUTES)
         {
-            m_surfStatus[0] = L"预览需要 Viewer.exe / XamlViewer.exe（尚未构建）";
+            m_surfStatus[0] = L"预览需要 Viewer.exe / XmlViewer.exe（尚未构建）";
             Invalidate(FALSE);
             return;
         }
@@ -1444,7 +1444,7 @@ void DesignerPaneView::previewCurrent()
     {
         ::CloseHandle(pi.hThread);
         ::CloseHandle(pi.hProcess);
-        m_surfStatus[0] = L"已在 XamlViewer 中打开当前文档";
+        m_surfStatus[0] = L"已在 XmlViewer 中打开当前文档";
     }
     else
         m_surfStatus[0] = L"预览进程启动失败";
@@ -1455,13 +1455,13 @@ void DesignerPaneView::checkCurrent()
 {
     const std::wstring file = saveToTemp();
     if (file.empty()) return;
-    std::wstring exe = exeDir() + L"\\XamlViewer.exe";
+    std::wstring exe = exeDir() + L"\\XmlViewer.exe";
     if (::GetFileAttributesW(exe.c_str()) == INVALID_FILE_ATTRIBUTES)
     {
         const std::wstring alt = exeDir() + L"\\Viewer.exe";
         if (::GetFileAttributesW(alt.c_str()) == INVALID_FILE_ATTRIBUTES)
         {
-            m_surfStatus[0] = L"校验需要 Viewer.exe / XamlViewer.exe（尚未构建）";
+            m_surfStatus[0] = L"校验需要 Viewer.exe / XmlViewer.exe（尚未构建）";
             Invalidate(FALSE);
             return;
         }
@@ -1489,17 +1489,17 @@ void DesignerPaneView::checkCurrent()
     Invalidate(FALSE);
 }
 
-// XAML 代码坞折叠：改自身界面根 Grid 的第 4 行轨道高度（行高来自 XAML，这里只翻档位）
+// XML 代码坞折叠：改自身界面根 Grid 的第 4 行轨道高度（行高来自 XML，这里只翻档位）
 void DesignerPaneView::toggleCodeDock()
 {
-    XamlElement* root = m_ui.root();
+    XmlElement* root = m_ui.root();
     if (root == nullptr || root->children.empty()) return;
-    XamlElement* grid = &root->children[0];
-    if (_wcsicmp(xamlmfc::BareTag(grid->tag).c_str(), L"Grid") != 0 || grid->gridRows.size() < 4) return;
+    XmlElement* grid = &root->children[0];
+    if (_wcsicmp(xmlmfc::BareTag(grid->tag).c_str(), L"Grid") != 0 || grid->gridRows.size() < 4) return;
 
     m_codeCollapsed = !m_codeCollapsed;
     grid->gridRows[3].second = m_codeCollapsed ? L"34" : L"236";
-    uidesign::Walk(root, [&](const Path&, XamlElement& el) {
+    uidesign::Walk(root, [&](const Path&, XmlElement& el) {
         if (el.name == L"btnCodeToggle")
             el.set(L"Text", m_codeCollapsed ? L"展开" : L"收起");
     });
@@ -1507,12 +1507,12 @@ void DesignerPaneView::toggleCodeDock()
     Invalidate(FALSE);
 }
 
-void DesignerPaneView::copyXamlToClipboard()
+void DesignerPaneView::copyXmlToClipboard()
 {
     const std::wstring xml = m_doc.toXml();
     if (xml.empty())
     {
-        m_surfStatus[0] = L"当前没有可复制的 XAML";
+        m_surfStatus[0] = L"当前没有可复制的 XML";
         Invalidate(FALSE);
         return;
     }
@@ -1532,7 +1532,7 @@ void DesignerPaneView::copyXamlToClipboard()
         }
     }
     ::CloseClipboard();
-    m_surfStatus[0] = L"XAML 源码已复制到剪贴板";
+    m_surfStatus[0] = L"XML 源码已复制到剪贴板";
     Invalidate(FALSE);
 }
 
@@ -1541,7 +1541,7 @@ void DesignerPaneView::updateStatus()
     int count = CountNodes(m_doc.root());
     CString sel = L"就绪";
     int sx = 0, sy = 0, sw = 0, sh = 0;
-    XamlElement* node = Resolve(m_doc.root(), m_selected);
+    XmlElement* node = Resolve(m_doc.root(), m_selected);
     if (node != nullptr)
     {
         CString nameDisp = node->name.empty() ? CString(L"(unnamed)") : CString(node->name.c_str());
@@ -1576,18 +1576,18 @@ void DesignerPaneView::updateStatus()
         else
             m_surfStatus[3] = L"100%";
     }
-    updateXamlView();
+    updateXmlView();
 }
 
-// 底部 XAML 源码区：控件库的 CodeEditor（独立控件，自带窗口 + D2D 自绘 + 智能提示）。
+// 底部 XML 源码区：控件库的 CodeEditor（独立控件，自带窗口 + D2D 自绘 + 智能提示）。
 // 位置要等第一帧算出 m_surfCodeRc 之后才准，所以这里只做"懒创建"，具体摆放交给 syncCodeEditor()。
-void DesignerPaneView::setupXamlCodeView()
+void DesignerPaneView::setupXmlCodeView()
 {
     if (m_codeEditor)
         return;
     m_codeEditor = std::make_unique<CodeEditor>();
     // 先建在 1×1 的角落里：矩形一算出来就搬过去，不会在屏幕中间闪一下
-    if (!m_codeEditor->create(m_hWnd, 2004, 0, 0, 1, 1, L"xaml"))
+    if (!m_codeEditor->create(m_hWnd, 2004, 0, 0, 1, 1, L"xml"))
         m_codeEditor.reset();
     else
     {
@@ -1658,7 +1658,7 @@ void DesignerPaneView::syncCodeEditor()
         m_codeEditor->setText(want);
 }
 
-void DesignerPaneView::updateXamlView()
+void DesignerPaneView::updateXmlView()
 {
     syncCodeEditor();
     Invalidate(FALSE);
@@ -1667,7 +1667,7 @@ void DesignerPaneView::updateXamlView()
 // ===========================================================================
 // 整窗单张 Direct2D 表面
 // 整个设计器客户区由一块 Direct2D 表面绘制：工具栏、控件箱、对象树、
-// 属性表、XAML 代码区、分隔条、状态栏全部自绘，不再创建子 HWND 控件。
+// 属性表、XML 代码区、分隔条、状态栏全部自绘，不再创建子 HWND 控件。
 // 唯一保留的真实窗口是主画布 —— DesignCanvas 自己就是一个 D2D 直呈窗口。
 // ===========================================================================
 void DesignerPaneView::OnPaint()

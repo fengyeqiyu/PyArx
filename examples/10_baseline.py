@@ -15,10 +15,10 @@ r"""示例 10：文字基线对齐（anchors.baseline / Qt.AlignBaseline）。
 import sys
 
 sys.path.insert(0, r"G:\PyArx\X64\Release")
-import PyMfcXaml as M  # noqa: E402
+import PyMfcXml as M  # noqa: E402
 
-SAMPLE = r"G:\PyArx\UIDesign\samples\15_qml_baseline.xaml"
-rects = M.xamlLayout(SAMPLE, 440, 260)
+SAMPLE = r"G:\PyArx\UIDesign\samples\15_qml_baseline.xml"
+rects = M.xmlLayout(SAMPLE, 440, 260)
 
 big = rects["Big1"]
 small = rects["Small1"]

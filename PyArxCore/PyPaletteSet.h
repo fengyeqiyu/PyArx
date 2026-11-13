@@ -10,7 +10,7 @@
 //   Show/Hide -> frame->ShowControlBar
 //   GetOrCreatePalette(name,w,h) -> 按名复用（防 arxload 累积）
 //
-// 说明：侧栏页内的控件宿主由 GUI 层（MfcXaml）创建后回填（见 PyPageHandle），
+// 说明：侧栏页内的控件宿主由 GUI 层（MfcXml）创建后回填（见 PyPageHandle），
 // PyArxCore 自身不创建任何宿主，也不假设宿主用什么渲染。
 // 编码：UTF-8 带 BOM。
 //-----------------------------------------------------------------------------
@@ -28,7 +28,7 @@
 
 namespace PyArx
 {
-    // 页内控件宿主句柄：由宿主层（MfcXaml 等）创建并回填，
+    // 页内控件宿主句柄：由宿主层（MfcXml 等）创建并回填，
     // PyArxCore 只负责把它挂到 CAdUiPalette 上，不创建宿主。
     struct PyPageHandle
     {

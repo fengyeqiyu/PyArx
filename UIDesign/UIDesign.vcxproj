@@ -38,7 +38,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;_AFXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);G:\PyArx\MfcXamlCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);G:\PyArx\MfcXmlCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4244;4267;4305;4838</DisableSpecificWarnings>
@@ -52,12 +52,12 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>msxml6.lib;comctl32.lib;MfcXamlCore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>msxml6.lib;comctl32.lib;MfcXmlCore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/MANIFEST:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Message>复制界面图标资源 res\、designer_layout.xaml 与 control_catalog.xml 到输出目录</Message>
+      <Message>复制界面图标资源 res\、designer_layout.xml 与 control_catalog.xml 到输出目录</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -85,7 +85,7 @@
   <!-- 资源随生成复制：走 MSBuild Copy，不经 cmd.exe（cmd 在受限环境下起不来会让 Build 直接失败） -->
   <Target Name="CopyDesignerAssets" AfterTargets="Build">
     <ItemGroup>
-      <DesignerAsset Include="$(ProjectDir)designer_layout.xaml;$(ProjectDir)control_catalog.xml" />
+      <DesignerAsset Include="$(ProjectDir)designer_layout.xml;$(ProjectDir)control_catalog.xml" />
       <DesignerRes Include="$(ProjectDir)res\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(DesignerAsset)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />

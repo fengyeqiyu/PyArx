@@ -7,7 +7,7 @@
 import os
 import tempfile
 
-import PyMfcXaml as p
+import PyMfcXml as p
 
 VIEW_W, VIEW_H = 380, 220
 ROW_H = 52
@@ -21,8 +21,8 @@ for i, t in enumerate(ROWS):
         'Background="#2B313C" Foreground="#E6EDF3" '
         'Canvas.Left="30" Canvas.Top="%d" />' % (i, t, 46 + i * ROW_H))
 
-XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Flickable 拖拽演示" Width="420" Height="382">
+XML = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="Flickable 拖拽演示" Width="420" Height="382">
   <XCanvas>
     <XLabel x:Name="lb" Text="拖住内容上下拖，松手会继续滑，拖过头会弹回" Width="386" Height="24" Canvas.Left="18" Canvas.Top="14" />
     <XFlickable x:Name="fl" Width="%d" Height="%d" Canvas.Left="20" Canvas.Top="46" />
@@ -33,9 +33,9 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
 
 
 def build():
-    path = os.path.join(tempfile.mkdtemp(prefix='pymfc_flick_'), 'flick.xaml')
+    path = os.path.join(tempfile.mkdtemp(prefix='pymfc_flick_'), 'flick.xml')
     with open(path, 'w', encoding='utf-8') as f:
-        f.write(XAML)
+        f.write(XML)
     return path
 
 

@@ -7,20 +7,20 @@ pymfc_palette_circle.py — 嵌入 CAD 主窗口的非侧栏窗体，点击按�
 CAD 保持活动视图，绘制后图形即时刷新（无需切回 CAD）。
 
 架构解耦：
-  PyMfcXaml.create_embedded 只接收父窗口 HWND（纯 MFC，不碰 CAD API）；
+  PyMfcXml.create_embedded 只接收父窗口 HWND（纯 MFC，不碰 CAD API）；
   父 HWND 由 PyArxCore.Ap.PyApp.mainWindow 提供（CAD 应用门面）。
 
 运行方式（CAD 内）：
   命令: PYRUNFILE   (选择本文件)   → 只创建窗体
   然后点击窗体上的“画圆”按钮，观察 CAD 绘图区即时出现新圆。
 """
-import PyMfcXaml
+import PyMfcXml
 import PyArxCore
 from PyArxCore.Db import PyDbCircle, PyDbTrans
 from PyArxCore.Ge import AcGePoint3d, AcGeVector3d
 
 LOG = r"G:\PyArx\log\pymfc_embed_circle.log"
-XAML = r"G:\PyArx\examples\pymfc_palette_circle.xaml"
+XML = r"G:\PyArx\examples\pymfc_palette_circle.xml"
 
 
 def _log(msg):
@@ -73,8 +73,8 @@ def build_embedded_form():
         print("无法取得 CAD 主窗口句柄")
         return None
 
-    w = PyMfcXaml.create_embedded(parent_hwnd, "PyArx 画圆演示", 300, 160)
-    PyMfcXaml.guiload(XAML, target=w, context=globals())
+    w = PyMfcXml.create_embedded(parent_hwnd, "PyArx 画圆演示", 300, 160)
+    PyMfcXml.guiload(XML, target=w, context=globals())
     _log("[build] embedded form shown")
     return w
 

@@ -1,14 +1,14 @@
 ﻿# -*- coding: utf-8 -*-
 """第九批演示：Repeater / GridView / PathView / QCanvas 同窗展示，窗口保持打开。"""
 import os, sys, tempfile
-import PyMfcXaml as p
+import PyMfcXml as p
 
 CMDS = ('Clear #2B313C; Rect 24,24,150,80,#00A8E8; RoundRect 24,130,150,60,12,#E8A800; '
         'Ellipse 210,24,90,90,#57C84D; Line 24,215,580,215,#FFFFFF,2; '
         'Text 210,150,画布由命令串驱动,13,#E6EDF3')
 
-XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="第九批 Repeater / GridView / PathView / QCanvas" Width="1240" Height="900">
+XML = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="第九批 Repeater / GridView / PathView / QCanvas" Width="1240" Height="900">
   <XCanvas>
     <Repeater x:Name="rep" Items="甲|乙|丙|丁" ItemHeight="34" Spacing="0" Canvas.Left="12" Canvas.Top="44">
       <XButton x:Name="rb" Text="行{item}" Width="104" Height="30" />
@@ -20,8 +20,8 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
   </XCanvas>
 </XWindow>''' % CMDS
 
-path = os.path.join(tempfile.mkdtemp(prefix='pymfc_qml9_'), 'q9.xaml')
-open(path, 'w', encoding='utf-8').write(XAML)
+path = os.path.join(tempfile.mkdtemp(prefix='pymfc_qml9_'), 'q9.xml')
+open(path, 'w', encoding='utf-8').write(XML)
 names = {}
 w = p.guiload(path, names=names)
 w.show()

@@ -1,5 +1,5 @@
 ﻿# -*- coding: utf-8 -*-
-"""生成《MFCXaml 控件接口清单》——数据来自运行中的 PyMfcXaml.prop_schema() 与控件源码。
+"""生成《MFCXml 控件接口清单》——数据来自运行中的 PyMfcXml.prop_schema() 与控件源码。
 
 用法（构建后执行，schema 变了重跑）：
     & 'D:\\Program Files\\Python314\\python.exe' G:\\PyArx\\tools\\gen_control_doc.py
@@ -10,7 +10,7 @@ import os
 import sys
 
 SCHEMA_JSON = r'G:\PyArx\docs\_schema.json'
-OUT = r'G:\PyArx\docs\mfcxaml-控件接口清单.md'
+OUT = r'G:\PyArx\docs\mfcxml-控件接口清单.md'
 BIN = r'G:\PyArx\X64\Release'
 
 COMMON = ['Shape', 'BackColor', 'FrontColor', 'Foreground', 'BorderColor', 'BorderStyle',
@@ -20,69 +20,69 @@ COMMON = ['Shape', 'BackColor', 'FrontColor', 'Foreground', 'BorderColor', 'Bord
 
 # 主标签 -> (实现方式, 源文件, 事件键)
 INFO = {
-    'ItemView':       ('属性驱动行模板容器（Model 逐行实例化 delegate 子节点）', 'XamlItemView.cpp', 'select'),
-    'Button':         ('原生 MFC Button', 'XamlButton.cpp', 'pointer'),
-    'Label':      ('原生 MFC Static', 'XamlTextBlock.cpp', 'pointer'),
-    'TextField':        ('原生 MFC Edit', 'XamlTextBox.cpp', 'text'),
-    'ListBox':        ('原生 MFC ListBox', 'XamlListBox.cpp', 'select'),
-    'CodeEditor':     ('C++ 自绘编辑器', 'XamlCodeEditor.cpp', 'text'),
-    'CheckBox':       ('原生 MFC Button(BS_AUTOCHECKBOX)', 'XamlCheckBox.cpp', 'check'),
-    'RadioButton':    ('原生 MFC Button(BS_AUTORADIO)', 'XamlRadioButton.cpp', 'radio'),
-    'GroupBox':       ('原生 MFC Button(BS_GROUPBOX)', 'XamlGroupBox.cpp', 'pointer'),
-    'ComboBox':       ('原生 MFC ComboBox', 'XamlComboBox.cpp', 'combo'),
-    'ProgressBar':    ('原生 MFC msctls_progress32', 'XamlProgressBar.cpp', 'value'),
-    'Slider':         ('原生 MFC msctls_trackbar32', 'XamlSlider.cpp', 'value'),
-    'TabBar':     ('原生 MFC SysTabControl32', 'XamlTabControl.cpp', 'fairly'),
-    'TreeView':       ('原生 MFC SysTreeView32', 'XamlTreeCtrl.cpp', 'select'),
-    'ListCtrl':       ('原生 MFC SysListView32', 'XamlListCtrl.cpp', 'select'),
-    'Choice':         ('原生 MFC ComboBox(CBS_DROPDOWNLIST)', 'XamlChoice.cpp', 'choice'),
-    'DatePicker':     ('原生 MFC SysDateTimePick32', 'XamlDatePicker.cpp', 'date'),
-    'Pane':          ('原生 MFC Static 容器', 'XamlPanel.cpp', 'panel'),
-    'SplitView':       ('原生 MFC 自注册拖动条', 'XamlSplitter.cpp', 'splitter'),
-    'Divider':     ('原生 MFC Static(SS_ETCHEDHORZ)', 'XamlStaticLine.cpp', 'pointer'),
-    'PowerCanvas':    ('宿主自绘画布（配电规划图）', 'XamlPowerCanvas.cpp', 'canvas'),
-    'Hyperlink':      ('原生 MFC SysLink', 'XamlHyperlink.cpp', 'link'),
-    'TextArea':       ('原生 MFC RICHEDIT50W', 'XamlRichText.cpp', 'text'),
-    'ToggleButton':   ('原生 MFC Button(BS_AUTOCHECKBOX 自绘)', 'XamlToggleButton.cpp', 'check'),
-    'IconButton':   ('原生 MFC Button(BS_BITMAP)', 'XamlBitmapButton.cpp', 'pointer'),
-    'Image':   ('原生 MFC Static(SS_BITMAP)', 'XamlStaticBitmap.cpp', 'pointer'),
-    'GridLayout':       ('原生 MFC 自注册网格', 'XamlGrid.cpp', 'select'),
-    'ScrollView': ('原生 MFC 自注册滚动容器', 'XamlScrolledWindow.cpp', 'scrolled'),
-    'MonthGrid':   ('原生 MFC SysMonthCal32', 'XamlCalendarCtrl.cpp', 'date'),
-    'Switch':         ('自绘 skin #1 Switch', 'XamlSwitch.cpp', 'switch'),
-    'SpinBox':        ('自绘 skin #2 Spin', 'XamlSpinBox.cpp', 'value'),
-    'RangeSlider':    ('自绘 skin #3 Range', 'XamlRangeSlider.cpp', 'value'),
-    'BusyIndicator':  ('自绘 skin #4 Busy', 'XamlBusyIndicator.cpp', 'busy'),
-    'PageIndicator':  ('自绘 skin #5 Pages', 'XamlPageIndicator.cpp', 'fairly'),
-    'Dial':           ('自绘 skin #6 Dial', 'XamlDial.cpp', 'value'),
-    'Tumbler':        ('自绘 skin #7 Tumbler', 'XamlTumbler.cpp', 'value'),
-    'ScrollBar':      ('自绘 skin #8 ScrollBar', 'XamlScrollBar.cpp', 'scrollbar'),
-    'TableView':      ('自绘 skin #9 Table（独立控件套装）', 'XamlTableView.cpp', 'select'),
-    'TreeTable':      ('自绘 skin #10 Tree', 'XamlTreeView.cpp', 'select'),
-    'ToolBar':      ('自绘 skin #11 ToolBar', 'XamlToolBar.cpp', 'toolstrip'),
-    'ToolTip':        ('自绘 skin #12 ToolTip', 'XamlToolTip.cpp', 'tooltip'),
-    'Menu':           ('自绘 skin #13 Menu', 'XamlMenu.cpp', 'menu'),
-    'MenuBar':      ('自绘 skin #14 MenuBar', 'XamlMenuBar.cpp', 'menustrip'),
-    'Popup':          ('自绘 skin #15 Popup', 'XamlPopup.cpp', 'popup'),
-    'VirtualList':    ('自绘 skin #16 ListView（虚拟化）', 'XamlListView.cpp', 'select'),
-    'Page':           ('自绘 skin #17 Pager（XamlPageView）', 'XamlPage.cpp', 'fairly'),
-    'GridView':       ('自绘 skin #18 GridView', 'XamlGridView.cpp', 'select'),
-    'PathView':       ('自绘 skin #19 PathView', 'XamlPathView.cpp', 'select'),
-    'QCanvas':        ('自绘 skin #20 QCanvas（命令脚本画布）', 'XamlQCanvas.cpp', 'canvas'),
-    'Flickable':      ('自绘 skin #21 Flick', 'XamlFlickable.cpp', 'flick'),
-    'StackView':      ('自绘 skin #17 Pager（XamlPageView 子类）', 'XamlStackView.h', 'fairly'),
-    'SwipeView':      ('自绘 skin #17 Pager（XamlPageView 子类）', 'XamlSwipeView.h', 'fairly'),
- 'Frame':          ('原生 MFC Panel + 内边距', 'XamlFrame.cpp', 'pointer'),
- 'Dialog':         ('原生 MFC Panel（模态标记）', 'XamlDialog.cpp', 'pointer'),
- 'Drawer':         ('原生 MFC Panel（侧边位置）', 'XamlDrawer.cpp', 'pointer'),
- 'RoundButton':    ('原生 MFC Button（圆形外观）', 'XamlRoundButton.cpp', 'pointer'),
- 'DelayButton':    ('原生 MFC Button（长按确认）', 'XamlDelayButton.cpp', 'pointer'),
- 'ToolButton':     ('原生 MFC Button（图标+文字）', 'XamlToolButton.cpp', 'pointer'),
- 'ToolSeparator':  ('原生 MFC StaticLine', 'XamlToolSeparator.cpp', 'pointer'),
- 'TabButton':      ('原生 MFC Button（页签态）', 'XamlTabButton.cpp', 'pointer'),
- 'ScrollIndicator':('自绘细条指示器', 'XamlScrollIndicator.cpp', 'pointer'),
- 'MenuItem':       ('原生 MFC Button（菜单项）', 'XamlMenuItem.cpp', 'pointer'),
- 'MenuSeparator':  ('原生 MFC StaticLine', 'XamlMenuSeparator.cpp', 'pointer'),
+    'ItemView':       ('属性驱动行模板容器（Model 逐行实例化 delegate 子节点）', 'XmlItemView.cpp', 'select'),
+    'Button':         ('原生 MFC Button', 'XmlButton.cpp', 'pointer'),
+    'Label':      ('原生 MFC Static', 'XmlTextBlock.cpp', 'pointer'),
+    'TextField':        ('原生 MFC Edit', 'XmlTextBox.cpp', 'text'),
+    'ListBox':        ('原生 MFC ListBox', 'XmlListBox.cpp', 'select'),
+    'CodeEditor':     ('C++ 自绘编辑器', 'XmlCodeEditor.cpp', 'text'),
+    'CheckBox':       ('原生 MFC Button(BS_AUTOCHECKBOX)', 'XmlCheckBox.cpp', 'check'),
+    'RadioButton':    ('原生 MFC Button(BS_AUTORADIO)', 'XmlRadioButton.cpp', 'radio'),
+    'GroupBox':       ('原生 MFC Button(BS_GROUPBOX)', 'XmlGroupBox.cpp', 'pointer'),
+    'ComboBox':       ('原生 MFC ComboBox', 'XmlComboBox.cpp', 'combo'),
+    'ProgressBar':    ('原生 MFC msctls_progress32', 'XmlProgressBar.cpp', 'value'),
+    'Slider':         ('原生 MFC msctls_trackbar32', 'XmlSlider.cpp', 'value'),
+    'TabBar':     ('原生 MFC SysTabControl32', 'XmlTabControl.cpp', 'fairly'),
+    'TreeView':       ('原生 MFC SysTreeView32', 'XmlTreeCtrl.cpp', 'select'),
+    'ListCtrl':       ('原生 MFC SysListView32', 'XmlListCtrl.cpp', 'select'),
+    'Choice':         ('原生 MFC ComboBox(CBS_DROPDOWNLIST)', 'XmlChoice.cpp', 'choice'),
+    'DatePicker':     ('原生 MFC SysDateTimePick32', 'XmlDatePicker.cpp', 'date'),
+    'Pane':          ('原生 MFC Static 容器', 'XmlPanel.cpp', 'panel'),
+    'SplitView':       ('原生 MFC 自注册拖动条', 'XmlSplitter.cpp', 'splitter'),
+    'Divider':     ('原生 MFC Static(SS_ETCHEDHORZ)', 'XmlStaticLine.cpp', 'pointer'),
+    'PowerCanvas':    ('宿主自绘画布（配电规划图）', 'XmlPowerCanvas.cpp', 'canvas'),
+    'Hyperlink':      ('原生 MFC SysLink', 'XmlHyperlink.cpp', 'link'),
+    'TextArea':       ('原生 MFC RICHEDIT50W', 'XmlRichText.cpp', 'text'),
+    'ToggleButton':   ('原生 MFC Button(BS_AUTOCHECKBOX 自绘)', 'XmlToggleButton.cpp', 'check'),
+    'IconButton':   ('原生 MFC Button(BS_BITMAP)', 'XmlBitmapButton.cpp', 'pointer'),
+    'Image':   ('原生 MFC Static(SS_BITMAP)', 'XmlStaticBitmap.cpp', 'pointer'),
+    'GridLayout':       ('原生 MFC 自注册网格', 'XmlGrid.cpp', 'select'),
+    'ScrollView': ('原生 MFC 自注册滚动容器', 'XmlScrolledWindow.cpp', 'scrolled'),
+    'MonthGrid':   ('原生 MFC SysMonthCal32', 'XmlCalendarCtrl.cpp', 'date'),
+    'Switch':         ('自绘 skin #1 Switch', 'XmlSwitch.cpp', 'switch'),
+    'SpinBox':        ('自绘 skin #2 Spin', 'XmlSpinBox.cpp', 'value'),
+    'RangeSlider':    ('自绘 skin #3 Range', 'XmlRangeSlider.cpp', 'value'),
+    'BusyIndicator':  ('自绘 skin #4 Busy', 'XmlBusyIndicator.cpp', 'busy'),
+    'PageIndicator':  ('自绘 skin #5 Pages', 'XmlPageIndicator.cpp', 'fairly'),
+    'Dial':           ('自绘 skin #6 Dial', 'XmlDial.cpp', 'value'),
+    'Tumbler':        ('自绘 skin #7 Tumbler', 'XmlTumbler.cpp', 'value'),
+    'ScrollBar':      ('自绘 skin #8 ScrollBar', 'XmlScrollBar.cpp', 'scrollbar'),
+    'TableView':      ('自绘 skin #9 Table（独立控件套装）', 'XmlTableView.cpp', 'select'),
+    'TreeTable':      ('自绘 skin #10 Tree', 'XmlTreeView.cpp', 'select'),
+    'ToolBar':      ('自绘 skin #11 ToolBar', 'XmlToolBar.cpp', 'toolstrip'),
+    'ToolTip':        ('自绘 skin #12 ToolTip', 'XmlToolTip.cpp', 'tooltip'),
+    'Menu':           ('自绘 skin #13 Menu', 'XmlMenu.cpp', 'menu'),
+    'MenuBar':      ('自绘 skin #14 MenuBar', 'XmlMenuBar.cpp', 'menustrip'),
+    'Popup':          ('自绘 skin #15 Popup', 'XmlPopup.cpp', 'popup'),
+    'VirtualList':    ('自绘 skin #16 ListView（虚拟化）', 'XmlListView.cpp', 'select'),
+    'Page':           ('自绘 skin #17 Pager（XmlPageView）', 'XmlPage.cpp', 'fairly'),
+    'GridView':       ('自绘 skin #18 GridView', 'XmlGridView.cpp', 'select'),
+    'PathView':       ('自绘 skin #19 PathView', 'XmlPathView.cpp', 'select'),
+    'QCanvas':        ('自绘 skin #20 QCanvas（命令脚本画布）', 'XmlQCanvas.cpp', 'canvas'),
+    'Flickable':      ('自绘 skin #21 Flick', 'XmlFlickable.cpp', 'flick'),
+    'StackView':      ('自绘 skin #17 Pager（XmlPageView 子类）', 'XmlStackView.h', 'fairly'),
+    'SwipeView':      ('自绘 skin #17 Pager（XmlPageView 子类）', 'XmlSwipeView.h', 'fairly'),
+ 'Frame':          ('原生 MFC Panel + 内边距', 'XmlFrame.cpp', 'pointer'),
+ 'Dialog':         ('原生 MFC Panel（模态标记）', 'XmlDialog.cpp', 'pointer'),
+ 'Drawer':         ('原生 MFC Panel（侧边位置）', 'XmlDrawer.cpp', 'pointer'),
+ 'RoundButton':    ('原生 MFC Button（圆形外观）', 'XmlRoundButton.cpp', 'pointer'),
+ 'DelayButton':    ('原生 MFC Button（长按确认）', 'XmlDelayButton.cpp', 'pointer'),
+ 'ToolButton':     ('原生 MFC Button（图标+文字）', 'XmlToolButton.cpp', 'pointer'),
+ 'ToolSeparator':  ('原生 MFC StaticLine', 'XmlToolSeparator.cpp', 'pointer'),
+ 'TabButton':      ('原生 MFC Button（页签态）', 'XmlTabButton.cpp', 'pointer'),
+ 'ScrollIndicator':('自绘细条指示器', 'XmlScrollIndicator.cpp', 'pointer'),
+ 'MenuItem':       ('原生 MFC Button（菜单项）', 'XmlMenuItem.cpp', 'pointer'),
+ 'MenuSeparator':  ('原生 MFC StaticLine', 'XmlMenuSeparator.cpp', 'pointer'),
 }
 
 EVENTS = {
@@ -188,7 +188,7 @@ def load_schema():
     try:
         sys.path.insert(0, BIN)
         os.add_dll_directory(BIN)
-        import PyMfcXaml as M
+        import PyMfcXml as M
         raw = M.prop_schema()
         with io.open(SCHEMA_JSON, 'w', encoding='utf-8', newline='\n') as f:
             f.write(raw)
@@ -196,7 +196,7 @@ def load_schema():
     except Exception:
         if not os.path.isfile(SCHEMA_JSON):
             raise
-        sys.stderr.write('WARN: PyMfcXaml 导入失败，回退到缓存 %s（可能是旧数据，请先构建）\n' % SCHEMA_JSON)
+        sys.stderr.write('WARN: PyMfcXml 导入失败，回退到缓存 %s（可能是旧数据，请先构建）\n' % SCHEMA_JSON)
         with io.open(SCHEMA_JSON, encoding='utf-8') as f:
             return json.load(f)
 
@@ -222,14 +222,14 @@ def main():
 
     buf = io.StringIO()
     w = buf.write
-    w('# MFCXaml 控件接口清单\n\n')
-    w('> 数据来源：运行中的 `PyMfcXaml.prop_schema()`（`XamlPropertySchemaJson()` 导出）+ '
-      '`MfcXamlCore\\controls\\RegisterPyMfcControls.cpp`（标签注册）+ `XamlEvents.h`（事件契约）。\n')
+    w('# MFCXml 控件接口清单\n\n')
+    w('> 数据来源：运行中的 `PyMfcXml.prop_schema()`（`XmlPropertySchemaJson()` 导出）+ '
+      '`MfcXmlCore\\controls\\RegisterPyMfcControls.cpp`（标签注册）+ `XmlEvents.h`（事件契约）。\n')
     w('> 属性内容就是控件真正读写的字段，不是文档承诺。schema 变了重跑本文档：'
-      '`python tools\\gen_control_doc.py`（需先构建出 `X64\\Release\\PyMfcXaml.pyd`）。\n\n')
+      '`python tools\\gen_control_doc.py`（需先构建出 `X64\\Release\\PyMfcXml.pyd`）。\n\n')
 
     w('## 一、读数口径\n\n')
-    w('- **通用属性 19 条**：每个控件都继承自 `XamlMfcControlBase`，是布局/外观字段 '
+    w('- **通用属性 19 条**：每个控件都继承自 `XmlMfcControlBase`，是布局/外观字段 '
       '（`Shape / BackColor / FrontColor / Foreground / BorderColor / BorderStyle / BorderThickness / '
       'Radius / Opacity / TextAlign / VerticalAlignment / TextWrapping / FontWeight / FontStyle / '
       'FontSize / FontFamily / Level / TabIndex / Theme`）。它们不构成"封装程度"。\n')
@@ -273,7 +273,7 @@ def main():
     w('\n\n')
     w('C 档不是"没实现"——这些控件在 C++ 里都有真实原生窗口/自绘实现、事件也照常派发，'
       '只是**业务字段没有暴露成属性**。要让它们进设计器可配置，得按需要补属性表条目；'
-      '这也是 `plugins` 层用 XAML 组合补位的典型对象（组合态用子控件属性，不硬造新属性）。\n\n')
+      '这也是 `plugins` 层用 XML 组合补位的典型对象（组合态用子控件属性，不硬造新属性）。\n\n')
 
     w('## 五、命名规范\n\n')
     w('标签统一为 `X + 本意名`（`XButton` / `XTextField` / `XStackPanel` / `XWindow`），'\
@@ -283,7 +283,7 @@ def main():
     w('## 六、本轮已修 / 剩余缺口\n\n')
     w('**本轮已修（v0.10.17）**\n\n')
     w('1. `TextArea` 属性重复：`FontSize`、`Foreground` 不再由控件自声明，统一走基类外观字段，'
-      '由 `onAppearanceChanged` 转成 `CHARFORMAT`（`XamlRichText.cpp`），schema 已无重名条目。\n')
+      '由 `onAppearanceChanged` 转成 `CHARFORMAT`（`XmlRichText.cpp`），schema 已无重名条目。\n')
     w('2. `MonthGrid` 补上 `Value`（`YYYY-MM-DD`，读写）：宿主新增 '
       '`getCalendarDate` / `setCalendarDate`（`MCM_GETCURSEL` / `MCM_SETCURSEL`）。\n')
     w('3. `Flickable` 补上 `OffsetX` / `OffsetY`（读写，落到宿主 `setFlickOffset`），'
@@ -293,11 +293,11 @@ def main():
     w('**剩余缺口（按实测，不含猜测）**\n\n')
     w('1. **只读属性共 7 个**：`TableView.RowCount`、`Menu.SelectedIndex`、`VirtualList.ItemCount`、'
       '`GridView.ItemCount`、`Page.PageCount`、`StackView.PageCount`、`SwipeView.PageCount`。'
-      '只有 `Menu.SelectedIndex` 是设计上的只读回读槽（`XamlMenu.cpp` 里 `Set` 为空，只反射当前选中）；'
+      '只有 `Menu.SelectedIndex` 是设计上的只读回读槽（`XmlMenu.cpp` 里 `Set` 为空，只反射当前选中）；'
       '若需要程序化选中菜单项，得补 `setMenuSelected` 宿主接口 + 属性 `Set`。其余 6 个是计数类，只读合理。\n')
-    w('2. **`Page` / `StackView` / `SwipeView` 是同一实现**（`XamlPageView`，skin #17），'
+    w('2. **`Page` / `StackView` / `SwipeView` 是同一实现**（`XmlPageView`，skin #17），'
       '三者属性都是 `SelectedIndex` + `PageCount`，差别仅在语义命名；后续若要真分页/滑动行为，'
-      '需要在 `XamlPageView` 上分模式，而不是继续加别名。\n')
+      '需要在 `XmlPageView` 上分模式，而不是继续加别名。\n')
     w('3. **仍有 5 个控件自有属性为 0**：`Pane`、`SplitView`、`Divider`、`BusyIndicator`、'
       '`Flickable`（Flickable 已补偏移，其余 4 个仍只有布局/外观）；`BusyIndicator` 要补 `Running` / '
       '`Interval` 得先给 skinbox 加状态接口。\n')

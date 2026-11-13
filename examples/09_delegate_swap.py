@@ -16,15 +16,15 @@ import sys
 
 os.add_dll_directory(r"G:\PyArx\X64\Release")
 sys.path.insert(0, r"G:\PyArx\X64\Release")
-import PyMfcXaml as M  # noqa: E402
+import PyMfcXml as M  # noqa: E402
 
 names = {}
-win = M.guiload(r"G:\PyArx\UIDesign\samples\14_qml_delegate_swap.xaml", names=names)
+win = M.guiload(r"G:\PyArx\UIDesign\samples\14_qml_delegate_swap.xml", names=names)
 win.show()
 
 print("宽行模板 ->", win.getText(names["W0"]), "|", win.getText(names["S0"]))
-win.setXamlValue("LV", "delegate", "RowCompact")
+win.setXmlValue("LV", "delegate", "RowCompact")
 print("紧凑模板 ->", win.getText(names["K0"]), win.getText(names["N1"]), win.getText(names["B1"]))
-win.setXamlValue("LV", "delegate", "RowWide")
+win.setXmlValue("LV", "delegate", "RowWide")
 print("换回宽行 ->", win.getText(names["W0"]), "|", win.getText(names["A0"]))
 win.close()

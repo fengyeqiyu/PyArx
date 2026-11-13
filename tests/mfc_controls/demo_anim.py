@@ -2,15 +2,15 @@
 """动画演示：PropertyAnimation / NumberAnimation / ColorAnimation，往复循环，窗口保持打开。"""
 import ctypes, os, tempfile, time
 from ctypes import wintypes
-import PyMfcXaml as p
+import PyMfcXml as p
 
 u = ctypes.windll.user32
 u.SetWindowPos.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int,
                            ctypes.c_int, ctypes.c_int, wintypes.UINT]
 u.SetForegroundWindow.argtypes = [ctypes.c_void_p]
 
-XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="动画引擎演示" Width="560" Height="380">
+XML = '''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="动画引擎演示" Width="560" Height="380">
   <XCanvas>
     <XLabel x:Name="t1" Text="PropertyAnimation：按钮 Width 140 → 420 往复（linear）" Width="460" Height="26" Canvas.Left="24" Canvas.Top="18" />
     <XButton x:Name="bt" Width="140" Height="44" Text="宽度动画" Canvas.Left="24" Canvas.Top="52" />
@@ -21,8 +21,8 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
   </XCanvas>
 </XWindow>'''
 
-path = os.path.join(tempfile.mkdtemp(prefix='pymfc_anim_demo_'), 'd.xaml')
-open(path, 'w', encoding='utf-8').write(XAML)
+path = os.path.join(tempfile.mkdtemp(prefix='pymfc_anim_demo_'), 'd.xml')
+open(path, 'w', encoding='utf-8').write(XML)
 names = {}
 w = p.guiload(path, names=names)
 w.show()

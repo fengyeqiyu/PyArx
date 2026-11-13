@@ -4,12 +4,12 @@
 //   * 静态 tag → 控件种类表（不用 if-else 链，加控件只加一行）
 //   * walk()：与绘制同一套矩形语义（previewX/Y/W/H + 原点偏移），
 //     容器继续递归、叶子建原生控件
-//   * 创建期样式（多行/只读/限长/占位/下拉风格/多选）从 XAML 属性解析后交给宿主
+//   * 创建期样式（多行/只读/限长/占位/下拉风格/多选）从 XML 属性解析后交给宿主
 //
 // 编码：本文件 UTF-8 with BOM。
 
 #include "ViewerControls.h"
-#include "../MfcXamlCore/controls/XamlMfcTags.h"   // 容器标签唯一来源（与运行时同一份）
+#include "../MfcXmlCore/controls/XmlMfcTags.h"   // 容器标签唯一来源（与运行时同一份）
 
 #include <cwctype>
 #include <map>
@@ -96,7 +96,7 @@ namespace
         return K_None;
     }
 
-    std::wstring attrOf(const XamlElement& el, const wchar_t* key)
+    std::wstring attrOf(const XmlElement& el, const wchar_t* key)
     {
         for (const auto& kv : el.attrs)
             if (_wcsicmp(kv.first.c_str(), key) == 0)
@@ -107,24 +107,24 @@ namespace
         return {};
     }
 
-    int intAttrOf(const XamlElement& el, const wchar_t* key, int fallback)
+    int intAttrOf(const XmlElement& el, const wchar_t* key, int fallback)
     {
         const std::wstring v = attrOf(el, key);
         return v.empty() ? fallback : _wtoi(v.c_str());
     }
 
-    bool boolAttrOf(const XamlElement& el, const wchar_t* key)
+    bool boolAttrOf(const XmlElement& el, const wchar_t* key)
     {
         const std::wstring v = attrOf(el, key);
         return _wcsicmp(v.c_str(), L"true") == 0 || _wcsicmp(v.c_str(), L"yes") == 0 || v == L"1";
     }
 
     // 元素的有效外观：本地声明优先，其余取样式/绑定注入层（与绘制口径一致）
-    xamlapp::XamlAppearance appearanceOf(const XamlElement& el)
+    xmlapp::XmlAppearance appearanceOf(const XmlElement& el)
     {
-        xamlapp::XamlAppearance ap;
+        xmlapp::XmlAppearance ap;
         for (const auto& kv : el.attrs)
-            xamlapp::SetProperty(ap, kv.first, kv.second);
+            xmlapp::SetProperty(ap, kv.first, kv.second);
         for (const auto& kv : el.styledAttrs)
         {
             bool local = false;
@@ -135,12 +135,12 @@ namespace
                     break;
                 }
             if (!local)
-                xamlapp::SetProperty(ap, kv.first, kv.second);
+                xmlapp::SetProperty(ap, kv.first, kv.second);
         }
         return ap;
     }
 
-    ViewerLeafOptions optionsOf(const XamlElement& el)
+    ViewerLeafOptions optionsOf(const XmlElement& el)
     {
         ViewerLeafOptions o;
         o.multiline = boolAttrOf(el, L"Multiline");
@@ -155,7 +155,7 @@ namespace
         return o;
     }
 
-    std::wstring textOf(const XamlElement& el)
+    std::wstring textOf(const XmlElement& el)
     {
         if (!el.text.empty())
             return el.text;
@@ -166,7 +166,7 @@ namespace
     }
 
     // 建一个叶子控件。id 由调用方按顺序分配（唯一且 >= 1000，宿主用它做控件 ID）
-    void createLeaf(ViewerMfcHost& host, const XamlElement& el, LeafKind kind, int id,
+    void createLeaf(ViewerMfcHost& host, const XmlElement& el, LeafKind kind, int id,
                     int x, int y, int w, int h)
     {
         const std::wstring text = textOf(el);
@@ -246,7 +246,7 @@ namespace
             else host.addListCtrl(id, x, y, w, h);
 
             // Columns="名称:180|状态:100"，Rows="甲\t1|乙\t2"：
-            // 与引擎 xamlextra::addColumns / addRows 同一语法，不解析就是空白列表。
+            // 与引擎 xmlextra::addColumns / addRows 同一语法，不解析就是空白列表。
             const std::wstring cols = attrOf(el, L"Columns");
             size_t start = 0;
             while (start < cols.size())
@@ -295,7 +295,7 @@ namespace
 
     const int kFirstControlId = 1000;
 
-    void walk(ViewerMfcHost& host, std::vector<ViewerLeafBinding>& out, XamlElement* el,
+    void walk(ViewerMfcHost& host, std::vector<ViewerLeafBinding>& out, XmlElement* el,
               int ox, int oy, COLORREF parentBack)
     {
         if (el == nullptr) return;
@@ -307,14 +307,14 @@ namespace
         rc.bottom = rc.top + el->previewH;
         if (rc.right <= rc.left || rc.bottom <= rc.top) return;
 
-        const xamlapp::XamlAppearance ap = appearanceOf(*el);
+        const xmlapp::XmlAppearance ap = appearanceOf(*el);
         const bool styled = !ap.empty();
 
         if (viewerIsContainerTag(el->tag))
         {
             COLORREF back = parentBack;
             COLORREF c = 0;
-            if (!ap.backColor.empty() && xamlapp::ParseColor(ap.backColor, c))
+            if (!ap.backColor.empty() && xmlapp::ParseColor(ap.backColor, c))
                 back = c;
             for (auto& child : el->children)
                 walk(host, out, &child, ox, oy, back);
@@ -323,12 +323,12 @@ namespace
 
         const LeafKind kind = kindOf(el->tag);
         if (kind == K_None)
-            return;   // 未知标签：不建控件，仍由父窗口按 XAML 自绘
+            return;   // 未知标签：不建控件，仍由父窗口按 XML 自绘
 
         const int id = kFirstControlId + static_cast<int>(out.size());
         createLeaf(host, *el, kind, id, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
 
-        // 通用基础属性：与运行时（XamlMfcControlBase）同一套解析口径
+        // 通用基础属性：与运行时（XmlMfcControlBase）同一套解析口径
         // Level 越大越靠上；TabIndex 只影响 Tab 遍历；Theme 先存着等颜色规则定
         const int level = intAttrOf(*el, L"Level", intAttrOf(*el, L"ZIndex", 0));
         host.setControlLevel(id, level);
@@ -352,10 +352,10 @@ bool viewerIsContainerTag(const std::wstring& tag)
 {
     // 与运行时（PyMfcCore）共用同一张容器表：以前这里自己抄了一份，
     // 结果 Layout 被当成未知标签、预览器弹"文档存在错误"。
-    return xamlmfc::isContainerTag(tag);
+    return xmlmfc::isContainerTag(tag);
 }
 
-std::vector<ViewerLeafBinding> viewerControlsBuild(ViewerMfcHost& host, XamlElement* root,
+std::vector<ViewerLeafBinding> viewerControlsBuild(ViewerMfcHost& host, XmlElement* root,
                                                    int originX, int originY)
 {
     std::vector<ViewerLeafBinding> out;

@@ -7,12 +7,12 @@ import sys as _sys
 _sys.path.insert(0, r'G:\PyArx\tests\cad')
 from _cadkeep import keep as _keep
 import os
-import PyMfcXaml as p
+import PyMfcXml as p
 import PyArxCore
 
 LOG = r"G:\PyArx\log\cad_form_overlay.log"
-XAML = r'''<?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PyArx CAD 浮层" Width="560" Height="360">
+XML = r'''<?xml version="1.0" encoding="utf-8"?>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="PyArx CAD 浮层" Width="560" Height="360">
   <XCanvas>
     <XLabel x:Name="lb" Text="MenuStrip / Menu / ToolTip / Popup 在 CAD 进程内" Width="500" Height="22" Canvas.Left="14" Canvas.Top="8" />
     <XMenuBar x:Name="mb" Width="520" Height="30" Canvas.Left="14" Canvas.Top="36" />
@@ -37,9 +37,9 @@ def _log(msg):
 
 def main():
     _log("[overlay] 开始")
-    path = os.path.join(os.path.dirname(LOG), "_cad_form_overlay.xaml")
+    path = os.path.join(os.path.dirname(LOG), "_cad_form_overlay.xml")
     with open(path, "w", encoding="utf-8") as f:
-        f.write(XAML)
+        f.write(XML)
 
     parent = PyArxCore.Ap.PyApp.mainWindow
     w = _keep(p.create_embedded(parent, "PyArx CAD 浮层", 560, 360))

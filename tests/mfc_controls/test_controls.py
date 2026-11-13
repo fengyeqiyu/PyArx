@@ -1,5 +1,5 @@
 ﻿# -*- coding: utf-8 -*-
-"""PyMfcXaml 控件全量测试：26 类控件 + 属性/交互/事件 + Panel 容器。
+"""PyMfcXml 控件全量测试：26 类控件 + 属性/交互/事件 + Panel 容器。
 
 用法：python.exe G:\\PyArx\\tests\\mfc_controls\\test_controls.py
 退出码 0 = 全通过；非 0 = 有失败项（明细见输出）。
@@ -9,7 +9,7 @@ import os
 import sys
 from ctypes import wintypes
 
-import PyMfcXaml as p
+import PyMfcXml as p
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 user32 = ctypes.windll.user32
@@ -107,16 +107,16 @@ TAG_OF = {
 }
 
 
-def run_window(xaml_name, title, tag_of):
+def run_window(xml_name, title, tag_of):
     section(title)
-    path = os.path.join(HERE, xaml_name)
+    path = os.path.join(HERE, xml_name)
     names = {}
     w = p.guiload(path, names=names)
     w.show()
     p.pump(400)
 
     cmap = ctrl_map(w, names)
-    record(title, 'XAML 加载', True, f'{len(names)} 个命名控件')
+    record(title, 'XML 加载', True, f'{len(names)} 个命名控件')
     record(title, '窗口句柄有效', bool(user32.IsWindow(w.hwnd)), hex(w.hwnd))
     record(title, '窗口可见', bool(user32.IsWindowVisible(w.hwnd)))
     record(title, '控件 ID 分配', all(v[1] is not None for v in cmap.values()),
@@ -327,19 +327,19 @@ def test_event_extended(w, cmap, names):
 
 
 def main():
-    print('PyMfcXaml 控件全量测试')
+    print('PyMfcXml 控件全量测试')
     print('解释器:', sys.executable)
     print('模块:', p.__file__)
 
     # ---------------- 基础窗口 ----------------
-    w, cmap, names = run_window('controls_basic.xaml', '基础窗口', TAG_OF)
+    w, cmap, names = run_window('controls_basic.xml', '基础窗口', TAG_OF)
     test_basic(w, cmap, names)
     test_event_extended(w, cmap, names)
     test_events(w, cmap, names)
     w.close(); p.pump(250)
 
     # ---------------- 扩展窗口 ----------------
-    w2, cmap2, names2 = run_window('controls_extended.xaml', '扩展窗口', TAG_OF)
+    w2, cmap2, names2 = run_window('controls_extended.xml', '扩展窗口', TAG_OF)
     test_extended(w2, cmap2, names2)
     w2.close(); p.pump(250)
 
