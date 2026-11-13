@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PrintWindow探针" Width="440" Height="330">
- <StackPanel Margin="8">
-  <ProgressBar x:Name="prg" Height="26"/>
-  <ListBox x:Name="lst" Height="110"/>
-  <CheckBox x:Name="chk" Text="同意条款" Height="30"/>
-  <TabControl x:Name="tab" Height="80"/>
- </StackPanel>
-</Window>

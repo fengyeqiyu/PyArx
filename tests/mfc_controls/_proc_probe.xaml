@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="proc探针" Width="420" Height="300">
- <StackPanel Margin="8">
-  <ProgressBar x:Name="prg" Height="26"/>
-  <Button x:Name="btn" Text="按钮" Height="40"/>
-  <CheckBox x:Name="chk" Text="同意条款" Height="30"/>
- </StackPanel>
-</Window>

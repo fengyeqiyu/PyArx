@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="AbsLayoutProbe" Width="360" Height="220">
-  <AbsolutePanel x:Name="root">
-    <Button x:Name="b1" Text="布局按钮" Width="120" Height="36" Canvas.Left="20" Canvas.Top="20" />
-    <TextBlock x:Name="t1" Text="绝对定位" Width="160" Height="22" Canvas.Left="150" Canvas.Top="28" />
-  </AbsolutePanel>
-</Window>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="可见性探针" Width="420" Height="420">
- <StackPanel Margin="8">
-  <ProgressBar x:Name="prg" Height="26"/>
-  <ComboBox x:Name="cbo" Height="25"/>
-  <TextBox x:Name="edt" Height="30"/>
- </StackPanel>
-</Window>
