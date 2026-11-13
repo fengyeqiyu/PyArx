@@ -530,12 +530,24 @@ void DesignerPaneView::endSizeMovePreview()
     if (m_canvas != nullptr && ::IsWindow(m_canvas->m_hWnd))
         m_canvas->ShowWindow(SW_SHOW);
     m_backSize = CSize(0, 0);       // 尺寸已变，缓存位图作废，下一次全量重画
+    // 期间没做布局，这里补一次：先按新尺寸重排，再整块重画
+    CRect client;
+    GetClientRect(&client);
+    resizeTo(client);
     RedrawWindow(nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
 }
 
 void DesignerPaneView::OnSize(UINT type, int cx, int cy)
 {
     CWnd::OnSize(type, cx, cy);
+    // 拖动/缩放期间不做完整重排：一次 layout 要遍历整棵节点树、重算所有子控件位置，
+    // 鼠标每挪一像素跑一遍，帧率必然掉。期间只拉伸上一帧（OnPaint 的分支），
+    // 松手时 endSizeMovePreview() 再一次性重排 —— 这就是 Qt "resize 期间只合成、不做布局"的路子。
+    if (m_sizeMove)
+    {
+        Invalidate(FALSE);
+        return;
+    }
     resizeTo(CRect(0, 0, cx, cy));
 }
 
@@ -1738,6 +1750,8 @@ void DesignerPaneView::OnPaint()
     // 边缘就留下旧像素 —— 这就是拖影。期间显示"上一帧拉伸"，松手再精确重画。
     if (m_sizeMove && m_backDc.GetSafeHdc() != nullptr && m_backSize.cx > 0 && m_backSize.cy > 0)
     {
+        // COLORONCOLOR（最近邻）：实测每步 6.9ms；HALFTONE 平滑但会周期性冒出 27ms 尖峰，
+        // 帧间隔一抖反而更"不丝滑"，所以这里选稳定的快路径。
         ::SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
         dc.StretchBlt(0, 0, client.Width(), client.Height(), &m_backDc,
                       0, 0, m_backSize.cx, m_backSize.cy, SRCCOPY);
