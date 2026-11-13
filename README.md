@@ -2,6 +2,17 @@
 
 AutoCAD（ObjectArx）+ MFC/XAML 的 Python 绑定与控件库。C++ 侧用 pybind11 暴露成 Python 模块，界面层用 MFC 承载一套自绘控件库，XAML 只做声明式布局与事件绑定。
 
+**一句话**：给 AutoCAD 二次开发一套「Python 写逻辑、XAML 写界面」的桌面 UI 方案——自带 50+ MFC 自绘控件、可视化 UI 设计器（拖控件、改属性、所见即所得）和独立预览器。
+
+**关键词**：AutoCAD 二次开发 · ObjectArx · pybind11 · Python 3.14 · MFC · XAML · 可视化 UI 设计器 · 自绘控件库 · 声明式界面 · 桌面 GUI 框架
+
+## 这个项目能做什么
+
+- **Python 调 CAD**：pybind11 把 ObjectArx 2024 的类库（数据库、实体、事务、选择集）暴露成 Python 模块，写业务逻辑不用碰 C++。
+- **XAML 写界面**：界面用声明式标签描述（`<XButton>`、`<XGrid>`、`<XStackPanel>` …），事件回 Python 函数（`on_click="fn"`），控件名直接当属性用（`c.BtnApply`）。
+- **可视化设计器**：`UIDesign.exe` 打开 `designer_layout.xaml` 做壳，画布拖放控件、属性表改值、对象树看层级、XAML 代码坞同步，改完直接跑。
+- **一致的双端渲染**：设计器画布、独立预览器、运行时用同一批 C++ 绘制函数，避免“设计器好看、跑起来不一样”。
+
 ## 项目简介
 
 PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XAML UI 技术桥接到 Python 的开发库。通过 pybind11 实现 C++ 到 Python 的绑定，结合自绘 MFC 控件库和 XAML 声明式 UI，实现 CAD 二次开发中的现代化界面开发能力。
