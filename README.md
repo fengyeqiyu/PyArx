@@ -11,8 +11,6 @@ PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XAML UI 技术桥接到 P
 - **Python 绑定**：使用 pybind11 将 ObjectArx 核心类库暴露为 Python 模块
 - **自绘控件库**：基于 MFC 的完全自绘控件，支持皮肤定制
 - **XAML 布局**：支持 XAML 声明式 UI 定义，配合 Python 事件回调
-- **WebView 集成**：内置 WebView 承载能力，支持混合开发
-- **QML 支持**：可选的 QML 界面开发方式
 
 ## 目录结构
 
@@ -22,9 +20,7 @@ PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XAML UI 技术桥接到 P
 | `PyArxEngine` | 几何计算与业务逻辑引擎 |
 | `MfcXamlCore` | XAML 解析引擎、控件库（controls\Xaml*.h/.cpp）、属性表（XamlTypes.h）、事件契约（XamlEvents.h） |
 | `PyMfcXaml` | MFC 宿主程序，包含窗口管理、皮肤自绘、事件派发（PyMfcHost / PyMfcProcs / PyMfcLoad） |
-| `PyMfcWebView` | WebView 承载模块 |
-| `MFCWebView` | WebView 核心实现，包含 JSON 解析、WebShell 命令处理 |
-| `PyArxQml` | QML 集成模块 |
+| `MfcXamlRuntime` | 复合控件运行框架（Python 实现） |
 | `UIDesign` | UI 设计器 |
 | `Viewer` / `XamlViewer` | 预览工具 |
 | `plugins` | 用 XAML 组合的复合控件（通用组合下沉到 C++ 基础控件） |
@@ -95,6 +91,7 @@ ObjectArx 核心 Python 绑定，包含：
 - 符号表（图层、线型、块表等）
 - 选择集与过滤
 - 反应器（数据库反应器、对象反应器）
+- 侧栏（CAdUiPaletteSet / CAdUiPalette），页内控件宿主由 GUI 层回填
 
 ### MfcXamlCore
 
@@ -105,13 +102,6 @@ XAML 解析与控件系统：
 - 几何引擎：基于 Boost.Geometry 的几何计算
 - SVG 支持：nanosvg 实现的 SVG 渲染
 - D3D11 渲染：Direct3D 11 后端渲染
-
-### MFCWebView
-
-WebView 承载方案：
-- 双窗口模式（侧栏 + 主区）
-- JSON 命令协议
-- 双向通信：页面 ↔ C++
 
 ### MfcXamlRuntime
 
