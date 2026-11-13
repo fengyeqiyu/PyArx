@@ -59,3 +59,8 @@ tests/**/_*.gif
 # 本地凭据/令牌目录一律不入库
 GITEE令牌/
 *令牌*
+
+__pycache__/
+*.pyc
+docs/_probe_profile/
+docs/_qt_baseline/
