@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "DesignerPaneView.h"
 #include "DesignerPaneInternal.h"
 #include <algorithm>
@@ -135,10 +135,58 @@ DesignerPaneView::SurfaceHit DesignerPaneView::surfaceHitTest(CPoint pt) const
     return h;
 }
 
+// 无边框窗体：贴窗口四边 6px 起缩放，标题行空白处起拖动；双击标题行切换最大化
+bool DesignerPaneView::tryFrameChrome(CPoint pt)
+{
+    HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
+    if (root == nullptr)
+        return false;
+    RECT wr = {};
+    ::GetWindowRect(root, &wr);
+    POINT sp = pt;
+    ClientToScreen(&sp);
+
+    const int edge = 6;
+    UINT ht = 0;
+    const bool left = sp.x - wr.left < edge;
+    const bool right = wr.right - sp.x < edge;
+    const bool top = sp.y - wr.top < edge;
+    const bool bottom = wr.bottom - sp.y < edge;
+    if (top) ht = left ? HTTOPLEFT : (right ? HTTOPRIGHT : HTTOP);
+    else if (bottom) ht = left ? HTBOTTOMLEFT : (right ? HTBOTTOMRIGHT : HTBOTTOM);
+    else if (left) ht = HTLEFT;
+    else if (right) ht = HTRIGHT;
+    if (ht != 0)
+    {
+        ::ReleaseCapture();
+        ::SendMessageW(root, WM_NCLBUTTONDOWN, (WPARAM)ht, 0);
+        return true;
+    }
+    return false;
+}
+
 void DesignerPaneView::surfaceToolClick(int idx)
 {
     if (idx < 0 || idx >= (int)m_surfToolNames.size()) return;
     const CString name(m_surfToolNames[idx].c_str());
+
+    // 窗口按钮：最小化 / 最大化（再点还原）/ 关闭，直接发给顶层框架
+    if (name.Compare(_T("btnWinMin")) == 0 || name.Compare(_T("btnWinMax")) == 0 ||
+        name.Compare(_T("btnWinClose")) == 0)
+    {
+        HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
+        if (root != nullptr)
+        {
+            if (name.Compare(_T("btnWinMin")) == 0)
+                ::PostMessageW(root, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+            else if (name.Compare(_T("btnWinClose")) == 0)
+                ::PostMessageW(root, WM_SYSCOMMAND, SC_CLOSE, 0);
+            else
+                ::PostMessageW(root, WM_SYSCOMMAND, ::IsZoomed(root) ? SC_RESTORE : SC_MAXIMIZE, 0);
+        }
+        Invalidate(FALSE);
+        return;
+    }
     const UINT id = ensureAction(name);   // 复用菜单同一套命令分发
     OnDynamicCmd(id);
     Invalidate(FALSE);
@@ -149,6 +197,20 @@ void DesignerPaneView::surfaceLButtonDown(CPoint pt)
     // 有内联编辑框时先落定上一次编辑：点别处即提交
     if (m_surfPropEditRow != -1) commitPropEditSurface();
     if (m_codeEditing) commitCodeEdit();
+
+    // 无边框窗体：先判贴边缩放，再判标题行拖动
+    if (tryFrameChrome(pt))
+        return;
+    if (pt.y < m_surfTitleStrip && surfaceHitTest(pt).kind == SurfaceHit::None)
+    {
+        HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
+        if (root != nullptr)
+        {
+            ::ReleaseCapture();
+            ::SendMessageW(root, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+        }
+        return;
+    }
 
     SurfaceHit h = surfaceHitTest(pt);
     switch (h.kind)

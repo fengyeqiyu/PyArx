@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 // DesignerPaneView：设计器内容视图（可嵌入任意 MFC 宿主）
 //
 // 本类只管"画什么、点了怎么反应"，不再假定自己是顶层框架窗口：
@@ -222,6 +222,7 @@ namespace uidesign
             int index = -1;      // 按钮/行/分割条序号
             bool onIcon = false; // 点在树行的展开/折叠方框上（而不是文字区）
         };
+        int m_surfTitleStrip = 28;   // 标题/菜单条下沿（无边框窗体的拖动区）
         std::vector<RECT>        m_surfToolRects;       // 工具栏按钮矩形（与 m_surfToolNames 同序）
         std::vector<std::wstring> m_surfToolNames;      // 按钮 Name（交给命令分发）
         // 菜单条：XAML 里 MenuBar 的顶层 MenuItem 横排，点击弹出系统下拉菜单
@@ -257,6 +258,8 @@ namespace uidesign
     int  m_surfInheritPt = 0;              // 父容器声明的字号（ToolBar/StatusBar 往下传，子元素不必逐个写 FontSize）
         SurfaceHit surfaceHitTest(CPoint pt) const;
         void surfaceLButtonDown(CPoint pt);
+        // 无边框窗体：贴边拖拽改尺寸 / 标题行拖拽移动（交给顶层框架按 NC 消息处理）
+        bool tryFrameChrome(CPoint pt);
         void surfaceLButtonUp(CPoint pt);
         void surfaceMouseMove(CPoint pt, UINT flags);
         BOOL surfaceMouseWheel(CPoint pt, short delta);

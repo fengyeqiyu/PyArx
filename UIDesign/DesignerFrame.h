@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "stdafx.h"
 #include <afxcontrolbars.h>     // CFrameWndEx / CDockablePane / CDockingManager 全家桶
 #include "DesignerDockPane.h"
@@ -25,6 +25,8 @@ namespace uidesign
         afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
         afx_msg void OnSize(UINT nType, int cx, int cy);
         afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+        afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
+        afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
         DECLARE_MESSAGE_MAP()
 
     private:

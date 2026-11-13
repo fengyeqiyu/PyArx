@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 // CDesignCanvas：设计器预览画布
 // 基于统一运行时 XamlElement 树渲染（GDI 预览 + 命中测试 + 选中控制点 + 网格点阵）。
 // 选中节点用路径（uidesign::Path，根到节点的 child 索引链）表达，避免值语义下指针失效。
 #include "stdafx.h"
+#include "XamlTheme.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <algorithm>
@@ -11,6 +12,7 @@
 #include "XamlGeometry.h"      // 绘制与夹点用的纯几何库（正圆弧、直线端点、各类夹点）
 #include "UiDocUtil.h"
 #include "XamlDraw.h"
+#include "XamlLeafPaint.h"   // 叶子控件统一渲染器（预览器同一份）
 #include "XamlD2D.h"
 #include "XamlControls.h"
 #include "DesignerTools.h"
@@ -18,19 +20,20 @@
 
 namespace uidesign
 {
-    // 画布上控件用的浅色调色板：与运行时原生控件一致（深色外壳只用于设计器自身 chrome）
+    // 画布上控件用的浅色调色板：值统一来自 MfcXamlCore/XamlTheme.h，
+    // 预览器（Viewer）用同一份——这是"预览器与设计器显示不一样"的根因修复。
     namespace cvdoc
     {
-        const COLORREF kSurface = RGB(250, 250, 250);   // 容器 / 空壳
-        const COLORREF kButton  = RGB(240, 240, 240);   // 按钮底
-        const COLORREF kField   = RGB(255, 255, 255);   // 输入、列表、表格
-        const COLORREF kBorder  = RGB(173, 178, 186);   // 边框
-        const COLORREF kInk     = RGB(32, 36, 42);      // 正文
-        const COLORREF kMuted   = RGB(118, 124, 132);   // 次要文字、占位
-        const COLORREF kAccent  = RGB(0, 120, 212);     // 进度、勾选
-        const COLORREF kTrack   = RGB(235, 237, 240);   // 轨道、空槽
-        const COLORREF kHead    = RGB(238, 241, 245);   // 表头
-        const COLORREF kGrid    = RGB(214, 218, 224);   // 表格线
+        const COLORREF kSurface = xamlmfc::theme::surface;   // 容器 / 空壳
+        const COLORREF kButton  = xamlmfc::theme::button;    // 按钮底
+        const COLORREF kField   = xamlmfc::theme::field;     // 输入、列表、表格
+        const COLORREF kBorder  = xamlmfc::theme::border;    // 边框
+        const COLORREF kInk     = xamlmfc::theme::ink;       // 正文
+        const COLORREF kMuted   = xamlmfc::theme::muted;     // 次要文字、占位
+        const COLORREF kAccent  = xamlmfc::theme::accent;    // 进度、勾选
+        const COLORREF kTrack   = xamlmfc::theme::track;     // 轨道、空槽
+        const COLORREF kHead    = xamlmfc::theme::head;      // 表头
+        const COLORREF kGrid    = xamlmfc::theme::grid;      // 表格线
 
         // 画布解析 Items / Nodes / Pages 这类"竖线分隔"属性（与运行时同一语法）
         inline std::vector<std::wstring> splitBar(const std::wstring& s)
@@ -1293,6 +1296,16 @@ namespace uidesign
         // 之前画布是深色卡片、预览器是浅色原生控件，同一个文档两边看起来不像一个东西，
         // 调色板统一放在 uidesign::cvdoc（文件头部），这里直接用。
 
+
+// 画布里的图标写法与预览器一致：相对 exe 目录
+inline std::wstring canvasExeDir()
+{
+    wchar_t path[MAX_PATH] = {};
+    ::GetModuleFileNameW(nullptr, path, MAX_PATH);
+    if (wchar_t* slash = wcsrchr(path, L'\\')) *(slash + 1) = 0;
+    return std::wstring(path);
+}
+
 void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = false,
                       COLORREF inheritBg = RGB(255, 255, 255))
         {
@@ -1470,6 +1483,27 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
                 }
             }
+            // ---- 统一渲染器 ----
+            // 按钮 / 文字 / 输入框 / 勾选 / 下拉 / 进度条：直接调 MfcXamlCore/XamlLeafPaint.h，
+            // 预览器调的是同一个函数，所以画布与预览的圆角、边框、配色不会再分叉。
+            else if (tagIs(node, L"Button") || tagIs(node, L"Label") || tagIs(node, L"TextField") ||
+                     tagIs(node, L"CheckBox") || tagIs(node, L"RadioButton") ||
+                     tagIs(node, L"ComboBox") || tagIs(node, L"ProgressBar"))
+            {
+                xamlapp::XamlAppearance ap;
+                ap.backColor = node->get(L"Background");
+                if (ap.backColor.empty()) ap.backColor = node->get(L"BackColor");
+                ap.foreColor = node->get(L"Foreground");
+                ap.borderColor = node->get(L"BorderColor");
+                ap.borderStyle = bdStyle;
+                ap.fontSize = fontSize;
+                {
+                    const std::wstring op = node->get(L"Opacity");
+                    ap.opacity = op.empty() ? 255 : _wtoi(op.c_str());
+                }
+                xamlleaf::drawLeaf(cv, node, rc, ap, node->styled, inheritBg, canvasExeDir());
+            }
+
             else if (tagIs(node, L"Button"))
             {
                 // 外壳按钮：声明了 Role（胶囊）或"图标 + 标题"时按设计器外壳的样子画，

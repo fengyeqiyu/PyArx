@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "DesignerPaneView.h"
 #include "ControlCatalog.h"
 #include "../MfcXamlCore/controls/XamlMfcTags.h"   // 统一标签命名（去 X 前缀比较）
@@ -453,6 +453,14 @@ void DesignerPaneView::OnLButtonDown(UINT nFlags, CPoint pt)
 void DesignerPaneView::OnLButtonDblClk(UINT nFlags, CPoint pt)
 {
     (void)nFlags;
+    // 双击标题行 = 最大化 / 还原（无边框窗体没有系统标题栏，只能自己给）
+    if (pt.y < m_surfTitleStrip && surfaceHitTest(pt).kind == SurfaceHit::None)
+    {
+        HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
+        if (root != nullptr)
+            ::ShowWindow(root, ::IsZoomed(root) ? SW_RESTORE : SW_MAXIMIZE);
+        return;
+    }
     surfaceLButtonDown(pt);
 }
 

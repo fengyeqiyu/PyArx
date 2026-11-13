@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "DesignerFrame.h"
 #include <stdio.h>
 
@@ -32,6 +32,8 @@ BEGIN_MESSAGE_MAP(DesignerFrame, CFrameWndEx)
     ON_WM_CREATE()
     ON_WM_SIZE()
     ON_WM_ERASEBKGND()
+    ON_WM_NCCALCSIZE()
+    ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
 
 BOOL DesignerFrame::PreTranslateMessage(MSG* pMsg)
@@ -101,7 +103,48 @@ BOOL DesignerFrame::PreCreateWindow(CREATESTRUCT& cs)
     hostLog(L"[P1] PreCreateWindow enter");
     BOOL ok = CFrameWndEx::PreCreateWindow(cs);
     hostLog(L"[P2] CFrameWndEx::PreCreateWindow -> %d", (int)ok);
+
+    // 无边框窗体：去掉系统标题栏与边框，标题、最小化/最大化/关闭全部由
+    // designer_layout.xaml 的 ShellTitle / Role=WinBtn|WinClose 自绘，
+    // 于是"设计器自己的外观"也回到"由 XAML 完全控制"这条线上。
+    // WS_THICKFRAME 保留缩放能力，热区由 DesignerPaneView::tryFrameChrome 处理。
+    cs.style = WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN;
+    cs.dwExStyle |= WS_EX_APPWINDOW;    // 无边框窗口也要有任务栏按钮
     return ok;
+}
+
+// 客户区铺满整窗：不留给系统标题栏/边框任何厚度
+void DesignerFrame::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
+{
+    (void)bCalcValidRects;
+    if (lpncsp != nullptr)
+    {
+        lpncsp->rgrc[0] = lpncsp->rgrc[0];   // 保持窗口矩形，不做内缩
+    }
+    // 不调用基类：基类会按 caption 高度重新算一遍，又把边留回来
+}
+
+// 无边框窗口最大化默认会盖住任务栏：按显示器工作区收口
+void DesignerFrame::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
+{
+    if (lpMMI != nullptr)
+    {
+        HMONITOR mon = ::MonitorFromWindow(m_hWnd, MONITOR_DEFAULTTONEAREST);
+        MONITORINFO mi = {};
+        mi.cbSize = sizeof(mi);
+        if (::GetMonitorInfoW(mon, &mi))
+        {
+            lpMMI->ptMaxPosition.x = mi.rcWork.left - mi.rcMonitor.left;
+            lpMMI->ptMaxPosition.y = mi.rcWork.top - mi.rcMonitor.top;
+            lpMMI->ptMaxSize.x = mi.rcWork.right - mi.rcWork.left;
+            lpMMI->ptMaxSize.y = mi.rcWork.bottom - mi.rcWork.top;
+            lpMMI->ptMaxTrackSize.x = lpMMI->ptMaxSize.x;
+            lpMMI->ptMaxTrackSize.y = lpMMI->ptMaxSize.y;
+            lpMMI->ptMinTrackSize.x = 720;
+            lpMMI->ptMinTrackSize.y = 480;
+        }
+    }
+    CFrameWndEx::OnGetMinMaxInfo(lpMMI);
 }
 
 BOOL DesignerFrame::createFrame(const CRect& rect)

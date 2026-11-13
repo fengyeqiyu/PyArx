@@ -47,8 +47,12 @@
       <RowDefinition Height="26"/>     <!-- 状态栏 -->
     </XGrid.RowDefinitions>
 
-    <!-- ==================== 菜单栏 ==================== -->
+    <!-- ==================== 标题栏 / 菜单栏（同一行） ==================== -->
+    <!-- 窗体是无边框的（WS_POPUP + 自绘窗口按钮），标题与最小化/最大化/关闭都由这套 XAML 决定，
+         不再出现系统标题栏，也不会和下面的暗色外壳撞色。 -->
     <MenuBar Grid.Row="0">
+
+      <ShellTitle Name="winTitle" Text="PyMfc Studio"/>
 
       <MenuItem Name="mnuFile" Header="文件">
         <MenuItem Name="mnuNew"     Header="新建"/>
@@ -92,6 +96,11 @@
         <MenuItem Name="mnuCheck"   Header="校验当前 XAML"/>
         <MenuItem Name="mnuAbout"   Header="关于 PyMfc UI Designer"/>
       </MenuItem>
+
+      <!-- 窗口按钮：Dock 靠右，颜色/字形由 paintMenuBar 自绘 -->
+      <XButton Name="btnWinClose" Role="WinClose" Dock="Right" Width="46" Height="28"/>
+      <XButton Name="btnWinMax"   Role="WinBtn"   Dock="Right" Width="46" Height="28"/>
+      <XButton Name="btnWinMin"   Role="WinBtn"   Dock="Right" Width="46" Height="28"/>
 
     </MenuBar>
 

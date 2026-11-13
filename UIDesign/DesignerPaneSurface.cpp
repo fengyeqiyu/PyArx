@@ -235,6 +235,7 @@ void DesignerPaneView::paintMenuBar(XamlCanvas& cv, const RECT& rc, XamlElement*
 {
     cv.fillRect(rc, xamlctl::shell().header);
     cv.fillRect(RECT{ rc.left, rc.bottom - 1, rc.right, rc.bottom }, xamlctl::shell().line);
+    m_surfTitleStrip = rc.bottom;      // 这一行就是无边框窗体的拖动区
 
     HDC hdc = ::GetDC(nullptr);
     HFONT font = ::CreateFontW(-13, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
@@ -243,8 +244,66 @@ void DesignerPaneView::paintMenuBar(XamlCanvas& cv, const RECT& rc, XamlElement*
     HGDIOBJ oldFont = ::SelectObject(hdc, font);
 
     int x = rc.left + 8;
+    int rightX = rc.right;          // 窗口按钮从右往左排：文档顺序第一个贴着最右边
     for (auto& c : node->children)
     {
+        const std::wstring bare = xamlmfc::BareTag(c.tag);
+
+        // ---- 标题：无边框窗体的名字，画在菜单条左端 ----
+        // 文案优先取顶层窗口标题（打开/保存文档时它会被更新），缺省用 XAML 里写的 Text；
+        // 固定占一列宽度并省略号收尾，长路径不会把菜单挤到屏幕外。
+        if (_wcsicmp(bare.c_str(), L"ShellTitle") == 0)
+        {
+            std::wstring t = c.get(L"Text");
+            if (t.empty()) t = c.text;
+            HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
+            if (root != nullptr)
+            {
+                wchar_t wt[512] = {};
+                if (::GetWindowTextW(root, wt, 511) > 0)
+                    t = wt;
+            }
+            const int w = 230;
+            RECT tr = { x, rc.top, x + w, rc.bottom };
+            cv.text(tr, t, RGB(236, 240, 246),
+                    DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, 10, L"");
+            x += w;
+            continue;
+        }
+
+        // ---- 窗口按钮：自绘最小化 / 最大化 / 关闭（不依赖系统标题栏）----
+        if (_wcsicmp(bare.c_str(), L"Button") == 0)
+        {
+            const std::wstring role = c.get(L"Role");
+            if (_wcsicmp(role.c_str(), L"WinBtn") == 0 || _wcsicmp(role.c_str(), L"WinClose") == 0)
+            {
+                const int w = c.previewW > 0 ? c.previewW : 46;
+                rightX -= w;
+                RECT br = { rightX, rc.top, rightX + w, rc.bottom };
+                m_surfToolRects.push_back(br);
+                m_surfToolNames.push_back(c.name);
+                const int idx = (int)m_surfToolNames.size() - 1;
+                const bool hot = idx == m_surfHotTool;
+                const bool isClose = _wcsicmp(role.c_str(), L"WinClose") == 0;
+                if (hot)
+                    cv.fillRect(br, isClose ? RGB(196, 43, 28) : RGB(58, 64, 72));
+                const int cx = (br.left + br.right) / 2;
+                const int cy = (br.top + br.bottom) / 2;
+                const COLORREF g = hot ? RGB(255, 255, 255) : RGB(206, 212, 220);
+                if (isClose)
+                {
+                    cv.strokeLine({ cx - 5, cy - 5 }, { cx + 5, cy + 5 }, g, 1);
+                    cv.strokeLine({ cx - 5, cy + 5 }, { cx + 5, cy - 5 }, g, 1);
+                }
+                else if (_wcsicmp(c.name.c_str(), L"btnWinMax") == 0)
+                    cv.strokeRect(RECT{ cx - 5, cy - 5, cx + 5, cy + 5 }, g, 1);
+                else
+                    cv.strokeLine({ cx - 5, cy }, { cx + 5, cy }, g, 1);
+                continue;
+            }
+        }
+
+        // ---- 菜单项 ----
         std::wstring hdr = c.get(L"Header");
         if (hdr.empty()) hdr = c.text;
         if (hdr.empty()) continue;
