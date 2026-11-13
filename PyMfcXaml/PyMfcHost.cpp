@@ -6333,6 +6333,10 @@ void PyMfcHost::onGridAction(py::object cb)
 
 void PyMfcHost::fireGridAction(int ctlId, const char* action, int row, int col, const std::wstring& text)
 {
+        // py::object 的拷贝会 inc_ref，必须在持有 GIL 时做：消息可能从 C++ 消息泵
+        // （已释放 GIL）进来，先取 GIL 再碰 py::object，否则 pybind11 报
+        // "inc_ref called while the GIL is not held"。
+        py::gil_scoped_acquire gil;
         py::object fn;
         auto it = m_gridActionFor.find(ctlId);
         if (it != m_gridActionFor.end())
@@ -6341,7 +6345,6 @@ void PyMfcHost::fireGridAction(int ctlId, const char* action, int row, int col, 
             fn = m_gridAction;          // 没按控件登记才退回全局
         if (!fn)
             return;
-        py::gil_scoped_acquire gil;
         try
         {
             fn(std::string(action), row, col, text);
