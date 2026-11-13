@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """生成控件"类名 / 中文名"对照表。
 
 数据来源：
@@ -426,7 +426,7 @@ def main():
     lines.append('')
     lines.append('> 由 `tools\\gen_control_names.py` 生成，勿手改。')
     lines.append('> XAML 标签（类名）就是 `guiload` / `xamlload` 里写的标签；中文名只用于界面与文档。')
-    lines.append('> 档位口径见 `docs\\mfcxaml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。')
+    lines.append('> QML 列统一按 Qt Quick Controls 2（Qt 5.15 / Qt 6 通用）对照；纯图元（Rectangle/Ellipse/Line/Arc）按 QtQuick 基础类型，窗口类按 QtQuick.Window。\n> 档位口径见 `docs\\mfcxaml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。')
     lines.append('> QML / WPF / WinForms 三列是"同一套界面换引擎时落在哪个类型"，"QML 方式"只说 QML 侧的同名/组合/自绘；')
     lines.append('> 写"无"的表示该平台没有等价内置控件，只能组合或自绘，迁移时是重写而不是换标签。')
     lines.append('')
@@ -440,7 +440,7 @@ def main():
         rows.sort(key=lambda kv: kv[0].lower())
         lines.append('## %s（%s）' % (CAT_CN.get(catkey, catkey), len(rows)))
         lines.append('')
-        lines.append('| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |')
+        lines.append('| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |')
         lines.append('|---|---|---|---|---|---|---|---|')
         for tag, (c, w, h) in rows:
             info = iface.get(bare(tag), {})

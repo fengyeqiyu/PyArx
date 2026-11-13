@@ -2,13 +2,14 @@
 
 > 由 `tools\gen_control_names.py` 生成，勿手改。
 > XAML 标签（类名）就是 `guiload` / `xamlload` 里写的标签；中文名只用于界面与文档。
+> QML 列统一按 Qt Quick Controls 2（Qt 5.15 / Qt 6 通用）对照；纯图元（Rectangle/Ellipse/Line/Arc）按 QtQuick 基础类型，窗口类按 QtQuick.Window。
 > 档位口径见 `docs\mfcxaml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。
 > QML / WPF / WinForms 三列是"同一套界面换引擎时落在哪个类型"，"QML 方式"只说 QML 侧的同名/组合/自绘；
 > 写"无"的表示该平台没有等价内置控件，只能组合或自绘，迁移时是重写而不是换标签。
 
 ## 容器（13）
 
-| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XBorder` | 边框容器 | Rectangle（border.*） | Border | Panel（BorderStyle） | 组合 | — | — |
 | `XDivider` | 分隔线 | Rectangle（height: 1）/ HorizontalDivider | Separator / Rectangle | Label（BorderStyle）/ Panel | 组合 | C 仅布局 | 19 |
@@ -26,7 +27,7 @@
 
 ## 按钮（8）
 
-| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XButton` | 按钮 | Button | Button | Button | 同名 | B 薄 | 20 |
 | `XCheckBox` | 复选框 | CheckBox | CheckBox | CheckBox | 同名 | B 薄 | 21 |
@@ -39,7 +40,7 @@
 
 ## 输入控件（13）
 
-| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XChoice` | 选择框 | ComboBox（editable:false） | ComboBox（IsEditable=False） | ComboBox（DropDownList） | 同名 | B 薄 | 20 |
 | `XCodeEditor` | 代码编辑器 | TextArea（等宽字体 + 行号槽） | TextBox（等宽 + 行号自绘） | TextBox（自绘行号）/ RichTextBox | 组合 | A 基本 | 22 |
@@ -57,7 +58,7 @@
 
 ## 显示控件（8）
 
-| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XBusyIndicator` | 忙碌指示器 | BusyIndicator | ProgressBar（IsIndeterminate） | ProgressBar（Marquee） | 同名 | C 仅布局 | 19 |
 | `XHyperlink` | 超链接 | Label + MouseArea（link 样式） | Hyperlink（TextBlock 内联） | LinkLabel | 组合 | B 薄 | 21 |
@@ -70,7 +71,7 @@
 
 ## 数据视图（9）
 
-| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XGridView` | 网格视图 | GridView | ListView（GridView 视图） | ListView（LargeIcon） | 同名 | S 完整 | 24 |
 | `XPage` | 页面 | Page | Frame / TabItem | TabPage / Panel | 同名 | B 薄 | 21 |
@@ -84,7 +85,7 @@
 
 ## 功能条（3）
 
-| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XMenuBar` | 菜单栏 | MenuBar | Menu | MenuBar | 组合 | B 薄 | 21 |
 | `XToolBar` | 工具栏 | ToolBar | ToolBar | ToolBar | 组合 | B 薄 | 21 |
@@ -92,7 +93,7 @@
 
 ## 浮层（7）
 
-| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XDialog` | 对话框 | Dialog | Window（ShowDialog） | Form（ShowDialog） | 同名 | A 基本 | 22 |
 | `XDrawer` | 抽屉面板 | Drawer | 无（Popup + 动画） | 无（Panel + 动画） | 同名 | — | — |
@@ -104,14 +105,14 @@
 
 ## 画布（2）
 
-| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XPowerCanvas` | 配电规划画布 | Canvas / Shape | Canvas（自绘 Path） | Panel（Graphics 自绘） | 自绘 | B 薄 | 20 |
 | `XQCanvas` | 通用画布 | Canvas / Item | Canvas（自绘） | Panel（Graphics 自绘） | 自绘 | B 薄 | 21 |
 
 ## 绘制图元（4）
 
-| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
 | `XArc` | 圆弧 | Shape + PathAngleArc | Path（ArcSegment） | Graphics.DrawArc（自绘） | 自绘 | — | — |
 | `XEllipse` | 椭圆 | Shape（PathArc） | Ellipse | Graphics.DrawEllipse（自绘） | 自绘 | — | — |
