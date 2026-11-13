@@ -336,10 +336,29 @@ inline void drawLeaf(XamlCanvas& cv, XamlElement* el, const RECT& rc,
         }
         if (isAnyTag(tag, {L"Divider"}))
         {
+            // 方向、粗细、颜色全部来自 XAML：Orientation / Thickness / Background / Foreground
+            COLORREF ink = xamlmfc::theme::border;
+            COLORREF c1;
+            if (xamlapp::ParseColor(el->get(L"Background"), c1)) ink = c1;
+            else if (xamlapp::ParseColor(el->get(L"Foreground"), c1)) ink = c1;
+            int thick = _wtoi(el->get(L"Thickness").c_str());
+            if (thick <= 0) thick = 1;
+            const std::wstring dir = el->get(L"Orientation");
+            const bool vertical = _wcsicmp(dir.c_str(), L"Vertical") == 0 ||
+                                  _wcsicmp(dir.c_str(), L"V") == 0 ||
+                                  (dir.empty() && (rc.right - rc.left) <= 4);
             RECT line = rc;
-            line.top = (rc.top + rc.bottom) / 2;
-            line.bottom = line.top + 1;
-            cv.fillRect(line, xamlmfc::theme::border);
+            if (vertical)
+            {
+                line.left = (rc.left + rc.right) / 2;
+                line.right = line.left + thick;
+            }
+            else
+            {
+                line.top = (rc.top + rc.bottom) / 2;
+                line.bottom = line.top + thick;
+            }
+            cv.fillRect(line, ink);
             return;
         }
         if (isAnyTag(tag, {L"Hyperlink"}))

@@ -89,6 +89,7 @@ inline void xamlDrawTreeLike(XamlCanvas& cv, const RECT& rc, const XamlElement& 
                              COLORREF ink, COLORREF edge, int lineH = 20)
 {
     if (rc.right <= rc.left || rc.bottom <= rc.top) return;
+    { const std::wstring lh = el.get(L"LineHeight"); if (!lh.empty()) lineH = _wtoi(lh.c_str()); }
     // 外观以节点自身属性为第一来源：Background 定底色、Foreground 定文字色
     COLORREF win = ::GetSysColor(COLOR_WINDOW);
     COLORREF ink2 = ink;
@@ -108,7 +109,13 @@ inline void xamlDrawTreeLike(XamlCanvas& cv, const RECT& rc, const XamlElement& 
                              _wcsicmp(c.get(L"HasChildren").c_str(), L"1") == 0;
         const bool sel = _wcsicmp(c.get(L"Selected").c_str(), L"True") == 0;
         RECT row{ rc.left, y, rc.right, y + lineH };
-        if (sel) cv.fillRect(row, RGB(210, 226, 250));
+        if (sel)
+        {
+            // 选中底色：XAML 的 SelectionColor 优先，缺省按底色明暗取协调色
+            COLORREF selC = GetRValue(win) > 140 ? RGB(210, 226, 250) : RGB(38, 66, 110);
+            { COLORREF sc; if (xamlapp::ParseColor(el.get(L"SelectionColor"), sc)) selC = sc; }
+            cv.fillRect(row, selC);
+        }
         int ax = (int)rc.left + 6 + level * 14;
         if (hasKids)
         {

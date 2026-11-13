@@ -1310,16 +1310,6 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             CRect rc(node->previewX + origin.x, node->previewY + origin.y,
                      node->previewX + origin.x + node->previewW,
                      node->previewY + origin.y + node->previewH);
-            {
-                static int ncount = 0;
-                if (ncount < 40)
-                {
-                    ++ncount;
-                    const std::string dtag = diagNarrow(node->tag);
-                    diagLog("[node] %-14s rc=%d,%d,%d,%d root=%d\n", dtag.c_str(),
-                            rc.left, rc.top, rc.right, rc.bottom, isRoot ? 1 : 0);
-                }
-            }
             // 通用外观属性（catalog 暴露后，画布预览直接生效）
             COLORREF bgC = parseColor(node->get(L"Background"), (COLORREF)-1);
             if (bgC == (COLORREF)-1)
