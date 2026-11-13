@@ -1890,7 +1890,7 @@ private:
             static const wchar_t* kAttrs[] = {
                 L"Name", L"Id", L"X", L"Y", L"Width", L"Height", L"Margin", L"Padding",
                 L"Background", L"Foreground", L"BorderBrush", L"FontSize", L"FontWeight",
-                L"HorizontalAlignment", L"VerticalAlignment", L"Text", L"Content", L"Value",
+                L"HorizontalAlignment", L"VerticalAlignment", L"Text", L"Value",
                 L"MinValue", L"MaxValue", L"IsReadOnly", L"Multiline", L"MaxLength",
                 L"Placeholder", L"Orientation", L"Columns", L"Rows", L"Level", L"TabIndex",
                 L"Theme", L"TextAlignment", L"CueBanner", L"Click", L"TextChanged",

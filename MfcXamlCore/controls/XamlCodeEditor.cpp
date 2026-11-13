@@ -1,4 +1,4 @@
-﻿// XamlCodeEditor.cpp —— 实现（从 header-only 拆出，UTF-8 with BOM）
+// XamlCodeEditor.cpp —— 实现（从 header-only 拆出，UTF-8 with BOM）
 #include "XamlCodeEditor.h"
 
 void XamlCodeEditor::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
@@ -9,7 +9,6 @@ void XamlCodeEditor::createNative(IXamlMfcHost* host, int id, int /*min*/, int /
 std::vector<XamlProperty> XamlCodeEditor::ownProperties() const
 {
         return {
-            {L"Content", XamlPropType::String, true, true},
             {L"Text", XamlPropType::String, true, true},
             {L"Syntax", XamlPropType::String, true, true},
             {L"IsReadOnly", XamlPropType::Bool, true, true},
@@ -21,7 +20,7 @@ bool XamlCodeEditor::setOwnProperty(const wchar_t* name, const std::wstring& val
         if (m_host == nullptr) return false;
         const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
 
-        if (xamlprop::StrEq(key, "content") || xamlprop::StrEq(key, "text"))
+        if (xamlprop::StrEq(key, "text"))
         {
             m_text = value;
             m_host->setText(m_id, value);
@@ -46,7 +45,7 @@ bool XamlCodeEditor::setOwnProperty(const wchar_t* name, const std::wstring& val
             }
             return true;
         }
-        if (xamlprop::StrEq(key, "isreadonly") || xamlprop::StrEq(key, "readonly"))
+        if (xamlprop::StrEq(key, "isreadonly"))
         {
             m_readOnly = xamlprop::ToBool(value);
             m_host->setReadOnly(m_id, m_readOnly);
@@ -59,11 +58,11 @@ std::wstring XamlCodeEditor::getOwnProperty(const wchar_t* name) const
 {
         if (m_host == nullptr) return {};
         const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "content") || xamlprop::StrEq(key, "text"))
+        if (xamlprop::StrEq(key, "text"))
             return m_host->getText(m_id);
         if (xamlprop::StrEq(key, "syntax"))
             return syntaxName();
-        if (xamlprop::StrEq(key, "isreadonly") || xamlprop::StrEq(key, "readonly"))
+        if (xamlprop::StrEq(key, "isreadonly"))
             return m_readOnly ? L"1" : L"0";
         return {};
     }

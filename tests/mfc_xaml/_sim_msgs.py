@@ -109,7 +109,7 @@ XAML = '''<Window Title="模拟消息测试" Width="620" Height="420">
            KeyDown="onCtlKeyDown" KeyUp="onCtlKeyUp" MouseDown="onCtlMouseDown" MouseUp="onCtlMouseUp"
            GotFocus="onCtlFocus"/>
   <CheckBox Name="C1" Left="16" Top="56" Width="140" Height="26"
-            Content="勾我" Click="onClick" CheckedChanged="onChecked"/>
+            Text="勾我" Click="onClick" CheckedChanged="onChecked"/>
   <ComboBox Name="CB1" Left="16" Top="92" Width="200" Height="26"
             Items="甲|乙|丙" SelectedIndex="0"
             SelectionChanged="onSel" DropDown="onDropDown"/>

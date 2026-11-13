@@ -32,7 +32,7 @@ bool XamlRichText::setOwnProperty(const wchar_t* name, const std::wstring& value
 {
         if (m_host == nullptr) return false;
         const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "text") || xamlprop::StrEq(key, "content"))
+        if (xamlprop::StrEq(key, "text"))
         {
             m_host->setText(m_id, value);
             return true;

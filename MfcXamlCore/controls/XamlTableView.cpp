@@ -1,4 +1,4 @@
-﻿// XamlTableView.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+// XamlTableView.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
 #include "XamlTableView.h"
 
 void XamlTableView::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
@@ -18,7 +18,7 @@ const std::vector<XamlPropEntry>& XamlTableView::PropTableData()
         {L"Rows", nullptr, XamlPropType::Rows, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlTableView&>(b).SetRowsProp(v); },
          nullptr},
-        {L"SelectedRow", L"CurrentIndex|Index", XamlPropType::Int, nullptr,
+        {L"SelectedIndex", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlTableView&>(b).SetSelectedRowProp(v); },
          [](const XamlMfcControlBase& b) { return static_cast<const XamlTableView&>(b).GetSelectedRowProp(); }},
         {L"RowCount", nullptr, XamlPropType::Int, nullptr,

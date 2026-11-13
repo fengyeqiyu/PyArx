@@ -1,4 +1,4 @@
-﻿// XamlPageIndicator.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+// XamlPageIndicator.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
 #include "XamlPageIndicator.h"
 
 void XamlPageIndicator::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
@@ -11,7 +11,7 @@ std::vector<XamlProperty> XamlPageIndicator::ownProperties() const
 {
         return {{L"Name", XamlPropType::String, true, true},
                 {L"Count", XamlPropType::Int, true, true},
-                {L"CurrentIndex", XamlPropType::Int, true, true}};
+                {L"SelectedIndex", XamlPropType::Int, true, true}};
     }
 
 bool XamlPageIndicator::setOwnProperty(const wchar_t* name, const std::wstring& value)
@@ -25,7 +25,7 @@ bool XamlPageIndicator::setOwnProperty(const wchar_t* name, const std::wstring& 
             m_host->setPageCount(m_id, n);
             return true;
         }
-        if (xamlprop::StrEq(key, "currentindex") || xamlprop::StrEq(key, "index"))
+        if (xamlprop::StrEq(key, "selectedindex"))
         {
             m_host->setPageIndex(m_id, n);
             return true;
@@ -39,7 +39,7 @@ std::wstring XamlPageIndicator::getOwnProperty(const wchar_t* name) const
         const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
         if (xamlprop::StrEq(key, "count"))
             return std::to_wstring(m_host->getPageCount(m_id));
-        if (xamlprop::StrEq(key, "currentindex") || xamlprop::StrEq(key, "index"))
+        if (xamlprop::StrEq(key, "selectedindex"))
             return std::to_wstring(m_host->getPageIndex(m_id));
         return {};
     }

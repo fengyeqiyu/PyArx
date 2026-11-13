@@ -54,7 +54,6 @@ struct XamlProperty
     bool readable = true;
     bool writable = true;
     const wchar_t* enumValues = nullptr; // Enum 类型时用
-    const wchar_t* aliases = nullptr;    // 额外写法，"Text|Caption"，'|' 分隔（大小写不敏感）
 };
 
 // ---------------------------------------------------------------------------

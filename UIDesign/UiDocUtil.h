@@ -122,7 +122,7 @@ namespace uidesign
         el.hasW = true; el.w = w;
         el.hasH = true; el.h = h;
         if (!name.empty()) el.set(L"Name", name);
-        if (!text.empty()) el.set(L"Content", text);
+        if (!text.empty()) el.set(L"Text", text);
         parent->children.push_back(std::move(el));
         return &parent->children.back();
     }

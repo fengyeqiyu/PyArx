@@ -1308,7 +1308,8 @@ namespace uidesign
                 for (auto& c : node->children)
                 {
                     xamlctl::StatusCell cell;
-                    cell.text = c.get(L"Content");
+                    cell.text = c.get(L"Text");
+                    if (cell.text.empty()) cell.text = c.get(L"Content");
                     if (cell.text.empty()) cell.text = c.text;
                     cell.width = c.previewW;
                     cells.push_back(cell);

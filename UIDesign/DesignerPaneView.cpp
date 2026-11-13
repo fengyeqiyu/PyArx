@@ -1462,7 +1462,7 @@ void DesignerPaneView::toggleCodeDock()
     grid->gridRows[3].second = m_codeCollapsed ? L"34" : L"236";
     uidesign::Walk(root, [&](const Path&, XamlElement& el) {
         if (el.name == L"btnCodeToggle")
-            el.set(L"Content", m_codeCollapsed ? L"展开" : L"收起");
+            el.set(L"Text", m_codeCollapsed ? L"展开" : L"收起");
     });
     relayoutUi();
     Invalidate(FALSE);

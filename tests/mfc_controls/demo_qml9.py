@@ -11,7 +11,7 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
 <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="第九批 Repeater / GridView / PathView / QCanvas" Width="1240" Height="900">
   <Canvas>
     <Repeater x:Name="rep" Items="甲|乙|丙|丁" ItemHeight="34" Spacing="0" Canvas.Left="12" Canvas.Top="44">
-      <Button x:Name="rb" Content="行{item}" Width="104" Height="30" />
+      <Button x:Name="rb" Text="行{item}" Width="104" Height="30" />
     </Repeater>
     <GridView x:Name="gv" Width="300" Height="320" CellHeight="74" Canvas.Left="130" Canvas.Top="44" />
     <PathView x:Name="pv" Width="304" Height="150" Canvas.Left="444" Canvas.Top="44" />

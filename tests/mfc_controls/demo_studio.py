@@ -54,8 +54,8 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
     <TextBlock x:Name="swDemoLabel" Text="演示动画" Width="110" Height="20"
                Canvas.Left="668" Canvas.Top="44" FontSize="12" Foreground="#9AA4B2" TextAlign="Right" />
     <Switch x:Name="swDemo" Width="96" Height="32" Value="0" Canvas.Left="786" Canvas.Top="40" />
-    <Button x:Name="btnRefresh" Content="刷新" Width="80" Height="32" Canvas.Left="900" Canvas.Top="40" />
-    <Button x:Name="btnExport" Content="导出" Width="80" Height="32" Canvas.Left="990" Canvas.Top="40" />
+    <Button x:Name="btnRefresh" Text="刷新" Width="80" Height="32" Canvas.Left="900" Canvas.Top="40" />
+    <Button x:Name="btnExport" Text="导出" Width="80" Height="32" Canvas.Left="990" Canvas.Top="40" />
 
     <QCanvas x:Name="rule" Width="1140" Height="3" Canvas.Left="20" Canvas.Top="94"
              Commands="Line,0,1,1140,1,#2A3038,1" />
@@ -63,10 +63,10 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
     <!-- ===== 左栏：导航 ===== -->
     <TextBlock x:Name="navTitle" Text="视图" Width="160" Height="18"
                Canvas.Left="20" Canvas.Top="110" FontSize="12" Foreground="#8A94A3" />
-    <Button x:Name="nav0" Content="总览" Width="190" Height="36" Canvas.Left="20" Canvas.Top="134" />
-    <Button x:Name="nav1" Content="设备布置" Width="190" Height="36" Canvas.Left="20" Canvas.Top="174" />
-    <Button x:Name="nav2" Content="维护记录" Width="190" Height="36" Canvas.Left="20" Canvas.Top="214" />
-    <Button x:Name="nav3" Content="趋势与动画" Width="190" Height="36" Canvas.Left="20" Canvas.Top="254" />
+    <Button x:Name="nav0" Text="总览" Width="190" Height="36" Canvas.Left="20" Canvas.Top="134" />
+    <Button x:Name="nav1" Text="设备布置" Width="190" Height="36" Canvas.Left="20" Canvas.Top="174" />
+    <Button x:Name="nav2" Text="维护记录" Width="190" Height="36" Canvas.Left="20" Canvas.Top="214" />
+    <Button x:Name="nav3" Text="趋势与动画" Width="190" Height="36" Canvas.Left="20" Canvas.Top="254" />
 
     <TextBlock x:Name="navTip" Width="190" Height="72"
                Text="布置图页：点图元选中，空白处拖拽框选，Delete 删除"
@@ -133,7 +133,7 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
     <TextBlock x:Name="sw4Label" Text="本页动画" Width="120" Height="20"
                Canvas.Left="244" Canvas.Top="166" FontSize="12" Foreground="#9AA4B2" />
     <Switch x:Name="sw4" Width="96" Height="32" Value="0" Canvas.Left="244" Canvas.Top="190" />
-    <Button x:Name="ab" Content="宽度动画" Width="160" Height="40" Canvas.Left="244" Canvas.Top="236" />
+    <Button x:Name="ab" Text="宽度动画" Width="160" Height="40" Canvas.Left="244" Canvas.Top="236" />
     <Dial x:Name="ad" Width="120" Height="120" Value="0" Minimum="0" Maximum="100"
           Canvas.Left="244" Canvas.Top="292" />
     <Progress x:Name="ap" Width="300" Height="16" Value="0" Minimum="0" Maximum="100"

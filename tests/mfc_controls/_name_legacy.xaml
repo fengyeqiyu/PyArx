@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="LegacyCanvasProbe" Width="360" Height="220">
   <Canvas x:Name="root">
-    <Button x:Name="b1" Content="老写法" Width="120" Height="36" Canvas.Left="20" Canvas.Top="20" />
+    <Button x:Name="b1" Text="老写法" Width="120" Height="36" Canvas.Left="20" Canvas.Top="20" />
   </Canvas>
 </Window>

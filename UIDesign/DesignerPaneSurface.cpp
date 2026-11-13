@@ -417,7 +417,8 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // ---- 面板标题条（旧写法：带 Background 的 TextBlock）----
     if (_wcsicmp(tag.c_str(), L"TextBlock") == 0)
     {
-        std::wstring content = node->get(L"Content");
+        std::wstring content = node->get(L"Text");
+        if (content.empty()) content = node->get(L"Content");
         if (content.empty()) content = node->text;
         COLORREF bg = ParseColor(CString(node->get(L"Background").c_str()));
         COLORREF fg = ParseColor(CString(node->get(L"Foreground").c_str()));
@@ -852,12 +853,10 @@ void DesignerPaneView::buildPropRows(XamlElement* node, std::vector<xamlctl::Pro
         }
     }
 
-    // 文本类属性的真实名字随节点而变：XAML 里写的是 Content 就显示 Content，
-    // 写的是 Text/Header 就显示对应名字（此前一律显示 Text，与源码对不上）。
-    // 一个都没写时按本工程的约定显示 Content（新建控件写入的也是 Content）。
-    CString textKey = L"Content";
-    if (node->has(L"Text")) textKey = L"Text";
-    else if (node->has(L"Header")) textKey = L"Header";
+    // 文本类属性的真实名字随节点而变：XAML 里写的是 Header（GroupBox）就显示 Header，
+    // 其余一律 Text。新建控件写入的也是 Text。
+    CString textKey = L"Text";
+    if (!node->has(L"Text") && node->has(L"Header")) textKey = L"Header";
 
     const uidesign::CtrlTemplate* t = m_catalog.byTag(CString(node->tag.c_str()));
     if (t != nullptr)

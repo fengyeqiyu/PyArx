@@ -2,9 +2,9 @@
 <PaletteSet xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Width="360" Height="700">
   <Page Header="控件演示">
     <TextBlock x:Name="hint" Text="PyMfc + XAML 侧栏页内控件" Width="320" Height="20" />
-    <Button x:Name="pbtn" Content="按钮 A" Width="140" Height="30" />
-    <Button x:Name="pbtn2" Content="按钮 B" Width="140" Height="30" />
-    <CheckBox x:Name="pchk" Content="勾选我" Width="140" Height="24" />
+    <Button x:Name="pbtn" Text="按钮 A" Width="140" Height="30" />
+    <Button x:Name="pbtn2" Text="按钮 B" Width="140" Height="30" />
+    <CheckBox x:Name="pchk" Text="勾选我" Width="140" Height="24" />
     <ProgressBar x:Name="pprog" Value="65" Width="320" Height="16" />
     <TextBox x:Name="pedit" Text="CAD 侧栏输入框" Width="320" Height="26" />
     <QCanvas x:Name="pqc" Width="320" Height="140"

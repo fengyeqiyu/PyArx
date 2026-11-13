@@ -1,4 +1,4 @@
-﻿// XamlTextBox.cpp —— 实现（从 header-only 拆出，UTF-8 with BOM）
+// XamlTextBox.cpp —— 实现（从 header-only 拆出，UTF-8 with BOM）
 #include "XamlTextBox.h"
 
 void XamlTextBox::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
@@ -12,10 +12,10 @@ void XamlTextBox::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*ma
 const std::vector<XamlPropEntry>& XamlTextBox::PropTableData()
 {
     static const std::vector<XamlPropEntry> kTable = {
-        {L"Text", L"Content|Caption", XamlPropType::String, nullptr,
+        {L"Text", nullptr, XamlPropType::String, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlTextBox&>(b).SetTextProp(v); },
          [](const XamlMfcControlBase& b) { return static_cast<const XamlTextBox&>(b).GetTextProp(); }},
-        {L"IsReadOnly", L"ReadOnly", XamlPropType::Bool, nullptr,
+        {L"IsReadOnly", nullptr, XamlPropType::Bool, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlTextBox&>(b).SetReadOnlyProp(v); },
          [](const XamlMfcControlBase& b) {
              return xamlprop2::FromBool(static_cast<const XamlTextBox&>(b).m_readOnly); }},
@@ -27,7 +27,7 @@ const std::vector<XamlPropEntry>& XamlTextBox::PropTableData()
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlTextBox&>(b).SetMaxLengthProp(v); },
          [](const XamlMfcControlBase& b) {
              return xamlprop2::FromInt(static_cast<const XamlTextBox&>(b).m_maxLength); }},
-        {L"Placeholder", L"Hint|CueBanner", XamlPropType::String, nullptr,
+        {L"Placeholder", nullptr, XamlPropType::String, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlTextBox&>(b).SetPlaceholderProp(v); },
          [](const XamlMfcControlBase& b) { return static_cast<const XamlTextBox&>(b).m_placeholder; }},
     };

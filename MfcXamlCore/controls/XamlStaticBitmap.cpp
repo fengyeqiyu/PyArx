@@ -1,4 +1,4 @@
-﻿// XamlStaticBitmap.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+// XamlStaticBitmap.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
 #include "XamlStaticBitmap.h"
 
 void XamlStaticBitmap::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
@@ -16,8 +16,7 @@ bool XamlStaticBitmap::setOwnProperty(const wchar_t* name, const std::wstring& v
 {
         if (m_host == nullptr) return false;
         const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "image") || xamlprop::StrEq(key, "src") ||
-            xamlprop::StrEq(key, "source"))
+        if (xamlprop::StrEq(key, "image"))
         {
             m_host->setImage(m_id, value);
             return true;

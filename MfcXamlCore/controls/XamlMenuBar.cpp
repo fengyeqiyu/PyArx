@@ -1,4 +1,4 @@
-﻿// XamlMenuBar.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+// XamlMenuBar.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
 #include "XamlMenuBar.h"
 
 void XamlMenuBar::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
@@ -25,7 +25,7 @@ bool XamlMenuBar::setOwnProperty(const wchar_t* name, const std::wstring& value)
                 m_host->addMenuBarItem(m_id, s);
             return true;
         }
-        if (xamlprop::StrEq(key, "selectedindex") || xamlprop::StrEq(key, "index"))
+        if (xamlprop::StrEq(key, "selectedindex"))
         {
             m_host->setMenuBarSelected(m_id, xamlExtraNum(value, -1));
             return true;
@@ -37,7 +37,7 @@ std::wstring XamlMenuBar::getOwnProperty(const wchar_t* name) const
 {
         if (m_host == nullptr) return {};
         const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "selectedindex") || xamlprop::StrEq(key, "index"))
+        if (xamlprop::StrEq(key, "selectedindex"))
             return std::to_wstring(m_host->getMenuBarSelected(m_id));
         return {};
     }

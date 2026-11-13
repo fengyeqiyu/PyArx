@@ -2,7 +2,7 @@
 """冒烟：属性表（S1）+ 事件契约（S2）落地验证。
 
 读回一律走宿主可观测的键（text / readOnly / curSel / rowCount），
-属性表内部的别名（Caption / Hint / CurSel / Index）则通过"写入生效"来验证。
+属性只认规范名，旧别名（Content / Caption / Index 等）已删除，这里按规范名验证写入生效。
 """
 import os
 import sys
@@ -38,10 +38,10 @@ def onScroll(v):
 
 XAML = '''<Window Title="属性表冒烟" Width="640" Height="480">
   <TextBox Name="T1" Left="16" Top="16" Width="240" Height="28"
-           Caption="初始" Hint="提示" MaxLength="12" IsReadOnly="true"
+           Text="初始" Placeholder="提示" MaxLength="12" IsReadOnly="true"
            TextChanged="onText" DoubleClick="onDbl" KeyDown="onKey" FooBar="1"/>
   <CheckBox Name="C1" Left="16" Top="56" Width="120" Height="24"
-            Content="勾我" CheckedChanged="onCheck"/>
+            Text="勾我" CheckedChanged="onCheck"/>
   <ComboBox Name="CB1" Left="16" Top="88" Width="200" Height="26"
             Items="甲|乙|丙" SelectedIndex="1" DropDownStyle="DropDown"/>
   <TableView Name="TV1" Left="16" Top="128" Width="320" Height="160"
@@ -75,11 +75,11 @@ def main():
     bid = names['CB1']
     vid = names['TV1']
 
-    # S1：别名 Caption -> Text
+    # S1：规范名 Text（原先的 Caption/Hint 等别名已全部删除）
     v = win.getXamlValue(tid, 'text')
-    check(v == '初始', 'TextBox 别名 Caption 生效', v)
+    check(v == '初始', 'TextBox Text 生效', v)
     v = win.getXamlValue(tid, 'readOnly')
-    check(v == 'true', 'TextBox 别名 IsReadOnly 生效', v)
+    check(v == 'true', 'TextBox IsReadOnly 生效', v)
     v = win.getXamlValue(bid, 'curSel')
     check(v == '1', 'ComboBox SelectedIndex 生效', v)
     v = win.getXamlValue(bid, 'text')

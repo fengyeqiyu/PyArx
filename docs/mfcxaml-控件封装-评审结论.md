@@ -431,3 +431,35 @@ Windows 版 Chromium 的 `cursor:grab` / `cursor:grabbing` 是运行时用内部
    把枚举放 `XamlTypes.h`，宿主 include 同一个头——一处定义、两处使用。
 5. 复合控件空心化（首轮 P0-4）依旧成立：`kSkinBox` 62 处证明自绘件的绘制/命中/光标逻辑都还在宿主里，
    这条要等上面 1~4 做完再动，顺序不能倒。
+---
+
+## 追加：属性规范名统一（去别名）
+
+约束：一个属性只保留一个规范名，别名分支全部删除，不再为旧写法回填。落实位置：
+
+- **实现层**：25 个控件 cpp 的 `xamlprop::StrEq` 别名链压成单条规范分支；属性表第二字段（Aliases）全部清空为 `nullptr`；`XamlProperty.aliases` 字段与其传递一并回退。
+- **声明层**：重复声明合并（CodeEditor/ToolTip 的 Content+Text、PageView 的 CurrentIndex+Index、PageIndicator/PathView/TreeView 的 CurrentIndex/Index/SelectedRow 统一为 SelectedIndex）。
+- **解析层**：`XamlCore` 的语义文字取 `Text → Content(Popup 正文) → Header`；`PyMfcLoad` 建控件时同样按此顺序，没有再以 Content 为第一优先。
+- **设计器**：`UIDesign` 新建控件写 `Text`，画面/属性面板读 `Text`（GroupBox 用 `Header`），代码折叠按钮改写 `Text`。
+- **仓库用法**：`tests`、`examples`、`UIDesign` 下 36 个文件、100 处属性写法已同步（脚本 `tests\mfc_xaml\_unify_usage.py`，可按标签-属性映射重跑）。
+
+规范名清单（其余一律视为错误写法）：
+
+| 概念 | 规范名 | 被删除的旧写法 |
+|---|---|---|
+| 显示文字 | Text | Content、Caption、Header（TextBlock/GroupBox 混用） |
+| 容器标题 | Header（仅 GroupBox） | Content、Text |
+| 勾选状态 | Checked | IsChecked、On |
+| 数值 | Value | Position |
+| 取值范围 | Minimum / Maximum | Min、Max；Dial 的 From/To |
+| 区间滑块 | LowValue / HighValue | From、To |
+| 选中项 | SelectedIndex | Index、CurrentIndex、SelectedRow、CurSel |
+| 分页滚动 | PageSize | Page |
+| 列表内容 | Items | Strings、Choices |
+| 图片 | Image | Source、Src |
+| 链接 | Url | Href、NavigateUrl |
+| 只读 | IsReadOnly | ReadOnly |
+| 滚动范围（ScrolledWindow） | ScrollMin / ScrollMax | Minimum / Maximum |
+| 计数 | Count | ModelCount |
+
+验证：`_smoke_proptable.py` 10/10、`_sim_msgs.py` 15/15、`pp_test_all.py` 27/27；配电图应用截图正常（39 节点、工具条与表头文字完整）。`UIDesign` 源文件 `ClCompile` 无错误（完整链接阶段受本机提权限制未跑，属既有环境问题）。

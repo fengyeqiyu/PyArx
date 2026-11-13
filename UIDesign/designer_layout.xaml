@@ -99,46 +99,46 @@
     <ToolBar Grid.Row="1" Spacing="2" Padding="10,2,10,0" FontSize="8">
 
       <!-- 文件 -->
-      <Button Name="btnNew"  Icon="res/new.png"  Content="新建" Width="46" Height="44"/>
-      <Button Name="btnOpen" Icon="res/open.png" Content="打开" Width="46" Height="44"/>
-      <Button Name="btnSave" Icon="res/save.png" Content="保存" Width="46" Height="44"/>
+      <Button Name="btnNew"  Icon="res/new.png"  Text="新建" Width="46" Height="44"/>
+      <Button Name="btnOpen" Icon="res/open.png" Text="打开" Width="46" Height="44"/>
+      <Button Name="btnSave" Icon="res/save.png" Text="保存" Width="46" Height="44"/>
       <Separator Width="9"/>
 
       <!-- 撤销 / 重做 -->
-      <Button Name="btnUndo" Icon="res/undo.png" Content="撤销" Width="46" Height="44"/>
-      <Button Name="btnRedo" Icon="res/redo.png" Content="重做" Width="46" Height="44"/>
+      <Button Name="btnUndo" Icon="res/undo.png" Text="撤销" Width="46" Height="44"/>
+      <Button Name="btnRedo" Icon="res/redo.png" Text="重做" Width="46" Height="44"/>
       <Separator Width="9"/>
 
       <!-- 剪贴板 -->
-      <Button Name="btnCut"    Icon="res/cut.png"   Content="剪切" Width="46" Height="44"/>
-      <Button Name="btnCopy"   Icon="res/copy.png"  Content="复制" Width="46" Height="44"/>
-      <Button Name="btnPaste"  Icon="res/paste.png" Content="粘贴" Width="46" Height="44"/>
-      <Button Name="btnDelete" Icon="res/del.png"   Content="删除" Width="46" Height="44"/>
+      <Button Name="btnCut"    Icon="res/cut.png"   Text="剪切" Width="46" Height="44"/>
+      <Button Name="btnCopy"   Icon="res/copy.png"  Text="复制" Width="46" Height="44"/>
+      <Button Name="btnPaste"  Icon="res/paste.png" Text="粘贴" Width="46" Height="44"/>
+      <Button Name="btnDelete" Icon="res/del.png"   Text="删除" Width="46" Height="44"/>
       <Separator Width="9"/>
 
       <!-- 对齐 / 均匀分布（Qt Designer 同组语义：多选按选区外接框，单选按父容器） -->
-      <Button Name="btnAlignLeft"     Icon="res/alignleft.png"    Content="左"     Width="34" Height="44"/>
-      <Button Name="btnAlignHCenter"  Icon="res/alignhcenter.png" Content="居中" Width="34" Height="44"/>
-      <Button Name="btnAlignRight"    Icon="res/alignright.png"   Content="右"     Width="34" Height="44"/>
-      <Button Name="btnAlignTop"      Icon="res/aligntop.png"     Content="上"     Width="34" Height="44"/>
-      <Button Name="btnAlignVCenter"  Icon="res/alignvcenter.png" Content="居中" Width="34" Height="44"/>
-      <Button Name="btnAlignBottom"   Icon="res/alignbottom.png"  Content="下"     Width="34" Height="44"/>
-      <Button Name="btnDistH"         Icon="res/disth.png"        Content="横分布" Width="56" Height="44"/>
-      <Button Name="btnDistV"         Icon="res/distv.png"        Content="纵分布" Width="56" Height="44"/>
+      <Button Name="btnAlignLeft"     Icon="res/alignleft.png"    Text="左"     Width="34" Height="44"/>
+      <Button Name="btnAlignHCenter"  Icon="res/alignhcenter.png" Text="居中" Width="34" Height="44"/>
+      <Button Name="btnAlignRight"    Icon="res/alignright.png"   Text="右"     Width="34" Height="44"/>
+      <Button Name="btnAlignTop"      Icon="res/aligntop.png"     Text="上"     Width="34" Height="44"/>
+      <Button Name="btnAlignVCenter"  Icon="res/alignvcenter.png" Text="居中" Width="34" Height="44"/>
+      <Button Name="btnAlignBottom"   Icon="res/alignbottom.png"  Text="下"     Width="34" Height="44"/>
+      <Button Name="btnDistH"         Icon="res/disth.png"        Text="横分布" Width="56" Height="44"/>
+      <Button Name="btnDistV"         Icon="res/distv.png"        Text="纵分布" Width="56" Height="44"/>
       <Separator Width="9"/>
 
       <!-- 视图 -->
-      <Button Name="btnGrid"  Icon="res/grid.png"  Content="网格" Width="46" Height="44"/>
-      <Button Name="btnRuler" Icon="res/ruler.png" Content="标尺" Width="46" Height="44"/>
+      <Button Name="btnGrid"  Icon="res/grid.png"  Text="网格" Width="46" Height="44"/>
+      <Button Name="btnRuler" Icon="res/ruler.png" Text="标尺" Width="46" Height="44"/>
       <Separator Width="9"/>
 
       <!-- 缩放 -->
-      <Button Name="btnZoomOut" Icon="res/zoomout.png" Content="缩小" Width="46" Height="44"/>
-      <Button Name="btnZoomIn"  Icon="res/zoomin.png"  Content="放大" Width="46" Height="44"/>
+      <Button Name="btnZoomOut" Icon="res/zoomout.png" Text="缩小" Width="46" Height="44"/>
+      <Button Name="btnZoomIn"  Icon="res/zoomin.png"  Text="放大" Width="46" Height="44"/>
 
       <!-- 右端动作：预览 / 校验（胶囊按钮，Dock 靠右） -->
-      <Button Name="btnCheck"   Role="Ghost"   Content="校验" Dock="Right" Width="68" Height="26" Margin="0,10,10,10"/>
-      <Button Name="btnPreview" Role="Primary" Content="预览" Dock="Right" Width="80" Height="26" Margin="0,10,16,10"/>
+      <Button Name="btnCheck"   Role="Ghost"   Text="校验" Dock="Right" Width="68" Height="26" Margin="0,10,10,10"/>
+      <Button Name="btnPreview" Role="Primary" Text="预览" Dock="Right" Width="80" Height="26" Margin="0,10,16,10"/>
 
     </ToolBar>
 

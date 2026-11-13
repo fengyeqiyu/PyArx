@@ -1,4 +1,4 @@
-﻿// XamlScrolledWindow.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+// XamlScrolledWindow.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
 #include "XamlScrolledWindow.h"
 
 void XamlScrolledWindow::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
@@ -17,13 +17,13 @@ bool XamlScrolledWindow::setOwnProperty(const wchar_t* name, const std::wstring&
 {
         if (m_host == nullptr) return false;
         const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "scrollmin") || xamlprop::StrEq(key, "minimum"))
+        if (xamlprop::StrEq(key, "scrollmin"))
         {
             m_minValue = _wtoi(value.c_str());
             applyRange();
             return true;
         }
-        if (xamlprop::StrEq(key, "scrollmax") || xamlprop::StrEq(key, "maximum"))
+        if (xamlprop::StrEq(key, "scrollmax"))
         {
             m_maxValue = _wtoi(value.c_str());
             applyRange();

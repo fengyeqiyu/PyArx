@@ -1,4 +1,4 @@
-﻿// XamlSlider.cpp —— 实现（属性表版，UTF-8 with BOM）
+// XamlSlider.cpp —— 实现（属性表版，UTF-8 with BOM）
 #include "XamlSlider.h"
 
 void XamlSlider::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
@@ -12,7 +12,7 @@ void XamlSlider::createNative(IXamlMfcHost* host, int id, int minValue, int maxV
 const std::vector<XamlPropEntry>& XamlSlider::PropTableData()
 {
     static const std::vector<XamlPropEntry> kTable = {
-        {L"Minimum", L"Min", XamlPropType::Int, nullptr,
+        {L"Minimum", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& s = static_cast<XamlSlider&>(b);
              s.m_min = xamlprop2::ToInt(v, s.m_min);
@@ -23,7 +23,7 @@ const std::vector<XamlPropEntry>& XamlSlider::PropTableData()
          [](const XamlMfcControlBase& b) {
              return xamlprop2::FromInt(static_cast<const XamlSlider&>(b).m_min);
          }},
-        {L"Maximum", L"Max", XamlPropType::Int, nullptr,
+        {L"Maximum", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& s = static_cast<XamlSlider&>(b);
              s.m_max = xamlprop2::ToInt(v, s.m_max);
@@ -34,7 +34,7 @@ const std::vector<XamlPropEntry>& XamlSlider::PropTableData()
          [](const XamlMfcControlBase& b) {
              return xamlprop2::FromInt(static_cast<const XamlSlider&>(b).m_max);
          }},
-        {L"Value", L"Position", XamlPropType::Int, nullptr,
+        {L"Value", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& s = static_cast<XamlSlider&>(b);
              s.m_value = xamlprop2::ToInt(v, s.m_value);

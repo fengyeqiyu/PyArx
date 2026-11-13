@@ -867,7 +867,7 @@ namespace
                 continue;  // 布局/资源定义，不是控件
             const py::dict attrs = child.attr("attrib").cast<py::dict>();
 
-            const std::wstring text = AttrWStringL(attrs, {"Content", "Header"});
+            const std::wstring text = AttrWStringL(attrs, {"Text", "Content", "Header"});
             const int defH = IsContainerTag(tag)
                 ? (flow.height > 0 ? flow.height : 160)
                 : DefaultHeight(tag);

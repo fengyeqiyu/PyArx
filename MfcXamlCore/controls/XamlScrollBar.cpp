@@ -1,4 +1,4 @@
-﻿// XamlScrollBar.cpp —— 实现（属性表版，UTF-8 with BOM）
+// XamlScrollBar.cpp —— 实现（属性表版，UTF-8 with BOM）
 #include "XamlScrollBar.h"
 
 void XamlScrollBar::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
@@ -40,7 +40,7 @@ const std::vector<XamlPropEntry>& XamlScrollBar::PropTableData()
          [](const XamlMfcControlBase& b) {
              return xamlprop2::FromInt(static_cast<const XamlScrollBar&>(b).m_vmax);
          }},
-        {L"Value", L"Position", XamlPropType::Int, nullptr,
+        {L"Value", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& s = static_cast<XamlScrollBar&>(b);
              s.m_value = xamlprop2::ToInt(v, s.m_value);
@@ -53,7 +53,7 @@ const std::vector<XamlPropEntry>& XamlScrollBar::PropTableData()
              const auto& s = static_cast<const XamlScrollBar&>(b);
              return xamlprop2::FromInt(s.m_host != nullptr ? s.m_host->getScrollBarValue(s.m_id) : s.m_value);
          }},
-        {L"PageSize", L"Page", XamlPropType::Int, nullptr,
+        {L"PageSize", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& s = static_cast<XamlScrollBar&>(b);
              s.m_pg = xamlprop2::ToInt(v, s.m_pg);

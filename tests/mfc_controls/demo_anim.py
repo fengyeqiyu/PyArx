@@ -13,7 +13,7 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
 <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="动画引擎演示" Width="560" Height="380">
   <Canvas>
     <TextBlock x:Name="t1" Text="PropertyAnimation：按钮 Width 140 → 420 往复（linear）" Width="460" Height="26" Canvas.Left="24" Canvas.Top="18" />
-    <Button x:Name="bt" Width="140" Height="44" Content="宽度动画" Canvas.Left="24" Canvas.Top="52" />
+    <Button x:Name="bt" Width="140" Height="44" Text="宽度动画" Canvas.Left="24" Canvas.Top="52" />
     <TextBlock x:Name="t2" Text="NumberAnimation：SpinBox Value 0 → 99 往复（outCubic）" Width="460" Height="26" Canvas.Left="24" Canvas.Top="120" />
     <SpinBox x:Name="sp" Width="220" Height="34" Value="0" Minimum="0" Maximum="99" Canvas.Left="24" Canvas.Top="152" />
     <TextBlock x:Name="t3" Text="ColorAnimation：Switch 底色在主题灰与强调蓝之间往复" Width="460" Height="26" Canvas.Left="24" Canvas.Top="206" />

@@ -3,21 +3,21 @@
         Title="基础控件测试" Width="560" Height="820">
   <StackPanel Margin="14" Spacing="8">
 
-    <TextBlock x:Name="lblHead" Content="基础控件（Button / TextBlock / TextBox / CheckBox / RadioButton / GroupBox / ComboBox / ListBox / ProgressBar / Slider）"
+    <TextBlock x:Name="lblHead" Text="基础控件（Button / TextBlock / TextBox / CheckBox / RadioButton / GroupBox / ComboBox / ListBox / ProgressBar / Slider）"
                Height="40"/>
 
     <TextBox x:Name="txtInput" Text="初始文本" Height="30"/>
-    <Button x:Name="btnOk" Content="确定" Height="32"/>
-    <CheckBox x:Name="chkAgree" Content="同意条款" Height="26"/>
-    <RadioButton x:Name="radA" Content="选项 A" Height="26"/>
-    <RadioButton x:Name="radB" Content="选项 B" Height="26"/>
-    <GroupBox x:Name="grpTest" Content="分组框" Height="70"/>
+    <Button x:Name="btnOk" Text="确定" Height="32"/>
+    <CheckBox x:Name="chkAgree" Text="同意条款" Height="26"/>
+    <RadioButton x:Name="radA" Text="选项 A" Height="26"/>
+    <RadioButton x:Name="radB" Text="选项 B" Height="26"/>
+    <GroupBox x:Name="grpTest" Header="分组框" Height="70"/>
     <ComboBox x:Name="cmbCity" Height="30"/>
     <ListBox x:Name="lstItems" Height="120"/>
     <ProgressBar x:Name="prgWork" Height="22"/>
     <Slider x:Name="sldLevel" Height="32"/>
-    <TextBlock x:Name="lblStatus" Content="就绪" Height="26"/>
-    <Button x:Name="btnHidden" Content="隐藏测试" Height="30"/>
+    <TextBlock x:Name="lblStatus" Text="就绪" Height="26"/>
+    <Button x:Name="btnHidden" Text="隐藏测试" Height="30"/>
 
   </StackPanel>
 </Window>

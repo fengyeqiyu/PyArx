@@ -15,7 +15,7 @@ XAML = r'''<?xml version="1.0" encoding="utf-8"?>
 <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PyArx CAD 动画" Width="520" Height="400">
   <Canvas>
     <TextBlock x:Name="lb" Text="宽度 / 数值 / 颜色动画 + StackView 切页" Width="470" Height="22" Canvas.Left="14" Canvas.Top="8" />
-    <Button x:Name="ab" Content="动画按钮" Width="160" Height="36" Canvas.Left="14" Canvas.Top="40" />
+    <Button x:Name="ab" Text="动画按钮" Width="160" Height="36" Canvas.Left="14" Canvas.Top="40" />
     <SpinBox x:Name="asp" Width="100" Height="30" Canvas.Left="190" Canvas.Top="42" Value="10" />
     <ProgressBar x:Name="apg" Width="300" Height="18" Canvas.Left="14" Canvas.Top="92" />
     <StackView x:Name="sv" Width="360" Height="180" Canvas.Left="14" Canvas.Top="126" />

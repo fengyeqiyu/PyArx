@@ -1,4 +1,4 @@
-﻿// XamlComboBox.cpp —— 实现（从 header-only 拆出，UTF-8 with BOM）
+// XamlComboBox.cpp —— 实现（从 header-only 拆出，UTF-8 with BOM）
 #include "XamlComboBox.h"
 
 void XamlComboBox::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
@@ -16,16 +16,16 @@ void XamlComboBox::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*m
 const std::vector<XamlPropEntry>& XamlComboBox::PropTableData()
 {
     static const std::vector<XamlPropEntry> kTable = {
-        {L"Items", L"Strings|Choices", XamlPropType::Items, nullptr,
+        {L"Items", nullptr, XamlPropType::Items, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlComboBox&>(b).SetItemsProp(v); },
          [](const XamlMfcControlBase& b) { return static_cast<const XamlComboBox&>(b).GetItemsProp(); }},
-        {L"Text", L"Content", XamlPropType::String, nullptr,
+        {L"Text", nullptr, XamlPropType::String, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlComboBox&>(b).SetTextProp(v); },
          [](const XamlMfcControlBase& b) { return static_cast<const XamlComboBox&>(b).GetTextProp(); }},
-        {L"SelectedIndex", L"CurSel", XamlPropType::Int, nullptr,
+        {L"SelectedIndex", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlComboBox&>(b).SetSelectedIndexProp(v); },
          [](const XamlMfcControlBase& b) { return static_cast<const XamlComboBox&>(b).GetSelectedIndexProp(); }},
-        {L"DropDownStyle", L"Style", XamlPropType::Enum, L"DropDownList|DropDown",
+        {L"DropDownStyle", nullptr, XamlPropType::Enum, L"DropDownList|DropDown",
          [](XamlMfcControlBase& b, const std::wstring& v) { return static_cast<XamlComboBox&>(b).SetDropDownStyleProp(v); },
          [](const XamlMfcControlBase& b) {
              return static_cast<const XamlComboBox&>(b).m_dropDownList ? L"DropDownList" : L"DropDown"; }},

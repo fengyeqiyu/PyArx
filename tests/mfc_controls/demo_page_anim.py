@@ -23,7 +23,7 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
     <!-- 第 1 页：宽度 + 进度 -->
     <Switch x:Name="s1" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
     <TextBlock x:Name="p1t" Text="第 1 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
-    <Button x:Name="p1b" Width="140" Height="42" Content="宽度动画" Canvas.Left="40" Canvas.Top="110" />
+    <Button x:Name="p1b" Width="140" Height="42" Text="宽度动画" Canvas.Left="40" Canvas.Top="110" />
     <Progress x:Name="p1p" Width="420" Height="18" Canvas.Left="40" Canvas.Top="170" Value="0" />
 
     <!-- 第 2 页：数值 -->

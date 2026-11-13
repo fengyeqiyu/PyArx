@@ -923,9 +923,9 @@ namespace
         node.name = node.get(L"x:Name");
         if (node.name.empty())
             node.name = node.get(L"Name");
-        node.text = node.get(L"Content");
+        node.text = node.get(L"Text");
         if (node.text.empty())
-            node.text = node.get(L"Text");
+            node.text = node.get(L"Content");   // Popup 的正文
         if (node.text.empty())
             node.text = node.get(L"Header");
         node.icon = node.get(L"Icon");   // 图标路径（res/xxx.png，相对 exe 目录）
@@ -2020,9 +2020,9 @@ namespace
     // 属性改了文字类属性后，语义字段（el.text）要跟着更新，否则渲染端读到旧值
     void SyncText(XamlElement& el)
     {
-        el.text = el.get(L"Content");
+        el.text = el.get(L"Text");
         if (el.text.empty())
-            el.text = el.get(L"Text");
+            el.text = el.get(L"Content");   // Popup 的正文
         if (el.text.empty())
             el.text = el.get(L"Header");
     }

@@ -14,14 +14,14 @@ CASES = {
     'abs': '''<?xml version="1.0" encoding="utf-8"?>
 <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="AbsLayoutProbe" Width="360" Height="220">
   <AbsolutePanel x:Name="root">
-    <Button x:Name="b1" Content="布局按钮" Width="120" Height="36" Canvas.Left="20" Canvas.Top="20" />
+    <Button x:Name="b1" Text="布局按钮" Width="120" Height="36" Canvas.Left="20" Canvas.Top="20" />
     <TextBlock x:Name="t1" Text="绝对定位" Width="160" Height="22" Canvas.Left="150" Canvas.Top="28" />
   </AbsolutePanel>
 </Window>''',
     'legacy': '''<?xml version="1.0" encoding="utf-8"?>
 <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="LegacyCanvasProbe" Width="360" Height="220">
   <Canvas x:Name="root">
-    <Button x:Name="b1" Content="老写法" Width="120" Height="36" Canvas.Left="20" Canvas.Top="20" />
+    <Button x:Name="b1" Text="老写法" Width="120" Height="36" Canvas.Left="20" Canvas.Top="20" />
   </Canvas>
 </Window>''',
     'draw': '''<?xml version="1.0" encoding="utf-8"?>
@@ -41,7 +41,7 @@ CASES = {
     'layout': '''<?xml version="1.0" encoding="utf-8"?>
 <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="LayoutAliasProbe" Width="360" Height="220">
   <Layout x:Name="root">
-    <Button x:Name="b1" Content="Layout 布局" Width="120" Height="36" Canvas.Left="20" Canvas.Top="20" />
+    <Button x:Name="b1" Text="Layout 布局" Width="120" Height="36" Canvas.Left="20" Canvas.Top="20" />
     <LayoutPanel x:Name="inner" Width="160" Height="80" Canvas.Left="150" Canvas.Top="20">
       <TextBlock x:Name="t1" Text="嵌套布局" Width="120" Height="22" Canvas.Left="10" Canvas.Top="10" />
     </LayoutPanel>

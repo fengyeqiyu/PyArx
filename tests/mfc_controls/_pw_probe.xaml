@@ -3,7 +3,7 @@
  <StackPanel Margin="8">
   <ProgressBar x:Name="prg" Height="26"/>
   <ListBox x:Name="lst" Height="110"/>
-  <CheckBox x:Name="chk" Content="同意条款" Height="30"/>
+  <CheckBox x:Name="chk" Text="同意条款" Height="30"/>
   <TabControl x:Name="tab" Height="80"/>
  </StackPanel>
 </Window>

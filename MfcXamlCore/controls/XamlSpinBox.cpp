@@ -1,4 +1,4 @@
-﻿// XamlSpinBox.cpp —— 实现（属性表版，UTF-8 with BOM）
+// XamlSpinBox.cpp —— 实现（属性表版，UTF-8 with BOM）
 #include "XamlSpinBox.h"
 
 void XamlSpinBox::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
@@ -15,7 +15,7 @@ void XamlSpinBox::createNative(IXamlMfcHost* host, int id, int minValue, int max
 const std::vector<XamlPropEntry>& XamlSpinBox::PropTableData()
 {
     static const std::vector<XamlPropEntry> kTable = {
-        {L"Minimum", L"Min", XamlPropType::Int, nullptr,
+        {L"Minimum", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& s = static_cast<XamlSpinBox&>(b);
              s.m_min = xamlprop2::ToInt(v, s.m_min);
@@ -26,7 +26,7 @@ const std::vector<XamlPropEntry>& XamlSpinBox::PropTableData()
          [](const XamlMfcControlBase& b) {
              return xamlprop2::FromInt(static_cast<const XamlSpinBox&>(b).m_min);
          }},
-        {L"Maximum", L"Max", XamlPropType::Int, nullptr,
+        {L"Maximum", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& s = static_cast<XamlSpinBox&>(b);
              s.m_max = xamlprop2::ToInt(v, s.m_max);
@@ -37,7 +37,7 @@ const std::vector<XamlPropEntry>& XamlSpinBox::PropTableData()
          [](const XamlMfcControlBase& b) {
              return xamlprop2::FromInt(static_cast<const XamlSpinBox&>(b).m_max);
          }},
-        {L"Value", L"Position", XamlPropType::Int, nullptr,
+        {L"Value", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& s = static_cast<XamlSpinBox&>(b);
              s.m_value = xamlprop2::ToInt(v, s.m_value);

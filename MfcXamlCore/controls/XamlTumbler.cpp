@@ -1,4 +1,4 @@
-﻿// XamlTumbler.cpp —— 实现（属性表版，UTF-8 with BOM）
+// XamlTumbler.cpp —— 实现（属性表版，UTF-8 with BOM）
 #include "XamlTumbler.h"
 
 void XamlTumbler::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
@@ -15,7 +15,7 @@ void XamlTumbler::createNative(IXamlMfcHost* host, int id, int minValue, int max
 const std::vector<XamlPropEntry>& XamlTumbler::PropTableData()
 {
     static const std::vector<XamlPropEntry> kTable = {
-        {L"Count", L"ModelCount", XamlPropType::Int, nullptr,
+        {L"Count", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& t = static_cast<XamlTumbler&>(b);
              t.m_count = xamlprop2::ToInt(v, t.m_count);
@@ -29,7 +29,7 @@ const std::vector<XamlPropEntry>& XamlTumbler::PropTableData()
              const auto& t = static_cast<const XamlTumbler&>(b);
              return xamlprop2::FromInt(t.m_host != nullptr ? t.m_host->getTumblerCount(t.m_id) : t.m_count);
          }},
-        {L"CurrentIndex", L"Index|Value", XamlPropType::Int, nullptr,
+        {L"SelectedIndex", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& t = static_cast<XamlTumbler&>(b);
              t.m_index = xamlprop2::ToInt(v, t.m_index);

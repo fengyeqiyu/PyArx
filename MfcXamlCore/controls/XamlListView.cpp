@@ -1,4 +1,4 @@
-﻿// XamlListView.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+// XamlListView.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
 #include "XamlListView.h"
 
 void XamlListView::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
@@ -48,7 +48,7 @@ bool XamlListView::setOwnProperty(const wchar_t* name, const std::wstring& value
             if (m_itemH < 20) m_itemH = 20;
             return true;
         }
-        if (xamlprop::StrEq(key, "selectedindex") || xamlprop::StrEq(key, "index"))
+        if (xamlprop::StrEq(key, "selectedindex"))
         {
             m_host->setListSelected(m_id, xamlExtraNum(value, -1));
             return true;
@@ -60,7 +60,7 @@ std::wstring XamlListView::getOwnProperty(const wchar_t* name) const
 {
         if (m_host == nullptr) return {};
         const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "selectedindex") || xamlprop::StrEq(key, "index"))
+        if (xamlprop::StrEq(key, "selectedindex"))
             return std::to_wstring(m_host->getListSelected(m_id));
         if (xamlprop::StrEq(key, "itemcount"))
             return std::to_wstring(m_host->getListItemCount(m_id));

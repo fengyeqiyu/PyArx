@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="grab probe" Width="320" Height="200">
   <StackPanel Orientation="Vertical" Spacing="6">
-    <Button x:Name="b1" Content="按钮" Width="200" Height="40" />
+    <Button x:Name="b1" Text="按钮" Width="200" Height="40" />
     <QCanvas x:Name="qc" Width="200" Height="100" Commands="Clear #232A33; Rect 10,10,80,40,#00A8E8" />
   </StackPanel>
 </Window>

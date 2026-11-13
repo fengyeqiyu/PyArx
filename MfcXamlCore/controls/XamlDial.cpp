@@ -1,4 +1,4 @@
-﻿// XamlDial.cpp —— 实现（属性表版，UTF-8 with BOM）
+// XamlDial.cpp —— 实现（属性表版，UTF-8 with BOM）
 #include "XamlDial.h"
 
 void XamlDial::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
@@ -17,7 +17,7 @@ void XamlDial::createNative(IXamlMfcHost* host, int id, int minValue, int maxVal
 const std::vector<XamlPropEntry>& XamlDial::PropTableData()
 {
     static const std::vector<XamlPropEntry> kTable = {
-        {L"Minimum", L"From|Min", XamlPropType::Int, nullptr,
+        {L"Minimum", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& d = static_cast<XamlDial&>(b);
              d.m_vmin = xamlprop2::ToInt(v, d.m_vmin);
@@ -29,7 +29,7 @@ const std::vector<XamlPropEntry>& XamlDial::PropTableData()
          [](const XamlMfcControlBase& b) {
              return xamlprop2::FromInt(static_cast<const XamlDial&>(b).m_vmin);
          }},
-        {L"Maximum", L"To|Max", XamlPropType::Int, nullptr,
+        {L"Maximum", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& d = static_cast<XamlDial&>(b);
              d.m_vmax = xamlprop2::ToInt(v, d.m_vmax);
@@ -41,7 +41,7 @@ const std::vector<XamlPropEntry>& XamlDial::PropTableData()
          [](const XamlMfcControlBase& b) {
              return xamlprop2::FromInt(static_cast<const XamlDial&>(b).m_vmax);
          }},
-        {L"Value", L"Position", XamlPropType::Int, nullptr,
+        {L"Value", nullptr, XamlPropType::Int, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& d = static_cast<XamlDial&>(b);
              d.m_value = xamlprop2::ToInt(v, d.m_value);

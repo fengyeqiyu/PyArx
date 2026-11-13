@@ -1,4 +1,4 @@
-﻿// XamlPathView.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+// XamlPathView.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
 #include "XamlPathView.h"
 
 void XamlPathView::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
@@ -12,7 +12,7 @@ std::vector<XamlProperty> XamlPathView::ownProperties() const
 {
         return {{L"Name", XamlPropType::String, true, true},
                 {L"Items", XamlPropType::String, true, true},
-                {L"CurrentIndex", XamlPropType::Int, true, true}};
+                {L"SelectedIndex", XamlPropType::Int, true, true}};
     }
 
 bool XamlPathView::setOwnProperty(const wchar_t* name, const std::wstring& value)
@@ -40,7 +40,7 @@ bool XamlPathView::setOwnProperty(const wchar_t* name, const std::wstring& value
                 m_host->addListItem(m_id, cur);
             return true;
         }
-        if (xamlprop::StrEq(key, "currentindex") || xamlprop::StrEq(key, "index"))
+        if (xamlprop::StrEq(key, "selectedindex"))
         {
             m_host->setListSelected(m_id, xamlExtraNum(value, 0));
             return true;
@@ -52,7 +52,7 @@ std::wstring XamlPathView::getOwnProperty(const wchar_t* name) const
 {
         if (m_host == nullptr) return {};
         const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "currentindex") || xamlprop::StrEq(key, "index"))
+        if (xamlprop::StrEq(key, "selectedindex"))
             return std::to_wstring(m_host->getListSelected(m_id));
         return {};
     }
