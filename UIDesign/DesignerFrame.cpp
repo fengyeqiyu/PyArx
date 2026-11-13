@@ -35,6 +35,9 @@ BEGIN_MESSAGE_MAP(DesignerFrame, CFrameWndEx)
     ON_WM_NCCALCSIZE()
     ON_WM_GETMINMAXINFO()
     ON_WM_TIMER()
+    ON_WM_ENTERSIZEMOVE()
+    ON_WM_EXITSIZEMOVE()
+    ON_WM_NCHITTEST()
     ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
@@ -106,6 +109,42 @@ BOOL DesignerFrame::PreTranslateMessage(MSG* pMsg)
     return CFrameWndEx::PreTranslateMessage(pMsg);
 }
 
+void DesignerFrame::OnEnterSizeMove()
+{
+    // 系统 SC_SIZE / SC_MOVE 循环开始：整窗改成"拉伸上一帧"预览
+    m_pane.view().beginSizeMovePreview();
+}
+
+void DesignerFrame::OnExitSizeMove()
+{
+    // 松手：恢复画布子窗口 + 强制一次全量重画，得到精确画面
+    m_pane.view().endSizeMovePreview();
+}
+
+LRESULT DesignerFrame::OnNcHitTest(CPoint point)
+{
+    // 无边框但保留系统缩放：四边 6px 直接报 HTLEFT/HTTOP...，
+    // 点下去就是系统的 SC_SIZE 循环，手感和原生窗口一致。
+    if (::IsZoomed(m_hWnd))
+        return HTCLIENT;
+    CRect r;
+    GetWindowRect(&r);
+    const int bw = 6;
+    const bool l = point.x < r.left + bw;
+    const bool rr = point.x >= r.right - bw;
+    const bool t = point.y < r.top + bw;
+    const bool b = point.y >= r.bottom - bw;
+    if (t && l) return HTTOPLEFT;
+    if (t && rr) return HTTOPRIGHT;
+    if (b && l) return HTBOTTOMLEFT;
+    if (b && rr) return HTBOTTOMRIGHT;
+    if (l) return HTLEFT;
+    if (rr) return HTRIGHT;
+    if (t) return HTTOP;
+    if (b) return HTBOTTOM;
+    return HTCLIENT;
+}
+
 BOOL DesignerFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
     hostLog(L"[P1] PreCreateWindow enter");
@@ -119,7 +158,11 @@ BOOL DesignerFrame::PreCreateWindow(CREATESTRUCT& cs)
     // 连 WS_THICKFRAME 也去掉：只要留着它，系统就保留"可缩放边框"这一层，
     // DWM 会在客户区内侧描 1px 可见边框、WM_NCHITTEST 也会把边缘判成 HTLEFT/HTRIGHT，
     // 缩放/拖动时还会走系统 SC_SIZE 循环画一圈白框。缩放改由 pane 自己 SetWindowPos 实现。
-    cs.style = WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN;
+    // 缩放/拖动交回系统（SC_SIZE / SC_MOVE）。自己 SetWindowPos 每帧改矩形，
+    // 布局与重画都挤在鼠标消息里，手感必然发涩、拖影；系统循环由 DWM 拿快照搬整窗，
+    // 画多久都不影响跟手。WS_THICKFRAME 只负责提供 HTLEFT/HTRIGHT 这类命中结果，
+    // 可见边框仍由 OnNcCalcSize 满矩形 + DWM 属性(33/34/37)压掉。
+    cs.style = WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN;
     cs.dwExStyle |= WS_EX_APPWINDOW;    // 无边框窗口也要有任务栏按钮
     return ok;
 }
@@ -265,12 +308,23 @@ void DesignerFrame::hideDockSliders()
     controlBar = ctx.bar;
     slider = ctx.sld;
 
-    if (slider != nullptr)
+    if (slider != nullptr && ::IsWindowVisible(slider))
         ::SetWindowPos(slider, nullptr, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
-    // 停靠条自己被 MFC 留出 4px 给滑块：把它铺满客户区，那 4px 就回到画面上
+    // 停靠条自己被 MFC 留出 4px 给滑块：把它铺满客户区，那 4px 就回到画面上。
+    // 只在尺寸真的不对时才改 —— 每 300ms 无条件 SetWindowPos 会触发停靠重排，整窗重画，看起来就是抖。
     if (controlBar != nullptr)
-        ::SetWindowPos(controlBar, nullptr, 0, 0, rc.Width(), rc.Height(),
-                       SWP_NOZORDER | SWP_NOACTIVATE);
+    {
+        RECT br = {};
+        ::GetWindowRect(controlBar, &br);
+        const int bw = br.right - br.left;
+        const int bh = br.bottom - br.top;
+        const int bx = br.left, by = br.top;
+        POINT org = {0, 0};
+        ::ClientToScreen(m_hWnd, &org);
+        if (bw != rc.Width() || bh != rc.Height() || bx != org.x || by != org.y)
+            ::SetWindowPos(controlBar, nullptr, 0, 0, rc.Width(), rc.Height(),
+                           SWP_NOZORDER | SWP_NOACTIVATE);
+    }
 }
 
 void DesignerFrame::postChromeFix()

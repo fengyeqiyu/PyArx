@@ -438,8 +438,11 @@ void DesignerPaneView::surfaceMouseMove(CPoint pt, UINT flags)
             if (r.Width() < 720) { if (m_frameEdges & 1) r.left = r.right - 720; else r.right = r.left + 720; }
             if (r.Height() < 480) { if (m_frameEdges & 4) r.top = r.bottom - 480; else r.bottom = r.top + 480; }
         }
+        // SWP_NOCOPYBITS：不让系统把旧内容滚动拷贝，新露出的边不会带出"旧像素拖影条"。
+        // 不做同步 UpdateWindow：每帧强刷会和后续鼠标消息互相顶，观感反而抖；
+        // 交给 WM_PAINT 正常排队，帧率由绘制速度自然决定。
         ::SetWindowPos(m_frameRoot, nullptr, r.left, r.top, r.Width(), r.Height(),
-                       SWP_NOZORDER | SWP_NOACTIVATE);
+                       SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOCOPYBITS);
         return;
     }
     if (m_dragSplit >= 0)
@@ -478,6 +481,20 @@ bool DesignerPaneView::surfaceScrollRect(const RECT& rc, CPoint pt, int& scroll,
 
 BOOL DesignerPaneView::surfaceMouseWheel(CPoint pt, short delta)
 {
+    // 光标在画布上 → 滚轮缩放（以光标为锚点），走画布自己的视图变换
+    if (m_canvas != nullptr && ::IsWindow(m_canvas->m_hWnd))
+    {
+        CRect cr;
+        m_canvas->GetWindowRect(&cr);
+        ScreenToClient(&cr);
+        if (cr.PtInRect(pt))
+        {
+            CPoint local = pt - cr.TopLeft();
+            m_canvas->zoomAt(local, delta);
+            updateStatus();
+            return TRUE;
+        }
+    }
     const int page = 0;
     (void)page;
     int pw = (int)(m_surfWidgetRc.bottom - m_surfWidgetRc.top);

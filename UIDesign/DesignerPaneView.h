@@ -82,6 +82,7 @@ namespace uidesign
         afx_msg void OnLButtonDown(UINT nFlags, CPoint pt);
         afx_msg void OnLButtonDblClk(UINT nFlags, CPoint pt);
         afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+        afx_msg LRESULT OnNcHitTest(CPoint point);
         afx_msg void OnDrawItem(int id, LPDRAWITEMSTRUCT dis);
         afx_msg void OnMeasureItem(int id, LPMEASUREITEMSTRUCT mis);
         afx_msg LRESULT OnCanvasSelect(WPARAM wParam, LPARAM lParam);
@@ -213,7 +214,22 @@ namespace uidesign
         // ---- 整窗单张 D2D 表面 ----
         // 整个客户区由一块 D2D 表面画出来，不再创建任何子 HWND 控件；
         // 唯一保留的真实窗口是画布（DesignCanvas 本身就是 D2D 直呈）。
-        void paintSurface(HDC hdc);                               // 入口：画到 WM_PAINT 的 DC，整窗绘制
+    public:
+        // 拖动/缩放窗口期间：不重画整窗，直接把上一帧位图拉伸上屏
+        // （相当于 Qt Quick 的 layer 缓存 + 视口变换：SC_SIZE 循环里每帧只有一次 BitBlt）
+        void beginSizeMovePreview();
+        void endSizeMovePreview();
+    private:
+
+        void paintSurface(HDC hdc);
+        // 常驻双缓冲：每帧 CreateCompatibleDC/CreateCompatibleBitmap 一张 1600x1000 的
+        // 位图，等于每帧重新申请并初始化 6MB GDI 内存 —— 缩放时这条就是主要开销。
+        // 改成尺寸不变就复用，只有客户区尺寸变了才重建。
+        CDC      m_backDc;
+        CBitmap  m_backBmp;
+        CBitmap* m_backOld = nullptr;
+        CSize    m_backSize = CSize(0, 0);
+        bool     m_sizeMove = false;      // 系统拖动/缩放循环进行中（只贴拉伸预览）                               // 入口：画到 WM_PAINT 的 DC，整窗绘制
         void paintSurfaceNode(XmlCanvas& cv, XmlElement* node); // 按 tag 分派
         void buildWidgetRows(std::vector<xmlctl::TreeRow>& rows);  // 控件箱数据
         void buildDocRows(XmlElement* node, int level, std::vector<xmlctl::TreeRow>& rows, XmlElement* sel); // 对象树数据

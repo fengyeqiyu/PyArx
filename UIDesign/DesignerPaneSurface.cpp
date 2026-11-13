@@ -11,6 +11,26 @@
 using namespace uidesign;
 using namespace uidesign::detail;
 
+// ==== 临时性能诊断：PYARX_DESIGN_DEBUG=1 时写 G:\PyArx\log\paint_diag.log ====
+static void paintLog(const char* fmt, ...)
+{
+    static int on = -1;
+    if (on < 0)
+    {
+        wchar_t ev[8] = {};
+        on = (::GetEnvironmentVariableW(L"PYARX_DESIGN_DEBUG", ev, 8) >= 1 && ev[0] == L'1') ? 1 : 0;
+    }
+    if (on != 1) return;
+    va_list ap;
+    va_start(ap, fmt);
+    char buf[512];
+    _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, ap);
+    va_end(ap);
+    FILE* f = nullptr;
+    _wfopen_s(&f, L"G:\\PyArx\\log\\paint_diag.log", L"a");
+    if (f != nullptr) { fputs(buf, f); fclose(f); }
+}
+
 // 元素字号：优先读 XML 的 FontSize 属性，没写就回落到调用方给的默认值
 static int fontPtOf(XmlElement* n, int def)
 {
@@ -80,10 +100,12 @@ void DesignerPaneView::paintSurface(HDC hdc)
         cv = new D2DDcCanvas();
         cvHwnd = m_hWnd;
     }
+    const ULONGLONG pt0 = ::GetTickCount64();
     const RECT target = {0, 0, client.Width(), client.Height()};
     cv->bind(hdc, target);
     if (!cv->begin(client.Width(), client.Height()))
         return;   // 硬件与 WARP 都起不来时这里什么都不画（不再回退 GDI 绘制）
+    const ULONGLONG pt1 = ::GetTickCount64();
 
     cv->fillRect(client, xmlctl::shell().base);
 
@@ -107,10 +129,22 @@ void DesignerPaneView::paintSurface(HDC hdc)
     if (root != nullptr)
     {
         for (auto& child : root->children)
+        {
+            const ULONGLONG a = ::GetTickCount64();
             paintSurfaceNode(*cv, &child);
+            const ULONGLONG b = ::GetTickCount64();
+            if (b - a >= 1)
+                paintLog("[node] %ws name=%ws %llu ms\n", child.tag.c_str(), child.name.c_str(),
+                         (unsigned long long)(b - a));
+        }
     }
+    const ULONGLONG pt2 = ::GetTickCount64();
 
     cv->end();
+    const ULONGLONG pt3 = ::GetTickCount64();
+    paintLog("[paint] %dx%d bind=%llu shell=%llu end=%llu\n", client.Width(), client.Height(),
+             (unsigned long long)(pt1 - pt0), (unsigned long long)(pt2 - pt1),
+             (unsigned long long)(pt3 - pt2));
 }
 
 // XML 代码行：行号栏 + 逐 token 着色。
@@ -354,7 +388,10 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
     // WS_CLIPCHILDREN 约束），所以画布内容必须由这张唯一的表面自己画。
     if (m_canvas != nullptr && node->name == L"canvasHost")
     {
+        const ULONGLONG ca = ::GetTickCount64();
         m_canvas->paintInto(cv, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
+        paintLog("[canvas] %llu ms %dx%d\n", (unsigned long long)(::GetTickCount64() - ca),
+                 rc.right - rc.left, rc.bottom - rc.top);
         return;
     }
 

@@ -27,7 +27,10 @@ namespace uidesign
         afx_msg BOOL OnEraseBkgnd(CDC* pDC);
         afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
         afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
-        afx_msg void OnClose();
+        afx_msg LRESULT OnNcHitTest(CPoint point);
+    afx_msg void OnEnterSizeMove();
+    afx_msg void OnExitSizeMove();
+    afx_msg void OnClose();
         afx_msg void OnTimer(UINT_PTR nIDEvent);
         void RecalcLayout(BOOL bNotify = TRUE) override;   // 停靠体系每次布局后立刻收掉 4px 滑块
         void hideDockSliders();

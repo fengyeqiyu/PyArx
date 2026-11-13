@@ -19,6 +19,7 @@ BEGIN_MESSAGE_MAP(DesignerPaneView, CWnd)
     ON_WM_LBUTTONDOWN()
     ON_WM_LBUTTONDBLCLK()
     ON_WM_SETCURSOR()
+    ON_WM_NCHITTEST()
     ON_MESSAGE(WM_CANVAS_SELECT, OnCanvasSelect)
     ON_MESSAGE(WM_CANVAS_SELECT_MULTI, OnCanvasSelectMulti)
     ON_MESSAGE(WM_DOC_CHANGED, OnDocChanged)
@@ -464,6 +465,18 @@ void DesignerPaneView::OnLButtonDblClk(UINT nFlags, CPoint pt)
     surfaceLButtonDown(pt);
 }
 
+LRESULT DesignerPaneView::OnNcHitTest(CPoint point)
+{
+    // 窗口四边（6px）不自绘缩放：返回 HTTRANSPARENT，把命中让给下面的顶层框架。
+    // 框架带 WS_THICKFRAME，OnNcHitTest 会返回 HTLEFT/HTTOP...，于是缩放走系统
+    // SC_SIZE 循环 —— 跟手、无拖影（DWM 直接搬整窗快照，不等我们画完）。
+    CPoint pt = point;
+    ScreenToClient(&pt);
+    if (frameEdgesAt(pt) != 0)
+        return HTTRANSPARENT;
+    return CWnd::OnNcHitTest(point);
+}
+
 BOOL DesignerPaneView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
     CPoint pt;
@@ -499,6 +512,26 @@ BOOL DesignerPaneView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
     return CWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
+void DesignerPaneView::beginSizeMovePreview()
+{
+    m_sizeMove = true;
+    diagLog("[sizeMove] begin\n");
+    // 画布是真实子窗口，会自己再画一次文档树；拖动期间先藏起来，交给拉伸预览
+    if (m_canvas != nullptr && ::IsWindow(m_canvas->m_hWnd))
+        m_canvas->ShowWindow(SW_HIDE);
+}
+
+void DesignerPaneView::endSizeMovePreview()
+{
+    if (!m_sizeMove) return;
+    m_sizeMove = false;
+    diagLog("[sizeMove] end\n");
+    if (m_canvas != nullptr && ::IsWindow(m_canvas->m_hWnd))
+        m_canvas->ShowWindow(SW_SHOW);
+    m_backSize = CSize(0, 0);       // 尺寸已变，缓存位图作废，下一次全量重画
+    RedrawWindow(nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
+}
+
 void DesignerPaneView::OnSize(UINT type, int cx, int cy)
 {
     CWnd::OnSize(type, cx, cy);
@@ -511,12 +544,21 @@ void DesignerPaneView::resizeTo(const CRect& rc)
     if (m_ui.root() == nullptr || rc.Width() <= 0 || rc.Height() <= 0)
         return;
 
+    const ULONGLONG t0 = ::GetTickCount64();
     applyResponsiveLayout(rc.Width());
+    const ULONGLONG t1 = ::GetTickCount64();
     m_ui.layout(0, 0, rc.Width(), rc.Height());
+    const ULONGLONG t2 = ::GetTickCount64();
     applyLayoutToControls();
+    const ULONGLONG t3 = ::GetTickCount64();
     // 尺寸变了以后整块重画一次：只让子窗口自己 Invalidate 的话，画布/代码坞缩小后
     // 腾出来的那块区域不会有人擦，上一帧的表格/控件像素就留在画布工作台上（残留画面）。
     RedrawWindow(nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
+    const ULONGLONG t4 = ::GetTickCount64();
+    diagLog("[resize] %dx%d resp=%llu layout=%llu apply=%llu redraw=%llu total=%llu\n",
+            rc.Width(), rc.Height(), (unsigned long long)(t1 - t0), (unsigned long long)(t2 - t1),
+            (unsigned long long)(t3 - t2), (unsigned long long)(t4 - t3),
+            (unsigned long long)(t4 - t0));
 }
 
 // 设计器面板在 CAD 侧栏里常被拖到 400~700 宽。两侧栏是固定列宽，
@@ -1691,19 +1733,35 @@ void DesignerPaneView::OnPaint()
     GetClientRect(&client);
     if (client.Width() <= 0 || client.Height() <= 0) return;
 
+    // 拖动/缩放窗口期间只贴拉伸预览：整窗重画一次 30~80ms，鼠标消息早跑完了，
+    // 边缘就留下旧像素 —— 这就是拖影。期间显示"上一帧拉伸"，松手再精确重画。
+    if (m_sizeMove && m_backDc.GetSafeHdc() != nullptr && m_backSize.cx > 0 && m_backSize.cy > 0)
+    {
+        ::SetStretchBltMode(dc.GetSafeHdc(), COLORONCOLOR);
+        dc.StretchBlt(0, 0, client.Width(), client.Height(), &m_backDc,
+                      0, 0, m_backSize.cx, m_backSize.cy, SRCCOPY);
+        return;
+    }
+
     // 双缓冲：D2D 先画到内存位图，一次 BitBlt 上屏。
-    // 直接画到窗口 DC 会让整窗逐帧刷新闪烁；BitBlt 的目标是 WM_PAINT 的 DC，
-    // 叠加 WS_CLIPCHILDREN 后子窗口区域自动被裁掉，不会盖住真实控件。
-    CDC mem;
-    mem.CreateCompatibleDC(&dc);
-    CBitmap bmp;
-    bmp.CreateCompatibleBitmap(&dc, client.Width(), client.Height());
-    CBitmap* oldBmp = mem.SelectObject(&bmp);
+    // 位图常驻复用（只在客户区尺寸变化时重建），缩放时不再每帧申请 6MB 位图。
+    if (m_backDc.GetSafeHdc() == nullptr)
+        m_backDc.CreateCompatibleDC(&dc);
+    if (m_backSize.cx != client.Width() || m_backSize.cy != client.Height())
+    {
+        if (m_backOld != nullptr)
+        {
+            m_backDc.SelectObject(m_backOld);
+            m_backOld = nullptr;
+        }
+        m_backBmp.DeleteObject();
+        m_backBmp.CreateCompatibleBitmap(&dc, client.Width(), client.Height());
+        m_backOld = m_backDc.SelectObject(&m_backBmp);
+        m_backSize = CSize(client.Width(), client.Height());
+    }
 
-    paintSurface(mem.GetSafeHdc());
+    paintSurface(m_backDc.GetSafeHdc());
 
-    // BitBlt 必须在 SelectObject 换回原位图之前，否则拷出来的是空位图
-    dc.BitBlt(0, 0, client.Width(), client.Height(), &mem, 0, 0, SRCCOPY);
-    mem.SelectObject(oldBmp);
+    dc.BitBlt(0, 0, client.Width(), client.Height(), &m_backDc, 0, 0, SRCCOPY);
 }
 

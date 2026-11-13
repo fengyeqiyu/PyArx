@@ -181,6 +181,29 @@ namespace uidesign
             m_zoom = z;
             Invalidate(FALSE);
         }
+        // 视图平移（窗口像素）。画布内容整体随 pan 走，鼠标事件入口按同一偏移反算，
+        // 于是"拖动查看"和"命中测试"用的是同一套坐标，不会出现点到别处的问题。
+        float panX() const { return m_panX; }
+        float panY() const { return m_panY; }
+        void setPan(float px, float py) { m_panX = px; m_panY = py; invalidateSurface(); }
+        void resetView() { m_panX = 0; m_panY = 0; Invalidate(FALSE); }
+
+        // 以画布客户坐标 localPt 为锚点缩放：缩放前后同一文档点仍落在光标下（鼠标滚轮用）
+        void zoomAt(CPoint localPt, short delta)
+        {
+            const float z0 = (m_zoom <= 0.0f) ? 1.0f : m_zoom;
+            float z1 = z0 * ((delta > 0) ? 1.2f : (1.0f / 1.2f));
+            if (z1 < 0.05f) z1 = 0.05f;
+            if (z1 > 8.0f) z1 = 8.0f;
+            if (z1 == z0) return;
+            const float dx = (float)localPt.x - m_panX;
+            const float dy = (float)localPt.y - m_panY;
+            m_zoom = z1;
+            m_panX = (float)localPt.x - dx * (z1 / z0);
+            m_panY = (float)localPt.y - dy * (z1 / z0);
+            invalidateSurface();
+        }
+
         // 标尺：窗口坐标下画顶部/左侧刻度条，不参与缩放
         void setShowRuler(bool on) { m_showRuler = on; Invalidate(FALSE); }
 
@@ -398,9 +421,11 @@ namespace uidesign
                 rt->DrawBitmap(m_bgD2DBmp, D2D1::RectF(0.0f, 0.0f,
                                                        static_cast<float>(W), static_cast<float>(H)));
 
-            // 缩放：背景位图已经画过（不缩放），从这里开始文档树与装饰层统一乘倍率
+            // 缩放 + 平移：背景位图已经画过（不缩放/不平移），
+            // 从这里开始文档树与装饰层统一乘倍率并跟随 m_panX/m_panY 走。
             if (rt != nullptr)
-                rt->SetTransform(D2D1::Matrix3x2F::Scale(m_zoom, m_zoom));
+                rt->SetTransform(D2D1::Matrix3x2F::Scale(m_zoom, m_zoom) *
+                                 D2D1::Matrix3x2F::Translation(m_panX, m_panY));
 
             if (root != nullptr)
                 drawNode(*m_d2dCv, root, CPoint(0, 0), true);
@@ -442,6 +467,26 @@ namespace uidesign
             m_memDC.SelectObject(oldBmp);
             if (FAILED(hr)) diagLog("[paintD2D] end hr=0x%08X\n", static_cast<unsigned int>(hr));
             return true;
+        }
+
+        afx_msg void OnMButtonDown(UINT nFlags, CPoint point)
+        {
+            (void)nFlags;
+            if (m_panning) return;
+            m_panning = true;
+            m_panStart = point;
+            m_panX0 = m_panX;
+            m_panY0 = m_panY;
+            SetCapture();
+            ::SetCursor(::LoadCursor(nullptr, IDC_SIZEALL));
+        }
+
+        afx_msg void OnMButtonUp(UINT nFlags, CPoint point)
+        {
+            (void)nFlags; (void)point;
+            if (!m_panning) return;
+            m_panning = false;
+            if (::GetCapture() == m_hWnd) ReleaseCapture();
         }
 
         afx_msg void OnLButtonDown(UINT flags, CPoint point)
@@ -565,6 +610,14 @@ namespace uidesign
 
         afx_msg void OnMouseMove(UINT nFlags, CPoint point)
         {
+            // 中键拖动 = 平移视图（不进文档坐标，直接用窗口像素）
+            if (m_panning)
+            {
+                m_panX = m_panX0 + (float)(point.x - m_panStart.x);
+                m_panY = m_panY0 + (float)(point.y - m_panStart.y);
+                invalidateSurface();
+                return;
+            }
             point = docPt(point);
             // 左键是否仍按住：真实鼠标看全局键状态；PostMessage 注入调试时消息里带 MK_LBUTTON
             const bool lbtnHeld = ((nFlags & MK_LBUTTON) != 0) ||
@@ -2674,7 +2727,7 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
         CPoint docPt(CPoint p) const
         {
             const float z = (m_zoom <= 0.0f) ? 1.0f : m_zoom;
-            return CPoint((int)(p.x / z), (int)(p.y / z));
+            return CPoint((int)((p.x - m_panX) / z), (int)((p.y - m_panY) / z));
         }
 
         // 标尺：窗口坐标下的顶部 / 左侧刻度条，不参与缩放（在单位变换下画）
@@ -2695,9 +2748,11 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
 
             const float z = (m_zoom <= 0.0f) ? 1.0f : m_zoom;
             // 每 10 文档单位短刻度、50 长刻度并标数字；文档 0 点对齐刻度条内侧
-            for (int docX = 0; ox + band + (int)(docX * z) < ox + W; docX += 10)
+            const int startX = (int)((-m_panX / z) / 10.0f) * 10;
+            const int startY = (int)((-m_panY / z) / 10.0f) * 10;
+            for (int docX = (startX < 0 ? startX : 0); ox + band + (int)(m_panX + docX * z) < ox + W; docX += 10)
             {
-                const int px = ox + band + (int)(docX * z);
+                const int px = ox + band + (int)(m_panX + docX * z);
                 if (px >= ox + W) break;
                 const bool major = (docX % 50 == 0);
                 cv.strokeLine(POINT{ px, oy + (major ? 4 : 12) }, POINT{ px, oy + band },
@@ -2708,9 +2763,9 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                     cv.text(tr, std::to_wstring(docX), textCol, DT_LEFT | DT_VCENTER | DT_SINGLELINE, 11, L"");
                 }
             }
-            for (int docY = 0; oy + band + (int)(docY * z) < oy + H; docY += 10)
+            for (int docY = (startY < 0 ? startY : 0); oy + band + (int)(m_panY + docY * z) < oy + H; docY += 10)
             {
-                const int py = oy + band + (int)(docY * z);
+                const int py = oy + band + (int)(m_panY + docY * z);
                 if (py >= oy + H) break;
                 const bool major = (docY % 50 == 0);
                 cv.strokeLine(POINT{ ox + (major ? 4 : 12), py }, POINT{ ox + band, py },
@@ -2749,7 +2804,8 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
             ID2D1RenderTarget* rt = (d2 != nullptr) ? d2->target() : nullptr;
             if (rt != nullptr)
                 rt->SetTransform(D2D1::Matrix3x2F::Scale(m_zoom, m_zoom) *
-                                 D2D1::Matrix3x2F::Translation((float)x, (float)y));
+                                 D2D1::Matrix3x2F::Translation((float)x + m_panX,
+                                                               (float)y + m_panY));
 
             XmlElement* root = (m_doc != nullptr) ? m_doc->root() : nullptr;
             if (root != nullptr)
@@ -2863,7 +2919,15 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
         void invalidateSurface()
         {
             CWnd* p = GetParent();
-            if (p != nullptr && ::IsWindow(p->m_hWnd)) p->Invalidate(FALSE);
+            if (p != nullptr && ::IsWindow(p->m_hWnd))
+            {
+                // 只让父表面重画"画布这一块"：整窗外壳（菜单/工具栏/两棵树/属性表/代码区）
+                // 在拖动时每帧重画是拖影的主因，电力设计应用也是只重画自己的画布窗口。
+                CRect me;
+                GetWindowRect(&me);
+                p->ScreenToClient(&me);
+                p->InvalidateRect(&me, FALSE);
+            }
             Invalidate(FALSE);
         }
 
@@ -3035,6 +3099,10 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
         std::vector<XmlElement*> m_selNodes;
         bool m_showGrid = true;
         float m_zoom = 1.0f;
+        float m_panX = 0.0f, m_panY = 0.0f;   // 视图平移（窗口像素）
+        bool  m_panning = false;              // 中键拖动平移中
+        CPoint m_panStart = CPoint(0, 0);     // 按下点（窗口坐标）
+        float  m_panX0 = 0.0f, m_panY0 = 0.0f;
         bool m_autoFit = true;                // 打开文档时按视口自动缩放到可见                 // 画布缩放倍率（0.25 ~ 4.0）
         bool m_showRuler = false;            // 标尺开关（顶部/左侧刻度条）
         ID2D1Bitmap* m_bgD2DBmp = nullptr;   // 背景（白底+网格）烘成的 D2D 位图

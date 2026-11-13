@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "DesignCanvas.h"
 
 BEGIN_MESSAGE_MAP(uidesign::DesignCanvas, CWnd)
@@ -9,6 +9,8 @@ BEGIN_MESSAGE_MAP(uidesign::DesignCanvas, CWnd)
     ON_WM_LBUTTONDOWN()
     ON_WM_RBUTTONDOWN()
     ON_WM_MOUSEMOVE()
+    ON_WM_MBUTTONDOWN()
+    ON_WM_MBUTTONUP()
     ON_WM_LBUTTONUP()
     ON_WM_LBUTTONDBLCLK()
     ON_WM_CHAR()
