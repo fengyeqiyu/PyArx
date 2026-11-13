@@ -10,8 +10,8 @@
 //   Show/Hide -> frame->ShowControlBar
 //   GetOrCreatePalette(name,w,h) -> 按名复用（防 arxload 累积）
 //
-// 说明：侧栏页内的控件宿主默认由 MFCWebView 提供（见 PyPaletteWeb.h），
-// AddPage 返回的页对象仍允许宿主层注入控件宿主句柄（见 PyPageHandle）。
+// 说明：侧栏页内的控件宿主由 GUI 层（MfcXaml）创建后回填（见 PyPageHandle），
+// PyArxCore 自身不创建任何宿主，也不假设宿主用什么渲染。
 // 编码：UTF-8 带 BOM。
 //-----------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@
 
 namespace PyArx
 {
-    // 页内控件宿主句柄：由宿主层（MFCWebView 等）创建并回填，
+    // 页内控件宿主句柄：由宿主层（MfcXaml 等）创建并回填，
     // PyArxCore 只负责把它挂到 CAdUiPalette 上，不创建宿主。
     struct PyPageHandle
     {
@@ -51,7 +51,7 @@ namespace PyArx
         void SetHost(HWND hwnd) { m_hostHwnd = hwnd; }
         HWND HostHwnd() const { return m_hostHwnd; }
 
-        // 页窗口本身：默认由 MFCWebView 在其上挂 WebView 渲染 HTML
+        // 页窗口本身：宿主层可把任意 HWND 挂到这块客户区上（默认空置）
         HWND Hwnd() const { return GetSafeHwnd(); }
 
         void ResizeHost()

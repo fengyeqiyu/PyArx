@@ -3,13 +3,12 @@
 // 依赖 ObjectARX 原生 AcUi 接口（CAdUiPaletteSet / CAdUiPalette），
 // 属 CAD 应用级能力，故收进 PyArxCore（而非 GUI 层 PyMfc）。
 //
-// 页内控件宿主：默认由 MFCWebView 把页窗口客户区整块渲染成 web，
-// PyArxCore 只负责把宿主窗口挂到 CAdUiPalette 上。
+// 页内控件宿主：由 GUI 层（MfcXaml）创建并回填，PyArxCore 只负责把宿主窗口
+// 挂到 CAdUiPalette 上，自身不创建任何渲染宿主。
 // 编码：UTF-8 带 BOM。
 //-----------------------------------------------------------------------------
 
 #include "PyPaletteSet.h"
-#include "PyPaletteWeb.h"
 
 #include <stdexcept>
 #include <thread>
@@ -301,34 +300,6 @@ namespace PyArx
     }
 } // namespace PyArx
 
-namespace
-{
-    // 侧栏页的 Web 宿主注册表：按「侧栏名 + 页名」复用，防 arxload 累积
-    std::map<std::wstring, std::unique_ptr<PyArx::PyPaletteWeb>>& webHosts()
-    {
-        static std::map<std::wstring, std::unique_ptr<PyArx::PyPaletteWeb>> map;
-        return map;
-    }
-
-    PyArx::PyPaletteWeb* webHostFor(const std::wstring& paletteName, const std::wstring& pageTitle)
-    {
-        auto& slot = webHosts()[paletteName + L"|" + pageTitle];
-        if (!slot)
-            slot = std::make_unique<PyArx::PyPaletteWeb>();
-        return slot.get();
-    }
-
-    std::string utf8Of(const std::wstring& text)
-    {
-        if (text.empty())
-            return std::string();
-        int len = ::WideCharToMultiByte(CP_UTF8, 0, text.c_str(), (int)text.size(), nullptr, 0, nullptr, nullptr);
-        std::string out((size_t)len, '\0');
-        ::WideCharToMultiByte(CP_UTF8, 0, text.c_str(), (int)text.size(), out.data(), len, nullptr, nullptr);
-        return out;
-    }
-}
-
 // ===========================================================================
 // 绑定
 // ===========================================================================
@@ -340,7 +311,7 @@ void bind_PyPaletteSet(pym& m)
         .def_property_readonly("title", &pa::PyPaletteImpl::Title)
         .def_property_readonly("hwnd", [](pa::PyPaletteImpl& p) {
             return static_cast<long long>(reinterpret_cast<std::intptr_t>(p.Hwnd()));
-        }, "页窗口句柄：由 MFCWebView 在其上挂 WebView 渲染 HTML（也可外部回填宿主）")
+        }, "页窗口句柄：宿主窗口挂到这里（MfcXaml 侧传 host.addXxx 的父窗口）")
         .def("setHost", [](pa::PyPaletteImpl& p, long long hwnd) {
             p.SetHost(reinterpret_cast<HWND>(hwnd));
         }, py::arg("hwnd"))
@@ -366,52 +337,6 @@ void bind_PyPaletteSet(pym& m)
        "按名获取/创建侧栏（复用同名实例，防 arxload 累积）");
 
     m.def("destroyAllPalettes", []() {
-        webHosts().clear();             // 先放掉 WebView，再销毁侧栏窗口
         pa::PyPaletteRegistry::Get().DestroyAll();
     }, "销毁全部侧栏（一般只在 arxunload 时调用）");
-
-    // 一站式：建侧栏 → 页窗口客户区交给 MFCWebView 渲染本地 HTML。
-    // 页内控件全部由 web 画，不再经过 PyMfcCore.guiload（XAML 链路）。
-    auto loadWebPalette = [](const std::wstring& htmlPath, const std::wstring& name, int width, int height,
-                             py::object /*context*/) -> py::object {
-        auto* pal = pa::PyPaletteRegistry::Get().GetOrCreate(name, width, height);
-        auto* page = pal->AddPage(name);
-        if (page == nullptr)
-            throw std::runtime_error("侧栏页创建失败（CAdUiPaletteSet/CAdUiPalette 未能建成）");
-
-        pa::PyPaletteWeb* web = webHostFor(name, page->Title());
-        std::wstring err;
-        if (!web->attachPage(page, err))
-            throw std::runtime_error(utf8Of(err));
-        if (!web->loadPage(htmlPath, err))
-            throw std::runtime_error(utf8Of(err));
-
-        pal->Show();
-        return py::cast(page, py::return_value_policy::reference);
-    };
-
-    m.def("loadPalette", loadWebPalette,
-          py::arg("path"), py::arg("name") = L"py-web-palette", py::arg("width") = 280,
-          py::arg("height") = 600, py::arg("context") = py::none(),
-          "按 HTML 载入侧栏：CAdUiPaletteSet 由本模块创建，页内控件由 MFCWebView 渲染");
-
-    m.def("loadPaletteWeb", loadWebPalette,
-          py::arg("path"), py::arg("name") = L"py-web-palette", py::arg("width") = 280,
-          py::arg("height") = 600, py::arg("context") = py::none(),
-          "loadPalette 的同义名（HTML + MFCWebView）");
-
-    // 往侧栏页推消息 / 执行 JS（页面里用 chrome.webview 收）
-    m.def("paletteEmit", [](const std::wstring& name, const std::wstring& json) {
-        auto it = webHosts().find(name + L"|" + name);
-        if (it == webHosts().end() || !it->second)
-            return false;
-        return it->second->emit(json);
-    }, py::arg("name"), py::arg("json"));
-
-    m.def("paletteEval", [](const std::wstring& name, const std::wstring& js) {
-        auto it = webHosts().find(name + L"|" + name);
-        if (it == webHosts().end() || !it->second)
-            return false;
-        return it->second->eval(js);
-    }, py::arg("name"), py::arg("js"));
 }
