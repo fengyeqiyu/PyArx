@@ -126,6 +126,11 @@ if ($DryRun) {
     exit 0
 }
 if ([string]::IsNullOrWhiteSpace($env:GITEE_TOKEN)) {
+    # 没设环境变量时，从 origin 远程地址里取已存的令牌
+    $remote = & $git remote get-url origin 2>$null
+    if ($remote -match '://[^:]+:([^@]+)@') { $env:GITEE_TOKEN = $matches[1] }
+}
+if ([string]::IsNullOrWhiteSpace($env:GITEE_TOKEN)) {
     throw '需要先设置 $env:GITEE_TOKEN 才能推送到 Gitee'
 }
 $env:GIT_TERMINAL_PROMPT = '0'
