@@ -87,8 +87,9 @@
 ## 七、回归与验收口径
 
 - 全量自动测试 **118 项**：`pp_test_all` 27、`pp_split_test` 13、`pp_cell_test` 15、`pp_event_test` 8、`pp_grid_test` 18、`pp_select_test` 7、`pp_real_test` 6、`pp_cursor_test` 5、`pp_click_test` 5、`pp_runtime_test` 9、`pp_plugin_test` 5。
-- **单脚本复跑才是判据**：无人值守批跑里 `pp_select` / `pp_real` / `pp_cursor` 会因前台窗口被别的进程抢走而偶发失败（同一秒窗口不在前台，真实鼠标就落不到画布上）；单跑实测 `split 13/13`、`cell 15/15`、`grid 18/18`、`real 6/6`、`cursor 5/5`。批跑出现这几项失败时，先单跑复验再判红。
-- 已修（v0.11.x）：①Ctrl+V 粘贴触发的 `pybind11 inc_ref ... GIL` 崩溃（`fireGridAction` 在取 GIL 前就拷贝 `py::object`）；②原地单元格编辑按 Esc 仍写回（C++ 回抛 `cellend` 时 `col` 槽位恒为 0，Python 收不到 27）。
+- **批次跑（`_run_regression.ps1`）实测 118/118 全绿**，这也是交付判据；单脚本复跑用于定位单点问题。
+- 写真实输入类用例（点卡片 / 点连线 / 滚轮 / 拖动）时，**先把详情浮层收起**（`app.hideDetail()`）：`planHit` 先判 `detailHit`，浮层压在连线上会让点击判成"没点中"，历史上就是这么偶发失败的。
+- 已修（v0.10.10–v0.10.14）：①Ctrl+V 粘贴触发的 `pybind11 inc_ref ... GIL` 崩溃（`fireGridAction` 在取 GIL 前就拷贝 `py::object`）；②原地单元格编辑按 Esc 仍写回（C++ 回抛 `cellend` 时 `col` 槽位恒为 0，Python 收不到 27）；③连线命中用例取三次贝塞尔 t=0.5 的点，而绘制与命中都按 4 拐点正交折线走（改为沿折线取弧长中点）。
 - 批次脚本 `_run_regression.ps1`：每个 GUI 用例前杀 python 进程并 sleep ≥1.4 s（残留窗口抢焦点会造成假失败），连跑两个 GUI 用例之间同样要杀进程 + sleep。
 - 断言只允许"让输入真实发生"（真鼠标 `SetCursorPos` + `GetCursor`），不允许放宽断言；`_smoke_proptable.py`（属性表冒烟）与 `_sim_msgs.py`（模拟消息）结果要求均为 0 项失败。
 - 审计：`_audit_prop_migration.py`（属性表迁移完整性，应为 0）、`_audit_contract_keys.py`（事件契约键）、`_audit_tags.py`（注册标签）；改名工具 `_unify_props.py` / `_unify_usage.py`。
@@ -115,4 +116,3 @@
 6. 整窗按失效矩形裁剪（目标 ≤20 ms）、画布缓存位图（6 ms → <1 ms）。
 7. `pp_app` 改读 `power_plan.xaml`（现在仍是手算 `_layout`）。
 8. 待补容器控件：`SplitPane`、`SidePanel`、`OverlayCard`、`MiniMap`、`ToolBar`。
-9. 新发现：`pp_select_test` 的"单击连线选中下游节点"在贝塞尔中点点击后偶发选不中（单次复验过、批跑挂过），需区分"命中容差不足"与"浮层遮挡"，之后给双三次曲线加命中带宽度。
