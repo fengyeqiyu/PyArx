@@ -1,110 +1,111 @@
-# MFCXaml 控件类名 / 中文名 / QML 对照表
+# MFCXaml 控件类名 / 中文名 / QML / WPF / WinForms 对照表
 
 > 由 `tools\gen_control_names.py` 生成，勿手改。
 > XAML 标签（类名）就是 `guiload` / `xamlload` 里写的标签；中文名只用于界面与文档。
 > 档位口径见 `docs\mfcxaml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。
-> QML 一列是"同一套界面换引擎时落在哪个类型"，同名即语义基本等价。
+> QML / WPF / WinForms 三列是"同一套界面换引擎时落在哪个类型"，"QML 方式"只说 QML 侧的同名/组合/自绘；
+> 写"无"的表示该平台没有等价内置控件，只能组合或自绘，迁移时是重写而不是换标签。
 
 ## 容器（11）
 
-| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XBorder` | 边框容器 | Rectangle（border.*） | 组合 | — | 160x100 | — | — |
-| `XFlickable` | 拖拽视口 | Flickable | 同名 | B 薄 | 320x160 | 21 | XamlFlickable.cpp |
-| `XGridCtrl` | 网格控件 | GridLayout / TableView | 组合 | B 薄 | 200x120 | 21 | XamlGrid.cpp |
-| `XGroupBox` | 分组框 | GroupBox | 同名 | B 薄 | 160x80 | 20 | XamlGroupBox.cpp |
-| `XListCtrl` | 列表控件 | ListView / TableView（单列） | 组合 | B 薄 | 160x120 | 21 | XamlListCtrl.cpp |
-| `XPanel` | 面板容器 | Item / Pane | 组合 | C 仅布局 | 160x100 | 19 | XamlPanel.cpp |
-| `XScrolledWindow` | 滚动窗口 | ScrollView | 组合 | B 薄 | 200x120 | 21 | XamlScrolledWindow.cpp |
-| `XSplitter` | 分隔条 | SplitView | 组合 | C 仅布局 | 8x200 | 19 | XamlSplitter.cpp |
-| `XStaticLine` | 分隔线 | Rectangle（height: 1）/ HorizontalDivider | 组合 | C 仅布局 | 120x4 | 19 | XamlStaticLine.cpp |
-| `XTabControl` | 选项卡 | TabBar + StackLayout | 组合 | B 薄 | 200x120 | 20 | XamlTabControl.cpp |
-| `XTreeCtrl` | 树形控件 | TreeView | 组合 | B 薄 | 160x120 | 20 | XamlTreeCtrl.cpp |
+| `XBorder` | 边框容器 | Rectangle（border.*） | Border | Panel（BorderStyle） | 组合 | — | — |
+| `XFlickable` | 拖拽视口 | Flickable | ScrollViewer（PanningMode） | Panel（AutoScroll） | 同名 | B 薄 | 21 |
+| `XGridCtrl` | 网格控件 | GridLayout / TableView | DataGrid / Grid | TableLayoutPanel | 组合 | B 薄 | 21 |
+| `XGroupBox` | 分组框 | GroupBox | GroupBox | GroupBox | 同名 | B 薄 | 20 |
+| `XListCtrl` | 列表控件 | ListView / TableView（单列） | ListView | ListView | 组合 | B 薄 | 21 |
+| `XPanel` | 面板容器 | Item / Pane | Panel | Panel | 组合 | C 仅布局 | 19 |
+| `XScrolledWindow` | 滚动窗口 | ScrollView | ScrollViewer | Panel（AutoScroll） | 组合 | B 薄 | 21 |
+| `XSplitter` | 分隔条 | SplitView | GridSplitter | SplitContainer | 组合 | C 仅布局 | 19 |
+| `XStaticLine` | 分隔线 | Rectangle（height: 1）/ HorizontalDivider | Separator / Rectangle | Label（BorderStyle）/ Panel | 组合 | C 仅布局 | 19 |
+| `XTabControl` | 选项卡 | TabBar + StackLayout | TabControl | TabControl | 组合 | B 薄 | 20 |
+| `XTreeCtrl` | 树形控件 | TreeView | TreeView | TreeView | 组合 | B 薄 | 20 |
 
 ## 按钮（5）
 
-| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XBitmapButton` | 图标按钮 | Button + icon.source | 组合 | B 薄 | 100x28 | 21 | XamlBitmapButton.cpp |
-| `XButton` | 按钮 | Button | 同名 | B 薄 | 100x28 | 20 | XamlButton.cpp |
-| `XCheckBox` | 复选框 | CheckBox | 同名 | B 薄 | 100x28 | 21 | XamlCheckBox.cpp |
-| `XRadioButton` | 单选按钮 | RadioButton | 同名 | B 薄 | 100x28 | 21 | XamlRadioButton.cpp |
-| `XToggleButton` | 开关按钮 | Button + checkable | 组合 | B 薄 | 100x28 | 21 | XamlToggleButton.cpp |
+| `XBitmapButton` | 图标按钮 | Button + icon.source | Button + Image | Button（Image） | 组合 | B 薄 | 21 |
+| `XButton` | 按钮 | Button | Button | Button | 同名 | B 薄 | 20 |
+| `XCheckBox` | 复选框 | CheckBox | CheckBox | CheckBox | 同名 | B 薄 | 21 |
+| `XRadioButton` | 单选按钮 | RadioButton | RadioButton | RadioButton | 同名 | B 薄 | 21 |
+| `XToggleButton` | 开关按钮 | Button + checkable | ToggleButton | CheckBox（Appearance=Button） | 组合 | B 薄 | 21 |
 
 ## 输入控件（13）
 
-| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XChoice` | 选择框 | ComboBox（editable:false） | 同名 | B 薄 | 120x28 | 20 | XamlChoice.cpp |
-| `XCodeEditor` | 代码编辑器 | TextArea（等宽字体 + 行号槽） | 组合 | A 基本 | 360x160 | 22 | XamlCodeEditor.cpp |
-| `XComboBox` | 下拉框 | ComboBox | 同名 | A 基本 | 120x28 | 23 | XamlComboBox.cpp |
-| `XDatePicker` | 日期选择框 | TextField + MonthGrid | 组合 | B 薄 | 140x28 | 20 | XamlDatePicker.cpp |
-| `XDial` | 旋钮 | Dial | 同名 | A 基本 | 88x88 | 22 | XamlDial.cpp |
-| `XListBox` | 列表框 | ListView | 组合 | A 基本 | 120x100 | 22 | XamlListBox.cpp |
-| `XRangeSlider` | 区间滑块 | RangeSlider | 同名 | A 基本 | 200x34 | 23 | XamlRangeSlider.cpp |
-| `XScrollBar` | 滚动条 | ScrollBar / ScrollView | 同名 | S 完整 | 200x18 | 24 | XamlScrollBar.cpp |
-| `XSlider` | 滑块 | Slider | 同名 | A 基本 | 200x34 | 22 | XamlSlider.cpp |
-| `XSpinBox` | 数值步进框 | SpinBox | 同名 | A 基本 | 120x30 | 22 | XamlSpinBox.cpp |
-| `XSwitch` | 开关 | Switch | 同名 | B 薄 | 64x28 | 20 | XamlSwitch.cpp |
-| `XTextBox` | 文本框 | TextField / TextArea | 同名 | S 完整 | 120x28 | 24 | XamlTextBox.cpp |
-| `XTumbler` | 滚轮选择器 | Tumbler | 同名 | B 薄 | 88x96 | 21 | XamlTumbler.cpp |
+| `XChoice` | 选择框 | ComboBox（editable:false） | ComboBox（IsEditable=False） | ComboBox（DropDownList） | 同名 | B 薄 | 20 |
+| `XCodeEditor` | 代码编辑器 | TextArea（等宽字体 + 行号槽） | TextBox（等宽 + 行号自绘） | TextBox（自绘行号）/ RichTextBox | 组合 | A 基本 | 22 |
+| `XComboBox` | 下拉框 | ComboBox | ComboBox | ComboBox | 同名 | A 基本 | 23 |
+| `XDatePicker` | 日期选择框 | TextField + MonthGrid | DatePicker | DateTimePicker | 组合 | B 薄 | 20 |
+| `XDial` | 旋钮 | Dial | 无（自绘） | 无（自绘） | 同名 | A 基本 | 22 |
+| `XListBox` | 列表框 | ListView | ListBox | ListBox | 组合 | A 基本 | 22 |
+| `XRangeSlider` | 区间滑块 | RangeSlider | Slider（IsSelectionRangeEnabled） | 无（自绘） | 同名 | A 基本 | 23 |
+| `XScrollBar` | 滚动条 | ScrollBar / ScrollView | ScrollBar / ScrollViewer | HScrollBar / VScrollBar | 同名 | S 完整 | 24 |
+| `XSlider` | 滑块 | Slider | Slider | TrackBar | 同名 | A 基本 | 22 |
+| `XSpinBox` | 数值步进框 | SpinBox | 无内置（TextBox + RepeatButton） | NumericUpDown | 同名 | A 基本 | 22 |
+| `XSwitch` | 开关 | Switch | ToggleButton（自定义模板） | CheckBox（自绘开关） | 同名 | B 薄 | 20 |
+| `XTextBox` | 文本框 | TextField / TextArea | TextBox | TextBox | 同名 | S 完整 | 24 |
+| `XTumbler` | 滚轮选择器 | Tumbler | 无（WinUI 有，WPF 需自绘） | 无（自绘） | 同名 | B 薄 | 21 |
 
 ## 显示控件（7）
 
-| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XBusyIndicator` | 忙碌指示器 | BusyIndicator | 同名 | C 仅布局 | 56x56 | 19 | XamlBusyIndicator.cpp |
-| `XCalendarCtrl` | 日历 | MonthGrid + DayOfWeekRow | 组合 | B 薄 | 180x160 | 20 | XamlCalendarCtrl.cpp |
-| `XHyperlink` | 超链接 | Label + MouseArea（link 样式） | 组合 | B 薄 | 120x24 | 21 | XamlHyperlink.cpp |
-| `XProgressBar` | 进度条 | ProgressBar | 同名 | A 基本 | 120x16 | 22 | XamlProgressBar.cpp |
-| `XRichText` | 富文本 | TextArea（textFormat: RichText） | 组合 | A 基本 | 200x100 | 22 | XamlRichText.cpp |
-| `XStaticBitmap` | 图片 | Image | 同名 | B 薄 | 80x80 | 20 | XamlStaticBitmap.cpp |
-| `XTextBlock` | 文本标签 | Label / Text | 同名 | B 薄 | 100x24 | 20 | XamlTextBlock.cpp |
+| `XBusyIndicator` | 忙碌指示器 | BusyIndicator | ProgressBar（IsIndeterminate） | ProgressBar（Marquee） | 同名 | C 仅布局 | 19 |
+| `XCalendarCtrl` | 日历 | MonthGrid + DayOfWeekRow | Calendar | MonthCalendar | 组合 | B 薄 | 20 |
+| `XHyperlink` | 超链接 | Label + MouseArea（link 样式） | Hyperlink（TextBlock 内联） | LinkLabel | 组合 | B 薄 | 21 |
+| `XProgressBar` | 进度条 | ProgressBar | ProgressBar | ProgressBar | 同名 | A 基本 | 22 |
+| `XRichText` | 富文本 | TextArea（textFormat: RichText） | RichTextBox | RichTextBox | 组合 | A 基本 | 22 |
+| `XStaticBitmap` | 图片 | Image | Image | PictureBox | 同名 | B 薄 | 20 |
+| `XTextBlock` | 文本标签 | Label / Text | TextBlock | Label | 同名 | B 薄 | 20 |
 
 ## 数据视图（9）
 
-| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XGridView` | 网格视图 | GridView | 同名 | S 完整 | 320x160 | 24 | XamlGridView.cpp |
-| `XPage` | 页面 | Page | 同名 | B 薄 | 360x160 | 21 | XamlPage.cpp |
-| `XPageIndicator` | 页指示器 | PageIndicator | 同名 | B 薄 | 160x22 | 21 | XamlPageIndicator.cpp |
-| `XPathView` | 路径视图 | PathView | 同名 | B 薄 | 320x140 | 21 | XamlPathView.cpp |
-| `XStackView` | 栈式视图 | StackView | 同名 | B 薄 | 360x160 | 21 | XamlStackView.h |
-| `XSwipeView` | 滑动视图 | SwipeView | 同名 | B 薄 | 360x160 | 21 | XamlSwipeView.h |
-| `XTableView` | 数据表格 | TableView（model + delegate） | 组合 | A 基本 | 160x32 | 23 | XamlTableView.cpp |
-| `XTreeTable` | 树形表格 | TreeView（6.x）+ 多列 delegate | 组合 | B 薄 | 320x140 | 21 | XamlTreeView.cpp |
-| `XVirtualList` | 虚拟列表 | ListView（cacheBuffer 虚拟化） | 组合 | A 基本 | 240x140 | 23 | XamlListView.cpp |
+| `XGridView` | 网格视图 | GridView | ListView（GridView 视图） | ListView（LargeIcon） | 同名 | S 完整 | 24 |
+| `XPage` | 页面 | Page | Frame / TabItem | TabPage / Panel | 同名 | B 薄 | 21 |
+| `XPageIndicator` | 页指示器 | PageIndicator | 无（ItemsControl + Ellipse） | 无（自绘） | 同名 | B 薄 | 21 |
+| `XPathView` | 路径视图 | PathView | 无（Canvas + Path 自绘） | 无（自绘） | 同名 | B 薄 | 21 |
+| `XStackView` | 栈式视图 | StackView | 无（ContentControl 切换） | 无（Panel 切换） | 同名 | B 薄 | 21 |
+| `XSwipeView` | 滑动视图 | SwipeView | 无（ScrollViewer 分页自绘） | 无（自绘） | 同名 | B 薄 | 21 |
+| `XTableView` | 数据表格 | TableView（model + delegate） | DataGrid | DataGridView | 组合 | A 基本 | 23 |
+| `XTreeTable` | 树形表格 | TreeView（6.x）+ 多列 delegate | TreeView + GridView 列 | 无（TreeView + DataGridView 组合） | 组合 | B 薄 | 21 |
+| `XVirtualList` | 虚拟列表 | ListView（cacheBuffer 虚拟化） | ListView（VirtualizingStackPanel） | ListView（VirtualMode） | 组合 | A 基本 | 23 |
 
 ## 功能条（2）
 
-| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XMenuStrip` | 菜单栏 | MenuBar | 组合 | B 薄 | 360x28 | 21 | XamlMenuBar.cpp |
-| `XToolStrip` | 工具栏 | ToolBar | 组合 | B 薄 | 360x32 | 21 | XamlToolBar.cpp |
+| `XMenuStrip` | 菜单栏 | MenuBar | Menu | MenuStrip | 组合 | B 薄 | 21 |
+| `XToolStrip` | 工具栏 | ToolBar | ToolBar | ToolStrip | 组合 | B 薄 | 21 |
 
 ## 浮层（3）
 
-| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XMenu` | 弹出菜单 | Menu | 同名 | B 薄 | 200x120 | 21 | XamlMenu.cpp |
-| `XPopup` | 浮层 | Popup | 同名 | A 基本 | 320x160 | 22 | XamlPopup.cpp |
-| `XToolTip` | 提示气泡 | ToolTip | 同名 | B 薄 | 160x24 | 20 | XamlToolTip.cpp |
+| `XMenu` | 弹出菜单 | Menu | ContextMenu | ContextMenuStrip | 同名 | B 薄 | 21 |
+| `XPopup` | 浮层 | Popup | Popup | ToolStripDropDown | 同名 | A 基本 | 22 |
+| `XToolTip` | 提示气泡 | ToolTip | ToolTip | ToolTip | 同名 | B 薄 | 20 |
 
 ## 画布（2）
 
-| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XPowerCanvas` | 配电规划画布 | Canvas / Shape | 自绘 | B 薄 | 420x260 | 20 | XamlPowerCanvas.cpp |
-| `XQCanvas` | 通用画布 | Canvas / Item | 自绘 | B 薄 | 420x200 | 21 | XamlQCanvas.cpp |
+| `XPowerCanvas` | 配电规划画布 | Canvas / Shape | Canvas（自绘 Path） | Panel（Graphics 自绘） | 自绘 | B 薄 | 20 |
+| `XQCanvas` | 通用画布 | Canvas / Item | Canvas（自绘） | Panel（Graphics 自绘） | 自绘 | B 薄 | 21 |
 
 ## 绘制图元（4）
 
-| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |
+| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XArc` | 圆弧 | Shape + PathAngleArc | 自绘 | — | 140x100 | — | — |
-| `XEllipse` | 椭圆 | Shape（PathArc） | 自绘 | — | 120x120 | — | — |
-| `XLine` | 直线 | Shape + Path | 自绘 | — | 120x2 | — | — |
-| `XRectangle` | 矩形 | Rectangle | 同名 | — | 160x90 | — | — |
+| `XArc` | 圆弧 | Shape + PathAngleArc | Path（ArcSegment） | Graphics.DrawArc（自绘） | 自绘 | — | — |
+| `XEllipse` | 椭圆 | Shape（PathArc） | Ellipse | Graphics.DrawEllipse（自绘） | 自绘 | — | — |
+| `XLine` | 直线 | Shape + Path | Line / Path | Graphics.DrawLine（自绘） | 自绘 | — | — |
+| `XRectangle` | 矩形 | Rectangle | Rectangle | Graphics.DrawRectangle（自绘） | 同名 | — | — |
 
 ## 属性对应
 

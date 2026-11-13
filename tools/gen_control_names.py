@@ -159,6 +159,126 @@ QML = {
     'Arc': ('Shape + PathAngleArc', '自绘'),
 }
 
+# tag -> WPF（.NET）对应类型
+WPF = {
+    'Button': 'Button',
+    'CheckBox': 'CheckBox',
+    'RadioButton': 'RadioButton',
+    'ToggleButton': 'ToggleButton',
+    'BitmapButton': 'Button + Image',
+    'TextBox': 'TextBox',
+    'ComboBox': 'ComboBox',
+    'ListBox': 'ListBox',
+    'Choice': 'ComboBox（IsEditable=False）',
+    'DatePicker': 'DatePicker',
+    'CodeEditor': 'TextBox（等宽 + 行号自绘）',
+    'Slider': 'Slider',
+    'Switch': 'ToggleButton（自定义模板）',
+    'SpinBox': '无内置（TextBox + RepeatButton）',
+    'RangeSlider': 'Slider（IsSelectionRangeEnabled）',
+    'Dial': '无（自绘）',
+    'Tumbler': '无（WinUI 有，WPF 需自绘）',
+    'ScrollBar': 'ScrollBar / ScrollViewer',
+    'TextBlock': 'TextBlock',
+    'ProgressBar': 'ProgressBar',
+    'Hyperlink': 'Hyperlink（TextBlock 内联）',
+    'RichText': 'RichTextBox',
+    'StaticBitmap': 'Image',
+    'CalendarCtrl': 'Calendar',
+    'BusyIndicator': 'ProgressBar（IsIndeterminate）',
+    'PageIndicator': '无（ItemsControl + Ellipse）',
+    'TableView': 'DataGrid',
+    'TreeTable': 'TreeView + GridView 列',
+    'VirtualList': 'ListView（VirtualizingStackPanel）',
+    'StackView': '无（ContentControl 切换）',
+    'SwipeView': '无（ScrollViewer 分页自绘）',
+    'GridView': 'ListView（GridView 视图）',
+    'PathView': '无（Canvas + Path 自绘）',
+    'Page': 'Frame / TabItem',
+    'GroupBox': 'GroupBox',
+    'TabControl': 'TabControl',
+    'Border': 'Border',
+    'Panel': 'Panel',
+    'Splitter': 'GridSplitter',
+    'TreeCtrl': 'TreeView',
+    'ListCtrl': 'ListView',
+    'StaticLine': 'Separator / Rectangle',
+    'GridCtrl': 'DataGrid / Grid',
+    'ScrolledWindow': 'ScrollViewer',
+    'Flickable': 'ScrollViewer（PanningMode）',
+    'ToolStrip': 'ToolBar',
+    'MenuStrip': 'Menu',
+    'ToolTip': 'ToolTip',
+    'Menu': 'ContextMenu',
+    'Popup': 'Popup',
+    'PowerCanvas': 'Canvas（自绘 Path）',
+    'QCanvas': 'Canvas（自绘）',
+    'Line': 'Line / Path',
+    'Rectangle': 'Rectangle',
+    'Ellipse': 'Ellipse',
+    'Arc': 'Path（ArcSegment）',
+}
+
+# tag -> WinForms（.NET）对应类型
+WIN = {
+    'Button': 'Button',
+    'CheckBox': 'CheckBox',
+    'RadioButton': 'RadioButton',
+    'ToggleButton': 'CheckBox（Appearance=Button）',
+    'BitmapButton': 'Button（Image）',
+    'TextBox': 'TextBox',
+    'ComboBox': 'ComboBox',
+    'ListBox': 'ListBox',
+    'Choice': 'ComboBox（DropDownList）',
+    'DatePicker': 'DateTimePicker',
+    'CodeEditor': 'TextBox（自绘行号）/ RichTextBox',
+    'Slider': 'TrackBar',
+    'Switch': 'CheckBox（自绘开关）',
+    'SpinBox': 'NumericUpDown',
+    'RangeSlider': '无（自绘）',
+    'Dial': '无（自绘）',
+    'Tumbler': '无（自绘）',
+    'ScrollBar': 'HScrollBar / VScrollBar',
+    'TextBlock': 'Label',
+    'ProgressBar': 'ProgressBar',
+    'Hyperlink': 'LinkLabel',
+    'RichText': 'RichTextBox',
+    'StaticBitmap': 'PictureBox',
+    'CalendarCtrl': 'MonthCalendar',
+    'BusyIndicator': 'ProgressBar（Marquee）',
+    'PageIndicator': '无（自绘）',
+    'TableView': 'DataGridView',
+    'TreeTable': '无（TreeView + DataGridView 组合）',
+    'VirtualList': 'ListView（VirtualMode）',
+    'StackView': '无（Panel 切换）',
+    'SwipeView': '无（自绘）',
+    'GridView': 'ListView（LargeIcon）',
+    'PathView': '无（自绘）',
+    'Page': 'TabPage / Panel',
+    'GroupBox': 'GroupBox',
+    'TabControl': 'TabControl',
+    'Border': 'Panel（BorderStyle）',
+    'Panel': 'Panel',
+    'Splitter': 'SplitContainer',
+    'TreeCtrl': 'TreeView',
+    'ListCtrl': 'ListView',
+    'StaticLine': 'Label（BorderStyle）/ Panel',
+    'GridCtrl': 'TableLayoutPanel',
+    'ScrolledWindow': 'Panel（AutoScroll）',
+    'Flickable': 'Panel（AutoScroll）',
+    'ToolStrip': 'ToolStrip',
+    'MenuStrip': 'MenuStrip',
+    'ToolTip': 'ToolTip',
+    'Menu': 'ContextMenuStrip',
+    'Popup': 'ToolStripDropDown',
+    'PowerCanvas': 'Panel（Graphics 自绘）',
+    'QCanvas': 'Panel（Graphics 自绘）',
+    'Line': 'Graphics.DrawLine（自绘）',
+    'Rectangle': 'Graphics.DrawRectangle（自绘）',
+    'Ellipse': 'Graphics.DrawEllipse（自绘）',
+    'Arc': 'Graphics.DrawArc（自绘）',
+}
+
 # 属性映射：MFCXaml 通用属性 -> QML
 PROP_MAP = [
     ('BackColor / FrontColor', 'background: Rectangle { color: ... }（QML 无全局底色属性）'),
@@ -257,12 +377,13 @@ def main():
         raise SystemExit('缺少中文名: %s' % ', '.join(missing_cn))
 
     lines = []
-    lines.append('# MFCXaml 控件类名 / 中文名 / QML 对照表')
+    lines.append('# MFCXaml 控件类名 / 中文名 / QML / WPF / WinForms 对照表')
     lines.append('')
     lines.append('> 由 `tools\\gen_control_names.py` 生成，勿手改。')
     lines.append('> XAML 标签（类名）就是 `guiload` / `xamlload` 里写的标签；中文名只用于界面与文档。')
     lines.append('> 档位口径见 `docs\\mfcxaml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。')
-    lines.append('> QML 一列是"同一套界面换引擎时落在哪个类型"，同名即语义基本等价。')
+    lines.append('> QML / WPF / WinForms 三列是"同一套界面换引擎时落在哪个类型"，"QML 方式"只说 QML 侧的同名/组合/自绘；')
+    lines.append('> 写"无"的表示该平台没有等价内置控件，只能组合或自绘，迁移时是重写而不是换标签。')
     lines.append('')
 
     total = 0
@@ -274,7 +395,7 @@ def main():
         rows.sort(key=lambda kv: kv[0].lower())
         lines.append('## %s（%s）' % (CAT_CN.get(catkey, catkey), len(rows)))
         lines.append('')
-        lines.append('| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |')
+        lines.append('| 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |')
         lines.append('|---|---|---|---|---|---|---|---|')
         for tag, (c, w, h) in rows:
             info = iface.get(bare(tag), {})
@@ -284,8 +405,9 @@ def main():
             props_s = str(props) if props is not None else '—'
             qml, kind = QML[bare(tag)]
             kind_count[kind] = kind_count.get(kind, 0) + 1
-            lines.append('| `%s` | %s | %s | %s | %s | %dx%d | %s | %s |'
-                         % (tag, CN[bare(tag)], qml, kind, grade, w, h, props_s, src))
+            lines.append('| `%s` | %s | %s | %s | %s | %s | %s | %s |'
+                         % (tag, CN[bare(tag)], qml, WPF[bare(tag)], WIN[bare(tag)],
+                            kind, grade, props_s))
             total += 1
         lines.append('')
 
