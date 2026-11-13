@@ -1350,7 +1350,10 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                 rc = CRect(origin.x, origin.y, origin.x + node->w, origin.y + node->h);
                 // 根窗口预览用白底：画布工作台是灰底，窗体必须保持白色，才能一眼看出"窗体内 / 窗体外的空白"。
                 cv.fillRect(rc, bgC == (COLORREF)-1 ? RGB(255, 255, 255) : bgC);
-                cv.strokeRect(rc, bdC == (COLORREF)-1 ? RGB(200, 204, 210) : bdC, 1);
+                // 根窗体外框只在 XML 声明了 BorderColor 时才画：
+                // 设计器自己的外壳是无边框窗口，画布再给它描一圈灰线就"多了一层外框"。
+                if (bdC != (COLORREF)-1)
+                    cv.strokeRect(rc, bdC, 1);
             }
             else if (tagIs(node, L"MenuBar"))
             {

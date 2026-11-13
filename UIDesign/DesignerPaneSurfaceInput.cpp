@@ -138,31 +138,44 @@ DesignerPaneView::SurfaceHit DesignerPaneView::surfaceHitTest(CPoint pt) const
 // 无边框窗体：贴窗口四边 6px 起缩放，标题行空白处起拖动；双击标题行切换最大化
 bool DesignerPaneView::tryFrameChrome(CPoint pt)
 {
-    HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
-    if (root == nullptr)
+    // 保留旧名字给外部调用：贴边按下即开始自己缩放
+    const int edges = frameEdgesAt(pt);
+    if (edges == 0)
         return false;
+    startFrameDrag(pt, edges);
+    return true;
+}
+
+// 1=左 2=右 4=上 8=下（相对顶层窗口）
+int DesignerPaneView::frameEdgesAt(CPoint pt)
+{
+    HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
+    if (root == nullptr || ::IsZoomed(root))
+        return 0;
     RECT wr = {};
     ::GetWindowRect(root, &wr);
     POINT sp = pt;
-    ClientToScreen(&sp);
-
+    ::ClientToScreen(m_hWnd, &sp);
     const int edge = 6;
-    UINT ht = 0;
-    const bool left = sp.x - wr.left < edge;
-    const bool right = wr.right - sp.x < edge;
-    const bool top = sp.y - wr.top < edge;
-    const bool bottom = wr.bottom - sp.y < edge;
-    if (top) ht = left ? HTTOPLEFT : (right ? HTTOPRIGHT : HTTOP);
-    else if (bottom) ht = left ? HTBOTTOMLEFT : (right ? HTBOTTOMRIGHT : HTBOTTOM);
-    else if (left) ht = HTLEFT;
-    else if (right) ht = HTRIGHT;
-    if (ht != 0)
-    {
-        ::ReleaseCapture();
-        ::SendMessageW(root, WM_NCLBUTTONDOWN, (WPARAM)ht, 0);
-        return true;
-    }
-    return false;
+    int edges = 0;
+    if (sp.x - wr.left < edge) edges |= 1;
+    if (wr.right - sp.x < edge) edges |= 2;
+    if (sp.y - wr.top < edge) edges |= 4;
+    if (wr.bottom - sp.y < edge) edges |= 8;
+    return edges;
+}
+
+// 直接 SetWindowPos 跟着鼠标走：系统 SC_MOVE/SC_SIZE 循环会画一圈系统边框（就是"白圈"）
+void DesignerPaneView::startFrameDrag(CPoint pt, int edges)
+{
+    HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
+    if (root == nullptr)
+        return;
+    m_frameRoot = root;
+    m_frameEdges = edges;
+    m_frameStart = pt;
+    ::GetWindowRect(root, &m_frameRect);
+    ::SetCapture(m_hWnd);
 }
 
 void DesignerPaneView::surfaceToolClick(int idx)
@@ -207,17 +220,16 @@ void DesignerPaneView::surfaceLButtonDown(CPoint pt)
     if (m_surfPropEditRow != -1) commitPropEditSurface();
     if (m_codeEditing) commitCodeEdit();
 
-    // 无边框窗体：先判贴边缩放，再判标题行拖动
-    if (tryFrameChrome(pt))
+    // 无边框窗体：贴边 → 自己缩放；标题行空白 → 自己拖动（都不进系统模态循环）
+    const int edges = frameEdgesAt(pt);
+    if (edges != 0)
+    {
+        startFrameDrag(pt, edges);
         return;
+    }
     if (pt.y < m_surfTitleStrip && surfaceHitTest(pt).kind == SurfaceHit::None)
     {
-        HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
-        if (root != nullptr)
-        {
-            ::ReleaseCapture();
-            ::SendMessageW(root, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-        }
+        startFrameDrag(pt, 0);
         return;
     }
 
@@ -369,6 +381,13 @@ void DesignerPaneView::surfaceLButtonDown(CPoint pt)
 
 void DesignerPaneView::surfaceLButtonUp(CPoint pt)
 {
+    if (m_frameRoot != nullptr && ::GetCapture() == m_hWnd)
+    {
+        m_frameRoot = nullptr;
+        m_frameEdges = 0;
+        ::ReleaseCapture();
+        return;
+    }
     (void)pt;
     // 枚举属性候选也在松开时弹（按下弹会被随后的 WM_LBUTTONUP 立刻关掉）
     if (m_surfEnumPendingRow >= 0)
@@ -398,6 +417,31 @@ void DesignerPaneView::surfaceLButtonUp(CPoint pt)
 void DesignerPaneView::surfaceMouseMove(CPoint pt, UINT flags)
 {
     (void)flags;
+    // 自己实现的拖动 / 贴边缩放：按屏幕位移直接改窗口矩形
+    if (m_frameRoot != nullptr)
+    {
+        POINT sp = pt;
+        ::ClientToScreen(m_hWnd, &sp);
+        const int dx = sp.x - (m_frameRect.left + m_frameStart.x);
+        const int dy = sp.y - (m_frameRect.top + m_frameStart.y);
+        CRect r = m_frameRect;
+        if (m_frameEdges == 0)
+        {
+            r.OffsetRect(dx, dy);
+        }
+        else
+        {
+            if (m_frameEdges & 1) r.left += dx;
+            if (m_frameEdges & 2) r.right += dx;
+            if (m_frameEdges & 4) r.top += dy;
+            if (m_frameEdges & 8) r.bottom += dy;
+            if (r.Width() < 720) { if (m_frameEdges & 1) r.left = r.right - 720; else r.right = r.left + 720; }
+            if (r.Height() < 480) { if (m_frameEdges & 4) r.top = r.bottom - 480; else r.bottom = r.top + 480; }
+        }
+        ::SetWindowPos(m_frameRoot, nullptr, r.left, r.top, r.Width(), r.Height(),
+                       SWP_NOZORDER | SWP_NOACTIVATE);
+        return;
+    }
     if (m_dragSplit >= 0)
     {
         splitterDrag(m_dragSplit, pt);

@@ -265,6 +265,8 @@ namespace uidesign
         void surfaceLButtonDown(CPoint pt);
         // 无边框窗体：贴边拖拽改尺寸 / 标题行拖拽移动（交给顶层框架按 NC 消息处理）
         bool tryFrameChrome(CPoint pt);
+        int  frameEdgesAt(CPoint pt);          // 1=左 2=右 4=上 8=下，0=不在边缘
+        void startFrameDrag(CPoint pt, int edges);  // 自己拖窗/缩放，不进系统 SC_MOVE/SC_SIZE 循环
         void surfaceLButtonUp(CPoint pt);
         void surfaceMouseMove(CPoint pt, UINT flags);
         BOOL surfaceMouseWheel(CPoint pt, short delta);
@@ -325,6 +327,11 @@ namespace uidesign
         };
         std::vector<SplitterInfo> m_splitters;
         int m_dragSplit = -1;             // 正在拖动的分割条索引，-1=无
+        // 无边框窗体自己实现的拖动/缩放（不进系统模态循环，才不会闪白圈）
+        int m_frameEdges = 0;             // 0=未拖动，否则为 1/2/4/8 的位或
+        CPoint m_frameStart = CPoint(0, 0);
+        CRect m_frameRect = CRect(0, 0, 0, 0);
+        HWND m_frameRoot = nullptr;
         DWORD m_splitDragLastMove = 0;    // 拖动节流时间戳
         void setupSplitters();            // 收集自身界面中的可拖分割条
         void splitterDrag(int idx, CPoint pt);   // 拖动中：改行列 + relayout

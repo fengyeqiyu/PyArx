@@ -469,6 +469,20 @@ BOOL DesignerPaneView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
     CPoint pt;
     ::GetCursorPos(&pt);
     ScreenToClient(&pt);
+    // 先判窗口四边：自己缩放的边也要有对应的缩放光标（系统边框去掉了，默认只剩箭头）
+    const int fe = frameEdgesAt(pt);
+    if (fe != 0)
+    {
+        LPCWSTR id = IDC_ARROW;
+        if ((fe & 1) && (fe & 4)) id = IDC_SIZENWSE;
+        else if ((fe & 2) && (fe & 8)) id = IDC_SIZENWSE;
+        else if ((fe & 2) && (fe & 4)) id = IDC_SIZENESW;
+        else if ((fe & 1) && (fe & 8)) id = IDC_SIZENESW;
+        else if (fe & 3) id = IDC_SIZEWE;
+        else id = IDC_SIZENS;
+        ::SetCursor(::LoadCursor(nullptr, id));
+        return TRUE;
+    }
     for (auto& r0 : m_surfSplitterRects)
     {
         RECT r = r0;

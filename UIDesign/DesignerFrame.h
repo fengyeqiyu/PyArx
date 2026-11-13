@@ -28,6 +28,11 @@ namespace uidesign
         afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
         afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
         afx_msg void OnClose();
+        afx_msg void OnTimer(UINT_PTR nIDEvent);
+        void RecalcLayout(BOOL bNotify = TRUE) override;   // 停靠体系每次布局后立刻收掉 4px 滑块
+        void hideDockSliders();
+        void postChromeFix();     // 隐藏 MFC 停靠面板的 AFX_SLIDER 滑块（右缘那条 4px 白条，也是抢鼠标的元凶）
+        void stripWindowFrame();        // 关掉 DWM 画的 1px 边框/圆角/阴影，外壳只剩 XML 的像素
         DECLARE_MESSAGE_MAP()
 
     private:

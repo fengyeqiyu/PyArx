@@ -34,6 +34,7 @@ BEGIN_MESSAGE_MAP(DesignerFrame, CFrameWndEx)
     ON_WM_ERASEBKGND()
     ON_WM_NCCALCSIZE()
     ON_WM_GETMINMAXINFO()
+    ON_WM_TIMER()
     ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
@@ -56,6 +57,12 @@ BOOL DesignerFrame::PreTranslateMessage(MSG* pMsg)
                 fclose(f);
             }
         }
+    }
+    // 停靠体系在每次布局后都会把 4px 滑块重新显示出来：排到消息队尾再收一次
+    if (pMsg != nullptr && pMsg->message == (WM_APP + 100))
+    {
+        hideDockSliders();
+        return TRUE;
     }
     // 焦点在框架本身（没落到设计器视图的子树）时，Delete 也要能删掉画布/对象树里选中的节点。
     // 焦点在视图子树时 DesignerPaneView::PreTranslateMessage 会先处理并吃掉消息，这里不会重复删。
@@ -109,7 +116,10 @@ BOOL DesignerFrame::PreCreateWindow(CREATESTRUCT& cs)
     // designer_layout.xml 的 ShellTitle / Role=WinBtn|WinClose 自绘，
     // 于是"设计器自己的外观"也回到"由 XML 完全控制"这条线上。
     // WS_THICKFRAME 保留缩放能力，热区由 DesignerPaneView::tryFrameChrome 处理。
-    cs.style = WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN;
+    // 连 WS_THICKFRAME 也去掉：只要留着它，系统就保留"可缩放边框"这一层，
+    // DWM 会在客户区内侧描 1px 可见边框、WM_NCHITTEST 也会把边缘判成 HTLEFT/HTRIGHT，
+    // 缩放/拖动时还会走系统 SC_SIZE 循环画一圈白框。缩放改由 pane 自己 SetWindowPos 实现。
+    cs.style = WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN;
     cs.dwExStyle |= WS_EX_APPWINDOW;    // 无边框窗口也要有任务栏按钮
     return ok;
 }
@@ -193,7 +203,79 @@ int DesignerFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
     // 设计器是框架的主内容面板，不允许关掉（关掉就只剩空框架）；
     // 浮动/自动隐藏/停靠仍然保留，停靠位置由 DockPane 决定。
     ModifyStyle(0, WS_CLIPCHILDREN);
+    stripWindowFrame();
+    hideDockSliders();
+    // 停靠体系在消息泵空闲时还会把 4px 滑块和 1356 宽的停靠条重新摆回来，
+    // RecalcLayout / OnSize 都堵不住；用一个低频定时器持续压平最稳（每 300ms 两次 SetWindowPos，开销可忽略）。
+    SetTimer(7, 300, nullptr);
     return 0;
+}
+
+// 无边框窗口在 Win10/11 上仍会被 DWM 描一圈 1px 边框、加圆角和投影：
+// 关掉非客户区渲染 + 圆角 + 边框色，外壳才真的是 XML 画出来的那一块。
+// 用动态加载，不额外给工程加 dwmapi.lib 依赖。
+void DesignerFrame::stripWindowFrame()
+{
+    HMODULE dwm = ::LoadLibraryW(L"dwmapi.dll");
+    if (dwm == nullptr) return;
+    typedef HRESULT(WINAPI* SetAttr)(HWND, DWORD, LPCVOID, DWORD);
+    SetAttr fn = reinterpret_cast<SetAttr>(::GetProcAddress(dwm, "DwmSetWindowAttribute"));
+    if (fn != nullptr && m_hWnd != nullptr)
+    {
+        DWORD doNotRound = 1;        // DWMWA_WINDOW_CORNER_PREFERENCE = DWMWCP_DONOTROUND
+        fn(m_hWnd, 33, &doNotRound, sizeof(doNotRound));
+        DWORD colorNone = 0xFFFFFFFE; // DWMWA_BORDER_COLOR = DWMWA_COLOR_NONE
+        fn(m_hWnd, 34, &colorNone, sizeof(colorNone));
+        DWORD thin = 0;              // DWMWA_VISIBLE_FRAME_BORDER_THICKNESS = 0，去掉那圈描边
+        fn(m_hWnd, 37, &thin, sizeof(thin));
+    }
+    ::FreeLibrary(dwm);
+}
+
+// MFC 停靠体系会在面板右缘留一个 4px 的 AFX_SLIDER 滑块窗口：
+// 它默认用系统窗口底色（白），正好贴着窗口右边，看起来就像"外壳的一圈外框"；
+// 同时它抢走右缘的鼠标，导致左右缩放拖不动。设计器是全窗口停靠，不再需要这个滑块。
+// MFC 的停靠体系在每次 RecalcLayout 里都会重建/显示那个 4px 的 AFX_SLIDER，
+// 所以只能"布局之后"再收：这是右缘白条反复出现的真正原因。
+void DesignerFrame::RecalcLayout(BOOL bNotify)
+{
+    CFrameWndEx::RecalcLayout(bNotify);
+    hideDockSliders();
+}
+
+void DesignerFrame::hideDockSliders()
+{
+    if (m_hWnd == nullptr) return;
+    CRect rc;
+    GetClientRect(&rc);
+    if (rc.Width() <= 0 || rc.Height() <= 0) return;
+
+    HWND controlBar = nullptr;
+    HWND slider = nullptr;
+    struct Ctx { HWND root; HWND bar; HWND sld; } ctx{ m_hWnd, nullptr, nullptr };
+    ::EnumChildWindows(m_hWnd, [](HWND h, LPARAM lp) -> BOOL {
+        Ctx* c = reinterpret_cast<Ctx*>(lp);
+        if (::GetParent(h) != c->root) return TRUE;
+        wchar_t cls[128] = {0};
+        ::GetClassNameW(h, cls, 127);
+        if (wcsstr(cls, L"Slider") != nullptr) c->sld = h;
+        else if (wcsstr(cls, L"ControlBar") != nullptr) c->bar = h;
+        return TRUE;
+    }, (LPARAM)&ctx);
+    controlBar = ctx.bar;
+    slider = ctx.sld;
+
+    if (slider != nullptr)
+        ::SetWindowPos(slider, nullptr, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+    // 停靠条自己被 MFC 留出 4px 给滑块：把它铺满客户区，那 4px 就回到画面上
+    if (controlBar != nullptr)
+        ::SetWindowPos(controlBar, nullptr, 0, 0, rc.Width(), rc.Height(),
+                       SWP_NOZORDER | SWP_NOACTIVATE);
+}
+
+void DesignerFrame::postChromeFix()
+{
+    ::PostMessageW(m_hWnd, WM_APP + 100, 0, 0);   // MFC 布局跑完会重新显示滑块，排到队尾再收一次
 }
 
 void DesignerFrame::OnClose()
@@ -202,6 +284,16 @@ void DesignerFrame::OnClose()
     if (!m_pane.view().confirmClose())
         return;                       // 用户取消，窗口保持打开
     CFrameWndEx::OnClose();
+}
+
+void DesignerFrame::OnTimer(UINT_PTR nIDEvent)
+{
+    if (nIDEvent == 7)
+    {
+        hideDockSliders();
+        return;
+    }
+    CFrameWndEx::OnTimer(nIDEvent);
 }
 
 BOOL DesignerFrame::OnEraseBkgnd(CDC* pDC)
@@ -226,7 +318,11 @@ void DesignerFrame::OnSize(UINT nType, int cx, int cy)
     CRect rc;
     GetClientRect(&rc);
     if (rc.Width() > 0 && rc.Height() > 0)
+    {
         m_pane.SetWindowPos(nullptr, 0, 0, rc.Width(), rc.Height(),
                             SWP_NOZORDER | SWP_NOACTIVATE);
+        hideDockSliders();
+        postChromeFix();
+    }
 }
 
