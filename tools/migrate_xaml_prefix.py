@@ -35,8 +35,8 @@ SKIP = {
 }
 
 ALIAS_TO_MAIN = {
-    'Label': 'TextBlock', 'Edit': 'TextBox', 'Progress': 'ProgressBar',
-    'TrackBar': 'Slider', 'TreeView': 'TreeCtrl', 'ListView': 'ListCtrl',
+    'Label': 'Label', 'Edit': 'TextField', 'Progress': 'ProgressBar',
+    'TrackBar': 'Slider', 'TreeView': 'TreeView', 'ListView': 'ListCtrl',
     'Checkbox': 'CheckBox', 'Radio': 'RadioButton', 'Group': 'GroupBox',
     'Combo': 'ComboBox', 'DataGrid': 'ListCtrl', 'Separator': 'StaticLine',
     'PlanCanvas': 'PowerCanvas', 'Knob': 'Dial', 'Gauge': 'Dial',
@@ -44,18 +44,18 @@ ALIAS_TO_MAIN = {
     'NumberBox': 'SpinBox', 'NumericUpDown': 'SpinBox',
     'TileView': 'GridView', 'CoverFlow': 'PathView', 'PagerDots': 'PageIndicator',
     'Wheel': 'Tumbler', 'DataTable': 'TableView', 'GridTable': 'TableView',
-    'HierarchicalTable': 'TreeTable', 'ToolButtonBar': 'ToolStrip',
+    'HierarchicalTable': 'TreeTable', 'ToolButtonBar': 'ToolBar',
     'ContextMenu': 'Menu', 'PopupMenu': 'Menu', 'Hint': 'ToolTip',
     'Overlay': 'Popup', 'PageView': 'StackView', 'CarouselView': 'StackView',
     'PageSwipe': 'SwipeView', 'DrawCanvas': 'QCanvas', 'PaintCanvas': 'QCanvas',
     'CanvasSurface': 'QCanvas', 'Painter': 'QCanvas',
-    'VScrollBar': 'ScrollBar', 'HScrollBar': 'ScrollBar', 'ScrollView': 'ScrolledWindow',
+    'VScrollBar': 'ScrollBar', 'HScrollBar': 'ScrollBar', 'ScrollView': 'ScrollView',
     'FlickArea': 'Flickable', 'ToggleSwitch': 'Switch', 'SliderRange': 'RangeSlider',
-    'DatePickerCtrl': 'DatePicker', 'SplitterWindow': 'Splitter',
-    'RichEdit': 'RichText', 'MaskedTextBox': 'TextBox', 'LinkLabel': 'Hyperlink',
+    'DatePickerCtrl': 'DatePicker', 'SplitterWindow': 'SplitView',
+    'RichEdit': 'TextArea', 'MaskedTextBox': 'TextField', 'LinkLabel': 'Hyperlink',
     'ToggleBtn': 'ToggleButton', 'BitmapBtn': 'BitmapButton',
-    'TabWidget': 'TabControl', 'MenuBarControl': 'MenuStrip',
-    'TopMenuBar': 'MenuStrip', 'MessageBoxX': 'Popup', 'SideSheet': 'Popup',
+    'TabWidget': 'TabControl', 'MenuBarControl': 'MenuBar',
+    'TopMenuBar': 'MenuBar', 'MessageBoxX': 'Popup', 'SideSheet': 'Popup',
 }
 
 

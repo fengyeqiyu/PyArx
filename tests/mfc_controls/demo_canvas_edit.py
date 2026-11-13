@@ -20,7 +20,7 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="画布图元编辑" Width="480" Height="420">
   <XLayout x:Name="root">
     <XQCanvas x:Name="cv" Width="%d" Height="%d" Canvas.Left="28" Canvas.Top="28" />
-    <XTextBlock x:Name="hint" Width="420" Height="22" Canvas.Left="28" Canvas.Top="362"
+    <XLabel x:Name="hint" Width="420" Height="22" Canvas.Left="28" Canvas.Top="362"
                Text="点图元选中 · 空白拖拽框选 · Delete 删除" />
   </XLayout>
 </XWindow>''' % (CANVAS, HEIGHT)

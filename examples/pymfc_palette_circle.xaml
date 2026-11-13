@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <XWindow Title="PyArx 画圆演示" Width="300" Height="160">
-  <XTextBlock Name="lblHint" Text="点击按钮在模型空间画圆（嵌入窗体，无需切焦点）"
+  <XLabel Name="lblHint" Text="点击按钮在模型空间画圆（嵌入窗体，无需切焦点）"
              Left="12" Top="10" Width="276" Height="20"/>
   <XButton Name="btnDraw" Text="画圆"
           Left="110" Top="50" Width="80" Height="32"

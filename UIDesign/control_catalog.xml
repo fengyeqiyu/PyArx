@@ -130,7 +130,7 @@
     <property name="Content" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="XTextBox" display="TextBox" category="Input Widgets" w="120" h="28">
+  <objectinfo tag="XTextField" display="TextField" category="Input Widgets" w="120" h="28">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
@@ -435,7 +435,7 @@
     <property name="Orientation" type="enum" options="horizontal|vertical"/>
   </objectinfo>
 
-  <objectinfo tag="XTextBlock" display="TextBlock" category="Display Widgets" w="100" h="24">
+  <objectinfo tag="XLabel" display="Label" category="Display Widgets" w="100" h="24">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
@@ -503,7 +503,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="XRichText" display="RichText" category="Display Widgets" w="200" h="100">
+  <objectinfo tag="XTextArea" display="TextArea" category="Display Widgets" w="200" h="100">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
@@ -525,7 +525,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="XStaticBitmap" display="StaticBitmap" category="Display Widgets" w="80" h="80">
+  <objectinfo tag="XImage" display="Image" category="Display Widgets" w="80" h="80">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -878,7 +878,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="XSplitter" display="Splitter" category="Containers" w="8" h="200">
+  <objectinfo tag="XSplitView" display="SplitView" category="Containers" w="8" h="200">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -899,7 +899,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="XTreeCtrl" display="TreeCtrl" category="Containers" w="160" h="120">
+  <objectinfo tag="XTreeView" display="TreeView" category="Containers" w="160" h="120">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -988,7 +988,7 @@
     <property name="Rows" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="XScrolledWindow" display="ScrolledWindow" category="Containers" w="200" h="120">
+  <objectinfo tag="XScrollView" display="ScrollView" category="Containers" w="200" h="120">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -1031,7 +1031,7 @@
     <property name="OffsetY" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="XToolStrip" display="ToolStrip" category="Function Bar" w="360" h="32">
+  <objectinfo tag="XToolBar" display="ToolBar" category="Function Bar" w="360" h="32">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -1053,7 +1053,7 @@
     <property name="SelectedIndex" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="XMenuStrip" display="MenuStrip" category="Function Bar" w="360" h="28">
+  <objectinfo tag="XMenuBar" display="MenuBar" category="Function Bar" w="360" h="28">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>

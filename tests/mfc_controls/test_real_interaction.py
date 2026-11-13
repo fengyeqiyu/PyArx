@@ -221,7 +221,7 @@ def build_window():
     <XCheckBox x:Name="chk" Text="勾选项" Height="34"/>
     <XRadioButton x:Name="rad" Text="单选项" Height="34"/>
     <XToggleButton x:Name="tgl" Text="切换" Height="38"/>
-    <XTextBox x:Name="txt" Text="" Height="34"/>
+    <XTextField x:Name="txt" Text="" Height="34"/>
     <XComboBox x:Name="cmb" Height="30"/>
     <XListBox x:Name="lst" Height="130"/>
     <XProgressBar x:Name="prg" Height="26"/>

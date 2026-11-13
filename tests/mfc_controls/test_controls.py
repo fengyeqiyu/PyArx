@@ -88,22 +88,22 @@ def section(title):
 EXPECT_CLASS = {
     'Button': 'Button', 'CheckBox': 'Button', 'RadioButton': 'Button',
     'GroupBox': 'Button', 'ToggleButton': 'Button', 'BitmapButton': 'Button',
-    'TextBlock': 'Static', 'TextBox': 'Edit', 'ListBox': 'ListBox',
+    'Label': 'Static', 'TextField': 'Edit', 'ListBox': 'ListBox',
     'ComboBox': 'ComboBox', 'ProgressBar': 'msctls_progress32', 'Slider': 'msctls_trackbar32',
-    'TabControl': 'SysTabControl32', 'TreeCtrl': 'SysTreeView32', 'ListCtrl': 'SysListView32',
+    'TabControl': 'SysTabControl32', 'TreeView': 'SysTreeView32', 'ListCtrl': 'SysListView32',
     'DatePicker': 'SysDateTimePick32', 'CalendarCtrl': 'SysMonthCal32',
 }
 
 TAG_OF = {
-    'lblHead': 'TextBlock', 'txtInput': 'TextBox', 'btnOk': 'Button', 'chkAgree': 'CheckBox',
+    'lblHead': 'Label', 'txtInput': 'TextField', 'btnOk': 'Button', 'chkAgree': 'CheckBox',
     'radA': 'RadioButton', 'radB': 'RadioButton', 'grpTest': 'GroupBox', 'cmbCity': 'ComboBox',
     'lstItems': 'ListBox', 'prgWork': 'ProgressBar', 'sldLevel': 'Slider',
-    'lblStatus': 'TextBlock', 'btnHidden': 'Button',
-    'tabMain': 'TabControl', 'treeFiles': 'TreeCtrl', 'lstView': 'ListCtrl', 'choPick': 'Choice',
-    'dtpDate': 'DatePicker', 'pnlHost': 'Panel', 'splVert': 'Splitter', 'lnSep': 'StaticLine',
-    'lnkOpen': 'Hyperlink', 'rtfNote': 'RichText', 'tglMode': 'ToggleButton',
-    'bbtnRun': 'BitmapButton', 'sbmpPreview': 'StaticBitmap', 'grdData': 'GridCtrl',
-    'scrArea': 'ScrolledWindow', 'calPick': 'CalendarCtrl',
+    'lblStatus': 'Label', 'btnHidden': 'Button',
+    'tabMain': 'TabControl', 'treeFiles': 'TreeView', 'lstView': 'ListCtrl', 'choPick': 'Choice',
+    'dtpDate': 'DatePicker', 'pnlHost': 'Panel', 'splVert': 'SplitView', 'lnSep': 'StaticLine',
+    'lnkOpen': 'Hyperlink', 'rtfNote': 'TextArea', 'tglMode': 'ToggleButton',
+    'bbtnRun': 'BitmapButton', 'sbmpPreview': 'Image', 'grdData': 'GridCtrl',
+    'scrArea': 'ScrollView', 'calPick': 'CalendarCtrl',
 }
 
 
@@ -239,7 +239,7 @@ def test_events(w, cmap, names):
 
 def test_extended(w, cmap, names):
     section('扩展控件行为')
-    for key, label in (('lnkOpen', 'Hyperlink'), ('rtfNote', 'RichText'),
+    for key, label in (('lnkOpen', 'Hyperlink'), ('rtfNote', 'TextArea'),
                        ('tglMode', 'ToggleButton'), ('bbtnRun', 'BitmapButton')):
         cid = names[key]
         w.setText(cid, '文本-' + label)

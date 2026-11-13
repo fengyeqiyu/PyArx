@@ -16,11 +16,11 @@
 | `XGroupBox` | 分组框 | GroupBox | GroupBox | GroupBox | 同名 | B 薄 | 20 |
 | `XListCtrl` | 列表控件 | ListView / TableView（单列） | ListView | ListView | 组合 | B 薄 | 21 |
 | `XPanel` | 面板容器 | Item / Pane | Panel | Panel | 组合 | C 仅布局 | 19 |
-| `XScrolledWindow` | 滚动窗口 | ScrollView | ScrollViewer | Panel（AutoScroll） | 组合 | B 薄 | 21 |
-| `XSplitter` | 分隔条 | SplitView | GridSplitter | SplitContainer | 组合 | C 仅布局 | 19 |
+| `XScrollView` | 滚动窗口 | ScrollView | ScrollViewer | Panel（AutoScroll） | 组合 | B 薄 | 21 |
+| `XSplitView` | 分隔条 | SplitView | GridSplitter | SplitContainer | 组合 | C 仅布局 | 19 |
 | `XStaticLine` | 分隔线 | Rectangle（height: 1）/ HorizontalDivider | Separator / Rectangle | Label（BorderStyle）/ Panel | 组合 | C 仅布局 | 19 |
 | `XTabControl` | 选项卡 | TabBar + StackLayout | TabControl | TabControl | 组合 | B 薄 | 20 |
-| `XTreeCtrl` | 树形控件 | TreeView | TreeView | TreeView | 组合 | B 薄 | 20 |
+| `XTreeView` | 树形控件 | TreeView | TreeView | TreeView | 组合 | B 薄 | 20 |
 
 ## 按钮（5）
 
@@ -47,7 +47,7 @@
 | `XSlider` | 滑块 | Slider | Slider | TrackBar | 同名 | A 基本 | 22 |
 | `XSpinBox` | 数值步进框 | SpinBox | 无内置（TextBox + RepeatButton） | NumericUpDown | 同名 | A 基本 | 22 |
 | `XSwitch` | 开关 | Switch | ToggleButton（自定义模板） | CheckBox（自绘开关） | 同名 | B 薄 | 20 |
-| `XTextBox` | 文本框 | TextField / TextArea | TextBox | TextBox | 同名 | S 完整 | 24 |
+| `XTextField` | 文本框 | TextField / TextArea | TextField | TextField | 同名 | S 完整 | 24 |
 | `XTumbler` | 滚轮选择器 | Tumbler | 无（WinUI 有，WPF 需自绘） | 无（自绘） | 同名 | B 薄 | 21 |
 
 ## 显示控件（7）
@@ -57,10 +57,10 @@
 | `XBusyIndicator` | 忙碌指示器 | BusyIndicator | ProgressBar（IsIndeterminate） | ProgressBar（Marquee） | 同名 | C 仅布局 | 19 |
 | `XCalendarCtrl` | 日历 | MonthGrid + DayOfWeekRow | Calendar | MonthCalendar | 组合 | B 薄 | 20 |
 | `XHyperlink` | 超链接 | Label + MouseArea（link 样式） | Hyperlink（TextBlock 内联） | LinkLabel | 组合 | B 薄 | 21 |
+| `XImage` | 图片 | Image | Image | PictureBox | 同名 | B 薄 | 20 |
+| `XLabel` | 文本标签 | Label / Text | Label | Label | 同名 | B 薄 | 20 |
 | `XProgressBar` | 进度条 | ProgressBar | ProgressBar | ProgressBar | 同名 | A 基本 | 22 |
-| `XRichText` | 富文本 | TextArea（textFormat: RichText） | RichTextBox | RichTextBox | 组合 | A 基本 | 22 |
-| `XStaticBitmap` | 图片 | Image | Image | PictureBox | 同名 | B 薄 | 20 |
-| `XTextBlock` | 文本标签 | Label / Text | TextBlock | Label | 同名 | B 薄 | 20 |
+| `XTextArea` | 富文本 | TextArea（textFormat: RichText） | RichTextBox | RichTextBox | 组合 | A 基本 | 22 |
 
 ## 数据视图（9）
 
@@ -80,8 +80,8 @@
 
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XMenuStrip` | 菜单栏 | MenuBar | Menu | MenuStrip | 组合 | B 薄 | 21 |
-| `XToolStrip` | 工具栏 | ToolBar | ToolBar | ToolStrip | 组合 | B 薄 | 21 |
+| `XMenuBar` | 菜单栏 | MenuBar | Menu | MenuBar | 组合 | B 薄 | 21 |
+| `XToolBar` | 工具栏 | ToolBar | ToolBar | ToolBar | 组合 | B 薄 | 21 |
 
 ## 浮层（3）
 

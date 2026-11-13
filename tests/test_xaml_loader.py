@@ -69,7 +69,7 @@ check('toDict 结构', d['tag'] == 'Window' and isinstance(d['children'], list))
 
 # 9. 注册标签
 tags = xaml.tags()
-for t in ('Button', 'TextBox', 'ComboBox', 'Slider', 'TabControl', 'CalendarCtrl'):
+for t in ('Button', 'TextField', 'ComboBox', 'Slider', 'TabControl', 'CalendarCtrl'):
     check('tags 含 ' + t, t in tags)
 check('tags 数量 >= 26', len(tags) >= 26, str(len(tags)))
 

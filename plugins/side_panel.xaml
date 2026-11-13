@@ -26,7 +26,7 @@
       <ColumnDefinition Width="12"/>
     </XGrid.ColumnDefinitions>
 
-    <XTextBlock Name="Title" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Text="配电规划表"/>
+    <XLabel Name="Title" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Text="配电规划表"/>
     <XListCtrl Name="Table" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5"/>
     <XButton Name="BtnApply" Grid.Row="2" Grid.Column="1" Text="应用" on_click="on_apply"/>
     <XButton Name="BtnLoad" Grid.Row="2" Grid.Column="2" Text="载入" on_click="on_load"/>

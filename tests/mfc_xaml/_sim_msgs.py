@@ -104,7 +104,7 @@ def onCtlMouseUp(*a):
 
 
 XAML = '''<XWindow Title="模拟消息测试" Width="620" Height="420">
-  <XTextBox Name="T1" Left="16" Top="16" Width="240" Height="28"
+  <XTextField Name="T1" Left="16" Top="16" Width="240" Height="28"
            Text="初始" Click="onClick" DoubleClick="onDbl" TextChanged="onText"
            KeyDown="onCtlKeyDown" KeyUp="onCtlKeyUp" MouseDown="onCtlMouseDown" MouseUp="onCtlMouseUp"
            GotFocus="onCtlFocus"/>

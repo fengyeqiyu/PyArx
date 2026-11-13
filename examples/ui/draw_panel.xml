@@ -7,8 +7,8 @@
 
     <TabItem Header="绘制">
         <XStackPanel>
-            <XTextBlock x:Name="d_lbl" Content="绘制参数" Height="24"/>
-            <XTextBox x:Name="d_radius" Content="R=100" Height="28" TextChanged="OnRadius"/>
+            <XLabel x:Name="d_lbl" Content="绘制参数" Height="24"/>
+            <XTextField x:Name="d_radius" Content="R=100" Height="28" TextChanged="OnRadius"/>
             <XButton x:Name="d_draw" Content="绘制" Height="32" Click="OnDraw"/>
             <XButton x:Name="d_clear" Content="清除" Height="32" Click="OnClear"/>
             <XListBox x:Name="d_list" Items="直线|圆" Height="90"/>
@@ -18,7 +18,7 @@
 
     <TabItem Header="设置">
         <XStackPanel>
-            <XTextBlock x:Name="s_lbl" Content="界面设置" Height="24"/>
+            <XLabel x:Name="s_lbl" Content="界面设置" Height="24"/>
             <XCheckBox x:Name="s_dark" Content="深色主题" Height="24" IsChecked="1"/>
             <XComboBox x:Name="s_unit" Items="毫米|米|英寸" Height="110"/>
             <XSlider x:Name="s_scale" Minimum="0" Maximum="20" Value="5" Height="32"/>

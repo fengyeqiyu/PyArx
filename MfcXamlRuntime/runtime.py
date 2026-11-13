@@ -32,7 +32,7 @@ PLUGIN_DIR = r'G:\PyArx\plugins'
 _TAG_SPEC = {
     'Label': ('addLabel', 'text'), 'Static': ('addLabel', 'text'),
     'Button': ('addButton', 'text'), 'PushButton': ('addButton', 'text'),
-    'TextBox': ('addEdit', 'text'), 'Edit': ('addEdit', 'text'),
+    'TextField': ('addEdit', 'text'), 'Edit': ('addEdit', 'text'),
     'CheckBox': ('addCheckBox', 'text'), 'Radio': ('addRadio', 'text'),
     'Group': ('addGroup', 'text'), 'GroupBox': ('addGroup', 'text'),
     'Toggle': ('addToggle', 'text'), 'Switch': ('addToggle', 'text'),
@@ -40,14 +40,14 @@ _TAG_SPEC = {
     'Progress': ('addProgress', 'rect'), 'ProgressBar': ('addProgress', 'rect'),
     'Slider': ('addSlider', 'slider'),
     'Tab': ('addTab', 'rect'), 'TabControl': ('addTab', 'rect'),
-    'Tree': ('addTree', 'rect'), 'TreeCtrl': ('addTree', 'rect'), 'TreeView': ('addTree', 'rect'),
+    'Tree': ('addTree', 'rect'), 'TreeView': ('addTree', 'rect'), 'TreeView': ('addTree', 'rect'),
     'ListCtrl': ('addListCtrl', 'rect'), 'ListBox': ('addListBox', 'rect'),
     'Table': ('addTable', 'rect'), 'GridCtrl': ('addGrid', 'rect'),
     'DatePicker': ('addDatePicker', 'rect'), 'Calendar': ('addCalendar', 'rect'),
-    'Splitter': ('addSplitter', 'rect'), 'StaticLine': ('addStaticLine', 'rect'),
-    'RichText': ('addRichText', 'rect'),
-    'StaticBitmap': ('addStaticBitmap', 'rect'), 'Image': ('addStaticBitmap', 'rect'),
-    'Panel': ('addPanel', 'rect'), 'ScrolledWindow': ('addScrolledWindow', 'rect'),
+    'SplitView': ('addSplitter', 'rect'), 'StaticLine': ('addStaticLine', 'rect'),
+    'TextArea': ('addRichText', 'rect'),
+    'Image': ('addStaticBitmap', 'rect'), 'Image': ('addStaticBitmap', 'rect'),
+    'Panel': ('addPanel', 'rect'), 'ScrollView': ('addScrolledWindow', 'rect'),
 }
 _TAGS = {k: v[0] for k, v in _TAG_SPEC.items()}     # 兼容按老表引用的地方
 

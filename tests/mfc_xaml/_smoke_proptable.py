@@ -37,7 +37,7 @@ def onScroll(v):
 
 
 XAML = '''<XWindow Title="属性表冒烟" Width="640" Height="480">
-  <XTextBox Name="T1" Left="16" Top="16" Width="240" Height="28"
+  <XTextField Name="T1" Left="16" Top="16" Width="240" Height="28"
            Text="初始" Placeholder="提示" MaxLength="12" IsReadOnly="true"
            TextChanged="onText" DoubleClick="onDbl" KeyDown="onKey" FooBar="1"/>
   <XCheckBox Name="C1" Left="16" Top="56" Width="120" Height="24"
@@ -97,7 +97,7 @@ def main():
     p2 = r'G:\PyArx\docs\_smoke_proptable_bad.xaml'
     with open(p2, 'w', encoding='utf-8') as f:
         f.write('<XWindow Title="坏回调" Width="320" Height="200">'
-                '<XTextBox Name="T2" Left="8" Top="8" Width="200" Height="26" '
+                '<XTextField Name="T2" Left="8" Top="8" Width="200" Height="26" '
                 'DoubleClick="这个函数不存在"/></XWindow>')
     try:
         w2 = M.guiload(p2, context=globals())
@@ -124,7 +124,7 @@ def main():
     p4 = r'G:\PyArx\docs\_smoke_proptable_scroll2.xaml'
     with open(p4, 'w', encoding='utf-8') as f:
         f.write('<XWindow Title="Scroll绑定" Width="320" Height="200">'
-                '<XScrolledWindow Name="SW2" Left="8" Top="8" Width="240" Height="120" '
+                '<XScrollView Name="SW2" Left="8" Top="8" Width="240" Height="120" '
                 'Scroll="onScroll"/></XWindow>')
     w4 = M.guiload(p4, context=globals())
     w4.close()

@@ -18,19 +18,19 @@ import PyMfcXaml as p
 XAML = '''<?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="层次与 Tab 序号" Width="560" Height="440">
   <XLayout x:Name="root">
-    <XTextBlock x:Name="a" Width="170" Height="90" Canvas.Left="30" Canvas.Top="30"
+    <XLabel x:Name="a" Width="170" Height="90" Canvas.Left="30" Canvas.Top="30"
                Text="A 块" Background="#C0392B" Foreground="#FFFFFF" Level="0" />
-    <XTextBlock x:Name="b" Width="170" Height="90" Canvas.Left="70" Canvas.Top="60"
+    <XLabel x:Name="b" Width="170" Height="90" Canvas.Left="70" Canvas.Top="60"
                Text="B 块" Background="#2E86C1" Foreground="#FFFFFF" Level="1" />
 
-    <XTextBox x:Name="e1" Width="150" Height="30" Canvas.Left="30" Canvas.Top="190" TabIndex="3" Text="第一个声明，Tab 第 3 个" />
-    <XTextBox x:Name="e2" Width="150" Height="30" Canvas.Left="30" Canvas.Top="230" TabIndex="1" Text="第二个声明，Tab 第 1 个" />
-    <XTextBox x:Name="e3" Width="150" Height="30" Canvas.Left="30" Canvas.Top="270" TabIndex="2" Text="第三个声明，Tab 第 2 个" />
+    <XTextField x:Name="e1" Width="150" Height="30" Canvas.Left="30" Canvas.Top="190" TabIndex="3" Text="第一个声明，Tab 第 3 个" />
+    <XTextField x:Name="e2" Width="150" Height="30" Canvas.Left="30" Canvas.Top="230" TabIndex="1" Text="第二个声明，Tab 第 1 个" />
+    <XTextField x:Name="e3" Width="150" Height="30" Canvas.Left="30" Canvas.Top="270" TabIndex="2" Text="第三个声明，Tab 第 2 个" />
 
     <XButton x:Name="btnTop" Text="B 置顶" Width="110" Height="34" Canvas.Left="250" Canvas.Top="190" TabIndex="4" />
     <XButton x:Name="btnBottom" Text="B 置底" Width="110" Height="34" Canvas.Left="250" Canvas.Top="234" TabIndex="5" />
     <XButton x:Name="btnSwap" Text="交换 A / B" Width="110" Height="34" Canvas.Left="250" Canvas.Top="278" TabIndex="6" />
-    <XTextBlock x:Name="status" Width="480" Height="26" Canvas.Left="30" Canvas.Top="340" Text="" />
+    <XLabel x:Name="status" Width="480" Height="26" Canvas.Left="30" Canvas.Top="340" Text="" />
   </XLayout>
 </XWindow>'''
 

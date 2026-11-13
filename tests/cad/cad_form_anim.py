@@ -14,12 +14,12 @@ LOG = r"G:\PyArx\log\cad_form_anim.log"
 XAML = r'''<?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PyArx CAD 动画" Width="520" Height="400">
   <XCanvas>
-    <XTextBlock x:Name="lb" Text="宽度 / 数值 / 颜色动画 + StackView 切页" Width="470" Height="22" Canvas.Left="14" Canvas.Top="8" />
+    <XLabel x:Name="lb" Text="宽度 / 数值 / 颜色动画 + StackView 切页" Width="470" Height="22" Canvas.Left="14" Canvas.Top="8" />
     <XButton x:Name="ab" Text="动画按钮" Width="160" Height="36" Canvas.Left="14" Canvas.Top="40" />
     <XSpinBox x:Name="asp" Width="100" Height="30" Canvas.Left="190" Canvas.Top="42" Value="10" />
     <XProgressBar x:Name="apg" Width="300" Height="18" Canvas.Left="14" Canvas.Top="92" />
     <XStackView x:Name="sv" Width="360" Height="180" Canvas.Left="14" Canvas.Top="126" />
-    <XTextBlock x:Name="pg1" Text="第一页：文字" Width="360" Height="150" Canvas.Left="14" Canvas.Top="126" />
+    <XLabel x:Name="pg1" Text="第一页：文字" Width="360" Height="150" Canvas.Left="14" Canvas.Top="126" />
     <XQCanvas x:Name="pg2" Width="360" Height="150" Canvas.Left="14" Canvas.Top="126"
              Commands="Clear #313842; Rect 12,12,90,40,#00A8E8; Ellipse 120,10,50,50,#57C84D; Text 12,96,第二页:画命令,9,#FFFFFF" />
   </XCanvas>

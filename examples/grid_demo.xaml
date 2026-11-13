@@ -11,7 +11,7 @@
       <ColumnDefinition Width="*"/>
     </XGrid.ColumnDefinitions>
 
-    <XTextBlock Name="title" Text="Grid + RowDefinitions + ColumnDefinitions"
+    <XLabel Name="title" Text="Grid + RowDefinitions + ColumnDefinitions"
                Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                Height="28" Margin="2"/>
 
@@ -21,7 +21,7 @@
     <XListBox Name="listRight"
              Grid.Row="1" Grid.Column="1" Margin="4"/>
 
-    <XTextBlock Name="status" Text="底部状态栏"
+    <XLabel Name="status" Text="底部状态栏"
                Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                Margin="2"/>
   </XGrid>

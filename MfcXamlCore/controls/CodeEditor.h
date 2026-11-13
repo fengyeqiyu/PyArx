@@ -1879,12 +1879,12 @@ private:
         if (m_syntax == Syntax::Xaml)
         {
             static const wchar_t* kTags[] = {
-                L"Button", L"TextBlock", L"TextBox", L"Edit", L"ListBox", L"CheckBox",
+                L"Button", L"Label", L"TextField", L"Edit", L"ListBox", L"CheckBox",
                 L"RadioButton", L"GroupBox", L"ComboBox", L"ProgressBar", L"Slider",
                 L"TabControl", L"TreeView", L"ListView", L"Calendar", L"DatePicker",
                 L"Layout", L"StackPanel", L"Grid", L"Canvas", L"QCanvas", L"ScrollView",
                 L"Flickable", L"PageView", L"CodeEditor", L"StaticLine", L"Hyperlink",
-                L"ToggleButton", L"Switch", L"Dial", L"Tumbler", L"Table", L"Splitter",
+                L"ToggleButton", L"Switch", L"Dial", L"Tumbler", L"Table", L"SplitView",
                 L"Window"
             };
             static const wchar_t* kAttrs[] = {

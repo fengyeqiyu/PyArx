@@ -222,11 +222,11 @@ struct IHostServices {  // 只留真正通用的能力
 - 修法：新增 `setScrollValueUser`（交互专用），值真正变化时才 `invokePython(m_value[id])`；
   程序赋值仍走 `setScrollBarValue`，避免"Python 设值 → 回调 → 再设值"自激；夹边/同值不发事件，滚到底不会刷回调。
 - 验证 `tests\mfc_xaml\_sim_scrollbar.py`（模拟消息，5/5）：点右轨道 0→10 且回调 1 次、点左轨道回 0、拖拇指到 64、滚轮到 69，共 4 次回调。
-- 仍未统一的一处：`ScrolledWindow` 的内容区滚动（`scrollAreaMouse`）点轨道只 `nudgeScroll(±1)`（一次一行，不是一页），且同样没有回调；
+- 仍未统一的一处：`ScrollView` 的内容区滚动（`scrollAreaMouse`）点轨道只 `nudgeScroll(±1)`（一次一行，不是一页），且同样没有回调；
   它属于 `Scroll` 事件与 S3 宿主瘦身的范围，本次未动。
 ### 统一：滚动区域与独立 ScrollBar 对齐（2026-11-13）
 
-对齐前的不一致：`ScrolledWindow` 点轨道走 `nudgeScroll(±1)`（一档 ≈ 量程 1/12，观感约一行），独立 `<XScrollBar>` 点轨道是翻一页；且两者改值都不发事件。
+对齐前的不一致：`ScrollView` 点轨道走 `nudgeScroll(±1)`（一档 ≈ 量程 1/12，观感约一行），独立 `<XScrollBar>` 点轨道是翻一页；且两者改值都不发事件。
 
 - **点轨道 = 翻一页**：滚动区域改为 `pos ± 视口高度`（`cr.bottom - cr.top`），与独立 ScrollBar 的"跳一页"一致；滚轮仍是一档（`量程/12`），保住手感。
 - **位置唯一写入口**：新增 `PyMfcHost::setScrollAreaPos(child, pos, notify)`，夹边、值真变了才重绘；`notify` 时 `fireControlEvent(id, L"scroll")`。`nudgeScroll` 与拖拇指都改走它。
@@ -244,7 +244,7 @@ struct IHostServices {  // 只留真正通用的能力
 `WindowFromPoint` → 沿父链找挂了 `PyMfcSkinHost` 属性的窗口 → 交给宿主 `wheelOnHoveredWindow`：
 
 - 独立 `ScrollBar`：整块可滚，一步 = `PageSize/2`（最少 1），走 `setScrollValueUser`，`ValueChanged` 与 `scroll` 都发。
-- `ScrolledWindow`：只认右侧 18px 滚动条条带，一步 = 量程 1/12（与内容区滚轮一致），走 `nudgeScroll → setScrollAreaPos`，发 `scroll`。
+- `ScrollView`：只认右侧 18px 滚动条条带，一步 = 量程 1/12（与内容区滚轮一致），走 `nudgeScroll → setScrollAreaPos`，发 `scroll`。
 - 命中非滚动件：不消费，交回原流程，内容控件自己的滚轮行为一点没变。
 
 验证 `tests\mfc_xaml\_sim_wheel.py` 7/7（`PostMessage` 投递 `WM_MOUSEWHEEL`，坐标写在 `lParam` 里，不动真实鼠标）：
@@ -255,7 +255,7 @@ struct IHostServices {  // 只留真正通用的能力
 
 - 手型（`IDC_HAND`）：真控件 hover——`Button/ToggleButton/BitmapButton`、`Hyperlink`（SysLink）、
   `ComboBox`、皮肤件里的 `ScrollBar/Switch/SpinBox/RangeSlider/PageIndicator/Dial/Tumbler/Table/Tree/ListView/GridView/PathView/Menu/MenuBar`，
-  以及任何绑了 `Click`/`DoubleClick` 的卡片类控件；`ScrolledWindow` 只在右侧 18px 滚动条条带上给手型。
+  以及任何绑了 `Click`/`DoubleClick` 的卡片类控件；`ScrollView` 只在右侧 18px 滚动条条带上给手型。
 - 爪型：`QCanvas` / `Flickable` / `PowerCanvas`。系统光标表里没有 grab 手型（`C:\Windows\Cursors` 只有
   aero_arrow / aero_link / aero_move 等，Win32 光标 ID 也无 grab），所以用资源文件 `res\grab.cur`：
   **当前版本是直接从浏览器实际使用的 HCURSOR 抓出来的原图**（见文末"直接从浏览器提取光标"一节），
@@ -267,7 +267,7 @@ struct IHostServices {  // 只留真正通用的能力
   绘制，光标看起来永远偏大——所以只保留 32 一张。
   自绘路线（胶囊 SDF / polygon）已全部废弃，不再使用 `_gen_grab_cursor.py`。
   `pyMfcGrabCursor()` 从 `<pyd 目录>\res\grab.cur` 载入，载不到退回手型（绝不退回箭头）。
-- 容器/空白（`Panel`、`Pager`、`ToolBar`、`BusyIndicator`、`Shadow`、`TextBlock`）仍是箭头；`Edit/RichText` 沿用系统的 I 型。
+- 容器/空白（`Panel`、`Pager`、`ToolBar`、`BusyIndicator`、`Shadow`、`Label`）仍是箭头；`Edit/RichText` 沿用系统的 I 型。
 - 复位：`WM_MOUSELEAVE` 把光标复位成箭头，不会出现"手型挂在窗外"。
 - 部署：`res\grab.cur` 必须跟 pyd 一起发布（已复制到 `X64\Release\res\grab.cur`）。
 
@@ -382,8 +382,8 @@ Windows 版 Chromium 的 `cursor:grab` / `cursor:grabbing` 是运行时用内部
 |---|---|---|
 | `XamlTabControl` | `tab` | `TabControl` / `tabcontrol` / `TabWidget` / `tabwidget`（无 `Tab`） |
 | `XamlToggleButton` | `togglebutton` | `ToggleButton` / `togglebutton` / `ToggleBtn`（无 `Toggle`/`toggle`） |
-| `XamlToolBar` | `toolbar` | `ToolStrip` / `toolstrip` / `ToolButtonBar`（`ToolBar` 归布局层） |
-| `XamlMenuBar` | `menubar` | `MenuStrip` / `menustrip` / `MenuBarControl` / `TopMenuBar` |
+| `XamlToolBar` | `toolbar` | `ToolBar` / `toolstrip` / `ToolButtonBar`（`ToolBar` 归布局层） |
+| `XamlMenuBar` | `menubar` | `MenuBar` / `menustrip` / `MenuBarControl` / `TopMenuBar` |
 
 后两者是为避免抢布局层的旧别名（`ToolBar`/`TreeView`）而特意改名的，属于**有意分叉但没留说明**；
 前两者是真缺口：XAML 里写 `<Toggle …>`、`<Tab …>` 不成立，而契约表和诊断里这两个控件就叫 `toggle`、`tab`。

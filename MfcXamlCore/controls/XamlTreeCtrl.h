@@ -8,7 +8,7 @@
 class XAML_CORE_API XamlTreeCtrl : public XamlMfcControlBase
 {
 public:
-    XamlTreeCtrl() : XamlMfcControlBase(L"TreeCtrl") {}
+    XamlTreeCtrl() : XamlMfcControlBase(L"TreeView") {}
 
 protected:
     void createNative(IXamlMfcHost* host, int id, int min, int max, int x, int y, int w, int h) override;

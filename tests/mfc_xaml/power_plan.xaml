@@ -24,12 +24,12 @@
     </XGrid.ColumnDefinitions>
 
     <!-- 画布：主内容左列 -->
-    <XTextBlock Name="CV" Grid.Row="1" Grid.Column="1"/>
+    <XLabel Name="CV" Grid.Row="1" Grid.Column="1"/>
 
     <!-- 分割条：画布与侧板之间，拖动它改第 3 列宽度（Python 传 overrides） -->
-    <XTextBlock Name="SPLIT" Grid.Row="1" Grid.Column="2"/>
+    <XLabel Name="SPLIT" Grid.Row="1" Grid.Column="2"/>
 
     <!-- 侧板（表格编辑器）：主内容右列 -->
-    <XTextBlock Name="Side" Grid.Row="1" Grid.Column="3"/>
+    <XLabel Name="Side" Grid.Row="1" Grid.Column="3"/>
   </XGrid>
 </XWindow>

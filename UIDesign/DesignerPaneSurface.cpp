@@ -418,7 +418,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 面板标题条（旧写法：带 Background 的 TextBlock）----
-    if (_wcsicmp(bareTag.c_str(), L"TextBlock") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"Label") == 0)
     {
         std::wstring content = node->get(L"Text");
         if (content.empty()) content = node->get(L"Content");
@@ -432,7 +432,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 分割条 ----
-    if (_wcsicmp(bareTag.c_str(), L"Splitter") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"SplitView") == 0)
     {
         int si = -1;
         for (size_t i = 0; i < m_splitters.size(); ++i)
@@ -473,7 +473,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 控件箱 / 对象树 ----
-    if (_wcsicmp(bareTag.c_str(), L"TreeCtrl") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"TreeView") == 0)
     {
         // 深色面板里不能再用系统白底（那是"未声明外观"的默认），否则整块泛白刺眼
         xamlctl::TreeStyle st;

@@ -11,9 +11,9 @@
         Title="控件演示" Width="460" Height="700" Theme="dark">
 
     <XStackPanel>
-        <XTextBlock x:Name="lblTitle" Content="原生 MFC 控件演示" Height="28"/>
+        <XLabel x:Name="lblTitle" Content="原生 MFC 控件演示" Height="28"/>
         <XButton x:Name="btnHello" Content="点我" Height="34" Click="OnHello"/>
-        <XTextBox x:Name="txtInput" Content="初始文本" Height="28" TextChanged="OnTextChanged"/>
+        <XTextField x:Name="txtInput" Content="初始文本" Height="28" TextChanged="OnTextChanged"/>
 
         <XStackPanel Orientation="Horizontal" Height="26">
             <XCheckBox x:Name="chkA" Content="选项 A" Width="130" IsChecked="1"/>
@@ -30,6 +30,6 @@
         <XListBox x:Name="lstShow" Items="alpha|beta|gamma" Height="100"/>
         <XSlider x:Name="sldLevel" Minimum="0" Maximum="100" Value="30" Height="32"/>
         <XProgressBar x:Name="prgState" Minimum="0" Maximum="100" Value="40" Height="20"/>
-        <XTextBox x:Name="txtReadonly" Content="只读文本" Height="28" IsReadOnly="1"/>
+        <XTextField x:Name="txtReadonly" Content="只读文本" Height="28" IsReadOnly="1"/>
     </XStackPanel>
 </XWindow>

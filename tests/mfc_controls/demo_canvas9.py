@@ -16,7 +16,7 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
     <XGridView x:Name="gv" Width="300" Height="320" CellHeight="74" Canvas.Left="130" Canvas.Top="44" />
     <XPathView x:Name="pv" Width="304" Height="150" Canvas.Left="444" Canvas.Top="44" />
     <XQCanvas x:Name="qc" Width="618" Height="240" Canvas.Left="130" Canvas.Top="384" Commands="%s" />
-    <XTextBlock x:Name="t" Text="Repeater 展开按钮 / GridView 12 格 / PathView 6 卡 / QCanvas 画命令" Width="700" Height="22" Canvas.Left="14" Canvas.Top="8" />
+    <XLabel x:Name="t" Text="Repeater 展开按钮 / GridView 12 格 / PathView 6 卡 / QCanvas 画命令" Width="700" Height="22" Canvas.Left="14" Canvas.Top="8" />
   </XCanvas>
 </XWindow>''' % CMDS
 

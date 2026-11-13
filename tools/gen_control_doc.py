@@ -21,8 +21,8 @@ COMMON = ['Shape', 'BackColor', 'FrontColor', 'Foreground', 'BorderColor', 'Bord
 # 主标签 -> (实现方式, 源文件, 事件键)
 INFO = {
     'Button':         ('原生 MFC Button', 'XamlButton.cpp', 'pointer'),
-    'TextBlock':      ('原生 MFC Static', 'XamlTextBlock.cpp', 'pointer'),
-    'TextBox':        ('原生 MFC Edit', 'XamlTextBox.cpp', 'text'),
+    'Label':      ('原生 MFC Static', 'XamlTextBlock.cpp', 'pointer'),
+    'TextField':        ('原生 MFC Edit', 'XamlTextBox.cpp', 'text'),
     'ListBox':        ('原生 MFC ListBox', 'XamlListBox.cpp', 'select'),
     'CodeEditor':     ('C++ 自绘编辑器', 'XamlCodeEditor.cpp', 'text'),
     'CheckBox':       ('原生 MFC Button(BS_AUTOCHECKBOX)', 'XamlCheckBox.cpp', 'check'),
@@ -32,21 +32,21 @@ INFO = {
     'ProgressBar':    ('原生 MFC msctls_progress32', 'XamlProgressBar.cpp', 'value'),
     'Slider':         ('原生 MFC msctls_trackbar32', 'XamlSlider.cpp', 'value'),
     'TabControl':     ('原生 MFC SysTabControl32', 'XamlTabControl.cpp', 'fairly'),
-    'TreeCtrl':       ('原生 MFC SysTreeView32', 'XamlTreeCtrl.cpp', 'select'),
+    'TreeView':       ('原生 MFC SysTreeView32', 'XamlTreeCtrl.cpp', 'select'),
     'ListCtrl':       ('原生 MFC SysListView32', 'XamlListCtrl.cpp', 'select'),
     'Choice':         ('原生 MFC ComboBox(CBS_DROPDOWNLIST)', 'XamlChoice.cpp', 'choice'),
     'DatePicker':     ('原生 MFC SysDateTimePick32', 'XamlDatePicker.cpp', 'date'),
     'Panel':          ('原生 MFC Static 容器', 'XamlPanel.cpp', 'panel'),
-    'Splitter':       ('原生 MFC 自注册拖动条', 'XamlSplitter.cpp', 'splitter'),
+    'SplitView':       ('原生 MFC 自注册拖动条', 'XamlSplitter.cpp', 'splitter'),
     'StaticLine':     ('原生 MFC Static(SS_ETCHEDHORZ)', 'XamlStaticLine.cpp', 'pointer'),
     'PowerCanvas':    ('宿主自绘画布（配电规划图）', 'XamlPowerCanvas.cpp', 'canvas'),
     'Hyperlink':      ('原生 MFC SysLink', 'XamlHyperlink.cpp', 'link'),
-    'RichText':       ('原生 MFC RICHEDIT50W', 'XamlRichText.cpp', 'text'),
+    'TextArea':       ('原生 MFC RICHEDIT50W', 'XamlRichText.cpp', 'text'),
     'ToggleButton':   ('原生 MFC Button(BS_AUTOCHECKBOX 自绘)', 'XamlToggleButton.cpp', 'check'),
     'BitmapButton':   ('原生 MFC Button(BS_BITMAP)', 'XamlBitmapButton.cpp', 'pointer'),
-    'StaticBitmap':   ('原生 MFC Static(SS_BITMAP)', 'XamlStaticBitmap.cpp', 'pointer'),
+    'Image':   ('原生 MFC Static(SS_BITMAP)', 'XamlStaticBitmap.cpp', 'pointer'),
     'GridCtrl':       ('原生 MFC 自注册网格', 'XamlGrid.cpp', 'select'),
-    'ScrolledWindow': ('原生 MFC 自注册滚动容器', 'XamlScrolledWindow.cpp', 'scrolled'),
+    'ScrollView': ('原生 MFC 自注册滚动容器', 'XamlScrolledWindow.cpp', 'scrolled'),
     'CalendarCtrl':   ('原生 MFC SysMonthCal32', 'XamlCalendarCtrl.cpp', 'date'),
     'Switch':         ('自绘 skin #1 Switch', 'XamlSwitch.cpp', 'switch'),
     'SpinBox':        ('自绘 skin #2 Spin', 'XamlSpinBox.cpp', 'value'),
@@ -58,10 +58,10 @@ INFO = {
     'ScrollBar':      ('自绘 skin #8 ScrollBar', 'XamlScrollBar.cpp', 'scrollbar'),
     'TableView':      ('自绘 skin #9 Table（独立控件套装）', 'XamlTableView.cpp', 'select'),
     'TreeTable':      ('自绘 skin #10 Tree', 'XamlTreeView.cpp', 'select'),
-    'ToolStrip':      ('自绘 skin #11 ToolBar', 'XamlToolBar.cpp', 'toolstrip'),
+    'ToolBar':      ('自绘 skin #11 ToolBar', 'XamlToolBar.cpp', 'toolstrip'),
     'ToolTip':        ('自绘 skin #12 ToolTip', 'XamlToolTip.cpp', 'tooltip'),
     'Menu':           ('自绘 skin #13 Menu', 'XamlMenu.cpp', 'menu'),
-    'MenuStrip':      ('自绘 skin #14 MenuBar', 'XamlMenuBar.cpp', 'menustrip'),
+    'MenuBar':      ('自绘 skin #14 MenuBar', 'XamlMenuBar.cpp', 'menustrip'),
     'Popup':          ('自绘 skin #15 Popup', 'XamlPopup.cpp', 'popup'),
     'VirtualList':    ('自绘 skin #16 ListView（虚拟化）', 'XamlListView.cpp', 'select'),
     'Page':           ('自绘 skin #17 Pager（XamlPageView）', 'XamlPage.cpp', 'fairly'),
@@ -102,8 +102,8 @@ EVENTS = {
 
 ALIAS = {
     'Button': 'button, BTN',
-    'TextBlock': 'textblock, Label, label',
-    'TextBox': 'textbox, Edit, edit',
+    'Label': 'textblock, Label, label',
+    'TextField': 'textbox, Edit, edit',
     'ListBox': 'listbox',
     'CodeEditor': 'codeeditor, CodeView, codeview, XmlEditor',
     'CheckBox': 'checkbox, Checkbox',
@@ -113,21 +113,21 @@ ALIAS = {
     'ProgressBar': 'progressbar, Progress, progress',
     'Slider': 'slider',
     'TabControl': 'tabcontrol, TabWidget, tabwidget',
-    'TreeCtrl': 'treectrl, TreeView, tree',
+    'TreeView': 'treectrl, TreeView, tree',
     'ListCtrl': 'listctrl, ListView, listctrl_view',
     'Choice': 'choice',
     'DatePicker': 'datepicker, DatePickerCtrl',
     'Panel': 'panel',
-    'Splitter': 'splitter, SplitterWindow',
+    'SplitView': 'splitter, SplitterWindow',
     'StaticLine': 'staticline',
     'PowerCanvas': 'powercanvas, PlanCanvas',
     'Hyperlink': 'hyperlink, HyperlinkCtrl',
-    'RichText': 'richtext, RichTextCtrl',
+    'TextArea': 'richtext, RichTextCtrl',
     'ToggleButton': 'togglebutton, ToggleBtn',
     'BitmapButton': 'bitmapbutton, BitmapBtn',
-    'StaticBitmap': 'staticbitmap',
+    'Image': 'staticbitmap',
     'GridCtrl': 'gridctrl, DataGrid',
-    'ScrolledWindow': 'scrolledwindow',
+    'ScrollView': 'scrolledwindow',
     'CalendarCtrl': 'calendar, Calendar',
     'Switch': 'switch, ToggleSwitch',
     'SpinBox': 'spinbox, NumberBox, NumericUpDown',
@@ -139,10 +139,10 @@ ALIAS = {
     'ScrollBar': 'scrollbar, VScrollBar, HScrollBar',
     'TableView': 'tableview, DataTable, GridTable',
     'TreeTable': 'treetable, HierarchicalTable',
-    'ToolStrip': 'toolstrip, ToolButtonBar',
+    'ToolBar': 'toolstrip, ToolButtonBar',
     'ToolTip': 'tooltip, Hint',
     'Menu': 'menu, ContextMenu, PopupMenu',
-    'MenuStrip': 'menustrip, MenuBarControl, TopMenuBar',
+    'MenuBar': 'menustrip, MenuBarControl, TopMenuBar',
     'Popup': 'popup, Overlay（Dialog / drawer 同实现）',
     'VirtualList': 'virtuallist, ListViewV, ModelList',
     'Page': 'PagedView, WizardPage',
@@ -264,13 +264,13 @@ def main():
       '这也是 `plugins` 层用 XAML 组合补位的典型对象（组合态用子控件属性，不硬造新属性）。\n\n')
 
     w('## 五、命名规范\n\n')
-    w('标签统一为 `X + 本意名`（`XButton` / `XTextBox` / `XStackPanel` / `XWindow`），'\
+    w('标签统一为 `X + 本意名`（`XButton` / `XTextField` / `XStackPanel` / `XWindow`），'\
       '只保留唯一一个标签，历史别名（`BTN` / `Edit` / `TreeView` / `Progress` 等）已全部删除。\n'\
       '解析入口统一去前缀取本意名，`<Button>` 这类旧写法不再注册。\n\n')
 
     w('## 六、本轮已修 / 剩余缺口\n\n')
     w('**本轮已修（v0.10.17）**\n\n')
-    w('1. `RichText` 属性重复：`FontSize`、`Foreground` 不再由控件自声明，统一走基类外观字段，'
+    w('1. `TextArea` 属性重复：`FontSize`、`Foreground` 不再由控件自声明，统一走基类外观字段，'
       '由 `onAppearanceChanged` 转成 `CHARFORMAT`（`XamlRichText.cpp`），schema 已无重名条目。\n')
     w('2. `CalendarCtrl` 补上 `Value`（`YYYY-MM-DD`，读写）：宿主新增 '
       '`getCalendarDate` / `setCalendarDate`（`MCM_GETCURSEL` / `MCM_SETCURSEL`）。\n')
@@ -286,7 +286,7 @@ def main():
     w('2. **`Page` / `StackView` / `SwipeView` 是同一实现**（`XamlPageView`，skin #17），'
       '三者属性都是 `SelectedIndex` + `PageCount`，差别仅在语义命名；后续若要真分页/滑动行为，'
       '需要在 `XamlPageView` 上分模式，而不是继续加别名。\n')
-    w('3. **仍有 5 个控件自有属性为 0**：`Panel`、`Splitter`、`StaticLine`、`BusyIndicator`、'
+    w('3. **仍有 5 个控件自有属性为 0**：`Panel`、`SplitView`、`StaticLine`、`BusyIndicator`、'
       '`Flickable`（Flickable 已补偏移，其余 4 个仍只有布局/外观）；`BusyIndicator` 要补 `Running` / '
       '`Interval` 得先给 skinbox 加状态接口。\n')
     w('4. **B 档 30 个控件多数只有一个主语义字段**，缺的是"第二层"能力（如 `Button.Icon` / '

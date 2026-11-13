@@ -17,17 +17,17 @@ CONTENT_H = len(ROWS) * ROW_H          # 416 > 220，可上下拖
 kids_xml = []
 for i, t in enumerate(ROWS):
     kids_xml.append(
-        '<XTextBlock x:Name="r%d" Text="%s" Width="340" Height="40" '
+        '<XLabel x:Name="r%d" Text="%s" Width="340" Height="40" '
         'Background="#2B313C" Foreground="#E6EDF3" '
         'Canvas.Left="30" Canvas.Top="%d" />' % (i, t, 46 + i * ROW_H))
 
 XAML = '''<?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Flickable 拖拽演示" Width="420" Height="382">
   <XCanvas>
-    <XTextBlock x:Name="lb" Text="拖住内容上下拖，松手会继续滑，拖过头会弹回" Width="386" Height="24" Canvas.Left="18" Canvas.Top="14" />
+    <XLabel x:Name="lb" Text="拖住内容上下拖，松手会继续滑，拖过头会弹回" Width="386" Height="24" Canvas.Left="18" Canvas.Top="14" />
     <XFlickable x:Name="fl" Width="%d" Height="%d" Canvas.Left="20" Canvas.Top="46" />
     %s
-    <XTextBlock x:Name="hint" Text="offset: 0, 0" Width="380" Height="22" Canvas.Left="20" Canvas.Top="288" />
+    <XLabel x:Name="hint" Text="offset: 0, 0" Width="380" Height="22" Canvas.Left="20" Canvas.Top="288" />
   </XCanvas>
 </XWindow>''' % (VIEW_W, VIEW_H, '\n    '.join(kids_xml))
 

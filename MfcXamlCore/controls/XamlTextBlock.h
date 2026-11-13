@@ -7,7 +7,7 @@
 class XAML_CORE_API XamlTextBlock : public XamlMfcControlBase
 {
 public:
-    XamlTextBlock() : XamlMfcControlBase(L"TextBlock") {}
+    XamlTextBlock() : XamlMfcControlBase(L"Label") {}
 
 protected:
     void createNative(IXamlMfcHost* host, int id, int min, int max, int x, int y, int w, int h) override;

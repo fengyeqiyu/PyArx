@@ -156,11 +156,11 @@ def build_window():
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="功能审计" Width="560" Height="760">
   <XStackPanel Margin="14" Spacing="8">
     <XHyperlink x:Name="lnk" Text="打开示例链接" Url="https://example.com" Height="30"/>
-    <XSplitter x:Name="spl" Height="20"/>
-    <XTextBox x:Name="below" Text="分隔条下方内容" Height="40"/>
-    <XScrolledWindow x:Name="scr" ScrollMin="0" ScrollMax="500" Height="90"/>
+    <XSplitView x:Name="spl" Height="20"/>
+    <XTextField x:Name="below" Text="分隔条下方内容" Height="40"/>
+    <XScrollView x:Name="scr" ScrollMin="0" ScrollMax="500" Height="90"/>
     <XCalendarCtrl x:Name="cal" Height="160"/>
-    <XRichText x:Name="rtf" Height="110"/>
+    <XTextArea x:Name="rtf" Height="110"/>
     <XBitmapButton x:Name="bb" Text="运行" Height="46"/>
     <XComboBox x:Name="cmb" Height="30"/>
   </XStackPanel>
@@ -207,7 +207,7 @@ def main():
            f'setUrl={hasattr(w, "setUrl")} getUrl={w.getUrl(names["lnk"]) if hasattr(w, "getUrl") else "无"}')
 
     # ---- Splitter：真拖，邻居是否跟随 ----
-    sec('Splitter')
+    sec('SplitView')
     before = rect_of(cmap['below'])
     x0, y0, sw, sh = rect_of(cmap['spl'])
     user32.SetCursorPos(x0 + sw // 2, y0 + sh // 2)
@@ -222,16 +222,16 @@ def main():
     user32.mouse_event(0x0004, 0, 0, 0, 0)
     p.pump(350)
     after = rect_of(cmap['below'])
-    record('Splitter', '拖拽改变相邻控件布局', before != after,
+    record('SplitView', '拖拽改变相邻控件布局', before != after,
            f'下方控件 {before} -> {after}')
 
     # ---- ScrolledWindow：滚动条由皮肤自绘，范围走自有接口 ----
-    sec('ScrolledWindow')
+    sec('ScrollView')
     style = user32.GetWindowLongPtrW(cmap['scr'], -16)
     has_vscroll = bool(style & WS_VSCROLL)
-    record('ScrolledWindow', '自绘滚动条（不挂系统滚动条）', not has_vscroll, f'style=0x{style:X}')
+    record('ScrollView', '自绘滚动条（不挂系统滚动条）', not has_vscroll, f'style=0x{style:X}')
     rng = w.getScrollRange(names['scr'])
-    record('ScrolledWindow', '存在可滚动范围', rng[1] > rng[0], f'min={rng[0]} max={rng[1]}')
+    record('ScrollView', '存在可滚动范围', rng[1] > rng[0], f'min={rng[0]} max={rng[1]}')
 
     # ---- Calendar：真点某天，选中日期是否变 ----
     sec('CalendarCtrl')
@@ -251,7 +251,7 @@ def main():
            f'{mid.wMonth}-{mid.wDay} -> {got.wMonth}-{got.wDay}')
 
     # ---- RichText：原生格式能力 vs 是否暴露 ----
-    sec('RichText')
+    sec('TextArea')
     w.setText(names['rtf'], '富文本格式测试')
     p.pump(150)
     cf = CHARFORMATW()
@@ -263,9 +263,9 @@ def main():
     read = CHARFORMATW()
     read.cbSize = ctypes.sizeof(CHARFORMATW)
     user32.SendMessageW(cmap['rtf'], EM_GETCHARFORMAT, SCF_ALL, ctypes.addressof(read))
-    record('RichText', '控件原生支持加粗（Bold）', bool(read.dwEffects & CFE_BOLD),
+    record('TextArea', '控件原生支持加粗（Bold）', bool(read.dwEffects & CFE_BOLD),
            f'dwEffects=0x{read.dwEffects:X}')
-    record('RichText', 'Python 接口暴露格式设置',
+    record('TextArea', 'Python 接口暴露格式设置',
            hasattr(w, 'setRichFormat'),
            f'setRichFormat={hasattr(w, "setRichFormat")}')
     if hasattr(w, 'setRichFormat'):
@@ -274,7 +274,7 @@ def main():
         got = CHARFORMATW()
         got.cbSize = ctypes.sizeof(CHARFORMATW)
         user32.SendMessageW(cmap['rtf'], EM_GETCHARFORMAT, SCF_ALL, ctypes.addressof(got))
-        record('RichText', '格式真落到文本（14pt + 加粗）',
+        record('TextArea', '格式真落到文本（14pt + 加粗）',
                abs(got.yHeight - 280) <= 1 and bool(got.dwEffects & CFE_BOLD),
                f'yHeight={got.yHeight} dwEffects=0x{got.dwEffects:X}')
 
@@ -332,11 +332,11 @@ def main():
         h = child_of(w.hwnd, content_id)
         root = user32.SendMessageW(h, TVM_GETNEXTITEM, TVGN_ROOT, 0)
         child = user32.SendMessageW(h, TVM_GETNEXTITEM, TVGN_CHILD, root) if root else 0
-        record('TreeCtrl', '装得进节点且层级正确', bool(root) and bool(child),
+        record('TreeView', '装得进节点且层级正确', bool(root) and bool(child),
                f'root={root} child={child}')
         user32.DestroyWindow(h)
     else:
-        record('TreeCtrl', '具备内容接口（addTree/addTreeNode）', False, 'Python 侧无对应接口')
+        record('TreeView', '具备内容接口（addTree/addTreeNode）', False, 'Python 侧无对应接口')
 
     # ListCtrl / GridCtrl：列 + 行
     for label, maker, adder in (('ListCtrl', 'addListCtrl', 'addColumn'), ('GridCtrl', 'addGrid', 'addColumn')):
@@ -356,7 +356,7 @@ def main():
             record(label, f'具备内容接口（{maker}/{adder}）', False, 'Python 侧无对应接口')
 
     # StaticBitmap / BitmapButton：图片接口（这一批还没做）
-    for label, exists in (('StaticBitmap', ('setImage', 'addStaticBitmap')),
+    for label, exists in (('Image', ('setImage', 'addStaticBitmap')),
                           ('BitmapButton', ('setImage', 'addBitmapButton'))):
         ok = all(hasattr(w, a) for a in exists)
         record(label, '具备图片装载接口（setImage）', ok,

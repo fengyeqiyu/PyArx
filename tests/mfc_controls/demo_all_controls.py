@@ -25,8 +25,8 @@ SWP_NOZORDER = 0x0004
 # tag, 标题, 宽, 高, 控件高度, XAML 额外属性, 可选内嵌子控件
 CONTROLS = [
     ('Button', '按钮', 300, 200, 46, 'Content="确定"', None),
-    ('TextBlock', '文本块', 300, 200, 60, 'Content="一段说明文字"', None),
-    ('TextBox', '文本框', 300, 200, 34, 'Text="初始文本"', None),
+    ('Label', '文本块', 300, 200, 60, 'Content="一段说明文字"', None),
+    ('TextField', '文本框', 300, 200, 34, 'Text="初始文本"', None),
     ('CheckBox', '复选框', 300, 200, 30, 'Content="同意条款"', None),
     ('RadioButton', '单选按钮', 300, 200, 30, 'Content="选项 A"', None),
     ('GroupBox', '分组框', 300, 200, 90, 'Content="分组框"', None),
@@ -35,20 +35,20 @@ CONTROLS = [
     ('ProgressBar', '进度条', 300, 200, 26, None, None),
     ('Slider', '滑块', 300, 200, 40, None, None),
     ('TabControl', '选项卡', 300, 220, 120, None, None),
-    ('TreeCtrl', '树形控件', 300, 220, 120, None, None),
+    ('TreeView', '树形控件', 300, 220, 120, None, None),
     ('ListCtrl', '列表控件', 300, 220, 110, None, None),
     ('Choice', '选择框', 300, 200, 34, None, None),
     ('DatePicker', '日期选择', 300, 200, 34, None, None),
-    ('Panel', '面板容器', 300, 200, 90, None, 'TextBlock'),
-    ('Splitter', '分隔条', 300, 200, 20, None, None),
+    ('Panel', '面板容器', 300, 200, 90, None, 'Label'),
+    ('SplitView', '分隔条', 300, 200, 20, None, None),
     ('StaticLine', '分隔线', 300, 200, 12, None, None),
     ('Hyperlink', '超链接', 300, 200, 34, 'Content="打开示例链接"', None),
-    ('RichText', '富文本', 300, 220, 110, None, None),
+    ('TextArea', '富文本', 300, 220, 110, None, None),
     ('ToggleButton', '切换按钮', 300, 200, 46, 'Content="切换模式"', None),
     ('BitmapButton', '位图按钮', 300, 200, 46, 'Content="运行"', None),
-    ('StaticBitmap', '静态位图', 300, 200, 70, None, None),
+    ('Image', '静态位图', 300, 200, 70, None, None),
     ('GridCtrl', '表格控件', 300, 220, 110, None, None),
-    ('ScrolledWindow', '滚动框', 300, 220, 90, None, 'TextBlock'),
+    ('ScrollView', '滚动框', 300, 220, 90, None, 'Label'),
     ('CalendarCtrl', '日历', 320, 240, 170, None, None),
     # QML 对齐（第三批）
     ('Switch', '开关', 300, 200, 30, None, None),
@@ -62,21 +62,21 @@ CONTROLS = [
     # QML 对齐（第四批）：表格类 + 工具栏
     ('TableView', '数据表格', 300, 200, 96, None, None),
     ('TreeTable', '树形表格', 300, 200, 96, None, None),
-    ('ToolStrip', '工具栏', 300, 200, 34, None, None),
+    ('ToolBar', '工具栏', 300, 200, 34, None, None),
 ]
 
 EXPECT_CLASS = {
     'Button': 'Button', 'CheckBox': 'Button', 'RadioButton': 'Button',
     'GroupBox': 'Button', 'ToggleButton': 'Button', 'BitmapButton': 'Button',
-    'TextBlock': 'Static', 'TextBox': 'Edit', 'ListBox': 'ListBox',
+    'Label': 'Static', 'TextField': 'Edit', 'ListBox': 'ListBox',
     'ComboBox': 'ComboBox', 'ProgressBar': 'msctls_progress32', 'Slider': 'msctls_trackbar32',
-    'TabControl': 'SysTabControl32', 'TreeCtrl': 'SysTreeView32', 'ListCtrl': 'SysListView32',
+    'TabControl': 'SysTabControl32', 'TreeView': 'SysTreeView32', 'ListCtrl': 'SysListView32',
     'DatePicker': 'SysDateTimePick32', 'CalendarCtrl': 'SysMonthCal32',
-    'Hyperlink': 'SysLink', 'RichText': 'RICHEDIT50W',
+    'Hyperlink': 'SysLink', 'TextArea': 'RICHEDIT50W',
     'Switch': 'PyMfcSkinBox', 'SpinBox': 'PyMfcSkinBox', 'RangeSlider': 'PyMfcSkinBox',
     'BusyIndicator': 'PyMfcSkinBox', 'PageIndicator': 'PyMfcSkinBox',
     'Dial': 'PyMfcSkinBox', 'Tumbler': 'PyMfcSkinBox', 'ScrollBar': 'PyMfcSkinBox',
-    'TableView': 'PyMfcSkinBox', 'TreeTable': 'PyMfcSkinBox', 'ToolStrip': 'PyMfcSkinBox',
+    'TableView': 'PyMfcSkinBox', 'TreeTable': 'PyMfcSkinBox', 'ToolBar': 'PyMfcSkinBox',
 }
 
 EnumChildProc = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
@@ -154,18 +154,18 @@ def decorate(w, tag, cid):
             w.addTreeItem(cid, '图层组', 1, True)
             w.addTreeItem(cid, '墙体', 2, False)
             w.setTreeSelectedRow(cid, 1)
-        elif tag == 'ToolStrip':
+        elif tag == 'ToolBar':
             for it in ('新建', '打开', '保存', '运行'):
                 w.addToolBarItem(cid, it)
             w.setToolBarSelected(cid, 2)
-        elif tag in ('TextBox', 'RichText'):
+        elif tag in ('TextField', 'TextArea'):
             w.setText(cid, '可以在里面输入文字')
         elif tag == 'TabControl':
             # 上一版这里是 pass，页签里什么都没有，看上去就是一块白板
             w.addTabItem(cid, '常规')
             w.addTabItem(cid, '高级')
             w.addTabItem(cid, '关于')
-        elif tag == 'TreeCtrl':
+        elif tag == 'TreeView':
             # addString 对 TreeView 无效，必须走 addTreeNode
             w.addTreeNode(cid, '根节点', -1)
             w.addTreeNode(cid, '子节点 A', 0)
@@ -177,10 +177,10 @@ def decorate(w, tag, cid):
             w.addRow(cid, '甲\t12')
             w.addRow(cid, '乙\t34')
             w.addRow(cid, '丙\t56')
-        elif tag == 'StaticBitmap':
+        elif tag == 'Image':
             # 不装图就是一块空白，看上去和坏掉没区别
             w.setImage(cid, os.path.join(HERE, 'res', 'dot.png'))
-        elif tag in ('Button', 'TextBlock', 'BitmapButton', 'Hyperlink', 'RadioButton'):
+        elif tag in ('Button', 'Label', 'BitmapButton', 'Hyperlink', 'RadioButton'):
             pass
     except Exception as exc:                      # 装饰失败不该阻断演示
         out(f'    装饰失败（{tag}）：{exc}')

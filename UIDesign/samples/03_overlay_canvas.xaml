@@ -9,25 +9,25 @@
 
   <XStackPanel Margin="16" Spacing="10">
 
-    <XMenuStrip x:Name="Top" Items="文件|编辑|视图|帮助" SelectedIndex="0" Height="28"/>
-    <XToolStrip x:Name="Bar1" Items="新建|打开|保存|运行" SelectedIndex="2" Height="32"
+    <XMenuBar x:Name="Top" Items="文件|编辑|视图|帮助" SelectedIndex="0" Height="28"/>
+    <XToolBar x:Name="Bar1" Items="新建|打开|保存|运行" SelectedIndex="2" Height="32"
                SelectionChanged="on_tool"/>
     <XMenu x:Name="Ctx" Items="复制|粘贴|删除" Height="56"/>
 
-    <XTextBlock x:Name="Hdr1" Text="配电规划画布" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XLabel x:Name="Hdr1" Text="配电规划画布" Height="26" FontSize="14" FontWeight="Bold"/>
     <XPowerCanvas x:Name="Plan" Data="{}" Height="260" Click="on_plan_click"/>
     <XQCanvas x:Name="Draw" Height="140"/>
 
-    <XTextBlock x:Name="Hdr2" Text="日期与浮层" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XLabel x:Name="Hdr2" Text="日期与浮层" Height="26" FontSize="14" FontWeight="Bold"/>
     <XDatePicker x:Name="Day" Value="2026-11-13" Height="30" ValueChanged="on_day"/>
     <XCalendarCtrl x:Name="Cal" Value="2026-11-13" Height="170"/>
     <XToolTip x:Name="Hint" Text="鼠标停留提示" Height="24"/>
     <XPopup x:Name="Sheet" Title="确认" Content="保存后关闭？" Height="90"/>
 
-    <XTextBlock x:Name="Hdr3" Text="滚动与拖拽容器" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XLabel x:Name="Hdr3" Text="滚动与拖拽容器" Height="26" FontSize="14" FontWeight="Bold"/>
     <XPanel x:Name="Host" Height="60"/>
-    <XSplitter x:Name="Split" Height="16"/>
-    <XScrolledWindow x:Name="Scroll" ScrollMin="0" ScrollMax="400" Height="80"/>
+    <XSplitView x:Name="Split" Height="16"/>
+    <XScrollView x:Name="Scroll" ScrollMin="0" ScrollMax="400" Height="80"/>
     <XFlickable x:Name="Flick" OffsetX="0" OffsetY="0" Height="100"/>
     <XStaticLine x:Name="Sep" Height="8"/>
 

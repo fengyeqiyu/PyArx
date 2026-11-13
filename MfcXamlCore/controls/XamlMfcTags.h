@@ -2,7 +2,7 @@
 // XamlMfcTags —— 控件标签的唯一命名来源。
 //
 // 命名规则（2026-11 起统一，不再保留别名）：
-//     所有自有元素一律 X + 本意名：<XButton> <XTextBox> <XStackPanel> <XWindow>
+//     所有自有元素一律 X + 本意名：<XButton> <XTextField> <XStackPanel> <XWindow>
 //     前缀只为消除与 WPF / QML / Win32 同名类的歧义，不改变本意名。
 //     大小写不敏感；资源类结构标签（Style / Setter / RowDefinition ...）不加前缀。
 //
@@ -45,7 +45,7 @@ namespace xamlmfc
             L"Grid", L"StackPanel", L"DockPanel", L"WrapPanel",
             // 容器控件
             L"Panel", L"Border", L"Frame", L"GroupBox", L"TabControl", L"TabPage",
-            L"TabItem", L"ScrollViewer", L"ScrolledWindow", L"ContentControl",
+            L"TabItem", L"ScrollViewer", L"ScrollView", L"ContentControl",
             // 外壳构件
             L"MenuBar", L"MenuItem", L"ToolBar", L"StatusBar", L"PropertyGrid", L"ListView",
             L"TreeView", L"PaletteSet", L"PalettePage", L"PaletteSet.Resources",
@@ -70,14 +70,14 @@ namespace xamlmfc
     inline const std::set<std::wstring>& controlTags()
     {
         static const std::set<std::wstring> kSet = {
-            L"Button", L"TextBlock", L"TextBox", L"ListBox", L"CodeEditor", L"CheckBox",
+            L"Button", L"Label", L"TextField", L"ListBox", L"CodeEditor", L"CheckBox",
             L"RadioButton", L"GroupBox", L"ComboBox", L"ProgressBar", L"Slider",
-            L"TabControl", L"TreeCtrl", L"ListCtrl", L"Choice", L"DatePicker", L"Panel",
-            L"Splitter", L"StaticLine", L"PowerCanvas", L"Hyperlink", L"RichText",
-            L"ToggleButton", L"BitmapButton", L"StaticBitmap", L"GridCtrl", L"ScrolledWindow",
+            L"TabControl", L"TreeView", L"ListCtrl", L"Choice", L"DatePicker", L"Panel",
+            L"SplitView", L"StaticLine", L"PowerCanvas", L"Hyperlink", L"TextArea",
+            L"ToggleButton", L"BitmapButton", L"Image", L"GridCtrl", L"ScrollView",
             L"CalendarCtrl", L"Switch", L"SpinBox", L"RangeSlider", L"BusyIndicator",
             L"PageIndicator", L"Dial", L"Tumbler", L"ScrollBar", L"TableView", L"TreeTable",
-            L"ToolStrip", L"ToolTip", L"Menu", L"MenuStrip", L"Popup", L"VirtualList",
+            L"ToolBar", L"ToolTip", L"Menu", L"MenuBar", L"Popup", L"VirtualList",
             L"StackView", L"SwipeView", L"GridView", L"PathView", L"QCanvas", L"Page",
             L"Flickable",
             // 绘制图元

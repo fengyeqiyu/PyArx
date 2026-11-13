@@ -1,4 +1,4 @@
-﻿// XamlViewer —— XAML 预览与校验器（控制台 exe）
+// XamlViewer —— XAML 预览与校验器（控制台 exe）
 //
 // 用法：
 //   XamlViewer.exe <file.xaml>            解析 + 校验 + 打开窗口渲染
@@ -330,7 +330,7 @@ static const std::set<std::wstring>& containerTags()
     static const std::set<std::wstring> kSet = {
         L"Window", L"Page", L"Grid", L"StackPanel", L"DockPanel", L"WrapPanel",
         L"Canvas", L"Panel", L"Frame", L"GroupBox", L"TabControl", L"TabPage",
-        L"Splitter", L"ScrollViewer", L"ScrolledWindow", L"MenuBar", L"MenuItem",
+        L"SplitView", L"ScrollViewer", L"ScrollView", L"MenuBar", L"MenuItem",
         L"Separator", L"ToolBar", L"StatusBar", L"RowDefinition", L"ColumnDefinition",
         L"Grid.RowDefinitions", L"Grid.ColumnDefinitions", L"Grid.Resources",
         L"TreeView", L"ListView", L"PropertyGrid", L"Border", L"ScrollBar",
@@ -572,7 +572,7 @@ static bool isContainerTag(const std::wstring& tag)
         L"Window", L"Page", L"Grid", L"StackPanel", L"DockPanel", L"WrapPanel",
         L"Canvas", L"Layout", L"LayoutPanel", L"AbsolutePanel", L"AbsPanel", L"CanvasPanel",
         L"Panel", L"Border", L"Frame", L"GroupBox", L"TabControl",
-        L"TabPage", L"ScrolledWindow", L"ScrollViewer", L"MenuBar", L"ToolBar", L"StatusBar",
+        L"TabPage", L"ScrollView", L"ScrollViewer", L"MenuBar", L"ToolBar", L"StatusBar",
         L"PaletteSet", L"PalettePage", L"page", L"TabItem",
         L"PanelHeader", L"TabStrip", L"ChipBar", L"Stage"
     };
@@ -697,7 +697,7 @@ static void drawLeaf(XamlCanvas& cv, XamlElement* el, const RECT& rc,
     }
 
     // 静态文本：运行时 Static 不铺底，只有文字
-    if (isAnyTag(tag, {L"TextBlock", L"Label", L"Static", L"LinkLabel"}))
+    if (isAnyTag(tag, {L"Label", L"Static", L"LinkLabel"}))
     {
         if (styled && (!ap.backColor.empty() || !ap.frontColor.empty() || !ap.borderColor.empty()))
             xamlDrawBackplate(cv, rc, ap, parentBack, kLine);
@@ -706,7 +706,7 @@ static void drawLeaf(XamlCanvas& cv, XamlElement* el, const RECT& rc,
     }
 
     // 输入框：窗口色 + 2px 凹陷 3D 边框（等价 WS_EX_CLIENTEDGE）
-    if (isAnyTag(tag, {L"TextBox", L"Edit", L"MaskedTextBox"}))
+    if (isAnyTag(tag, {L"TextField", L"Edit", L"MaskedTextBox"}))
     {
         const COLORREF win = ::GetSysColor(COLOR_WINDOW);
         if (styled)

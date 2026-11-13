@@ -5,9 +5,9 @@
         Title="XAML 界面演示" Width="460" Height="640" Theme="dark">
 
     <XStackPanel>
-        <XTextBlock x:Name="hint" Content="下面的按钮由 Click 绑定"/>
+        <XLabel x:Name="hint" Content="下面的按钮由 Click 绑定"/>
         <XButton x:Name="btnDraw" Content="点我" Width="160" Height="34" Click="OnDraw"/>
-        <XTextBox x:Name="txtRadius" Content="R=100" Height="28" TextChanged="OnRadiusChanged"/>
+        <XTextField x:Name="txtRadius" Content="R=100" Height="28" TextChanged="OnRadiusChanged"/>
     </XStackPanel>
 
     <XGroupBox x:Name="grpOptions" Header="选项" Height="250">

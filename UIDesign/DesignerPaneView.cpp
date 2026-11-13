@@ -324,7 +324,7 @@ void DesignerPaneView::setupSplitters()
     std::function<void(XamlElement&, XamlElement*)> walk;
     walk = [&](XamlElement& el, XamlElement* parent)
     {
-        if ((_wcsicmp(xamlmfc::BareTag(el.tag).c_str(), L"Splitter") == 0 ||
+        if ((_wcsicmp(xamlmfc::BareTag(el.tag).c_str(), L"SplitView") == 0 ||
              _wcsicmp(xamlmfc::BareTag(el.tag).c_str(), L"Separator") == 0) && parent != nullptr)
         {
             // 仅处理竖分割条：属于含 5 列的主体 Grid，col1(左栏-画布)/col3(画布-右栏)
@@ -660,7 +660,7 @@ void DesignerPaneView::dispatchAction(Action a, const CString& name)
     case Action::Exit: onExit(); break;
     case Action::New: onNew(); break;
     case Action::AddButton: addControl(L"Button"); break;
-    case Action::AddLabel: addControl(L"TextBlock"); break;
+    case Action::AddLabel: addControl(L"Label"); break;
     case Action::Apply: onApply(); break;
     case Action::Delete: onDelete(); break;
     case Action::Grid: toggleGrid(); break;

@@ -106,12 +106,12 @@ namespace uidesign
         int cx = rc.CenterPoint().x, cy = rc.CenterPoint().y;
         CRect b(cx - 9, cy - 9, cx + 9, cy + 9);
         if (tag == L"Button") dc.RoundRect(b, CPoint(3, 3));
-        else if (tag == L"TextBlock" || tag == L"Label")
+        else if (tag == L"Label" || tag == L"Label")
         {
             dc.MoveTo(cx - 5, cy + 7); dc.LineTo(cx - 5, cy - 7); dc.LineTo(cx + 5, cy - 7);
             dc.MoveTo(cx - 2, cy - 1); dc.LineTo(cx + 2, cy - 1);
         }
-        else if (tag == L"TextBox") { dc.Rectangle(b); dc.MoveTo(cx + 4, cy - 6); dc.LineTo(cx + 4, cy + 6); }
+        else if (tag == L"TextField") { dc.Rectangle(b); dc.MoveTo(cx + 4, cy - 6); dc.LineTo(cx + 4, cy + 6); }
         else if (tag == L"CheckBox")
         {
             dc.Rectangle(b);
@@ -164,12 +164,12 @@ namespace uidesign
             dc.MoveTo(cx, cy - 9); dc.LineTo(cx, cy + 9);
             dc.FillSolidRect(CRect(cx - 2, cy - 2, cx + 2, cy + 2), RGB(150, 195, 235));
         }
-        else if (tag == L"MenuBar" || tag == L"MenuStrip")
+        else if (tag == L"MenuBar" || tag == L"MenuBar")
         {
             dc.Rectangle(b.left - 2, b.top - 4, b.right + 2, b.top + 2);
             for (int i = 0; i < 3; ++i) dc.Rectangle(b.left + i * 6 - 2, b.top - 3, b.left + i * 6 + 2, b.top - 1);
         }
-        else if (tag == L"ToolBar" || tag == L"ToolStrip")
+        else if (tag == L"ToolBar" || tag == L"ToolBar")
         {
             dc.Rectangle(b.left - 2, b.top - 2, b.right + 2, b.top + 4);
             for (int i = 0; i < 3; ++i) dc.Rectangle(b.left + i * 6 - 1, b.top - 1, b.left + i * 6 + 2, b.top + 2);
@@ -219,24 +219,24 @@ namespace uidesign
     inline CString TagFromToolName(const CString& name)
     {
         if (name == L"toolButton") return L"XButton";
-        if (name == L"toolTextBlock") return L"XTextBlock";
-        if (name == L"toolTextBox") return L"XTextBox";
+        if (name == L"toolTextBlock") return L"XLabel";
+        if (name == L"toolTextBox") return L"XTextField";
         if (name == L"toolCheckBox") return L"XCheckBox";
         if (name == L"toolComboBox") return L"XComboBox";
         if (name == L"toolListBox") return L"XListBox";
         if (name == L"toolRadioButton") return L"XRadioButton";
-        if (name == L"toolPictureBox") return L"XStaticBitmap";
-        if (name == L"toolLabel") return L"XTextBlock";
+        if (name == L"toolPictureBox") return L"XImage";
+        if (name == L"toolLabel") return L"XLabel";
         if (name == L"toolProgressBar") return L"XProgressBar";
         if (name == L"toolListView") return L"XListCtrl";
-        if (name == L"toolTreeView") return L"XTreeCtrl";
+        if (name == L"toolTreeView") return L"XTreeView";
         if (name == L"toolTabControl") return L"XTabControl";
         if (name == L"toolBorder") return L"XBorder";
         if (name == L"toolGroupBox") return L"XGroupBox";
         if (name == L"toolPanel") return L"XPanel";
-        if (name == L"toolSplitContainer") return L"XSplitter";
-        if (name == L"toolMenuStrip") return L"XMenuStrip";
-        if (name == L"toolToolStrip") return L"XToolStrip";
+        if (name == L"toolSplitContainer") return L"XSplitView";
+        if (name == L"toolMenuStrip") return L"XMenuBar";
+        if (name == L"toolToolStrip") return L"XToolBar";
         if (name == L"toolStatusStrip") return L"XStatusBar";
         if (name == L"toolTimer") return L"Timer";
         if (name == L"toolPrintDocument") return L"PrintDocument";

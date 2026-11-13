@@ -170,10 +170,10 @@
           <Chip Name="chipShow"   Text="显示" Category="Display Widgets"  Width="42" Height="22"/>
         </XChipBar>
 
-        <XTreeCtrl Name="widgetBox" Grid.Row="2" FontSize="8"/>
+        <XTreeView Name="widgetBox" Grid.Row="2" FontSize="8"/>
       </XGrid>
 
-      <XSplitter Grid.Column="1"/>
+      <XSplitView Grid.Column="1"/>
 
       <!-- ========== 中间：文档标签条 + 画布舞台 ========== -->
       <XGrid Grid.Column="2" Background="#15181D">
@@ -193,7 +193,7 @@
         </XStage>
       </XGrid>
 
-      <XSplitter Grid.Column="3"/>
+      <XSplitView Grid.Column="3"/>
 
       <!-- ========== 右栏：对象检查器 + 属性编辑器 ========== -->
       <XGrid Grid.Column="4" Background="#1C2027">
@@ -206,15 +206,15 @@
         </XGrid.RowDefinitions>
 
         <XPanelHeader Name="hdrInspector" Grid.Row="0" Text="对象检查器" FontSize="9"/>
-        <XTreeCtrl Name="objInspector" Grid.Row="1" FontSize="8"/>
-        <XSplitter Grid.Row="2"/>
+        <XTreeView Name="objInspector" Grid.Row="1" FontSize="8"/>
+        <XSplitView Grid.Row="2"/>
         <XPanelHeader Name="hdrProps" Grid.Row="3" Text="属性编辑器" FontSize="9"/>
         <PropertyGrid Name="propsHost" Grid.Row="4" FontSize="8"/>
       </XGrid>
     </XGrid>
 
     <!-- 主体与代码坞之间的水平分隔条（上下拖动改变代码坞高度） -->
-    <XSplitter Grid.Row="3"/>
+    <XSplitView Grid.Row="3"/>
 
     <!-- ==================== XAML 源码坞 ==================== -->
     <XGrid Name="codeDock" Grid.Row="4" Background="#14171C">
@@ -230,11 +230,11 @@
 
     <!-- ==================== 状态栏 ==================== -->
     <StatusBar Grid.Row="5" Spacing="0">
-      <XTextBlock Name="statusBrand" Text="PyMfc Studio" Width="112"/>
-      <XTextBlock Name="statusText"  Text="就绪"        Width="620"/>
-      <XTextBlock Name="statusPos"   Text="X:0 Y:0"     Width="112"/>
-      <XTextBlock Name="statusSize"  Text="W:0 H:0"     Width="112"/>
-      <XTextBlock Name="statusZoom"  Text="100%"        Width="72"/>
+      <XLabel Name="statusBrand" Text="PyMfc Studio" Width="112"/>
+      <XLabel Name="statusText"  Text="就绪"        Width="620"/>
+      <XLabel Name="statusPos"   Text="X:0 Y:0"     Width="112"/>
+      <XLabel Name="statusSize"  Text="W:0 H:0"     Width="112"/>
+      <XLabel Name="statusZoom"  Text="100%"        Width="72"/>
     </StatusBar>
 
   </XGrid>

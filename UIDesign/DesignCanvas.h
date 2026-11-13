@@ -1358,7 +1358,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                           inkLum > 140 ? RGB(32, 36, 42) : RGB(228, 231, 236),
                                           RGB(120, 130, 150));
             }
-            else if (tagIs(node, L"Splitter"))
+            else if (tagIs(node, L"SplitView"))
             {
                 const bool vertical = node->previewW <= node->previewH;
                 xamlctl::xamlDrawSplitter(cv, rc, vertical, false, false,
@@ -1504,7 +1504,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                     }
                 }
             }
-            else if (tagIs(node, L"TextBlock") || tagIs(node, L"Label"))
+            else if (tagIs(node, L"Label") || tagIs(node, L"Label"))
             {
                 CRect textRect = rc;
                 if (txtFlags == DT_LEFT)
@@ -1513,7 +1513,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                            fgC == (COLORREF)-1 ? textOn(bgC == (COLORREF)-1 ? inheritBg : bgC) : fgC,
                            txtFlags | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, pt, fam);
             }
-            else if (tagIs(node, L"TextBox"))
+            else if (tagIs(node, L"TextField"))
             {
                 const COLORREF boxBg = bgC == (COLORREF)-1 ? cvdoc::kField : bgC;
                 drawRoundedCv(cv, rc, boxBg, bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC, 4);
@@ -1858,7 +1858,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 drawTextCv(cv, rc, std::wstring(L"[") + node->tag + std::wstring(L"]"),
                            cvdoc::kMuted, DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
             }
-            else if (tagIs(node, L"TreeCtrl") || tagIs(node, L"TreeTable"))
+            else if (tagIs(node, L"TreeView") || tagIs(node, L"TreeTable"))
             {
                 drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
                 CRect body = rc;
@@ -2135,7 +2135,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                     }
                 }
             }
-            else if (tagIs(node, L"MenuStrip") || tagIs(node, L"ToolStrip") || tagIs(node, L"Menu"))
+            else if (tagIs(node, L"MenuBar") || tagIs(node, L"ToolBar") || tagIs(node, L"Menu"))
             {
                 const bool bar = !tagIs(node, L"Menu");
                 if (bar) cv.fillRect(rc, cvdoc::kHead);
@@ -2265,7 +2265,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 const int midY = (rc.top + rc.bottom) / 2;
                 cv.strokeLine(POINT{ rc.left, midY }, POINT{ rc.right, midY }, cvdoc::kBorder, 1);
             }
-            else if (tagIs(node, L"StaticBitmap"))
+            else if (tagIs(node, L"Image"))
             {
                 // 画布不加载图片文件，用浅底 + 图元标记表示"这里有一张位图"；
                 // 运行时（预览器/正式界面）按 Image 属性真画图
@@ -2789,7 +2789,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
 
         static bool isTextControl(const XamlElement* n)
         {
-            return n != nullptr && (tagIs(n, L"TextBox") || tagIs(n, L"TextBlock") || tagIs(n, L"Label"));
+            return n != nullptr && (tagIs(n, L"TextField") || tagIs(n, L"Label") || tagIs(n, L"Label"));
         }
         static bool isToggleControl(const XamlElement* n)
         {

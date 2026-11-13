@@ -21,12 +21,12 @@
 `guiload` 能直接加载运行。控件箱条目来自 `UIDesign\control_catalog.xml`，
 目录按 `prop_schema()` 生成，缺条目时设计器会提示“未知标签”。
 
-> 注意：`TreeCtrl` / `TreeTable` 的 `Nodes` 在画布上显示为占位，树内容请用
+> 注意：`TreeView` / `TreeTable` 的 `Nodes` 在画布上显示为占位，树内容请用
 > `addTreeNode(id, 文本, parentIndex)` 在 Python 侧灌（这是运行时已验证的写法）。
 
 ## 一、按钮与勾选
 
-覆盖：`Button` / `ToggleButton` / `CheckBox` / `RadioButton` / `GroupBox` / `BitmapButton` / `StaticBitmap`
+覆盖：`Button` / `ToggleButton` / `CheckBox` / `RadioButton` / `GroupBox` / `BitmapButton` / `Image`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -38,7 +38,7 @@
     <XRadioButton x:Name="PlanA" Text="方案 A" Height="26"/>
     <XGroupBox x:Name="Group1" Header="参数组" Height="70"/>
     <XBitmapButton x:Name="Export" Text="导出" Height="32"/>
-    <XStaticBitmap x:Name="Preview" Height="56"/>
+    <XImage x:Name="Preview" Height="56"/>
   </XStackPanel>
 </XWindow>
 ```
@@ -48,18 +48,18 @@
 
 ## 二、文本输入与展示
 
-覆盖：`TextBlock` / `TextBox` / `RichText` / `CodeEditor` / `Hyperlink`
+覆盖：`Label` / `TextField` / `TextArea` / `CodeEditor` / `Hyperlink`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="文本族" Width="460" Height="380">
   <XStackPanel Margin="12" Spacing="8">
-    <XTextBlock x:Name="Title" Text="回路参数" Height="26" FontSize="14" FontWeight="Bold"/>
-    <XTextBox x:Name="Name" Text="WL-AT1-1" Placeholder="请输入回路编号" MaxLength="32" Height="30"
+    <XLabel x:Name="Title" Text="回路参数" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XTextField x:Name="Name" Text="WL-AT1-1" Placeholder="请输入回路编号" MaxLength="32" Height="30"
              TextChanged="on_name"/>
-    <XTextBox x:Name="Note" Multiline="true" Height="70" Text="多行备注"/>
-    <XTextBox x:Name="Code" Text="只读内容" IsReadOnly="true" Height="30"/>
-    <XRichText x:Name="Rtf" Text="富文本段落" Bold="true" Italic="false" FontSize="11"
+    <XTextField x:Name="Note" Multiline="true" Height="70" Text="多行备注"/>
+    <XTextField x:Name="Code" Text="只读内容" IsReadOnly="true" Height="30"/>
+    <XTextArea x:Name="Rtf" Text="富文本段落" Bold="true" Italic="false" FontSize="11"
               Foreground="#334155" Height="80"/>
     <XCodeEditor x:Name="Src" Syntax="xaml" Text="&lt;Button Text=&quot;运行&quot;/&gt;" Height="90"/>
     <XHyperlink x:Name="Help" Text="查看规范" Url="https://example.com/doc" Height="26"
@@ -68,7 +68,7 @@
 </XWindow>
 ```
 
-要点：`RichText` 的字号与前景色就是通用外观字段 `FontSize` / `Foreground`（v0.10.17 起不再重复声明）；
+要点：`TextArea` 的字号与前景色就是通用外观字段 `FontSize` / `Foreground`（v0.10.17 起不再重复声明）；
 `CodeEditor` 的 `Syntax` 取 `xaml` / `python`。
 
 ## 三、选择类
@@ -115,14 +115,14 @@
 
 ## 五、列表与表格
 
-覆盖：`ListCtrl` / `TreeCtrl` / `GridCtrl` / `TableView` / `TreeTable` / `VirtualList` / `GridView` / `PathView`
+覆盖：`ListCtrl` / `TreeView` / `GridCtrl` / `TableView` / `TreeTable` / `VirtualList` / `GridView` / `PathView`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="列表族" Width="620" Height="560">
   <XStackPanel Margin="12" Spacing="8">
     <XListCtrl x:Name="Files" Columns="名称:140|类型:90" Rows="图框	A3|标注	箭头" Height="90"/>
-    <XTreeCtrl x:Name="Tree1" Nodes="项目根|图纸 A|图纸 B|图层组" Height="90"/>
+    <XTreeView x:Name="Tree1" Nodes="项目根|图纸 A|图纸 B|图层组" Height="90"/>
     <XGridCtrl x:Name="Grid1" Columns="名称:120|数值:80" Rows="甲	12|乙	34" Height="90"/>
     <XTableView x:Name="Table1" Columns="名称:120|数值:80|状态:70"
                Rows="甲	30	正常|乙	12	警告|丙	21	正常" SelectedIndex="1" Height="110"
@@ -142,7 +142,7 @@
 
 ## 六、容器与布局件
 
-覆盖：`Panel` / `ScrolledWindow` / `Splitter` / `StaticLine` / `Flickable`
+覆盖：`Panel` / `ScrollView` / `SplitView` / `StaticLine` / `Flickable`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -150,14 +150,14 @@
   <XStackPanel Margin="12" Spacing="8">
     <XPanel x:Name="Host" Height="70"/>
     <XStaticLine x:Name="Sep1" Height="10"/>
-    <XSplitter x:Name="Split" Height="16"/>
-    <XScrolledWindow x:Name="Scroll" ScrollMin="0" ScrollMax="400" Height="90"/>
+    <XSplitView x:Name="Split" Height="16"/>
+    <XScrollView x:Name="Scroll" ScrollMin="0" ScrollMax="400" Height="90"/>
     <XFlickable x:Name="Flick" OffsetX="0" OffsetY="0" Height="110"/>
   </XStackPanel>
 </XWindow>
 ```
 
-要点：容器子控件写在容器标签内（`<XPanel><XTextBlock .../></XPanel>`）；
+要点：容器子控件写在容器标签内（`<XPanel><XLabel .../></XPanel>`）；
 `Flickable.OffsetX/OffsetY` 是 v0.10.17 新增的读写视口偏移。
 
 ## 七、页与导航
@@ -182,14 +182,14 @@
 
 ## 八、菜单、工具条与浮层
 
-覆盖：`Menu` / `MenuStrip` / `ToolStrip` / `ToolTip` / `Popup`
+覆盖：`Menu` / `MenuBar` / `ToolBar` / `ToolTip` / `Popup`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="浮层族" Width="460" Height="380">
   <XStackPanel Margin="12" Spacing="8">
-    <XMenuStrip x:Name="Top" Items="文件|编辑|视图" SelectedIndex="0" Height="28"/>
-    <XToolStrip x:Name="Bar1" Items="新建|打开|保存|运行" SelectedIndex="2" Height="32"
+    <XMenuBar x:Name="Top" Items="文件|编辑|视图" SelectedIndex="0" Height="28"/>
+    <XToolBar x:Name="Bar1" Items="新建|打开|保存|运行" SelectedIndex="2" Height="32"
                SelectionChanged="on_tool"/>
     <XMenu x:Name="Ctx" Items="复制|粘贴|删除" Height="60"/>
     <XToolTip x:Name="Hint" Text="鼠标停留提示" Height="24"/>
@@ -198,7 +198,7 @@
 </XWindow>
 ```
 
-要点：`Menu` 是上下文菜单（不占版面时由 `showMenu` 弹出），`MenuStrip` 是顶部菜单条；
+要点：`Menu` 是上下文菜单（不占版面时由 `showMenu` 弹出），`MenuBar` 是顶部菜单条；
 `Popup` 与 `Dialog` / `Drawer` 同一实现。
 
 ## 九、画布
@@ -253,17 +253,17 @@
 
 ## 十二、组合示例：回路参数卡（含回调）
 
-覆盖落点：`Panel` + `TextBlock` + `TextBox` + `ComboBox` + `Slider` + `Switch` +
+覆盖落点：`Panel` + `Label` + `TextField` + `ComboBox` + `Slider` + `Switch` +
 `TableView` + `Button` + `PageIndicator`（组合控件由 XAML 拼，不硬造新类）。
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="回路参数卡" Width="640" Height="520">
   <XStackPanel Margin="14" Spacing="10">
-    <XTextBlock x:Name="Head" Text="AT1-1 回路参数" Height="28" FontSize="15" FontWeight="Bold"/>
+    <XLabel x:Name="Head" Text="AT1-1 回路参数" Height="28" FontSize="15" FontWeight="Bold"/>
 
     <XPanel x:Name="Row1" Height="34">
-      <XTextBox x:Name="Code" Text="WL-AT1-1" Left="0" Top="2" Width="220" Height="30"/>
+      <XTextField x:Name="Code" Text="WL-AT1-1" Left="0" Top="2" Width="220" Height="30"/>
       <XButton x:Name="Apply" Text="应用" Left="232" Top="2" Width="90" Height="30"
               Click="on_apply"/>
     </XPanel>

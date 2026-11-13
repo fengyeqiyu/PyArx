@@ -8,7 +8,7 @@
 class XAML_CORE_API XamlMenuBar : public XamlMfcControlBase
 {
 public:
-    XamlMenuBar() : XamlMfcControlBase(L"MenuStrip") {}
+    XamlMenuBar() : XamlMfcControlBase(L"MenuBar") {}
 
 protected:
     void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;

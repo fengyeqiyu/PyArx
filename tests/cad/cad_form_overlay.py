@@ -14,8 +14,8 @@ LOG = r"G:\PyArx\log\cad_form_overlay.log"
 XAML = r'''<?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PyArx CAD 浮层" Width="560" Height="360">
   <XCanvas>
-    <XTextBlock x:Name="lb" Text="MenuStrip / Menu / ToolTip / Popup 在 CAD 进程内" Width="500" Height="22" Canvas.Left="14" Canvas.Top="8" />
-    <XMenuStrip x:Name="mb" Width="520" Height="30" Canvas.Left="14" Canvas.Top="36" />
+    <XLabel x:Name="lb" Text="MenuStrip / Menu / ToolTip / Popup 在 CAD 进程内" Width="500" Height="22" Canvas.Left="14" Canvas.Top="8" />
+    <XMenuBar x:Name="mb" Width="520" Height="30" Canvas.Left="14" Canvas.Top="36" />
     <XButton x:Name="btn" Text="打开菜单" Width="130" Height="34" Canvas.Left="14" Canvas.Top="86" />
     <XButton x:Name="btn2" Text="显示提示" Width="130" Height="34" Canvas.Left="154" Canvas.Top="86" />
     <XButton x:Name="btn3" Text="弹出层" Width="130" Height="34" Canvas.Left="294" Canvas.Top="86" />

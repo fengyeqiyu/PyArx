@@ -38,9 +38,9 @@ void RegisterPyMfcControls()
     RegisterOne(reg, []() -> IXamlControl* { return new XamlButton(); },
                 {L"XButton"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlTextBlock(); },
-                {L"XTextBlock"});
+                {L"XLabel"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlTextBox(); },
-                {L"XTextBox"});
+                {L"XTextField"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlListBox(); },
                 {L"XListBox"});
     // 代码编辑器（独立控件）：Syntax 取 xaml / python，带行号槽与语法着色
@@ -62,7 +62,7 @@ void RegisterPyMfcControls()
     RegisterOne(reg, []() -> IXamlControl* { return new XamlTabControl(); },
                 {L"XTabControl"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlTreeCtrl(); },
-                {L"XTreeCtrl"});
+                {L"XTreeView"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlListCtrl(); },
                 {L"XListCtrl"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlChoice(); },
@@ -72,7 +72,7 @@ void RegisterPyMfcControls()
     RegisterOne(reg, []() -> IXamlControl* { return new XamlPanel(); },
                 {L"XPanel"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlSplitter(); },
-                {L"XSplitter"});
+                {L"XSplitView"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlStaticLine(); },
                 {L"XStaticLine"});
     // 配电规划图画布（自绘：缩放平移 + 卡片命中）
@@ -81,18 +81,18 @@ void RegisterPyMfcControls()
     RegisterOne(reg, []() -> IXamlControl* { return new XamlHyperlink(); },
                 {L"XHyperlink"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlRichText(); },
-                {L"XRichText"});
+                {L"XTextArea"});
     // 第二批扩展控件
     RegisterOne(reg, []() -> IXamlControl* { return new XamlToggleButton(); },
                 {L"XToggleButton"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlBitmapButton(); },
                 {L"XBitmapButton"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlStaticBitmap(); },
-                {L"XStaticBitmap"});
+                {L"XImage"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlGrid(); },
                 {L"XGridCtrl"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlScrolledWindow(); },
-                {L"XScrolledWindow"});
+                {L"XScrollView"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlCalendarCtrl(); },
                 {L"XCalendarCtrl"});
     // QML 对齐（第三批）：自建画布小控件
@@ -123,7 +123,7 @@ void RegisterPyMfcControls()
     // 注意：`ToolBar` / `toolbar` 这个标签归布局层（工具栏容器，用来横向排子控件），
     // 所以自绘的工具条按钮条用 ToolStrip 这个名字，避免把布局容器顶掉。
     RegisterOne(reg, []() -> IXamlControl* { return new XamlToolBar(); },
-                {L"XToolStrip"});
+                {L"XToolBar"});
 
     // QML 对齐（第六批）：浮层族
     RegisterOne(reg, []() -> IXamlControl* { return new XamlToolTip(); },
@@ -131,7 +131,7 @@ void RegisterPyMfcControls()
     RegisterOne(reg, []() -> IXamlControl* { return new XamlMenu(); },
                 {L"XMenu"});
     RegisterOne(reg, []() -> IXamlControl* { return new XamlMenuBar(); },
-                {L"XMenuStrip"});
+                {L"XMenuBar"});
     // Popup / Dialog / Drawer 共用同一个实现（标题条 + 正文 + 点正文关闭）
     RegisterOne(reg, []() -> IXamlControl* { return new XamlPopup(); },
                 {L"XPopup"});

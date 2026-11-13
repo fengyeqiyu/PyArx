@@ -28,8 +28,8 @@
 | 控件 | 实现 | 自有属性（读写） | 只读 | 事件 | 档位 | 源文件 |
 |---|---|---|---|---|---|---|
 | **XButton** | 原生 MFC Button | Text | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlButton.cpp` |
-| **XTextBlock** | 原生 MFC Static | Text | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlTextBlock.cpp` |
-| **XTextBox** | 原生 MFC Edit | Text / IsReadOnly / Multiline / MaxLength / Placeholder | — | change / keydown / keyup / gotfocus / lostfocus / click / dblclick | S 完整 | `XamlTextBox.cpp` |
+| **XLabel** | 原生 MFC Static | Text | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlTextBlock.cpp` |
+| **XTextField** | 原生 MFC Edit | Text / IsReadOnly / Multiline / MaxLength / Placeholder | — | change / keydown / keyup / gotfocus / lostfocus / click / dblclick | S 完整 | `XamlTextBox.cpp` |
 | **XListBox** | 原生 MFC ListBox | Items / SelectedIndex / SelectionMode | — | select / click / dblclick / scroll / gotfocus / lostfocus | A 基本 | `XamlListBox.cpp` |
 | **XCodeEditor** | C++ 自绘编辑器 | Text / Syntax / IsReadOnly | — | change / keydown / keyup / gotfocus / lostfocus / click / dblclick | A 基本 | `XamlCodeEditor.cpp` |
 | **XCheckBox** | 原生 MFC Button(BS_AUTOCHECKBOX) | Text / Checked | — | click / checked / dblclick / gotfocus / lostfocus | B 薄 | `XamlCheckBox.cpp` |
@@ -39,21 +39,21 @@
 | **XProgressBar** | 原生 MFC msctls_progress32 | Minimum / Maximum / Value | — | value / scroll / gotfocus / lostfocus / click | A 基本 | `XamlProgressBar.cpp` |
 | **XSlider** | 原生 MFC msctls_trackbar32 | Minimum / Maximum / Value | — | value / scroll / gotfocus / lostfocus / click | A 基本 | `XamlSlider.cpp` |
 | **XTabControl** | 原生 MFC SysTabControl32 | Pages | — | click / select / gotfocus / lostfocus | B 薄 | `XamlTabControl.cpp` |
-| **XTreeCtrl** | 原生 MFC SysTreeView32 | Nodes | — | select / click / dblclick / scroll / gotfocus / lostfocus | B 薄 | `XamlTreeCtrl.cpp` |
+| **XTreeView** | 原生 MFC SysTreeView32 | Nodes | — | select / click / dblclick / scroll / gotfocus / lostfocus | B 薄 | `XamlTreeCtrl.cpp` |
 | **XListCtrl** | 原生 MFC SysListView32 | Columns / Rows | — | select / click / dblclick / scroll / gotfocus / lostfocus | B 薄 | `XamlListCtrl.cpp` |
 | **XChoice** | 原生 MFC ComboBox(CBS_DROPDOWNLIST) | Items | — | select / dropdown / dblclick / gotfocus / lostfocus | B 薄 | `XamlChoice.cpp` |
 | **XDatePicker** | 原生 MFC SysDateTimePick32 | Value | — | select / value / dblclick / gotfocus / lostfocus | B 薄 | `XamlDatePicker.cpp` |
 | **XPanel** | 原生 MFC Static 容器 | — | — | click / dblclick / mousedown / mouseup / mousemove | C 仅布局 | `XamlPanel.cpp` |
-| **XSplitter** | 原生 MFC 自注册拖动条 | — | — | mousedown / mouseup / mousemove / dblclick | C 仅布局 | `XamlSplitter.cpp` |
+| **XSplitView** | 原生 MFC 自注册拖动条 | — | — | mousedown / mouseup / mousemove / dblclick | C 仅布局 | `XamlSplitter.cpp` |
 | **XStaticLine** | 原生 MFC Static(SS_ETCHEDHORZ) | — | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | C 仅布局 | `XamlStaticLine.cpp` |
 | **XPowerCanvas** | 宿主自绘画布（配电规划图） | Data | — | click / dblclick / mousedown / mouseup / mousemove / scroll / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlPowerCanvas.cpp` |
 | **XHyperlink** | 原生 MFC SysLink | Text / Url | — | click / dblclick / gotfocus / lostfocus | B 薄 | `XamlHyperlink.cpp` |
-| **XRichText** | 原生 MFC RICHEDIT50W | Text / Bold / Italic | — | change / keydown / keyup / gotfocus / lostfocus / click / dblclick | A 基本 | `XamlRichText.cpp` |
+| **XTextArea** | 原生 MFC RICHEDIT50W | Text / Bold / Italic | — | change / keydown / keyup / gotfocus / lostfocus / click / dblclick | A 基本 | `XamlRichText.cpp` |
 | **XToggleButton** | 原生 MFC Button(BS_AUTOCHECKBOX 自绘) | Text / Checked | — | click / checked / dblclick / gotfocus / lostfocus | B 薄 | `XamlToggleButton.cpp` |
 | **XBitmapButton** | 原生 MFC Button(BS_BITMAP) | Text / Image | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlBitmapButton.cpp` |
-| **XStaticBitmap** | 原生 MFC Static(SS_BITMAP) | Image | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlStaticBitmap.cpp` |
+| **XImage** | 原生 MFC Static(SS_BITMAP) | Image | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlStaticBitmap.cpp` |
 | **XGridCtrl** | 原生 MFC 自注册网格 | Columns / Rows | — | select / click / dblclick / scroll / gotfocus / lostfocus | B 薄 | `XamlGrid.cpp` |
-| **XScrolledWindow** | 原生 MFC 自注册滚动容器 | ScrollMin / ScrollMax | — | scroll / click / gotfocus / lostfocus | B 薄 | `XamlScrolledWindow.cpp` |
+| **XScrollView** | 原生 MFC 自注册滚动容器 | ScrollMin / ScrollMax | — | scroll / click / gotfocus / lostfocus | B 薄 | `XamlScrolledWindow.cpp` |
 | **XCalendarCtrl** | 原生 MFC SysMonthCal32 | Value | — | select / value / dblclick / gotfocus / lostfocus | B 薄 | `XamlCalendarCtrl.cpp` |
 | **XSwitch** | 自绘 skin #1 Switch | Checked | — | click / checked / value / gotfocus / lostfocus | B 薄 | `XamlSwitch.cpp` |
 | **XSpinBox** | 自绘 skin #2 Spin | Minimum / Maximum / Value | — | value / scroll / gotfocus / lostfocus / click | A 基本 | `XamlSpinBox.cpp` |
@@ -65,10 +65,10 @@
 | **XScrollBar** | 自绘 skin #8 ScrollBar | Minimum / Maximum / Value / PageSize / Orientation | — | value / scroll / gotfocus / lostfocus | S 完整 | `XamlScrollBar.cpp` |
 | **XTableView** | 自绘 skin #9 Table（独立控件套装） | Columns / Rows / SelectedIndex / RowCount | RowCount | select / click / dblclick / scroll / gotfocus / lostfocus | A 基本 | `XamlTableView.cpp` |
 | **XTreeTable** | 自绘 skin #10 Tree | Nodes / SelectedIndex | — | select / click / dblclick / scroll / gotfocus / lostfocus | B 薄 | `XamlTreeView.cpp` |
-| **XToolStrip** | 自绘 skin #11 ToolBar | Items / SelectedIndex | — | click / select / dropdown | B 薄 | `XamlToolBar.cpp` |
+| **XToolBar** | 自绘 skin #11 ToolBar | Items / SelectedIndex | — | click / select / dropdown | B 薄 | `XamlToolBar.cpp` |
 | **XToolTip** | 自绘 skin #12 ToolTip | Text | — | click | B 薄 | `XamlToolTip.cpp` |
 | **XMenu** | 自绘 skin #13 Menu | Items / SelectedIndex | SelectedIndex | click / select | B 薄 | `XamlMenu.cpp` |
-| **XMenuStrip** | 自绘 skin #14 MenuBar | Items / SelectedIndex | — | click / select | B 薄 | `XamlMenuBar.cpp` |
+| **XMenuBar** | 自绘 skin #14 MenuBar | Items / SelectedIndex | — | click / select | B 薄 | `XamlMenuBar.cpp` |
 | **XPopup** | 自绘 skin #15 Popup | Title / Content / Lines | — | click / gotfocus / lostfocus | A 基本 | `XamlPopup.cpp` |
 | **XVirtualList** | 自绘 skin #16 ListView（虚拟化） | Items / ItemHeight / SelectedIndex / ItemCount | ItemCount | select / click / dblclick / scroll / gotfocus / lostfocus | A 基本 | `XamlListView.cpp` |
 | **XStackView** | 自绘 skin #17 Pager（XamlPageView 子类） | SelectedIndex / PageCount | PageCount | click / select / gotfocus / lostfocus | B 薄 | `XamlStackView.h` |
@@ -81,26 +81,26 @@
 
 ## 四、分档结论
 
-**S 完整（自有 ≥5，可直接当业务控件用）**：XTextBox(5)、XScrollBar(5)、XGridView(5)
+**S 完整（自有 ≥5，可直接当业务控件用）**：XTextField(5)、XScrollBar(5)、XGridView(5)
 
-**A 基本（3–4，够用但还缺边角能力）**：XListBox(3)、XCodeEditor(3)、XComboBox(4)、XProgressBar(3)、XSlider(3)、XRichText(3)、XSpinBox(3)、XRangeSlider(4)、XDial(3)、XTableView(4)、XPopup(3)、XVirtualList(4)
+**A 基本（3–4，够用但还缺边角能力）**：XListBox(3)、XCodeEditor(3)、XComboBox(4)、XProgressBar(3)、XSlider(3)、XTextArea(3)、XSpinBox(3)、XRangeSlider(4)、XDial(3)、XTableView(4)、XPopup(3)、XVirtualList(4)
 
-**B 薄（1–2，只有主语义那一个字段）**：XButton(1)、XTextBlock(1)、XCheckBox(2)、XRadioButton(2)、XGroupBox(1)、XTabControl(1)、XTreeCtrl(1)、XListCtrl(2)、XChoice(1)、XDatePicker(1)、XPowerCanvas(1)、XHyperlink(2)、XToggleButton(2)、XBitmapButton(2)、XStaticBitmap(1)、XGridCtrl(2)、XScrolledWindow(2)、XCalendarCtrl(1)、XSwitch(1)、XPageIndicator(2)、XTumbler(2)、XTreeTable(2)、XToolStrip(2)、XToolTip(1)、XMenu(2)、XMenuStrip(2)、XStackView(2)、XSwipeView(2)、XPathView(2)、XQCanvas(2)、XPage(2)、XFlickable(2)
+**B 薄（1–2，只有主语义那一个字段）**：XButton(1)、XLabel(1)、XCheckBox(2)、XRadioButton(2)、XGroupBox(1)、XTabControl(1)、XTreeView(1)、XListCtrl(2)、XChoice(1)、XDatePicker(1)、XPowerCanvas(1)、XHyperlink(2)、XToggleButton(2)、XBitmapButton(2)、XImage(1)、XGridCtrl(2)、XScrollView(2)、XCalendarCtrl(1)、XSwitch(1)、XPageIndicator(2)、XTumbler(2)、XTreeTable(2)、XToolBar(2)、XToolTip(1)、XMenu(2)、XMenuBar(2)、XStackView(2)、XSwipeView(2)、XPathView(2)、XQCanvas(2)、XPage(2)、XFlickable(2)
 
-**C 仅布局（自有 0，属性面上等同一块带样式的面板）**：XPanel、XSplitter、XStaticLine、XBusyIndicator
+**C 仅布局（自有 0，属性面上等同一块带样式的面板）**：XPanel、XSplitView、XStaticLine、XBusyIndicator
 
 C 档不是"没实现"——这些控件在 C++ 里都有真实原生窗口/自绘实现、事件也照常派发，只是**业务字段没有暴露成属性**。要让它们进设计器可配置，得按需要补属性表条目；这也是 `plugins` 层用 XAML 组合补位的典型对象（组合态用子控件属性，不硬造新属性）。
 
 ## 五、命名规范
 
-标签统一为 `X + 本意名`（`XButton` / `XTextBox` / `XStackPanel` / `XWindow`），只保留唯一一个标签，历史别名（`BTN` / `Edit` / `TreeView` / `Progress` 等）已全部删除。
+标签统一为 `X + 本意名`（`XButton` / `XTextField` / `XStackPanel` / `XWindow`），只保留唯一一个标签，历史别名（`BTN` / `Edit` / `TreeView` / `Progress` 等）已全部删除。
 解析入口统一去前缀取本意名，`<Button>` 这类旧写法不再注册。
 
 ## 六、本轮已修 / 剩余缺口
 
 **本轮已修（v0.10.17）**
 
-1. `RichText` 属性重复：`FontSize`、`Foreground` 不再由控件自声明，统一走基类外观字段，由 `onAppearanceChanged` 转成 `CHARFORMAT`（`XamlRichText.cpp`），schema 已无重名条目。
+1. `TextArea` 属性重复：`FontSize`、`Foreground` 不再由控件自声明，统一走基类外观字段，由 `onAppearanceChanged` 转成 `CHARFORMAT`（`XamlRichText.cpp`），schema 已无重名条目。
 2. `CalendarCtrl` 补上 `Value`（`YYYY-MM-DD`，读写）：宿主新增 `getCalendarDate` / `setCalendarDate`（`MCM_GETCURSEL` / `MCM_SETCURSEL`）。
 3. `Flickable` 补上 `OffsetX` / `OffsetY`（读写，落到宿主 `setFlickOffset`），不再只能靠手势改视口。
 4. 事件契约：`combobox` / `choice` 补 `keydown` / `keyup`（宿主本来就把 `WM_KEYDOWN` 统一派发成 `keydown`，缺的只是契约条目）。
@@ -109,5 +109,5 @@ C 档不是"没实现"——这些控件在 C++ 里都有真实原生窗口/自�
 
 1. **只读属性共 7 个**：`TableView.RowCount`、`Menu.SelectedIndex`、`VirtualList.ItemCount`、`GridView.ItemCount`、`Page.PageCount`、`StackView.PageCount`、`SwipeView.PageCount`。只有 `Menu.SelectedIndex` 是设计上的只读回读槽（`XamlMenu.cpp` 里 `Set` 为空，只反射当前选中）；若需要程序化选中菜单项，得补 `setMenuSelected` 宿主接口 + 属性 `Set`。其余 6 个是计数类，只读合理。
 2. **`Page` / `StackView` / `SwipeView` 是同一实现**（`XamlPageView`，skin #17），三者属性都是 `SelectedIndex` + `PageCount`，差别仅在语义命名；后续若要真分页/滑动行为，需要在 `XamlPageView` 上分模式，而不是继续加别名。
-3. **仍有 5 个控件自有属性为 0**：`Panel`、`Splitter`、`StaticLine`、`BusyIndicator`、`Flickable`（Flickable 已补偏移，其余 4 个仍只有布局/外观）；`BusyIndicator` 要补 `Running` / `Interval` 得先给 skinbox 加状态接口。
+3. **仍有 5 个控件自有属性为 0**：`Panel`、`SplitView`、`StaticLine`、`BusyIndicator`、`Flickable`（Flickable 已补偏移，其余 4 个仍只有布局/外观）；`BusyIndicator` 要补 `Running` / `Interval` 得先给 skinbox 加状态接口。
 4. **B 档 30 个控件多数只有一个主语义字段**，缺的是"第二层"能力（如 `Button.Icon` / `ListBox.MultiSelect` 之外的 `ItemHeight`、`TreeCtrl.Indent` / `NodeState`），要按实际使用场景逐个补，不预造属性。

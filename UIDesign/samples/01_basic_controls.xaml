@@ -10,31 +10,31 @@
 
   <XStackPanel Margin="16" Spacing="10">
 
-    <XTextBlock x:Name="Hdr1" Text="按钮与勾选" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XLabel x:Name="Hdr1" Text="按钮与勾选" Height="26" FontSize="14" FontWeight="Bold"/>
     <XButton x:Name="Run" Text="运行" Height="32" Click="on_run"/>
     <XToggleButton x:Name="Night" Text="夜间模式" Height="30" CheckedChanged="on_night"/>
     <XCheckBox x:Name="Agree" Text="同意条款" Height="26" CheckedChanged="on_agree"/>
     <XRadioButton x:Name="PlanA" Text="方案 A" Height="26"/>
     <XGroupBox x:Name="Group1" Header="参数组" Height="64"/>
     <XBitmapButton x:Name="Export" Text="导出" Height="32"/>
-    <XStaticBitmap x:Name="Preview" Height="48"/>
+    <XImage x:Name="Preview" Height="48"/>
 
     <XStaticLine x:Name="Sep1" Height="8"/>
 
-    <XTextBlock x:Name="Hdr2" Text="文本输入" Height="26" FontSize="14" FontWeight="Bold"/>
-    <XTextBlock x:Name="Caption" Text="回路编号" Height="22" Foreground="#64748B"/>
-    <XTextBox x:Name="Code" Text="WL-AT1-1" Placeholder="请输入编号" MaxLength="32" Height="30"
+    <XLabel x:Name="Hdr2" Text="文本输入" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XLabel x:Name="Caption" Text="回路编号" Height="22" Foreground="#64748B"/>
+    <XTextField x:Name="Code" Text="WL-AT1-1" Placeholder="请输入编号" MaxLength="32" Height="30"
              TextChanged="on_code"/>
-    <XTextBox x:Name="Note" Text="多行备注：可用于记录现场条件" Multiline="true" Height="64"/>
-    <XTextBox x:Name="ReadOnly" Text="只读内容" IsReadOnly="true" Height="30"/>
+    <XTextField x:Name="Note" Text="多行备注：可用于记录现场条件" Multiline="true" Height="64"/>
+    <XTextField x:Name="ReadOnly" Text="只读内容" IsReadOnly="true" Height="30"/>
     <XCodeEditor x:Name="Src" Syntax="xaml" Text="&lt;Button Text=&quot;运行&quot;/&gt;" Height="70"/>
-    <XRichText x:Name="Rtf" Text="富文本段落，字号与前景色走统一外观。" Bold="true" FontSize="11"
+    <XTextArea x:Name="Rtf" Text="富文本段落，字号与前景色走统一外观。" Bold="true" FontSize="11"
               Foreground="#1F2937" Height="70"/>
     <XHyperlink x:Name="Help" Text="查看规范" Url="https://example.com/doc" Height="26"/>
 
     <XStaticLine x:Name="Sep2" Height="8"/>
 
-    <XTextBlock x:Name="Hdr3" Text="选择与取值" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XLabel x:Name="Hdr3" Text="选择与取值" Height="26" FontSize="14" FontWeight="Bold"/>
     <XComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25|VV-3×10" SelectedIndex="0"
               DropDownStyle="DropDown" Height="28" SelectionChanged="on_cable"/>
     <XChoice x:Name="Zone" Items="A 区|B 区|C 区" Height="28"/>

@@ -8,7 +8,7 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
   <XCanvas>
     <XStackView x:Name="sv" Width="360" Height="240" Canvas.Left="20" Canvas.Top="16" />
     <XButton x:Name="b1" Text="第一页：按钮" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
-    <XTextBlock x:Name="t2" Text="第二页：文字页" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
+    <XLabel x:Name="t2" Text="第二页：文字页" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
     <XTableView x:Name="tv3" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
   </XCanvas>
 </XWindow>'''

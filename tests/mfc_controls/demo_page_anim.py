@@ -22,18 +22,18 @@ XAML = '''<?xml version="1.0" encoding="utf-8"?>
 
     <!-- 第 1 页：宽度 + 进度 -->
     <XSwitch x:Name="s1" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
-    <XTextBlock x:Name="p1t" Text="第 1 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
+    <XLabel x:Name="p1t" Text="第 1 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
     <XButton x:Name="p1b" Width="140" Height="42" Text="宽度动画" Canvas.Left="40" Canvas.Top="110" />
     <XProgressBar x:Name="p1p" Width="420" Height="18" Canvas.Left="40" Canvas.Top="170" Value="0" />
 
     <!-- 第 2 页：数值 -->
     <XSwitch x:Name="s2" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
-    <XTextBlock x:Name="p2t" Text="第 2 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
+    <XLabel x:Name="p2t" Text="第 2 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
     <XSpinBox x:Name="p2s" Width="220" Height="34" Value="0" Minimum="0" Maximum="99" Canvas.Left="40" Canvas.Top="110" />
 
     <!-- 第 3 页：表盘 -->
     <XSwitch x:Name="s3" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
-    <XTextBlock x:Name="p3t" Text="第 3 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
+    <XLabel x:Name="p3t" Text="第 3 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
     <XDial x:Name="p3d" Width="120" Height="120" Value="0" Minimum="0" Maximum="100" Canvas.Left="40" Canvas.Top="104" />
   </XLayout>
 </XWindow>'''

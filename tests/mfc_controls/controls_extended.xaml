@@ -3,24 +3,24 @@
         Title="扩展控件测试" Width="640" Height="900">
   <XStackPanel Margin="14" Spacing="8">
 
-    <XTextBlock x:Name="lblHead" Text="扩展控件（Tab / Tree / ListCtrl / Choice / DatePicker / Panel / Splitter / StaticLine / Hyperlink / RichText / Toggle / BitmapButton / StaticBitmap / GridCtrl / ScrolledWindow / Calendar）"
+    <XLabel x:Name="lblHead" Text="扩展控件（Tab / Tree / ListCtrl / Choice / DatePicker / Panel / Splitter / StaticLine / Hyperlink / RichText / Toggle / BitmapButton / StaticBitmap / GridCtrl / ScrolledWindow / Calendar）"
                Height="40"/>
 
     <XTabControl x:Name="tabMain" Height="130"/>
-    <XTreeCtrl x:Name="treeFiles" Height="120"/>
+    <XTreeView x:Name="treeFiles" Height="120"/>
     <XListCtrl x:Name="lstView" Height="110"/>
     <XChoice x:Name="choPick" Height="30"/>
     <XDatePicker x:Name="dtpDate" Height="30"/>
     <XPanel x:Name="pnlHost" Height="60"/>
-    <XSplitter x:Name="splVert" Height="18"/>
+    <XSplitView x:Name="splVert" Height="18"/>
     <XStaticLine x:Name="lnSep" Height="10"/>
     <XHyperlink x:Name="lnkOpen" Text="打开示例链接" Height="26"/>
-    <XRichText x:Name="rtfNote" Height="90"/>
+    <XTextArea x:Name="rtfNote" Height="90"/>
     <XToggleButton x:Name="tglMode" Text="切换模式" Height="30"/>
     <XBitmapButton x:Name="bbtnRun" Text="运行" Height="32"/>
-    <XStaticBitmap x:Name="sbmpPreview" Height="50"/>
+    <XImage x:Name="sbmpPreview" Height="50"/>
     <XGridCtrl x:Name="grdData" Height="110"/>
-    <XScrolledWindow x:Name="scrArea" Height="80"/>
+    <XScrollView x:Name="scrArea" Height="80"/>
     <XCalendarCtrl x:Name="calPick" Height="150"/>
 
   </XStackPanel>
