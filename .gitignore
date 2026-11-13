@@ -1,0 +1,64 @@
+﻿# PyArx —— 只跟踪源码与工程配置，构建产物/依赖/临时产物一律不入库
+
+# 构建输出
+X64/
+x64/
+Debug/
+Release/
+build/
+obj/
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.exp
+*.idb
+*.res
+*.tlog
+
+# 二进制产物
+*.pyd
+*.dll
+*.lib
+*.exe
+*.arx
+*.crx
+*.mui
+*.manifest.bak
+
+# 第三方依赖（体积大，按需自行拉取：pybind11 / zlib / python315t / vcpkg）
+third_party/
+
+# 运行时数据与日志
+log/
+*.log
+pylibs/
+
+# 临时脚本产物与调试痕迹
+_com_*.txt
+_pump_stats*.txt
+docs/_*.png
+docs/**/_*.png
+docs/_*
+*.tmp
+*.bak
+
+# IDE / 系统
+.vs/
+.ipch
+Thumbs.db
+desktop.ini
+
+# 空占位目录
+MFCXaml 此文件夹项目暂停修改/
+*.bmp
+tests/**/_*.png
+tests/**/_*.gif
+
+# 本地凭据/令牌目录一律不入库
+GITEE令牌/
+*令牌*
+
+__pycache__/
+*.pyc
+docs/_probe_profile/

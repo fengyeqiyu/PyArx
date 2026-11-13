@@ -1,0 +1,1356 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<!--
+  PyArx 控件目录（参照 wxFormBuilder objectinfo 声明机制）
+  每个 <objectinfo> 声明一个可在设计器画布上放置的控件：
+    tag       = XML 标签（XmlRuntime 实例化用）
+    display   = 控件箱显示名
+    category  = 控件箱分类
+    w / h     = 拖入画布时的默认尺寸
+  子 <property name type> 声明该控件的属性表（属性面板按此表展示/编辑）。
+  新增自定义控件：在此文件加一个 <objectinfo> + 在 C++ 注册实例化即可，无需改硬编码分支。
+-->
+<package name="PyArx" desc="PyArx XML 控件目录">
+
+  <objectinfo tag="XButton" display="Button" category="Buttons" w="100" h="28">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Icon" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Enabled" type="bool"/>
+    <property name="Visible" type="bool"/>
+    <property name="Click" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+  </objectinfo>
+
+  <objectinfo tag="XCheckBox" display="CheckBox" category="Buttons" w="100" h="28">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Checked" type="bool"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Enabled" type="bool"/>
+    <property name="Checked" type="bool"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+  </objectinfo>
+
+  <objectinfo tag="XRadioButton" display="RadioButton" category="Buttons" w="100" h="28">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Checked" type="bool"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+  </objectinfo>
+
+  <objectinfo tag="XToggleButton" display="ToggleButton" category="Buttons" w="100" h="28">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Checked" type="bool"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Content" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XIconButton" display="IconButton" category="Buttons" w="100" h="28">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Content" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XTextField" display="TextField" category="Input Widgets" w="120" h="28">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="TextChanged" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Placeholder" type="text"/>
+    <property name="MaxLength" type="int"/>
+    <property name="ReadOnly" type="bool"/>
+    <property name="Multiline" type="bool"/>
+  </objectinfo>
+
+  <objectinfo tag="XComboBox" display="ComboBox" category="Input Widgets" w="120" h="28">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Items" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+    <property name="DropDownStyle" type="enum" options="DropDown|DropDownList"/>
+  </objectinfo>
+
+  <objectinfo tag="XListBox" display="ListBox" category="Input Widgets" w="120" h="100">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="SelectionChanged" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Items" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+    <property name="SelectionMode" type="enum" options="Single|Multiple"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XChoice" display="Choice" category="Input Widgets" w="120" h="28">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Items" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XDatePicker" display="DatePicker" category="Input Widgets" w="140" h="28">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Value" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XCodeEditor" display="CodeEditor" category="Input Widgets" w="360" h="160">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Syntax" type="text"/>
+    <property name="IsReadOnly" type="bool"/>
+  </objectinfo>
+
+  <objectinfo tag="XSlider" display="Slider" category="Input Widgets" w="200" h="34">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Minimum" type="int"/>
+    <property name="Maximum" type="int"/>
+    <property name="Value" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XSwitch" display="Switch" category="Input Widgets" w="64" h="28">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Checked" type="bool"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XSpinBox" display="SpinBox" category="Input Widgets" w="120" h="30">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Minimum" type="int"/>
+    <property name="Maximum" type="int"/>
+    <property name="Value" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XRangeSlider" display="RangeSlider" category="Input Widgets" w="200" h="34">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="LowValue" type="int"/>
+    <property name="HighValue" type="int"/>
+    <property name="Minimum" type="int"/>
+    <property name="Maximum" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XDial" display="Dial" category="Input Widgets" w="88" h="88">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Minimum" type="int"/>
+    <property name="Maximum" type="int"/>
+    <property name="Value" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XTumbler" display="Tumbler" category="Input Widgets" w="88" h="96">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Count" type="int"/>
+    <property name="SelectedIndex" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XScrollBar" display="ScrollBar" category="Input Widgets" w="200" h="18">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Minimum" type="int"/>
+    <property name="Maximum" type="int"/>
+    <property name="Value" type="int"/>
+    <property name="PageSize" type="int"/>
+    <property name="Orientation" type="enum" options="horizontal|vertical"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XLabel" display="Label" category="Display Widgets" w="100" h="24">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+  </objectinfo>
+
+  <objectinfo tag="XProgressBar" display="ProgressBar" category="Display Widgets" w="120" h="16">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Min" type="int"/>
+    <property name="Max" type="int"/>
+    <property name="Value" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XHyperlink" display="Hyperlink" category="Display Widgets" w="120" h="24">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+  </objectinfo>
+
+  <objectinfo tag="XTextArea" display="TextArea" category="Display Widgets" w="200" h="100">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+  </objectinfo>
+
+  <objectinfo tag="XImage" display="Image" category="Display Widgets" w="80" h="80">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XMonthGrid" display="MonthGrid" category="Display Widgets" w="180" h="160">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XBusyIndicator" display="BusyIndicator" category="Display Widgets" w="56" h="56">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XPageIndicator" display="PageIndicator" category="Data Views" w="160" h="22">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Count" type="int"/>
+    <property name="SelectedIndex" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XTableView" display="TableView" category="Data Views" w="160" h="32">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Columns" type="text"/>
+    <property name="Rows" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+    <property name="RowCount" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XTreeTable" display="TreeTable" category="Data Views" w="320" h="140">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Nodes" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XVirtualList" display="VirtualList" category="Data Views" w="240" h="140">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Items" type="text"/>
+    <property name="ItemHeight" type="int"/>
+    <property name="SelectedIndex" type="int"/>
+    <property name="ItemCount" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XStackView" display="StackView" category="Data Views" w="360" h="160">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+    <property name="PageCount" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XSwipeView" display="SwipeView" category="Data Views" w="360" h="160">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+    <property name="PageCount" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XGridView" display="GridView" category="Data Views" w="320" h="160">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Items" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+    <property name="CellWidth" type="int"/>
+    <property name="CellHeight" type="int"/>
+    <property name="ItemCount" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XPathView" display="PathView" category="Data Views" w="320" h="140">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Items" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XPage" display="Page" category="Data Views" w="360" h="160">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+    <property name="PageCount" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XGroupBox" display="GroupBox" category="Containers" w="160" h="80">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Caption" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XTabBar" display="TabBar" category="Containers" w="200" h="120">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Pages" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XBorder" display="Border" category="Containers" w="160" h="100">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XPane" display="Pane" category="Containers" w="160" h="100">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XSplitView" display="SplitView" category="Containers" w="8" h="200">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XTreeView" display="TreeView" category="Containers" w="160" h="120">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XListCtrl" display="ListCtrl" category="Containers" w="160" h="120">
+    <property name="Name" type="text"/>
+    <property name="Columns" type="text"/>
+    <property name="Rows" type="text"/>
+    <property name="Sort" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XDivider" display="Divider" category="Containers" w="120" h="4">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XGridLayout" display="GridLayout" category="Containers" w="200" h="120">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+    <property name="Columns" type="text"/>
+    <property name="Rows" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XScrollView" display="ScrollView" category="Containers" w="200" h="120">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="Background" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="Style" type="text"/>
+    <property name="Template" type="text"/>
+    <property name="Dock" type="enum" options="None|Fill|Top|Bottom|Left|Right"/>
+    <property name="Orientation" type="enum" options="Horizontal|Vertical"/>
+    <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XFlickable" display="Flickable" category="Containers" w="320" h="160">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="OffsetX" type="int"/>
+    <property name="OffsetY" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XToolBar" display="ToolBar" category="Function Bar" w="360" h="32">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Items" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XMenuBar" display="MenuBar" category="Function Bar" w="360" h="28">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Items" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XToolTip" display="ToolTip" category="Overlay" w="160" h="24">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+  </objectinfo>
+
+  <objectinfo tag="XMenu" display="Menu" category="Overlay" w="200" h="120">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Items" type="text"/>
+    <property name="SelectedIndex" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XPopup" display="Popup" category="Overlay" w="320" h="160">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Title" type="text"/>
+    <property name="Content" type="text"/>
+    <property name="Lines" type="text"/>
+  </objectinfo>
+
+  <objectinfo tag="XPowerCanvas" display="PowerCanvas" category="Canvas" w="420" h="260">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Data" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XQCanvas" display="QCanvas" category="Canvas" w="420" h="200">
+    <property name="Name" type="text"/>
+    <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
+    <property name="BackColor" type="color"/>
+    <property name="FrontColor" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderStyle" type="enum" options="None|Single|Sunken|Raised"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+    <property name="TextAlign" type="enum" options="Left|Center|Right"/>
+    <property name="VerticalAlignment" type="enum" options="Top|Center|Bottom"/>
+    <property name="TextWrapping" type="enum" options="NoWrap|Wrap|WrapWithOverflow"/>
+    <property name="FontWeight" type="enum" options="Normal|Bold|SemiBold|Light"/>
+    <property name="FontStyle" type="enum" options="Normal|Italic|Oblique"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Commands" type="text"/>
+    <property name="Script" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XLine" display="Line" category="Draw" w="120" h="2">
+    <property name="Name" type="text"/>
+    <property name="Direction" type="enum" options="Down|Up|H|V"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderThickness" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XRectangle" display="Rectangle" category="Draw" w="160" h="90">
+    <property name="Name" type="text"/>
+    <property name="Background" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Radius" type="int"/>
+    <property name="Opacity" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XEllipse" display="Ellipse" category="Draw" w="120" h="120">
+    <property name="Name" type="text"/>
+    <property name="Background" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="BorderThickness" type="int"/>
+    <property name="Opacity" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XArc" display="Arc" category="Draw" w="140" h="100">
+    <property name="Name" type="text"/>
+    <property name="StartAngle" type="int"/>
+    <property name="SweepAngle" type="int"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderThickness" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+  <objectinfo tag="XItemView" display="ItemView" category="Item Views" w="320" h="240">
+    <property name="Name" type="text"/>
+    <property name="Model" type="text"/>
+    <property name="ItemHeight" type="int"/>
+    <property name="SelectedIndex" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+  <objectinfo tag="XFrame" display="Frame" category="Containers" w="200" h="120">
+    <property name="Name" type="text"/>
+    <property name="Padding" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+  <objectinfo tag="XDialog" display="Dialog" category="Overlay" w="320" h="200">
+    <property name="Name" type="text"/>
+    <property name="Title" type="text"/>
+    <property name="Modal" type="bool"/>
+    <property name="StandardButtons" type="text"/>
+  </objectinfo>
+  <objectinfo tag="XDrawer" display="Drawer" category="Overlay" w="200" h="360">
+    <property name="Name" type="text"/>
+    <property name="Edge" type="text"/>
+    <property name="Modal" type="bool"/>
+    <property name="Position" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+  <objectinfo tag="XRoundButton" display="RoundButton" category="Buttons" w="48" h="48">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Radius" type="int"/>
+  </objectinfo>
+  <objectinfo tag="XDelayButton" display="DelayButton" category="Buttons" w="120" h="32">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Delay" type="int"/>
+    <property name="Checked" type="bool"/>
+  </objectinfo>
+  <objectinfo tag="XToolButton" display="ToolButton" category="Buttons" w="32" h="32">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="IconSource" type="text"/>
+    <property name="Display" type="text"/>
+  </objectinfo>
+  <objectinfo tag="XToolSeparator" display="ToolSeparator" category="Function Bar" w="8" h="24">
+    <property name="Name" type="text"/>
+    <property name="Orientation" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+  <objectinfo tag="XTabButton" display="TabButton" category="Containers" w="90" h="30">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Checked" type="bool"/>
+  </objectinfo>
+  <objectinfo tag="XScrollIndicator" display="ScrollIndicator" category="Display Widgets" w="8" h="120">
+    <property name="Name" type="text"/>
+    <property name="Orientation" type="text"/>
+    <property name="Size" type="int"/>
+    <property name="Position" type="int"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+  <objectinfo tag="XMenuItem" display="MenuItem" category="Overlay" w="140" h="26">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="Checkable" type="bool"/>
+    <property name="Checked" type="bool"/>
+  </objectinfo>
+  <objectinfo tag="XShellTitle" display="ShellTitle" category="Overlay" w="230" h="28">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+      <property name="Text" type="text"/>
+    <property name="FontSize" type="int"/>
+  </objectinfo>
+  <objectinfo tag="XMenuSeparator" display="MenuSeparator" category="Overlay" w="140" h="8">
+    <property name="Name" type="text"/>
+    <property name="Orientation" type="text"/>
+      <property name="Title" type="string"/>
+    </objectinfo>
+
+</package>

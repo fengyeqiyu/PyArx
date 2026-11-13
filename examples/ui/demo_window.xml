@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 控件清单示例（XML 写法）：覆盖 label/button/edit/listbox/checkbox/radio/group/combo/progress/slider 十类控件。
+     要点：
+       1. 控件一律用 x:Name 命名，ID 由 guiload 自动分配并回填到 names
+       2. 不写 Top/Left 就按流式纵向排列；写了就按绝对坐标（相对容器内区）
+       3. <XStackPanel> 是纯布局容器，不创建原生控件；Orientation="Horizontal" 改为横向
+       4. <XGroupBox> 也可以是容器，内部控件坐标相对分组框内区，高度要自己写够
+       5. x: 前缀必须声明，否则 XML 解析报 unbound prefix
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
+        Title="控件演示" Width="460" Height="700" Theme="dark">
+
+    <XStackPanel>
+        <XLabel x:Name="lblTitle" Content="原生 MFC 控件演示" Height="28"/>
+        <XButton x:Name="btnHello" Content="点我" Height="34" Click="OnHello"/>
+        <XTextField x:Name="txtInput" Content="初始文本" Height="28" TextChanged="OnTextChanged"/>
+
+        <XStackPanel Orientation="Horizontal" Height="26">
+            <XCheckBox x:Name="chkA" Content="选项 A" Width="130" IsChecked="1"/>
+            <XCheckBox x:Name="chkB" Content="选项 B" Width="130"/>
+        </XStackPanel>
+
+        <XGroupBox x:Name="grpChoice" Header="单选" Height="130">
+            <XRadioButton x:Name="radOne" Content="方案一" Height="24" IsChecked="1"/>
+            <XRadioButton x:Name="radTwo" Content="方案二" Height="24"/>
+            <XRadioButton x:Name="radThree" Content="方案三" Height="24"/>
+        </XGroupBox>
+
+        <XComboBox x:Name="cmbPick" Items="北京|上海|广州" Height="120" SelectionChanged="OnPick"/>
+        <XListBox x:Name="lstShow" Items="alpha|beta|gamma" Height="100"/>
+        <XSlider x:Name="sldLevel" Minimum="0" Maximum="100" Value="30" Height="32"/>
+        <XProgressBar x:Name="prgState" Minimum="0" Maximum="100" Value="40" Height="20"/>
+        <XTextField x:Name="txtReadonly" Content="只读文本" Height="28" IsReadOnly="1"/>
+    </XStackPanel>
+</XWindow>

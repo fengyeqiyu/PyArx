@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  示例 15：文字基线对齐（对齐 QML 的 anchors.baseline / Qt.AlignBaseline）
+
+  三种写法：
+    1) Layout.alignment="Qt.AlignBaseline"  —— 同一行里不同字号，文字基线齐平
+    2) anchors.baseline="T2"                —— 本控件基线压到兄弟控件的基线
+    3) anchors.top="T3.baseline"            —— 本控件顶边落在兄弟控件的基线上
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
+        Title="15 基线对齐" Width="440" Height="340" Background="#F4F6F8">
+
+  <XPane x:Name="Root" Padding="12" Spacing="16">
+
+    <!-- 1) 行内基线对齐：16pt 与 9pt 并排，文字底部落在同一条线 -->
+    <XStackPanel x:Name="Row1" Orientation="Horizontal" Spacing="8" Height="40">
+      <XLabel x:Name="Big1" text="回路一" FontSize="16" width="90"
+              Layout.alignment="Qt.AlignBaseline"/>
+      <XLabel x:Name="Small1" text="（说明文字 9pt）" FontSize="9" width="150"
+              Layout.alignment="Qt.AlignBaseline"/>
+    </XStackPanel>
+
+    <!-- 2) anchors.baseline：小字号的说明贴住大字号的基线 -->
+    <XStackPanel x:Name="Row2" Orientation="Horizontal" Spacing="8" Height="40">
+      <XLabel x:Name="T2" text="标题" FontSize="16" width="90" height="28"/>
+      <XLabel x:Name="S2" text="说明" FontSize="9" width="100" height="28"
+              anchors.left="T2.right" anchors.baseline="T2"/>
+    </XStackPanel>
+
+    <!-- 3) anchors.top = 兄弟.baseline：方块顶边落在标题文字基线上 -->
+    <XStackPanel x:Name="Row3" Orientation="Horizontal" Spacing="8" Height="40">
+      <XLabel x:Name="T3" text="标题" FontSize="16" width="90" height="28"/>
+      <XPane x:Name="P3" width="60" height="18"
+             anchors.left="T3.right" anchors.top="T3.baseline"/>
+    </XStackPanel>
+
+    <!-- 4) 字体族 / 字重不同，也走同一套度量（Consolas 12pt 与 YaHei Bold 9pt） -->
+    <XStackPanel x:Name="Row4" Orientation="Horizontal" Spacing="8" Height="40">
+      <XLabel x:Name="Mono4" text="const cv" FontFamily="Consolas" FontSize="12" width="80"
+              Layout.alignment="Qt.AlignBaseline"/>
+      <XLabel x:Name="Bold4" text="粗体说明" FontFamily="Microsoft YaHei UI"
+              FontWeight="Bold" FontSize="9" width="100"
+              Layout.alignment="Qt.AlignBaseline"/>
+    </XStackPanel>
+
+    <!-- 5) 文字垂直居中的控件（按钮/输入框）：基线在盒子中线附近 -->
+    <XStackPanel x:Name="Row5" Orientation="Horizontal" Spacing="8" Height="44">
+      <XButton x:Name="Btn5" text="确定" width="80" height="32"/>
+      <XLabel x:Name="Lbl5" text="说明" FontSize="9" width="100" height="20"
+              anchors.left="Btn5.right" anchors.baseline="Btn5"/>
+    </XStackPanel>
+
+    <!-- 6) 多行文本取首行基线：折行的说明与单行标签同基线 -->
+    <XStackPanel x:Name="Row6" Orientation="Horizontal" Spacing="8" Height="52">
+      <XLabel x:Name="Multi6" text="第一行较长需要折行的说明文字，会占两行高度" FontSize="9"
+              width="160" height="44" TextWrapping="Wrap"
+              Layout.alignment="Qt.AlignBaseline"/>
+      <XLabel x:Name="Single6" text="单行" FontSize="9" width="60" height="44"
+              Layout.alignment="Qt.AlignBaseline"/>
+    </XStackPanel>
+
+  </XPane>
+</XWindow>
+

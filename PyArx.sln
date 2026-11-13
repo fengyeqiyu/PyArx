@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.0.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyArxCore", "PyArxCore\PyArxCore.vcxproj", "{EF2A1EA9-C01E-4113-BFA5-478598A8A417}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyArxEngine", "PyArxEngine\PyArxEngine.vcxproj", "{28504A60-C45D-411E-8052-EBD0D225C657}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PyMfcXml", "PyMfcXml\PyMfcXml.vcxproj", "{C8D3E4F5-6A7B-4C9D-8E1F-2A3B4C5D6E7F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UIDesign", "UIDesign\UIDesign.vcxproj", "{B7C2D3E4-5F6A-4B8C-9D0E-1F2A3B4C5D6E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Viewer", "Viewer\Viewer.vcxproj", "{5B0F7E44-8C41-4A36-9F1D-2B0C7A8D9E10}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MfcXmlCore", "MfcXmlCore\MfcXmlCore.vcxproj", "{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}"
+EndProject
+EndProject
+EndProject
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF2A1EA9-C01E-4113-BFA5-478598A8A417}.Release|x64.ActiveCfg = Release|x64
+		{EF2A1EA9-C01E-4113-BFA5-478598A8A417}.Release|x64.Build.0 = Release|x64
+		{28504A60-C45D-411E-8052-EBD0D225C657}.Release|x64.ActiveCfg = Release|x64
+		{28504A60-C45D-411E-8052-EBD0D225C657}.Release|x64.Build.0 = Release|x64
+		{C8D3E4F5-6A7B-4C9D-8E1F-2A3B4C5D6E7F}.Release|x64.ActiveCfg = Release|x64
+		{C8D3E4F5-6A7B-4C9D-8E1F-2A3B4C5D6E7F}.Release|x64.Build.0 = Release|x64
+		{B7C2D3E4-5F6A-4B8C-9D0E-1F2A3B4C5D6E}.Release|x64.ActiveCfg = Release|x64
+		{B7C2D3E4-5F6A-4B8C-9D0E-1F2A3B4C5D6E}.Release|x64.Build.0 = Release|x64
+		{5B0F7E44-8C41-4A36-9F1D-2B0C7A8D9E10}.Release|x64.ActiveCfg = Release|x64
+		{5B0F7E44-8C41-4A36-9F1D-2B0C7A8D9E10}.Release|x64.Build.0 = Release|x64
+		{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}.Release|x64.ActiveCfg = Release|x64
+		{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		        SolutionGuid = {C5502B5B-C30C-41DF-B9C6-675BBF5ACB56}
+		SolutionGuid = {4D4454A4-8FAA-44A7-A5AF-D3689EEC1782}
+	EndGlobalSection
+EndGlobal

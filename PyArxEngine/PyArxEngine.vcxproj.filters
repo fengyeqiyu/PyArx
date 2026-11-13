@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Core"><UniqueIdentifier>{FBCBF371-A20E-4F63-B148-65380622A58A}</UniqueIdentifier></Filter>
+    <Filter Include="Rx"><UniqueIdentifier>{3897FA5F-CD5D-4F83-A325-237F81DFDF1A}</UniqueIdentifier></Filter>
+    <Filter Include="Framework"><UniqueIdentifier>{7D70A4E2-0F7D-49B8-B0BB-F5EBDE9888B1}</UniqueIdentifier></Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PyCmdBinder.h"><Filter>Core</Filter></ClInclude>
+    <ClInclude Include="PyEngine.h"><Filter>Core</Filter></ClInclude>
+    <ClInclude Include="PyEngineC.h"><Filter>Core</Filter></ClInclude>
+    <ClInclude Include="PyRedir.h"><Filter>Core</Filter></ClInclude>
+    <ClInclude Include="PyRxCmd.h"><Filter>Rx</Filter></ClInclude>
+    <ClInclude Include="singleinstance.h"><Filter>Core</Filter></ClInclude>
+    <ClInclude Include="stdafx.h"><Filter>Framework</Filter></ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="acrxEntryPoint.cpp"><Filter>Framework</Filter></ClCompile>
+    <ClCompile Include="dllmain.cpp"><Filter>Framework</Filter></ClCompile>
+    <ClCompile Include="PyCmdBinder.cpp"><Filter>Core</Filter></ClCompile>
+    <ClCompile Include="PyEngine.cpp"><Filter>Core</Filter></ClCompile>
+    <ClCompile Include="PyEngineC.cpp"><Filter>Core</Filter></ClCompile>
+    <ClCompile Include="PyRedir.cpp"><Filter>Core</Filter></ClCompile>
+    <ClCompile Include="PyRxCmd.cpp"><Filter>Rx</Filter></ClCompile>
+    <ClCompile Include="stdafx.cpp"><Filter>Framework</Filter></ClCompile>
+  </ItemGroup>
+</Project>

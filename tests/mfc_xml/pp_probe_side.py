@@ -1,0 +1,18 @@
+import os, sys, time
+sys.path.insert(0, r'G:\PyArx\X64\Release')
+sys.path.insert(0, r'G:\PyArx\tests\mfc_xml')
+os.add_dll_directory(r'G:\PyArx\X64\Release')
+import PyMfcXml as M, ppApp
+app = ppApp.App(); app.win.show(); time.sleep(0.4); M.pump(30)
+print('addWhiteRect 存在 =', hasattr(app.win, 'addWhiteRect'))
+app.onSampleDoc(); time.sleep(0.2); M.pump(30)
+app.showEditor(); time.sleep(0.4); M.pump(30)
+print('画布 view =', app.win.getPlanView(ppApp.CV), 'cvW =', app.cvW)
+print('表格行数 =', app.win.getTableRowCount(ppApp.TBL))
+app.win.savePng(r'G:\PyArx\docs\_pp_app_editor.png')
+print('截图 OK')
+app.hideEditor(); time.sleep(0.3); M.pump(30)
+print('关闭后 view =', app.win.getPlanView(ppApp.CV), 'cvW =', app.cvW)
+app.win.savePng(r'G:\PyArx\docs\_pp_app_after_editor.png')
+app.win.close()
+print('完成')
