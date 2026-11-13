@@ -1,43 +1,43 @@
-// XamlMenuBar.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlMenuBar.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlMenuBar.h"
 
-void XamlMenuBar::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
+void XamlMenuBar::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addSkinBox(id, 14, x, y, w, h);
-        (void)minValue;
-        (void)maxValue;
-    }
+    host->addSkinBox(id, 14, x, y, w, h);
+    applyItems();
+    if (m_selectedIndex >= 0)
+        host->setMenuBarSelected(id, m_selectedIndex);
+}
 
-std::vector<XamlProperty> XamlMenuBar::ownProperties() const
+void XamlMenuBar::applyItems()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Items", XamlPropType::String, true, true},
-                {L"SelectedIndex", XamlPropType::Int, true, true}};
-    }
+    if (m_host == nullptr || m_items.empty()) return;
+    for (const auto& s : xamlSplitItems(m_items))
+        m_host->addMenuBarItem(m_id, s);
+}
 
-bool XamlMenuBar::setOwnProperty(const wchar_t* name, const std::wstring& value)
+const std::vector<XamlPropEntry>& XamlMenuBar::PropTableData()
 {
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "items"))
-        {
-            for (const auto& s : xamlSplitItems(value))
-                m_host->addMenuBarItem(m_id, s);
-            return true;
-        }
-        if (xamlprop::StrEq(key, "selectedindex"))
-        {
-            m_host->setMenuBarSelected(m_id, xamlExtraNum(value, -1));
-            return true;
-        }
-        return false;
-    }
-
-std::wstring XamlMenuBar::getOwnProperty(const wchar_t* name) const
-{
-        if (m_host == nullptr) return {};
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "selectedindex"))
-            return std::to_wstring(m_host->getMenuBarSelected(m_id));
-        return {};
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Items", nullptr, XamlPropType::Items, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlMenuBar&>(b);
+             c.m_items = v;
+             c.applyItems();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return static_cast<const XamlMenuBar&>(b).m_items; }},
+        {L"SelectedIndex", nullptr, XamlPropType::Int, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlMenuBar&>(b);
+             c.m_selectedIndex = xamlprop2::ToInt(v, -1);
+             if (c.m_host != nullptr) c.m_host->setMenuBarSelected(c.m_id, c.m_selectedIndex);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlMenuBar&>(b);
+             return std::to_wstring(c.m_host != nullptr ? c.m_host->getMenuBarSelected(c.m_id) : c.m_selectedIndex);
+         }},
+    };
+    return kTable;
+}

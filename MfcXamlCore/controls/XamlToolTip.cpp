@@ -1,27 +1,23 @@
-// XamlToolTip.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlToolTip.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlToolTip.h"
 
-void XamlToolTip::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
+void XamlToolTip::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addSkinBox(id, 12, x, y, w, h);
-        (void)minValue;
-        (void)maxValue;
-    }
+    host->addSkinBox(id, 12, x, y, w, h);
+    if (!m_text.empty()) host->showToolTip(id, m_text, 0);   // 0 = 不自动消失
+}
 
-std::vector<XamlProperty> XamlToolTip::ownProperties() const
+const std::vector<XamlPropEntry>& XamlToolTip::PropTableData()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Text", XamlPropType::String, true, true}};
-    }
-
-bool XamlToolTip::setOwnProperty(const wchar_t* name, const std::wstring& value)
-{
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "text"))
-        {
-            m_host->showToolTip(m_id, value, 0);   // 0 = 不自动消失（静态展示）
-            return true;
-        }
-        return false;
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Text", nullptr, XamlPropType::String, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlToolTip&>(b);
+             c.m_text = v;
+             if (c.m_host != nullptr) c.m_host->showToolTip(c.m_id, v, 0);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return static_cast<const XamlToolTip&>(b).m_text; }},
+    };
+    return kTable;
+}

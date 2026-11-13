@@ -1,20 +1,29 @@
-#pragma once
-#include "XamlMfcControlBase.h"
-#include "XamlContentParse.h"
+﻿#pragma once
+// XamlToolBar —— XAML <ToolStrip> 工具栏（kind 11）。属性表驱动：Items、SelectedIndex。
+// 编码：本文件 UTF-8 with BOM。
 
-// <ToolBar> 工具栏：Items="打开|保存|运行"
+#include "XamlMfcControlBase.h"
+
 class XAML_CORE_API XamlToolBar : public XamlMfcControlBase
 {
-
 public:
     XamlToolBar() : XamlMfcControlBase(L"ToolStrip") {}
 
 protected:
-        void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;
+    void createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h) override;
 
-        std::vector<XamlProperty> ownProperties() const override;
+    const XamlPropEntry* ownPropTable(size_t& count) const override
+    {
+        const std::vector<XamlPropEntry>& t = PropTableData();
+        count = t.size();
+        return t.data();
+    }
 
-        bool setOwnProperty(const wchar_t* name, const std::wstring& value) override;
+private:
+    static const std::vector<XamlPropEntry>& PropTableData();
 
-        std::wstring getOwnProperty(const wchar_t* name) const override;
+    void applyItems();
+
+    std::wstring m_items;
+    int m_selectedIndex = -1;
 };

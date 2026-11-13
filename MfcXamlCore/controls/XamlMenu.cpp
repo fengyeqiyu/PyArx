@@ -1,39 +1,34 @@
-// XamlMenu.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlMenu.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlMenu.h"
 
-void XamlMenu::createNative(IXamlMfcHost* host, int id, int minValue, int maxValue, int x, int y, int w, int h)
+void XamlMenu::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addSkinBox(id, 13, x, y, w, h);
-        (void)minValue;
-        (void)maxValue;
-    }
+    host->addSkinBox(id, 13, x, y, w, h);
+    applyItems();
+}
 
-std::vector<XamlProperty> XamlMenu::ownProperties() const
+void XamlMenu::applyItems()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Items", XamlPropType::String, true, true},
-                {L"SelectedIndex", XamlPropType::Int, true, true}};
-    }
+    if (m_host != nullptr && !m_items.empty())
+        m_host->setMenuItems(m_id, xamlSplitItems(m_items));
+}
 
-bool XamlMenu::setOwnProperty(const wchar_t* name, const std::wstring& value)
+const std::vector<XamlPropEntry>& XamlMenu::PropTableData()
 {
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "items"))
-        {
-            m_host->setMenuItems(m_id, xamlSplitItems(value));
-            return true;
-        }
-        if (xamlprop::StrEq(key, "selectedindex"))
-            return false;   // 只读：点击后由 getMenuSelected 回读
-        return false;
-    }
-
-std::wstring XamlMenu::getOwnProperty(const wchar_t* name) const
-{
-        if (m_host == nullptr) return {};
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "selectedindex"))
-            return std::to_wstring(m_host->getMenuSelected(m_id));
-        return {};
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Items", nullptr, XamlPropType::Items, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlMenu&>(b);
+             c.m_items = v;
+             c.applyItems();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return static_cast<const XamlMenu&>(b).m_items; }},
+        {L"SelectedIndex", nullptr, XamlPropType::Int, nullptr, nullptr,
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlMenu&>(b);
+             return std::to_wstring(c.m_host != nullptr ? c.m_host->getMenuSelected(c.m_id) : -1);
+         }},
+    };
+    return kTable;
+}

@@ -1,42 +1,38 @@
-// XamlToggleButton.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlToggleButton.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlToggleButton.h"
 
-void XamlToggleButton::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlToggleButton::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addToggle(id, L"", x, y, w, h);
-    }
+    host->addToggle(id, m_text, x, y, w, h);
+    if (m_checked) host->setCheck(id, true);
+}
 
-std::vector<XamlProperty> XamlToggleButton::ownProperties() const
+const std::vector<XamlPropEntry>& XamlToggleButton::PropTableData()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Text", XamlPropType::String, true, true},
-                {L"Checked", XamlPropType::Bool, true, true}};
-    }
-
-bool XamlToggleButton::setOwnProperty(const wchar_t* name, const std::wstring& value)
-{
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "text"))
-        {
-            m_host->setText(m_id, value);
-            return true;
-        }
-        if (xamlprop::StrEq(key, "checked"))
-        {
-            m_host->setCheck(m_id, value == L"true" || value == L"1");
-            return true;
-        }
-        return false;
-    }
-
-std::wstring XamlToggleButton::getOwnProperty(const wchar_t* name) const
-{
-        if (m_host == nullptr) return {};
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (xamlprop::StrEq(key, "text"))
-            return m_host->getText(m_id);
-        if (xamlprop::StrEq(key, "checked"))
-            return m_host->getCheck(m_id) ? L"true" : L"false";
-        return {};
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Text", nullptr, XamlPropType::String, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlToggleButton&>(b);
+             c.m_text = v;
+             if (c.m_host != nullptr) c.m_host->setText(c.m_id, v);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlToggleButton&>(b);
+             return c.m_host != nullptr ? c.m_host->getText(c.m_id) : c.m_text;
+         }},
+        {L"Checked", nullptr, XamlPropType::Bool, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlToggleButton&>(b);
+             c.m_checked = xamlprop2::ToBool(v);
+             if (c.m_host != nullptr) c.m_host->setCheck(c.m_id, c.m_checked);
+             return true;
+         },
+         [](const XamlMfcControlBase& b) {
+             const auto& c = static_cast<const XamlToggleButton&>(b);
+             const bool on = c.m_host != nullptr ? c.m_host->getCheck(c.m_id) : c.m_checked;
+             return xamlprop2::FromBool(on);
+         }},
+    };
+    return kTable;
+}
