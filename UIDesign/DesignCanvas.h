@@ -30,6 +30,42 @@ namespace uidesign
         const COLORREF kTrack   = RGB(235, 237, 240);   // 轨道、空槽
         const COLORREF kHead    = RGB(238, 241, 245);   // 表头
         const COLORREF kGrid    = RGB(214, 218, 224);   // 表格线
+
+        // 画布解析 Items / Nodes / Pages 这类"竖线分隔"属性（与运行时同一语法）
+        inline std::vector<std::wstring> splitBar(const std::wstring& s)
+        {
+            std::vector<std::wstring> out;
+            size_t start = 0;
+            while (start <= s.size())
+            {
+                const size_t i = s.find(L'|', start);
+                const std::wstring seg = (i == std::wstring::npos) ? s.substr(start) : s.substr(start, i - start);
+                if (!seg.empty()) out.push_back(seg);
+                if (i == std::wstring::npos) break;
+                start = i + 1;
+            }
+            return out;
+        }
+
+        // 树形：seg 里 '>' 表示父子层级；返回 {depth, text}
+        inline void flattenNodes(const std::wstring& nodes,
+                                 std::vector<std::pair<int, std::wstring>>& out)
+        {
+            for (auto& seg : splitBar(nodes))
+            {
+                int depth = 0;
+                size_t start = 0;
+                while (start <= seg.size())
+                {
+                    const size_t gt = seg.find(L'>', start);
+                    const std::wstring part = (gt == std::wstring::npos) ? seg.substr(start)
+                                                                        : seg.substr(start, gt - start);
+                    if (!part.empty()) out.push_back({ depth++, part });
+                    if (gt == std::wstring::npos) break;
+                    start = gt + 1;
+                }
+            }
+        }
     }
 
     // 画布消息：选中节点（lParam 为 new Path*，由接收方拷贝/释放）
@@ -1814,6 +1850,407 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
                 drawTextCv(cv, rc, std::wstring(L"[") + node->tag + std::wstring(L"]"),
                            cvdoc::kMuted, DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
+            }
+            else if (tagIs(node, L"TreeCtrl") || tagIs(node, L"TreeTable"))
+            {
+                drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
+                CRect body = rc;
+                body.DeflateRect(1, 1);
+                int y = body.top + 4;
+
+                // TreeTable 有 Columns 时先画表头
+                const std::wstring cols = node->get(L"Columns");
+                if (!cols.empty())
+                {
+                    CRect head = body;
+                    head.bottom = head.top + 24;
+                    cv.fillRect(head, cvdoc::kHead);
+                    cv.strokeLine(POINT{ head.left, head.bottom - 1 },
+                                  POINT{ head.right, head.bottom - 1 }, cvdoc::kGrid, 1);
+                    int x = head.left + 6;
+                    for (auto& c : cvdoc::splitBar(cols))
+                    {
+                        std::wstring title = c;
+                        const size_t colon = c.find(L':');
+                        int w = 80;
+                        if (colon != std::wstring::npos)
+                        {
+                            title = c.substr(0, colon);
+                            const std::wstring wt = c.substr(colon + 1);
+                            if (!wt.empty() && wt.find_first_not_of(L"0123456789") == std::wstring::npos)
+                                w = (std::max)(24, _wtoi(wt.c_str()));
+                        }
+                        CRect cell(x, head.top, (std::min)(x + w, static_cast<int>(head.right)), head.bottom);
+                        CRect tr = cell; tr.DeflateRect(4, 0);
+                        drawTextCv(cv, tr, title, cvdoc::kInk,
+                                   DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, pt, fam);
+                        x += w;
+                    }
+                    y = head.bottom + 2;
+                }
+
+                std::vector<std::pair<int, std::wstring>> rows;
+                cvdoc::flattenNodes(node->get(L"Nodes"), rows);
+                const int rowH = 20;
+                cv.clipPush(body);
+                for (auto& r : rows)
+                {
+                    if (y + rowH > body.bottom) break;
+                    CRect row(body.left, y, body.right, y + rowH);
+                    const int ind = 8 + r.first * 14;
+                    CRect mark(row.left + ind - 10, row.top + 4, row.left + ind - 4, row.top + 10);
+                    // 折叠箭头（与资源管理器一致），不是叉
+                    const int midY2 = (mark.top + mark.bottom) / 2;
+                    cv.strokeLine(POINT{ mark.left, mark.top }, POINT{ mark.left + 3, midY2 }, cvdoc::kMuted, 1);
+                    cv.strokeLine(POINT{ mark.left + 3, midY2 }, POINT{ mark.left, mark.bottom }, cvdoc::kMuted, 1);
+                    CRect tr = row; tr.left += ind;
+                    drawTextCv(cv, tr, r.second, cvdoc::kInk,
+                               DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, pt, fam);
+                    y += rowH;
+                }
+                cv.clipPop();
+            }
+            else if (tagIs(node, L"TabControl"))
+            {
+                // 页签条 + 内容区，与运行时原生 Tab 一致
+                const std::vector<std::wstring> pages = cvdoc::splitBar(node->get(L"Pages"));
+                CRect strip = rc;
+                strip.bottom = strip.top + 26;
+                cv.fillRect(rc, cvdoc::kField);
+                int x = strip.left;
+                const wchar_t* names[] = { L"常规", L"高级", L"关于" };
+                for (size_t i = 0; i < (pages.empty() ? 3 : pages.size()); ++i)
+                {
+                    const std::wstring title = pages.empty() ? std::wstring(names[i]) : pages[i];
+                    const int w = (std::min)(120, (int)(title.size() * 9 + 26));
+                    CRect tab(x, strip.top, x + w, strip.bottom);
+                    const bool active = (i == 0);
+                    cv.fillRect(tab, active ? cvdoc::kField : cvdoc::kHead);
+                    cv.strokeLine(POINT{ tab.left, tab.bottom - 1 }, POINT{ tab.right, tab.bottom - 1 },
+                                  cvdoc::kBorder, 1);
+                    drawTextCv(cv, tab, title, cvdoc::kInk, DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+                    x += w + 2;
+                }
+                CRect frame(rc.left, strip.bottom - 1, rc.right, rc.bottom);
+                cv.strokeRect(frame, cvdoc::kBorder, 1);
+                if (!pages.empty())
+                    drawTextCv(cv, frame, pages[0], cvdoc::kMuted,
+                               DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+            }
+            else if (tagIs(node, L"StackView") || tagIs(node, L"SwipeView") || tagIs(node, L"Page"))
+            {
+                cv.fillRect(rc, cvdoc::kField);
+                cv.strokeRect(rc, cvdoc::kBorder, 1);
+                const int count = (std::max)(1, _wtoi(node->get(L"PageCount").c_str()));
+                const int sel = (std::max)(0, (std::min)(count - 1, _wtoi(node->get(L"SelectedIndex").c_str())));
+                const int d = 7;
+                int x = rc.CenterPoint().x - (count * (d + 6) - 6) / 2;
+                for (int i = 0; i < count; ++i)
+                {
+                    CRect dot(x, rc.bottom - 16, x + d, rc.bottom - 16 + d);
+                    cv.fillRoundRect(dot, i == sel ? cvdoc::kAccent : cvdoc::kTrack,
+                                     i == sel ? cvdoc::kAccent : cvdoc::kBorder, d / 2);
+                    x += d + 6;
+                }
+            }
+            else if (tagIs(node, L"PageIndicator"))
+            {
+                const int count = (std::max)(1, _wtoi(node->get(L"Count").c_str()));
+                const int sel = (std::max)(0, (std::min)(count - 1, _wtoi(node->get(L"SelectedIndex").c_str())));
+                const int d = 8;
+                int x = rc.CenterPoint().x - (count * (d + 6) - 6) / 2;
+                for (int i = 0; i < count; ++i)
+                {
+                    CRect dot(x, rc.CenterPoint().y - d / 2, x + d, rc.CenterPoint().y + d / 2);
+                    cv.fillRoundRect(dot, i == sel ? cvdoc::kAccent : cvdoc::kTrack,
+                                     i == sel ? cvdoc::kAccent : cvdoc::kBorder, d / 2);
+                    x += d + 6;
+                }
+            }
+            else if (tagIs(node, L"VirtualList"))
+            {
+                drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
+                CRect body = rc; body.DeflateRect(1, 1);
+                const int rowH = (std::max)(14, _wtoi(node->get(L"ItemHeight").c_str()));
+                const int sel = _wtoi(node->get(L"SelectedIndex").c_str());
+                std::vector<std::wstring> items = cvdoc::splitBar(node->get(L"Items"));
+                int y = body.top + 1;
+                cv.clipPush(body);
+                for (size_t i = 0; i < items.size() && y + rowH <= body.bottom; ++i)
+                {
+                    CRect row(body.left, y, body.right, y + rowH);
+                    if ((int)i == sel) cv.fillRect(row, RGB(219, 233, 249));
+                    CRect tr = row; tr.left += 8;
+                    drawTextCv(cv, tr, items[i], cvdoc::kInk,
+                               DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, pt, fam);
+                    y += rowH;
+                }
+                cv.clipPop();
+            }
+            else if (tagIs(node, L"GridView"))
+            {
+                cv.fillRect(rc, cvdoc::kField);
+                cv.strokeRect(rc, cvdoc::kBorder, 1);
+                const int cw = (std::max)(24, _wtoi(node->get(L"CellWidth").c_str()));
+                const int chh = (std::max)(20, _wtoi(node->get(L"CellHeight").c_str()));
+                const int sel = _wtoi(node->get(L"SelectedIndex").c_str());
+                std::vector<std::wstring> items = cvdoc::splitBar(node->get(L"Items"));
+                int x = rc.left + 6, y = rc.top + 6, col = 0;
+                for (size_t i = 0; i < items.size(); ++i)
+                {
+                    CRect tile(x, y, x + cw, y + chh);
+                    if (tile.right > rc.right - 6) { x = rc.left + 6; y += chh + 6; col = 0; tile = CRect(x, y, x + cw, y + chh); }
+                    if (tile.bottom > rc.bottom - 6) break;
+                    cv.fillRoundRect(tile, (int)i == sel ? RGB(219, 233, 249) : cvdoc::kSurface,
+                                     cvdoc::kBorder, 4);
+                    drawTextCv(cv, tile, items[i], cvdoc::kInk,
+                               DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, pt, fam);
+                    x += cw + 6;
+                    ++col;
+                }
+            }
+            else if (tagIs(node, L"PathView"))
+            {
+                cv.fillRect(rc, cvdoc::kSurface);
+                cv.strokeRect(rc, cvdoc::kBorder, 1);
+                std::vector<std::wstring> items = cvdoc::splitBar(node->get(L"Items"));
+                const int sel = _wtoi(node->get(L"SelectedIndex").c_str());
+                const int rowH = (std::min)(24, (int)((rc.Height() - 12) / (std::max)(1, (int)items.size())));
+                int y = rc.top + 6;
+                for (size_t i = 0; i < items.size(); ++i)
+                {
+                    const int shrink = (std::abs)((int)i - sel) * 8;
+                    CRect row(rc.left + 12 + shrink, y, rc.right - 12 - shrink, y + rowH);
+                    cv.fillRoundRect(row, (int)i == sel ? RGB(219, 233, 249) : cvdoc::kSurface,
+                                     cvdoc::kBorder, 4);
+                    drawTextCv(cv, row, items[i], cvdoc::kInk,
+                               DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+                    y += rowH + 4;
+                }
+            }
+            else if (tagIs(node, L"Dial"))
+            {
+                const int d = (std::min)(rc.Width(), rc.Height());
+                CRect box(0, 0, d, d);
+                box.OffsetRect(rc.left + (rc.Width() - d) / 2, rc.top + (rc.Height() - d) / 2);
+                cv.fillRoundRect(box, cvdoc::kSurface, cvdoc::kBorder, d / 2);
+                CRect inner = box; inner.DeflateRect(d / 8, d / 8);
+                cv.fillRoundRect(inner, cvdoc::kField, cvdoc::kBorder, inner.Width() / 2);
+                CRect knob(box.CenterPoint().x - d / 12, box.top + d / 6,
+                           box.CenterPoint().x + d / 12, box.top + d / 6 + d / 6);
+                cv.fillRoundRect(knob, cvdoc::kAccent, cvdoc::kAccent, d / 12);
+                const std::wstring val = node->get(L"Value");
+                if (!val.empty())
+                    drawTextCv(cv, box, val, cvdoc::kInk,
+                               DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+            }
+            else if (tagIs(node, L"Tumbler"))
+            {
+                cv.fillRect(rc, cvdoc::kField);
+                cv.strokeRect(rc, cvdoc::kBorder, 1);
+                const int count = (std::max)(1, _wtoi(node->get(L"Count").c_str()));
+                const int sel = (std::max)(0, (std::min)(count - 1, _wtoi(node->get(L"SelectedIndex").c_str())));
+                CRect mid = rc;
+                mid.top = rc.CenterPoint().y - 12;
+                mid.bottom = rc.CenterPoint().y + 12;
+                cv.fillRect(mid, RGB(219, 233, 249));
+                wchar_t buf[16];
+                swprintf_s(buf, L"%02d", sel);
+                drawTextCv(cv, mid, buf, cvdoc::kInk, DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+                swprintf_s(buf, L"%02d", (sel + 1) % count);
+                CRect below = rc; below.top = mid.bottom;
+                drawTextCv(cv, below, buf, cvdoc::kMuted, DT_CENTER | DT_TOP | DT_SINGLELINE, pt, fam);
+            }
+            else if (tagIs(node, L"RangeSlider") || tagIs(node, L"Slider"))
+            {
+                // 轨道 + 手柄（RangeSlider 两个手柄，值来自 LowValue/HighValue）
+                CRect track(rc.left, rc.CenterPoint().y - 2, rc.right, rc.CenterPoint().y + 2);
+                cv.fillRect(track, cvdoc::kTrack);
+
+                auto knobAt = [&](int pct) {
+                    const int x = rc.left + (int)((rc.Width() - 10) * pct / 100.0);
+                    CRect k(x, rc.CenterPoint().y - 7, x + 10, rc.CenterPoint().y + 7);
+                    cv.fillRoundRect(k, cvdoc::kAccent, cvdoc::kAccent, 5);
+                };
+                if (node->tag == L"RangeSlider")
+                {
+                    CRect hot = track;
+                    hot.left = rc.left + (int)((rc.Width() - 10) * _wtoi(node->get(L"LowValue").c_str()) / 100.0);
+                    hot.right = rc.left + (int)((rc.Width() - 10) * _wtoi(node->get(L"HighValue").c_str()) / 100.0) + 10;
+                    cv.fillRect(hot, RGB(140, 190, 240));
+                    knobAt(_wtoi(node->get(L"LowValue").c_str()));
+                    knobAt(_wtoi(node->get(L"HighValue").c_str()));
+                }
+                else
+                {
+                    int v = _wtoi(node->get(L"Value").c_str());
+                    const int maxV = (std::max)(1, _wtoi(node->get(L"Maximum").c_str()));
+                    if (v > maxV) v = maxV;
+                    CRect hot = track;
+                    hot.left = rc.left;
+                    hot.right = rc.left + (int)((rc.Width() - 10) * v / (double)maxV) + 10;
+                    cv.fillRect(hot, RGB(140, 190, 240));
+                    knobAt((int)(100.0 * v / maxV));
+                }
+            }
+            else if (tagIs(node, L"DatePicker"))
+            {
+                drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
+                cv.fillRect(CRect(rc.right - 18, rc.top + 1, rc.right - 1, rc.bottom - 1), cvdoc::kTrack);
+                CRect tr = rc; tr.DeflateRect(6, 0); tr.right -= 20;
+                drawTextCv(cv, tr, node->get(L"Value"), cvdoc::kInk,
+                           DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
+            }
+            else if (tagIs(node, L"CalendarCtrl"))
+            {
+                drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
+                CRect head = rc; head.bottom = head.top + 24;
+                cv.fillRect(head, cvdoc::kHead);
+                drawTextCv(cv, head, node->get(L"Value").empty() ? std::wstring(L"2026-11")
+                                                                : node->get(L"Value").substr(0, 7),
+                           cvdoc::kInk, DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+                // 7 列日期格：只画网格与首行数字，密度与运行时接近
+                CRect grid = rc; grid.top = head.bottom + 2; grid.DeflateRect(4, 0);
+                const int cellW = grid.Width() / 7;
+                const int cellH = (std::min)(18, grid.Height() / 6);
+                for (int r = 0; r < 6; ++r)
+                {
+                    for (int c = 0; c < 7; ++c)
+                    {
+                        CRect cell(grid.left + c * cellW, grid.top + r * cellH,
+                                   grid.left + (c + 1) * cellW, grid.top + (r + 1) * cellH);
+                        if (cell.bottom > rc.bottom - 2) break;
+                        wchar_t buf[8];
+                        swprintf_s(buf, L"%d", r * 7 + c + 1);
+                        if (r * 7 + c + 1 <= 30)
+                            drawTextCv(cv, cell, buf, cvdoc::kMuted,
+                                       DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
+                    }
+                }
+            }
+            else if (tagIs(node, L"MenuStrip") || tagIs(node, L"ToolStrip") || tagIs(node, L"Menu"))
+            {
+                const bool bar = node->tag != L"Menu";
+                if (bar) cv.fillRect(rc, cvdoc::kHead);
+                else drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
+                cv.strokeLine(POINT{ rc.left, rc.bottom - 1 }, POINT{ rc.right, rc.bottom - 1 },
+                              cvdoc::kBorder, 1);
+                const int sel = _wtoi(node->get(L"SelectedIndex").c_str());
+                int x = rc.left + 4;
+                std::vector<std::wstring> items = cvdoc::splitBar(node->get(L"Items"));
+                for (size_t i = 0; i < items.size(); ++i)
+                {
+                    const int w = (std::min)(110, (int)(items[i].size() * 12 + 20));
+                    if (x + w > rc.right - 4) break;
+                    CRect item(x, rc.top + 2, x + w, rc.bottom - 2);
+                    if ((int)i == sel && bar) cv.fillRect(item, RGB(219, 233, 249));
+                    drawTextCv(cv, item, items[i], cvdoc::kInk,
+                               DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+                    x += w + 3;
+                }
+            }
+            else if (tagIs(node, L"ToolTip"))
+            {
+                drawRoundedCv(cv, rc, RGB(255, 255, 225), cvdoc::kBorder, 3);
+                CRect tr = rc; tr.DeflateRect(6, 0);
+                drawTextCv(cv, tr, node->text, cvdoc::kInk,
+                           DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
+            }
+            else if (tagIs(node, L"Popup"))
+            {
+                cv.fillRect(rc, RGB(0, 0, 0));
+                CRect panel = rc; panel.DeflateRect(4, 4);
+                drawRoundedCv(cv, panel, cvdoc::kField, cvdoc::kBorder, 4);
+                CRect title = panel; title.bottom = title.top + 26;
+                cv.fillRect(title, cvdoc::kHead);
+                CRect tr = title; tr.left += 8;
+                drawTextCv(cv, tr, node->get(L"Title"), cvdoc::kInk,
+                           DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
+                CRect body = panel;
+                body.top = title.bottom + 4;
+                body.DeflateRect(8, 0);
+                drawTextCv(cv, body, node->get(L"Content"), cvdoc::kInk,
+                           DT_LEFT | DT_TOP | DT_WORDBREAK, pt, fam);
+            }
+            else if (tagIs(node, L"PowerCanvas") || tagIs(node, L"QCanvas"))
+            {
+                cv.fillRect(rc, RGB(255, 255, 255));
+                cv.strokeRect(rc, cvdoc::kBorder, 1);
+                // 淡网格，表明这是个画布而不是空框
+                for (int x = rc.left + 24; x < rc.right; x += 24)
+                    cv.strokeLine(POINT{ x, rc.top + 1 }, POINT{ x, rc.bottom - 1 }, RGB(238, 240, 243), 1);
+                for (int y = rc.top + 24; y < rc.bottom; y += 24)
+                    cv.strokeLine(POINT{ rc.left + 1, y }, POINT{ rc.right - 1, y }, RGB(238, 240, 243), 1);
+                drawTextCv(cv, rc, node->tag, cvdoc::kMuted,
+                           DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+            }
+            else if (tagIs(node, L"Flickable"))
+            {
+                drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
+                // 虚线视口框：表示可拖动的内容区
+                const int inset = 10;
+                for (int x = rc.left + inset; x < rc.right - inset; x += 8)
+                    cv.strokeLine(POINT{ x, rc.top + inset }, POINT{ (std::min)(x + 4, static_cast<int>(rc.right) - inset), rc.top + inset },
+                                  cvdoc::kBorder, 1);
+                for (int x = rc.left + inset; x < rc.right - inset; x += 8)
+                    cv.strokeLine(POINT{ x, rc.bottom - inset }, POINT{ (std::min)(x + 4, static_cast<int>(rc.right) - inset), rc.bottom - inset },
+                                  cvdoc::kBorder, 1);
+                for (int y = rc.top + inset; y < rc.bottom - inset; y += 8)
+                    cv.strokeLine(POINT{ rc.left + inset, y }, POINT{ rc.left + inset, (std::min)(y + 4, static_cast<int>(rc.bottom) - inset) },
+                                  cvdoc::kBorder, 1);
+                for (int y = rc.top + inset; y < rc.bottom - inset; y += 8)
+                    cv.strokeLine(POINT{ rc.right - inset, y }, POINT{ rc.right - inset, (std::min)(y + 4, static_cast<int>(rc.bottom) - inset) },
+                                  cvdoc::kBorder, 1);
+                const std::wstring off = node->get(L"OffsetX") + L"," + node->get(L"OffsetY");
+                drawTextCv(cv, rc, (off == L",") ? node->tag : off, cvdoc::kMuted,
+                           DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+            }
+            else if (tagIs(node, L"CodeEditor"))
+            {
+                cv.fillRect(rc, cvdoc::kField);
+                cv.strokeRect(rc, cvdoc::kBorder, 1);
+                const int gutter = 26;
+                cv.fillRect(CRect(rc.left, rc.top, rc.left + gutter, rc.bottom), cvdoc::kHead);
+                cv.strokeLine(POINT{ rc.left + gutter, rc.top }, POINT{ rc.left + gutter, rc.bottom },
+                              cvdoc::kBorder, 1);
+                std::vector<std::wstring> lines;
+                std::wstring txt = node->text;
+                size_t start = 0;
+                while (start <= txt.size())
+                {
+                    const size_t nl = txt.find(L'\n', start);
+                    lines.push_back((nl == std::wstring::npos) ? txt.substr(start) : txt.substr(start, nl - start));
+                    if (nl == std::wstring::npos) break;
+                    start = nl + 1;
+                }
+                int y = rc.top + 3;
+                for (size_t i = 0; i < lines.size() && y < rc.bottom - 12; ++i)
+                {
+                    CRect no(rc.left, y, rc.left + gutter - 4, y + 16);
+                    wchar_t buf[8];
+                    swprintf_s(buf, L"%d", (int)i + 1);
+                    drawTextCv(cv, no, buf, cvdoc::kMuted, DT_RIGHT | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
+                    CRect tr(rc.left + gutter + 6, y, rc.right - 4, y + 16);
+                    drawTextCv(cv, tr, lines[i], cvdoc::kInk, DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
+                    y += 16;
+                }
+            }
+            else if (tagIs(node, L"Hyperlink"))
+            {
+                CRect tr = rc;
+                drawTextCv(cv, tr, node->text.empty() ? node->get(L"Url") : node->text, cvdoc::kAccent,
+                           DT_CENTER | DT_VCENTER | DT_SINGLELINE, pt, fam);
+                const int y = rc.CenterPoint().y + 8;
+                cv.strokeLine(POINT{ rc.left + 6, y }, POINT{ rc.right - 6, y }, cvdoc::kAccent, 1);
+            }
+            else if (tagIs(node, L"Choice"))
+            {
+                drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
+                cv.fillRect(CRect(rc.right - 18, rc.top + 1, rc.right - 1, rc.bottom - 1), cvdoc::kTrack);
+                CRect tr = rc; tr.DeflateRect(6, 0); tr.right -= 20;
+                std::vector<std::wstring> items = cvdoc::splitBar(node->get(L"Items"));
+                drawTextCv(cv, tr, items.empty() ? node->text : items[0], cvdoc::kInk,
+                           DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
             }
             else if (node->tag == L"StaticLine")
             {
