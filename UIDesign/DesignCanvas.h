@@ -118,6 +118,7 @@ namespace uidesign
         void setDocument(XmlRuntime* doc)
         {
             m_doc = doc;
+            m_docBmpDirty = true;
             m_sel.clear();
             m_selPath = nullptr;
             fitToView();
@@ -166,6 +167,7 @@ namespace uidesign
         ~DesignCanvas()
         {
             if (m_bgD2DBmp != nullptr) { m_bgD2DBmp->Release(); m_bgD2DBmp = nullptr; }
+            if (m_docBmp != nullptr) { m_docBmp->Release(); m_docBmp = nullptr; }
             delete m_d2dCv; m_d2dCv = nullptr;
         }
 
@@ -377,6 +379,75 @@ namespace uidesign
             m_bgD2DGrid = m_showGrid;
         }
 
+        // 把整棵文档树烘成一张"自然尺寸"的 D2D 位图（不乘倍率、不做平移）。
+        // 之后平移/缩放都靠这张走位图变换；文档内容没变就不重建，避免每帧遍历节点树。
+        void ensureDocCache(XmlElement* root, ID2D1RenderTarget* rt)
+        {
+            if (root == nullptr || rt == nullptr) { m_docBmpDirty = true; return; }
+            const int dw = root->previewW;
+            const int dh = root->previewH;
+            // 超大文档 / 超高倍率下位图会爆内存：放弃烘焙，退回逐帧直画
+            if (dw <= 0 || dh <= 0 || dw > 4096 || dh > 4096) { m_docBmpDirty = true; return; }
+
+            if (!m_docBmpDirty && m_docBmp != nullptr && m_docBmpRoot == root &&
+                m_docBmpW == dw && m_docBmpH == dh)
+                return;
+
+            if (m_docBmp != nullptr) { m_docBmp->Release(); m_docBmp = nullptr; }
+            m_docBmpRoot = nullptr;
+
+            BITMAPINFO bmi = {};
+            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmi.bmiHeader.biWidth = dw;
+            bmi.bmiHeader.biHeight = -dh;          // top-down
+            bmi.bmiHeader.biPlanes = 1;
+            bmi.bmiHeader.biBitCount = 32;
+            bmi.bmiHeader.biCompression = BI_RGB;
+
+            void* bits = nullptr;
+            HDC screen = ::GetDC(nullptr);
+            HDC memDC = ::CreateCompatibleDC(screen);
+            HBITMAP hbm = ::CreateDIBSection(memDC, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
+            if (hbm == nullptr || bits == nullptr)
+            {
+                if (hbm != nullptr) ::DeleteObject(hbm);
+                ::DeleteDC(memDC);
+                ::ReleaseDC(nullptr, screen);
+                m_docBmpDirty = true;
+                return;
+            }
+
+            // 烘焙画布：白底起手，再用文档自己的绘制路径把树画一遍（单位变换）
+            D2DDcCanvas bake;
+            RECT bakeRc = { 0, 0, dw, dh };
+            if (bake.bind(memDC, bakeRc) && bake.begin(dw, dh))
+            {
+                RECT wr = { 0, 0, dw, dh };
+                bake.fillRect(wr, RGB(255, 255, 255));
+                drawNode(bake, root, CPoint(0, 0), true);
+                bake.end();
+            }
+
+            D2D1_BITMAP_PROPERTIES bp = D2D1::BitmapProperties(
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE), 96.0f, 96.0f);
+            const HRESULT hr = rt->CreateBitmap(D2D1::SizeU(static_cast<UINT32>(dw),
+                                                            static_cast<UINT32>(dh)),
+                                                bits, static_cast<UINT32>(dw * 4), bp, &m_docBmp);
+            ::DeleteObject(hbm);
+            ::DeleteDC(memDC);
+            ::ReleaseDC(nullptr, screen);
+            if (FAILED(hr))
+            {
+                if (m_docBmp != nullptr) { m_docBmp->Release(); m_docBmp = nullptr; }
+                m_docBmpDirty = true;
+                return;
+            }
+            m_docBmpRoot = root;
+            m_docBmpW = dw;
+            m_docBmpH = dh;
+            m_docBmpDirty = false;
+        }
+
         bool paintD2D(CDC& dc, int W, int H)
         {
             // 画布是停靠面板里的子窗口：实测 HwndRenderTarget 直呈在本窗口上 EndDraw 返回 S_OK
@@ -428,7 +499,10 @@ namespace uidesign
                                  D2D1::Matrix3x2F::Translation(m_panX, m_panY));
 
             if (root != nullptr)
-                drawNode(*m_d2dCv, root, CPoint(0, 0), true);
+            {
+                const RECT vp = docViewport(W, H);
+                drawNode(*m_d2dCv, root, CPoint(0, 0), true, RGB(255, 255, 255), &vp);
+            }
             else
                 m_d2dCv->text(CRect(0, 0, W, H), L"打开或新建 XML 后在此预览", RGB(170, 170, 170),
                              DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, L"");
@@ -1013,6 +1087,7 @@ namespace uidesign
         void endDrag()
         {
             m_dragMode = kNone;
+            m_docBmpDirty = true;
             if (m_selPath != nullptr)
                 diagLog("[drag] end node x=%d y=%d prev=%d,%d\n", m_selPath->x, m_selPath->y,
                         (int)m_selPath->previewX, (int)m_selPath->previewY);
@@ -1372,12 +1447,17 @@ inline std::wstring canvasExeDir()
 }
 
 void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = false,
-                      COLORREF inheritBg = RGB(255, 255, 255))
+                      COLORREF inheritBg = RGB(255, 255, 255), const RECT* vp = nullptr)
         {
             // 统一坐标系：屏幕/客户坐标 = 文档坐标 + 画布原点(origin)
             CRect rc(node->previewX + origin.x, node->previewY + origin.y,
                      node->previewX + origin.x + node->previewW,
                      node->previewY + origin.y + node->previewH);
+            // 视口裁剪：整棵子树都在可见矩形外时直接跳过（根窗是锚点，不裁）
+            if (!isRoot && vp != nullptr &&
+                (rc.right < vp->left || rc.bottom < vp->top ||
+                 rc.left > vp->right || rc.top > vp->bottom))
+                return;
             // 通用外观属性（catalog 暴露后，画布预览直接生效）
             COLORREF bgC = parseColor(node->get(L"Background"), (COLORREF)-1);
             if (bgC == (COLORREF)-1)
@@ -2549,7 +2629,7 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                         firstPageDrawn = true;
                     }
                     drawNode(cv, &child, origin, false,
-                             bgC == (COLORREF)-1 ? inheritBg : bgC);
+                             bgC == (COLORREF)-1 ? inheritBg : bgC, vp);
                 }
             }
         }
@@ -2730,6 +2810,18 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
             return CPoint((int)((p.x - m_panX) / z), (int)((p.y - m_panY) / z));
         }
 
+        // 客户区矩形换算成文档坐标矩形：drawNode 视口裁剪用，外扩 1px 防止贴边节点被切掉
+        RECT docViewport(int w, int h) const
+        {
+            const float z = (m_zoom <= 0.0f) ? 1.0f : m_zoom;
+            RECT vp;
+            vp.left = (int)((0.0f - m_panX) / z) - 1;
+            vp.top = (int)((0.0f - m_panY) / z) - 1;
+            vp.right = (int)((w - m_panX) / z) + 1;
+            vp.bottom = (int)((h - m_panY) / z) + 1;
+            return vp;
+        }
+
         // 标尺：窗口坐标下的顶部 / 左侧刻度条，不参与缩放（在单位变换下画）
         // ox/oy 是画布矩形在目标表面上的偏移
         void drawRulerCv(XmlCanvas& cv, int ox, int oy, int W, int H)
@@ -2808,7 +2900,19 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
             XmlElement* root = (m_doc != nullptr) ? m_doc->root() : nullptr;
             if (root != nullptr)
             {
-                drawNode(cv, root, CPoint(0, 0), true);
+                ensureDocCache(root, rt);
+                if (rt != nullptr && m_docBmp != nullptr)
+                {
+                    // 文档层：缓存位图随当前 Scale*Translation 一起走，平移/缩放不再遍历节点
+                    rt->DrawBitmap(m_docBmp, D2D1::RectF(0.0f, 0.0f,
+                                                         static_cast<float>(m_docBmpW),
+                                                         static_cast<float>(m_docBmpH)));
+                }
+                else
+                {
+                    const RECT vp = docViewport(w, h);
+                    drawNode(cv, root, CPoint(0, 0), true, RGB(255, 255, 255), &vp);
+                }
                 // 根 Window 只画选中框，不给 8 个夹点（设计器窗体本身不可缩放/拖移）
                 drawSelectionCv(cv, m_selPath, CPoint(0, 0),
                                 m_selPath != nullptr && m_selPath != root);
@@ -2931,6 +3035,7 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
 
         void notifyDocChanged()
         {
+            m_docBmpDirty = true;   // 文档内容变了，图层缓存作废
             CWnd* parent = GetParent();
             if (parent != nullptr && ::IsWindow(parent->m_hWnd))
                 parent->PostMessage(WM_DOC_CHANGED, 0, 0);
@@ -3106,6 +3211,12 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
         ID2D1Bitmap* m_bgD2DBmp = nullptr;   // 背景（白底+网格）烘成的 D2D 位图
         int m_bgD2DW = 0, m_bgD2DH = 0;
         bool m_bgD2DGrid = false;
+        // 文档图层缓存：整棵文档树按"自然尺寸"烘成一张位图，平移/缩放只走位图变换，
+        // 文档不变就不重画；选中框/夹点/拖拽框属于交互层，每帧单独画在缓存之上。
+        ID2D1Bitmap* m_docBmp = nullptr;
+        XmlElement*  m_docBmpRoot = nullptr;
+        int m_docBmpW = 0, m_docBmpH = 0;
+        bool m_docBmpDirty = true;
         D2DDcCanvas* m_d2dCv = nullptr;      // D2D 绘制目标（DCRenderTarget，画到内存 DC）
         CDC m_memDC;                         // 双缓冲内存 DC（D2D 画完后 BitBlt 上屏）
         CBitmap m_memBmp;
