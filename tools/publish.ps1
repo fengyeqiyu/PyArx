@@ -142,11 +142,9 @@ $out = & $git push $url master 2>&1
 if ($LASTEXITCODE -ne 0) { throw (($out | ForEach-Object { $_ -replace $masked, '***' }) -join "`n") }
 $out | ForEach-Object { $_ -replace $masked, '***' }
 
-if ($tagged.Count -gt 0) {
-    Write-Host '==> 推送新标签'
-    $out = & $git push $url --tags 2>&1
-    if ($LASTEXITCODE -ne 0) { throw (($out | ForEach-Object { $_ -replace $masked, '***' }) -join "`n") }
-    $out | ForEach-Object { $_ -replace $masked, '***' }
-}
+Write-Host '==> 推送标签'
+$out = & $git push $url --tags 2>&1
+if ($LASTEXITCODE -ne 0) { throw (($out | ForEach-Object { $_ -replace $masked, '***' }) -join "`n") }
+$out | ForEach-Object { $_ -replace $masked, '***' }
 
 Write-Host ("发布完成：HEAD={0} 最新标签={1}" -f ((Invoke-Git rev-parse --short HEAD)), $tagged[-1])
