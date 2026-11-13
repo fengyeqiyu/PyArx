@@ -22,6 +22,8 @@ user32.SendMessageW.restype = ctypes.c_ssize_t
 user32.PostMessageW.argtypes = [wt.HWND, wt.UINT, wt.WPARAM, wt.LPARAM]
 user32.PostMessageW.restype = wt.BOOL
 user32.SetForegroundWindow.argtypes = [wt.HWND]
+user32.GetClientRect.argtypes = [wt.HWND, ctypes.POINTER(wt.RECT)]
+user32.GetClientRect.restype = wt.BOOL
 
 GW_CHILD, GW_HWNDNEXT, GWL_ID = 5, 2, -12
 WM_MOUSEMOVE, WM_LBUTTONDOWN, WM_LBUTTONUP = 0x0200, 0x0201, 0x0202
@@ -65,28 +67,85 @@ M.pump(100)
 app.showEditor()
 M.pump(250)
 
+
+def wait_canvas_ready(timeout_ms=2500, step_ms=100):
+    """等画布视口稳定：zoom/offset 连续两次采样一致才算布局/动画跑完。
+
+    进入编辑器的头几百毫秒里视口还会因布局/自适应缩放变化，此时算出来的卡片矩形
+    和点击时的变换不是同一个，点击会落在卡片外（批跑时表现为偶发"单击卡片未选中"）。
+    """
+    last = None
+    waited = 0
+    while waited < timeout_ms:
+        cur = app.win.getPlanView(pp_app.CV)
+        if last is not None and cur == last:
+            return cur
+        last = cur
+        M.pump(step_ms)
+        waited += step_ms
+    return last
+
+
+wait_canvas_ready()
+
 cv = find_by_id(app.win.hwnd, pp_app.CV)
 print('画布 %s' % cv, flush=True)
 
+
+def client_size(hwnd):
+    rc = wt.RECT()
+    user32.GetClientRect(hwnd, ctypes.byref(rc))
+    return rc.right - rc.left, rc.bottom - rc.top
+
+
+def click_card(code, tries=4):
+    """点卡片：每轮重新取矩形再点。
+
+    视口在进入编辑器后还会被自适应缩放/居中改一次（ox/oy 能差上百像素），
+    先前算好的矩形在 20ms 后点下去就可能落在卡片外，所以按需重取重试。
+    """
+    for _ in range(tries):
+        rc = app.win.cardRectPlan(pp_app.CV, code)
+        if not rc or len(rc) != 4 or rc[2] <= 0:
+            M.pump(100)
+            continue
+        cx, cy = int(rc[0] + rc[2] / 2), int(rc[1] + rc[3] / 2)
+        click(cv, cx, cy)
+        if app.win.getPlanSelection(pp_app.CV) == code:
+            return cx, cy
+        M.pump(100)
+    return None
+
+
 # --- 1. 点卡片：拿卡片屏幕矩形 -> 中心点击 ---
 code0 = app.nodes[2]['code']
-rc = app.win.cardRectPlan(pp_app.CV, code0)
-print('卡片 %s 客户区 rect=%s' % (code0, rc), flush=True)
-if rc and len(rc) == 4 and rc[2] > 0:
-    cx, cy = int(rc[0] + rc[2] / 2), int(rc[1] + rc[3] / 2)
-    click(cv, cx, cy)
-    sel = app.win.getPlanSelection(pp_app.CV)
-    chk('单击卡片被选中', sel == code0, '%s (点击 %d,%d)' % (sel, cx, cy))
+print('卡片 %s 客户区 rect=%s' % (code0, app.win.cardRectPlan(pp_app.CV, code0)), flush=True)
+hit = click_card(code0)
+if hit:
+    cx, cy = hit
+    chk('单击卡片被选中', True, '%s (点击 %d,%d)' % (code0, cx, cy))
     chk('详情浮层打开', bool(app._detailVisible), 'visible=%s cur=%s'
         % (app._detailVisible, app.curSel))
     chk('详情显示的就是该节点', app.curSel == code0, app.curSel)
 else:
-    chk('单击卡片被选中', False, 'planCardRect 取不到')
+    chk('单击卡片被选中', False, '四次重点都没选中 %s' % code0)
 
 # --- 2. 点空白处：应清空选中 ---
-click(cv, 3, 3)
-chk('点空白清空选中', app.win.getPlanSelection(pp_app.CV) == '',
-    repr(app.win.getPlanSelection(pp_app.CV)))
+# 空白点不能写死坐标：画布里有连线，坐标偶尔落在线段上（点线=选中其下游节点），
+# 边角 (3,3) 也不在命中判定的有效区域。这里按网格试几个点，命中空白即通过。
+w, h = client_size(cv)
+cleared_at = None
+for fx, fy in ((0.06, 0.06), (0.94, 0.06), (0.06, 0.94), (0.94, 0.94),
+               (0.5, 0.06), (0.5, 0.94), (0.06, 0.5), (0.94, 0.5)):
+    px, py = int(w * fx), int(h * fy)
+    app.hideDetail()
+    M.pump(80)
+    click(cv, px, py)
+    if app.win.getPlanSelection(pp_app.CV) == '':
+        cleared_at = (px, py)
+        break
+chk('点空白清空选中', cleared_at is not None,
+    '在 %s 处清空' % (cleared_at,) if cleared_at else '八个候选空白点都没清空')
 
 # --- 3. 点连线：取某条线的中点（模型坐标按当前 view 折算成客户区） ---
 # 详情浮层若还在屏上会吃掉这一下（planHit 先判 detailHit），先显式收起再取视口参数。

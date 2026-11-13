@@ -106,6 +106,11 @@ protected:
     // 外观变化后通知宿主重绘
     void pushAppearance();
 
+    // 外观变化后给子类的钩子：需要在"外观字段"落地到自己内部格式的控件
+    // （如 RichText 的 FontSize/Foreground 要转成 CHARFORMAT）在这里同步，
+    // 默认什么都不做。调用点在 pushAppearance 里，setProperty 写外观后必然经过。
+    virtual void onAppearanceChanged() {}
+
     std::wstring m_type;       // 短名（button/label/...）
     IXamlMfcHost* m_host = nullptr;
     int m_id = 0;

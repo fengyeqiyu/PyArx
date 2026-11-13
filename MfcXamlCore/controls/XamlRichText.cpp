@@ -1,4 +1,6 @@
 ﻿// XamlRichText.cpp —— 属性表实现（UTF-8 with BOM）
+// FontSize / Foreground 归基类统一外观（一个名字只能出现一次）；
+// 这里通过 onAppearanceChanged 把外观字段转成 RichEdit 的 CHARFORMAT。
 #include "XamlRichText.h"
 
 void XamlRichText::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
@@ -12,6 +14,20 @@ void XamlRichText::applyFormat()
 {
     if (m_host != nullptr)
         m_host->setRichFormat(m_id, m_fontPt, m_bold, m_italic, m_color);
+}
+
+void XamlRichText::onAppearanceChanged()
+{
+    const xamlapp::XamlAppearance& ap = appearance();
+    if (ap.fontSize > 0)
+        m_fontPt = ap.fontSize;
+    if (!ap.foreColor.empty())
+    {
+        COLORREF rgb = 0;
+        if (xamlapp::ParseColor(ap.foreColor, rgb))
+            m_color = (GetRValue(rgb) << 16) | (GetGValue(rgb) << 8) | GetBValue(rgb);
+    }
+    applyFormat();
 }
 
 const std::vector<XamlPropEntry>& XamlRichText::PropTableData()
@@ -28,14 +44,6 @@ const std::vector<XamlPropEntry>& XamlRichText::PropTableData()
              const auto& c = static_cast<const XamlRichText&>(b);
              return c.m_host != nullptr ? c.m_host->getText(c.m_id) : c.m_text;
          }},
-        {L"FontSize", nullptr, XamlPropType::Int, nullptr,
-         [](XamlMfcControlBase& b, const std::wstring& v) {
-             auto& c = static_cast<XamlRichText&>(b);
-             c.m_fontPt = xamlprop2::ToInt(v, 9);
-             c.applyFormat();
-             return true;
-         },
-         [](const XamlMfcControlBase& b) { return std::to_wstring(static_cast<const XamlRichText&>(b).m_fontPt); }},
         {L"Bold", nullptr, XamlPropType::Bool, nullptr,
          [](XamlMfcControlBase& b, const std::wstring& v) {
              auto& c = static_cast<XamlRichText&>(b);
@@ -52,24 +60,6 @@ const std::vector<XamlPropEntry>& XamlRichText::PropTableData()
              return true;
          },
          [](const XamlMfcControlBase& b) { return xamlprop2::FromBool(static_cast<const XamlRichText&>(b).m_italic); }},
-        {L"Foreground", nullptr, XamlPropType::Color, nullptr,
-         [](XamlMfcControlBase& b, const std::wstring& v) {
-             auto& c = static_cast<XamlRichText&>(b);
-             COLORREF rgb = 0;
-             if (xamlapp::ParseColor(v, rgb))
-             {
-                 c.m_color = (GetRValue(rgb) << 16) | (GetGValue(rgb) << 8) | GetBValue(rgb);
-                 c.applyFormat();
-             }
-             return true;
-         },
-         [](const XamlMfcControlBase& b) {
-             const unsigned long rgb = static_cast<const XamlRichText&>(b).m_color;
-             wchar_t buf[16];
-             _snwprintf_s(buf, _countof(buf), _TRUNCATE, L"#%02lX%02lX%02lX",
-                          (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
-             return std::wstring(buf);
-         }},
     };
     return kTable;
 }

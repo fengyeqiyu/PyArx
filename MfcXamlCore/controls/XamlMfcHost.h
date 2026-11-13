@@ -49,6 +49,10 @@ struct IXamlMfcHost
     virtual void addScrolledWindow(int id, int x, int y, int w, int h) = 0;
     virtual void addCalendar(int id, int x, int y, int w, int h) = 0;
 
+    // 日历选中日期的读写（值格式 "YYYY-MM-DD"）。默认实现不支持，控件属性会读到空。
+    virtual std::wstring getCalendarDate(int /*id*/) const { return {}; }
+    virtual bool setCalendarDate(int /*id*/, const std::wstring& /*value*/) { return false; }
+
     // 创建"带基础功能"的输入类控件（文本框可多行/只读/限长/占位提示，
     // 下拉框可选可编辑或只读下拉，列表框可多选）。默认实现退回普通创建，
     // 让只关心外观的实现（如设计器自绘侧）不必关心这些细节。

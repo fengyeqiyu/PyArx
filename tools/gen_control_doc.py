@@ -272,20 +272,30 @@ def main():
     w('- `Canvas` 归绝对布局容器，画命令画布只能用 `QCanvas`（正名 `DrawCanvas` / `PaintCanvas`）。\n')
     w('- `Dialog` / `Drawer` 与 `Popup` 同一实现（标题条 + 正文），属性表相同。\n\n')
 
-    w('## 六、已知缺口（按实测，不含猜测）\n\n')
-    w('1. **`RichText` 属性重复**：schema 里 `FontSize`、`Foreground` 各出现两次（通用属性一次 + '
-      '控件自有解析一次），属性面板会出现两行同名项，需去重。\n')
-    w('2. **只读属性共 7 个**：`TableView.RowCount`、`Menu.SelectedIndex`、`VirtualList.ItemCount`、'
+    w('## 六、本轮已修 / 剩余缺口\n\n')
+    w('**本轮已修（v0.10.17）**\n\n')
+    w('1. `RichText` 属性重复：`FontSize`、`Foreground` 不再由控件自声明，统一走基类外观字段，'
+      '由 `onAppearanceChanged` 转成 `CHARFORMAT`（`XamlRichText.cpp`），schema 已无重名条目。\n')
+    w('2. `CalendarCtrl` 补上 `Value`（`YYYY-MM-DD`，读写）：宿主新增 '
+      '`getCalendarDate` / `setCalendarDate`（`MCM_GETCURSEL` / `MCM_SETCURSEL`）。\n')
+    w('3. `Flickable` 补上 `OffsetX` / `OffsetY`（读写，落到宿主 `setFlickOffset`），'
+      '不再只能靠手势改视口。\n')
+    w('4. 事件契约：`combobox` / `choice` 补 `keydown` / `keyup`（宿主本来就把 `WM_KEYDOWN` '
+      '统一派发成 `keydown`，缺的只是契约条目）。\n\n')
+    w('**剩余缺口（按实测，不含猜测）**\n\n')
+    w('1. **只读属性共 7 个**：`TableView.RowCount`、`Menu.SelectedIndex`、`VirtualList.ItemCount`、'
       '`GridView.ItemCount`、`Page.PageCount`、`StackView.PageCount`、`SwipeView.PageCount`。'
       '只有 `Menu.SelectedIndex` 是设计上的只读回读槽（`XamlMenu.cpp` 里 `Set` 为空，只反射当前选中）；'
-      '若需要程序化选中菜单项，得补一条 `Set`。其余 6 个是计数类，只读合理。\n')
-    w('3. **`Page` / `StackView` / `SwipeView` 是同一实现**（`XamlPageView`，skin #17），'
+      '若需要程序化选中菜单项，得补 `setMenuSelected` 宿主接口 + 属性 `Set`。其余 6 个是计数类，只读合理。\n')
+    w('2. **`Page` / `StackView` / `SwipeView` 是同一实现**（`XamlPageView`，skin #17），'
       '三者属性都是 `SelectedIndex` + `PageCount`，差别仅在语义命名；后续若要真分页/滑动行为，'
       '需要在 `XamlPageView` 上分模式，而不是继续加别名。\n')
-    w('4. **`CalendarCtrl` 属性为 0**：原生 `SysMonthCal32` 的选中日期没有暴露成属性（'
-      '`Value` 只在 `DatePicker` 上有），要用就得补一条。\n')
-    w('5. 事件契约里 `choice` / `combo` 缺 `keydown` / `keyup`（原生 ComboBox 实际会发键消息），'
-      '如需要键盘回调要补契约条目。\n')
+    w('3. **仍有 5 个控件自有属性为 0**：`Panel`、`Splitter`、`StaticLine`、`BusyIndicator`、'
+      '`Flickable`（Flickable 已补偏移，其余 4 个仍只有布局/外观）；`BusyIndicator` 要补 `Running` / '
+      '`Interval` 得先给 skinbox 加状态接口。\n')
+    w('4. **B 档 30 个控件多数只有一个主语义字段**，缺的是"第二层"能力（如 `Button.Icon` / '
+      '`ListBox.MultiSelect` 之外的 `ItemHeight`、`TreeCtrl.Indent` / `NodeState`），'
+      '要按实际使用场景逐个补，不预造属性。\n')
 
     with io.open(OUT, 'w', encoding='utf-8', newline='\n') as f:
         f.write(buf.getvalue())

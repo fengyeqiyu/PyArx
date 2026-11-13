@@ -77,6 +77,8 @@ void XamlMfcControlBase::attach(IXamlMfcHost* host, int id, int minValue, int ma
 
 void XamlMfcControlBase::pushAppearance()
 {
+    // 先让子类把外观字段同步到自己的内部格式（无宿主的纯声明阶段也要生效）
+    onAppearanceChanged();
     if (m_host != nullptr && m_id >= 1000 && m_id <= 65000 && !m_ap.empty())
         m_host->setControlAppearance(m_id, m_ap);
 }

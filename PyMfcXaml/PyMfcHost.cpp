@@ -1500,6 +1500,44 @@ void PyMfcHost::addCalendar(int id, int x, int y, int w, int h)
         createControl(L"SysMonthCal32", L"", WS_TABSTOP, x, y, w, h, id);
     }
 
+// SysMonthCal32 只有 MCM_GETCURSEL / MCM_SETCURSEL 这一对消息，没有 WM_SETTEXT 语义；
+// 值统一用 "YYYY-MM-DD"，和 DatePicker 的 Value 保持同一套文本口径。
+static std::wstring MonthCalDateText(const SYSTEMTIME& st)
+{
+        wchar_t buf[32];
+        _snwprintf_s(buf, _countof(buf), _TRUNCATE, L"%04u-%02u-%02u", st.wYear, st.wMonth, st.wDay);
+        return std::wstring(buf);
+    }
+
+std::wstring PyMfcHost::getCalendarDate(int id) const
+{
+        HWND h = ::GetDlgItem(m_hWnd, id);
+        if (h == nullptr)
+            return {};
+        SYSTEMTIME st = {};
+        if (::SendMessageW(h, MCM_GETCURSEL, 0, reinterpret_cast<LPARAM>(&st)) == 0)
+            return {};
+        return MonthCalDateText(st);
+    }
+
+bool PyMfcHost::setCalendarDate(int id, const std::wstring& value)
+{
+        HWND h = ::GetDlgItem(m_hWnd, id);
+        if (h == nullptr)
+            return false;
+        int y = 0, m = 0, d = 0;
+        if (swscanf_s(value.c_str(), L"%d-%d-%d", &y, &m, &d) != 3 || y < 1601 || m < 1 || m > 12 ||
+            d < 1 || d > 31)
+            return false;
+        SYSTEMTIME st = {};
+        st.wYear = static_cast<WORD>(y);
+        st.wMonth = static_cast<WORD>(m);
+        st.wDay = static_cast<WORD>(d);
+        ::SendMessageW(h, MCM_SETCURSEL, 0, reinterpret_cast<LPARAM>(&st));
+        ::InvalidateRect(h, nullptr, TRUE);
+        return true;
+    }
+
 void PyMfcHost::addSkinBox(int id, int kind, int x, int y, int w, int h)
 {
         createControl(kSkinBoxClass, L"", WS_TABSTOP, x, y, w, h, id);

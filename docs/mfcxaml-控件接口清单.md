@@ -15,13 +15,13 @@
 | 项 | 数量 |
 |---|---|
 | 控件（注册主标签） | 51 |
-| 属性条目合计（含通用） | 1075 |
-| 其中通用属性 | 971（51 控件 × 19） |
-| 其中自有属性 | 104 |
+| 属性条目合计（含通用） | 1076 |
+| 其中通用属性 | 969（51 控件 × 19） |
+| 其中自有属性 | 107 |
 | 只读属性 | 7 |
 | 事件键（内部名） | 15（click / dblclick / change / select / value / checked / dropdown / scroll / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus） |
 
-档位分布：S 完整 **3** 个 · A 基本 **12** 个 · B 薄 **30** 个 · C 仅布局 **6** 个 · 
+档位分布：S 完整 **3** 个 · A 基本 **12** 个 · B 薄 **32** 个 · C 仅布局 **4** 个 · 
 
 ## 三、逐控件清单
 
@@ -54,7 +54,7 @@
 | **StaticBitmap** | 原生 MFC Static(SS_BITMAP) | Image | — | click / dblclick / mousedown / mouseup / mousemove / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlStaticBitmap.cpp` |
 | **GridCtrl** | 原生 MFC 自注册网格 | Columns / Rows | — | select / click / dblclick / scroll / gotfocus / lostfocus | B 薄 | `XamlGrid.cpp` |
 | **ScrolledWindow** | 原生 MFC 自注册滚动容器 | ScrollMin / ScrollMax | — | scroll / click / gotfocus / lostfocus | B 薄 | `XamlScrolledWindow.cpp` |
-| **CalendarCtrl** | 原生 MFC SysMonthCal32 | — | — | select / value / dblclick / gotfocus / lostfocus | C 仅布局 | `XamlCalendarCtrl.cpp` |
+| **CalendarCtrl** | 原生 MFC SysMonthCal32 | Value | — | select / value / dblclick / gotfocus / lostfocus | B 薄 | `XamlCalendarCtrl.cpp` |
 | **Switch** | 自绘 skin #1 Switch | Checked | — | click / checked / value / gotfocus / lostfocus | B 薄 | `XamlSwitch.cpp` |
 | **SpinBox** | 自绘 skin #2 Spin | Minimum / Maximum / Value | — | value / scroll / gotfocus / lostfocus / click | A 基本 | `XamlSpinBox.cpp` |
 | **RangeSlider** | 自绘 skin #3 Range | LowValue / HighValue / Minimum / Maximum | — | value / scroll / gotfocus / lostfocus / click | A 基本 | `XamlRangeSlider.cpp` |
@@ -77,7 +77,7 @@
 | **PathView** | 自绘 skin #19 PathView | Items / SelectedIndex | — | select / click / dblclick / scroll / gotfocus / lostfocus | B 薄 | `XamlPathView.cpp` |
 | **QCanvas** | 自绘 skin #20 QCanvas（命令脚本画布） | Commands / Script | — | click / dblclick / mousedown / mouseup / mousemove / scroll / keydown / keyup / gotfocus / lostfocus | B 薄 | `XamlQCanvas.cpp` |
 | **Page** | 自绘 skin #17 Pager（XamlPageView） | SelectedIndex / PageCount | PageCount | click / select / gotfocus / lostfocus | B 薄 | `XamlPage.cpp` |
-| **Flickable** | 自绘 skin #21 Flick | — | — | scroll / click / mousedown / mouseup / mousemove | C 仅布局 | `XamlFlickable.cpp` |
+| **Flickable** | 自绘 skin #21 Flick | OffsetX / OffsetY | — | scroll / click / mousedown / mouseup / mousemove | B 薄 | `XamlFlickable.cpp` |
 
 ## 四、分档结论
 
@@ -85,9 +85,9 @@
 
 **A 基本（3–4，够用但还缺边角能力）**：ListBox(3)、CodeEditor(3)、ComboBox(4)、ProgressBar(3)、Slider(3)、RichText(3)、SpinBox(3)、RangeSlider(4)、Dial(3)、TableView(4)、Popup(3)、VirtualList(4)
 
-**B 薄（1–2，只有主语义那一个字段）**：Button(1)、TextBlock(1)、CheckBox(2)、RadioButton(2)、GroupBox(1)、TabControl(1)、TreeCtrl(1)、ListCtrl(2)、Choice(1)、DatePicker(1)、PowerCanvas(1)、Hyperlink(2)、ToggleButton(2)、BitmapButton(2)、StaticBitmap(1)、GridCtrl(2)、ScrolledWindow(2)、Switch(1)、PageIndicator(2)、Tumbler(2)、TreeTable(2)、ToolStrip(2)、ToolTip(1)、Menu(2)、MenuStrip(2)、StackView(2)、SwipeView(2)、PathView(2)、QCanvas(2)、Page(2)
+**B 薄（1–2，只有主语义那一个字段）**：Button(1)、TextBlock(1)、CheckBox(2)、RadioButton(2)、GroupBox(1)、TabControl(1)、TreeCtrl(1)、ListCtrl(2)、Choice(1)、DatePicker(1)、PowerCanvas(1)、Hyperlink(2)、ToggleButton(2)、BitmapButton(2)、StaticBitmap(1)、GridCtrl(2)、ScrolledWindow(2)、CalendarCtrl(1)、Switch(1)、PageIndicator(2)、Tumbler(2)、TreeTable(2)、ToolStrip(2)、ToolTip(1)、Menu(2)、MenuStrip(2)、StackView(2)、SwipeView(2)、PathView(2)、QCanvas(2)、Page(2)、Flickable(2)
 
-**C 仅布局（自有 0，属性面上等同一块带样式的面板）**：Panel、Splitter、StaticLine、CalendarCtrl、BusyIndicator、Flickable
+**C 仅布局（自有 0，属性面上等同一块带样式的面板）**：Panel、Splitter、StaticLine、BusyIndicator
 
 C 档不是"没实现"——这些控件在 C++ 里都有真实原生窗口/自绘实现、事件也照常派发，只是**业务字段没有暴露成属性**。要让它们进设计器可配置，得按需要补属性表条目；这也是 `plugins` 层用 XAML 组合补位的典型对象（组合态用子控件属性，不硬造新属性）。
 
@@ -157,10 +157,18 @@ C 档不是"没实现"——这些控件在 C++ 里都有真实原生窗口/自�
 - `Canvas` 归绝对布局容器，画命令画布只能用 `QCanvas`（正名 `DrawCanvas` / `PaintCanvas`）。
 - `Dialog` / `Drawer` 与 `Popup` 同一实现（标题条 + 正文），属性表相同。
 
-## 六、已知缺口（按实测，不含猜测）
+## 六、本轮已修 / 剩余缺口
 
-1. **`RichText` 属性重复**：schema 里 `FontSize`、`Foreground` 各出现两次（通用属性一次 + 控件自有解析一次），属性面板会出现两行同名项，需去重。
-2. **只读属性共 7 个**：`TableView.RowCount`、`Menu.SelectedIndex`、`VirtualList.ItemCount`、`GridView.ItemCount`、`Page.PageCount`、`StackView.PageCount`、`SwipeView.PageCount`。只有 `Menu.SelectedIndex` 是设计上的只读回读槽（`XamlMenu.cpp` 里 `Set` 为空，只反射当前选中）；若需要程序化选中菜单项，得补一条 `Set`。其余 6 个是计数类，只读合理。
-3. **`Page` / `StackView` / `SwipeView` 是同一实现**（`XamlPageView`，skin #17），三者属性都是 `SelectedIndex` + `PageCount`，差别仅在语义命名；后续若要真分页/滑动行为，需要在 `XamlPageView` 上分模式，而不是继续加别名。
-4. **`CalendarCtrl` 属性为 0**：原生 `SysMonthCal32` 的选中日期没有暴露成属性（`Value` 只在 `DatePicker` 上有），要用就得补一条。
-5. 事件契约里 `choice` / `combo` 缺 `keydown` / `keyup`（原生 ComboBox 实际会发键消息），如需要键盘回调要补契约条目。
+**本轮已修（v0.10.17）**
+
+1. `RichText` 属性重复：`FontSize`、`Foreground` 不再由控件自声明，统一走基类外观字段，由 `onAppearanceChanged` 转成 `CHARFORMAT`（`XamlRichText.cpp`），schema 已无重名条目。
+2. `CalendarCtrl` 补上 `Value`（`YYYY-MM-DD`，读写）：宿主新增 `getCalendarDate` / `setCalendarDate`（`MCM_GETCURSEL` / `MCM_SETCURSEL`）。
+3. `Flickable` 补上 `OffsetX` / `OffsetY`（读写，落到宿主 `setFlickOffset`），不再只能靠手势改视口。
+4. 事件契约：`combobox` / `choice` 补 `keydown` / `keyup`（宿主本来就把 `WM_KEYDOWN` 统一派发成 `keydown`，缺的只是契约条目）。
+
+**剩余缺口（按实测，不含猜测）**
+
+1. **只读属性共 7 个**：`TableView.RowCount`、`Menu.SelectedIndex`、`VirtualList.ItemCount`、`GridView.ItemCount`、`Page.PageCount`、`StackView.PageCount`、`SwipeView.PageCount`。只有 `Menu.SelectedIndex` 是设计上的只读回读槽（`XamlMenu.cpp` 里 `Set` 为空，只反射当前选中）；若需要程序化选中菜单项，得补 `setMenuSelected` 宿主接口 + 属性 `Set`。其余 6 个是计数类，只读合理。
+2. **`Page` / `StackView` / `SwipeView` 是同一实现**（`XamlPageView`，skin #17），三者属性都是 `SelectedIndex` + `PageCount`，差别仅在语义命名；后续若要真分页/滑动行为，需要在 `XamlPageView` 上分模式，而不是继续加别名。
+3. **仍有 5 个控件自有属性为 0**：`Panel`、`Splitter`、`StaticLine`、`BusyIndicator`、`Flickable`（Flickable 已补偏移，其余 4 个仍只有布局/外观）；`BusyIndicator` 要补 `Running` / `Interval` 得先给 skinbox 加状态接口。
+4. **B 档 30 个控件多数只有一个主语义字段**，缺的是"第二层"能力（如 `Button.Icon` / `ListBox.MultiSelect` 之外的 `ItemHeight`、`TreeCtrl.Indent` / `NodeState`），要按实际使用场景逐个补，不预造属性。

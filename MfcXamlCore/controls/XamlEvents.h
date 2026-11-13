@@ -159,9 +159,11 @@ inline const std::vector<XamlEventKind>& xamlDefaultEvents(const std::wstring& t
         // 选择族
         {L"combobox", {XamlEventKind::SelectionChanged, XamlEventKind::TextChanged,
                        XamlEventKind::DropDown, XamlEventKind::DoubleClick,
+                       XamlEventKind::KeyDown, XamlEventKind::KeyUp,
                        XamlEventKind::GotFocus, XamlEventKind::LostFocus}},
         {L"choice", {XamlEventKind::SelectionChanged, XamlEventKind::DropDown,
-                     XamlEventKind::DoubleClick, XamlEventKind::GotFocus,
+                     XamlEventKind::DoubleClick, XamlEventKind::KeyDown,
+                     XamlEventKind::KeyUp, XamlEventKind::GotFocus,
                      XamlEventKind::LostFocus}},
         {L"listbox", kSelect}, {L"listctrl", kSelect}, {L"treectrl", kSelect},
         {L"tabcontrol", kFairly}, {L"tableview", kSelect}, {L"treetable", kSelect},

@@ -1,6 +1,7 @@
 ﻿#pragma once
 // XamlRichText —— XAML <RichText> 富文本（原生 RichEdit）。
-// 属性表驱动：Text、FontSize、Bold、Italic、Foreground。
+// 自有属性：Text、Bold、Italic；字号与前景色沿用基类统一外观的 FontSize / Foreground，
+// 由 onAppearanceChanged 转成 CHARFORMAT（不重复声明同名属性）。
 // 编码：本文件 UTF-8 with BOM。
 
 #include "XamlMfcControlBase.h"
@@ -24,6 +25,7 @@ private:
     static const std::vector<XamlPropEntry>& PropTableData();
 
     void applyFormat();
+    void onAppearanceChanged() override;
 
     std::wstring m_text;
     int m_fontPt = 9;

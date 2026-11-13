@@ -257,6 +257,10 @@ void addGrid(int id, int x, int y, int w, int h);
 void addScrolledWindow(int id, int x, int y, int w, int h);
 void addCalendar(int id, int x, int y, int w, int h);
 
+	// 日历选中日期：SysMonthCal32 走 MCM_GETCURSEL / MCM_SETCURSEL，值格式 "YYYY-MM-DD"。
+std::wstring getCalendarDate(int id) const override;
+bool setCalendarDate(int id, const std::wstring& value) override;
+
 
     // ---- PyMfcSkinBox：QML 对齐的几个"小控件"，共用一个自建画布窗口 ----
     // 只有一块画布 + 宿主里的状态，没有系统类可用（Switch/RangeSlider/SpinBox/Busy/PageDots
