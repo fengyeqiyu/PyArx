@@ -1,34 +1,41 @@
-﻿// XamlTabControl.cpp —— 实现（拆分自 XamlExtraControls.h，UTF-8 with BOM）
+﻿// XamlTabControl.cpp —— 属性表实现（UTF-8 with BOM）
 #include "XamlTabControl.h"
 
-void XamlTabControl::createNative(IXamlMfcHost* host, int id, int /*min*/, int /*max*/, int x, int y, int w, int h)
+void XamlTabControl::createNative(IXamlMfcHost* host, int id, int, int, int x, int y, int w, int h)
 {
-        host->addTab(id, x, y, w, h);
-    }
+    host->addTab(id, x, y, w, h);
+    addPages();
+}
 
-std::vector<XamlProperty> XamlTabControl::ownProperties() const
+void XamlTabControl::addPages()
 {
-        return {{L"Name", XamlPropType::String, true, true},
-                {L"Pages", XamlPropType::String, true, true}};
+    if (m_host == nullptr || m_pages.empty()) return;
+    size_t start = 0;
+    while (start <= m_pages.size())
+    {
+        const size_t bar = m_pages.find(L'|', start);
+        const std::wstring item = (bar == std::wstring::npos)
+            ? m_pages.substr(start)
+            : m_pages.substr(start, bar - start);
+        if (!item.empty())
+            m_host->addTabItem(m_id, item);
+        if (bar == std::wstring::npos)
+            break;
+        start = bar + 1;
     }
+}
 
-bool XamlTabControl::setOwnProperty(const wchar_t* name, const std::wstring& value)
+const std::vector<XamlPropEntry>& XamlTabControl::PropTableData()
 {
-        if (m_host == nullptr) return false;
-        const std::string key = xamlprop::Lower(xamlprop::WideToUtf8(name ? name : L""));
-        if (!xamlprop::StrEq(key, "pages")) return false;
-        size_t start = 0;
-        while (start <= value.size())
-        {
-            const size_t bar = value.find(L'|', start);
-            const std::wstring item = (bar == std::wstring::npos)
-                ? value.substr(start)
-                : value.substr(start, bar - start);
-            if (!item.empty())
-                m_host->addTabItem(m_id, item);
-            if (bar == std::wstring::npos)
-                break;
-            start = bar + 1;
-        }
-        return true;
-    }
+    static const std::vector<XamlPropEntry> kTable = {
+        {L"Pages", nullptr, XamlPropType::Items, nullptr,
+         [](XamlMfcControlBase& b, const std::wstring& v) {
+             auto& c = static_cast<XamlTabControl&>(b);
+             c.m_pages = v;
+             c.addPages();
+             return true;
+         },
+         [](const XamlMfcControlBase& b) { return static_cast<const XamlTabControl&>(b).m_pages; }},
+    };
+    return kTable;
+}
