@@ -125,7 +125,7 @@ bool DesignerPaneView::loadLayout()
     std::vector<std::wstring> candidates = {
         std::wstring(exeDir + L"designer_layout.xaml"),
         // 从输出目录（X64\Release）回到源码目录，换盘/换机仍可用，不再写死 G:\PyArx
-        std::wstring(exeDir + L"..\\..\\PyMfcDesigner\\designer_layout.xaml"),
+        std::wstring(exeDir + L"..\\..\\UIDesign\\designer_layout.xaml"),
     };
     std::wstring used;
     std::wstring err;
@@ -139,7 +139,14 @@ bool DesignerPaneView::loadLayout()
     }
     if (used.empty() || !m_ui.loadFile(used.c_str(), err))
     {
-        AfxMessageBox(CString(L"无法加载设计器布局: ") + err.c_str(), MB_ICONERROR);
+        // 报错要把找过的地方说清楚，否则只剩一句"无法加载"，排不出是路径还是文件的问题
+        CString tried;
+        for (auto& c : candidates)
+            tried += L"\n  " + CString(c.c_str());
+        if (err.empty())
+            err = L"文件不存在";
+        AfxMessageBox(CString(L"无法加载设计器布局：") + err.c_str() + L"\n已查找：" + tried,
+                      MB_ICONERROR);
         return false;
     }
 

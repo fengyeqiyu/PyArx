@@ -57,9 +57,6 @@
       <AdditionalOptions>/MANIFEST:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /D /I "$(ProjectDir)res\*.*" "$(OutDir)res\"
-xcopy /Y /D "$(ProjectDir)designer_layout.xaml" "$(OutDir)"
-xcopy /Y /D "$(ProjectDir)control_catalog.xml" "$(OutDir)"</Command>
       <Message>复制界面图标资源 res\、designer_layout.xaml 与 control_catalog.xml 到输出目录</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -85,5 +82,15 @@ xcopy /Y /D "$(ProjectDir)control_catalog.xml" "$(OutDir)"</Command>
     <ClInclude Include="UiDocUtil.h" />
     <ClInclude Include="ControlCatalog.h" />
   </ItemGroup>
+  <!-- 资源随生成复制：走 MSBuild Copy，不经 cmd.exe（cmd 在受限环境下起不来会让 Build 直接失败） -->
+  <Target Name="CopyDesignerAssets" AfterTargets="Build">
+    <ItemGroup>
+      <DesignerAsset Include="$(ProjectDir)designer_layout.xaml;$(ProjectDir)control_catalog.xml" />
+      <DesignerRes Include="$(ProjectDir)res\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DesignerAsset)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DesignerRes)" DestinationFolder="$(OutDir)res\" SkipUnchangedFiles="true"
+          Condition="'@(DesignerRes)' != ''" />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
