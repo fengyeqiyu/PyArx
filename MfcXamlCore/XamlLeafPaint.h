@@ -1,0 +1,285 @@
+﻿#pragma once
+// XamlLeafPaint.h — 叶子控件"怎么画"的唯一实现。
+//
+// 之前的事实：预览器（Viewer/XamlViewer.cpp::drawLeaf）和设计器画布
+// （UIDesign/DesignCanvas.h::drawNode）各写了一套叶子绘制代码，于是同一个 Button
+// 在两处圆角/边框/配色都不一样 —— 用户看到的就是"预览器与设计器显示不一样"。
+//
+// 现在只有这一份：按控件类型分派，配色取 XamlTheme.h，几何取 XamlDraw / XamlControls。
+// 设计器画布、预览器调用同一个函数，观感不会再分叉。
+//
+// 用法：
+//   xamlleaf::drawLeaf(cv, el, rc, appearance, styled, parentBack, 图标根目录);
+
+#include <windows.h>
+#include <string>
+#include <initializer_list>
+
+#include "XamlCore.h"
+#include "controls/XamlMfcTags.h"
+#include "XamlAppearance.h"
+#include "XamlDraw.h"
+#include "XamlControls.h"
+#include "XamlTheme.h"
+
+namespace xamlleaf
+{
+
+inline bool isAnyTag(const std::wstring& tag, std::initializer_list<const wchar_t*> names)
+{
+    for (const wchar_t* n : names)
+        if (_wcsicmp(tag.c_str(), n) == 0) return true;
+    return false;
+}
+
+inline bool truthy(const std::wstring& v)
+{
+    return _wcsicmp(v.c_str(), L"true") == 0 || _wcsicmp(v.c_str(), L"yes") == 0 || v == L"1";
+}
+
+// 图标写法是相对 exe 目录的路径；绝对路径原样用
+inline std::wstring resolveIconPath(const std::wstring& base, const std::wstring& p)
+{
+    if (p.empty()) return std::wstring();
+    if (p.size() > 2 && p[1] == L':') return p;
+    if (!base.empty() && p[0] != L'\\') return base + L"\\" + p;
+    return p;
+}
+
+inline void drawLeaf(XamlCanvas& cv, XamlElement* el, const RECT& rc,
+                     const xamlapp::XamlAppearance& ap, bool styled, COLORREF parentBack,
+                     const std::wstring& urlBase)
+{
+    // 标签可能是 XButton/XTextField 这种 X+QML 写法：统一取本意名再分派
+    const std::wstring tag = xamlmfc::BareTag(el->tag);
+
+    // 设计器外壳叶子：文档标签 / 分类胶囊
+    if (isAnyTag(tag, {L"Tab"}))
+    {
+        xamlctl::xamlDrawTab(cv, rc, el->text, truthy(el->get(L"Active")), false, 9);
+        return;
+    }
+    if (isAnyTag(tag, {L"Chip"}))
+    {
+        xamlctl::xamlDrawChip(cv, rc, el->text, truthy(el->get(L"Checked")), false, 9);
+        return;
+    }
+
+    // 按钮：运行时是 owner-draw —— RoundRect(按钮面, 边框, 8) + 文字居中
+    // 有 Icon 时：左侧方形图标 + 文字右移；只有图标时图标居中
+    if (isAnyTag(tag, {L"Button", L"PushButton", L"IconButton", L"ToggleButton"}))
+    {
+        // 设计器外壳的两种按钮角色：Primary/Ghost 画胶囊，IconTop 画"图标 + 标题"。
+        // 预览器与设计器必须同形，否则外壳一进预览就散架。
+        const std::wstring role = el->get(L"Role");
+        const std::wstring iconProbe = resolveIconPath(urlBase, el->icon);
+        if (_wcsicmp(role.c_str(), L"Primary") == 0 || _wcsicmp(role.c_str(), L"Ghost") == 0)
+        {
+            xamlctl::xamlDrawPillButton(cv, rc, el->text,
+                                        _wcsicmp(role.c_str(), L"Primary") == 0, false, 9);
+            return;
+        }
+        if (!iconProbe.empty() && !el->text.empty() && (rc.bottom - rc.top) >= 36)
+        {
+            xamlctl::xamlDrawToolButtonCaption(cv, rc, iconProbe, el->text, false, false, false,
+                                               xamlctl::ToolButtonStyle(), 8);
+            return;
+        }
+
+        if (styled)
+            xamlDrawBackplate(cv, rc, ap, xamlmfc::theme::button, xamlmfc::theme::border);
+        else
+        {
+            cv.fillRect(rc, parentBack);
+            cv.fillRoundRect(rc, xamlmfc::theme::button, xamlmfc::theme::border, xamlmfc::theme::radius);
+        }
+        const std::wstring iconPath = resolveIconPath(urlBase, el->icon);
+        if (!iconPath.empty() && rc.bottom > rc.top)
+        {
+            const int side = (rc.bottom - rc.top) - 8;
+            if (side > 0)
+            {
+                RECT ir = { rc.left + 4, rc.top + 4, rc.left + 4 + side, rc.top + 4 + side };
+                if (el->text.empty())
+                {
+                    ir.left = rc.left + ((rc.right - rc.left) - side) / 2;
+                    ir.right = ir.left + side;
+                }
+                if (ir.right <= rc.right)
+                {
+                    cv.drawImage(ir, iconPath);
+                    if (!el->text.empty())
+                    {
+                        RECT tr = rc;
+                        tr.left = ir.right + 4;
+                        xamlDrawText(cv, tr, el->text, ap, styled, xamlmfc::theme::ink, DT_LEFT, 0);
+                    }
+                    return;
+                }
+            }
+        }
+        xamlDrawText(cv, rc, el->text, ap, styled, xamlmfc::theme::ink, DT_CENTER, 0);
+        return;
+    }
+
+    // 静态文本：运行时 Static 不铺底，只有文字
+    if (isAnyTag(tag, {L"Label", L"Static", L"LinkLabel"}))
+    {
+        if (styled && (!ap.backColor.empty() || !ap.frontColor.empty() || !ap.borderColor.empty()))
+            xamlDrawBackplate(cv, rc, ap, parentBack, xamlmfc::theme::border);
+        xamlDrawText(cv, rc, el->text, ap, styled, xamlmfc::theme::ink, DT_LEFT, 6);
+        return;
+    }
+
+    // 输入框：窗口色 + 2px 凹陷 3D 边框（等价 WS_EX_CLIENTEDGE）
+    if (isAnyTag(tag, {L"TextField", L"Edit", L"MaskedTextBox"}))
+    {
+        const COLORREF win = xamlmfc::theme::field;
+        if (styled)
+            xamlDrawBackplate(cv, rc, ap, win, xamlmfc::theme::border);
+        else
+            cv.fillRoundRect(rc, xamlmfc::theme::field, xamlmfc::theme::border, xamlmfc::theme::radius);
+        xamlDrawText(cv, rc, el->text, ap, styled, xamlmfc::theme::ink, DT_LEFT, 4);
+        return;
+    }
+
+    // 复选框：13×13 凹陷方框 + 勾 + 右侧文字
+    if (isAnyTag(tag, {L"CheckBox"}))
+    {
+        if (styled) xamlDrawBackplate(cv, rc, ap, parentBack, xamlmfc::theme::border);
+        const int side = 13;
+        RECT box = rc;
+        box.left = rc.left + 2;
+        box.top = rc.top + (rc.bottom - rc.top - side) / 2;
+        box.right = box.left + side;
+        box.bottom = box.top + side;
+        cv.fillRoundRect(box, xamlmfc::theme::field, xamlmfc::theme::border, 2);
+        if (truthy(el->get(L"Checked")) || truthy(el->get(L"IsChecked")))
+        {
+            cv.strokeLine({box.left + 3, box.top + 7}, {box.left + 5, box.top + 9}, xamlmfc::theme::ink, 2);
+            cv.strokeLine({box.left + 5, box.top + 9}, {box.left + 10, box.top + 3}, xamlmfc::theme::ink, 2);
+        }
+        RECT tr = rc;
+        tr.left += side + 8;
+        xamlDrawText(cv, tr, el->text, ap, styled, xamlmfc::theme::ink, DT_LEFT, 0);
+        return;
+    }
+
+    // 单选：12×12 圆框 + 实心圆点 + 右侧文字
+    if (isAnyTag(tag, {L"RadioButton", L"RadioBox"}))
+    {
+        if (styled) xamlDrawBackplate(cv, rc, ap, parentBack, xamlmfc::theme::border);
+        const int side = 12;
+        RECT cir = rc;
+        cir.left = rc.left + 2;
+        cir.top = rc.top + (rc.bottom - rc.top - side) / 2;
+        cir.right = cir.left + side;
+        cir.bottom = cir.top + side;
+        if (truthy(el->get(L"Checked")) || truthy(el->get(L"IsChecked")))
+        {
+            cv.fillEllipse(cir, xamlmfc::theme::field, xamlmfc::theme::border);
+            RECT dot = cir;
+            ::InflateRect(&dot, -3, -3);
+            if (dot.right > dot.left && dot.bottom > dot.top)
+                cv.fillEllipse(dot, xamlmfc::theme::ink, xamlmfc::theme::ink);
+        }
+        else
+        {
+            cv.fillEllipse(cir, xamlmfc::theme::field, xamlmfc::theme::border);
+        }
+        RECT tr = rc;
+        tr.left += side + 8;
+        xamlDrawText(cv, tr, el->text, ap, styled, xamlmfc::theme::ink, DT_LEFT, 0);
+        return;
+    }
+
+    // 列表类：窗口色 + 凹陷边框 + 逐行条目
+    // 与设计器画布 / 运行时共用同一实现（XamlControls::xamlDrawListLike），
+    // 否则三端会各自漂移成"这里浅色、那里深色"。
+    if (isAnyTag(tag, {L"ListBox", L"ListView", L"TreeView", L"PropertyGrid"}))
+    {
+        xamlctl::xamlDrawListLike(cv, rc, *el, styled, ap, xamlmfc::theme::ink, xamlmfc::theme::border);
+        return;
+    }
+
+    // 下拉框：窗口色 + 右侧按钮面 + 下箭头 + 文字（收起状态）
+    if (isAnyTag(tag, {L"ComboBox"}))
+    {
+        const COLORREF win = xamlmfc::theme::field;
+        const int arrowW = 18;
+        if (styled)
+            xamlDrawBackplate(cv, rc, ap, win, xamlmfc::theme::border);
+        else
+            cv.fillRoundRect(rc, xamlmfc::theme::field, xamlmfc::theme::border, xamlmfc::theme::radius);
+        RECT btn = rc;
+        ::InflateRect(&btn, -2, -2);
+        btn.left = btn.right - arrowW;
+        if (btn.right > btn.left)
+        {
+            cv.fillRect(btn, xamlmfc::theme::button);
+            cv.strokeLine({btn.left, rc.top + 2}, {btn.left, rc.bottom - 3}, xamlmfc::theme::border, 1);
+            const int mx = (btn.left + btn.right) / 2;
+            const int my = (btn.top + btn.bottom) / 2;
+            cv.strokeLine({mx - 5, my - 2}, {mx, my + 4}, xamlmfc::theme::ink, 1);
+            cv.strokeLine({mx, my + 4}, {mx + 5, my - 2}, xamlmfc::theme::ink, 1);
+        }
+        RECT tr = rc;
+        tr.right = btn.left - 2;
+        xamlDrawText(cv, tr, el->text, ap, styled, xamlmfc::theme::ink, DT_LEFT, 4);
+        return;
+    }
+
+    // 进度条：浅槽 + 绿色填充（Value 0-100，缺省 40）
+    if (isAnyTag(tag, {L"ProgressBar"}))
+    {
+        cv.fillRoundRect(rc, xamlmfc::theme::track, xamlmfc::theme::border, xamlmfc::theme::radius);
+        int pct = _wtoi(el->get(L"Value").c_str());
+        if (pct <= 0) pct = 40;
+        if (pct > 100) pct = 100;
+        RECT fill = rc;
+        ::InflateRect(&fill, -2, -2);
+        if (fill.right > fill.left)
+            fill.right = fill.left + ::MulDiv(fill.right - fill.left, pct, 100);
+        if (fill.right > fill.left + 2)
+            cv.fillRoundRect(fill, xamlmfc::theme::accent, xamlmfc::theme::accent, 2);
+        return;
+    }
+
+    // 滑块：横向沟槽 + 居中圆角滑块
+    if (isAnyTag(tag, {L"Slider", L"TrackBar"}))
+    {
+        RECT groove = rc;
+        const int gh = 4;
+        groove.top = rc.top + (rc.bottom - rc.top - gh) / 2;
+        groove.bottom = groove.top + gh;
+        groove.left += 8;
+        groove.right -= 8;
+        cv.fillRect(groove, xamlmfc::theme::track);
+        cv.strokeRect(groove, xamlmfc::theme::border, 1);
+
+        const int tw = 12, th = 20;
+        RECT thumb = rc;
+        thumb.left = (rc.left + rc.right) / 2 - tw / 2;
+        thumb.right = thumb.left + tw;
+        thumb.top = (rc.top + rc.bottom) / 2 - th / 2;
+        thumb.bottom = thumb.top + th;
+        cv.fillRoundRect(thumb, xamlmfc::theme::button, xamlmfc::theme::border, 4);
+        return;
+    }
+
+    // 状态栏
+    if (isAnyTag(tag, {L"StatusBar"}))
+    {
+        cv.fillRect(rc, xamlmfc::theme::button);
+        xamlDrawText(cv, rc, el->text, ap, styled, xamlmfc::theme::muted, DT_LEFT, 6);
+        return;
+    }
+
+    // 其它：有文字就按文字画，避免出现调试标注
+    if (!el->text.empty())
+        xamlDrawText(cv, rc, el->text, ap, styled, xamlmfc::theme::ink, DT_LEFT, 6);
+}
+
+// 容器：背景/边框 + 返回给子节点继承的底色
+
+} // namespace xamlleaf

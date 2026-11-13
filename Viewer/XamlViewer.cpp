@@ -1,4 +1,4 @@
-// XamlViewer —— XAML 预览与校验器（控制台 exe）
+﻿// XamlViewer —— XAML 预览与校验器（控制台 exe）
 //
 // 用法：
 //   XamlViewer.exe <file.xaml>            解析 + 校验 + 打开窗口渲染
@@ -590,6 +590,8 @@ static bool isContainerTag(const std::wstring& tag)
 // MFC 控件封装 + 实体化层：控件是真控件（能打字/下拉/勾选），外观仍由 D2D 画。
 // 注意：afxwin.h 必须放在 windows.h 之后；本项目已用 (std::min) 形式避开 MFC 的 min/max 宏。
 #include <afxwin.h>
+#include "XamlTheme.h"
+#include "XamlLeafPaint.h"
 #include "XamlViewerMfcHost.h"
 #include "ViewerControls.h"
 
@@ -598,14 +600,17 @@ static bool isContainerTag(const std::wstring& tag)
 //   语义与 PyMfc 运行时一致（同一份 XamlAppearance）；GDI 与 Direct2D
 //   两个后端产出同一套几何，保证"设计器 / 预览器 / CAD 运行时"观感一致。
 // ---------------------------------------------------------------------------
-static const COLORREF kBtnFace  = RGB(240, 242, 245);   // 与 PyMfc m_btn 一致
-static const COLORREF kLine     = RGB(200, 205, 210);   // 与 PyMfc m_border 一致
-static const COLORREF kEditEdge = RGB(160, 164, 170);
-static const COLORREF kInk      = RGB(32, 34, 38);
-static const COLORREF kMuted    = RGB(120, 126, 134);
-static const COLORREF kTrack    = RGB(214, 218, 222);
-static const COLORREF kProgress = RGB(6, 176, 37);
-static const COLORREF kPageBack = RGB(250, 250, 250);
+// 配色/圆角统一到 MfcXamlCore/XamlTheme.h（与设计器画布同一份）：
+// 这里只留名字，值全来自主题，观感不再两边各画各的。
+static const COLORREF kBtnFace  = xamlmfc::theme::button;
+static const COLORREF kLine     = xamlmfc::theme::border;
+static const COLORREF kEditEdge = xamlmfc::theme::border;
+static const COLORREF kInk      = xamlmfc::theme::ink;
+static const COLORREF kMuted    = xamlmfc::theme::muted;
+static const COLORREF kTrack    = xamlmfc::theme::track;
+static const COLORREF kProgress = xamlmfc::theme::accent;
+static const COLORREF kPageBack = xamlmfc::theme::surface;
+static const COLORREF kFieldCv  = xamlmfc::theme::field;
 
 static const wchar_t* g_backend = L"未初始化";
 
@@ -622,245 +627,14 @@ static bool truthy(const std::wstring& v)
 }
 
 // 叶子控件：按类型复刻运行时外观（有 XAML 外观声明时优先用 XamlAppearance 背板）
+// 叶子控件统一由 MfcXamlCore/XamlLeafPaint.h 绘制：
+// 设计器画布、预览器调的是同一份实现，圆角/边框/配色不可能再分叉。
 static void drawLeaf(XamlCanvas& cv, XamlElement* el, const RECT& rc,
                      const xamlapp::XamlAppearance& ap, bool styled, COLORREF parentBack)
 {
-    const std::wstring& tag = el->tag;
-
-    // 设计器外壳叶子：文档标签 / 分类胶囊
-    if (isAnyTag(tag, {L"Tab"}))
-    {
-        xamlctl::xamlDrawTab(cv, rc, el->text, truthy(el->get(L"Active")), false, 9);
-        return;
-    }
-    if (isAnyTag(tag, {L"Chip"}))
-    {
-        xamlctl::xamlDrawChip(cv, rc, el->text, truthy(el->get(L"Checked")), false, 9);
-        return;
-    }
-
-    // 按钮：运行时是 owner-draw —— RoundRect(按钮面, 边框, 8) + 文字居中
-    // 有 Icon 时：左侧方形图标 + 文字右移；只有图标时图标居中
-    if (isAnyTag(tag, {L"Button", L"PushButton", L"IconButton", L"ToggleButton"}))
-    {
-        // 设计器外壳的两种按钮角色：Primary/Ghost 画胶囊，IconTop 画"图标 + 标题"。
-        // 预览器与设计器必须同形，否则外壳一进预览就散架。
-        const std::wstring role = el->get(L"Role");
-        const std::wstring iconProbe = resolveIconPath(el->icon);
-        if (_wcsicmp(role.c_str(), L"Primary") == 0 || _wcsicmp(role.c_str(), L"Ghost") == 0)
-        {
-            xamlctl::xamlDrawPillButton(cv, rc, el->text,
-                                        _wcsicmp(role.c_str(), L"Primary") == 0, false, 9);
-            return;
-        }
-        if (!iconProbe.empty() && !el->text.empty() && (rc.bottom - rc.top) >= 36)
-        {
-            xamlctl::xamlDrawToolButtonCaption(cv, rc, iconProbe, el->text, false, false, false,
-                                               xamlctl::ToolButtonStyle(), 8);
-            return;
-        }
-
-        if (styled)
-            xamlDrawBackplate(cv, rc, ap, kBtnFace, kLine);
-        else
-        {
-            cv.fillRect(rc, parentBack);
-            cv.fillRoundRect(rc, kBtnFace, kLine, 8);
-        }
-        const std::wstring iconPath = resolveIconPath(el->icon);
-        if (!iconPath.empty() && rc.bottom > rc.top)
-        {
-            const int side = (rc.bottom - rc.top) - 8;
-            if (side > 0)
-            {
-                RECT ir = { rc.left + 4, rc.top + 4, rc.left + 4 + side, rc.top + 4 + side };
-                if (el->text.empty())
-                {
-                    ir.left = rc.left + ((rc.right - rc.left) - side) / 2;
-                    ir.right = ir.left + side;
-                }
-                if (ir.right <= rc.right)
-                {
-                    cv.drawImage(ir, iconPath);
-                    if (!el->text.empty())
-                    {
-                        RECT tr = rc;
-                        tr.left = ir.right + 4;
-                        xamlDrawText(cv, tr, el->text, ap, styled, kInk, DT_LEFT, 0);
-                    }
-                    return;
-                }
-            }
-        }
-        xamlDrawText(cv, rc, el->text, ap, styled, kInk, DT_CENTER, 0);
-        return;
-    }
-
-    // 静态文本：运行时 Static 不铺底，只有文字
-    if (isAnyTag(tag, {L"Label", L"Static", L"LinkLabel"}))
-    {
-        if (styled && (!ap.backColor.empty() || !ap.frontColor.empty() || !ap.borderColor.empty()))
-            xamlDrawBackplate(cv, rc, ap, parentBack, kLine);
-        xamlDrawText(cv, rc, el->text, ap, styled, kInk, DT_LEFT, 6);
-        return;
-    }
-
-    // 输入框：窗口色 + 2px 凹陷 3D 边框（等价 WS_EX_CLIENTEDGE）
-    if (isAnyTag(tag, {L"TextField", L"Edit", L"MaskedTextBox"}))
-    {
-        const COLORREF win = ::GetSysColor(COLOR_WINDOW);
-        if (styled)
-            xamlDrawBackplate(cv, rc, ap, win, kEditEdge);
-        else
-        {
-            cv.fillRect(rc, win);
-            cv.frame3d(rc, kEditEdge, true, 2);
-        }
-        xamlDrawText(cv, rc, el->text, ap, styled, kInk, DT_LEFT, 4);
-        return;
-    }
-
-    // 复选框：13×13 凹陷方框 + 勾 + 右侧文字
-    if (isAnyTag(tag, {L"CheckBox"}))
-    {
-        if (styled) xamlDrawBackplate(cv, rc, ap, parentBack, kLine);
-        const int side = 13;
-        RECT box = rc;
-        box.left = rc.left + 2;
-        box.top = rc.top + (rc.bottom - rc.top - side) / 2;
-        box.right = box.left + side;
-        box.bottom = box.top + side;
-        cv.fillRect(box, ::GetSysColor(COLOR_WINDOW));
-        cv.frame3d(box, kEditEdge, true, 2);
-        if (truthy(el->get(L"Checked")) || truthy(el->get(L"IsChecked")))
-        {
-            cv.strokeLine({box.left + 3, box.top + 7}, {box.left + 5, box.top + 9}, kInk, 2);
-            cv.strokeLine({box.left + 5, box.top + 9}, {box.left + 10, box.top + 3}, kInk, 2);
-        }
-        RECT tr = rc;
-        tr.left += side + 8;
-        xamlDrawText(cv, tr, el->text, ap, styled, kInk, DT_LEFT, 0);
-        return;
-    }
-
-    // 单选：12×12 圆框 + 实心圆点 + 右侧文字
-    if (isAnyTag(tag, {L"RadioButton", L"RadioBox"}))
-    {
-        if (styled) xamlDrawBackplate(cv, rc, ap, parentBack, kLine);
-        const int side = 12;
-        RECT cir = rc;
-        cir.left = rc.left + 2;
-        cir.top = rc.top + (rc.bottom - rc.top - side) / 2;
-        cir.right = cir.left + side;
-        cir.bottom = cir.top + side;
-        if (truthy(el->get(L"Checked")) || truthy(el->get(L"IsChecked")))
-        {
-            cv.fillEllipse(cir, ::GetSysColor(COLOR_WINDOW), kEditEdge);
-            RECT dot = cir;
-            ::InflateRect(&dot, -3, -3);
-            if (dot.right > dot.left && dot.bottom > dot.top)
-                cv.fillEllipse(dot, kInk, kInk);
-        }
-        else
-        {
-            cv.fillEllipse(cir, ::GetSysColor(COLOR_WINDOW), kEditEdge);
-        }
-        RECT tr = rc;
-        tr.left += side + 8;
-        xamlDrawText(cv, tr, el->text, ap, styled, kInk, DT_LEFT, 0);
-        return;
-    }
-
-    // 列表类：窗口色 + 凹陷边框 + 逐行条目
-    // 与设计器画布 / 运行时共用同一实现（XamlControls::xamlDrawListLike），
-    // 否则三端会各自漂移成"这里浅色、那里深色"。
-    if (isAnyTag(tag, {L"ListBox", L"ListView", L"TreeView", L"PropertyGrid"}))
-    {
-        xamlctl::xamlDrawListLike(cv, rc, *el, styled, ap, kInk, kEditEdge);
-        return;
-    }
-
-    // 下拉框：窗口色 + 右侧按钮面 + 下箭头 + 文字（收起状态）
-    if (isAnyTag(tag, {L"ComboBox"}))
-    {
-        const COLORREF win = ::GetSysColor(COLOR_WINDOW);
-        const int arrowW = 18;
-        if (styled)
-            xamlDrawBackplate(cv, rc, ap, win, kEditEdge);
-        else
-        {
-            cv.fillRect(rc, win);
-            cv.frame3d(rc, kEditEdge, true, 2);
-        }
-        RECT btn = rc;
-        ::InflateRect(&btn, -2, -2);
-        btn.left = btn.right - arrowW;
-        if (btn.right > btn.left)
-        {
-            cv.fillRect(btn, kBtnFace);
-            const int mx = (btn.left + btn.right) / 2;
-            const int my = (btn.top + btn.bottom) / 2;
-            cv.strokeLine({mx - 5, my - 2}, {mx, my + 4}, kInk, 1);
-            cv.strokeLine({mx, my + 4}, {mx + 5, my - 2}, kInk, 1);
-        }
-        RECT tr = rc;
-        tr.right = btn.left - 2;
-        xamlDrawText(cv, tr, el->text, ap, styled, kInk, DT_LEFT, 4);
-        return;
-    }
-
-    // 进度条：浅槽 + 绿色填充（Value 0-100，缺省 40）
-    if (isAnyTag(tag, {L"ProgressBar"}))
-    {
-        cv.fillRect(rc, kTrack);
-        int pct = _wtoi(el->get(L"Value").c_str());
-        if (pct <= 0) pct = 40;
-        if (pct > 100) pct = 100;
-        RECT fill = rc;
-        ::InflateRect(&fill, -2, -2);
-        if (fill.right > fill.left)
-            fill.right = fill.left + ::MulDiv(fill.right - fill.left, pct, 100);
-        cv.fillRect(fill, kProgress);
-        cv.frame3d(rc, kEditEdge, true, 1);
-        return;
-    }
-
-    // 滑块：横向沟槽 + 居中圆角滑块
-    if (isAnyTag(tag, {L"Slider", L"TrackBar"}))
-    {
-        RECT groove = rc;
-        const int gh = 4;
-        groove.top = rc.top + (rc.bottom - rc.top - gh) / 2;
-        groove.bottom = groove.top + gh;
-        groove.left += 8;
-        groove.right -= 8;
-        cv.fillRect(groove, kTrack);
-        cv.strokeRect(groove, kEditEdge, 1);
-
-        const int tw = 12, th = 20;
-        RECT thumb = rc;
-        thumb.left = (rc.left + rc.right) / 2 - tw / 2;
-        thumb.right = thumb.left + tw;
-        thumb.top = (rc.top + rc.bottom) / 2 - th / 2;
-        thumb.bottom = thumb.top + th;
-        cv.fillRoundRect(thumb, kBtnFace, kEditEdge, 4);
-        return;
-    }
-
-    // 状态栏
-    if (isAnyTag(tag, {L"StatusBar"}))
-    {
-        cv.fillRect(rc, kBtnFace);
-        xamlDrawText(cv, rc, el->text, ap, styled, kMuted, DT_LEFT, 6);
-        return;
-    }
-
-    // 其它：有文字就按文字画，避免出现调试标注
-    if (!el->text.empty())
-        xamlDrawText(cv, rc, el->text, ap, styled, kInk, DT_LEFT, 6);
+    xamlleaf::drawLeaf(cv, el, rc, ap, styled, parentBack, exeDir());
 }
 
-// 容器：背景/边框 + 返回给子节点继承的底色
 static COLORREF drawContainer(XamlCanvas& cv, XamlElement* el, const RECT& rc,
                               const xamlapp::XamlAppearance& ap, bool styled, COLORREF parentBack)
 {
