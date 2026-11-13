@@ -345,6 +345,14 @@ bool XamlMfcControlBase::IsLayoutAttribute(const std::wstring& key)
         L"margin", L"padding", L"dock", L"row", L"column", L"rowspan", L"columnspan",
         L"align", L"halign", L"valign", L"visible", L"enabled", L"opacity",
         L"style", L"template", L"tag", L"tooltip", L"cursor", L"zindex",
+        // QML 布局写法（对齐 QML 的 Layout 附加属性与 anchors）
+        L"layout.row", L"layout.column", L"layout.rowspan", L"layout.columnspan",
+        L"layout.preferredwidth", L"layout.preferredheight",
+        L"layout.fillwidth", L"layout.fillheight", L"layout.alignment",
+        L"layout.margins", L"layout.minimumwidth", L"layout.minimumheight",
+        L"anchors.fill", L"anchors.left", L"anchors.right", L"anchors.top",
+        L"anchors.bottom", L"anchors.centering", L"anchors.centerin",
+        L"anchors.margins", L"anchors.horizontalcenter", L"anchors.verticalcenter",
         L"name", L"x:name"    // 节点名由加载器消费，控件不认识属正常
     };
     if (key.find(L'.') != std::wstring::npos)   // Grid.Row / Panel.ZIndex 等附加属性

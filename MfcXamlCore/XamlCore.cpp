@@ -970,6 +970,43 @@ namespace
         node.horizontal = _wcsicmp(node.get(L"Orientation").c_str(), L"Horizontal") == 0;
         node.hasOrientation = !node.get(L"Orientation").empty();
 
+        // QML 布局写法：Layout.row / Layout.column / Layout.preferredWidth / anchors.* / x / y
+        // 只做"写法归一"，落到的仍是 Grid 附加属性与 x/y/w/h，布局算法不变。
+        {
+            const std::wstring lrow = node.get(L"Layout.row");
+            if (!lrow.empty()) node.row = IntAttr(lrow, node.row);
+            const std::wstring lcol = node.get(L"Layout.column");
+            if (!lcol.empty()) node.col = IntAttr(lcol, node.col);
+            const std::wstring lrs = node.get(L"Layout.rowSpan");
+            if (!lrs.empty()) node.rowSpan = (std::max)(1, IntAttr(lrs, node.rowSpan));
+            const std::wstring lcs = node.get(L"Layout.columnSpan");
+            if (!lcs.empty()) node.colSpan = (std::max)(1, IntAttr(lcs, node.colSpan));
+            if (!node.hasW)
+            {
+                const std::wstring pw = node.get(L"Layout.preferredWidth");
+                const std::wstring qw = node.get(L"width");
+                if (!pw.empty()) { node.w = IntAttr(pw, node.w); node.hasW = true; }
+                else if (!qw.empty()) { node.w = IntAttr(qw, node.w); node.hasW = true; }
+            }
+            if (!node.hasH)
+            {
+                const std::wstring ph = node.get(L"Layout.preferredHeight");
+                const std::wstring qh = node.get(L"height");
+                if (!ph.empty()) { node.h = IntAttr(ph, node.h); node.hasH = true; }
+                else if (!qh.empty()) { node.h = IntAttr(qh, node.h); node.hasH = true; }
+            }
+            if (!node.hasX)
+            {
+                const std::wstring qx = node.get(L"x");
+                if (!qx.empty()) { node.x = IntAttr(qx, node.x); node.hasX = true; }
+            }
+            if (!node.hasY)
+            {
+                const std::wstring qy = node.get(L"y");
+                if (!qy.empty()) { node.y = IntAttr(qy, node.y); node.hasY = true; }
+            }
+        }
+
         if (_wcsicmp(xamlmfc::BareTag(node.tag).c_str(), L"Grid") == 0)
         {
             ParseDefs(element, true, node);

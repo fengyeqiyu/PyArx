@@ -247,3 +247,21 @@ XAML 里可以直接按 QML 的属性名写，渲染仍是 MFC 自绘；旧的 W
 | `onPositionChanged` | `MouseMove` | 移动 |
 | `onActivated` / `onDeactivated` | `GotFocus` / `LostFocus` | 获得 / 失去焦点 |
 | `onWheel` | `Scroll` | 滚轮 |
+
+## QML 写法对照（布局）
+
+Grid 里的位置和尺寸可以直接按 QML 的附加属性写，落到的是 Grid 行/列与 Width/Height。
+
+| QML 写法 | 等价旧写法 | 说明 |
+|---|---|---|
+| `Layout.row` | `Grid.Row` | 所在行 |
+| `Layout.column` | `Grid.Column` | 所在列 |
+| `Layout.rowSpan` | `Grid.RowSpan` | 跨行 |
+| `Layout.columnSpan` | `Grid.ColumnSpan` | 跨列 |
+| `Layout.preferredWidth` | `Width` | 声明尺寸（未写 Width 时生效） |
+| `Layout.preferredHeight` | `Height` | 声明尺寸（未写 Height 时生效） |
+| `Layout.margins` | `Margin` | 外边距 |
+| `x` / `y` | `Left` / `Top` | 绝对定位 |
+| `width` / `height` | `Width` / `Height` | 尺寸 |
+
+`Layout.fillWidth` / `Layout.fillHeight` / `anchors.*` 目前只做写法兼容（不报未知属性），实际拉伸仍由容器（StackPanel / Grid / Pane）决定。
