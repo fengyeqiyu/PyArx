@@ -1487,8 +1487,24 @@ namespace
         int pt = _wtoi(el.get(L"FontSize").c_str());
         if (pt <= 0)
             pt = 9;
-        static std::map<int, int> s_cache;
-        auto it = s_cache.find(pt);
+        // 字体族与字重也参与度量：同字号下不同字体/粗体的 ascent 可能差 1~3px，
+        // 用固定字体量会把这点误差带进布局
+        std::wstring face = el.get(L"FontFamily");
+        if (face.empty())
+            face = L"Microsoft YaHei UI";
+        int weight = FW_NORMAL;
+        const std::wstring fw = el.get(L"FontWeight");
+        if (_wcsicmp(fw.c_str(), L"Bold") == 0 ||
+            _wcsicmp(el.get(L"Bold").c_str(), L"true") == 0)
+            weight = FW_BOLD;
+        else if (_wcsicmp(fw.c_str(), L"SemiBold") == 0)
+            weight = FW_SEMIBOLD;
+        else if (_wcsicmp(fw.c_str(), L"Light") == 0)
+            weight = FW_LIGHT;
+
+        static std::map<std::wstring, int> s_cache;
+        std::wstring key = face + L"|" + std::to_wstring(pt) + L"|" + std::to_wstring(weight);
+        auto it = s_cache.find(key);
         if (it != s_cache.end())
             return it->second;
         int ascent = 0;
@@ -1496,10 +1512,10 @@ namespace
         if (dc != nullptr)
         {
             const int hpx = -::MulDiv(pt, ::GetDeviceCaps(dc, LOGPIXELSY), 72);
-            HFONT f = ::CreateFontW(hpx, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+            HFONT f = ::CreateFontW(hpx, 0, 0, 0, weight, FALSE, FALSE, FALSE,
                                     DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
                                     CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-                                    L"Microsoft YaHei UI");
+                                    face.c_str());
             if (f != nullptr)
             {
                 HFONT old = static_cast<HFONT>(::SelectObject(dc, f));
@@ -1513,7 +1529,7 @@ namespace
         }
         if (ascent <= 0)
             ascent = (std::max)(1, pt * 4 / 3);   // 量不到就按 4/3 估，至少不是 0
-        s_cache[pt] = ascent;
+        s_cache[key] = ascent;
         return ascent;
     }
 
@@ -1575,6 +1591,11 @@ namespace
         {
             const std::wstring ct = KindOf(c.tag);
             if (ct == L"page" || ct == L"rowdefinition" || ct == L"columndefinition")
+                continue;
+            if (HasSiblingAnchor(c))
+                continue;                                  // 绝对锚定的项不参与行内基线
+            const std::wstring dk = c.get(L"Dock");
+            if (!dk.empty() && _wcsicmp(dk.c_str(), L"None") != 0)
                 continue;
             rowMaxAsc = (std::max)(rowMaxAsc, BaselineFromTop(c));
         }

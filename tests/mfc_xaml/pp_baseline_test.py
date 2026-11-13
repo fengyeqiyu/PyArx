@@ -60,5 +60,10 @@ check("anchors.top=A.baseline 生效", 10 <= dy3 <= 30, "dy=%d" % dy3)
 check("baseline 边比底边更靠上", dy3 < h("T3"), "dy=%d h=%d" % (dy3, h("T3")))
 check("P3 在 T3 右侧", x("P3") >= x("T3") + w("T3"), "x=%d" % x("P3"))
 
+# 4) 字体族 / 字重不同也按同一套度量对齐（Consolas 12pt vs YaHei Bold 9pt）
+dy4 = y("Bold4") - y("Mono4")
+check("不同字体族/字重的基线对齐", 0 <= dy4 <= 18, "dy=%d" % dy4)
+check("字体差异不算进同一行外的其它行", abs(y("Mono4") - y("Small1")) > 0, "mono_y=%d" % y("Mono4"))
+
 print("=== %d/%d PASS ===" % (ok, ok + fail))
 sys.exit(0 if fail == 0 else 1)
