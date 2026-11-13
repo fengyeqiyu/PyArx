@@ -240,12 +240,19 @@ def read_schema():
     return out
 
 
+def bare(tag):
+    """标签统一为 X + 本意名，查表按本意名走。"""
+    if len(tag) > 1 and tag[0] in 'Xx' and tag[1].isupper():
+        return tag[1:]
+    return tag
+
+
 def main():
     cat = read_catalog()
-    iface = read_iface()
-    schema = read_schema()
+    iface = {bare(k): v for k, v in read_iface().items()}
+    schema = {bare(k): v for k, v in read_schema().items()}
 
-    missing_cn = [t for t in cat if t not in CN]
+    missing_cn = [t for t in cat if bare(t) not in CN]
     if missing_cn:
         raise SystemExit('缺少中文名: %s' % ', '.join(missing_cn))
 
@@ -270,15 +277,15 @@ def main():
         lines.append('| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |')
         lines.append('|---|---|---|---|---|---|---|---|')
         for tag, (c, w, h) in rows:
-            info = iface.get(tag, {})
+            info = iface.get(bare(tag), {})
             grade = info.get('grade') or '—'
             src = info.get('src') or '—'
-            props = schema.get(tag)
+            props = schema.get(bare(tag))
             props_s = str(props) if props is not None else '—'
-            qml, kind = QML[tag]
+            qml, kind = QML[bare(tag)]
             kind_count[kind] = kind_count.get(kind, 0) + 1
             lines.append('| `%s` | %s | %s | %s | %s | %dx%d | %s | %s |'
-                         % (tag, CN[tag], qml, kind, grade, w, h, props_s, src))
+                         % (tag, CN[bare(tag)], qml, kind, grade, w, h, props_s, src))
             total += 1
         lines.append('')
 

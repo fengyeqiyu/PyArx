@@ -5,11 +5,11 @@
 1. **MFCXaml 只提供控件库**：`Button` / `Label` / `TextBox` / `ListCtrl` / `ListBox` / `Panel` /
    `StaticLine` / `StaticBitmap` 这些基础控件由 C++ 侧创建与绘制，XAML 只管结构与尺寸。
 2. **复合控件 = 基础控件 + XAML 布局**，放在本目录，一个 `.xaml` 一个复合控件：
-   根 `<Window Name="...">` 是控件类型名，里面的 `x:Name` 是子控件名。
+   根 `<XWindow Name="...">` 是控件类型名，里面的 `x:Name` 是子控件名。
    几何全部由 `M.xamlLayout(path, w, h)` 算出，加载方不写任何像素计算。
 3. **回调写在 XAML 里**：
    ```xml
-   <Button Name="BtnApply" Text="应用" on_click="on_apply"/>
+   <XButton Name="BtnApply" Text="应用" on_click="on_apply"/>
    ```
    Python 侧只需定义同名函数（`def on_apply(comp, name)`），加载时按名字在调用方作用域里解析并绑定。
 4. **import 即建对象**：`pp_plugin.import_plugin('side_panel', app, x, y, w, h)` 会
@@ -32,7 +32,7 @@ XAML 组合先跑通行为，**满足下面任一条就提升为 C++ 控件类**
 - **跨项目复用**：两处以上地方用同一个组合（如 `TableView` / `SplitPane`）。
 - 已经进入**热路径**：每次数据变化都要重建子控件（如表格 39 行 × 8 列）。
 
-提升时接口不变：XAML 里仍是同一个标签名（`<TableView .../>`），属性与 `on_*` 回调名保持不变，
+提升时接口不变：XAML 里仍是同一个标签名（`<XTableView .../>`），属性与 `on_*` 回调名保持不变，
 C++ 类内部接管创建与事件，Python 侧代码不用改。这样"XAML 编写 → 需要时下沉 C++"是一条可逆的路。
 
 ## 四、加载与验证
@@ -48,7 +48,7 @@ c.set_rows('Table', rows)                  # 一次灌满，不逐行插
 c.move(20, 20, 500, 300)                   # 改外框尺寸，内部按 XAML 重排
 
 # 2) XAML 预先声明回调，Python 只定义同名函数
-#    <Button Name="BtnApply" Text="应用" on_click="on_apply"/>
+#    <XButton Name="BtnApply" Text="应用" on_click="on_apply"/>
 c = pp_plugin.import_plugin('side_panel', app, 10, 10, 640, 380)
 def on_apply(comp, name): ...
 ```

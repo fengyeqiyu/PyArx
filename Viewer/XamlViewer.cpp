@@ -355,7 +355,7 @@ static bool isKnownTag(const std::wstring& tag)
     // 不再在这里另抄一张表 —— 抄一份就会漂移，出现"Layout/Edit 未知标签"。
     if (xamlmfc::isContainerTag(tag)) return true;
     if (!xamlmfc::leafCanonical(tag).empty()) return true;
-    return containerTags().count(tag) > 0;
+    return containerTags().count(xamlmfc::BareTag(tag)) > 0;
 }
 
 static const PropSpec* findProp(const std::wstring& tag, const std::wstring& name)
@@ -576,7 +576,8 @@ static bool isContainerTag(const std::wstring& tag)
         L"PaletteSet", L"PalettePage", L"page", L"TabItem",
         L"PanelHeader", L"TabStrip", L"ChipBar", L"Stage"
     };
-    return kSet.count(tag) > 0;
+    // 统一命名：比较前一律去 X 前缀（<XWindow> / <XStackPanel> 与旧写法同一语义）
+    return kSet.count(xamlmfc::BareTag(tag)) > 0;
 }
 
 #include <memory>

@@ -87,9 +87,19 @@ namespace uidesign
         dc.SelectObject(oldPen);
     }
 
-    // 绘制控件类型的 16x16 简笔图标（工具栏/控件箱用）
-    inline void DrawToolIcon(CDC& dc, const CRect& rc, const CString& tag)
+    inline CString BareTagName(const CString& tag)
     {
+        // 统一命名：XButton -> Button，图标分派按本意名走
+        CString t = tag;
+        if (t.GetLength() > 1 && (t[0] == L'X' || t[0] == L'x') && _istupper(t[1]))
+            t = t.Mid(1);
+        return t;
+    }
+
+    // 绘制控件类型的 16x16 简笔图标（工具栏/控件箱用）
+    inline void DrawToolIcon(CDC& dc, const CRect& rc, const CString& rawTag)
+    {
+        const CString tag = BareTagName(rawTag);
         CPen pen(PS_SOLID, 1, RGB(150, 195, 235));
         CPen* oldPen = dc.SelectObject(&pen);
         CBrush* oldBrush = (CBrush*)dc.SelectStockObject(NULL_BRUSH);
@@ -208,31 +218,31 @@ namespace uidesign
 
     inline CString TagFromToolName(const CString& name)
     {
-        if (name == L"toolButton") return L"Button";
-        if (name == L"toolTextBlock") return L"TextBlock";
-        if (name == L"toolTextBox") return L"TextBox";
-        if (name == L"toolCheckBox") return L"CheckBox";
-        if (name == L"toolComboBox") return L"ComboBox";
-        if (name == L"toolListBox") return L"ListBox";
-        if (name == L"toolRadioButton") return L"RadioButton";
-        if (name == L"toolPictureBox") return L"Image";
-        if (name == L"toolLabel") return L"Label";
-        if (name == L"toolProgressBar") return L"ProgressBar";
-        if (name == L"toolListView") return L"ListView";
-        if (name == L"toolTreeView") return L"TreeView";
-        if (name == L"toolTabControl") return L"TabControl";
-        if (name == L"toolBorder") return L"Border";
-        if (name == L"toolGroupBox") return L"GroupBox";
-        if (name == L"toolPanel") return L"Panel";
-        if (name == L"toolSplitContainer") return L"Splitter";
-        if (name == L"toolMenuStrip") return L"MenuBar";
-        if (name == L"toolToolStrip") return L"ToolBar";
-        if (name == L"toolStatusStrip") return L"StatusBar";
+        if (name == L"toolButton") return L"XButton";
+        if (name == L"toolTextBlock") return L"XTextBlock";
+        if (name == L"toolTextBox") return L"XTextBox";
+        if (name == L"toolCheckBox") return L"XCheckBox";
+        if (name == L"toolComboBox") return L"XComboBox";
+        if (name == L"toolListBox") return L"XListBox";
+        if (name == L"toolRadioButton") return L"XRadioButton";
+        if (name == L"toolPictureBox") return L"XStaticBitmap";
+        if (name == L"toolLabel") return L"XTextBlock";
+        if (name == L"toolProgressBar") return L"XProgressBar";
+        if (name == L"toolListView") return L"XListCtrl";
+        if (name == L"toolTreeView") return L"XTreeCtrl";
+        if (name == L"toolTabControl") return L"XTabControl";
+        if (name == L"toolBorder") return L"XBorder";
+        if (name == L"toolGroupBox") return L"XGroupBox";
+        if (name == L"toolPanel") return L"XPanel";
+        if (name == L"toolSplitContainer") return L"XSplitter";
+        if (name == L"toolMenuStrip") return L"XMenuStrip";
+        if (name == L"toolToolStrip") return L"XToolStrip";
+        if (name == L"toolStatusStrip") return L"XStatusBar";
         if (name == L"toolTimer") return L"Timer";
         if (name == L"toolPrintDocument") return L"PrintDocument";
         if (name == L"toolOpenFileDialog") return L"OpenFileDialog";
         if (name == L"toolSaveFileDialog") return L"SaveFileDialog";
-        if (name == L"toolDataGridView") return L"DataGridView";
+        if (name == L"toolDataGridView") return L"XTableView";
         return L"";
     }
 }

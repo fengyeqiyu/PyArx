@@ -11,25 +11,25 @@
   行：0 标题 40 / 1 表格 * / 2 底部按钮条 34
   列：0 左边距 12 / 1 按钮 * / 2 按钮 * / 3 按钮 * / 4 右边距 12
 -->
-<Window Name="SidePanel" Width="640" Height="755">
-  <Grid Name="Root">
-    <Grid.RowDefinitions>
+<XWindow Name="SidePanel" Width="640" Height="755">
+  <XGrid Name="Root">
+    <XGrid.RowDefinitions>
       <RowDefinition Height="40"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="34"/>
-    </Grid.RowDefinitions>
-    <Grid.ColumnDefinitions>
+    </XGrid.RowDefinitions>
+    <XGrid.ColumnDefinitions>
       <ColumnDefinition Width="12"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="12"/>
-    </Grid.ColumnDefinitions>
+    </XGrid.ColumnDefinitions>
 
-    <Label Name="Title" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Text="配电规划表"/>
-    <ListCtrl Name="Table" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5"/>
-    <Button Name="BtnApply" Grid.Row="2" Grid.Column="1" Text="应用" on_click="on_apply"/>
-    <Button Name="BtnLoad" Grid.Row="2" Grid.Column="2" Text="载入" on_click="on_load"/>
-    <Button Name="BtnClose" Grid.Row="2" Grid.Column="3" Text="关闭" on_click="on_close"/>
-  </Grid>
-</Window>
+    <XTextBlock Name="Title" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Text="配电规划表"/>
+    <XListCtrl Name="Table" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5"/>
+    <XButton Name="BtnApply" Grid.Row="2" Grid.Column="1" Text="应用" on_click="on_apply"/>
+    <XButton Name="BtnLoad" Grid.Row="2" Grid.Column="2" Text="载入" on_click="on_load"/>
+    <XButton Name="BtnClose" Grid.Row="2" Grid.Column="3" Text="关闭" on_click="on_close"/>
+  </XGrid>
+</XWindow>

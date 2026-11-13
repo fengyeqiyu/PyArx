@@ -8,17 +8,17 @@ CMDS = ('Clear #2B313C; Rect 24,24,150,80,#00A8E8; RoundRect 24,130,150,60,12,#E
         'Text 210,150,画布由命令串驱动,13,#E6EDF3')
 
 XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="第九批 Repeater / GridView / PathView / QCanvas" Width="1240" Height="900">
-  <Canvas>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="第九批 Repeater / GridView / PathView / QCanvas" Width="1240" Height="900">
+  <XCanvas>
     <Repeater x:Name="rep" Items="甲|乙|丙|丁" ItemHeight="34" Spacing="0" Canvas.Left="12" Canvas.Top="44">
-      <Button x:Name="rb" Text="行{item}" Width="104" Height="30" />
+      <XButton x:Name="rb" Text="行{item}" Width="104" Height="30" />
     </Repeater>
-    <GridView x:Name="gv" Width="300" Height="320" CellHeight="74" Canvas.Left="130" Canvas.Top="44" />
-    <PathView x:Name="pv" Width="304" Height="150" Canvas.Left="444" Canvas.Top="44" />
-    <QCanvas x:Name="qc" Width="618" Height="240" Canvas.Left="130" Canvas.Top="384" Commands="%s" />
-    <TextBlock x:Name="t" Text="Repeater 展开按钮 / GridView 12 格 / PathView 6 卡 / QCanvas 画命令" Width="700" Height="22" Canvas.Left="14" Canvas.Top="8" />
-  </Canvas>
-</Window>''' % CMDS
+    <XGridView x:Name="gv" Width="300" Height="320" CellHeight="74" Canvas.Left="130" Canvas.Top="44" />
+    <XPathView x:Name="pv" Width="304" Height="150" Canvas.Left="444" Canvas.Top="44" />
+    <XQCanvas x:Name="qc" Width="618" Height="240" Canvas.Left="130" Canvas.Top="384" Commands="%s" />
+    <XTextBlock x:Name="t" Text="Repeater 展开按钮 / GridView 12 格 / PathView 6 卡 / QCanvas 画命令" Width="700" Height="22" Canvas.Left="14" Canvas.Top="8" />
+  </XCanvas>
+</XWindow>''' % CMDS
 
 path = os.path.join(tempfile.mkdtemp(prefix='pymfc_qml9_'), 'q9.xaml')
 open(path, 'w', encoding='utf-8').write(XAML)

@@ -31,21 +31,21 @@
     ChipBar      分类过滤条；Chip Category="分类名" 空=全部
     Stage        画布舞台（深色台面 + 四角定位标）
 -->
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="PyMfc UI Designer"
         Width="1440"
         Height="900"
         Background="#15181D">
 
-  <Grid Name="rootGrid" Background="#15181D">
-    <Grid.RowDefinitions>
+  <XGrid Name="rootGrid" Background="#15181D">
+    <XGrid.RowDefinitions>
       <RowDefinition Height="28"/>     <!-- 菜单栏（单表面自绘，点击弹系统下拉菜单） -->
       <RowDefinition Height="48"/>     <!-- 工具栏 -->
       <RowDefinition Height="*"/>      <!-- 主体三栏 -->
       <RowDefinition Height="6"/>      <!-- 水平 Splitter（拖动调整代码坞高度） -->
       <RowDefinition Height="160"/>    <!-- XAML 源码坞 -->
       <RowDefinition Height="26"/>     <!-- 状态栏 -->
-    </Grid.RowDefinitions>
+    </XGrid.RowDefinitions>
 
     <!-- ==================== 菜单栏 ==================== -->
     <MenuBar Grid.Row="0">
@@ -82,7 +82,7 @@
         <MenuItem Name="mnuAlignTop"     Header="顶对齐"/>
         <MenuItem Name="mnuAlignVCenter" Header="垂直居中"/>
         <MenuItem Name="mnuAlignBottom"  Header="底对齐"/>
-        <Separator/>
+        <XStaticLine/>
         <MenuItem Name="mnuDistH"        Header="横向均匀分布"/>
         <MenuItem Name="mnuDistV"        Header="纵向均匀分布"/>
       </MenuItem>
@@ -99,143 +99,143 @@
     <ToolBar Grid.Row="1" Spacing="2" Padding="10,2,10,0" FontSize="8">
 
       <!-- 文件 -->
-      <Button Name="btnNew"  Icon="res/new.png"  Text="新建" Width="46" Height="44"/>
-      <Button Name="btnOpen" Icon="res/open.png" Text="打开" Width="46" Height="44"/>
-      <Button Name="btnSave" Icon="res/save.png" Text="保存" Width="46" Height="44"/>
-      <Separator Width="9"/>
+      <XButton Name="btnNew"  Icon="res/new.png"  Text="新建" Width="46" Height="44"/>
+      <XButton Name="btnOpen" Icon="res/open.png" Text="打开" Width="46" Height="44"/>
+      <XButton Name="btnSave" Icon="res/save.png" Text="保存" Width="46" Height="44"/>
+      <XStaticLine Width="9"/>
 
       <!-- 撤销 / 重做 -->
-      <Button Name="btnUndo" Icon="res/undo.png" Text="撤销" Width="46" Height="44"/>
-      <Button Name="btnRedo" Icon="res/redo.png" Text="重做" Width="46" Height="44"/>
-      <Separator Width="9"/>
+      <XButton Name="btnUndo" Icon="res/undo.png" Text="撤销" Width="46" Height="44"/>
+      <XButton Name="btnRedo" Icon="res/redo.png" Text="重做" Width="46" Height="44"/>
+      <XStaticLine Width="9"/>
 
       <!-- 剪贴板 -->
-      <Button Name="btnCut"    Icon="res/cut.png"   Text="剪切" Width="46" Height="44"/>
-      <Button Name="btnCopy"   Icon="res/copy.png"  Text="复制" Width="46" Height="44"/>
-      <Button Name="btnPaste"  Icon="res/paste.png" Text="粘贴" Width="46" Height="44"/>
-      <Button Name="btnDelete" Icon="res/del.png"   Text="删除" Width="46" Height="44"/>
-      <Separator Width="9"/>
+      <XButton Name="btnCut"    Icon="res/cut.png"   Text="剪切" Width="46" Height="44"/>
+      <XButton Name="btnCopy"   Icon="res/copy.png"  Text="复制" Width="46" Height="44"/>
+      <XButton Name="btnPaste"  Icon="res/paste.png" Text="粘贴" Width="46" Height="44"/>
+      <XButton Name="btnDelete" Icon="res/del.png"   Text="删除" Width="46" Height="44"/>
+      <XStaticLine Width="9"/>
 
       <!-- 对齐 / 均匀分布（Qt Designer 同组语义：多选按选区外接框，单选按父容器） -->
-      <Button Name="btnAlignLeft"     Icon="res/alignleft.png"    Text="左"     Width="34" Height="44"/>
-      <Button Name="btnAlignHCenter"  Icon="res/alignhcenter.png" Text="居中" Width="34" Height="44"/>
-      <Button Name="btnAlignRight"    Icon="res/alignright.png"   Text="右"     Width="34" Height="44"/>
-      <Button Name="btnAlignTop"      Icon="res/aligntop.png"     Text="上"     Width="34" Height="44"/>
-      <Button Name="btnAlignVCenter"  Icon="res/alignvcenter.png" Text="居中" Width="34" Height="44"/>
-      <Button Name="btnAlignBottom"   Icon="res/alignbottom.png"  Text="下"     Width="34" Height="44"/>
-      <Button Name="btnDistH"         Icon="res/disth.png"        Text="横分布" Width="56" Height="44"/>
-      <Button Name="btnDistV"         Icon="res/distv.png"        Text="纵分布" Width="56" Height="44"/>
-      <Separator Width="9"/>
+      <XButton Name="btnAlignLeft"     Icon="res/alignleft.png"    Text="左"     Width="34" Height="44"/>
+      <XButton Name="btnAlignHCenter"  Icon="res/alignhcenter.png" Text="居中" Width="34" Height="44"/>
+      <XButton Name="btnAlignRight"    Icon="res/alignright.png"   Text="右"     Width="34" Height="44"/>
+      <XButton Name="btnAlignTop"      Icon="res/aligntop.png"     Text="上"     Width="34" Height="44"/>
+      <XButton Name="btnAlignVCenter"  Icon="res/alignvcenter.png" Text="居中" Width="34" Height="44"/>
+      <XButton Name="btnAlignBottom"   Icon="res/alignbottom.png"  Text="下"     Width="34" Height="44"/>
+      <XButton Name="btnDistH"         Icon="res/disth.png"        Text="横分布" Width="56" Height="44"/>
+      <XButton Name="btnDistV"         Icon="res/distv.png"        Text="纵分布" Width="56" Height="44"/>
+      <XStaticLine Width="9"/>
 
       <!-- 视图 -->
-      <Button Name="btnGrid"  Icon="res/grid.png"  Text="网格" Width="46" Height="44"/>
-      <Button Name="btnRuler" Icon="res/ruler.png" Text="标尺" Width="46" Height="44"/>
-      <Separator Width="9"/>
+      <XButton Name="btnGrid"  Icon="res/grid.png"  Text="网格" Width="46" Height="44"/>
+      <XButton Name="btnRuler" Icon="res/ruler.png" Text="标尺" Width="46" Height="44"/>
+      <XStaticLine Width="9"/>
 
       <!-- 缩放 -->
-      <Button Name="btnZoomOut" Icon="res/zoomout.png" Text="缩小" Width="46" Height="44"/>
-      <Button Name="btnZoomIn"  Icon="res/zoomin.png"  Text="放大" Width="46" Height="44"/>
+      <XButton Name="btnZoomOut" Icon="res/zoomout.png" Text="缩小" Width="46" Height="44"/>
+      <XButton Name="btnZoomIn"  Icon="res/zoomin.png"  Text="放大" Width="46" Height="44"/>
 
       <!-- 右端动作：预览 / 校验（胶囊按钮，Dock 靠右） -->
-      <Button Name="btnCheck"   Role="Ghost"   Text="校验" Dock="Right" Width="68" Height="26" Margin="0,10,10,10"/>
-      <Button Name="btnPreview" Role="Primary" Text="预览" Dock="Right" Width="80" Height="26" Margin="0,10,16,10"/>
+      <XButton Name="btnCheck"   Role="Ghost"   Text="校验" Dock="Right" Width="68" Height="26" Margin="0,10,10,10"/>
+      <XButton Name="btnPreview" Role="Primary" Text="预览" Dock="Right" Width="80" Height="26" Margin="0,10,16,10"/>
 
     </ToolBar>
 
     <!-- ==================== 主体三栏 ==================== -->
-    <Grid Grid.Row="2" Background="#15181D">
-      <Grid.ColumnDefinitions>
+    <XGrid Grid.Row="2" Background="#15181D">
+      <XGrid.ColumnDefinitions>
         <ColumnDefinition Width="248"/>   <!-- 控件箱 -->
         <ColumnDefinition Width="6"/>     <!-- 垂直 Splitter -->
         <ColumnDefinition Width="*"/>     <!-- 画布 -->
         <ColumnDefinition Width="6"/>     <!-- 垂直 Splitter -->
         <ColumnDefinition Width="308"/>   <!-- 对象检查器 + 属性编辑器 -->
-      </Grid.ColumnDefinitions>
+      </XGrid.ColumnDefinitions>
 
       <!-- ========== 左栏：控件箱 ========== -->
-      <Grid Grid.Column="0" Background="#1C2027">
-        <Grid.RowDefinitions>
+      <XGrid Grid.Column="0" Background="#1C2027">
+        <XGrid.RowDefinitions>
           <RowDefinition Height="34"/>    <!-- 标题条 -->
           <RowDefinition Height="36"/>    <!-- 分类过滤 -->
           <RowDefinition Height="*"/>     <!-- 控件箱树 -->
-        </Grid.RowDefinitions>
+        </XGrid.RowDefinitions>
 
-        <PanelHeader Name="hdrWidgetBox" Grid.Row="0" Text="控件箱"/>
+        <XPanelHeader Name="hdrWidgetBox" Grid.Row="0" Text="控件箱"/>
 
-        <ChipBar Name="widgetChips" Grid.Row="1" Orientation="Horizontal" Spacing="4" Padding="8,7,6,0">
+        <XChipBar Name="widgetChips" Grid.Row="1" Orientation="Horizontal" Spacing="4" Padding="8,7,6,0">
           <Chip Name="chipAll"    Text="全部" Category=""                 Checked="True" Width="42" Height="22"/>
           <Chip Name="chipLayout" Text="容器" Category="Containers"       Width="42" Height="22"/>
           <Chip Name="chipButton" Text="按钮" Category="Buttons"          Width="42" Height="22"/>
           <Chip Name="chipInput"  Text="输入" Category="Input Widgets"    Width="42" Height="22"/>
           <Chip Name="chipShow"   Text="显示" Category="Display Widgets"  Width="42" Height="22"/>
-        </ChipBar>
+        </XChipBar>
 
-        <TreeView Name="widgetBox" Grid.Row="2" FontSize="8"/>
-      </Grid>
+        <XTreeCtrl Name="widgetBox" Grid.Row="2" FontSize="8"/>
+      </XGrid>
 
-      <Splitter Grid.Column="1"/>
+      <XSplitter Grid.Column="1"/>
 
       <!-- ========== 中间：文档标签条 + 画布舞台 ========== -->
-      <Grid Grid.Column="2" Background="#15181D">
-        <Grid.RowDefinitions>
+      <XGrid Grid.Column="2" Background="#15181D">
+        <XGrid.RowDefinitions>
           <RowDefinition Height="36"/>
           <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        </XGrid.RowDefinitions>
 
-        <TabStrip Name="docTabs" Grid.Row="0" Orientation="Horizontal" Padding="8,6,0,0" Spacing="6">
+        <XTabStrip Name="docTabs" Grid.Row="0" Orientation="Horizontal" Padding="8,6,0,0" Spacing="6">
           <Tab Name="tabDoc" Text="designer_layout.xaml" Active="True" Width="300" Height="28"/>
-        </TabStrip>
+        </XTabStrip>
 
-        <Stage Grid.Row="1">
-          <Grid Margin="14,12,14,14">
-            <Canvas Name="canvasHost" Background="#FFFFFF"/>
-          </Grid>
-        </Stage>
-      </Grid>
+        <XStage Grid.Row="1">
+          <XGrid Margin="14,12,14,14">
+            <XCanvas Name="canvasHost" Background="#FFFFFF"/>
+          </XGrid>
+        </XStage>
+      </XGrid>
 
-      <Splitter Grid.Column="3"/>
+      <XSplitter Grid.Column="3"/>
 
       <!-- ========== 右栏：对象检查器 + 属性编辑器 ========== -->
-      <Grid Grid.Column="4" Background="#1C2027">
-        <Grid.RowDefinitions>
+      <XGrid Grid.Column="4" Background="#1C2027">
+        <XGrid.RowDefinitions>
           <RowDefinition Height="34"/>    <!-- 对象检查器标题 -->
           <RowDefinition Height="130"/>   <!-- 对象树 -->
           <RowDefinition Height="6"/>     <!-- 水平 Splitter -->
           <RowDefinition Height="34"/>    <!-- 属性编辑器标题 -->
           <RowDefinition Height="*"/>     <!-- 属性表 -->
-        </Grid.RowDefinitions>
+        </XGrid.RowDefinitions>
 
-        <PanelHeader Name="hdrInspector" Grid.Row="0" Text="对象检查器" FontSize="9"/>
-        <TreeView Name="objInspector" Grid.Row="1" FontSize="8"/>
-        <Splitter Grid.Row="2"/>
-        <PanelHeader Name="hdrProps" Grid.Row="3" Text="属性编辑器" FontSize="9"/>
+        <XPanelHeader Name="hdrInspector" Grid.Row="0" Text="对象检查器" FontSize="9"/>
+        <XTreeCtrl Name="objInspector" Grid.Row="1" FontSize="8"/>
+        <XSplitter Grid.Row="2"/>
+        <XPanelHeader Name="hdrProps" Grid.Row="3" Text="属性编辑器" FontSize="9"/>
         <PropertyGrid Name="propsHost" Grid.Row="4" FontSize="8"/>
-      </Grid>
-    </Grid>
+      </XGrid>
+    </XGrid>
 
     <!-- 主体与代码坞之间的水平分隔条（上下拖动改变代码坞高度） -->
-    <Splitter Grid.Row="3"/>
+    <XSplitter Grid.Row="3"/>
 
     <!-- ==================== XAML 源码坞 ==================== -->
-    <Grid Name="codeDock" Grid.Row="4" Background="#14171C">
-      <Grid.RowDefinitions>
+    <XGrid Name="codeDock" Grid.Row="4" Background="#14171C">
+      <XGrid.RowDefinitions>
         <RowDefinition Height="34"/>
         <RowDefinition Height="*"/>
-      </Grid.RowDefinitions>
+      </XGrid.RowDefinitions>
 
-      <PanelHeader Name="hdrCode" Grid.Row="0" Text="XAML 源码"/>
+      <XPanelHeader Name="hdrCode" Grid.Row="0" Text="XAML 源码"/>
 
-      <Canvas Name="xamlCodeHost" Grid.Row="1" Background="#12151A"/>
-    </Grid>
+      <XCanvas Name="xamlCodeHost" Grid.Row="1" Background="#12151A"/>
+    </XGrid>
 
     <!-- ==================== 状态栏 ==================== -->
     <StatusBar Grid.Row="5" Spacing="0">
-      <TextBlock Name="statusBrand" Text="PyMfc Studio" Width="112"/>
-      <TextBlock Name="statusText"  Text="就绪"        Width="620"/>
-      <TextBlock Name="statusPos"   Text="X:0 Y:0"     Width="112"/>
-      <TextBlock Name="statusSize"  Text="W:0 H:0"     Width="112"/>
-      <TextBlock Name="statusZoom"  Text="100%"        Width="72"/>
+      <XTextBlock Name="statusBrand" Text="PyMfc Studio" Width="112"/>
+      <XTextBlock Name="statusText"  Text="就绪"        Width="620"/>
+      <XTextBlock Name="statusPos"   Text="X:0 Y:0"     Width="112"/>
+      <XTextBlock Name="statusSize"  Text="W:0 H:0"     Width="112"/>
+      <XTextBlock Name="statusZoom"  Text="100%"        Width="72"/>
     </StatusBar>
 
-  </Grid>
-</Window>
+  </XGrid>
+</XWindow>

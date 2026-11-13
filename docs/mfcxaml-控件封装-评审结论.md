@@ -153,7 +153,7 @@ struct IHostServices {  // 只留真正通用的能力
 - skin box / 圆角阴影 / 表头外观抽成 `XamlSkinPainter`（core），运行时、Viewer、`CDesignCanvas` 共用同一份；
   设计器只保留选框/夹点/网格这类编辑装饰。
 
-**验收**：`<TableView Columns="…"/>` 在三处像素一致；`pp_app` 里不再出现 `E_F0+i`、`B_APPLYROW` 这类手工摆位 id。
+**验收**：`<XTableView Columns="…"/>` 在三处像素一致；`pp_app` 里不再出现 `E_F0+i`、`B_APPLYROW` 这类手工摆位 id。
 
 ### S5 注册表与测试
 
@@ -217,7 +217,7 @@ struct IHostServices {  // 只留真正通用的能力
 
 ### 追加：ScrollBar 交互补全（2026-11-13）
 
-- 现状核对：独立 `<ScrollBar>`（`kSkinBoxScrollBar = 8`）本来就支持"点轨道跳一页 / 拖拇指 / 滚轮半页"（`PyMfcHost.cpp` 的 `skinBoxMouse`），
+- 现状核对：独立 `<XScrollBar>`（`kSkinBoxScrollBar = 8`）本来就支持"点轨道跳一页 / 拖拇指 / 滚轮半页"（`PyMfcHost.cpp` 的 `skinBoxMouse`），
   但三者都只走 `setScrollValueInternal`——只改 `m_scrollVal` 再重绘，**一次都不回调 Python**，表现为"能滚但程序不知道"。
 - 修法：新增 `setScrollValueUser`（交互专用），值真正变化时才 `invokePython(m_value[id])`；
   程序赋值仍走 `setScrollBarValue`，避免"Python 设值 → 回调 → 再设值"自激；夹边/同值不发事件，滚到底不会刷回调。
@@ -226,7 +226,7 @@ struct IHostServices {  // 只留真正通用的能力
   它属于 `Scroll` 事件与 S3 宿主瘦身的范围，本次未动。
 ### 统一：滚动区域与独立 ScrollBar 对齐（2026-11-13）
 
-对齐前的不一致：`ScrolledWindow` 点轨道走 `nudgeScroll(±1)`（一档 ≈ 量程 1/12，观感约一行），独立 `<ScrollBar>` 点轨道是翻一页；且两者改值都不发事件。
+对齐前的不一致：`ScrolledWindow` 点轨道走 `nudgeScroll(±1)`（一档 ≈ 量程 1/12，观感约一行），独立 `<XScrollBar>` 点轨道是翻一页；且两者改值都不发事件。
 
 - **点轨道 = 翻一页**：滚动区域改为 `pos ± 视口高度`（`cr.bottom - cr.top`），与独立 ScrollBar 的"跳一页"一致；滚轮仍是一档（`量程/12`），保住手感。
 - **位置唯一写入口**：新增 `PyMfcHost::setScrollAreaPos(child, pos, notify)`，夹边、值真变了才重绘；`notify` 时 `fireControlEvent(id, L"scroll")`。`nudgeScroll` 与拖拇指都改走它。
@@ -361,7 +361,7 @@ Windows 版 Chromium 的 `cursor:grab` / `cursor:grabbing` 是运行时用内部
 1. **表里声明了、set 里没有分支 → 写了静默返回 false**
    - `XamlBusyIndicator.cpp`：`Running`
    - `XamlPowerCanvas.cpp`：`Source`
-   XAML 里写 `<PowerCanvas Source="…">` 从属性接口进去时直接被拒，且因为 `ownProperties` 里声明过，
+   XAML 里写 `<XPowerCanvas Source="…">` 从属性接口进去时直接被拒，且因为 `ownProperties` 里声明过，
    调用方会以为"这是合法属性"，比未知属性更难查。
 2. **实现认别名、表里没声明 → 别名回读/诊断都看不到**（23 个控件）
    最典型：`XamlScrollBar.cpp`（`page`、`position`）、`XamlRangeSlider.cpp`（`from`、`to`）、

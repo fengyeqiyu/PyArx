@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PaletteSet xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Width="360" Height="700">
-  <Page Header="控件演示">
-    <TextBlock x:Name="hint" Text="PyMfc + XAML 侧栏页内控件" Width="320" Height="20" />
-    <Button x:Name="pbtn" Text="按钮 A" Width="140" Height="30" />
-    <Button x:Name="pbtn2" Text="按钮 B" Width="140" Height="30" />
-    <CheckBox x:Name="pchk" Text="勾选我" Width="140" Height="24" />
-    <ProgressBar x:Name="pprog" Value="65" Width="320" Height="16" />
-    <TextBox x:Name="pedit" Text="CAD 侧栏输入框" Width="320" Height="26" />
-    <QCanvas x:Name="pqc" Width="320" Height="140"
+<XPaletteSet xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Width="360" Height="700">
+  <XPage Header="控件演示">
+    <XTextBlock x:Name="hint" Text="PyMfc + XAML 侧栏页内控件" Width="320" Height="20" />
+    <XButton x:Name="pbtn" Text="按钮 A" Width="140" Height="30" />
+    <XButton x:Name="pbtn2" Text="按钮 B" Width="140" Height="30" />
+    <XCheckBox x:Name="pchk" Text="勾选我" Width="140" Height="24" />
+    <XProgressBar x:Name="pprog" Value="65" Width="320" Height="16" />
+    <XTextBox x:Name="pedit" Text="CAD 侧栏输入框" Width="320" Height="26" />
+    <XQCanvas x:Name="pqc" Width="320" Height="140"
              Commands="Clear #313842; Rect 12,12,70,40,#00A8E8; RoundRect 12,66,70,40,8,#E8A800; Ellipse 100,12,50,50,#57C84D; Line 12,130,300,130,#FFFFFF,2; Text 12,104,侧栏画命令,9,#FFFFFF" />
-  </Page>
-</PaletteSet>
+  </XPage>
+</XPaletteSet>

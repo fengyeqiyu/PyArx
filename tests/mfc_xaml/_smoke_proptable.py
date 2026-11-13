@@ -36,17 +36,17 @@ def onScroll(v):
     HITS['scroll'] = v
 
 
-XAML = '''<Window Title="属性表冒烟" Width="640" Height="480">
-  <TextBox Name="T1" Left="16" Top="16" Width="240" Height="28"
+XAML = '''<XWindow Title="属性表冒烟" Width="640" Height="480">
+  <XTextBox Name="T1" Left="16" Top="16" Width="240" Height="28"
            Text="初始" Placeholder="提示" MaxLength="12" IsReadOnly="true"
            TextChanged="onText" DoubleClick="onDbl" KeyDown="onKey" FooBar="1"/>
-  <CheckBox Name="C1" Left="16" Top="56" Width="120" Height="24"
+  <XCheckBox Name="C1" Left="16" Top="56" Width="120" Height="24"
             Text="勾我" CheckedChanged="onCheck"/>
-  <ComboBox Name="CB1" Left="16" Top="88" Width="200" Height="26"
+  <XComboBox Name="CB1" Left="16" Top="88" Width="200" Height="26"
             Items="甲|乙|丙" SelectedIndex="1" DropDownStyle="DropDown"/>
-  <TableView Name="TV1" Left="16" Top="128" Width="320" Height="160"
+  <XTableView Name="TV1" Left="16" Top="128" Width="320" Height="160"
              Columns="名称:120|值:80" Rows="A\t1|B\t2" SelectedRow="1" Scroll="onScroll"/>
-</Window>'''
+</XWindow>'''
 
 fails = []
 
@@ -96,9 +96,9 @@ def main():
     # 声明一个不存在回调的 DoubleClick，必须报错（旧代码只认三种，这里会被静默忽略）
     p2 = r'G:\PyArx\docs\_smoke_proptable_bad.xaml'
     with open(p2, 'w', encoding='utf-8') as f:
-        f.write('<Window Title="坏回调" Width="320" Height="200">'
-                '<TextBox Name="T2" Left="8" Top="8" Width="200" Height="26" '
-                'DoubleClick="这个函数不存在"/></Window>')
+        f.write('<XWindow Title="坏回调" Width="320" Height="200">'
+                '<XTextBox Name="T2" Left="8" Top="8" Width="200" Height="26" '
+                'DoubleClick="这个函数不存在"/></XWindow>')
     try:
         w2 = M.guiload(p2, context=globals())
         w2.close()
@@ -110,9 +110,9 @@ def main():
     # 回调名不存在时与其它事件一致，加载期直接报错，不再"只告警不绑死"
     p3 = r'G:\PyArx\docs\_smoke_proptable_scroll.xaml'
     with open(p3, 'w', encoding='utf-8') as f:
-        f.write('<Window Title="Scroll校验" Width="320" Height="200">'
-                '<TableView Name="TV2" Left="8" Top="8" Width="240" Height="120" '
-                'Columns="A:80" Rows="1|2" Scroll="这个函数不存在"/></Window>')
+        f.write('<XWindow Title="Scroll校验" Width="320" Height="200">'
+                '<XTableView Name="TV2" Left="8" Top="8" Width="240" Height="120" '
+                'Columns="A:80" Rows="1|2" Scroll="这个函数不存在"/></XWindow>')
     try:
         w3 = M.guiload(p3, context=globals())
         w3.close()
@@ -123,9 +123,9 @@ def main():
     # 回调存在时应正常绑定（滚动时由宿主派发）
     p4 = r'G:\PyArx\docs\_smoke_proptable_scroll2.xaml'
     with open(p4, 'w', encoding='utf-8') as f:
-        f.write('<Window Title="Scroll绑定" Width="320" Height="200">'
-                '<ScrolledWindow Name="SW2" Left="8" Top="8" Width="240" Height="120" '
-                'Scroll="onScroll"/></Window>')
+        f.write('<XWindow Title="Scroll绑定" Width="320" Height="200">'
+                '<XScrolledWindow Name="SW2" Left="8" Top="8" Width="240" Height="120" '
+                'Scroll="onScroll"/></XWindow>')
     w4 = M.guiload(p4, context=globals())
     w4.close()
     check(True, 'Scroll 回调存在时正常绑定')

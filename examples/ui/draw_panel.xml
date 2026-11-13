@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 侧栏示例（XAML 写法）：根 <PaletteSet>，页用 <TabItem Header="...">，
+<!-- 侧栏示例（XAML 写法）：根 <XPaletteSet>，页用 <TabItem Header="...">，
      每个 <TabItem> 下直接写控件。页名来自 Header，同名页会被复用。
      Name 决定 PaletteSet 的名字（同名 PaletteSet 复用同一个）。 -->
-<PaletteSet xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<XPaletteSet xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             Name="draw-panel" Width="300" Height="640">
 
     <TabItem Header="绘制">
-        <StackPanel>
-            <TextBlock x:Name="d_lbl" Content="绘制参数" Height="24"/>
-            <TextBox x:Name="d_radius" Content="R=100" Height="28" TextChanged="OnRadius"/>
-            <Button x:Name="d_draw" Content="绘制" Height="32" Click="OnDraw"/>
-            <Button x:Name="d_clear" Content="清除" Height="32" Click="OnClear"/>
-            <ListBox x:Name="d_list" Items="直线|圆" Height="90"/>
-            <Slider x:Name="d_width" Minimum="1" Maximum="10" Value="3" Height="32"/>
-        </StackPanel>
+        <XStackPanel>
+            <XTextBlock x:Name="d_lbl" Content="绘制参数" Height="24"/>
+            <XTextBox x:Name="d_radius" Content="R=100" Height="28" TextChanged="OnRadius"/>
+            <XButton x:Name="d_draw" Content="绘制" Height="32" Click="OnDraw"/>
+            <XButton x:Name="d_clear" Content="清除" Height="32" Click="OnClear"/>
+            <XListBox x:Name="d_list" Items="直线|圆" Height="90"/>
+            <XSlider x:Name="d_width" Minimum="1" Maximum="10" Value="3" Height="32"/>
+        </XStackPanel>
     </TabItem>
 
     <TabItem Header="设置">
-        <StackPanel>
-            <TextBlock x:Name="s_lbl" Content="界面设置" Height="24"/>
-            <CheckBox x:Name="s_dark" Content="深色主题" Height="24" IsChecked="1"/>
-            <ComboBox x:Name="s_unit" Items="毫米|米|英寸" Height="110"/>
-            <Slider x:Name="s_scale" Minimum="0" Maximum="20" Value="5" Height="32"/>
-            <Button x:Name="s_apply" Content="应用" Height="32" Click="OnApply"/>
-        </StackPanel>
+        <XStackPanel>
+            <XTextBlock x:Name="s_lbl" Content="界面设置" Height="24"/>
+            <XCheckBox x:Name="s_dark" Content="深色主题" Height="24" IsChecked="1"/>
+            <XComboBox x:Name="s_unit" Items="毫米|米|英寸" Height="110"/>
+            <XSlider x:Name="s_scale" Minimum="0" Maximum="20" Value="5" Height="32"/>
+            <XButton x:Name="s_apply" Content="应用" Height="32" Click="OnApply"/>
+        </XStackPanel>
     </TabItem>
-</PaletteSet>
+</XPaletteSet>

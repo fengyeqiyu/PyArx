@@ -4,32 +4,32 @@
 
   菜单条与上下文菜单同属 Menu 体系；Popup 与 Dialog/Drawer 同实现。
 -->
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="03 浮层与画布" Width="760" Height="680" Background="#F4F6F8">
 
-  <StackPanel Margin="16" Spacing="10">
+  <XStackPanel Margin="16" Spacing="10">
 
-    <MenuStrip x:Name="Top" Items="文件|编辑|视图|帮助" SelectedIndex="0" Height="28"/>
-    <ToolStrip x:Name="Bar1" Items="新建|打开|保存|运行" SelectedIndex="2" Height="32"
+    <XMenuStrip x:Name="Top" Items="文件|编辑|视图|帮助" SelectedIndex="0" Height="28"/>
+    <XToolStrip x:Name="Bar1" Items="新建|打开|保存|运行" SelectedIndex="2" Height="32"
                SelectionChanged="on_tool"/>
-    <Menu x:Name="Ctx" Items="复制|粘贴|删除" Height="56"/>
+    <XMenu x:Name="Ctx" Items="复制|粘贴|删除" Height="56"/>
 
-    <TextBlock x:Name="Hdr1" Text="配电规划画布" Height="26" FontSize="14" FontWeight="Bold"/>
-    <PowerCanvas x:Name="Plan" Data="{}" Height="260" Click="on_plan_click"/>
-    <QCanvas x:Name="Draw" Height="140"/>
+    <XTextBlock x:Name="Hdr1" Text="配电规划画布" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XPowerCanvas x:Name="Plan" Data="{}" Height="260" Click="on_plan_click"/>
+    <XQCanvas x:Name="Draw" Height="140"/>
 
-    <TextBlock x:Name="Hdr2" Text="日期与浮层" Height="26" FontSize="14" FontWeight="Bold"/>
-    <DatePicker x:Name="Day" Value="2026-11-13" Height="30" ValueChanged="on_day"/>
-    <CalendarCtrl x:Name="Cal" Value="2026-11-13" Height="170"/>
-    <ToolTip x:Name="Hint" Text="鼠标停留提示" Height="24"/>
-    <Popup x:Name="Sheet" Title="确认" Content="保存后关闭？" Height="90"/>
+    <XTextBlock x:Name="Hdr2" Text="日期与浮层" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XDatePicker x:Name="Day" Value="2026-11-13" Height="30" ValueChanged="on_day"/>
+    <XCalendarCtrl x:Name="Cal" Value="2026-11-13" Height="170"/>
+    <XToolTip x:Name="Hint" Text="鼠标停留提示" Height="24"/>
+    <XPopup x:Name="Sheet" Title="确认" Content="保存后关闭？" Height="90"/>
 
-    <TextBlock x:Name="Hdr3" Text="滚动与拖拽容器" Height="26" FontSize="14" FontWeight="Bold"/>
-    <Panel x:Name="Host" Height="60"/>
-    <Splitter x:Name="Split" Height="16"/>
-    <ScrolledWindow x:Name="Scroll" ScrollMin="0" ScrollMax="400" Height="80"/>
-    <Flickable x:Name="Flick" OffsetX="0" OffsetY="0" Height="100"/>
-    <StaticLine x:Name="Sep" Height="8"/>
+    <XTextBlock x:Name="Hdr3" Text="滚动与拖拽容器" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XPanel x:Name="Host" Height="60"/>
+    <XSplitter x:Name="Split" Height="16"/>
+    <XScrolledWindow x:Name="Scroll" ScrollMin="0" ScrollMax="400" Height="80"/>
+    <XFlickable x:Name="Flick" OffsetX="0" OffsetY="0" Height="100"/>
+    <XStaticLine x:Name="Sep" Height="8"/>
 
-  </StackPanel>
-</Window>
+  </XStackPanel>
+</XWindow>

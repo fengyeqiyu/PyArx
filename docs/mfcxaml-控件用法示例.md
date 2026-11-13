@@ -30,17 +30,17 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="按钮族" Width="420" Height="340">
-  <StackPanel Margin="12" Spacing="8">
-    <Button x:Name="Run" Text="运行" Height="32" Click="on_run"/>
-    <ToggleButton x:Name="Night" Text="夜间模式" Height="32" CheckedChanged="on_night"/>
-    <CheckBox x:Name="Agree" Text="同意条款" Height="26" CheckedChanged="on_agree"/>
-    <RadioButton x:Name="PlanA" Text="方案 A" Height="26"/>
-    <GroupBox x:Name="Group1" Header="参数组" Height="70"/>
-    <BitmapButton x:Name="Export" Text="导出" Height="32"/>
-    <StaticBitmap x:Name="Preview" Height="56"/>
-  </StackPanel>
-</Window>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="按钮族" Width="420" Height="340">
+  <XStackPanel Margin="12" Spacing="8">
+    <XButton x:Name="Run" Text="运行" Height="32" Click="on_run"/>
+    <XToggleButton x:Name="Night" Text="夜间模式" Height="32" CheckedChanged="on_night"/>
+    <XCheckBox x:Name="Agree" Text="同意条款" Height="26" CheckedChanged="on_agree"/>
+    <XRadioButton x:Name="PlanA" Text="方案 A" Height="26"/>
+    <XGroupBox x:Name="Group1" Header="参数组" Height="70"/>
+    <XBitmapButton x:Name="Export" Text="导出" Height="32"/>
+    <XStaticBitmap x:Name="Preview" Height="56"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：按钮类文字统一走 `Text`（`Content` 是历史别名，不再用）；`Checked` 可读写，
@@ -52,20 +52,20 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="文本族" Width="460" Height="380">
-  <StackPanel Margin="12" Spacing="8">
-    <TextBlock x:Name="Title" Text="回路参数" Height="26" FontSize="14" FontWeight="Bold"/>
-    <TextBox x:Name="Name" Text="WL-AT1-1" Placeholder="请输入回路编号" MaxLength="32" Height="30"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="文本族" Width="460" Height="380">
+  <XStackPanel Margin="12" Spacing="8">
+    <XTextBlock x:Name="Title" Text="回路参数" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XTextBox x:Name="Name" Text="WL-AT1-1" Placeholder="请输入回路编号" MaxLength="32" Height="30"
              TextChanged="on_name"/>
-    <TextBox x:Name="Note" Multiline="true" Height="70" Text="多行备注"/>
-    <TextBox x:Name="Code" Text="只读内容" IsReadOnly="true" Height="30"/>
-    <RichText x:Name="Rtf" Text="富文本段落" Bold="true" Italic="false" FontSize="11"
+    <XTextBox x:Name="Note" Multiline="true" Height="70" Text="多行备注"/>
+    <XTextBox x:Name="Code" Text="只读内容" IsReadOnly="true" Height="30"/>
+    <XRichText x:Name="Rtf" Text="富文本段落" Bold="true" Italic="false" FontSize="11"
               Foreground="#334155" Height="80"/>
-    <CodeEditor x:Name="Src" Syntax="xaml" Text="&lt;Button Text=&quot;运行&quot;/&gt;" Height="90"/>
-    <Hyperlink x:Name="Help" Text="查看规范" Url="https://example.com/doc" Height="26"
+    <XCodeEditor x:Name="Src" Syntax="xaml" Text="&lt;Button Text=&quot;运行&quot;/&gt;" Height="90"/>
+    <XHyperlink x:Name="Help" Text="查看规范" Url="https://example.com/doc" Height="26"
                Click="on_help"/>
-  </StackPanel>
-</Window>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：`RichText` 的字号与前景色就是通用外观字段 `FontSize` / `Foreground`（v0.10.17 起不再重复声明）；
@@ -77,14 +77,14 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="选择族" Width="420" Height="300">
-  <StackPanel Margin="12" Spacing="8">
-    <ComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25|VV-3×10" SelectedIndex="0"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="选择族" Width="420" Height="300">
+  <XStackPanel Margin="12" Spacing="8">
+    <XComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25|VV-3×10" SelectedIndex="0"
               DropDownStyle="DropDown" Height="28" SelectionChanged="on_cable"/>
-    <Choice x:Name="Zone" Items="A 区|B 区|C 区" Height="28"/>
-    <ListBox x:Name="Loads" Items="照明 12kW|动力 30kW|空调 8kW" SelectionMode="Single" Height="110"/>
-  </StackPanel>
-</Window>
+    <XChoice x:Name="Zone" Items="A 区|B 区|C 区" Height="28"/>
+    <XListBox x:Name="Loads" Items="照明 12kW|动力 30kW|空调 8kW" SelectionMode="Single" Height="110"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：`Items` 用 `|` 分隔；`SelectedIndex` 读写；`ComboBox` 还带 `Text`（可编辑）与 `DropDownStyle`。
@@ -95,19 +95,19 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="取值族" Width="440" Height="420">
-  <StackPanel Margin="12" Spacing="8">
-    <ProgressBar x:Name="Pct" Minimum="0" Maximum="100" Value="65" Height="22"/>
-    <Slider x:Name="Level" Minimum="0" Maximum="100" Value="45" Height="34" ValueChanged="on_level"/>
-    <SpinBox x:Name="Count" Minimum="1" Maximum="64" Value="12" Height="30"/>
-    <RangeSlider x:Name="Band" Minimum="0" Maximum="100" LowValue="25" HighValue="75" Height="34"/>
-    <Dial x:Name="Knob" Minimum="0" Maximum="100" Value="40" Height="64"/>
-    <Tumbler x:Name="Hour" Count="24" SelectedIndex="3" Height="72"/>
-    <ScrollBar x:Name="Bar" Minimum="0" Maximum="200" Value="35" PageSize="20"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="取值族" Width="440" Height="420">
+  <XStackPanel Margin="12" Spacing="8">
+    <XProgressBar x:Name="Pct" Minimum="0" Maximum="100" Value="65" Height="22"/>
+    <XSlider x:Name="Level" Minimum="0" Maximum="100" Value="45" Height="34" ValueChanged="on_level"/>
+    <XSpinBox x:Name="Count" Minimum="1" Maximum="64" Value="12" Height="30"/>
+    <XRangeSlider x:Name="Band" Minimum="0" Maximum="100" LowValue="25" HighValue="75" Height="34"/>
+    <XDial x:Name="Knob" Minimum="0" Maximum="100" Value="40" Height="64"/>
+    <XTumbler x:Name="Hour" Count="24" SelectedIndex="3" Height="72"/>
+    <XScrollBar x:Name="Bar" Minimum="0" Maximum="200" Value="35" PageSize="20"
                Orientation="Vertical" Height="46"/>
-    <Switch x:Name="Power" Checked="true" Height="30" CheckedChanged="on_power"/>
-  </StackPanel>
-</Window>
+    <XSwitch x:Name="Power" Checked="true" Height="30" CheckedChanged="on_power"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：这一类都遵循 `Minimum` / `Maximum` / `Value` 口径（`RangeSlider` 用 `LowValue` / `HighValue`，
@@ -119,22 +119,22 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="列表族" Width="620" Height="560">
-  <StackPanel Margin="12" Spacing="8">
-    <ListCtrl x:Name="Files" Columns="名称:140|类型:90" Rows="图框	A3|标注	箭头" Height="90"/>
-    <TreeCtrl x:Name="Tree1" Nodes="项目根|图纸 A|图纸 B|图层组" Height="90"/>
-    <GridCtrl x:Name="Grid1" Columns="名称:120|数值:80" Rows="甲	12|乙	34" Height="90"/>
-    <TableView x:Name="Table1" Columns="名称:120|数值:80|状态:70"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="列表族" Width="620" Height="560">
+  <XStackPanel Margin="12" Spacing="8">
+    <XListCtrl x:Name="Files" Columns="名称:140|类型:90" Rows="图框	A3|标注	箭头" Height="90"/>
+    <XTreeCtrl x:Name="Tree1" Nodes="项目根|图纸 A|图纸 B|图层组" Height="90"/>
+    <XGridCtrl x:Name="Grid1" Columns="名称:120|数值:80" Rows="甲	12|乙	34" Height="90"/>
+    <XTableView x:Name="Table1" Columns="名称:120|数值:80|状态:70"
                Rows="甲	30	正常|乙	12	警告|丙	21	正常" SelectedIndex="1" Height="110"
                SelectionChanged="on_row"/>
-    <TreeTable x:Name="Hier" Nodes="项目根|图纸 A|图层组" SelectedIndex="1" Height="90"/>
-    <VirtualList x:Name="VList" Items="第一行|第二行|第三行|第四行" ItemHeight="24"
+    <XTreeTable x:Name="Hier" Nodes="项目根|图纸 A|图层组" SelectedIndex="1" Height="90"/>
+    <XVirtualList x:Name="VList" Items="第一行|第二行|第三行|第四行" ItemHeight="24"
                  SelectedIndex="0" Height="90"/>
-    <GridView x:Name="Tiles" Items="回路 1|回路 2|回路 3|回路 4" CellWidth="80" CellHeight="56"
+    <XGridView x:Name="Tiles" Items="回路 1|回路 2|回路 3|回路 4" CellWidth="80" CellHeight="56"
               SelectedIndex="0" Height="90"/>
-    <PathView x:Name="Cover" Items="方案 A|方案 B|方案 C" SelectedIndex="1" Height="90"/>
-  </StackPanel>
-</Window>
+    <XPathView x:Name="Cover" Items="方案 A|方案 B|方案 C" SelectedIndex="1" Height="90"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：列/行用 `名称:宽度` 与制表符分隔（`\t`）；`TableView.RowCount`、`VirtualList.ItemCount`、
@@ -146,18 +146,18 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="容器族" Width="460" Height="420">
-  <StackPanel Margin="12" Spacing="8">
-    <Panel x:Name="Host" Height="70"/>
-    <StaticLine x:Name="Sep1" Height="10"/>
-    <Splitter x:Name="Split" Height="16"/>
-    <ScrolledWindow x:Name="Scroll" ScrollMin="0" ScrollMax="400" Height="90"/>
-    <Flickable x:Name="Flick" OffsetX="0" OffsetY="0" Height="110"/>
-  </StackPanel>
-</Window>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="容器族" Width="460" Height="420">
+  <XStackPanel Margin="12" Spacing="8">
+    <XPanel x:Name="Host" Height="70"/>
+    <XStaticLine x:Name="Sep1" Height="10"/>
+    <XSplitter x:Name="Split" Height="16"/>
+    <XScrolledWindow x:Name="Scroll" ScrollMin="0" ScrollMax="400" Height="90"/>
+    <XFlickable x:Name="Flick" OffsetX="0" OffsetY="0" Height="110"/>
+  </XStackPanel>
+</XWindow>
 ```
 
-要点：容器子控件写在容器标签内（`<Panel><TextBlock .../></Panel>`）；
+要点：容器子控件写在容器标签内（`<XPanel><XTextBlock .../></XPanel>`）；
 `Flickable.OffsetX/OffsetY` 是 v0.10.17 新增的读写视口偏移。
 
 ## 七、页与导航
@@ -166,15 +166,15 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页族" Width="460" Height="420">
-  <StackPanel Margin="12" Spacing="8">
-    <TabControl x:Name="Tabs" Pages="常规|高级|关于" Height="110"/>
-    <StackView x:Name="Stack" SelectedIndex="0" PageCount="3" Height="90"/>
-    <SwipeView x:Name="Swipe" SelectedIndex="1" PageCount="2" Height="90"/>
-    <Page x:Name="Wizard" SelectedIndex="0" PageCount="2" Height="70"/>
-    <PageIndicator x:Name="Dots" Count="3" SelectedIndex="1" Height="22"/>
-  </StackPanel>
-</Window>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页族" Width="460" Height="420">
+  <XStackPanel Margin="12" Spacing="8">
+    <XTabControl x:Name="Tabs" Pages="常规|高级|关于" Height="110"/>
+    <XStackView x:Name="Stack" SelectedIndex="0" PageCount="3" Height="90"/>
+    <XSwipeView x:Name="Swipe" SelectedIndex="1" PageCount="2" Height="90"/>
+    <XPage x:Name="Wizard" SelectedIndex="0" PageCount="2" Height="70"/>
+    <XPageIndicator x:Name="Dots" Count="3" SelectedIndex="1" Height="22"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：`StackView` / `SwipeView` / `Page` 是同一实现（`XamlPageView`）的三个语义名，
@@ -186,16 +186,16 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="浮层族" Width="460" Height="380">
-  <StackPanel Margin="12" Spacing="8">
-    <MenuStrip x:Name="Top" Items="文件|编辑|视图" SelectedIndex="0" Height="28"/>
-    <ToolStrip x:Name="Bar1" Items="新建|打开|保存|运行" SelectedIndex="2" Height="32"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="浮层族" Width="460" Height="380">
+  <XStackPanel Margin="12" Spacing="8">
+    <XMenuStrip x:Name="Top" Items="文件|编辑|视图" SelectedIndex="0" Height="28"/>
+    <XToolStrip x:Name="Bar1" Items="新建|打开|保存|运行" SelectedIndex="2" Height="32"
                SelectionChanged="on_tool"/>
-    <Menu x:Name="Ctx" Items="复制|粘贴|删除" Height="60"/>
-    <ToolTip x:Name="Hint" Text="鼠标停留提示" Height="24"/>
-    <Popup x:Name="Sheet" Title="确认" Content="保存后关闭？" Height="90"/>
-  </StackPanel>
-</Window>
+    <XMenu x:Name="Ctx" Items="复制|粘贴|删除" Height="60"/>
+    <XToolTip x:Name="Hint" Text="鼠标停留提示" Height="24"/>
+    <XPopup x:Name="Sheet" Title="确认" Content="保存后关闭？" Height="90"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：`Menu` 是上下文菜单（不占版面时由 `showMenu` 弹出），`MenuStrip` 是顶部菜单条；
@@ -207,12 +207,12 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="画布族" Width="520" Height="360">
-  <StackPanel Margin="12" Spacing="8">
-    <PowerCanvas x:Name="Plan" Data="{}" Height="200" Click="on_plan_click"/>
-    <QCanvas x:Name="Draw" Height="120"/>
-  </StackPanel>
-</Window>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="画布族" Width="520" Height="360">
+  <XStackPanel Margin="12" Spacing="8">
+    <XPowerCanvas x:Name="Plan" Data="{}" Height="200" Click="on_plan_click"/>
+    <XQCanvas x:Name="Draw" Height="120"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：`PowerCanvas` 吃配电规划模型（`Data` 是规划 JSON，实际运行用 `loadPowerPlan` 灌）；
@@ -224,12 +224,12 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="日期族" Width="420" Height="320">
-  <StackPanel Margin="12" Spacing="8">
-    <DatePicker x:Name="Day" Value="2026-11-13" Height="30" ValueChanged="on_day"/>
-    <CalendarCtrl x:Name="Cal" Value="2026-11-13" Height="180" SelectionChanged="on_cal"/>
-  </StackPanel>
-</Window>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="日期族" Width="420" Height="320">
+  <XStackPanel Margin="12" Spacing="8">
+    <XDatePicker x:Name="Day" Value="2026-11-13" Height="30" ValueChanged="on_day"/>
+    <XCalendarCtrl x:Name="Cal" Value="2026-11-13" Height="180" SelectionChanged="on_cal"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：两者 `Value` 都是 `YYYY-MM-DD` 文本（`CalendarCtrl.Value` 是 v0.10.17 补的，
@@ -241,11 +241,11 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="指示" Width="320" Height="200">
-  <StackPanel Margin="12" Spacing="8">
-    <BusyIndicator x:Name="Busy" Height="56"/>
-  </StackPanel>
-</Window>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="指示" Width="320" Height="200">
+  <XStackPanel Margin="12" Spacing="8">
+    <XBusyIndicator x:Name="Busy" Height="56"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 要点：`BusyIndicator` 现在的自有属性是 0（只有外观/布局字段），动画由 skin #4 定时器驱动；
@@ -258,28 +258,28 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="回路参数卡" Width="640" Height="520">
-  <StackPanel Margin="14" Spacing="10">
-    <TextBlock x:Name="Head" Text="AT1-1 回路参数" Height="28" FontSize="15" FontWeight="Bold"/>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="回路参数卡" Width="640" Height="520">
+  <XStackPanel Margin="14" Spacing="10">
+    <XTextBlock x:Name="Head" Text="AT1-1 回路参数" Height="28" FontSize="15" FontWeight="Bold"/>
 
-    <Panel x:Name="Row1" Height="34">
-      <TextBox x:Name="Code" Text="WL-AT1-1" Left="0" Top="2" Width="220" Height="30"/>
-      <Button x:Name="Apply" Text="应用" Left="232" Top="2" Width="90" Height="30"
+    <XPanel x:Name="Row1" Height="34">
+      <XTextBox x:Name="Code" Text="WL-AT1-1" Left="0" Top="2" Width="220" Height="30"/>
+      <XButton x:Name="Apply" Text="应用" Left="232" Top="2" Width="90" Height="30"
               Click="on_apply"/>
-    </Panel>
+    </XPanel>
 
-    <ComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25" SelectedIndex="0" Height="28"/>
-    <Slider x:Name="Load" Minimum="0" Maximum="100" Value="11" Height="34" ValueChanged="on_load"/>
-    <Switch x:Name="Energized" Checked="true" Height="28"/>
+    <XComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25" SelectedIndex="0" Height="28"/>
+    <XSlider x:Name="Load" Minimum="0" Maximum="100" Value="11" Height="34" ValueChanged="on_load"/>
+    <XSwitch x:Name="Energized" Checked="true" Height="28"/>
 
-    <TableView x:Name="Detail" Columns="参数:140|取值:90|单位:60"
+    <XTableView x:Name="Detail" Columns="参数:140|取值:90|单位:60"
                Rows="相数	1	-
 额定电压	380	V
 计算电流	21.4	A" Height="120" SelectionChanged="on_detail"/>
 
-    <PageIndicator x:Name="Dots" Count="3" SelectedIndex="0" Height="20"/>
-  </StackPanel>
-</Window>
+    <XPageIndicator x:Name="Dots" Count="3" SelectedIndex="0" Height="20"/>
+  </XStackPanel>
+</XWindow>
 ```
 
 Python 侧接线（回调名在 XAML 里声明，函数从 `context` 里解析；也可以加载后再绑定）：

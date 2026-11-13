@@ -8,6 +8,7 @@
 #include <string>
 #include <deque>
 #include "XamlCore.h"
+#include "../MfcXamlCore/controls/XamlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
 
 namespace uidesign
 {
@@ -57,55 +58,53 @@ namespace uidesign
     }
 
     // 是否容器标签（画布/树需要按容器处理）
-    // 布局容器：AbsolutePanel 是"绝对定位布局"的正名（Canvas 只是它的兼容别名，
-    // 画布另有 DrawCanvas/PaintCanvas/QCanvas）。
+    // 统一先去掉 X 前缀再按本意名比较（大小写不敏感），不再保留任何别名。
     inline bool IsContainer(const std::wstring& tag)
     {
-        static const wchar_t* k[] = {
-            L"Window", L"Grid", L"StackPanel", L"Canvas", L"Layout", L"LayoutPanel", L"AbsolutePanel", L"AbsPanel", L"CanvasPanel",
-            L"GroupBox",
-            L"TabControl", L"TabPage", L"Border", L"Panel", L"WrapPanel", L"DockPanel", L"GridPanel",
-            L"ToolBar", L"MenuBar", L"StatusBar", L"ScrollViewer", L"ScrolledWindow",
-            // 侧栏：<PaletteSet> 是多页宿主，<page>/<TabItem> 是一页
-            L"PaletteSet", L"Page", L"page", L"TabItem"
-        };
-        for (auto kk : k) if (tag == kk) return true;
-        return false;
+        if (xamlmfc::isContainerTag(tag)) return true;
+        const std::wstring t = xamlmfc::BareTag(tag);
+        return _wcsicmp(t.c_str(), L"GridPanel") == 0 ||
+               _wcsicmp(t.c_str(), L"Page") == 0 ||
+               _wcsicmp(t.c_str(), L"TabPage") == 0;
     }
 
     // 是否为纯容器（不建 HWND）：Window/Grid/MenuBar/ToolBar/StatusBar/MenuItem/Splitter
     inline bool IsPureContainer(const std::wstring& tag)
     {
+        const std::wstring t = xamlmfc::BareTag(tag);
         static const wchar_t* k[] = {
             L"Window", L"Grid", L"MenuBar", L"ToolBar", L"StatusBar", L"MenuItem", L"Splitter"
         };
-        for (auto kk : k) if (tag == kk) return true;
+        for (auto kk : k) if (_wcsicmp(t.c_str(), kk) == 0) return true;
         return false;
     }
 
     // 绘图图元（没有文本内容，只靠尺寸/方向/颜色描述）
     inline bool IsShapeTag(const std::wstring& tag)
     {
-        return tag == L"Line" || tag == L"Rectangle" || tag == L"Ellipse" || tag == L"Arc";
+        const std::wstring t = xamlmfc::BareTag(tag);
+        return _wcsicmp(t.c_str(), L"Line") == 0 || _wcsicmp(t.c_str(), L"Rectangle") == 0 ||
+               _wcsicmp(t.c_str(), L"Ellipse") == 0 || _wcsicmp(t.c_str(), L"Arc") == 0;
     }
 
-    // 默认尺寸（AddControl 时用）
+    // 默认尺寸（AddControl 时用）；标签一律 X + 本意名
     inline void DefaultSize(const std::wstring& tag, int& w, int& h)
     {
         w = 100; h = 28;
-        if (tag == L"ListBox" || tag == L"ListView") { h = 80; }
-        else if (tag == L"DataGrid" || tag == L"DataGridView") { w = 240; h = 120; }
-        else if (tag == L"ComboBox") { h = 24; }
-        else if (tag == L"GroupBox") { w = 160; h = 80; }
-        else if (tag == L"Image") { w = 80; h = 80; }
-        else if (tag == L"ProgressBar") { w = 120; h = 16; }
-        else if (tag == L"TabControl") { w = 200; h = 120; }
-        else if (tag == L"TextBlock" || tag == L"Label") { w = 160; h = 24; }
+        const std::wstring t = xamlmfc::BareTag(tag);
+        if (t == L"ListBox" || t == L"ListCtrl" || t == L"VirtualList") { h = 80; }
+        else if (t == L"TableView" || t == L"TreeTable" || t == L"GridCtrl" || t == L"TreeCtrl") { w = 240; h = 120; }
+        else if (t == L"ComboBox") { h = 24; }
+        else if (t == L"GroupBox") { w = 160; h = 80; }
+        else if (t == L"StaticBitmap") { w = 80; h = 80; }
+        else if (t == L"ProgressBar") { w = 120; h = 16; }
+        else if (t == L"TabControl") { w = 200; h = 120; }
+        else if (t == L"TextBlock") { w = 160; h = 24; }
         // 绘图图元：直线默认水平、矩形/圆给一块像样的初始尺寸
-        else if (tag == L"Line") { w = 120; h = 2; }
-        else if (tag == L"Rectangle") { w = 160; h = 90; }
-        else if (tag == L"Ellipse") { w = 120; h = 120; }
-        else if (tag == L"Arc") { w = 140; h = 100; }
+        else if (t == L"Line") { w = 120; h = 2; }
+        else if (t == L"Rectangle") { w = 160; h = 90; }
+        else if (t == L"Ellipse") { w = 120; h = 120; }
+        else if (t == L"Arc") { w = 140; h = 100; }
     }
 
     // 追加子节点并设置布局属性；返回新节点（仅本次调用有效，勿长期持有）

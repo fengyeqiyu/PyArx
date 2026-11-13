@@ -215,20 +215,20 @@ def sm(hwnd, msg, wp=0, lp=0):
 def build_window():
     """一个窗口内放本轮需要的控件。"""
     xaml = '''<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="真实交互测试" Width="620" Height="720">
-  <StackPanel Margin="14" Spacing="8">
-    <Button x:Name="btn" Text="点我" Height="40"/>
-    <CheckBox x:Name="chk" Text="勾选项" Height="34"/>
-    <RadioButton x:Name="rad" Text="单选项" Height="34"/>
-    <ToggleButton x:Name="tgl" Text="切换" Height="38"/>
-    <TextBox x:Name="txt" Text="" Height="34"/>
-    <ComboBox x:Name="cmb" Height="30"/>
-    <ListBox x:Name="lst" Height="130"/>
-    <ProgressBar x:Name="prg" Height="26"/>
-    <Slider x:Name="sld" Height="40"/>
-    <DatePicker x:Name="dtp" Height="32"/>
-  </StackPanel>
-</Window>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="真实交互测试" Width="620" Height="720">
+  <XStackPanel Margin="14" Spacing="8">
+    <XButton x:Name="btn" Text="点我" Height="40"/>
+    <XCheckBox x:Name="chk" Text="勾选项" Height="34"/>
+    <XRadioButton x:Name="rad" Text="单选项" Height="34"/>
+    <XToggleButton x:Name="tgl" Text="切换" Height="38"/>
+    <XTextBox x:Name="txt" Text="" Height="34"/>
+    <XComboBox x:Name="cmb" Height="30"/>
+    <XListBox x:Name="lst" Height="130"/>
+    <XProgressBar x:Name="prg" Height="26"/>
+    <XSlider x:Name="sld" Height="40"/>
+    <XDatePicker x:Name="dtp" Height="32"/>
+  </XStackPanel>
+</XWindow>
 '''
     path = os.path.join(HERE, '_interaction_probe.xaml')
     with open(path, 'w', encoding='utf-8') as fh:

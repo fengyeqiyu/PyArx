@@ -8,28 +8,28 @@
   行：0 顶部工具栏 78 / 1 主内容 * / 2 底部留白 8
   列：0 左边距 8 / 1 画布 * / 2 分割条 6 / 3 侧板 640 / 4 右边距 8
 -->
-<Window Name="PowerPlan" Width="1340" Height="881">
-  <Grid Name="Root">
-    <Grid.RowDefinitions>
+<XWindow Name="PowerPlan" Width="1340" Height="881">
+  <XGrid Name="Root">
+    <XGrid.RowDefinitions>
       <RowDefinition Height="78"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="8"/>
-    </Grid.RowDefinitions>
-    <Grid.ColumnDefinitions>
+    </XGrid.RowDefinitions>
+    <XGrid.ColumnDefinitions>
       <ColumnDefinition Width="8"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="6"/>
       <ColumnDefinition Width="640"/>
       <ColumnDefinition Width="8"/>
-    </Grid.ColumnDefinitions>
+    </XGrid.ColumnDefinitions>
 
     <!-- 画布：主内容左列 -->
-    <Label Name="CV" Grid.Row="1" Grid.Column="1"/>
+    <XTextBlock Name="CV" Grid.Row="1" Grid.Column="1"/>
 
     <!-- 分割条：画布与侧板之间，拖动它改第 3 列宽度（Python 传 overrides） -->
-    <Label Name="SPLIT" Grid.Row="1" Grid.Column="2"/>
+    <XTextBlock Name="SPLIT" Grid.Row="1" Grid.Column="2"/>
 
     <!-- 侧板（表格编辑器）：主内容右列 -->
-    <Label Name="Side" Grid.Row="1" Grid.Column="3"/>
-  </Grid>
-</Window>
+    <XTextBlock Name="Side" Grid.Row="1" Grid.Column="3"/>
+  </XGrid>
+</XWindow>

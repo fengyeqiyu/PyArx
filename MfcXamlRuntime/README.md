@@ -36,8 +36,8 @@ c2 = Runtime.create('side_panel', app, 0, 0, 640, 380)
 XAML 里也可以预先声明回调，加载时按函数名在调用方作用域解析（`app` 对象的方法也算）：
 
 ```xml
-<Button Name="BtnApply" Text="应用" on_click="on_apply"/>
-<Button Name="BtnLoad"  Text="载入" on_click="on_load"/>
+<XButton Name="BtnApply" Text="应用" on_click="on_apply"/>
+<XButton Name="BtnLoad"  Text="载入" on_click="on_load"/>
 ```
 
 回调签名自适应：`(comp, name, payload)` / `(comp, name)` / `(name)` / `()` 都能挂。

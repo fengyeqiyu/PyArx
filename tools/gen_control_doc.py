@@ -158,6 +158,12 @@ ALIAS = {
 GRADE = [(5, 'S 完整'), (3, 'A 基本'), (1, 'B 薄'), (0, 'C 仅布局')]
 
 
+def bare(tag):
+    if len(tag) > 1 and tag[0] in 'Xx' and tag[1].isupper():
+        return tag[1:]
+    return tag
+
+
 def grade(n):
     for lo, name in GRADE:
         if n >= lo:
@@ -197,10 +203,10 @@ def main():
         ro = [p['name'] for p in c['properties'] if p.get('readOnly')]
         own_total += len(own)
         common_total += len(props) - len(own)
-        impl, src, ev = INFO[tag]
+        impl, src, ev = INFO[bare(tag)]
         g = grade(len(own))
         stat[g] = stat.get(g, 0) + 1
-        rows.append((tag, impl, src, own, ro, EVENTS[ev], g, ALIAS.get(tag, '—')))
+        rows.append((tag, impl, src, own, ro, EVENTS[ev], g))
 
     buf = io.StringIO()
     w = buf.write
@@ -237,7 +243,7 @@ def main():
     w('## 三、逐控件清单\n\n')
     w('| 控件 | 实现 | 自有属性（读写） | 只读 | 事件 | 档位 | 源文件 |\n')
     w('|---|---|---|---|---|---|---|\n')
-    for tag, impl, src, own, ro, ev, g, alias in rows:
+    for tag, impl, src, own, ro, ev, g in rows:
         w('| **%s** | %s | %s | %s | %s | %s | `%s` |\n' % (
             tag, impl, ' / '.join(own) if own else '—',
             ' / '.join(ro) if ro else '—', ev, g, src))
@@ -245,32 +251,22 @@ def main():
 
     w('## 四、分档结论\n\n')
     w('**S 完整（自有 ≥5，可直接当业务控件用）**：')
-    w('、'.join('%s(%d)' % (t, len(o)) for t, i, s, o, r, e, g, a in rows if g == 'S 完整'))
+    w('、'.join('%s(%d)' % (t, len(o)) for t, i, s, o, r, e, g in rows if g == 'S 完整'))
     w('\n\n**A 基本（3–4，够用但还缺边角能力）**：')
-    w('、'.join('%s(%d)' % (t, len(o)) for t, i, s, o, r, e, g, a in rows if g == 'A 基本'))
+    w('、'.join('%s(%d)' % (t, len(o)) for t, i, s, o, r, e, g in rows if g == 'A 基本'))
     w('\n\n**B 薄（1–2，只有主语义那一个字段）**：')
-    w('、'.join('%s(%d)' % (t, len(o)) for t, i, s, o, r, e, g, a in rows if g == 'B 薄'))
+    w('、'.join('%s(%d)' % (t, len(o)) for t, i, s, o, r, e, g in rows if g == 'B 薄'))
     w('\n\n**C 仅布局（自有 0，属性面上等同一块带样式的面板）**：')
-    w('、'.join(t for t, i, s, o, r, e, g, a in rows if g == 'C 仅布局'))
+    w('、'.join(t for t, i, s, o, r, e, g in rows if g == 'C 仅布局'))
     w('\n\n')
     w('C 档不是"没实现"——这些控件在 C++ 里都有真实原生窗口/自绘实现、事件也照常派发，'
       '只是**业务字段没有暴露成属性**。要让它们进设计器可配置，得按需要补属性表条目；'
       '这也是 `plugins` 层用 XAML 组合补位的典型对象（组合态用子控件属性，不硬造新属性）。\n\n')
 
-    w('## 五、别名现状（建议只用主标签）\n\n')
-    w('同一实现注册了多个标签，`XAML` 里写别名能跑，但会让人分不清"这到底是哪个控件"。'
-      '按项目规矩**只用第一列主标签**，别名仅作历史兼容：\n\n')
-    w('| 主标签 | 历史别名（勿用） |\n|---|---|\n')
-    for tag, impl, src, own, ro, ev, g, alias in rows:
-        if alias != '—':
-            w('| %s | %s |\n' % (tag, alias))
-    w('\n')
-    w('冲突点（别名被别的层占着，所以自绘控件另起主名）：\n\n')
-    w('- `TreeView` / `tree` 归原生 `SysTreeView32`（`TreeCtrl`），自绘层次表只能用 `TreeTable`。\n')
-    w('- `ToolBar` / `toolbar` 归布局容器，自绘按钮条只能用 `ToolStrip`。\n')
-    w('- `ListView` 归原生 `SysListView32`（`ListCtrl`），虚拟列表只能用 `VirtualList`。\n')
-    w('- `Canvas` 归绝对布局容器，画命令画布只能用 `QCanvas`（正名 `DrawCanvas` / `PaintCanvas`）。\n')
-    w('- `Dialog` / `Drawer` 与 `Popup` 同一实现（标题条 + 正文），属性表相同。\n\n')
+    w('## 五、命名规范\n\n')
+    w('标签统一为 `X + 本意名`（`XButton` / `XTextBox` / `XStackPanel` / `XWindow`），'\
+      '只保留唯一一个标签，历史别名（`BTN` / `Edit` / `TreeView` / `Progress` 等）已全部删除。\n'\
+      '解析入口统一去前缀取本意名，`<Button>` 这类旧写法不再注册。\n\n')
 
     w('## 六、本轮已修 / 剩余缺口\n\n')
     w('**本轮已修（v0.10.17）**\n\n')

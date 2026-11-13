@@ -5,51 +5,51 @@
   只使用控件主标签（不用别名），属性名与 prop_schema() 一致。
   结构：Window > StackPanel 纵向堆叠，每块一个语义分组。
 -->
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="01 基础控件" Width="520" Height="720" Background="#F4F6F8">
 
-  <StackPanel Margin="16" Spacing="10">
+  <XStackPanel Margin="16" Spacing="10">
 
-    <TextBlock x:Name="Hdr1" Text="按钮与勾选" Height="26" FontSize="14" FontWeight="Bold"/>
-    <Button x:Name="Run" Text="运行" Height="32" Click="on_run"/>
-    <ToggleButton x:Name="Night" Text="夜间模式" Height="30" CheckedChanged="on_night"/>
-    <CheckBox x:Name="Agree" Text="同意条款" Height="26" CheckedChanged="on_agree"/>
-    <RadioButton x:Name="PlanA" Text="方案 A" Height="26"/>
-    <GroupBox x:Name="Group1" Header="参数组" Height="64"/>
-    <BitmapButton x:Name="Export" Text="导出" Height="32"/>
-    <StaticBitmap x:Name="Preview" Height="48"/>
+    <XTextBlock x:Name="Hdr1" Text="按钮与勾选" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XButton x:Name="Run" Text="运行" Height="32" Click="on_run"/>
+    <XToggleButton x:Name="Night" Text="夜间模式" Height="30" CheckedChanged="on_night"/>
+    <XCheckBox x:Name="Agree" Text="同意条款" Height="26" CheckedChanged="on_agree"/>
+    <XRadioButton x:Name="PlanA" Text="方案 A" Height="26"/>
+    <XGroupBox x:Name="Group1" Header="参数组" Height="64"/>
+    <XBitmapButton x:Name="Export" Text="导出" Height="32"/>
+    <XStaticBitmap x:Name="Preview" Height="48"/>
 
-    <StaticLine x:Name="Sep1" Height="8"/>
+    <XStaticLine x:Name="Sep1" Height="8"/>
 
-    <TextBlock x:Name="Hdr2" Text="文本输入" Height="26" FontSize="14" FontWeight="Bold"/>
-    <TextBlock x:Name="Caption" Text="回路编号" Height="22" Foreground="#64748B"/>
-    <TextBox x:Name="Code" Text="WL-AT1-1" Placeholder="请输入编号" MaxLength="32" Height="30"
+    <XTextBlock x:Name="Hdr2" Text="文本输入" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XTextBlock x:Name="Caption" Text="回路编号" Height="22" Foreground="#64748B"/>
+    <XTextBox x:Name="Code" Text="WL-AT1-1" Placeholder="请输入编号" MaxLength="32" Height="30"
              TextChanged="on_code"/>
-    <TextBox x:Name="Note" Text="多行备注：可用于记录现场条件" Multiline="true" Height="64"/>
-    <TextBox x:Name="ReadOnly" Text="只读内容" IsReadOnly="true" Height="30"/>
-    <CodeEditor x:Name="Src" Syntax="xaml" Text="&lt;Button Text=&quot;运行&quot;/&gt;" Height="70"/>
-    <RichText x:Name="Rtf" Text="富文本段落，字号与前景色走统一外观。" Bold="true" FontSize="11"
+    <XTextBox x:Name="Note" Text="多行备注：可用于记录现场条件" Multiline="true" Height="64"/>
+    <XTextBox x:Name="ReadOnly" Text="只读内容" IsReadOnly="true" Height="30"/>
+    <XCodeEditor x:Name="Src" Syntax="xaml" Text="&lt;Button Text=&quot;运行&quot;/&gt;" Height="70"/>
+    <XRichText x:Name="Rtf" Text="富文本段落，字号与前景色走统一外观。" Bold="true" FontSize="11"
               Foreground="#1F2937" Height="70"/>
-    <Hyperlink x:Name="Help" Text="查看规范" Url="https://example.com/doc" Height="26"/>
+    <XHyperlink x:Name="Help" Text="查看规范" Url="https://example.com/doc" Height="26"/>
 
-    <StaticLine x:Name="Sep2" Height="8"/>
+    <XStaticLine x:Name="Sep2" Height="8"/>
 
-    <TextBlock x:Name="Hdr3" Text="选择与取值" Height="26" FontSize="14" FontWeight="Bold"/>
-    <ComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25|VV-3×10" SelectedIndex="0"
+    <XTextBlock x:Name="Hdr3" Text="选择与取值" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25|VV-3×10" SelectedIndex="0"
               DropDownStyle="DropDown" Height="28" SelectionChanged="on_cable"/>
-    <Choice x:Name="Zone" Items="A 区|B 区|C 区" Height="28"/>
-    <ListBox x:Name="Loads" Items="照明 12kW|动力 30kW|空调 8kW" SelectionMode="Single" Height="88"/>
-    <ProgressBar x:Name="Pct" Minimum="0" Maximum="100" Value="65" Height="22"/>
-    <Slider x:Name="Level" Minimum="0" Maximum="100" Value="45" Height="32"/>
-    <SpinBox x:Name="Count" Minimum="1" Maximum="64" Value="12" Height="30"/>
-    <RangeSlider x:Name="Band" Minimum="0" Maximum="100" LowValue="25" HighValue="75" Height="32"/>
-    <Dial x:Name="Knob" Minimum="0" Maximum="100" Value="40" Height="60"/>
-    <Tumbler x:Name="Hour" Count="24" SelectedIndex="3" Height="64"/>
-    <ScrollBar x:Name="Bar" Minimum="0" Maximum="200" Value="35" PageSize="20"
+    <XChoice x:Name="Zone" Items="A 区|B 区|C 区" Height="28"/>
+    <XListBox x:Name="Loads" Items="照明 12kW|动力 30kW|空调 8kW" SelectionMode="Single" Height="88"/>
+    <XProgressBar x:Name="Pct" Minimum="0" Maximum="100" Value="65" Height="22"/>
+    <XSlider x:Name="Level" Minimum="0" Maximum="100" Value="45" Height="32"/>
+    <XSpinBox x:Name="Count" Minimum="1" Maximum="64" Value="12" Height="30"/>
+    <XRangeSlider x:Name="Band" Minimum="0" Maximum="100" LowValue="25" HighValue="75" Height="32"/>
+    <XDial x:Name="Knob" Minimum="0" Maximum="100" Value="40" Height="60"/>
+    <XTumbler x:Name="Hour" Count="24" SelectedIndex="3" Height="64"/>
+    <XScrollBar x:Name="Bar" Minimum="0" Maximum="200" Value="35" PageSize="20"
                Orientation="Vertical" Height="40"/>
-    <Switch x:Name="Power" Checked="true" Height="28"/>
-    <BusyIndicator x:Name="Busy" Height="48"/>
-    <PageIndicator x:Name="Dots" Count="3" SelectedIndex="1" Height="20"/>
+    <XSwitch x:Name="Power" Checked="true" Height="28"/>
+    <XBusyIndicator x:Name="Busy" Height="48"/>
+    <XPageIndicator x:Name="Dots" Count="3" SelectedIndex="1" Height="20"/>
 
-  </StackPanel>
-</Window>
+  </XStackPanel>
+</XWindow>

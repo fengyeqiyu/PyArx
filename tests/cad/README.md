@@ -36,7 +36,7 @@ AutoCAD 2024 常驻一个实例，Python 解释器由 ARX 首次命令时懒初�
 | `cad_form_test.py` + `cad_ui.xaml` | `create_embedded(CAD 主窗口 HWND)` + `guiload(target=w)` | 独立顶层窗体（`PyMfcNativeWindow`，540×460） | 8 个控件：TextBlock / 2×Button / CheckBox / ProgressBar(65%) / TextBox / GridView(12 格，选中 4) / QCanvas(5 种画命令) |
 | `cad_palette_test.py` + `cad_ui_palette.xaml` | `PyArxCore.Ap.getPalette(...)` + `guiload(palette=pal)` | 左侧停靠侧栏（`CAdUiPaletteSet`，标题 `PY-MFC-PALETTE`） | 7 个控件：TextBlock / 2×Button / CheckBox / ProgressBar(65%) / TextBox / QCanvas |
 
-侧栏 XAML 的根节点必须是 `<PaletteSet>`，页是 `<Page Header="...">`；页内走的是 flow（纵向堆叠）布局，
+侧栏 XAML 的根节点必须是 `<XPaletteSet>`，页是 `<XPage Header="...">`；页内走的是 flow（纵向堆叠）布局，
 每个控件必须写 `x:Name`，否则 `guiload` 直接抛 `需要 x:Name 属性`。
 根节点必须声明 `xmlns:x`，否则 XML 解析阶段就会因 `x:Name` 前缀未绑定而失败（`unbound prefix`）。
 

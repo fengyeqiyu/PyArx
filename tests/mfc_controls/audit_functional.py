@@ -153,18 +153,18 @@ def api_surface():
 
 def build_window():
     xaml = '''<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="功能审计" Width="560" Height="760">
-  <StackPanel Margin="14" Spacing="8">
-    <Hyperlink x:Name="lnk" Text="打开示例链接" Url="https://example.com" Height="30"/>
-    <Splitter x:Name="spl" Height="20"/>
-    <TextBox x:Name="below" Text="分隔条下方内容" Height="40"/>
-    <ScrolledWindow x:Name="scr" ScrollMin="0" ScrollMax="500" Height="90"/>
-    <CalendarCtrl x:Name="cal" Height="160"/>
-    <RichText x:Name="rtf" Height="110"/>
-    <BitmapButton x:Name="bb" Text="运行" Height="46"/>
-    <ComboBox x:Name="cmb" Height="30"/>
-  </StackPanel>
-</Window>
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="功能审计" Width="560" Height="760">
+  <XStackPanel Margin="14" Spacing="8">
+    <XHyperlink x:Name="lnk" Text="打开示例链接" Url="https://example.com" Height="30"/>
+    <XSplitter x:Name="spl" Height="20"/>
+    <XTextBox x:Name="below" Text="分隔条下方内容" Height="40"/>
+    <XScrolledWindow x:Name="scr" ScrollMin="0" ScrollMax="500" Height="90"/>
+    <XCalendarCtrl x:Name="cal" Height="160"/>
+    <XRichText x:Name="rtf" Height="110"/>
+    <XBitmapButton x:Name="bb" Text="运行" Height="46"/>
+    <XComboBox x:Name="cmb" Height="30"/>
+  </XStackPanel>
+</XWindow>
 '''
     path = os.path.join(HERE, '_audit_probe.xaml')
     with open(path, 'w', encoding='utf-8') as fh:

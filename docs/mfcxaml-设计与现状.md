@@ -7,10 +7,10 @@
 ## 一、架构规矩（最高优先级）
 
 1. **MFCXaml 只提供控件库**：`Button/Label/TextBox/ListCtrl/ListBox/Panel/StaticLine/StaticBitmap` 等基础控件；不在 C++ 里为业务界面写布局，也不在 Python 里算像素。
-2. **复合控件用 XAML 组合基础控件**，放 `G:\PyArx\plugins`：一个 `<Window Name="...">` 文件 = 一个复合控件，`x:Name` 是子控件名，几何来自 `M.xamlLayout(path, w, h)`。
+2. **复合控件用 XAML 组合基础控件**，放 `G:\PyArx\plugins`：一个 `<XWindow Name="...">` 文件 = 一个复合控件，`x:Name` 是子控件名，几何来自 `M.xamlLayout(path, w, h)`。
 3. **通用组合可下沉成 C++ 控件类**，接口不变（XAML 标签名、属性、`on_*` 回调名都不改，只把创建与事件搬进 C++）；判定标准见 `plugins\README.md`。
 4. **所有回调一律回 Python**，两种写法等价可混用：
-   - XAML 预声明：`<Button Name="BtnApply" Text="应用" on_click="on_apply"/>`，加载时按名字在调用方作用域解析；
+   - XAML 预声明：`<XButton Name="BtnApply" Text="应用" on_click="on_apply"/>`，加载时按名字在调用方作用域解析；
    - 运行期赋值：`btn = xamlload(path); btn.BtnApply.click = fn`。
    事件名：`click / dblclick / change / grid`（`grid` 回调签名 `(action, row, col, text)`）。
 5. **布局大小交给 XAML**；Python 侧仍存的手算坐标属未完成项，不是规范。

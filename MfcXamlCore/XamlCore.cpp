@@ -1,4 +1,5 @@
 ﻿#include "XamlCore.h"
+#include "controls/XamlMfcTags.h"
 
 #include <msxml6.h>
 #include <algorithm>
@@ -385,7 +386,7 @@ namespace
             child->get_tagName(&tagB);
             std::wstring childTag = tagB != nullptr ? tagB : L"";
             ::SysFreeString(tagB);
-            if (childTag != defsTag)
+            if (_wcsicmp(xamlmfc::BareTag(childTag).c_str(), defsTag.c_str()) != 0)
             {
                 child->Release();
                 continue;
@@ -415,7 +416,7 @@ namespace
                 def->get_tagName(&dt);
                 std::wstring defTag = dt != nullptr ? dt : L"";
                 ::SysFreeString(dt);
-                if (defTag == itemTag)
+                if (_wcsicmp(xamlmfc::BareTag(defTag).c_str(), itemTag.c_str()) == 0)
                     target.emplace_back(sizeAttr, Attr(def, sizeAttr.c_str()));
                 def->Release();
             }
@@ -954,9 +955,10 @@ namespace
         }
         if (!node.hasH)
         {
-            if (_wcsicmp(node.tag.c_str(), L"ToolBar") == 0) node.h = 32;
-            else if (_wcsicmp(node.tag.c_str(), L"MenuBar") == 0) node.h = 24;
-            else if (_wcsicmp(node.tag.c_str(), L"StatusBar") == 0) node.h = 24;
+            const std::wstring bare = xamlmfc::BareTag(node.tag);
+            if (_wcsicmp(bare.c_str(), L"ToolBar") == 0) node.h = 32;
+            else if (_wcsicmp(bare.c_str(), L"MenuBar") == 0) node.h = 24;
+            else if (_wcsicmp(bare.c_str(), L"StatusBar") == 0) node.h = 24;
         }
         node.row = IntAttr(node.get(L"Grid.Row"), 0);
         node.col = IntAttr(node.get(L"Grid.Column"), 0);
@@ -968,7 +970,7 @@ namespace
         node.horizontal = _wcsicmp(node.get(L"Orientation").c_str(), L"Horizontal") == 0;
         node.hasOrientation = !node.get(L"Orientation").empty();
 
-        if (_wcsicmp(node.tag.c_str(), L"Grid") == 0)
+        if (_wcsicmp(xamlmfc::BareTag(node.tag).c_str(), L"Grid") == 0)
         {
             ParseDefs(element, true, node);
             ParseDefs(element, false, node);
@@ -1134,6 +1136,9 @@ namespace
         const size_t brace = tag.rfind(L'}');
         if (brace != std::wstring::npos)
             tag = tag.substr(brace + 1);
+        // 统一命名：<XButton> / <XStackPanel> 去掉前缀后按本意名分派
+        if (tag.size() > 1 && (tag[0] == L'X' || tag[0] == L'x') && iswupper(tag[1]))
+            tag = tag.substr(1);
         for (wchar_t& c : tag)
             c = (wchar_t)towlower(c);
         const size_t dot = tag.rfind(L'.');
@@ -2703,9 +2708,10 @@ namespace
         node.h = (hAttr.empty() || hAuto) ? dh : IntAttr(hAttr, dh);
         if (!node.hasH)
         {
-            if (_wcsicmp(node.tag.c_str(), L"ToolBar") == 0) node.h = 32;
-            else if (_wcsicmp(node.tag.c_str(), L"MenuBar") == 0) node.h = 24;
-            else if (_wcsicmp(node.tag.c_str(), L"StatusBar") == 0) node.h = 24;
+            const std::wstring bare = xamlmfc::BareTag(node.tag);
+            if (_wcsicmp(bare.c_str(), L"ToolBar") == 0) node.h = 32;
+            else if (_wcsicmp(bare.c_str(), L"MenuBar") == 0) node.h = 24;
+            else if (_wcsicmp(bare.c_str(), L"StatusBar") == 0) node.h = 24;
         }
         node.x = IntAttr(node.get(L"Left"), 0);
         node.y = IntAttr(node.get(L"Top"), 0);

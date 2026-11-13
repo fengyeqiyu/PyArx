@@ -52,7 +52,7 @@ check('grid 扣掉 Margin', (gw, gh) == (420 - 24, 300 - 24), f'{gw}x{gh}')
 
 # 6. 序列化往返
 text = doc.toXml()
-check('toXml 含 Window', '<Window' in text and 'Grid' in text)
+check('toXml 含 Window', '<XWindow' in text and 'Grid' in text)
 doc2 = xaml.loadString(text)
 check('toXml 可回读', doc2.root.tag == 'Window' and doc2.root.find('btnLeft') is not None)
 
@@ -84,7 +84,7 @@ print('info  defaultSize(Button) =', ds)
 
 # 12. 报错路径
 try:
-    xaml.loadString('<Window><Button x:Name="a"/></Window>')
+    xaml.loadString('<XWindow><XButton x:Name="a"/></XWindow>')
     check('缺 xmlns:x 应报错', False, '未报错')
 except RuntimeError as e:
     check('缺 xmlns:x 报错文案', 'XML 解析失败' in str(e), str(e))

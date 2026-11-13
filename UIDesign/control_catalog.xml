@@ -11,7 +11,7 @@
 -->
 <package name="PyArx" desc="PyArx XAML 控件目录">
 
-  <objectinfo tag="Button" display="Button" category="Buttons" w="100" h="28">
+  <objectinfo tag="XButton" display="Button" category="Buttons" w="100" h="28">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Icon" type="text"/>
@@ -37,7 +37,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="CheckBox" display="CheckBox" category="Buttons" w="100" h="28">
+  <objectinfo tag="XCheckBox" display="CheckBox" category="Buttons" w="100" h="28">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Checked" type="bool"/>
@@ -62,7 +62,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="RadioButton" display="RadioButton" category="Buttons" w="100" h="28">
+  <objectinfo tag="XRadioButton" display="RadioButton" category="Buttons" w="100" h="28">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
@@ -85,7 +85,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="ToggleButton" display="ToggleButton" category="Buttons" w="100" h="28">
+  <objectinfo tag="XToggleButton" display="ToggleButton" category="Buttons" w="100" h="28">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -108,7 +108,7 @@
     <property name="Content" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="BitmapButton" display="BitmapButton" category="Buttons" w="100" h="28">
+  <objectinfo tag="XBitmapButton" display="BitmapButton" category="Buttons" w="100" h="28">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -130,7 +130,7 @@
     <property name="Content" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="TextBox" display="TextBox" category="Input Widgets" w="120" h="28">
+  <objectinfo tag="XTextBox" display="TextBox" category="Input Widgets" w="120" h="28">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
@@ -157,7 +157,7 @@
     <property name="Multiline" type="bool"/>
   </objectinfo>
 
-  <objectinfo tag="ComboBox" display="ComboBox" category="Input Widgets" w="120" h="28">
+  <objectinfo tag="XComboBox" display="ComboBox" category="Input Widgets" w="120" h="28">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
@@ -182,7 +182,7 @@
     <property name="DropDownStyle" type="enum" options="DropDown|DropDownList"/>
   </objectinfo>
 
-  <objectinfo tag="ListBox" display="ListBox" category="Input Widgets" w="120" h="100">
+  <objectinfo tag="XListBox" display="ListBox" category="Input Widgets" w="120" h="100">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -207,7 +207,7 @@
     <property name="SelectionMode" type="enum" options="Single|Multiple"/>
   </objectinfo>
 
-  <objectinfo tag="Choice" display="Choice" category="Input Widgets" w="120" h="28">
+  <objectinfo tag="XChoice" display="Choice" category="Input Widgets" w="120" h="28">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -229,7 +229,7 @@
     <property name="Items" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="DatePicker" display="DatePicker" category="Input Widgets" w="140" h="28">
+  <objectinfo tag="XDatePicker" display="DatePicker" category="Input Widgets" w="140" h="28">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -251,7 +251,7 @@
     <property name="Value" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="CodeEditor" display="CodeEditor" category="Input Widgets" w="360" h="160">
+  <objectinfo tag="XCodeEditor" display="CodeEditor" category="Input Widgets" w="360" h="160">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -274,7 +274,7 @@
     <property name="IsReadOnly" type="bool"/>
   </objectinfo>
 
-  <objectinfo tag="Slider" display="Slider" category="Input Widgets" w="200" h="34">
+  <objectinfo tag="XSlider" display="Slider" category="Input Widgets" w="200" h="34">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -297,7 +297,7 @@
     <property name="Value" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="Switch" display="Switch" category="Input Widgets" w="64" h="28">
+  <objectinfo tag="XSwitch" display="Switch" category="Input Widgets" w="64" h="28">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -318,7 +318,7 @@
     <property name="Checked" type="bool"/>
   </objectinfo>
 
-  <objectinfo tag="SpinBox" display="SpinBox" category="Input Widgets" w="120" h="30">
+  <objectinfo tag="XSpinBox" display="SpinBox" category="Input Widgets" w="120" h="30">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -341,7 +341,7 @@
     <property name="Value" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="RangeSlider" display="RangeSlider" category="Input Widgets" w="200" h="34">
+  <objectinfo tag="XRangeSlider" display="RangeSlider" category="Input Widgets" w="200" h="34">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -365,7 +365,7 @@
     <property name="Maximum" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="Dial" display="Dial" category="Input Widgets" w="88" h="88">
+  <objectinfo tag="XDial" display="Dial" category="Input Widgets" w="88" h="88">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -388,7 +388,7 @@
     <property name="Value" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="Tumbler" display="Tumbler" category="Input Widgets" w="88" h="96">
+  <objectinfo tag="XTumbler" display="Tumbler" category="Input Widgets" w="88" h="96">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -410,7 +410,7 @@
     <property name="SelectedIndex" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="ScrollBar" display="ScrollBar" category="Input Widgets" w="200" h="18">
+  <objectinfo tag="XScrollBar" display="ScrollBar" category="Input Widgets" w="200" h="18">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -435,7 +435,7 @@
     <property name="Orientation" type="enum" options="horizontal|vertical"/>
   </objectinfo>
 
-  <objectinfo tag="TextBlock" display="TextBlock" category="Display Widgets" w="100" h="24">
+  <objectinfo tag="XTextBlock" display="TextBlock" category="Display Widgets" w="100" h="24">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
@@ -457,7 +457,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="ProgressBar" display="ProgressBar" category="Display Widgets" w="120" h="16">
+  <objectinfo tag="XProgressBar" display="ProgressBar" category="Display Widgets" w="120" h="16">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -481,7 +481,7 @@
     <property name="Value" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="Hyperlink" display="Hyperlink" category="Display Widgets" w="120" h="24">
+  <objectinfo tag="XHyperlink" display="Hyperlink" category="Display Widgets" w="120" h="24">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
@@ -503,7 +503,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="RichText" display="RichText" category="Display Widgets" w="200" h="100">
+  <objectinfo tag="XRichText" display="RichText" category="Display Widgets" w="200" h="100">
     <property name="Name" type="text"/>
     <property name="Text" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
@@ -525,7 +525,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="StaticBitmap" display="StaticBitmap" category="Display Widgets" w="80" h="80">
+  <objectinfo tag="XStaticBitmap" display="StaticBitmap" category="Display Widgets" w="80" h="80">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -546,7 +546,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="CalendarCtrl" display="CalendarCtrl" category="Display Widgets" w="180" h="160">
+  <objectinfo tag="XCalendarCtrl" display="CalendarCtrl" category="Display Widgets" w="180" h="160">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -567,7 +567,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="BusyIndicator" display="BusyIndicator" category="Display Widgets" w="56" h="56">
+  <objectinfo tag="XBusyIndicator" display="BusyIndicator" category="Display Widgets" w="56" h="56">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -587,7 +587,7 @@
     <property name="FontFamily" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="PageIndicator" display="PageIndicator" category="Data Views" w="160" h="22">
+  <objectinfo tag="XPageIndicator" display="PageIndicator" category="Data Views" w="160" h="22">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -609,7 +609,7 @@
     <property name="SelectedIndex" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="TableView" display="TableView" category="Data Views" w="160" h="32">
+  <objectinfo tag="XTableView" display="TableView" category="Data Views" w="160" h="32">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -633,7 +633,7 @@
     <property name="RowCount" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="TreeTable" display="TreeTable" category="Data Views" w="320" h="140">
+  <objectinfo tag="XTreeTable" display="TreeTable" category="Data Views" w="320" h="140">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -655,7 +655,7 @@
     <property name="SelectedIndex" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="VirtualList" display="VirtualList" category="Data Views" w="240" h="140">
+  <objectinfo tag="XVirtualList" display="VirtualList" category="Data Views" w="240" h="140">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -679,7 +679,7 @@
     <property name="ItemCount" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="StackView" display="StackView" category="Data Views" w="360" h="160">
+  <objectinfo tag="XStackView" display="StackView" category="Data Views" w="360" h="160">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -701,7 +701,7 @@
     <property name="PageCount" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="SwipeView" display="SwipeView" category="Data Views" w="360" h="160">
+  <objectinfo tag="XSwipeView" display="SwipeView" category="Data Views" w="360" h="160">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -723,7 +723,7 @@
     <property name="PageCount" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="GridView" display="GridView" category="Data Views" w="320" h="160">
+  <objectinfo tag="XGridView" display="GridView" category="Data Views" w="320" h="160">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -748,7 +748,7 @@
     <property name="ItemCount" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="PathView" display="PathView" category="Data Views" w="320" h="140">
+  <objectinfo tag="XPathView" display="PathView" category="Data Views" w="320" h="140">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -770,7 +770,7 @@
     <property name="SelectedIndex" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="Page" display="Page" category="Data Views" w="360" h="160">
+  <objectinfo tag="XPage" display="Page" category="Data Views" w="360" h="160">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -792,7 +792,7 @@
     <property name="PageCount" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="GroupBox" display="GroupBox" category="Containers" w="160" h="80">
+  <objectinfo tag="XGroupBox" display="GroupBox" category="Containers" w="160" h="80">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -814,7 +814,7 @@
     <property name="Caption" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="TabControl" display="TabControl" category="Containers" w="200" h="120">
+  <objectinfo tag="XTabControl" display="TabControl" category="Containers" w="200" h="120">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -836,7 +836,7 @@
     <property name="Pages" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="Border" display="Border" category="Containers" w="160" h="100">
+  <objectinfo tag="XBorder" display="Border" category="Containers" w="160" h="100">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -857,7 +857,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="Panel" display="Panel" category="Containers" w="160" h="100">
+  <objectinfo tag="XPanel" display="Panel" category="Containers" w="160" h="100">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -878,7 +878,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="Splitter" display="Splitter" category="Containers" w="8" h="200">
+  <objectinfo tag="XSplitter" display="Splitter" category="Containers" w="8" h="200">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -899,7 +899,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="TreeCtrl" display="TreeCtrl" category="Containers" w="160" h="120">
+  <objectinfo tag="XTreeCtrl" display="TreeCtrl" category="Containers" w="160" h="120">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -920,7 +920,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="ListCtrl" display="ListCtrl" category="Containers" w="160" h="120">
+  <objectinfo tag="XListCtrl" display="ListCtrl" category="Containers" w="160" h="120">
     <property name="Name" type="text"/>
     <property name="Columns" type="text"/>
     <property name="Rows" type="text"/>
@@ -944,7 +944,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="StaticLine" display="StaticLine" category="Containers" w="120" h="4">
+  <objectinfo tag="XStaticLine" display="StaticLine" category="Containers" w="120" h="4">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -965,7 +965,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="GridCtrl" display="GridCtrl" category="Containers" w="200" h="120">
+  <objectinfo tag="XGridCtrl" display="GridCtrl" category="Containers" w="200" h="120">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -988,7 +988,7 @@
     <property name="Rows" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="ScrolledWindow" display="ScrolledWindow" category="Containers" w="200" h="120">
+  <objectinfo tag="XScrolledWindow" display="ScrolledWindow" category="Containers" w="200" h="120">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="Background" type="color"/>
@@ -1009,7 +1009,7 @@
     <property name="ScrollStyle" type="enum" options="None|Vertical|Horizontal|Both"/>
   </objectinfo>
 
-  <objectinfo tag="Flickable" display="Flickable" category="Containers" w="320" h="160">
+  <objectinfo tag="XFlickable" display="Flickable" category="Containers" w="320" h="160">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -1031,7 +1031,7 @@
     <property name="OffsetY" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="ToolStrip" display="ToolStrip" category="Function Bar" w="360" h="32">
+  <objectinfo tag="XToolStrip" display="ToolStrip" category="Function Bar" w="360" h="32">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -1053,7 +1053,7 @@
     <property name="SelectedIndex" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="MenuStrip" display="MenuStrip" category="Function Bar" w="360" h="28">
+  <objectinfo tag="XMenuStrip" display="MenuStrip" category="Function Bar" w="360" h="28">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -1075,7 +1075,7 @@
     <property name="SelectedIndex" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="ToolTip" display="ToolTip" category="Overlay" w="160" h="24">
+  <objectinfo tag="XToolTip" display="ToolTip" category="Overlay" w="160" h="24">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -1096,7 +1096,7 @@
     <property name="Text" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="Menu" display="Menu" category="Overlay" w="200" h="120">
+  <objectinfo tag="XMenu" display="Menu" category="Overlay" w="200" h="120">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -1118,7 +1118,7 @@
     <property name="SelectedIndex" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="Popup" display="Popup" category="Overlay" w="320" h="160">
+  <objectinfo tag="XPopup" display="Popup" category="Overlay" w="320" h="160">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -1141,7 +1141,7 @@
     <property name="Lines" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="PowerCanvas" display="PowerCanvas" category="Canvas" w="420" h="260">
+  <objectinfo tag="XPowerCanvas" display="PowerCanvas" category="Canvas" w="420" h="260">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -1162,7 +1162,7 @@
     <property name="Data" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="QCanvas" display="QCanvas" category="Canvas" w="420" h="200">
+  <objectinfo tag="XQCanvas" display="QCanvas" category="Canvas" w="420" h="200">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>
     <property name="BackColor" type="color"/>
@@ -1184,14 +1184,14 @@
     <property name="Script" type="text"/>
   </objectinfo>
 
-  <objectinfo tag="Line" display="Line" category="Draw" w="120" h="2">
+  <objectinfo tag="XLine" display="Line" category="Draw" w="120" h="2">
     <property name="Name" type="text"/>
     <property name="Direction" type="enum" options="Down|Up|H|V"/>
     <property name="Foreground" type="color"/>
     <property name="BorderThickness" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="Rectangle" display="Rectangle" category="Draw" w="160" h="90">
+  <objectinfo tag="XRectangle" display="Rectangle" category="Draw" w="160" h="90">
     <property name="Name" type="text"/>
     <property name="Background" type="color"/>
     <property name="BorderColor" type="color"/>
@@ -1200,7 +1200,7 @@
     <property name="Opacity" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="Ellipse" display="Ellipse" category="Draw" w="120" h="120">
+  <objectinfo tag="XEllipse" display="Ellipse" category="Draw" w="120" h="120">
     <property name="Name" type="text"/>
     <property name="Background" type="color"/>
     <property name="BorderColor" type="color"/>
@@ -1208,7 +1208,7 @@
     <property name="Opacity" type="int"/>
   </objectinfo>
 
-  <objectinfo tag="Arc" display="Arc" category="Draw" w="140" h="100">
+  <objectinfo tag="XArc" display="Arc" category="Draw" w="140" h="100">
     <property name="Name" type="text"/>
     <property name="StartAngle" type="int"/>
     <property name="SweepAngle" type="int"/>

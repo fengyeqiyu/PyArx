@@ -5,7 +5,7 @@
 1. MFCXaml 只提供控件库（Button / Label / TextBox / ListCtrl / StaticLine / Panel）；
    复合控件不新增 C++ 类，而是"基础控件 + XAML 布局"的组合。
 2. 复合控件定义放在 `G:\\PyArx\\plugins\\*.xaml`，一个文件 = 一个复合控件，
-   根元素 `<Window Name="...">` 就是控件类型名，里面的 `x:Name` 是子控件名。
+   根元素 `<XWindow Name="...">` 就是控件类型名，里面的 `x:Name` 是子控件名。
 3. 所有子控件的事件统一在本类里转成 Python 回调：`on(name, event, cb)`，
    cb 收到 (composite, name, payload)，调用方不用记 id、不用自己算坐标。
 
@@ -92,6 +92,17 @@ EVENT_SPEC = (
 )
 
 _X = '{http://schemas.microsoft.com/winfx/2006/xaml}' 
+
+
+def _bare_tag(tag):
+    """统一命名：<XButton> / <XGrid.RowDefinitions> 去前缀取本意名。"""
+    tag = tag.split('}')[-1]
+    if '.' in tag:
+        tag = tag.rsplit('.', 1)[-1]
+    if len(tag) > 1 and tag[0] in 'Xx' and tag[1].isupper():
+        tag = tag[1:]
+    return tag
+
 
 def _name_of(el):
     """同一份 XAML 里 x:Name 和 Name 都要认：guiload 只认 x:Name，
@@ -219,7 +230,7 @@ class Composite(object):
         idx = 0
         for el in root.iter():
             name = _name_of(el)
-            tag = el.tag.split('}')[-1]
+            tag = _bare_tag(el.tag)
             if not name or tag in ('Window', 'Grid', 'RowDefinition', 'ColumnDefinition'):
                 continue
             spec = _TAG_SPEC.get(tag)

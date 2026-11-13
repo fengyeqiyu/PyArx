@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""把 SVG 直接写进 XAML 属性：<PowerCanvas Data="&lt;svg ...&gt;"/>。
+"""把 SVG 直接写进 XAML 属性：<XPowerCanvas Data="&lt;svg ...&gt;"/>。
 
 用户的要求是"在 xaml 里面加入 svg 矢量化图"，路径必须成立：
 XAML 文档里声明一块画布，属性值就是 SVG 全文，运行时自己解析并绘制。
@@ -27,11 +27,11 @@ def main():
         svg = f.read()
 
     doc = ('<?xml version="1.0" encoding="utf-8"?>\r\n'
-           '<Window Name="SvgDoc" Width="860" Height="620" Title="SVG 在 XAML 里" '
+           '<XWindow Name="SvgDoc" Width="860" Height="620" Title="SVG 在 XAML 里" '
            'Background="#FFFAFCFF">\r\n'
-           '  <PowerCanvas Name="Board" Left="0" Top="0" Width="860" Height="620" Data="'
+           '  <XPowerCanvas Name="Board" Left="0" Top="0" Width="860" Height="620" Data="'
            + esc(svg) + '"/>\r\n'
-           '</Window>\r\n')
+           '</XWindow>\r\n')
     with open(XAML, 'w', encoding='utf-8') as f:
         f.write(doc)
     print('XAML 字符数 %d（其中 SVG %d）' % (len(doc), len(svg)))

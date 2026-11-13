@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""校验 toXaml 现在的输出：一张 <PowerCanvas Data="...JSON..."/>。
+"""校验 toXaml 现在的输出：一张 <XPowerCanvas Data="...JSON..."/>。
 以前这里输出 38 个 <Curve> 标签，Viewer --check 全报"未知标签"。
 """
 import os
@@ -23,7 +23,7 @@ def main():
         f.write(xaml)
 
     print('xaml 字符数 %d' % len(xaml))
-    print('含 PowerCanvas =', '<PowerCanvas' in xaml)
+    print('含 PowerCanvas =', '<XPowerCanvas' in xaml)
     print('含 Curve       =', '<Curve' in xaml)
     print('Data 属性长度  =', xaml.split('Data="', 1)[1].rsplit('"', 1)[0].__len__())
 

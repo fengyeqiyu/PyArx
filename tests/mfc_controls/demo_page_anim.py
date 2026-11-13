@@ -16,27 +16,27 @@ import time
 import PyMfcXaml as p
 
 XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页容器 + 动画开关" Width="600" Height="440">
-  <Layout x:Name="root">
-    <StackView x:Name="sv" Width="520" Height="330" Canvas.Left="20" Canvas.Top="20" />
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页容器 + 动画开关" Width="600" Height="440">
+  <XLayout x:Name="root">
+    <XStackView x:Name="sv" Width="520" Height="330" Canvas.Left="20" Canvas.Top="20" />
 
     <!-- 第 1 页：宽度 + 进度 -->
-    <Switch x:Name="s1" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
-    <TextBlock x:Name="p1t" Text="第 1 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
-    <Button x:Name="p1b" Width="140" Height="42" Text="宽度动画" Canvas.Left="40" Canvas.Top="110" />
-    <Progress x:Name="p1p" Width="420" Height="18" Canvas.Left="40" Canvas.Top="170" Value="0" />
+    <XSwitch x:Name="s1" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
+    <XTextBlock x:Name="p1t" Text="第 1 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
+    <XButton x:Name="p1b" Width="140" Height="42" Text="宽度动画" Canvas.Left="40" Canvas.Top="110" />
+    <XProgressBar x:Name="p1p" Width="420" Height="18" Canvas.Left="40" Canvas.Top="170" Value="0" />
 
     <!-- 第 2 页：数值 -->
-    <Switch x:Name="s2" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
-    <TextBlock x:Name="p2t" Text="第 2 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
-    <SpinBox x:Name="p2s" Width="220" Height="34" Value="0" Minimum="0" Maximum="99" Canvas.Left="40" Canvas.Top="110" />
+    <XSwitch x:Name="s2" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
+    <XTextBlock x:Name="p2t" Text="第 2 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
+    <XSpinBox x:Name="p2s" Width="220" Height="34" Value="0" Minimum="0" Maximum="99" Canvas.Left="40" Canvas.Top="110" />
 
     <!-- 第 3 页：表盘 -->
-    <Switch x:Name="s3" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
-    <TextBlock x:Name="p3t" Text="第 3 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
-    <Dial x:Name="p3d" Width="120" Height="120" Value="0" Minimum="0" Maximum="100" Canvas.Left="40" Canvas.Top="104" />
-  </Layout>
-</Window>'''
+    <XSwitch x:Name="s3" Width="96" Height="40" Value="0" Canvas.Left="40" Canvas.Top="52" />
+    <XTextBlock x:Name="p3t" Text="第 3 页 · 动画已停止" Width="420" Height="24" Canvas.Left="150" Canvas.Top="64" />
+    <XDial x:Name="p3d" Width="120" Height="120" Value="0" Minimum="0" Maximum="100" Canvas.Left="40" Canvas.Top="104" />
+  </XLayout>
+</XWindow>'''
 
 PATH = os.path.join(tempfile.mkdtemp(prefix='pymfc_pganim_'), 'pa.xaml')
 SEG = 600           # 单程

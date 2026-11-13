@@ -205,12 +205,12 @@ def main():
             body = f'    <{tag} x:Name="ctrl" {attr_text}Height="{ch}" />\n'
         xaml = (
             '<?xml version="1.0" encoding="utf-8"?>\n'
-            '<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"\n'
+            '<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"\n'
             f'        Title="{title}" Width="{ww}" Height="{hh}">\n'
-            '  <StackPanel Margin="12" Spacing="6">\n'
+            '  <XStackPanel Margin="12" Spacing="6">\n'
             f'{body}'
-            '  </StackPanel>\n'
-            '</Window>\n'
+            '  </XStackPanel>\n'
+            '</XWindow>\n'
         )
         path = os.path.join(tmpdir, f'{index:02d}_{tag}.xaml')
         with open(path, 'w', encoding='utf-8') as fh:

@@ -103,19 +103,19 @@ def onCtlMouseUp(*a):
     HITS['ctl_mouseup'] = HITS.get('ctl_mouseup', 0) + 1
 
 
-XAML = '''<Window Title="模拟消息测试" Width="620" Height="420">
-  <TextBox Name="T1" Left="16" Top="16" Width="240" Height="28"
+XAML = '''<XWindow Title="模拟消息测试" Width="620" Height="420">
+  <XTextBox Name="T1" Left="16" Top="16" Width="240" Height="28"
            Text="初始" Click="onClick" DoubleClick="onDbl" TextChanged="onText"
            KeyDown="onCtlKeyDown" KeyUp="onCtlKeyUp" MouseDown="onCtlMouseDown" MouseUp="onCtlMouseUp"
            GotFocus="onCtlFocus"/>
-  <CheckBox Name="C1" Left="16" Top="56" Width="140" Height="26"
+  <XCheckBox Name="C1" Left="16" Top="56" Width="140" Height="26"
             Text="勾我" Click="onClick" CheckedChanged="onChecked"/>
-  <ComboBox Name="CB1" Left="16" Top="92" Width="200" Height="26"
+  <XComboBox Name="CB1" Left="16" Top="92" Width="200" Height="26"
             Items="甲|乙|丙" SelectedIndex="0"
             SelectionChanged="onSel" DropDown="onDropDown"/>
-  <Slider Name="S1" Left="16" Top="130" Width="200" Height="24"
+  <XSlider Name="S1" Left="16" Top="130" Width="200" Height="24"
           Minimum="0" Maximum="10" ValueChanged="onValue"/>
-</Window>'''
+</XWindow>'''
 
 fails = []
 

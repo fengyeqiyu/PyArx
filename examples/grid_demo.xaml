@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Window Title="Grid 布局演示" Width="420" Height="300">
-  <Grid Margin="12" Padding="6">
-    <Grid.RowDefinitions>
+<XWindow Title="Grid 布局演示" Width="420" Height="300">
+  <XGrid Margin="12" Padding="6">
+    <XGrid.RowDefinitions>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="32"/>
-    </Grid.RowDefinitions>
-    <Grid.ColumnDefinitions>
+    </XGrid.RowDefinitions>
+    <XGrid.ColumnDefinitions>
       <ColumnDefinition Width="120"/>
       <ColumnDefinition Width="*"/>
-    </Grid.ColumnDefinitions>
+    </XGrid.ColumnDefinitions>
 
-    <TextBlock Name="title" Text="Grid + RowDefinitions + ColumnDefinitions"
+    <XTextBlock Name="title" Text="Grid + RowDefinitions + ColumnDefinitions"
                Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                Height="28" Margin="2"/>
 
-    <Button Name="btnLeft" Text="左侧按钮"
+    <XButton Name="btnLeft" Text="左侧按钮"
             Grid.Row="1" Grid.Column="0" Margin="4"/>
 
-    <ListBox Name="listRight"
+    <XListBox Name="listRight"
              Grid.Row="1" Grid.Column="1" Margin="4"/>
 
-    <TextBlock Name="status" Text="底部状态栏"
+    <XTextBlock Name="status" Text="底部状态栏"
                Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                Margin="2"/>
-  </Grid>
-</Window>
+  </XGrid>
+</XWindow>

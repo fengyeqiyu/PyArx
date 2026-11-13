@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <algorithm>
 #include "XamlCore.h"
+#include "../MfcXamlCore/controls/XamlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
 #include "XamlGeometry.h"      // 绘制与夹点用的纯几何库（正圆弧、直线端点、各类夹点）
 #include "UiDocUtil.h"
 #include "XamlDraw.h"
@@ -110,9 +111,12 @@ namespace uidesign
         DesignCanvas() = default;
 
         // 绑定编辑文档（XamlRuntime 持有 XamlElement 树）；node 为空表示未选中
+
         void setDocument(XamlRuntime* doc)
         {
-            m_doc = doc; m_sel.clear(); m_selPath = nullptr;
+            m_doc = doc;
+            m_sel.clear();
+            m_selPath = nullptr;
             if (m_doc != nullptr && m_doc->root() != nullptr)
             {
                 XamlElement* r = m_doc->root();
@@ -772,9 +776,9 @@ namespace uidesign
         //   Arc       → 2 个（弧的两个端点），拖端点改起始角 / 扫掠角
         //   Ellipse   → 5 个（0 圆心 = 整体移动；1 上 / 2 下 / 3 左 / 4 右 = 改尺寸）
         //   其余控件   → 8 个方框夹点（维持原样）
-        static bool isLineNode(const XamlElement* n) { return n != nullptr && n->tag == L"Line"; }
-        static bool isEllipseNode(const XamlElement* n) { return n != nullptr && n->tag == L"Ellipse"; }
-        static bool isArcNode(const XamlElement* n) { return n != nullptr && n->tag == L"Arc"; }
+        static bool isLineNode(const XamlElement* n) { return n != nullptr && tagIs(n, L"Line"); }
+        static bool isEllipseNode(const XamlElement* n) { return n != nullptr && tagIs(n, L"Ellipse"); }
+        static bool isArcNode(const XamlElement* n) { return n != nullptr && tagIs(n, L"Arc"); }
         // 两端口夹点的"开放图元"（直线、圆弧）
         static bool isOpenShapeNode(const XamlElement* n) { return isLineNode(n) || isArcNode(n); }
 
@@ -871,8 +875,8 @@ namespace uidesign
         void beginDrag(int mode, int handle, CPoint pt, bool undoAlready = false)
         {
             // 文档根（Window）是设计器的"画布本身"，不支持拖动/改尺寸
-            if (m_selPath == nullptr || (m_doc != nullptr && m_selPath == m_doc->root()) ||
-                m_selPath->tag == L"Window") { m_dragMode = kNone; return; }
+            if (m_selPath == nullptr || (m_doc != nullptr && m_selPath == m_doc->root()))
+            { m_dragMode = kNone; return; }
             m_dragMode = static_cast<DragMode>(mode);
             m_resizeHandle = handle;
             m_resizeBoxHandle = boxHandleOf(m_selPath, handle);
@@ -1261,8 +1265,11 @@ namespace uidesign
         // 而 IsContainer 内部按小写比较，两边混用会静默漏掉分支。
         static bool tagIs(const XamlElement* node, const wchar_t* t)
         {
-            return node != nullptr && node->tag.c_str() != nullptr &&
-                   _wcsicmp(node->tag.c_str(), t) == 0;
+            if (node == nullptr || node->tag.c_str() == nullptr)
+                return false;
+            // 统一命名：<XButton> 与旧写法 <Button> 同一判定，去掉 X 前缀再比
+            const std::wstring bare = xamlmfc::BareTag(node->tag);
+            return _wcsicmp(bare.c_str(), t) == 0;
         }
 
         // 图标路径与设计器表面一致：Icon="res/xxx.png" 相对 exe 目录
@@ -1405,15 +1412,15 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             {
                 // 可见容器（TabControl/Border/Panel/ToolBar 等）画占位；纯布局容器保持透明，
                 // 除非它在 XAML 里显式声明了 Background / BorderColor（声明了就按声明渲染）
-                const bool isPalettePage = node->tag == L"Page" || node->tag == L"page" ||
-                                           node->tag == L"TabItem";
+                const bool isPalettePage = tagIs(node, L"Page") || tagIs(node, L"page") ||
+                                           tagIs(node, L"TabItem");
                 const bool layoutOnly = isPalettePage ||
-                                        (node->tag == L"Grid" && false) ||
-                                        node->tag == L"StackPanel" ||
-                                        node->tag == L"Canvas" ||
-                                        node->tag == L"WrapPanel" ||
-                                        node->tag == L"DockPanel" ||
-                                        node->tag == L"GridPanel";
+                                        (tagIs(node, L"Grid") && false) ||
+                                        tagIs(node, L"StackPanel") ||
+                                        tagIs(node, L"Canvas") ||
+                                        tagIs(node, L"WrapPanel") ||
+                                        tagIs(node, L"DockPanel") ||
+                                        tagIs(node, L"GridPanel");
                 if (!layoutOnly)
                 {
                     drawRoundedCv(cv, rc,
@@ -1453,7 +1460,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                    DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
                     }
                 }
-                if (node->tag == L"GroupBox")
+                if (tagIs(node, L"GroupBox"))
                 {
                     drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
                     CRect title = rc;
@@ -1463,7 +1470,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                DT_LEFT | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
                 }
             }
-            else if (node->tag == L"Button")
+            else if (tagIs(node, L"Button"))
             {
                 // 外壳按钮：声明了 Role（胶囊）或"图标 + 标题"时按设计器外壳的样子画，
                 // 否则仍是画布通用按钮预览
@@ -1497,7 +1504,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                     }
                 }
             }
-            else if (node->tag == L"TextBlock" || node->tag == L"Label")
+            else if (tagIs(node, L"TextBlock") || tagIs(node, L"Label"))
             {
                 CRect textRect = rc;
                 if (txtFlags == DT_LEFT)
@@ -1506,7 +1513,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                            fgC == (COLORREF)-1 ? textOn(bgC == (COLORREF)-1 ? inheritBg : bgC) : fgC,
                            txtFlags | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, pt, fam);
             }
-            else if (node->tag == L"TextBox")
+            else if (tagIs(node, L"TextBox"))
             {
                 const COLORREF boxBg = bgC == (COLORREF)-1 ? cvdoc::kField : bgC;
                 drawRoundedCv(cv, rc, boxBg, bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC, 4);
@@ -1538,7 +1545,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                       textRect.left + cx + 1, textRect.bottom - 5), RGB(120, 190, 255));
                 }
             }
-            else if (node->tag == L"CheckBox" || node->tag == L"RadioButton")
+            else if (tagIs(node, L"CheckBox") || tagIs(node, L"RadioButton"))
             {
                 CRect box(rc.left, rc.top + (rc.Height() - 14) / 2,
                           rc.left + 14, rc.top + (rc.Height() + 14) / 2);
@@ -1551,7 +1558,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 if (on)
                 {
                     const COLORREF mark = cvdoc::kAccent;
-                    if (node->tag == L"CheckBox")
+                    if (tagIs(node, L"CheckBox"))
                     {
                         cv.strokeLine(POINT{ box.left + 3, box.top + 7 }, POINT{ box.left + 6, box.bottom - 4 }, mark, 2);
                         cv.strokeLine(POINT{ box.left + 6, box.bottom - 4 }, POINT{ box.right - 3, box.top + 4 }, mark, 2);
@@ -1567,7 +1574,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                            fgC == (COLORREF)-1 ? textOn(bgC == (COLORREF)-1 ? inheritBg : bgC) : fgC,
                            DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
             }
-            else if (node->tag == L"ComboBox")
+            else if (tagIs(node, L"ComboBox"))
             {
                 drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
                 cv.fillRect(CRect(rc.right - 18, rc.top, rc.right, rc.bottom), cvdoc::kTrack);
@@ -1575,7 +1582,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 drawTextCv(cv, tr, node->text, cvdoc::kInk,
                            DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
             }
-            else if (node->tag == L"ListBox")
+            else if (tagIs(node, L"ListBox"))
             {
                 drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
                 for (int r = 0; r < 3; ++r)
@@ -1788,26 +1795,26 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                     cv.clipPop();
                 }
             }
-            else if (node->tag == L"Rectangle" || node->tag == L"Ellipse" || node->tag == L"Line" ||
-                     node->tag == L"Arc")
+            else if (tagIs(node, L"Rectangle") || tagIs(node, L"Ellipse") || tagIs(node, L"Line") ||
+                     tagIs(node, L"Arc"))
             {
                 // 绘图图元：Background 填面、BorderColor/Foreground 描边、BorderThickness 线宽
                 const COLORREF fill = bgC != (COLORREF)-1 ? bgC : cvdoc::kSurface;
                 const COLORREF stroke = fgC != (COLORREF)-1 ? fgC
                                        : (bdC != (COLORREF)-1 ? bdC : cvdoc::kBorder);
                 const int thick = bdThick > 0 ? bdThick : 1;
-                if (node->tag == L"Arc")
+                if (tagIs(node, L"Arc"))
                 {
                     // 圆弧：StartAngle/SweepAngle 决定弧度，包围盒决定长短轴（可椭）
                     int sa = 180, sw = 180;
                     arcParams(node, sa, sw);
                     cv.strokePath(arcPoints(rc, sa, sw, 64), stroke, thick, false);
                 }
-                else if (node->tag == L"Ellipse")
+                else if (tagIs(node, L"Ellipse"))
                 {
                     cv.fillEllipse(rc, fill, stroke);
                 }
-                else if (node->tag == L"Line")
+                else if (tagIs(node, L"Line"))
                 {
                     // Direction 决定这根线走哪条对角线：Down=左上→右下（默认），Up=左下→右上，
                     // 另加 H/V 便于画纯水平、纯垂直的线
@@ -1837,15 +1844,15 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                     }
                 }
             }
-            else if (node->tag == L"ProgressBar")
+            else if (tagIs(node, L"ProgressBar"))
             {
                 cv.fillRect(rc, cvdoc::kTrack);
                 CRect fill = rc; fill.right = fill.left + rc.Width() / 2;
                 cv.fillRect(fill, cvdoc::kAccent);
                 cv.strokeRect(rc, cvdoc::kBorder, 1);
             }
-            else if (node->tag == L"Image" || node->tag == L"ListView" ||
-                     node->tag == L"TabControl" || node->tag == L"Border")
+            else if (tagIs(node, L"Image") || tagIs(node, L"ListView") ||
+                     tagIs(node, L"TabControl") || tagIs(node, L"Border"))
             {
                 drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
                 drawTextCv(cv, rc, std::wstring(L"[") + node->tag + std::wstring(L"]"),
@@ -2072,7 +2079,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                     CRect k(x, rc.CenterPoint().y - 7, x + 10, rc.CenterPoint().y + 7);
                     cv.fillRoundRect(k, cvdoc::kAccent, cvdoc::kAccent, 5);
                 };
-                if (node->tag == L"RangeSlider")
+                if (tagIs(node, L"RangeSlider"))
                 {
                     CRect hot = track;
                     hot.left = rc.left + (int)((rc.Width() - 10) * _wtoi(node->get(L"LowValue").c_str()) / 100.0);
@@ -2130,7 +2137,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
             }
             else if (tagIs(node, L"MenuStrip") || tagIs(node, L"ToolStrip") || tagIs(node, L"Menu"))
             {
-                const bool bar = node->tag != L"Menu";
+                const bool bar = !tagIs(node, L"Menu");
                 if (bar) cv.fillRect(rc, cvdoc::kHead);
                 else drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
                 cv.strokeLine(POINT{ rc.left, rc.bottom - 1 }, POINT{ rc.right, rc.bottom - 1 },
@@ -2252,13 +2259,13 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 drawTextCv(cv, tr, items.empty() ? node->text : items[0], cvdoc::kInk,
                            DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
             }
-            else if (node->tag == L"StaticLine")
+            else if (tagIs(node, L"StaticLine"))
             {
                 // 分隔线：一条横线，不再画成"文字卡片"
                 const int midY = (rc.top + rc.bottom) / 2;
                 cv.strokeLine(POINT{ rc.left, midY }, POINT{ rc.right, midY }, cvdoc::kBorder, 1);
             }
-            else if (node->tag == L"StaticBitmap")
+            else if (tagIs(node, L"StaticBitmap"))
             {
                 // 画布不加载图片文件，用浅底 + 图元标记表示"这里有一张位图"；
                 // 运行时（预览器/正式界面）按 Image 属性真画图
@@ -2266,7 +2273,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 drawTextCv(cv, rc, std::wstring(L"\u25A3"), cvdoc::kMuted,
                            DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
             }
-            else if (node->tag == L"Switch")
+            else if (tagIs(node, L"Switch"))
             {
                 const std::wstring ck = node->get(L"Checked");
                 const bool on = (_wcsicmp(ck.c_str(), L"true") == 0 || ck == L"1");
@@ -2287,7 +2294,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
                 }
             }
-            else if (node->tag == L"SpinBox")
+            else if (tagIs(node, L"SpinBox"))
             {
                 drawRoundedCv(cv, rc, cvdoc::kField, cvdoc::kBorder, 3);
                 CRect step(rc.right - 18, rc.top + 1, rc.right - 1, rc.bottom - 1);
@@ -2299,7 +2306,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 if (val.empty()) val = node->text;
                 drawTextCv(cv, tr, val, cvdoc::kInk, DT_LEFT | DT_VCENTER | DT_SINGLELINE, pt, fam);
             }
-            else if (node->tag == L"ScrollBar")
+            else if (tagIs(node, L"ScrollBar"))
             {
                 const bool vert = node->get(L"Orientation") != L"Horizontal";
                 cv.fillRect(rc, cvdoc::kTrack);
@@ -2316,7 +2323,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                                      cvdoc::kButton, cvdoc::kBorder, 4);
                 }
             }
-            else if (node->tag == L"BusyIndicator")
+            else if (tagIs(node, L"BusyIndicator"))
             {
                 const int d = (std::min)(rc.Width(), rc.Height());
                 CRect c(0, 0, d, d);
@@ -2344,7 +2351,7 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 drawScrollBarsCv(cv, rc, scrollStyle);
 
             // 控件模板实体化出的视觉层也要画出来（所见即所得）
-            if (IsContainer(node->tag) || node->tag == L"Window" || node->tag == L"GroupBox" ||
+            if (IsContainer(node->tag) || tagIs(node, L"Window") || tagIs(node, L"GroupBox") ||
                 tagIs(node, L"PanelHeader") || tagIs(node, L"TabStrip") ||
                 tagIs(node, L"ChipBar") || tagIs(node, L"Stage") ||
                 hasTemplateChild(node))
@@ -2355,9 +2362,9 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
                 for (int ci : order)
                 {
                     auto& child = node->children[ci];
-                    const bool isPage = child.tag == L"Page" || child.tag == L"page" ||
-                                        child.tag == L"TabItem";
-                    if (node->tag == L"PaletteSet" && isPage)
+                    const bool isPage = tagIs(&child, L"Page") || tagIs(&child, L"page") ||
+                                        tagIs(&child, L"TabItem");
+                    if (tagIs(node, L"PaletteSet") && isPage)
                     {
                         if (firstPageDrawn)
                             continue;
@@ -2782,16 +2789,16 @@ void drawNode(XamlCanvas& cv, XamlElement* node, CPoint origin, bool isRoot = fa
 
         static bool isTextControl(const XamlElement* n)
         {
-            return n != nullptr && (n->tag == L"TextBox" || n->tag == L"TextBlock" || n->tag == L"Label");
+            return n != nullptr && (tagIs(n, L"TextBox") || tagIs(n, L"TextBlock") || tagIs(n, L"Label"));
         }
         static bool isToggleControl(const XamlElement* n)
         {
-            return n != nullptr && (n->tag == L"CheckBox" || n->tag == L"RadioButton" || n->tag == L"ToggleButton");
+            return n != nullptr && (tagIs(n, L"CheckBox") || tagIs(n, L"RadioButton") || tagIs(n, L"ToggleButton"));
         }
         static bool isListControl(const XamlElement* n)
         {
             if (n == nullptr) return false;
-            return n->tag == L"ComboBox" || n->tag == L"ListBox" || n->tag == L"Choice" || n->tag == L"DatePicker";
+            return tagIs(n, L"ComboBox") || tagIs(n, L"ListBox") || tagIs(n, L"Choice") || tagIs(n, L"DatePicker");
         }
 
         // 画布内容实际由父表面 paintInto 绘制：改完必须让父表面重画，本窗口 Invalidate 看不到效果

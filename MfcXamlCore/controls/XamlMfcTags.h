@@ -1,10 +1,13 @@
 #pragma once
-// XamlMfcTags —— 控件标签的"规范名 / 别名 / 容器"唯一来源。
+// XamlMfcTags —— 控件标签的唯一命名来源。
 //
-// 背景：同一个标签要在三处判断，过去三张表各写一遍，必然漂移 ——
-// 预览器校验说"未知标签 Layout"，而运行时的 Layout 一直好好的。
-// 这里把判定收成一份，运行时（PyMfcCore）、预览器（XamlViewer）、
-// 设计器（PyMfcDesigner）都查这张表。
+// 命名规则（2026-11 起统一，不再保留别名）：
+//     所有自有元素一律 X + 本意名：<XButton> <XTextBox> <XStackPanel> <XWindow>
+//     前缀只为消除与 WPF / QML / Win32 同名类的歧义，不改变本意名。
+//     大小写不敏感；资源类结构标签（Style / Setter / RowDefinition ...）不加前缀。
+//
+// 判定规则：比较前统一用 BareTag 去掉命名空间与 X 前缀，只在一处收口，
+// 避免"预览器说未知标签而运行时正常"这类漂移。
 //
 // 编码：本文件 UTF-8 with BOM。
 
@@ -16,24 +19,33 @@
 #include <set>
 #include <string>
 
+#include <cwctype>
+
 namespace xamlmfc
 {
-    // 命名约定（与 docs\PyMfcXaml-对比WPF与QML.md 一致）：
-    //   布局是布局，画布是画布
-    //   Layout（旧别名 LayoutPanel / AbsolutePanel / AbsPanel / CanvasPanel / CanvasLayout）
-    //   QCanvas 才是绘图画布（旧别名 DrawCanvas / PaintCanvas / CanvasSurface / Painter）
-    //   <Canvas> 历史上一直当布局用，改名属破坏性切换，暂时仍按容器处理。
+    // 去掉 XML 命名空间（{...}Tag、a.b.Tag）与统一前缀 X，得到本意名。
+    inline std::wstring BareTag(const std::wstring& tag)
+    {
+        std::wstring t = tag;
+        const size_t brace = t.rfind(L'}');
+        if (brace != std::wstring::npos)
+            t = t.substr(brace + 1);
+        if (t.size() > 1 && (t[0] == L'X' || t[0] == L'x') && iswupper(t[1]))
+            t = t.substr(1);
+        return t;
+    }
+
+    // 容器（布局层）：可以承载子元素，自身不一定实体化为控件
     inline const std::set<std::wstring>& containerTags()
     {
         static const std::set<std::wstring> kSet = {
             // 根与布局
-            L"Window", L"UserControl", L"Page", L"page",
-            L"Layout", L"LayoutPanel", L"AbsolutePanel", L"AbsPanel",
-            L"CanvasPanel", L"CanvasLayout", L"Canvas",
+            L"Window", L"UserControl", L"Layout", L"LayoutPanel", L"AbsolutePanel",
+            L"AbsPanel", L"CanvasPanel", L"CanvasLayout", L"Canvas",
             L"Grid", L"StackPanel", L"DockPanel", L"WrapPanel",
             // 容器控件
-            L"Panel", L"Border", L"Frame", L"GroupBox", L"TabControl", L"TabPage", L"TabItem",
-            L"ScrollViewer", L"ScrolledWindow", L"ContentControl",
+            L"Panel", L"Border", L"Frame", L"GroupBox", L"TabControl", L"TabPage",
+            L"TabItem", L"ScrollViewer", L"ScrolledWindow", L"ContentControl",
             // 外壳构件
             L"MenuBar", L"MenuItem", L"ToolBar", L"StatusBar", L"PropertyGrid", L"ListView",
             L"TreeView", L"PaletteSet", L"PalettePage", L"PaletteSet.Resources",
@@ -44,57 +56,49 @@ namespace xamlmfc
             L"Window.Resources", L"UserControl.Resources", L"Grid.Resources",
             L"Grid.RowDefinitions", L"Grid.ColumnDefinitions",
             L"RowDefinition", L"ColumnDefinition",
-            L"ResourceDictionary", L"MergedDictionaries",
-            L"ResourceDictionary.MergedDictionaries"
+            L"ResourceDictionary", L"MergedDictionaries"
         };
         return kSet;
     }
 
     inline bool isContainerTag(const std::wstring& tag)
     {
-        return containerTags().count(tag) > 0;
+        return containerTags().count(BareTag(tag)) > 0;
     }
 
-    // 控件标签的规范名：别名归一后与运行时实体化的种类一致。
-    // 返回空串表示"不是已知控件标签"。
+    // 会实体化为控件的标签（本意名，不含 X 前缀）
+    inline const std::set<std::wstring>& controlTags()
+    {
+        static const std::set<std::wstring> kSet = {
+            L"Button", L"TextBlock", L"TextBox", L"ListBox", L"CodeEditor", L"CheckBox",
+            L"RadioButton", L"GroupBox", L"ComboBox", L"ProgressBar", L"Slider",
+            L"TabControl", L"TreeCtrl", L"ListCtrl", L"Choice", L"DatePicker", L"Panel",
+            L"Splitter", L"StaticLine", L"PowerCanvas", L"Hyperlink", L"RichText",
+            L"ToggleButton", L"BitmapButton", L"StaticBitmap", L"GridCtrl", L"ScrolledWindow",
+            L"CalendarCtrl", L"Switch", L"SpinBox", L"RangeSlider", L"BusyIndicator",
+            L"PageIndicator", L"Dial", L"Tumbler", L"ScrollBar", L"TableView", L"TreeTable",
+            L"ToolStrip", L"ToolTip", L"Menu", L"MenuStrip", L"Popup", L"VirtualList",
+            L"StackView", L"SwipeView", L"GridView", L"PathView", L"QCanvas", L"Page",
+            L"Flickable",
+            // 绘制图元
+            L"Line", L"Rectangle", L"Ellipse", L"Arc"
+        };
+        return kSet;
+    }
+
+    // 规范名：X + 本意名。返回空串表示"不是已知控件标签"。
     inline std::wstring canonicalTag(const std::wstring& tag)
     {
-        static const wchar_t* kAliases[][2] = {
-            // 别名            规范名
-            {L"Edit", L"TextBox"},
-            {L"MaskedTextBox", L"TextBox"},
-            {L"RichEdit", L"RichText"},
-            {L"Choice", L"ComboBox"},
-            {L"Tree", L"TreeView"},
-            {L"DataGrid", L"ListCtrl"},
-            {L"Image", L"StaticBitmap"},
-            {L"BitmapButton", L"Button"},
-            {L"ToolButton", L"Button"},
-            {L"LinkLabel", L"Hyperlink"},
-            {L"Label", L"Label"},
-            {L"StatusBar", L"StatusBar"},
-            {L"Separator", L"StaticLine"},
-            {L"PlanCanvas", L"PowerCanvas"},
-        };
-        for (const auto& a : kAliases)
-            if (_wcsicmp(tag.c_str(), a[0]) == 0)
-                return a[1];
-        return tag;
+        const std::wstring bare = BareTag(tag);
+        if (controlTags().count(bare) == 0)
+            return std::wstring();
+        return L"X" + bare;
     }
 
     // 设计器/预览器共用：这个标签最终会建出什么控件（空 = 不建控件）
     inline std::wstring leafCanonical(const std::wstring& tag)
     {
-        if (isContainerTag(tag))
-            return std::wstring();
-        const std::wstring c = canonicalTag(tag);
-        static const std::set<std::wstring> kLeaf{
-            L"Button", L"ToggleButton", L"CheckBox", L"RadioButton", L"Label", L"TextBlock",
-            L"Hyperlink", L"TextBox", L"RichText", L"ComboBox", L"ListBox", L"ProgressBar",
-            L"Slider", L"TrackBar", L"TabControl", L"TreeView", L"ListCtrl", L"DatePicker",
-            L"Calendar", L"CalendarCtrl", L"StaticBitmap", L"StaticLine", L"Splitter", L"Panel",
-            L"PowerCanvas"};
-        return kLeaf.count(c) > 0 ? c : std::wstring();
+        return canonicalTag(tag);
     }
 } // namespace xamlmfc
 

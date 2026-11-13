@@ -2,7 +2,7 @@
 """端到端：从 XAML 文档开窗显示配电图（不写一行布局代码）。
 
 文档由 powerplan.build(...)['xaml'] 生成，内容是
-  <Window ...><PowerCanvas Name="Plan" Data="{...JSON...}"/></Window>
+  <XWindow ...><XPowerCanvas Name="Plan" Data="{...JSON...}"/></XWindow>
 """
 import os
 import sys

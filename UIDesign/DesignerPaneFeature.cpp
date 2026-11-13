@@ -40,8 +40,10 @@ void DesignerPaneView::onNew()
     XamlElement* root = m_doc.root();
     if (root != nullptr)
         m_doc.layout(0, 0, root->w, root->h);
-    m_canvas->setDocument(&m_doc);
+    // 画布本身是控件树里的一个节点：必须先 rebuildTree 把它建出来，再灌文档，
+    // 否则首次 newDocument 时 m_canvas 还是 nullptr（启动即崩）。
     rebuildTree();
+    if (m_canvas != nullptr) m_canvas->setDocument(&m_doc);
     fillProperties(nullptr);
     SetWindowText(_T("PyMfc UI Designer - 未命名"));
     updateStatus();

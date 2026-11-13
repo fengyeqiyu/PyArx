@@ -4,14 +4,14 @@ import os, sys, tempfile
 import PyMfcXaml as p
 
 XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页容器演示" Width="460" Height="330">
-  <Canvas>
-    <StackView x:Name="sv" Width="360" Height="240" Canvas.Left="20" Canvas.Top="16" />
-    <Button x:Name="b1" Text="第一页：按钮" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
-    <TextBlock x:Name="t2" Text="第二页：文字页" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
-    <TableView x:Name="tv3" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
-  </Canvas>
-</Window>'''
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页容器演示" Width="460" Height="330">
+  <XCanvas>
+    <XStackView x:Name="sv" Width="360" Height="240" Canvas.Left="20" Canvas.Top="16" />
+    <XButton x:Name="b1" Text="第一页：按钮" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
+    <XTextBlock x:Name="t2" Text="第二页：文字页" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
+    <XTableView x:Name="tv3" Width="360" Height="214" Canvas.Left="20" Canvas.Top="16" />
+  </XCanvas>
+</XWindow>'''
 
 path = os.path.join(tempfile.mkdtemp(prefix='pymfc_pgdemo_'), 'pg.xaml')
 open(path, 'w', encoding='utf-8').write(XAML)

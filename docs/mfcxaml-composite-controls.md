@@ -75,7 +75,7 @@
 
 ## 五、验收口径
 
-- 复合控件：XAML 里写 `<TableView Columns="..." />` 就能出完整可编辑表格，Python 只挂回调和给数据；
+- 复合控件：XAML 里写 `<XTableView Columns="..." />` 就能出完整可编辑表格，Python 只挂回调和给数据；
   `pp_app` 里不再出现 `E_F0+i`、`B_APPLYROW`、`L_EDIT_FOOT` 这类手工摆放。
 - 性能：整窗重绘 ≤ 20 ms、表格重绘 ≤ 3 ms、`fill_table` 39 行 ≤ 5 ms、选中一行 ≤ 1 ms；
   上面三条都要在 `_perf_ctl.py` / `_perf_table.py` 里留成可重跑的基线脚本。

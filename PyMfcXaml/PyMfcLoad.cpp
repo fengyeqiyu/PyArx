@@ -24,6 +24,9 @@ namespace
         const size_t brace = tag.rfind('}');
         if (brace != std::string::npos)
             tag = tag.substr(brace + 1);
+        // 统一命名：<XWindow> / <XButton> 去掉前缀后按本意名分派
+        if (tag.size() > 1 && (tag[0] == 'X' || tag[0] == 'x') && isupper((unsigned char)tag[1]))
+            tag = tag.substr(1);
         for (char& c : tag)
             c = (char)tolower((unsigned char)c);
         const size_t dot = tag.rfind('.');
@@ -397,6 +400,9 @@ namespace
         tag = LocalName(tag);
         for (char& c : tag)
             c = (char)tolower((unsigned char)c);
+        // 统一命名：<XStackPanel> 去掉前缀后按本意名分派
+        if (tag.size() > 1 && tag[0] == 'x' && isupper((unsigned char)tag[1]))
+            tag = tag.substr(1);
         return tag;
     }
 

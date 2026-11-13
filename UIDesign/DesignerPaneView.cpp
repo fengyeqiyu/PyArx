@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "DesignerPaneView.h"
 #include "ControlCatalog.h"
+#include "../MfcXamlCore/controls/XamlMfcTags.h"   // 统一标签命名（去 X 前缀比较）
 #include <shellapi.h>
 #include <algorithm>
 #include <unordered_map>
@@ -188,7 +189,7 @@ void DesignerPaneView::createControlForElement(XamlElement* el)
     // 只有主画布需要真实窗口（DesignCanvas 本身就是 D2D 直呈窗口），
     // 其余全部由 DesignerPaneView 用一块 D2D 表面画出来，不再创建任何子 HWND。
     // 必须递归下去找 canvasHost —— 它藏在 Grid 里，直接 return 会连画布一起丢掉。
-    if (_wcsicmp(el->tag.c_str(), L"Canvas") != 0)
+    if (_wcsicmp(xamlmfc::BareTag(el->tag).c_str(), L"Canvas") != 0)
     {
         for (auto& child : el->children)
             createControlForElement(&child);
@@ -207,7 +208,7 @@ void DesignerPaneView::createControlForElement(XamlElement* el)
              el->previewX + el->previewW, el->previewY + el->previewH);
 
     CWnd* w = nullptr;
-    if (tag.CompareNoCase(L"Canvas") == 0)
+    if (_wcsicmp(xamlmfc::BareTag(el->tag).c_str(), L"Canvas") == 0)
     {
         // 主画布 canvasHost 用 DesignCanvas（自身即 D2D 直呈窗口）；
         // xamlCodeHost 已在函数开头 return，走不到这里。
@@ -323,7 +324,8 @@ void DesignerPaneView::setupSplitters()
     std::function<void(XamlElement&, XamlElement*)> walk;
     walk = [&](XamlElement& el, XamlElement* parent)
     {
-        if ((el.tag == L"Splitter" || el.tag == L"Separator") && parent != nullptr)
+        if ((_wcsicmp(xamlmfc::BareTag(el.tag).c_str(), L"Splitter") == 0 ||
+             _wcsicmp(xamlmfc::BareTag(el.tag).c_str(), L"Separator") == 0) && parent != nullptr)
         {
             // 仅处理竖分割条：属于含 5 列的主体 Grid，col1(左栏-画布)/col3(画布-右栏)
             if (parent->gridCols.size() >= 5)
@@ -554,7 +556,7 @@ namespace
     // MenuBar 位于主 Grid 的 Row 0 内，需在整棵树中递归查找
     XamlElement* findMenuBar(XamlElement& el)
     {
-        if (el.tag == L"MenuBar") return &el;
+        if (_wcsicmp(xamlmfc::BareTag(el.tag).c_str(), L"MenuBar") == 0) return &el;
         for (auto& c : el.children)
         {
             if (XamlElement* r = findMenuBar(c)) return r;
@@ -735,10 +737,11 @@ bool DesignerPaneView::openFile(const CString& path)
     XamlElement* root = m_doc.root();
     if (root != nullptr)
         m_doc.layout(0, 0, root->w, root->h);
-    m_canvas->setDocument(&m_doc);
     m_selected.clear();
     m_docPath = path;
+    // 画布节点在 rebuildTree 里创建，先建树再灌文档（首帧 openFile 时 m_canvas 可能还是空）
     rebuildTree();
+    if (m_canvas != nullptr) m_canvas->setDocument(&m_doc);
     CString title;
     title.Format(_T("PyMfc UI Designer - %s"), (LPCWSTR)path);
     SetWindowText(title);
@@ -855,7 +858,7 @@ void DesignerPaneView::addControlAt(const CString& tag, const CString& name, int
     // Grid 子节点按 Row/Column 占格，不写 Left/Top（写了会与网格冲突）。
     if (node != nullptr)
     {
-        const bool gridParent = _wcsicmp(parent->tag.c_str(), L"Grid") == 0;
+        const bool gridParent = _wcsicmp(xamlmfc::BareTag(parent->tag).c_str(), L"Grid") == 0;
         if (gridParent)
         {
             node->hasX = false;
@@ -1463,7 +1466,7 @@ void DesignerPaneView::toggleCodeDock()
     XamlElement* root = m_ui.root();
     if (root == nullptr || root->children.empty()) return;
     XamlElement* grid = &root->children[0];
-    if (_wcsicmp(grid->tag.c_str(), L"Grid") != 0 || grid->gridRows.size() < 4) return;
+    if (_wcsicmp(xamlmfc::BareTag(grid->tag).c_str(), L"Grid") != 0 || grid->gridRows.size() < 4) return;
 
     m_codeCollapsed = !m_codeCollapsed;
     grid->gridRows[3].second = m_codeCollapsed ? L"34" : L"236";

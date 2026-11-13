@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "../MfcXamlCore/controls/XamlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
 #include "DesignerPaneView.h"
 #include "DesignerPaneInternal.h"
 #include "../MfcXamlCore/controls/XamlMfcOrder.h"   // Level 排序规则与运行时/预览器共用
@@ -288,6 +289,8 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     if (rc.right <= rc.left || rc.bottom <= rc.top) return;
 
     const std::wstring tag = node->tag;
+    // 统一命名：X + 本意名，外壳构件按本意名分派
+    const std::wstring bareTag = xamlmfc::BareTag(tag);
 
     // ---- 画布：内容直接画进父表面 ----
     // 父表面的 HwndRenderTarget 不透明呈现会盖住画布子窗口（DWM 合成不受
@@ -301,14 +304,14 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     const int rowH = 24;
 
     // ---- 菜单条（单表面自绘：顶层 MenuItem 横排，点击弹系统下拉菜单）----
-    if (_wcsicmp(tag.c_str(), L"MenuBar") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"MenuBar") == 0)
     {
         paintMenuBar(cv, rc, node);
         return;
     }
 
     // ---- 工具栏 ----
-    if (_wcsicmp(tag.c_str(), L"ToolBar") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"ToolBar") == 0)
     {
         cv.fillRect(rc, xamlctl::shell().header);
         cv.fillRect(RECT{ rc.left, rc.bottom - 1, rc.right, rc.bottom }, xamlctl::shell().line);
@@ -319,7 +322,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         m_surfInheritPt = savedPt;
         return;
     }
-    if (_wcsicmp(tag.c_str(), L"Button") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"Button") == 0)
     {
         // 按钮自己登记命中矩形：绘制顺序即 XAML 顺序，不依赖 ToolBar 分支是否先跑
         m_surfToolRects.push_back(RECT{ rc.left, rc.top, rc.right, rc.bottom });
@@ -361,14 +364,14 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         xamlctl::xamlDrawToolButton(cv, rc, path, hot, false, tbs);
         return;
     }
-    if (_wcsicmp(tag.c_str(), L"Separator") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"Separator") == 0)
     {
         xamlctl::xamlDrawSeparator(cv, rc, node->previewW <= node->previewH);
         return;
     }
 
     // ---- 面板标题条（XAML 声明的 <PanelHeader Text=".." Hint="..">）----
-    if (_wcsicmp(tag.c_str(), L"PanelHeader") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"PanelHeader") == 0)
     {
         std::wstring hint = node->get(L"Hint");
         if (node->name == L"hdrWidgetBox")
@@ -415,7 +418,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 面板标题条（旧写法：带 Background 的 TextBlock）----
-    if (_wcsicmp(tag.c_str(), L"TextBlock") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"TextBlock") == 0)
     {
         std::wstring content = node->get(L"Text");
         if (content.empty()) content = node->get(L"Content");
@@ -429,7 +432,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 分割条 ----
-    if (_wcsicmp(tag.c_str(), L"Splitter") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"Splitter") == 0)
     {
         int si = -1;
         for (size_t i = 0; i < m_splitters.size(); ++i)
@@ -470,7 +473,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 控件箱 / 对象树 ----
-    if (_wcsicmp(tag.c_str(), L"TreeView") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"TreeCtrl") == 0)
     {
         // 深色面板里不能再用系统白底（那是"未声明外观"的默认），否则整块泛白刺眼
         xamlctl::TreeStyle st;
@@ -536,7 +539,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 属性表 ----
-    if (_wcsicmp(tag.c_str(), L"PropertyGrid") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"PropertyGrid") == 0)
     {
         xamlctl::PropStyle st;
         st.back = RGB(23, 27, 33);
@@ -569,7 +572,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- Canvas：主画布交给真实窗口；代码区交给 CodeEditor 控件 ----
-    if (_wcsicmp(tag.c_str(), L"Canvas") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"Canvas") == 0)
     {
         if (node->name == L"xamlCodeHost")
         {
@@ -584,7 +587,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 文档标签条 ----
-    if (_wcsicmp(tag.c_str(), L"TabStrip") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"TabStrip") == 0)
     {
         xamlctl::xamlDrawTabBar(cv, rc);
         int ti = 0;
@@ -608,7 +611,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         }
         return;
     }
-    if (_wcsicmp(tag.c_str(), L"Tab") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"Tab") == 0)
     {
         xamlctl::xamlDrawTab(cv, rc, std::wstring(uiNodeText(node).GetString()),
                              _wcsicmp(node->get(L"Active").c_str(), L"True") == 0, false, 9);
@@ -616,7 +619,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 控件箱分类过滤（<ChipBar> + <Chip Category="..">）----
-    if (_wcsicmp(tag.c_str(), L"ChipBar") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"ChipBar") == 0)
     {
         for (auto& c : node->children)
         {
@@ -636,7 +639,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         }
         return;
     }
-    if (_wcsicmp(tag.c_str(), L"Chip") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"Chip") == 0)
     {
         const CString cat = CString(node->get(L"Category").c_str());
         xamlctl::xamlDrawChip(cv, rc, std::wstring(uiNodeText(node).GetString()),
@@ -645,7 +648,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 画布舞台：深色台面 + 四角定位标，画布（真实窗口）叠在上面 ----
-    if (_wcsicmp(tag.c_str(), L"Stage") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"Stage") == 0)
     {
         xamlctl::xamlDrawStage(cv, rc);
         RECT savedParentS = m_surfParentRc;
@@ -657,7 +660,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     }
 
     // ---- 状态栏 ----
-    if (_wcsicmp(tag.c_str(), L"StatusBar") == 0)
+    if (_wcsicmp(bareTag.c_str(), L"StatusBar") == 0)
     {
         std::vector<xamlctl::StatusCell2> cells;
         int i = 0;
@@ -690,9 +693,9 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // 单表面模式下容器没有子窗口，底色必须在这里补上；否则 XAML 里写的面板背景
     // 永远看不见（以前只有 Window Background 生效这一条"看不见的规则"）。
     const bool plainContainer =
-        _wcsicmp(tag.c_str(), L"Grid") == 0 || _wcsicmp(tag.c_str(), L"DockPanel") == 0 ||
-        _wcsicmp(tag.c_str(), L"StackPanel") == 0 || _wcsicmp(tag.c_str(), L"WrapPanel") == 0 ||
-        _wcsicmp(tag.c_str(), L"Page") == 0 || _wcsicmp(tag.c_str(), L"PaletteSet") == 0;
+        _wcsicmp(bareTag.c_str(), L"Grid") == 0 || _wcsicmp(bareTag.c_str(), L"DockPanel") == 0 ||
+        _wcsicmp(bareTag.c_str(), L"StackPanel") == 0 || _wcsicmp(bareTag.c_str(), L"WrapPanel") == 0 ||
+        _wcsicmp(bareTag.c_str(), L"Page") == 0 || _wcsicmp(bareTag.c_str(), L"PaletteSet") == 0;
     if (plainContainer)
     {
         COLORREF bg = ParseColor(CString(node->get(L"Background").c_str()));

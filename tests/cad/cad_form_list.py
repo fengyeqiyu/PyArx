@@ -12,21 +12,21 @@ import PyArxCore
 
 LOG = r"G:\PyArx\log\cad_form_list.log"
 XAML = r'''<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PyArx CAD 列表与表格" Width="560" Height="470">
-  <Canvas>
-    <TextBlock x:Name="lb" Text="VirtualList 21 行 / TableView 3 行 / 数值控件" Width="490" Height="22" Canvas.Left="14" Canvas.Top="8" />
-    <VirtualList x:Name="lv" Items="%s" ItemHeight="44" Width="260" Height="230" Canvas.Left="14" Canvas.Top="36" />
-    <TableView x:Name="tv" Width="260" Height="230" Canvas.Left="288" Canvas.Top="36" />
-    <SpinBox x:Name="sp" Width="90" Height="28" Canvas.Left="14" Canvas.Top="282" Value="42" />
-    <RangeSlider x:Name="rs" Width="180" Height="28" Canvas.Left="118" Canvas.Top="282" LowValue="20" HighValue="70" />
-    <Dial x:Name="dl" Width="90" Height="90" Canvas.Left="14" Canvas.Top="320" Value="40" />
-    <Tumbler x:Name="tb" Width="90" Height="90" Canvas.Left="118" Canvas.Top="320" />
-    <ScrollBar x:Name="sb" Width="24" Height="90" Canvas.Left="228" Canvas.Top="320" Value="35" />
-    <Switch x:Name="sw" Width="56" Height="28" Canvas.Left="288" Canvas.Top="282" Checked="true" />
-    <QCanvas x:Name="qc" Width="230" Height="90" Canvas.Left="288" Canvas.Top="320"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="PyArx CAD 列表与表格" Width="560" Height="470">
+  <XCanvas>
+    <XTextBlock x:Name="lb" Text="VirtualList 21 行 / TableView 3 行 / 数值控件" Width="490" Height="22" Canvas.Left="14" Canvas.Top="8" />
+    <XVirtualList x:Name="lv" Items="%s" ItemHeight="44" Width="260" Height="230" Canvas.Left="14" Canvas.Top="36" />
+    <XTableView x:Name="tv" Width="260" Height="230" Canvas.Left="288" Canvas.Top="36" />
+    <XSpinBox x:Name="sp" Width="90" Height="28" Canvas.Left="14" Canvas.Top="282" Value="42" />
+    <XRangeSlider x:Name="rs" Width="180" Height="28" Canvas.Left="118" Canvas.Top="282" LowValue="20" HighValue="70" />
+    <XDial x:Name="dl" Width="90" Height="90" Canvas.Left="14" Canvas.Top="320" Value="40" />
+    <XTumbler x:Name="tb" Width="90" Height="90" Canvas.Left="118" Canvas.Top="320" />
+    <XScrollBar x:Name="sb" Width="24" Height="90" Canvas.Left="228" Canvas.Top="320" Value="35" />
+    <XSwitch x:Name="sw" Width="56" Height="28" Canvas.Left="288" Canvas.Top="282" Checked="true" />
+    <XQCanvas x:Name="qc" Width="230" Height="90" Canvas.Left="288" Canvas.Top="320"
              Commands="Clear #313842; Rect 10,10,80,30,#00A8E8; Ellipse 110,8,44,44,#57C84D; Line 10,72,220,72,#FFFFFF,2; Text 10,50,列表页,9,#FFFFFF" />
-  </Canvas>
-</Window>''' % ';'.join('工程 %02d|负责：张%d|%d%%' % (i + 1, (i % 9) + 1, (i * 7) % 100) for i in range(21))
+  </XCanvas>
+</XWindow>''' % ';'.join('工程 %02d|负责：张%d|%d%%' % (i + 1, (i % 9) + 1, (i * 7) % 100) for i in range(21))
 
 
 def _log(msg):

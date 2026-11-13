@@ -17,13 +17,13 @@ CANVAS = 420
 HEIGHT = 320
 
 XAML = '''<?xml version="1.0" encoding="utf-8"?>
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="画布图元编辑" Width="480" Height="420">
-  <Layout x:Name="root">
-    <DrawCanvas x:Name="cv" Width="%d" Height="%d" Canvas.Left="28" Canvas.Top="28" />
-    <TextBlock x:Name="hint" Width="420" Height="22" Canvas.Left="28" Canvas.Top="362"
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="画布图元编辑" Width="480" Height="420">
+  <XLayout x:Name="root">
+    <XQCanvas x:Name="cv" Width="%d" Height="%d" Canvas.Left="28" Canvas.Top="28" />
+    <XTextBlock x:Name="hint" Width="420" Height="22" Canvas.Left="28" Canvas.Top="362"
                Text="点图元选中 · 空白拖拽框选 · Delete 删除" />
-  </Layout>
-</Window>''' % (CANVAS, HEIGHT)
+  </XLayout>
+</XWindow>''' % (CANVAS, HEIGHT)
 
 CMDS = ('Clear,#313842;'
         'Rect,20,20,120,80,#3574C8;'
