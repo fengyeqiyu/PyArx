@@ -371,20 +371,29 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
     // 外观与命中都在外壳这一侧；画布只保存"待放置图元"的状态
     if (_wcsicmp(bareTag.c_str(), L"DrawBar") == 0)
     {
-        const xamlctl::ShellTheme& th = xamlctl::shell();
-        // 布局引擎给外壳自定义容器的矩形可能只按内容高度算，这里按 4 个工具按钮撑开
-        if (rc.bottom - rc.top < 176) rc.bottom = rc.top + 176;
-        cv.fillRect(rc, th.panel);
-        cv.fillRect(RECT{ rc.left, rc.top, rc.left + 1, rc.bottom }, th.line);
+        // Draw 竖条外观全部来自 XAML 节点属性，和画布、预览器用同一套数值
+        const xamlctl::ShellLook dl = xamlctl::shellLookOf(*node);
+        const int itemH = xamlctl::shellInt(*node, L"ItemHeight", 32);
+        const int pad = xamlctl::shellInt(*node, L"ItemPadding", 6);
+        const int gap = xamlctl::shellInt(*node, L"ItemSpacing", 4);
+        const int capH = xamlctl::shellInt(*node, L"CaptionHeight", 24);
+        const int capPt = xamlctl::shellInt(*node, L"CaptionFontSize", dl.fontPt);
 
-        RECT hr{ rc.left, rc.top, rc.right, rc.top + 22 };
-        cv.text(hr, L"Draw", th.textDim, DT_CENTER | DT_VCENTER | DT_SINGLELINE, 8,
+        // 布局引擎给外壳自定义容器的矩形可能只按内容高度算，这里按工具数撑开
+        const int needH = capH + pad + (int)node->children.size() * (itemH + gap) + pad;
+        if (rc.bottom - rc.top < needH) rc.bottom = rc.top + needH;
+        cv.fillRect(rc, dl.back);
+        cv.fillRect(RECT{ rc.left, rc.top, rc.left + 1, rc.bottom }, dl.line);
+
+        std::wstring cap = node->get(L"Title");
+        if (cap.empty()) cap = node->get(L"Text");
+        RECT hr{ rc.left, rc.top, rc.right, rc.top + capH };
+        cv.text(hr, cap, dl.dim, DT_CENTER | DT_VCENTER | DT_SINGLELINE, capPt,
                 L"Microsoft YaHei UI");
 
         const std::wstring pending = (m_canvas != nullptr) ? m_canvas->PendingShapeTag()
                                                            : std::wstring();
-        int y = rc.top + 24;
-        const int pad = 5;
+        int y = rc.top + capH + pad;
         // 工具清单以 XAML 的 DrawBar 子节点为准；子节点缺失时退回四个内置图元
         std::vector<std::wstring> tools;
         for (auto& c : node->children)
@@ -402,12 +411,12 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
         }
         for (auto& shape : tools)
         {
-            RECT b{ rc.left + pad, y, rc.right - pad, y + 30 };
+            RECT b{ rc.left + pad, y, rc.right - pad, y + itemH };
             if (b.bottom > rc.bottom - pad) break;
             const bool on = (_wcsicmp(pending.c_str(), shape.c_str()) == 0);
-            cv.fillRect(b, on ? th.accent : th.header);
-            cv.strokeRect(b, on ? th.accent : th.line, 1);
-            const COLORREF ink = on ? RGB(255, 255, 255) : th.text;
+            cv.fillRect(b, on ? dl.accent : dl.back);
+            cv.strokeRect(b, on ? dl.accent : dl.line, 1);
+            const COLORREF ink = on ? RGB(255, 255, 255) : dl.fore;
 
             if (_wcsicmp(shape.c_str(), L"Line") == 0)
                 cv.strokeLine(POINT{ b.left + 8, b.bottom - 8 }, POINT{ b.right - 8, b.top + 8 },
@@ -416,7 +425,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
                 cv.strokeRect(RECT{ b.left + 7, b.top + 6, b.right - 7, b.bottom - 6 }, ink, 1);
             else if (_wcsicmp(shape.c_str(), L"Ellipse") == 0)
                 cv.fillEllipse(RECT{ b.left + 7, b.top + 6, b.right - 7, b.bottom - 6 },
-                               on ? th.accent : th.header, ink);
+                               on ? dl.accent : dl.back, ink);
             else
             {
                 const int cx = (b.left + b.right) / 2;
@@ -434,7 +443,7 @@ void DesignerPaneView::paintSurfaceNode(XamlCanvas& cv, XamlElement* node)
 
             m_surfToolRects.push_back(RECT{ b.left, b.top, b.right, b.bottom });
             m_surfToolNames.push_back(std::wstring(L"shape:") + shape);
-            y += 34;
+            y += itemH + gap;
         }
         return;
     }
