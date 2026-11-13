@@ -95,6 +95,101 @@ CAT_CN = {
 CAT_ORDER = ['Containers', 'Buttons', 'Input Widgets', 'Display Widgets',
              'Data Views', 'Function Bar', 'Overlay', 'Canvas', 'Draw']
 
+# tag -> (QML 对应类型, 对应方式)
+# 对应方式：同名 = QML 里有同名同义控件（换个引擎基本能直接搬）
+#           组合 = QML 用两三个控件拼出等价能力
+#           自绘 = QML 侧要用 Canvas / Shape 画
+#           无   = QML 无等价，需另找方案
+QML = {
+    'Button': ('Button', '同名'),
+    'CheckBox': ('CheckBox', '同名'),
+    'RadioButton': ('RadioButton', '同名'),
+    'ToggleButton': ('Button + checkable', '组合'),
+    'BitmapButton': ('Button + icon.source', '组合'),
+    'TextBox': ('TextField / TextArea', '同名'),
+    'ComboBox': ('ComboBox', '同名'),
+    'ListBox': ('ListView', '组合'),
+    'Choice': ('ComboBox（editable:false）', '同名'),
+    'DatePicker': ('TextField + MonthGrid', '组合'),
+    'CodeEditor': ('TextArea（等宽字体 + 行号槽）', '组合'),
+    'Slider': ('Slider', '同名'),
+    'Switch': ('Switch', '同名'),
+    'SpinBox': ('SpinBox', '同名'),
+    'RangeSlider': ('RangeSlider', '同名'),
+    'Dial': ('Dial', '同名'),
+    'Tumbler': ('Tumbler', '同名'),
+    'ScrollBar': ('ScrollBar / ScrollView', '同名'),
+    'TextBlock': ('Label / Text', '同名'),
+    'ProgressBar': ('ProgressBar', '同名'),
+    'Hyperlink': ('Label + MouseArea（link 样式）', '组合'),
+    'RichText': ('TextArea（textFormat: RichText）', '组合'),
+    'StaticBitmap': ('Image', '同名'),
+    'CalendarCtrl': ('MonthGrid + DayOfWeekRow', '组合'),
+    'BusyIndicator': ('BusyIndicator', '同名'),
+    'PageIndicator': ('PageIndicator', '同名'),
+    'TableView': ('TableView（model + delegate）', '组合'),
+    'TreeTable': ('TreeView（6.x）+ 多列 delegate', '组合'),
+    'VirtualList': ('ListView（cacheBuffer 虚拟化）', '组合'),
+    'StackView': ('StackView', '同名'),
+    'SwipeView': ('SwipeView', '同名'),
+    'GridView': ('GridView', '同名'),
+    'PathView': ('PathView', '同名'),
+    'Page': ('Page', '同名'),
+    'GroupBox': ('GroupBox', '同名'),
+    'TabControl': ('TabBar + StackLayout', '组合'),
+    'Border': ('Rectangle（border.*）', '组合'),
+    'Panel': ('Item / Pane', '组合'),
+    'Splitter': ('SplitView', '组合'),
+    'TreeCtrl': ('TreeView', '组合'),
+    'ListCtrl': ('ListView / TableView（单列）', '组合'),
+    'StaticLine': ('Rectangle（height: 1）/ HorizontalDivider', '组合'),
+    'GridCtrl': ('GridLayout / TableView', '组合'),
+    'ScrolledWindow': ('ScrollView', '组合'),
+    'Flickable': ('Flickable', '同名'),
+    'ToolStrip': ('ToolBar', '组合'),
+    'MenuStrip': ('MenuBar', '组合'),
+    'ToolTip': ('ToolTip', '同名'),
+    'Menu': ('Menu', '同名'),
+    'Popup': ('Popup', '同名'),
+    'PowerCanvas': ('Canvas / Shape', '自绘'),
+    'QCanvas': ('Canvas / Item', '自绘'),
+    'Line': ('Shape + Path', '自绘'),
+    'Rectangle': ('Rectangle', '同名'),
+    'Ellipse': ('Shape（PathArc）', '自绘'),
+    'Arc': ('Shape + PathAngleArc', '自绘'),
+}
+
+# 属性映射：MFCXaml 通用属性 -> QML
+PROP_MAP = [
+    ('BackColor / FrontColor', 'background: Rectangle { color: ... }（QML 无全局底色属性）'),
+    ('Foreground / FrontColor(文字)', 'color（Text / Label）或 palette.text'),
+    ('BorderColor / BorderStyle / BorderThickness', 'Rectangle 的 border.color / border.width；Sunken、Raised 需自绘'),
+    ('Radius', 'radius'),
+    ('Opacity', 'opacity（0-255 折算成 0.0-1.0）'),
+    ('TextAlign', 'horizontalAlignment / verticalAlignment'),
+    ('TextWrapping', 'wrapMode'),
+    ('FontSize / FontFamily / FontWeight / FontStyle', 'font.pixelSize / font.family / font.weight / font.italic'),
+    ('Level', 'z（叠放顺序，语义等价）'),
+    ('TabIndex', '无对应：Qt 用 activeFocusOnTab + KeyNavigation'),
+    ('Theme', '无对应：Qt 用 qtquickcontrols2.conf / 自定义 Style'),
+]
+
+# 事件映射：XAML 回调键 -> QML 信号处理器
+EVENT_MAP = [
+    ('click', 'onClicked（Button）/ MouseArea.onClicked'),
+    ('dblclick', 'MouseArea.onDoubleClicked'),
+    ('change', 'onTextEdited / onTextChanged / onAccepted'),
+    ('select', 'onCurrentIndexChanged / onCurrentItemChanged'),
+    ('value', 'onValueChanged / onPositionChanged'),
+    ('checked', 'onCheckedChanged / onToggled'),
+    ('dropdown', 'onPressedChanged（Popup 开合）'),
+    ('scroll', 'WheelHandler.onWheel'),
+    ('mousedown / mouseup / mousemove', 'MouseArea.onPressed / onReleased / onPositionChanged'),
+    ('keydown / keyup', 'Keys.onPressed / Keys.onReleased'),
+    ('gotfocus / lostfocus', 'onActiveFocusChanged'),
+]
+
+
 ROW_RE = re.compile(r'\|\s*\*\*(?P<tag>[A-Za-z]+)\*\*\s*\|(?P<rest>.*)\|')
 
 
@@ -155,14 +250,16 @@ def main():
         raise SystemExit('缺少中文名: %s' % ', '.join(missing_cn))
 
     lines = []
-    lines.append('# MFCXaml 控件类名 / 中文名对照表')
+    lines.append('# MFCXaml 控件类名 / 中文名 / QML 对照表')
     lines.append('')
     lines.append('> 由 `tools\\gen_control_names.py` 生成，勿手改。')
     lines.append('> XAML 标签（类名）就是 `guiload` / `xamlload` 里写的标签；中文名只用于界面与文档。')
     lines.append('> 档位口径见 `docs\\mfcxaml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。')
+    lines.append('> QML 一列是"同一套界面换引擎时落在哪个类型"，同名即语义基本等价。')
     lines.append('')
 
     total = 0
+    kind_count = {}
     for catkey in CAT_ORDER:
         rows = [(t, v) for t, v in cat.items() if v[0] == catkey]
         if not rows:
@@ -170,24 +267,62 @@ def main():
         rows.sort(key=lambda kv: kv[0].lower())
         lines.append('## %s（%s）' % (CAT_CN.get(catkey, catkey), len(rows)))
         lines.append('')
-        lines.append('| 类名（XAML 标签） | 中文名 | 实现方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |')
-        lines.append('|---|---|---|---|---|---|---|')
+        lines.append('| 类名（XAML 标签） | 中文名 | QML 对应 | 对应方式 | 档位 | 默认尺寸 | 属性数 | 源文件 |')
+        lines.append('|---|---|---|---|---|---|---|---|')
         for tag, (c, w, h) in rows:
             info = iface.get(tag, {})
             grade = info.get('grade') or '—'
-            impl = info.get('impl') or '—'
             src = info.get('src') or '—'
             props = schema.get(tag)
             props_s = str(props) if props is not None else '—'
-            lines.append('| `%s` | %s | %s | %s | %dx%d | %s | %s |'
-                         % (tag, CN[tag], impl, grade, w, h, props_s, src))
+            qml, kind = QML[tag]
+            kind_count[kind] = kind_count.get(kind, 0) + 1
+            lines.append('| `%s` | %s | %s | %s | %s | %dx%d | %s | %s |'
+                         % (tag, CN[tag], qml, kind, grade, w, h, props_s, src))
             total += 1
         lines.append('')
 
-    lines.append('## 合计')
+    lines.append('## 属性对应')
+    lines.append('')
+    lines.append('| MFCXaml 属性 | QML 写法 |')
+    lines.append('|---|---|')
+    for a, b in PROP_MAP:
+        lines.append('| %s | %s |' % (a, b))
+    lines.append('')
+
+    lines.append('## 事件对应')
+    lines.append('')
+    lines.append('| XAML 回调键 | QML 信号处理器 |')
+    lines.append('|---|---|')
+    for a, b in EVENT_MAP:
+        lines.append('| `%s` | `%s` |' % (a, b))
+    lines.append('')
+
+    lines.append('## 合计与对应情况')
     lines.append('')
     lines.append('共 **%d** 个标签：51 个主控件 + 5 个绘制图元（Line / Rectangle / Ellipse / Arc / Border）。'
                  % total)
+    lines.append('')
+    for k in ('同名', '组合', '自绘', '无'):
+        if kind_count.get(k):
+            lines.append('- **%s**：%d 个' % (k, kind_count[k]))
+    lines.append('')
+    lines.append('同名的那批（Button / CheckBox / ComboBox / Slider / Switch / SpinBox / Dial / Tumbler / '
+                 'StackView / SwipeView / GridView / PathView / Page / Flickable / ToolTip / Menu / Popup 等）'
+                 '换到 QML 只要改标签名和属性写法，布尔与数值语义一致，可以直接对搬。')
+    lines.append('')
+    lines.append('三处必须注意的结构差异：')
+    lines.append('')
+    lines.append('1. **表格与列表是 model + delegate**：MFCXaml 的 `Rows` / `Items` / `Columns` 是字符串直填，'
+                 'QML 侧要换 `ListModel` 或 `QAbstractTableModel` + delegate，这是迁移时工作量最大的地方。')
+    lines.append('2. **没有原生 TreeTable / GridCtrl**：QML 需 TreeView 或多列 delegate 自己组，'
+                 '不是换个标签就能完成。')
+    lines.append('3. **自绘控件（PowerCanvas / QCanvas / Line / Ellipse / Arc）**：MFCXaml 走 GDI 自绘，'
+                 'QML 侧对应 Canvas 或 Shape，绘制代码要重写而不是映射。')
+    lines.append('')
+    lines.append('另外两条工程差异：QML 默认按 96 DPI 的像素单位布局，MFC 是物理像素，'
+                 '尺寸要按 `devicePixelRatio` 折算；QML 的焦点与 Tab 顺序靠 `activeFocusOnTab` + `KeyNavigation`，'
+                 '不像 XAML 有 `TabIndex`。')
     lines.append('')
     lines.append('不在本表的旧别名（已淘汰，勿再使用）：`TrackBar`（Slider 的旧名）、`Label`（TextBlock）、'
                  '`Edit`（TextBox）、`Progress`（ProgressBar）、`TreeView`（TreeCtrl）、`ListView`（ListCtrl）。')
@@ -195,7 +330,7 @@ def main():
 
     with open(OUT, 'w', encoding='utf-8', newline='\n') as f:
         f.write('\n'.join(lines))
-    print('写出 %s，共 %d 行控件' % (OUT, total))
+    print('写出 %s，共 %d 行控件；对应方式 %s' % (OUT, total, kind_count))
 
 
 if __name__ == '__main__':
