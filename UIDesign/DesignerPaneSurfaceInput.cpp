@@ -176,6 +176,7 @@ void DesignerPaneView::startFrameDrag(CPoint pt, int edges)
     m_frameStart = pt;
     ::GetWindowRect(root, &m_frameRect);
     ::SetCapture(m_hWnd);
+    beginSizeMovePreview();     // 拖动/缩放期间只贴拉伸预览，松手再全量重画
 }
 
 void DesignerPaneView::surfaceToolClick(int idx)
@@ -386,6 +387,7 @@ void DesignerPaneView::surfaceLButtonUp(CPoint pt)
         m_frameRoot = nullptr;
         m_frameEdges = 0;
         ::ReleaseCapture();
+        endSizeMovePreview();
         return;
     }
     (void)pt;

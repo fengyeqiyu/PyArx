@@ -446,6 +446,9 @@ void DesignerPaneView::relayoutUi()
 void DesignerPaneView::OnLButtonDown(UINT nFlags, CPoint pt)
 {
     (void)nFlags;
+    // 贴窗口四边 6px：直接起自绘缩放（顶层框架没有非客户区，系统拿不到命中）
+    if (tryFrameChrome(pt))
+        return;
     surfaceLButtonDown(pt);
 }
 
@@ -467,13 +470,11 @@ void DesignerPaneView::OnLButtonDblClk(UINT nFlags, CPoint pt)
 
 LRESULT DesignerPaneView::OnNcHitTest(CPoint point)
 {
-    // 窗口四边（6px）不自绘缩放：返回 HTTRANSPARENT，把命中让给下面的顶层框架。
-    // 框架带 WS_THICKFRAME，OnNcHitTest 会返回 HTLEFT/HTTOP...，于是缩放走系统
-    // SC_SIZE 循环 —— 跟手、无拖影（DWM 直接搬整窗快照，不等我们画完）。
-    CPoint pt = point;
-    ScreenToClient(&pt);
-    if (frameEdgesAt(pt) != 0)
-        return HTTRANSPARENT;
+    // 注意：HTTRANSPARENT 只会把命中让给"z 序下方"的窗口，不会交给父窗口，
+    // 顶层框架的 OnNcCalcSize 又是满矩形（没有非客户区），结果四边既收不到
+    // WM_NCLBUTTONDOWN、也没有缩放光标 —— 这就是"四周拖不动"的根因。
+    // 这里统一返回 HTCLIENT，四边按下由 tryFrameChrome() 起自绘缩放，
+    // 缩放期间靠 beginSizeMovePreview() 的拉伸预览保证跟手。
     return CWnd::OnNcHitTest(point);
 }
 
