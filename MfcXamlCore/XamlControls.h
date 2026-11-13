@@ -482,6 +482,17 @@ inline void xamlDrawShellStage(XamlCanvas& cv, const RECT& rc, const XamlElement
     COLORREF back = fallback;
     { COLORREF c; if (shellColor(el.get(L"Background"), c)) back = c; }
     cv.fillRect(rc, back);
+    // 网格：间距与颜色由 XAML 的 GridSize / GridColor 决定，0 表示不画
+    int grid = shellInt(el, L"GridSize", 0);
+    if (grid >= 4 && rc.right > rc.left && rc.bottom > rc.top)
+    {
+        COLORREF gc = RGB(34, 38, 46);
+        { COLORREF c; if (shellColor(el.get(L"GridColor"), c)) gc = c; }
+        for (int x = rc.left + grid; x < rc.right; x += grid)
+            cv.strokeLine(POINT{ x, rc.top }, POINT{ x, rc.bottom }, gc, 1);
+        for (int y = rc.top + grid; y < rc.bottom; y += grid)
+            cv.strokeLine(POINT{ rc.left, y }, POINT{ rc.right, y }, gc, 1);
+    }
     COLORREF edge;
     if (shellColor(el.get(L"BorderColor"), edge)) cv.strokeRect(rc, edge, 1);
 }
