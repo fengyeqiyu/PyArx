@@ -70,6 +70,9 @@ namespace uidesign
         // 宿主切换时刷新视图尺寸：pane 从浮动改停靠、Arx 侧栏改宽度都会走这里。
         void resizeTo(const CRect& rc);
 
+        // XML 顶栏的实际像素高度（外壳用它判定拖动区：顶栏整条可拖窗，按钮除外）
+        int titleBarHeight() const { return m_zoneTopH; }
+
         // 窄宽度自适应：停靠成 CAD 侧栏时宽度可能只有 400~700，
         // 固定 248+308 的两侧栏会把画布挤没，按档位收窄左/右栏。
         void applyResponsiveLayout(int width);
@@ -232,6 +235,7 @@ namespace uidesign
         CBitmap* m_backOld = nullptr;
         CSize    m_backSize = CSize(0, 0);
         bool     m_sizeMove = false;      // 系统拖动/缩放循环进行中（只贴拉伸预览）
+        ULONGLONG m_lastSizeTick = 0;     // 上一次 WM_SIZE 的时刻（两次间隔很短=正在拖）
         // 上一次完整布局算出来的"分区尺寸"，缩放期间按分区贴图（Qt 的 layer 分块）：
         // 左右两栏宽度不变 -> 1:1 贴原位，只有中间画布区双向拉伸。
         int      m_zoneTopH = 0;

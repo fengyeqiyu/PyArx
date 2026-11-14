@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -68,15 +68,15 @@
     <ClCompile Include="DesignerPaneFeature.cpp" />
     <ClCompile Include="DesignCanvas.cpp" />
     <ClCompile Include="ControlCatalog.cpp" />
-    <ClCompile Include="DesignerDockPane.cpp" />
-    <ClCompile Include="DesignerFrame.cpp" />
+  <ClCompile Include="DesignerShell.cpp" />
+
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="DesignerPaneView.h" />
     <ClInclude Include="DesignerPaneInternal.h" />
-    <ClInclude Include="DesignerDockPane.h" />
-    <ClInclude Include="DesignerFrame.h" />
+  <ClInclude Include="DesignerShell.h" />
+
     <ClInclude Include="DesignCanvas.h" />
     <ClInclude Include="DesignerTools.h" />
     <ClInclude Include="UiDocUtil.h" />

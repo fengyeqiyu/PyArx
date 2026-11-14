@@ -134,6 +134,8 @@
     <ClInclude Include="XmlAppearance.h" />
     <ClInclude Include="XmlPowerPlan.h" />
     <ClInclude Include="XmlSvgScene.h" />
+    <ClInclude Include="XFrameWindow.h" />
+    <ClInclude Include="XFrameWnd.h" />
     <ClInclude Include="controls\CodeEditor.h" />
     <ClInclude Include="controls\RegisterPyMfcControls.h" />
     <ClInclude Include="controls\XmlBitmapButton.h" />
@@ -200,3 +202,4 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
+

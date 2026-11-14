@@ -595,15 +595,24 @@ void DesignerPaneView::computeLayoutZones(const CRect& rc)
 void DesignerPaneView::OnSize(UINT type, int cx, int cy)
 {
     CWnd::OnSize(type, cx, cy);
-    // 窗口移动/缩放期间不做完整重排，也不重绘：系统模态循环里 DWM 合成上一帧，
+
+    // 窗口移动/缩放期间不做完整重排，也不重绘：系统循环里 DWM 合成上一帧，
     // 我们自己每帧 Invalidate 只会插进空 WM_PAINT，反而让边缘闪。
     // 松手时 endSizeMovePreview() 一次性重排重画 —— Qt 就是这么做的。
-    // 但"松手"不能靠 WM_EXITSIZEMOVE 一条路：MFC 的 NC 路径会吞掉它，
-    // 于是拖完还停在冻结态，下一轮缩小就按旧尺寸布局（界面大面积缺失）。
-    // 这里用"尺寸静止 40ms"判定拖完：每次 WM_SIZE 重置计时，静止了才收尾。
-    if (m_sizeMove)
+    //
+    // 判据不能只靠 WM_ENTERSIZEMOVE：它由系统循环发，MFC/自绘外壳路径上会丢。
+    // 这里用"两次 WM_SIZE 间隔"自己判定：间隔很短就是用户正在拖，直接进冻结态。
+    // 单次尺寸变化（还原、最大化、程序改尺寸）间隔大，走正常重排。
+    const ULONGLONG now = ::GetTickCount64();
+    const bool continuous = (m_lastSizeTick != 0 && now - m_lastSizeTick < 120);
+    m_lastSizeTick = now;
+
+    if (continuous || m_sizeMove)
     {
-        SetTimer(1, 40, nullptr);
+        if (!m_sizeMove)
+            beginSizeMovePreview();
+        // 尺寸还在变：60ms 后仍没有新的 WM_SIZE 就认为拖完了，兜底收尾
+        SetTimer(1, 60, nullptr);
         return;
     }
     KillTimer(1);
@@ -615,8 +624,17 @@ void DesignerPaneView::OnTimer(UINT_PTR nIDEvent)
     if (nIDEvent == 1)
     {
         KillTimer(1);
-        if (m_sizeMove)
-            endSizeMovePreview();
+        if (!m_sizeMove)
+            return;
+        // 只有"尺寸真正静止"才收尾：定时器每隔 60ms 来看一次，但最后一次 WM_SIZE
+        // 距今不足 200ms 就继续等。判据必须比单步处理时间宽，否则每步都会误判松手，
+        // 变成"每帧重排重画"（拖动卡顿 + 拖影的根源）。
+        if (::GetTickCount64() - m_lastSizeTick < 200)
+        {
+            SetTimer(1, 60, nullptr);
+            return;
+        }
+        endSizeMovePreview();
         return;
     }
     CWnd::OnTimer(nIDEvent);
@@ -1829,9 +1847,12 @@ void DesignerPaneView::OnPaint()
     // 这里有兜底（OnLButtonDown / OnMouseMove / 定时器），万一退出消息漏了也会自拔。
     if (m_sizeMove)
     {
+        diagLog("[panePaint] preview %dx%d\n", client.Width(), client.Height());
         dc.FillSolidRect(&client, RGB(21, 24, 29));
         return;
     }
+    diagLog("[panePaint] full %dx%d back=%dx%d\n", client.Width(), client.Height(),
+            m_backSize.cx, m_backSize.cy);
 
     // 双缓冲：D2D 先画到内存位图，一次 BitBlt 上屏。
     // 位图常驻复用（只在客户区尺寸变化时重建），缩放时不再每帧申请 6MB 位图。
@@ -1845,11 +1866,27 @@ void DesignerPaneView::OnPaint()
             m_backOld = nullptr;
         }
         m_backBmp.DeleteObject();
-        // 兼容位图必须按"屏幕 DC"建，不能用 CPaintDC：走 WM_PRINTCLIENT / PrintWindow
-        // 时 CPaintDC 是重定向 DC（可能只有 1bpp），照它建出来的位图会是全黑，
-        // 而且会被缓存下来，之后真实显示也跟着黑。
+        // 后台位图必须建 32bpp DIB Section：
+        //   1) DCRenderTarget 只能可靠绑定 DIB，Display 兼容位图在部分驱动上 BindDC 会失败
+        //      —— 表现就是"位图全黑、只剩子窗口可见"；
+        //   2) 不能用 CPaintDC 建（走 WM_PRINTCLIENT / PrintWindow 时它是重定向 DC，
+        //      可能只有 1bpp，建出来的位图是黑的，还会被缓存下来）。
         HDC sdc = ::GetDC(nullptr);
-        m_backBmp.Attach(::CreateCompatibleBitmap(sdc, client.Width(), client.Height()));
+        BITMAPINFO bmi = {};
+        bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        bmi.bmiHeader.biWidth = client.Width();
+        bmi.bmiHeader.biHeight = -client.Height();      // top-down
+        bmi.bmiHeader.biPlanes = 1;
+        bmi.bmiHeader.biBitCount = 32;
+        bmi.bmiHeader.biCompression = BI_RGB;
+        void* bits = nullptr;
+        HBITMAP hbm = ::CreateDIBSection(sdc, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
+        if (hbm == nullptr)
+        {
+            ::ReleaseDC(nullptr, sdc);
+            return;                                       // 建不出来就不画，避免 BitBlt 一张空位图
+        }
+        m_backBmp.Attach(hbm);
         ::ReleaseDC(nullptr, sdc);
         m_backOld = m_backDc.SelectObject(&m_backBmp);
         m_backSize = CSize(client.Width(), client.Height());

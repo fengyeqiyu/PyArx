@@ -594,6 +594,7 @@ static bool isContainerTag(const std::wstring& tag)
 #include "XmlLeafPaint.h"
 #include "XmlViewerMfcHost.h"
 #include "ViewerControls.h"
+#include "../MfcXmlCore/XFrameWindow.h"   // 无框外壳规则（边命中/系统循环/DWM 剥离）
 
 // ---------------------------------------------------------------------------
 // 渲染（后端无关）：画什么由这里决定，用什么画交给 XmlCanvas
@@ -791,6 +792,7 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
 }
 
 static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+static bool g_inSizeMove = false;   // 系统拖动/缩放循环中：只擦底色，松手后一次重画
 
 // 实体化状态：控件 id -> 元素/矩形/外观；宿主负责建窗与 owner-draw 绘制
 static ViewerMfcHost* g_host = nullptr;
@@ -865,11 +867,76 @@ static void ensureControlsBuilt(HWND hwnd)
 
 static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+    // 外壳选项：PYARX_FRAME=native 走系统标题栏，默认无框（外观由 XML 决定，
+    // 与设计器 / 运行时同一套边命中与系统缩放循环 —— 能力在控件库，这里只是调用者）。
+    static const bool frameless = []() {
+        wchar_t v[16] = {};
+        if (::GetEnvironmentVariableW(L"PYARX_FRAME", v, 16) > 0 &&
+            _wcsicmp(v, L"native") == 0)
+            return false;
+        return true;
+    }();
+    // XML 根节点的标题条高度（preview 里没有该属性时退回 32px 拖动区）
+    static const int captionHeight = 32;
+
+    if (frameless)
+    {
+        bool handled = false;
+        LRESULT r = xmlframe::framelessNcProc(hwnd, msg, wp, lp, handled,
+                                              captionHeight, 0, 320, 200);
+        if (handled)
+            return r;
+    }
     switch (msg)
     {
+    case WM_CREATE:
+        if (frameless)
+            xmlframe::stripDwmFrame(hwnd);
+        return 0;
+
+    case WM_SIZE:
+        // 尺寸变化只冻结绘制；松手后由 EXITSIZEMOVE / 静止 60ms 收尾重画一次
+        if (frameless && wp != SIZE_MINIMIZED)
+        {
+            g_inSizeMove = true;
+            ::SetTimer(hwnd, 2, 60, nullptr);
+        }
+        break;
+
+    case WM_TIMER:
+        if (wp == 2)
+        {
+            ::KillTimer(hwnd, 2);
+            if (frameless)
+                xmlframe::stripDwmFrame(hwnd);   // 稳定态再压描边（每帧压会让 DWM 重算整窗）
+            if (g_inSizeMove)
+            {
+                g_inSizeMove = false;
+                ::InvalidateRect(hwnd, nullptr, TRUE);
+            }
+            return 0;
+        }
+        break;
+
+    case WM_ENTERSIZEMOVE:
+        g_inSizeMove = true;
+        return 0;
+
+    case WM_EXITSIZEMOVE:
+        g_inSizeMove = false;
+        ::InvalidateRect(hwnd, nullptr, TRUE);
+        return 0;
+
+    case WM_ACTIVATE:
+        // 激活切换后 DWM 会按新状态重画描边，再压一次
+        if (frameless && LOWORD(wp) != WA_INACTIVE)
+            xmlframe::stripDwmFrame(hwnd);
+        break;
+
     case WM_ERASEBKGND:
         // 每一帧都由渲染后端整幅覆盖，不需要系统先擦一遍（避免"擦白再画"的一帧闪烁）
         return 1;
+
 
     case WM_PAINT:
     {
@@ -878,6 +945,14 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         RECT client;
         ::GetClientRect(hwnd, &client);
         const int cw = client.right, ch = client.bottom;
+
+        // 拖动/缩放期间不重画：只擦应用底色，交给 DWM 合成上一帧（Qt 的节奏）
+        if (g_inSizeMove)
+        {
+            ::FillRect(dc, &client, (HBRUSH)::GetStockObject(BLACK_BRUSH));
+            ::EndPaint(hwnd, &ps);
+            return 0;
+        }
 
         // 先建真控件，再画父窗口表面：DCRenderTarget 画到 BeginPaint 的 DC，
         // 受 WS_CLIPCHILDREN 约束，不会盖住子控件（HwndRenderTarget 直呈会被 DWM
@@ -986,13 +1061,21 @@ static int showPreview(const std::wstring& title, int contentW, int contentH,
     wc.hCursor = ::LoadCursorW(nullptr, IDC_ARROW);
     wc.lpszClassName = L"XmlViewerWnd";
     wc.style = CS_HREDRAW | CS_VREDRAW;   // 拉窗口时整幅重绘（D2D 渲染目标随之重建）
+    wc.hbrBackground = ::CreateSolidBrush(RGB(238, 240, 243));   // 首帧/未画到的像素一律应用底色，不闪白
     ::RegisterClassExW(&wc);
 
     RECT rc = {0, 0, contentW, contentH};
-    ::AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+
+    // 外壳两种形态：默认无框（与设计器 / 运行时同观感），PYARX_FRAME=native 走系统标题栏
+    wchar_t frameMode[16] = {};
+    const bool frameless = !(::GetEnvironmentVariableW(L"PYARX_FRAME", frameMode, 16) > 0 &&
+                             _wcsicmp(frameMode, L"native") == 0);
+    if (!frameless)
+        ::AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
     HWND hwnd = ::CreateWindowExW(0, L"XmlViewerWnd", title.c_str(),
-                                  WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+                                  frameless ? xmlframe::framelessStyle()
+                                            : (WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN),
                                   CW_USEDEFAULT, CW_USEDEFAULT,
                                   rc.right - rc.left, rc.bottom - rc.top,
                                   nullptr, nullptr, wc.hInstance, nullptr);
