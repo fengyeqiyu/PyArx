@@ -1076,6 +1076,17 @@
       <property name="Title" type="string"/>
     </objectinfo>
 
+  <objectinfo tag="XRibbon" display="Ribbon" category="Function Bar" w="900" h="126">
+    <property name="Name" type="text"/>
+    <property name="SelectedTab" type="int"/>
+    <property name="Background" type="color"/>
+    <property name="Foreground" type="color"/>
+    <property name="BorderColor" type="color"/>
+    <property name="FontSize" type="int"/>
+    <property name="FontFamily" type="text"/>
+    <property name="Title" type="string"/>
+  </objectinfo>
+
   <objectinfo tag="XToolBar" display="ToolBar" category="Function Bar" w="360" h="32">
     <property name="Name" type="text"/>
     <property name="Shape" type="enum" options="Rect|RoundRect|Ellipse|Capsule"/>

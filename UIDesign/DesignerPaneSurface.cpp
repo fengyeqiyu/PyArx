@@ -519,6 +519,65 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
         return;
     }
 
+    // ---- Ribbon（控件库 xmlctl::XRibbonModel：选项卡条 + 分组大按钮 + 组名）----
+    // 结构与行为全在控件库（XmlRibbon.h），设计器只做三件事：
+    //   1) 把 XML 节点解析成模型；2) 调库绘制；3) 把命中矩形登记成动作名。
+    if (_wcsicmp(bareTag.c_str(), L"Ribbon") == 0)
+    {
+        // 图标相对路径的根：控件库只认 res/xxx.png，设计器告诉它自己的 exe 目录
+        if (xmlctl::ribbonIconBase().empty())
+            xmlctl::ribbonIconBase() = exeDir();
+
+        // 每帧重建结构，但"当前选中页"是运行状态，不能被 XML 里的 SelectedTab 反复覆盖
+        const int keepSel = m_ribbon.selected;
+        xmlctl::ribbonParse(*node, m_ribbon);
+        if (!m_ribbonInited)
+        {
+            const std::wstring sel = node->get(L"SelectedTab");
+            if (!sel.empty()) m_ribbon.selected = _wtoi(sel.c_str());
+            m_ribbonInited = true;
+        }
+        else
+        {
+            m_ribbon.selected = keepSel;
+            if (m_ribbon.selected >= (int)m_ribbon.tabs.size()) m_ribbon.selected = 0;
+        }
+
+        const int tabH = 34;
+        RECT tabRc{ rc.left, rc.top, rc.right, rc.top + tabH };
+        RECT bodyRc{ rc.left, rc.top + tabH, rc.right, rc.bottom };
+
+        xmlctl::XRibbonMetrics mx;
+        mx.bodyH = bodyRc.bottom - bodyRc.top;
+        mx.titleTop = (std::max)(36, mx.bodyH - 24);
+
+        xmlctl::XRibbonLayout lay;
+        xmlctl::ribbonLayout(m_ribbon, mx, tabRc, bodyRc, lay);
+        xmlctl::ribbonDraw(cv, tabRc, bodyRc, m_ribbon, mx, lay, m_ribbonHotTab, m_ribbonHotBtn,
+                           std::wstring(), 10, 9);
+
+        // 命中登记：选项卡 -> "ribbon:tab:N"，按钮 -> 按钮 Name（与工具栏命令同名）
+        for (size_t i = 0; i < lay.tabs.size(); ++i)
+        {
+            m_surfToolRects.push_back(lay.tabs[i]);
+            m_surfToolNames.push_back(std::wstring(L"ribbon:tab:") + std::to_wstring(i));
+        }
+        if (const xmlctl::XRibbonTab* tab = m_ribbon.current())
+        {
+            for (size_t gi = 0; gi < lay.groups.size() && gi < tab->groups.size(); ++gi)
+            {
+                const xmlctl::XRibbonGroup& grp = tab->groups[gi];
+                const xmlctl::XRibbonGroupBox& box = lay.groups[gi];
+                for (size_t bi = 0; bi < box.buttons.size() && bi < grp.buttons.size(); ++bi)
+                {
+                    m_surfToolRects.push_back(box.buttons[bi]);
+                    m_surfToolNames.push_back(grp.buttons[bi].name);
+                }
+            }
+        }
+        return;
+    }
+
     // ---- 工具栏 ----
     if (_wcsicmp(bareTag.c_str(), L"ToolBar") == 0)
     {

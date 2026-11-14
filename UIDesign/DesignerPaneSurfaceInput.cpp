@@ -192,6 +192,18 @@ void DesignerPaneView::surfaceToolClick(int idx)
     if (idx < 0 || idx >= (int)m_surfToolNames.size()) return;
     const CString name(m_surfToolNames[idx].c_str());
 
+    // Ribbon 选项卡：切页（选中态归控件库模型，重绘即可）
+    if (name.Left(11).Compare(_T("ribbon:tab:")) == 0)
+    {
+        const int tab = _wtoi((LPCWSTR)name.Mid(11));
+        if (tab >= 0 && tab < (int)m_ribbon.tabs.size())
+        {
+            m_ribbon.selected = tab;
+            Invalidate(FALSE);
+        }
+        return;
+    }
+
     // 窗口按钮：最小化 / 最大化（再点还原）/ 关闭，直接发给顶层框架
     if (name.Compare(_T("btnWinMin")) == 0 || name.Compare(_T("btnWinMax")) == 0 ||
         name.Compare(_T("btnWinClose")) == 0)
@@ -445,6 +457,19 @@ void DesignerPaneView::surfaceMouseMove(CPoint pt, UINT flags)
         m_surfHotTool = hotTool;
         m_surfHotSplit = hotSplit;
         m_surfHotChip = hotChip;
+
+        // Ribbon 的悬停态要按"名字"告诉控件库（画的时候命中列表还是空的）
+        m_ribbonHotBtn.clear();
+        m_ribbonHotTab = -1;
+        if (hotTool >= 0 && hotTool < (int)m_surfToolNames.size())
+        {
+            const std::wstring& nm = m_surfToolNames[(size_t)hotTool];
+            if (nm.compare(0, 11, L"ribbon:tab:") == 0)
+                m_ribbonHotTab = _wtoi(nm.c_str() + 11);
+            else
+                m_ribbonHotBtn = nm;
+        }
+
         ::SetCursor(::LoadCursor(nullptr, hotTool >= 0 ? IDC_HAND : IDC_ARROW));
         Invalidate(FALSE);
     }

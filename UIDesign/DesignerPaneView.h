@@ -21,6 +21,7 @@
 #include "../MfcXmlCore/controls/CodeEditor.h"   // 源码区用的独立代码编辑器控件
 #include "XmlBackBuffer.h"                       // 控件库统一离屏缓冲（32bpp DIB + BitBlt）
 #include "XFrameWindow.h"                        // 控件库的拖动判据 LiveResize
+#include "XmlRibbon.h"                           // 控件库 Ribbon（选项卡 / 分组 / 大按钮）
 
 namespace uidesign
 {
@@ -284,6 +285,11 @@ namespace uidesign
         int m_surfWidgetScroll = 0, m_surfDocScroll = 0, m_surfPropScroll = 0, m_surfCodeScroll = 0;
         int m_surfWidgetTotal = 0, m_surfDocTotal = 0, m_surfPropTotal = 0, m_surfCodeTotal = 0;
         int m_surfHotTool = -1;      // 悬停的工具栏按钮
+        // Ribbon（控件库 xmlctl::XRibbonModel）：每帧按 XML 重建，选中页与悬停态单独保存
+        xmlctl::XRibbonModel m_ribbon;
+        std::wstring m_ribbonHotBtn; // 悬停的 Ribbon 按钮名
+        int m_ribbonHotTab = -1;     // 悬停的选项卡序号
+        bool m_ribbonInited = false;
         int m_surfHotSplit = -1;     // 悬停的分割条
         int m_surfSelWidgetRow = -1; // 控件箱选中行
         int m_surfSelPropRow = -1;   // 属性表选中行
