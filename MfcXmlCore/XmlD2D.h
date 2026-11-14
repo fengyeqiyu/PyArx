@@ -496,6 +496,8 @@ public:
     void clipPush(const RECT& rc) override
     {
         if (m_rt == nullptr) return;
+        // D2D 的轴对齐裁剪会被当前 transform 变换（rendertarget 坐标系），
+        // 所以这里原样传调用方自己的坐标，不要自己再乘一遍视图矩阵。
         m_rt->PushAxisAlignedClip(rectf(rc), D2D1_ANTIALIAS_MODE_ALIASED);
         ++m_depth;
     }

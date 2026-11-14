@@ -41,14 +41,34 @@
 2. 设计器文档画布里 `XRibbon` / `PowerCanvas` 以前是"占位框"，
    现在与预览器同一份 `ribbonDraw` / `PowerCanvasView`。
 
+## 交互（预览器）
+
+预览器只做"上一帧记下矩形和模型，下一帧按同一份命中表反查"，业务全在库里：
+
+| 操作 | 落到哪 |
+| --- | --- |
+| 画布滚轮 | `PowerCanvasView::wheelAt`（锚点锁光标） |
+| 画布中键拖动 | `PowerCanvasView::panBy` |
+| 画布左键 | `PowerCanvasView::hit` → `sel`（卡片优先，其次回路折线容差 8/zoom） |
+| Ribbon 点选项卡 | `ribbonHitTest` → 覆盖 XML 的 `SelectedTab`（否则重绘就被打回原页） |
+| 适应窗口 / 放大 / 缩小 / 100% / 电缆标注 | 按钮 `Name` 直接当命令名，转成视图状态 |
+
+选中结果不是"预览器自己再画一块信息板"，而是写回外壳 XML 里那几个 `XLabel` 的
+`Content`（注意解析期已把 Content 收进 `XmlElement::text`，两处都要改），所以右侧
+信息板和状态行的样子仍然完全由 XML 决定。
+
 ## 验收
 
 - `docs/_pp_shell_viewer2.png`：Viewer 打开 `power_plan_shell.xml`，12 台设备、11 条回路完整。
 - `docs/_pp_shell_designer7.png`：同一份 XML 在设计器里，画布观感与 Viewer 一致。
 - `docs/_pp_zoom_in.png`：设计器滚轮 48% → 73%，整窗外层缩放与画布内 fit 互不干扰。
+- `docs/_pp_viselect.png`：点树顶卡片 → 红框 + 右板 P0/10kV 总进线/10kV/YJV22-3×70。
+- `docs/_pp_vizoom.png`：滚轮放大，内容严格裁在画布矩形内（不再压到右板）。
+- `docs/_pp_vitabview.png` / `_pp_vifit.png`：切「视图」页 → 点「适应窗口」复位，选中保持。
 
 ## 还差的（明确没做）
 
-- 运行时按钮命令（适应窗口 / 电缆标注开关 / 导出）绑定，外壳里按钮已就位但命令未接。
+- 导入/导出/打印/撤销重做等按钮在预览器里是 no-op（留给运行时宿主接 Python 回调）。
 - 小地图（`Mini`）、详情浮层、侧板表格编辑仍是旧 Python 实现，未搬进库。
 - `XPowerCanvas` 在 `MfcXmlFrame` 的 `IXmlMfcHost` 侧未实现（该框架暂无此控件）。
+- 设计器里点文档内的 Ribbon 按钮不触发命令（设计器是编辑器，点中即选中控件）。

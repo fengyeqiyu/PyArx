@@ -104,8 +104,11 @@ namespace xmlctl
                 fitTo(rc);
             cv.fillRect(rc, bg);
             if (!loaded) return;
+            // 真裁剪：放大后卡片不许溢出画布矩形（此前后端只做了"整项不可见就跳过"）
+            cv.clipPush(rc);
             RECT clip = rc;
             xmlplan::drawPlan(cv, plan, zoom, ox, oy, sel, showCable, &clip);
+            cv.clipPop();
         }
 
         // ---- 命中：先卡片，再回路（点到线 = 选中它的下游节点） ----
@@ -159,8 +162,16 @@ namespace xmlctl
             if (!loaded) return;
             const float z0 = (zoom > 0.001f) ? zoom : 1.0f;
             float z1 = z0 * static_cast<float>(std::pow(1.15, static_cast<double>(delta) / 120.0));
+            setZoomAbout(x, y, z1);
+        }
+
+        // 指定倍率缩放（按钮 100% / 放大 / 缩小共用），锚点同样锁在 (x, y)
+        void setZoomAbout(int x, int y, float z1)
+        {
+            if (!loaded) return;
             if (z1 < 0.05f) z1 = 0.05f;
             if (z1 > 4.0f) z1 = 4.0f;
+            const float z0 = (zoom > 0.001f) ? zoom : 1.0f;
             if (z1 == z0) return;
             const float mx = (static_cast<float>(x) - ox) / z0;
             const float my = (static_cast<float>(y) - oy) / z0;

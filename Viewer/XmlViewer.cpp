@@ -623,6 +623,28 @@ static const COLORREF kFieldCv  = xmlmfc::theme::field;
 
 static const wchar_t* g_backend = L"未初始化";
 
+// ---------------------------------------------------------------------------
+// 交互状态（预览器最小可用：配电画布 + Ribbon 按钮）
+// 只记录"上一帧画到哪、模型是什么"，命中与业务全部交给控件库：
+// 画布 = xmlctl::PowerCanvasView，Ribbon = ribbonHitTest + 按钮 name 命令表。
+// ---------------------------------------------------------------------------
+static xmlctl::PowerCanvasView g_powerView;      // 当前文档的配电画布
+static RECT   g_powerRc = { 0, 0, 0, 0 };        // 画布最后一帧的客户区矩形
+static bool   g_powerShowCable = true;
+static bool   g_panning = false;
+static POINT  g_panLast = { 0, 0 };
+
+static xmlctl::XRibbonModel  g_ribbonModel;
+static xmlctl::XRibbonLayout g_ribbonLayout;
+static bool   g_ribbonValid = false;
+static int    g_ribbonSel = -1;     // 用户在预览器里切换的选项卡（-1 = 用 XML 的 SelectedTab）
+
+static bool inRectPt(const RECT& r, POINT p)
+{
+    return r.right > r.left && r.bottom > r.top &&
+           p.x >= r.left && p.x < r.right && p.y >= r.top && p.y < r.bottom;
+}
+
 // 名字比对要同时认 "GroupBox" 与 "XGroupBox"：XML 里统一是 X 前缀，
 // 绘制分支按本意名分派，两边都要命中（否则预览器会静默漏画一类控件）。
 static bool isAnyTag(const std::wstring& tag, std::initializer_list<const wchar_t*> names)
@@ -791,6 +813,9 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
             xmlctl::ribbonParse(*el, model);
             // Collapsed="true"：只显示选项卡条（与设计器点右端三角收起后的观感一致）
             model.bodyCollapsed = _wcsicmp(el->get(L"Collapsed").c_str(), L"true") == 0;
+            // 预览器里点过的选项卡优先于 XML 的 SelectedTab（否则一重绘就被打回原页）
+            if (g_ribbonSel >= 0 && g_ribbonSel < (int)model.tabs.size())
+                model.selected = g_ribbonSel;
             const int tabH = 34;
             RECT tabRc  = { rc.left, rc.top, rc.right, rc.top + tabH };
             RECT bodyRc = { rc.left, rc.top + tabH, rc.right,
@@ -801,24 +826,31 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
             xmlctl::XRibbonLayout lay;
             xmlctl::ribbonLayout(model, mx, tabRc, bodyRc, lay);
             xmlctl::ribbonDraw(cv, tabRc, bodyRc, model, mx, lay, -1, std::wstring(), std::wstring(), 10, 9);
+            // 命中表留在全局：点击选项卡 / 按钮时由窗口过程按同一份 layout 反查
+            g_ribbonModel = model;
+            g_ribbonLayout = lay;
+            g_ribbonValid = true;
             return;
         }
         if (_wcsicmp(shellTag.c_str(), L"PowerCanvas") == 0)
         {
             // 配电规划画布：解析/布局/绘制全在控件库（xmlctl::PowerCanvasView），
             // 这里只按 XML 的 Data 属性喂数据，不再自己算排版 —— 与设计器同一份画法。
-            static std::wstring cachedData;
-            static xmlctl::PowerCanvasView cachedView;
             const std::wstring data = el->get(L"Data");
             const bool showCable = _wcsicmp(el->get(L"ShowCable").c_str(), L"0") != 0;
-            if (data != cachedData || !cachedView.loaded)
+            // 只在 Data 换版本时重建视图状态（重绘不清用户的选择）
+            if (data != g_powerView.data)
             {
-                cachedData = data;
-                cachedView.load(data);
-                cachedView.sel.clear();
+                g_powerView.load(data);
+                g_powerView.sel.clear();
             }
-            cachedView.showCable = showCable;
-            cachedView.paint(cv, rc, RGB(0xF3, 0xF5, 0xF8));
+            else if (!g_powerView.loaded)
+            {
+                g_powerView.load(data);
+            }
+            g_powerView.showCable = showCable && g_powerShowCable;
+            g_powerRc = rc;
+            g_powerView.paint(cv, rc, RGB(0xF3, 0xF5, 0xF8));
             return;
         }
     }
@@ -839,6 +871,109 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
 }
 
 static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+
+// 预览器把选中结果写回外壳 XML 的对应标签：右侧信息板是普通 XLabel，
+// 名称由 XML 决定，内容由控件层汇报 —— 不在预览器里画一块"专用的"信息板。
+static bool setLabelByName(XmlElement& el, const std::wstring& name, const std::wstring& text)
+{
+    if (el.name == name)
+    {
+        el.set(L"Content", text);
+        el.text = text;          // 解析期已把 Content 收进 text，绘制读的就是它
+        return true;
+    }
+    for (auto& child : el.children)
+        if (setLabelByName(child, name, text))
+            return true;
+    return false;
+}
+
+static void viewerSyncSelection()
+{
+    if (g_root == nullptr) return;
+    const xmlplan::PowerNode* node = nullptr;
+    for (const xmlplan::PowerNode& n : g_powerView.plan.nodes)
+    {
+        if (n.code == g_powerView.sel)
+        {
+            node = &n;
+            break;
+        }
+    }
+    const int total = (int)g_powerView.plan.boxes.size();
+    const int links = (int)g_powerView.plan.links.size();
+    wchar_t buf[256];
+    if (node == nullptr)
+    {
+        setLabelByName(*g_root, L"lblSelCode", L"（未选中）");
+        setLabelByName(*g_root, L"lblSelName", L"名称");
+        setLabelByName(*g_root, L"lblSelVolt", L"电压等级");
+        setLabelByName(*g_root, L"lblSelLoad", L"负荷");
+        setLabelByName(*g_root, L"lblSelCable", L"电缆");
+        setLabelByName(*g_root, L"lblSelLen", L"长度");
+        swprintf_s(buf, L"就绪 · %d 台设备 · %d 条回路", total, links);
+        setLabelByName(*g_root, L"lblState", buf);
+        return;
+    }
+    setLabelByName(*g_root, L"lblSelCode", node->code);
+    setLabelByName(*g_root, L"lblSelName",
+                   node->name.empty() ? std::wstring(L"名称  —")
+                                      : (std::wstring(L"名称  ") + node->name));
+    setLabelByName(*g_root, L"lblSelVolt", std::wstring(L"电压等级  ") + node->voltage);
+    if (node->loadKw > 0.0)
+    {
+        swprintf_s(buf, L"负荷  %.1f kW", node->loadKw);
+        setLabelByName(*g_root, L"lblSelLoad", buf);
+    }
+    else setLabelByName(*g_root, L"lblSelLoad", L"负荷  —");
+    setLabelByName(*g_root, L"lblSelCable",
+                   node->cable.empty() ? std::wstring(L"电缆  —")
+                                       : (std::wstring(L"电缆  ") + node->cable));
+    if (node->length > 0.0)
+    {
+        swprintf_s(buf, L"长度  %.0f m", node->length);
+        setLabelByName(*g_root, L"lblSelLen", buf);
+    }
+    else setLabelByName(*g_root, L"lblSelLen", L"长度  —");
+    swprintf_s(buf, L"就绪 · %d 台设备 · %d 条回路 · 选中 %s", total, links,
+               node->name.empty() ? node->code.c_str() : node->name.c_str());
+    setLabelByName(*g_root, L"lblState", buf);
+}
+
+// 按钮命令：外壳 XML 里 <XRibbonButton Name="btnZoomFit"/> 的 Name 就是命令名。
+// 全部转成 PowerCanvasView 的一个动作，预览器不自己算任何几何。
+static void viewerCommand(HWND hwnd, const std::wstring& name)
+{
+    if (name.empty()) return;
+    const int cx = g_powerRc.left + (g_powerRc.right - g_powerRc.left) / 2;
+    const int cy = g_powerRc.top + (g_powerRc.bottom - g_powerRc.top) / 2;
+    bool changed = true;
+    if (name == L"btnZoomFit")
+    {
+        g_powerView.fitPending = true;
+    }
+    else if (name == L"btnZoomIn")
+    {
+        g_powerView.wheelAt(cx, cy, 120);
+    }
+    else if (name == L"btnZoomOut")
+    {
+        g_powerView.wheelAt(cx, cy, -120);
+    }
+    else if (name == L"btnZoomReset")
+    {
+        g_powerView.setZoomAbout(cx, cy, 1.0f);
+    }
+    else if (name == L"btnCable")
+    {
+        g_powerShowCable = !g_powerShowCable;
+    }
+    else
+    {
+        changed = false;   // 设备表 / 导出 / 打印等留给运行时宿主，预览器不假装实现
+    }
+    if (changed) ::InvalidateRect(hwnd, &g_powerRc, FALSE);
+}
 static bool g_inSizeMove = false;   // 系统拖动/缩放循环中：只擦底色，松手后一次重画
 
 // 实体化状态：控件 id -> 元素/矩形/外观；宿主负责建窗与 owner-draw 绘制
@@ -1044,6 +1179,88 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
             return 0;
         }
         break;
+
+    // ---- 配电画布 + Ribbon 交互：几何、命中和视图状态都在控件库 ----
+    case WM_LBUTTONDOWN:
+    {
+        POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
+        if (inRectPt(g_powerRc, p))
+        {
+            g_powerView.sel = g_powerView.hit(p.x, p.y);
+            viewerSyncSelection();
+            ::InvalidateRect(hwnd, nullptr, FALSE);
+            return 0;
+        }
+        if (g_ribbonValid)
+        {
+            const xmlctl::XRibbonHit hit = xmlctl::ribbonHitTest(g_ribbonLayout, p);
+            if (hit.tab >= 0)
+            {
+                if (hit.tab != g_ribbonModel.selected)
+                {
+                    g_ribbonSel = hit.tab;          // 重绘时按它覆盖 XML 的 SelectedTab
+                    g_ribbonModel.selected = hit.tab;
+                    ::InvalidateRect(hwnd, nullptr, FALSE);
+                }
+                return 0;
+            }
+            if (hit.button >= 0 && !g_ribbonModel.tabs.empty())
+            {
+                const xmlctl::XRibbonTab* tab = g_ribbonModel.current();
+                if (tab != nullptr && hit.group >= 0 && hit.group < (int)tab->groups.size())
+                {
+                    const xmlctl::XRibbonGroup& grp = tab->groups[(size_t)hit.group];
+                    if (hit.button < (int)grp.buttons.size())
+                        viewerCommand(hwnd, grp.buttons[(size_t)hit.button].name);
+                }
+                return 0;
+            }
+        }
+        break;
+    }
+    case WM_MBUTTONDOWN:
+    {
+        POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
+        if (inRectPt(g_powerRc, p))
+        {
+            g_panning = true;
+            g_panLast = p;
+            ::SetCapture(hwnd);
+            ::SetCursor(::LoadCursor(nullptr, IDC_SIZEALL));
+            return 0;
+        }
+        break;
+    }
+    case WM_MBUTTONUP:
+        if (g_panning)
+        {
+            g_panning = false;
+            if (::GetCapture() == hwnd) ::ReleaseCapture();
+            return 0;
+        }
+        break;
+    case WM_MOUSEMOVE:
+        if (g_panning)
+        {
+            POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
+            g_powerView.panBy(p.x - g_panLast.x, p.y - g_panLast.y);
+            g_panLast = p;
+            ::InvalidateRect(hwnd, &g_powerRc, FALSE);
+            return 0;
+        }
+        break;
+    case WM_MOUSEWHEEL:
+    {
+        POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
+        ::ScreenToClient(hwnd, &p);
+        if (inRectPt(g_powerRc, p))
+        {
+            g_powerView.wheelAt(p.x, p.y, static_cast<short>(GET_WHEEL_DELTA_WPARAM(wp)));
+            ::InvalidateRect(hwnd, &g_powerRc, FALSE);
+            return 0;
+        }
+        break;
+    }
 
     case WM_DRAWITEM:
         // owner-draw：按钮/标签的外观由 D2D 画到控件自己的 HDC

@@ -33,6 +33,7 @@
 #include "controls/RegisterPyMfcControls.h"
 #include "XmlBindings.h"   // PyMfcCore.xml 子模块：把 PyMfcXml 加载器暴露给 Python
 #include "XmlPowerPlan.h"  // 配电规划图：建树/布局/XML/JSON/CSV + 离屏渲染
+#include "XmlPowerPlanDraw.h"  // 唯一一份配电图画法（屏幕自绘 / 预览 / 设计器 / 离屏共用）
 #include "XmlGeometry.h"   // sCurvePoints：回路 S 曲线采样
 #include "XmlSvgScene.h"   // SVG：nanosvg 解析 → XmlCanvas 绘制
 #include <algorithm>
