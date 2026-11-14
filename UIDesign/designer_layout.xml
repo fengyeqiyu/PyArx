@@ -110,6 +110,9 @@
     <!-- ==================== Ribbon（控件库 XRibbon：选项卡 / 分组 / 大按钮 / 组名） ====================
          结构见 MfcXmlCore\XmlRibbon.h：选项卡 → 分组 → 按钮。要增删按钮只改这份 XML，
          绘制、命中、切页都由控件库完成，设计器只负责把命中转成动作名。 -->
+    <!-- ==================== Ribbon（控件库 XRibbon：选项卡 / 分组 / 大按钮 / 组名） ====================
+         结构见 MfcXmlCore\XmlRibbon.h：选项卡 → 分组 → 按钮。要增删按钮只改这份 XML，
+         绘制、命中、切页都由控件库完成，设计器只负责把命中转成动作名。 -->
     <XRibbon Name="mainRibbon" Grid.Row="1" SelectedTab="1">
 
       <XRibbonTab Header="文件">
@@ -117,6 +120,7 @@
           <XRibbonButton Name="btnNew" Icon="res/new.png" Text="新建"/>
           <XRibbonButton Name="btnOpen" Icon="res/open.png" Text="打开"/>
           <XRibbonButton Name="btnSave" Icon="res/save.png" Text="保存"/>
+          <XRibbonButton Name="btnExit" Text="退出"/>
         </XRibbonGroup>
       </XRibbonTab>
 
@@ -143,38 +147,36 @@
           <XRibbonButton Name="btnDistH" Icon="res/disth.png" Text="横分布"/>
           <XRibbonButton Name="btnDistV" Icon="res/distv.png" Text="纵分布"/>
         </XRibbonGroup>
-        <XRibbonGroup Header="视图">
-          <XRibbonButton Name="btnGrid" Icon="res/grid.png" Text="网格"/>
-          <XRibbonButton Name="btnRuler" Icon="res/ruler.png" Text="标尺"/>
-        </XRibbonGroup>
-        <XRibbonGroup Header="缩放">
-          <XRibbonButton Name="btnZoomOut" Icon="res/zoomout.png" Text="缩小"/>
-          <XRibbonButton Name="btnZoomIn" Icon="res/zoomin.png" Text="放大"/>
-        </XRibbonGroup>
       </XRibbonTab>
 
       <XRibbonTab Header="插入">
-        <XRibbonGroup Header="剪贴板">
-          <XRibbonButton Name="btnPaste" Icon="res/paste.png" Text="粘贴"/>
-          <XRibbonButton Name="btnCut" Icon="res/cut.png" Text="剪切"/>
-          <XRibbonButton Name="btnCopy" Icon="res/copy.png" Text="复制"/>
-          <XRibbonButton Name="btnDelete" Icon="res/del.png" Text="删除"/>
+        <XRibbonGroup Header="图形">
+          <XRibbonButton Name="btnShapeLine" Text="直线"/>
+          <XRibbonButton Name="btnShapeRect" Text="矩形"/>
+          <XRibbonButton Name="btnShapeEllipse" Text="圆"/>
+          <XRibbonButton Name="btnShapeArc" Text="圆弧"/>
+          <XRibbonButton Name="btnShapeText" Text="文本"/>
         </XRibbonGroup>
       </XRibbonTab>
 
       <XRibbonTab Header="布局">
-        <XRibbonGroup Header="对齐">
+        <XRibbonGroup Header="排列">
           <XRibbonButton Name="btnAlignLeft" Icon="res/alignleft.png" Text="左"/>
           <XRibbonButton Name="btnAlignHCenter" Icon="res/alignhcenter.png" Text="居中"/>
           <XRibbonButton Name="btnAlignRight" Icon="res/alignright.png" Text="右"/>
-          <XRibbonButton Name="btnAlignTop" Icon="res/aligntop.png" Text="上"/>
-          <XRibbonButton Name="btnAlignVCenter" Icon="res/alignvcenter.png" Text="居中"/>
-          <XRibbonButton Name="btnAlignBottom" Icon="res/alignbottom.png" Text="下"/>
+        </XRibbonGroup>
+        <XRibbonGroup Header="分布">
+          <XRibbonButton Name="btnDistH" Icon="res/disth.png" Text="横分布"/>
+          <XRibbonButton Name="btnDistV" Icon="res/distv.png" Text="纵分布"/>
+        </XRibbonGroup>
+        <XRibbonGroup Header="层级">
+          <XRibbonButton Name="btnBringFront" Text="上移一层"/>
+          <XRibbonButton Name="btnSendBack" Text="下移一层"/>
         </XRibbonGroup>
       </XRibbonTab>
 
       <XRibbonTab Header="视图">
-        <XRibbonGroup Header="视图">
+        <XRibbonGroup Header="显示">
           <XRibbonButton Name="btnGrid" Icon="res/grid.png" Text="网格"/>
           <XRibbonButton Name="btnRuler" Icon="res/ruler.png" Text="标尺"/>
         </XRibbonGroup>
@@ -185,10 +187,10 @@
       </XRibbonTab>
 
       <XRibbonTab Header="帮助">
-        <XRibbonGroup Header="文件">
-          <XRibbonButton Name="btnNew" Icon="res/new.png" Text="新建"/>
-          <XRibbonButton Name="btnOpen" Icon="res/open.png" Text="打开"/>
-          <XRibbonButton Name="btnSave" Icon="res/save.png" Text="保存"/>
+        <XRibbonGroup Header="支持">
+          <XRibbonButton Name="btnAbout" Icon="res/logo.png" Text="关于"/>
+          <XRibbonButton Name="btnHelpDoc" Icon="res/open.png" Text="文档"/>
+          <XRibbonButton Name="btnFeedback" Icon="res/ok.png" Text="反馈"/>
         </XRibbonGroup>
       </XRibbonTab>
 

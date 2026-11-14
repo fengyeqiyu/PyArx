@@ -206,7 +206,9 @@ inline void ribbonDrawButton(XmlCanvas& cv, const RECT& rc, const XRibbonButton&
 {
     const ShellTheme& th = shell();
     const COLORREF back = pressed ? th.accentDim : (hot ? RGB(58, 70, 88) : RGB(45, 54, 66));
-    cv.fillRoundRect(rc, back, back, 5);
+    // 左右各留 2px，相邻按钮才不会连成一条长块
+    RECT face = { rc.left + 2, rc.top, rc.right - 2, rc.bottom };
+    cv.fillRoundRect(face, back, back, 5);
 
     if (btn.icon.empty())
     {
