@@ -28,7 +28,7 @@ $cb = [WinCap+EnumProc]{
     if ($procId -eq $p.Id) {
         $sb = New-Object System.Text.StringBuilder 256
         [WinCap]::GetWindowText($h, $sb, 256) | Out-Null
-        if ($sb.ToString() -like '*PyMfc UI Designer*') { $script:found = $h; return $false }
+        if ($sb.ToString() -like '*PyArx*') { $script:found = $h; return $false }
     }
     return $true
 }

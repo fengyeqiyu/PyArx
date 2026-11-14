@@ -915,7 +915,7 @@ bool DesignerPaneView::openFile(const CString& path)
     rebuildTree();
     if (m_canvas != nullptr) m_canvas->setDocument(&m_doc);
     CString title;
-    title.Format(_T("PyMfc UI Designer - %s"), (LPCWSTR)path);
+    title.Format(_T("PyArx - %s"), (LPCWSTR)path);
     SetWindowText(title);
     updateStatus();
     return true;
@@ -1548,7 +1548,7 @@ bool DesignerPaneView::confirmClose()
 
 void DesignerPaneView::onAbout()
 {
-    AfxMessageBox(_T("PyMfc UI Designer\n基于 PyMfcXml 的可视化界面设计器\n输出 XML 供 PyMfc 运行时加载"),
+    AfxMessageBox(_T("PyArx\n基于 PyMfcXml 的可视化界面设计器\n输出 XML 供 PyMfc 运行时加载"),
                   MB_ICONINFORMATION | MB_OK);
 }
 
@@ -1728,9 +1728,9 @@ void DesignerPaneView::updateStatus()
         // 注意要写到顶层框架：DockPane 的窗格标题只在窗格内部可见，外面看着没变。
         CString t;
         if (m_docPath.IsEmpty())
-            t.Format(_T("PyMfc UI Designer · %s"), (LPCWSTR)sel);
+            t.Format(_T("PyArx · %s"), (LPCWSTR)sel);
         else
-            t.Format(_T("PyMfc UI Designer - %s · %s"), (LPCWSTR)m_docPath, (LPCWSTR)sel);
+            t.Format(_T("PyArx - %s · %s"), (LPCWSTR)m_docPath, (LPCWSTR)sel);
         CFrameWnd* frame = GetTopLevelFrame();
         CWnd* target = (frame != nullptr) ? static_cast<CWnd*>(frame) : this;
         target->SetWindowText(t);

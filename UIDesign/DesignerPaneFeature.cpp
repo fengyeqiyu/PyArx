@@ -45,7 +45,7 @@ void DesignerPaneView::onNew()
     rebuildTree();
     if (m_canvas != nullptr) m_canvas->setDocument(&m_doc);
     fillProperties(nullptr);
-    SetWindowText(_T("PyMfc UI Designer - 未命名"));
+    SetWindowText(_T("PyArx - 未命名"));
     updateStatus();
 }
 

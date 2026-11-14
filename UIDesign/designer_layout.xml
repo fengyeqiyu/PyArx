@@ -32,7 +32,7 @@
     Stage        画布舞台（深色台面 + 四角定位标）
 -->
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
-        Title="PyMfc UI Designer"
+        Title="PyArx"
         Width="1440"
         Height="900"
         Background="#15181D">
@@ -55,7 +55,7 @@
            FontSize="10" TitleWidth="120" WinButtonWidth="46" ItemGap="10">
 
       <XImage Name="appLogo" Source="res\logo.png" Width="26" Height="26"/>
-      <ShellTitle Name="winTitle" Text="PyMfc Studio"/>
+      <ShellTitle Name="winTitle" Text="PyArx"/>
 
       <MenuItem Name="mnuFile" Header="文件">
         <MenuItem Name="mnuNew"     Header="新建"/>
@@ -97,7 +97,7 @@
       <MenuItem Name="mnuHelp" Header="帮助">
         <MenuItem Name="mnuPreview" Header="在预览器中打开"/>
         <MenuItem Name="mnuCheck"   Header="校验当前 XML"/>
-        <MenuItem Name="mnuAbout"   Header="关于 PyMfc UI Designer"/>
+        <MenuItem Name="mnuAbout"   Header="关于 PyArx"/>
       </MenuItem>
 
       <!-- 窗口按钮：Dock 靠右，颜色/字形由 paintMenuBar 自绘 -->
@@ -361,7 +361,7 @@
     <!-- ==================== 状态栏 ==================== -->
     <StatusBar Grid.Row="5" Background="#252A33" Foreground="#C7D0DC"
              BorderColor="#39404B" FontSize="9" Spacing="0">
-      <XLabel Name="statusBrand" Text="PyMfc Studio" Width="112"/>
+      <XLabel Name="statusBrand" Text="PyArx" Width="64"/>
       <XLabel Name="statusText"  Text="就绪"        Width="620"/>
       <XLabel Name="statusPos"   Text="X:0 Y:0"     Width="112"/>
       <XLabel Name="statusSize"  Text="W:0 H:0"     Width="112"/>

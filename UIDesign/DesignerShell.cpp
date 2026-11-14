@@ -7,7 +7,7 @@ using namespace uidesign;
 
 BOOL DesignerShell::createShell(const CRect& rect)
 {
-    if (!CreateFrame(_T("PyMfc UI Designer"), rect))
+    if (!CreateFrame(_T("PyArx"), rect))
         return FALSE;
 
     // 顶栏高度随后按内容视图的布局给出（XML rootGrid 的第一行）
