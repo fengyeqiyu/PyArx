@@ -12,6 +12,7 @@
 #include "XmlGeometry.h"      // 绘制与夹点用的纯几何库（正圆弧、直线端点、各类夹点）
 #include "UiDocUtil.h"
 #include "XmlDraw.h"
+#include "XmlTableDraw.h"     // 控件库表格画法（预览器同一份）
 #include "XmlLeafPaint.h"   // 叶子控件统一渲染器（预览器同一份）
 #include "XmlD2D.h"
 #include "XmlControls.h"
@@ -1982,202 +1983,27 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
             else if (tagIs(node, L"ListCtrl") || tagIs(node, L"GridLayout") ||
                      tagIs(node, L"DataGrid") || tagIs(node, L"TableView"))
             {
-                // 表格类控件：把 XML 里的 Columns / Rows 真画出来。
-                // 之前这里只是"空壳 + 控件名"，表头和数据一行都看不到，等于没法做表格界面。
-                // 语法与引擎一致：Columns="名称:180|状态:100"，Rows="甲\t1|乙\t2"
-                const std::wstring colsAttr = node->get(L"Columns");
-                const std::wstring rowsAttr = node->get(L"Rows");
-                const std::wstring sortAttr = node->get(L"Sort");
-
+                // 表格：画法与预览器/运行时同一份（MfcXmlCore/XmlTableDraw.h），
+                // 这里只把 XML 颜色属性和字号转成 Style，不再各端各写一套行/表头逻辑。
                 const COLORREF tbg = bgC == (COLORREF)-1 ? cvdoc::kField : bgC;
                 const int lum = (GetRValue(tbg) * 30 + GetGValue(tbg) * 59 + GetBValue(tbg) * 11) / 100;
                 const bool dark = lum < 128;
-                const COLORREF tink = fgC == (COLORREF)-1 ? (dark ? RGB(226, 231, 238) : cvdoc::kInk) : fgC;
-                const COLORREF headBg = dark ? RGB(52, 58, 70) : cvdoc::kHead;
-                const COLORREF gridC = dark ? RGB(72, 79, 92) : cvdoc::kGrid;
-                drawRoundedCv(cv, rc, tbg, bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC, 3);
-
-                auto splitBy = [](const std::wstring& s, wchar_t sep) {
-                    std::vector<std::wstring> out;
-                    size_t start = 0;
-                    while (true)
-                    {
-                        const size_t i = s.find(sep, start);
-                        const std::wstring seg = (i == std::wstring::npos) ? s.substr(start) : s.substr(start, i - start);
-                        if (!seg.empty()) out.push_back(seg);
-                        if (i == std::wstring::npos) break;
-                        start = i + 1;
-                    }
-                    return out;
-                };
-
-                struct Col { std::wstring title; int w; };
-                std::vector<Col> cols;
-                for (auto& seg : splitBy(colsAttr, L'|'))
-                {
-                    Col c;
-                    c.title = seg;
-                    c.w = 120;
-                    const size_t colon = seg.rfind(L':');
-                    if (colon != std::wstring::npos)
-                    {
-                        const std::wstring wt = seg.substr(colon + 1);
-                        if (!wt.empty() && wt.find_first_not_of(L"0123456789") == std::wstring::npos)
-                        {
-                            c.w = (std::max)(20, _wtoi(wt.c_str()));
-                            c.title = seg.substr(0, colon);
-                        }
-                    }
-                    cols.push_back(c);
-                }
-
-                if (cols.empty())
+                xmltable::Style st;
+                st.bg = tbg;
+                st.ink = fgC == (COLORREF)-1 ? (dark ? RGB(226, 231, 238) : cvdoc::kInk) : fgC;
+                st.headBg = dark ? RGB(52, 58, 70) : cvdoc::kHead;
+                st.grid = dark ? RGB(72, 79, 92) : cvdoc::kGrid;
+                st.border = bdC == (COLORREF)-1 ? cvdoc::kBorder : bdC;
+                if (pt > 0) st.pt = pt;
+                if (!fam.empty()) st.family = fam;
+                drawRoundedCv(cv, rc, tbg, st.border, 3);
+                if (!xmltable::drawTable(cv, rc, node->get(L"Columns"), node->get(L"Rows"),
+                                         node->get(L"Sort"), st))
                 {
                     // 没声明列就仍是"空表格"，但标出控件类型，避免看起来像坏掉的空框
                     drawRoundedCv(cv, rc, cvdoc::kSurface, cvdoc::kBorder, 4);
                     drawTextCv(cv, rc, std::wstring(L"[") + node->tag + std::wstring(L"]"),
                                cvdoc::kMuted, DT_CENTER | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
-                }
-                else
-                {
-                    // 多列排序：Sort="数量:desc,状态:asc"
-                    //   键可以是列标题（不区分大小写）或 0 基列序号；方向缺省 asc，可写 asc/desc；
-                    //   多个键按书写顺序逐级比较（前者优先级高），比较是稳定排序。
-                    //   两边都是数字时按数值比（12 > 3），否则按字符串比。
-                    struct SortKey { int col; bool desc; };
-                    std::vector<SortKey> sortKeys;
-                    for (auto& seg : splitBy(sortAttr, L','))
-                    {
-                        std::wstring item = seg;
-                        while (!item.empty() && (item.front() == L' ' || item.front() == L'\t')) item.erase(item.begin());
-                        while (!item.empty() && (item.back() == L' ' || item.back() == L'\t')) item.pop_back();
-                        if (item.empty()) continue;
-                        bool desc = false;
-                        const size_t colon = item.find(L':');
-                        if (colon != std::wstring::npos)
-                        {
-                            std::wstring dir = item.substr(colon + 1);
-                            for (auto& ch : dir) ch = (wchar_t)towlower(ch);
-                            desc = (dir == L"desc" || dir == L"d" || dir == L"降序" || dir == L"-1");
-                            item = item.substr(0, colon);
-                        }
-                        int colIdx = -1;
-                        if (!item.empty() && item.find_first_not_of(L"0123456789") == std::wstring::npos)
-                        {
-                            colIdx = _wtoi(item.c_str());
-                            if (colIdx < 0 || colIdx >= (int)cols.size()) colIdx = -1;
-                        }
-                        if (colIdx < 0)
-                        {
-                            for (size_t ci = 0; ci < cols.size(); ++ci)
-                                if (_wcsicmp(cols[ci].title.c_str(), item.c_str()) == 0) { colIdx = (int)ci; break; }
-                        }
-                        if (colIdx >= 0) sortKeys.push_back({ colIdx, desc });
-                    }
-
-                    // 数据行 -> 单元格矩阵（行用 | 分隔，列用 \t 分隔）
-                    std::vector<std::vector<std::wstring>> data;
-                    for (auto& rtext : splitBy(rowsAttr, L'|'))
-                        data.push_back(splitBy(rtext, L'\t'));
-
-                    if (!sortKeys.empty() && data.size() > 1)
-                    {
-                        auto numOf = [](const std::wstring& s, double& out) -> bool {
-                            if (s.empty()) return false;
-                            wchar_t* end = nullptr;
-                            out = wcstod(s.c_str(), &end);
-                            return end != nullptr && *end == L'\0';
-                        };
-                        auto cellOf = [](const std::vector<std::wstring>& row, int ci) -> const std::wstring& {
-                            static const std::wstring kEmpty;
-                            return (ci >= 0 && ci < (int)row.size()) ? row[ci] : kEmpty;
-                        };
-                        std::stable_sort(data.begin(), data.end(),
-                            [&](const std::vector<std::wstring>& A, const std::vector<std::wstring>& B) {
-                                for (const auto& k : sortKeys)
-                                {
-                                    const std::wstring& a = cellOf(A, k.col);
-                                    const std::wstring& b = cellOf(B, k.col);
-                                    double na = 0, nb = 0;
-                                    const bool an = numOf(a, na);
-                                    const bool bn = numOf(b, nb);
-                                    int cmp = 0;
-                                    if (an && bn) cmp = (na < nb) ? -1 : ((na > nb) ? 1 : 0);
-                                    else cmp = _wcsicmp(a.c_str(), b.c_str());
-                                    if (cmp != 0) return k.desc ? (cmp > 0) : (cmp < 0);
-                                }
-                                return false;
-                            });
-                    }
-
-                    const int padX = 4, padY = 4;
-                    const int left = (int)rc.left + padX;
-                    const int availW = (std::max)(1, (int)rc.Width() - padX * 2);
-                    int total = 0;
-                    for (auto& c : cols) total += c.w;
-                    if (total > availW && total > 0)
-                    {
-                        // 列宽超宽时按比例压缩，不让最后一列跑出控件外
-                        for (auto& c : cols) c.w = (std::max)(20, c.w * availW / total);
-                        total = 0;
-                        for (auto& c : cols) total += c.w;
-                    }
-                    // 末尾留白并给最后一列吃掉，表头底线与控件右边对齐
-                    if (total < availW) cols.back().w += availW - total;
-
-                    const int headH = (std::max)(20, pt > 0 ? pt + 12 : 22);
-                    const int rowH = (std::max)(18, pt > 0 ? pt + 10 : 20);
-                    const int top = (int)rc.top + padY;
-                    const int bottom = (int)rc.bottom - padY;
-
-                    cv.clipPush(rc);
-                    // 表头
-                    cv.fillRect(CRect(left, top, left + availW, top + headH), headBg);
-                    int x = left;
-                    for (size_t ci = 0; ci < cols.size(); ++ci)
-                    {
-                        auto& c = cols[ci];
-                        CRect cell(x + 6, top, x + c.w - 4, top + headH);
-                        cv.clipPush(cell);
-                        drawTextCv(cv, cell, c.title, tink, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, pt, fam);
-                        cv.clipPop();
-                        // 排序标记：▲升序 / ▼降序，多键时带优先级序号 1..N
-                        for (size_t ki = 0; ki < sortKeys.size(); ++ki)
-                        {
-                            if (sortKeys[ki].col != (int)ci) continue;
-                            std::wstring mark = sortKeys[ki].desc ? L"\u25BC" : L"\u25B2";
-                            if (sortKeys.size() > 1)
-                                mark += std::to_wstring(ki + 1);
-                            CRect mr(x + c.w - 34, top, x + c.w - 4, top + headH);
-                            drawTextCv(cv, mr, mark, tink, DT_RIGHT | DT_VCENTER | DT_SINGLELINE, 0, std::wstring());
-                            break;
-                        }
-                        if (x > left)
-                            cv.strokeLine(POINT{ x, top }, POINT{ x, bottom }, gridC, 1);
-                        x += c.w;
-                    }
-                    cv.strokeLine(POINT{ left, top + headH }, POINT{ left + availW, top + headH }, gridC, 1);
-
-                    // 数据行（已按 Sort 排好）
-                    int y = top + headH;
-                    for (auto& cells : data)
-                    {
-                        if (y + rowH > bottom) break;
-                        x = left;
-                        for (size_t ci = 0; ci < cols.size(); ++ci)
-                        {
-                            CRect cell(x + 6, y, x + cols[ci].w - 4, y + rowH);
-                            cv.clipPush(cell);
-                            const std::wstring val = ci < cells.size() ? cells[ci] : std::wstring();
-                            if (!val.empty())
-                                drawTextCv(cv, cell, val, tink, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, pt, fam);
-                            cv.clipPop();
-                            x += cols[ci].w;
-                        }
-                        y += rowH;
-                        cv.strokeLine(POINT{ left, y }, POINT{ left + availW, y }, gridC, 1);
-                    }
-                    cv.clipPop();
                 }
             }
             else if (tagIs(node, L"Rectangle") || tagIs(node, L"Ellipse") || tagIs(node, L"Line") ||

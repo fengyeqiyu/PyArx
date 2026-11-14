@@ -95,3 +95,17 @@
 - 小地图（`Mini`）、详情浮层、侧板表格编辑仍是旧 Python 实现，未搬进库。
 - `XPowerCanvas` 在 `MfcXmlFrame` 的 `IXmlMfcHost` 侧未实现（该框架暂无此控件）。
 - 设计器里点文档内的 Ribbon 按钮不触发命令（设计器是编辑器，点中即选中控件）。
+
+### 表格（数据页）
+
+表格画法下沉到控件库 `MfcXmlCore/XmlTableDraw.h`（`xmltable::drawTable`），
+设计器画布和预览器都调这一份，不再各写一套表头/行/排序逻辑。XML 语法与引擎一致：
+
+```xml
+<TableView Width="316" Height="182" Columns="设备:56|名称:104|kW:44|电缆:110"
+           Rows="P0<TAB>10kV 总进线<TAB>0<TAB>YJV22-3x70|P1<TAB>1# 双电源柜<TAB>45<TAB>YJV22-4x95|…"/>
+```
+
+- `Columns` 用 `|` 分隔，列宽写在标题后 `:数字`；总宽超出控件时按比例压缩；
+- `Rows` 每行 `|` 分隔、单元格 TAB 分隔；`Sort="名称:desc,负荷:asc"` 支持多键；
+- 数据页设备清单就是这样一块 `TableView`，放在右板小地图下面。

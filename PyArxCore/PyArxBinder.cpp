@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "logPath.h"
 #include <fstream>
+#include <cstring>
 #include "PyGeBinder.h"
 #include "PyAdsCode.h"
 #include "PyRxBinder.h"
@@ -23,14 +24,23 @@
 //   Db(依赖 Rx 基类) → Ed(依赖 Ge) →
 //   Gi(依赖 Db) → Core → Utility → Debug
 // ===========================================================================
-// 热编译：模块名可由 HotModuleName.h 覆盖，默认仍是 PyArxCore。
-// 构建成 PyArxCoreH<时间戳>.pyd 后，在 CAD 内 import 该新模块，
-// 其入口会把 sys.modules["PyArxCore"] 指向自身，即完成热替换。
-#include "HotModuleName.h"
+// 热编译：模块名由 HotModName.h 覆盖（默认 PyArxCore），该文件只被本 TU 包含，
+// 所以换名热编译只重编这一个文件 + 链接。构建成 PyArxCoreH<tag>.pyd 后，
+// 在 CAD 内 import 新模块即可接管 sys.modules["PyArxCore"]。
+#include "HotModName.h"
 
 PYBIND11_MODULE(PYARX_HOT_MODULE, m) {
+    const char* selfName = PyModule_GetName(m.ptr());
+    const bool hotBuild = selfName && std::strcmp(selfName, "PyArxCore") != 0;
+    if (hotBuild) {
+        // 热编译第二个及以后的模块：先清掉旧的 C++→Python 类型注册，
+        // 否则 pybind11 会报 "type X is already registered"。
+        auto& it = py::detail::get_internals();
+        it.registered_types_cpp.clear();
+        it.registered_types_py.clear();
+    }
     acutPrintf(L"\n[PyArx] PYBIND11_MODULE(%hs) 入口执行\n",
-               PyModule_GetName(m.ptr()) ? PyModule_GetName(m.ptr()) : "PyArxCore");
+               selfName ? selfName : "PyArxCore");
     m.doc() = "PyArxCore - AutoCAD ObjectARX pybind11 封装绑定（独立 pyd，可热替换）";
 
     // 先把主模块登记进 sys.modules，使子模块内 py::module_::import("PyArxCore.X") 命中

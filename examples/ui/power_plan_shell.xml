@@ -79,7 +79,10 @@
         <XLabel Content="Ribbon「视图 → 适应窗口」复位" Height="24"/>
         <XDivider Height="1"/>
         <XLabel Content="小地图" Height="28"/>
-        <PowerCanvas Name="Mini" Width="316" Height="160" Mini="1" MiniOf="Plan"/>
+        <PowerCanvas Name="Mini" Width="316" Height="120" Mini="1" MiniOf="Plan"/>
+        <XDivider Height="1"/>
+        <XLabel Content="设备清单（数据页）" Height="28"/>
+        <TableView Width="316" Height="182" Columns="设备:56|名称:104|kW:44|电缆:110" Rows="P0	10kV 总进线	0	YJV22-3x70|P1	1# 双电源柜	45	YJV22-4x95|P2	2# 配电柜	36	YJV22-4x70|T11	中试车间照明	11	YJV22-4x35|T12	车间动力 1#	22	YJV22-4x50|T13	涂布机主控	8.5	YJV22-4x25|T21	空压站	15	YJV22-4x35|T22	空调机房	30	YJV22-4x50|T23	办公区照明	6	YJV22-4x16|T24	UPS 机房	9	YJV22-4x25|L111	车间插座回路	3.5	YJV22-4x16|L112	应急照明	1.5	YJV22-4x10"/>
       </XStackPanel>
     </XStackPanel>
 

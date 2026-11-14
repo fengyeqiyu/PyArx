@@ -594,6 +594,7 @@ static bool isContainerTag(const std::wstring& tag)
 #include "XmlControls.h"
 #include "../MfcXmlCore/XmlRibbon.h"      // 控件库 Ribbon：预览器与设计器画同一份
 #include "../MfcXmlCore/XmlPowerCanvasView.h"  // 控件库配电画布：解析/布局/绘制/命中
+#include "../MfcXmlCore/XmlTableDraw.h"        // 控件库表格画法：与设计器同一份
 
 // MFC 控件封装 + 实体化层：控件是真控件（能打字/下拉/勾选），外观仍由 D2D 画。
 // 注意：afxwin.h 必须放在 windows.h 之后；本项目已用 (std::min) 形式避开 MFC 的 min/max 宏。
@@ -867,6 +868,24 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
             g_ribbonLayout = lay;
             g_ribbonValid = true;
             return;
+        }
+        if (_wcsicmp(shellTag.c_str(), L"TableView") == 0 ||
+            _wcsicmp(shellTag.c_str(), L"DataGrid") == 0 ||
+            _wcsicmp(shellTag.c_str(), L"ListCtrl") == 0)
+        {
+            // 表格：与设计器画布同一份实现（MfcXmlCore/XmlTableDraw.h）
+            xmltable::Style st;
+            st.ink = kInk;
+            st.headBg = RGB(0xF3, 0xF5, 0xF8);
+            st.grid = RGB(0xDC, 0xE2, 0xEA);
+            st.border = kLine;
+            cv.fillRect(rc, RGB(0xFF, 0xFF, 0xFF));
+            if (xmltable::drawTable(cv, rc, el->get(L"Columns"), el->get(L"Rows"),
+                                    el->get(L"Sort"), st))
+            {
+                cv.strokeRect(rc, kLine, 1);
+                return;
+            }
         }
         if (_wcsicmp(shellTag.c_str(), L"PowerCanvas") == 0)
         {
