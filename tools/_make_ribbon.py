@@ -4,7 +4,7 @@ import io, os
 PATH = r'G:\PyArx\UIDesign\designer_layout.xml'
 
 GROUPS = [
-    ('快速访问', [
+    ('文件', [
         ('btnNew', 'res/new.png', '新建'),
         ('btnOpen', 'res/open.png', '打开'),
         ('btnSave', 'res/save.png', '保存'),
@@ -41,13 +41,13 @@ GROUPS = [
     ]),
 ]
 
-GROUP_IDS = {'快速访问': 'QuickAccess', '剪贴板': 'Clip', '编辑': 'Edit', '对齐': 'Align',
+GROUP_IDS = {'文件': 'File', '剪贴板': 'Clip', '编辑': 'Edit', '对齐': 'Align',
              '分布': 'Dist', '视图': 'View', '缩放': 'Zoom'}
 
 BTN_W, BTN_H, BTN_Y = 58, 60, 4
 PAD_X, DIV_W = 12, 13
 
-TABS = [('tabFile', '文件'), ('tabHome', '开始'), ('tabInsert', '插入'),
+TABS = [('tabFile', '文件'), ('tabEdit', '编辑'), ('tabInsert', '插入'),
         ('tabLayout', '布局'), ('tabView', '视图'), ('tabHelp', '帮助')]
 
 
@@ -57,7 +57,7 @@ def build():
     lines.append('    <ToolBar Grid.Row="1" Background="#232830" Foreground="#C8D2DF" FontSize="10"')
     lines.append('             BorderColor="#39404B" Spacing="0" Padding="10,0,10,0">')
     for name, text in TABS:
-        sel = ' Selected="1"' if name == 'tabHome' else ''
+        sel = ' Selected="1"' if name == 'tabEdit' else ''
         lines.append('      <XButton Name="%s" Role="Tab" Text="%s" Width="66" Height="32"%s/>' % (name, text, sel))
     # 右端动作放在选项卡条上：Ribbon 区留给分组，避免大按钮被压住
     lines.append('      <XButton Name="btnCheck" Text="校验" Role="Ghost" Dock="Right" Width="68" Height="26" Margin="0,3,10,0" FontSize="10"/>')
