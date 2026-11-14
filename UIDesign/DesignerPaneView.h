@@ -76,6 +76,7 @@ namespace uidesign
     protected:
         afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
         afx_msg void OnSize(UINT type, int cx, int cy);
+        afx_msg void OnTimer(UINT_PTR nIDEvent);   // 1 = 尺寸静止检测，收尾预览态
         afx_msg void OnDynamicCmd(UINT id);
         afx_msg void OnMouseMove(UINT nFlags, CPoint pt);
         afx_msg void OnLButtonUp(UINT nFlags, CPoint pt);

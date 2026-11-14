@@ -12,6 +12,7 @@ using namespace uidesign;
 BEGIN_MESSAGE_MAP(DesignerPaneView, CWnd)
     ON_WM_CREATE()
     ON_WM_SIZE()
+    ON_WM_TIMER()
     ON_COMMAND_RANGE(kId_CMD_MIN, kId_CMD_MAX, OnDynamicCmd)
     ON_WM_DRAWITEM()
     ON_WM_MEASUREITEM()
@@ -548,6 +549,15 @@ void DesignerPaneView::endSizeMovePreview()
     GetClientRect(&client);
     resizeTo(client);
     RedrawWindow(nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
+    // 画布是唯一真实子窗口，它是 D2D 直呈的：父表面重画到画布区域会被 WS_CLIPCHILDREN
+    // 跳过，所以这里必须显式让它按新尺寸再画一遍，并同步上屏。
+    // 漏了这一步的表现是"放大再缩回去，画布那一块还是旧尺寸的内容"。
+    if (m_canvas != nullptr && ::IsWindow(m_canvas->GetSafeHwnd()))
+    {
+        ::RedrawWindow(m_canvas->GetSafeHwnd(), nullptr, nullptr,
+                       RDW_INVALIDATE | RDW_ERASE | RDW_UPDATENOW);
+        ::UpdateWindow(m_canvas->GetSafeHwnd());
+    }
 }
 
 // 记下最后一次完整布局的"分区尺寸"：顶栏高度、底栏高度、左右两栏宽度。
@@ -588,9 +598,28 @@ void DesignerPaneView::OnSize(UINT type, int cx, int cy)
     // 窗口移动/缩放期间不做完整重排，也不重绘：系统模态循环里 DWM 合成上一帧，
     // 我们自己每帧 Invalidate 只会插进空 WM_PAINT，反而让边缘闪。
     // 松手时 endSizeMovePreview() 一次性重排重画 —— Qt 就是这么做的。
+    // 但"松手"不能靠 WM_EXITSIZEMOVE 一条路：MFC 的 NC 路径会吞掉它，
+    // 于是拖完还停在冻结态，下一轮缩小就按旧尺寸布局（界面大面积缺失）。
+    // 这里用"尺寸静止 40ms"判定拖完：每次 WM_SIZE 重置计时，静止了才收尾。
     if (m_sizeMove)
+    {
+        SetTimer(1, 40, nullptr);
         return;
+    }
+    KillTimer(1);
     resizeTo(CRect(0, 0, cx, cy));
+}
+
+void DesignerPaneView::OnTimer(UINT_PTR nIDEvent)
+{
+    if (nIDEvent == 1)
+    {
+        KillTimer(1);
+        if (m_sizeMove)
+            endSizeMovePreview();
+        return;
+    }
+    CWnd::OnTimer(nIDEvent);
 }
 
 // 宿主可重复调用：停靠/浮动切换、Arx 侧栏改宽，都走同一条重排路径。
@@ -1816,7 +1845,12 @@ void DesignerPaneView::OnPaint()
             m_backOld = nullptr;
         }
         m_backBmp.DeleteObject();
-        m_backBmp.CreateCompatibleBitmap(&dc, client.Width(), client.Height());
+        // 兼容位图必须按"屏幕 DC"建，不能用 CPaintDC：走 WM_PRINTCLIENT / PrintWindow
+        // 时 CPaintDC 是重定向 DC（可能只有 1bpp），照它建出来的位图会是全黑，
+        // 而且会被缓存下来，之后真实显示也跟着黑。
+        HDC sdc = ::GetDC(nullptr);
+        m_backBmp.Attach(::CreateCompatibleBitmap(sdc, client.Width(), client.Height()));
+        ::ReleaseDC(nullptr, sdc);
         m_backOld = m_backDc.SelectObject(&m_backBmp);
         m_backSize = CSize(client.Width(), client.Height());
     }
