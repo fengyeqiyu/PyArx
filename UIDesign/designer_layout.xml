@@ -39,7 +39,7 @@
 
   <XGrid Name="rootGrid" Background="#15181D">
     <XGrid.RowDefinitions>
-      <RowDefinition Height="32"/>     <!-- 标题 + 菜单栏（单表面自绘，窗体无边框） -->
+      <RowDefinition Height="38"/>     <!-- 标题 + 菜单栏（单表面自绘，窗体无边框） -->
       <RowDefinition Height="54"/>     <!-- 工具栏（图标 + 标题，分组） -->
       <RowDefinition Height="*"/>      <!-- 主体三栏 -->
       <RowDefinition Height="5"/>      <!-- 水平 Splitter（拖动调整代码坞高度） -->
@@ -54,7 +54,7 @@
            BorderColor="#39404B" AccentColor="#4C8DFF"
            FontSize="10" TitleWidth="120" WinButtonWidth="46" ItemGap="10">
 
-      <XImage Name="appLogo" Source="res\logo.png" Width="26" Height="26"/>
+      <XImage Name="appLogo" Source="res\logo.png" Width="32" Height="32"/>
       <ShellTitle Name="winTitle" Text="PyArx"/>
 
       <MenuItem Name="mnuFile" Header="文件">
