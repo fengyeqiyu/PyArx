@@ -149,16 +149,6 @@
         </XRibbonGroup>
       </XRibbonTab>
 
-      <XRibbonTab Header="插入">
-        <XRibbonGroup Header="图形">
-          <XRibbonButton Name="btnShapeLine" Text="直线"/>
-          <XRibbonButton Name="btnShapeRect" Text="矩形"/>
-          <XRibbonButton Name="btnShapeEllipse" Text="圆"/>
-          <XRibbonButton Name="btnShapeArc" Text="圆弧"/>
-          <XRibbonButton Name="btnShapeText" Text="文本"/>
-        </XRibbonGroup>
-      </XRibbonTab>
-
       <XRibbonTab Header="布局">
         <XRibbonGroup Header="排列">
           <XRibbonButton Name="btnAlignLeft" Icon="res/alignleft.png" Text="左"/>
