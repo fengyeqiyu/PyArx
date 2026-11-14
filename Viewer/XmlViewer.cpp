@@ -412,7 +412,12 @@ static void validateElement(IXMLDOMElement* el,
         g_issues.push_back(is);
     }
 
-    if (!name.empty() && seenNames.count(name) > 0)
+    // Ribbon 的子结构允许重名：同一个命令（如"左对齐"）可以同时挂在多个选项卡下，
+    // 名字就是命令名，跨选项卡复用是 Office 的常规做法，不是错误。
+    const bool ribbonChild = _wcsicmp(tag.c_str(), L"XRibbonButton") == 0 ||
+                             _wcsicmp(tag.c_str(), L"XRibbonTab") == 0 ||
+                             _wcsicmp(tag.c_str(), L"XRibbonGroup") == 0;
+    if (!name.empty() && !ribbonChild && seenNames.count(name) > 0)
     {
         Issue is;
         is.line = line;
@@ -586,6 +591,7 @@ static bool isContainerTag(const std::wstring& tag)
 #include "XmlDraw.h"
 #include "XmlD2D.h"
 #include "XmlControls.h"
+#include "../MfcXmlCore/XmlRibbon.h"      // 控件库 Ribbon：预览器与设计器画同一份
 
 // MFC 控件封装 + 实体化层：控件是真控件（能打字/下拉/勾选），外观仍由 D2D 画。
 // 注意：afxwin.h 必须放在 windows.h 之后；本项目已用 (std::min) 形式避开 MFC 的 min/max 宏。
@@ -772,6 +778,24 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
         if (_wcsicmp(shellTag.c_str(), L"TabStrip") == 0)
         {
             xmlctl::xmlDrawShellTabStrip(cv, rc, *el);
+            return;
+        }
+        if (_wcsicmp(shellTag.c_str(), L"Ribbon") == 0)
+        {
+            // 与设计器同一份绘制：控件库按 XML 解析、布局、画（含宽度不足时的分组折叠）
+            if (xmlctl::ribbonIconBase().empty())
+                xmlctl::ribbonIconBase() = exeDir();
+            xmlctl::XRibbonModel model;
+            xmlctl::ribbonParse(*el, model);
+            const int tabH = 34;
+            RECT tabRc  = { rc.left, rc.top, rc.right, rc.top + tabH };
+            RECT bodyRc = { rc.left, rc.top + tabH, rc.right, rc.bottom };
+            xmlctl::XRibbonMetrics mx;
+            mx.bodyH = bodyRc.bottom - bodyRc.top;
+            mx.titleTop = (std::max)(36, mx.bodyH - 24);
+            xmlctl::XRibbonLayout lay;
+            xmlctl::ribbonLayout(model, mx, tabRc, bodyRc, lay);
+            xmlctl::ribbonDraw(cv, tabRc, bodyRc, model, mx, lay, -1, std::wstring(), std::wstring(), 10, 9);
             return;
         }
     }

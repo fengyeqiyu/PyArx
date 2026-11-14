@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- XRibbon 控件演示：Ribbon 整块由控件库 MfcXmlCore\XmlRibbon.h 解析 + 绘制，
+     预览器与设计器看的是同一份代码，不含任何绝对坐标拼装。 -->
+<XWindow
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    Title="XRibbon 控件演示" Width="1200" Height="760" Theme="dark" Background="#15181D">
+  <XStackPanel>
+      <XRibbon Name="demoRibbon" Height="126" SelectedTab="1">
+  
+        <XRibbonTab Header="文件">
+          <XRibbonGroup Header="文件">
+            <XRibbonButton Name="btnNew" Icon="res/new.png" Text="新建"/>
+            <XRibbonButton Name="btnOpen" Icon="res/open.png" Text="打开"/>
+            <XRibbonButton Name="btnSave" Icon="res/save.png" Text="保存"/>
+            <XRibbonButton Name="btnExit" Text="退出"/>
+          </XRibbonGroup>
+        </XRibbonTab>
+  
+        <XRibbonTab Header="编辑">
+          <XRibbonGroup Header="剪贴板">
+            <XRibbonButton Name="btnPaste" Icon="res/paste.png" Text="粘贴"/>
+            <XRibbonButton Name="btnCut" Icon="res/cut.png" Text="剪切"/>
+            <XRibbonButton Name="btnCopy" Icon="res/copy.png" Text="复制"/>
+            <XRibbonButton Name="btnDelete" Icon="res/del.png" Text="删除"/>
+          </XRibbonGroup>
+          <XRibbonGroup Header="编辑">
+            <XRibbonButton Name="btnUndo" Icon="res/undo.png" Text="撤销"/>
+            <XRibbonButton Name="btnRedo" Icon="res/redo.png" Text="重做"/>
+          </XRibbonGroup>
+          <XRibbonGroup Header="对齐">
+            <XRibbonButton Name="btnAlignLeft" Icon="res/alignleft.png" Text="左"/>
+            <XRibbonButton Name="btnAlignHCenter" Icon="res/alignhcenter.png" Text="居中"/>
+            <XRibbonButton Name="btnAlignRight" Icon="res/alignright.png" Text="右"/>
+            <XRibbonButton Name="btnAlignTop" Icon="res/aligntop.png" Text="上"/>
+            <XRibbonButton Name="btnAlignVCenter" Icon="res/alignvcenter.png" Text="居中"/>
+            <XRibbonButton Name="btnAlignBottom" Icon="res/alignbottom.png" Text="下"/>
+          </XRibbonGroup>
+          <XRibbonGroup Header="分布">
+            <XRibbonButton Name="btnDistH" Icon="res/disth.png" Text="横分布"/>
+            <XRibbonButton Name="btnDistV" Icon="res/distv.png" Text="纵分布"/>
+          </XRibbonGroup>
+        </XRibbonTab>
+  
+        <XRibbonTab Header="布局">
+          <XRibbonGroup Header="排列">
+            <XRibbonButton Name="btnAlignLeft" Icon="res/alignleft.png" Text="左"/>
+            <XRibbonButton Name="btnAlignHCenter" Icon="res/alignhcenter.png" Text="居中"/>
+            <XRibbonButton Name="btnAlignRight" Icon="res/alignright.png" Text="右"/>
+          </XRibbonGroup>
+          <XRibbonGroup Header="分布">
+            <XRibbonButton Name="btnDistH" Icon="res/disth.png" Text="横分布"/>
+            <XRibbonButton Name="btnDistV" Icon="res/distv.png" Text="纵分布"/>
+          </XRibbonGroup>
+          <XRibbonGroup Header="层级">
+            <XRibbonButton Name="btnBringFront" Text="上移一层"/>
+            <XRibbonButton Name="btnSendBack" Text="下移一层"/>
+          </XRibbonGroup>
+        </XRibbonTab>
+  
+        <XRibbonTab Header="视图">
+          <XRibbonGroup Header="显示">
+            <XRibbonButton Name="btnGrid" Icon="res/grid.png" Text="网格"/>
+            <XRibbonButton Name="btnRuler" Icon="res/ruler.png" Text="标尺"/>
+          </XRibbonGroup>
+          <XRibbonGroup Header="缩放">
+            <XRibbonButton Name="btnZoomOut" Icon="res/zoomout.png" Text="缩小"/>
+            <XRibbonButton Name="btnZoomIn" Icon="res/zoomin.png" Text="放大"/>
+          </XRibbonGroup>
+        </XRibbonTab>
+  
+        <XRibbonTab Header="帮助">
+          <XRibbonGroup Header="支持">
+            <XRibbonButton Name="btnAbout" Icon="res/about.png" Text="关于"/>
+            <XRibbonButton Name="btnHelpDoc" Icon="res/open.png" Text="文档"/>
+            <XRibbonButton Name="btnFeedback" Icon="res/ok.png" Text="反馈"/>
+          </XRibbonGroup>
+        </XRibbonTab>
+  
+      </XRibbon>
+    <XLabel Text="上方整块 Ribbon（选项卡 / 分组 / 大按钮 / 组名 / 折叠）全部由控件库 XRibbon 绘制；" Height="28"/>
+    <XLabel Text="这里只是 XML 声明，没有一行坐标代码属于调用方。" Height="28"/>
+  </XStackPanel>
+</XWindow>

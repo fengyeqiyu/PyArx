@@ -568,6 +568,12 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
             {
                 const xmlctl::XRibbonGroup& grp = tab->groups[gi];
                 const xmlctl::XRibbonGroupBox& box = lay.groups[gi];
+                if (box.collapsed)   // 宽度不足被折叠的整组：一个命中块，后续可弹溢出菜单
+                {
+                    m_surfToolRects.push_back(box.rc);
+                    m_surfToolNames.push_back(std::wstring(L"ribbon:group:") + std::to_wstring(gi));
+                    continue;
+                }
                 for (size_t bi = 0; bi < box.buttons.size() && bi < grp.buttons.size(); ++bi)
                 {
                     m_surfToolRects.push_back(box.buttons[bi]);

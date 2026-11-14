@@ -1076,6 +1076,24 @@
       <property name="Title" type="string"/>
     </objectinfo>
 
+  <!-- Ribbon 的子结构：只用于 XML 语义校验（无 category，不出现在控件箱） -->
+  <objectinfo tag="XRibbonTab" display="RibbonTab" w="66" h="34">
+    <property name="Name" type="text"/>
+    <property name="Header" type="string"/>
+  </objectinfo>
+
+  <objectinfo tag="XRibbonGroup" display="RibbonGroup" w="174" h="92">
+    <property name="Name" type="text"/>
+    <property name="Header" type="string"/>
+  </objectinfo>
+
+  <objectinfo tag="XRibbonButton" display="RibbonButton" w="58" h="60">
+    <property name="Name" type="text"/>
+    <property name="Text" type="string"/>
+    <property name="Icon" type="text"/>
+    <property name="Width" type="int"/>
+  </objectinfo>
+
   <objectinfo tag="XRibbon" display="Ribbon" category="Function Bar" w="900" h="126">
     <property name="Name" type="text"/>
     <property name="SelectedTab" type="int"/>

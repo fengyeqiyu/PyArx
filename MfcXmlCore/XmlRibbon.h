@@ -17,6 +17,8 @@
 //   </XRibbon>
 #pragma once
 
+#include <algorithm>
+
 #include "XmlControls.h"
 #include "XmlCore.h"
 
@@ -69,6 +71,7 @@ struct XRibbonMetrics
     int titleTop = 68;  // 组名的 y（相对功能区）
     int titleH  = 16;
     int iconSide = 30;
+    int foldW   = 46;   // 折叠组的宽度（三个点 + 组名）
 };
 
 // ---------------------------------------------------------------- 解析
@@ -130,6 +133,7 @@ struct XRibbonGroupBox
     RECT rc;                 // 整组矩形（含组名）
     RECT titleRc;            // 组名矩形
     std::vector<RECT> buttons;
+    bool collapsed = false;  // 宽度不足时整组收成窄块（不裁掉）
 };
 
 struct XRibbonLayout
@@ -160,27 +164,66 @@ inline void ribbonLayout(const XRibbonModel& m, const XRibbonMetrics& mx,
     const XRibbonTab* tab = m.current();
     if (tab == nullptr) return;
 
+    // ---- 宽度不足时按"从右往左折叠"处理：整组收成一个窄块，不裁掉 ----
+    const int avail = (bodyRc.right - mx.padX) - (bodyRc.left + mx.padX);
+    std::vector<int> want(tab->groups.size());
+    for (size_t gi = 0; gi < tab->groups.size(); ++gi)
+    {
+        int w = 0;
+        for (const auto& b : tab->groups[gi].buttons)
+            w += (b.width > 0 ? b.width : mx.btnW);
+        want[gi] = w;
+    }
+
+    std::vector<bool> folded(tab->groups.size(), false);
+    auto totalWidth = [&]() -> int
+    {
+        int sum = 0;
+        for (size_t gi = 0; gi < want.size(); ++gi)
+        {
+            const int w = folded[gi] ? mx.foldW : want[gi];
+            sum += w + (gi + 1 < want.size() ? mx.divW : 0);
+        }
+        return sum;
+    };
+    // 从最后一组开始折叠，直到放得下；只剩一组时不再折叠（宁可留一点溢出也不空场）
+    for (int gi = (int)want.size() - 1; gi >= 0 && totalWidth() > avail; --gi)
+    {
+        if ((int)want.size() - 1 < 1) break;
+        if ((int)std::count(folded.begin(), folded.end(), true) >= (int)want.size() - 1) break;
+        folded[(size_t)gi] = true;
+    }
+
     int gx = bodyRc.left + mx.padX;
     for (size_t gi = 0; gi < tab->groups.size(); ++gi)
     {
         const XRibbonGroup& grp = tab->groups[gi];
         XRibbonGroupBox box;
-        box.rc = RECT{ gx, bodyRc.top, gx + (int)grp.buttons.size() * mx.btnW, bodyRc.bottom };
+        box.collapsed = folded[gi];
 
-        int bx = gx;
-        for (size_t bi = 0; bi < grp.buttons.size(); ++bi)
+        if (box.collapsed)
         {
-            const int bw = grp.buttons[bi].width > 0 ? grp.buttons[bi].width : mx.btnW;
-            box.buttons.push_back(RECT{ bx, bodyRc.top + mx.btnTop, bx + bw, bodyRc.top + mx.btnTop + mx.btnH });
-            bx += bw;
+            box.rc = RECT{ gx, bodyRc.top, gx + mx.foldW, bodyRc.bottom };
+            box.titleRc = RECT{ box.rc.left, bodyRc.top + mx.titleTop,
+                                box.rc.right, bodyRc.top + mx.titleTop + mx.titleH };
+        }
+        else
+        {
+            box.rc = RECT{ gx, bodyRc.top, gx + want[gi], bodyRc.bottom };
+            int bx = gx;
+            for (size_t bi = 0; bi < grp.buttons.size(); ++bi)
+            {
+                const int bw = grp.buttons[bi].width > 0 ? grp.buttons[bi].width : mx.btnW;
+                box.buttons.push_back(RECT{ bx, bodyRc.top + mx.btnTop, bx + bw, bodyRc.top + mx.btnTop + mx.btnH });
+                bx += bw;
+            }
+            box.titleRc = RECT{ box.rc.left, bodyRc.top + mx.titleTop,
+                                box.rc.right, bodyRc.top + mx.titleTop + mx.titleH };
         }
 
-        box.titleRc = RECT{ box.rc.left, bodyRc.top + mx.titleTop,
-                            box.rc.right, bodyRc.top + mx.titleTop + mx.titleH };
         out.groups.push_back(box);
-        gx += bx - gx;
-        out.contentWidth = gx - (bodyRc.left + mx.padX);
-        gx += mx.divW;
+        gx += (box.rc.right - box.rc.left) + mx.divW;
+        out.contentWidth = gx - mx.divW - (bodyRc.left + mx.padX);
     }
 }
 
@@ -281,18 +324,42 @@ inline void ribbonDraw(XmlCanvas& cv, const RECT& tabRc, const RECT& bodyRc, con
         const XRibbonGroupBox& box = lay.groups[gi];
         const XRibbonGroup& grp = tab->groups[gi];
 
-        for (size_t bi = 0; bi < box.buttons.size() && bi < grp.buttons.size(); ++bi)
+        if (box.collapsed)
         {
-            const XRibbonButton& b = grp.buttons[bi];
-            const bool hot = !hotButton.empty() && _wcsicmp(hotButton.c_str(), b.name.c_str()) == 0;
-            const bool press = !pressedButton.empty() && _wcsicmp(pressedButton.c_str(), b.name.c_str()) == 0;
-            ribbonDrawButton(cv, box.buttons[bi], b, hot, press, mx, btnPt);
-        }
+            // 折叠组：一块窄面板 + 上方三个点（表示"还有内容"）+ 组名
+            const bool hot = !hotButton.empty() &&
+                             _wcsicmp(hotButton.c_str(), (std::wstring(L"ribbon:group:") +
+                                                          std::to_wstring(gi)).c_str()) == 0;
+            RECT face = { box.rc.left + 2, box.rc.top + mx.btnTop, box.rc.right - 2,
+                          box.rc.top + mx.btnTop + mx.btnH };
+            const COLORREF back = hot ? RGB(58, 70, 88) : RGB(45, 54, 66);
+            cv.fillRoundRect(face, back, back, 5);
 
-        // 组名（居中暗字）
-        cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
-        cv.text(box.titleRc, grp.header, th.textDim, DT_CENTER | DT_VCENTER, 8, std::wstring());
-        cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+            const int cx = (face.left + face.right) / 2;
+            const int cy = face.top + 16;
+            for (int k = -1; k <= 1; ++k)
+                cv.fillEllipse(RECT{ cx + k * 9 - 2, cy - 2, cx + k * 9 + 2, cy + 2 },
+                               RGB(196, 205, 218), RGB(196, 205, 218));
+
+            cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+            cv.text(box.titleRc, grp.header, th.textDim, DT_CENTER | DT_VCENTER, 8, std::wstring());
+            cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+        }
+        else
+        {
+            for (size_t bi = 0; bi < box.buttons.size() && bi < grp.buttons.size(); ++bi)
+            {
+                const XRibbonButton& b = grp.buttons[bi];
+                const bool hot = !hotButton.empty() && _wcsicmp(hotButton.c_str(), b.name.c_str()) == 0;
+                const bool press = !pressedButton.empty() && _wcsicmp(pressedButton.c_str(), b.name.c_str()) == 0;
+                ribbonDrawButton(cv, box.buttons[bi], b, hot, press, mx, btnPt);
+            }
+
+            // 组名（居中暗字）
+            cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+            cv.text(box.titleRc, grp.header, th.textDim, DT_CENTER | DT_VCENTER, 8, std::wstring());
+            cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+        }
 
         // 组右分隔线
         const int lineX = box.rc.right + mx.divW / 2;
@@ -325,6 +392,16 @@ inline XRibbonHit ribbonHitTest(const XRibbonLayout& lay, POINT pt)
     for (size_t gi = 0; gi < lay.groups.size(); ++gi)
     {
         const XRibbonGroupBox& box = lay.groups[gi];
+        if (box.collapsed)
+        {
+            const RECT& r = box.rc;
+            if (pt.x >= r.left && pt.x < r.right && pt.y >= r.top && pt.y < r.bottom)
+            {
+                hit.group = (int)gi;   // button = -1：整组被折叠，调用方决定弹菜单
+                return hit;
+            }
+            continue;
+        }
         for (size_t bi = 0; bi < box.buttons.size(); ++bi)
         {
             const RECT& r = box.buttons[bi];
