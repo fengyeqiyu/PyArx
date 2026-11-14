@@ -19,6 +19,8 @@
 #include "ControlCatalog.h"
 #include "XmlControls.h"
 #include "../MfcXmlCore/controls/CodeEditor.h"   // 源码区用的独立代码编辑器控件
+#include "XmlBackBuffer.h"                       // 控件库统一离屏缓冲（32bpp DIB + BitBlt）
+#include "XFrameWindow.h"                        // 控件库的拖动判据 LiveResize
 
 namespace uidesign
 {
@@ -227,15 +229,12 @@ namespace uidesign
     private:
 
         void paintSurface(HDC hdc);
-        // 常驻双缓冲：每帧 CreateCompatibleDC/CreateCompatibleBitmap 一张 1600x1000 的
-        // 位图，等于每帧重新申请并初始化 6MB GDI 内存 —— 缩放时这条就是主要开销。
-        // 改成尺寸不变就复用，只有客户区尺寸变了才重建。
-        CDC      m_backDc;
-        CBitmap  m_backBmp;
-        CBitmap* m_backOld = nullptr;
-        CSize    m_backSize = CSize(0, 0);
+        // 离屏双缓冲（32bpp DIB + BitBlt）由控件库提供，不在设计器里自己维护 GDI 对象：
+        // 位图类型/绑定方式一旦写错就是"整窗变黑、只剩子窗口可见"，这是库级约束，不是调用方细节。
+        xmlctl::XmlBackBuffer m_back;
         bool     m_sizeMove = false;      // 系统拖动/缩放循环进行中（只贴拉伸预览）
-        ULONGLONG m_lastSizeTick = 0;     // 上一次 WM_SIZE 的时刻（两次间隔很短=正在拖）
+        // 拖动判据与"真静止"阈值也来自库（连两次 WM_SIZE 间隔 <120ms 视为在拖）
+        xmlframe::LiveResize m_live;
         // 上一次完整布局算出来的"分区尺寸"，缩放期间按分区贴图（Qt 的 layer 分块）：
         // 左右两栏宽度不变 -> 1:1 贴原位，只有中间画布区双向拉伸。
         int      m_zoneTopH = 0;

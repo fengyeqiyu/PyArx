@@ -517,6 +517,7 @@ BOOL DesignerPaneView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 void DesignerPaneView::beginSizeMovePreview()
 {
     m_sizeMove = true;
+    m_live.begin();
     diagLog("[sizeMove] begin\n");
     // 系统缩放/移动循环期间：整窗由 DWM 合成旧帧，我们不画。
     // 子窗口（画布/代码坞）只冻结重绘，不再 SW_HIDE —— 一藏一显就是"画布闪一下"。
@@ -530,6 +531,7 @@ void DesignerPaneView::endSizeMovePreview()
 {
     if (!m_sizeMove) return;
     m_sizeMove = false;
+    m_live.end();
     diagLog("[sizeMove] end\n");
     // 解冻子窗口后必须显式让它重画一次：WM_SETREDRAW(FALSE) 期间收到的 WM_PAINT 全被丢弃，
     // 只恢复标志位不会补画（"移动完画布不显示"就是这么来的）。
@@ -543,7 +545,7 @@ void DesignerPaneView::endSizeMovePreview()
         ::SendMessageW(m_codeEditor->hwnd(), WM_SETREDRAW, TRUE, 0);
         ::InvalidateRect(m_codeEditor->hwnd(), nullptr, TRUE);
     }
-    m_backSize = CSize(0, 0);       // 尺寸已变，缓存位图作废，下一次全量重画
+    m_back.invalidate();            // 尺寸已变，库缓冲下次 ensure 时重建
     // 期间没做布局，这里补一次：先按新尺寸重排，再整块重画（一次，不再逐帧）
     CRect client;
     GetClientRect(&client);
@@ -603,9 +605,10 @@ void DesignerPaneView::OnSize(UINT type, int cx, int cy)
     // 判据不能只靠 WM_ENTERSIZEMOVE：它由系统循环发，MFC/自绘外壳路径上会丢。
     // 这里用"两次 WM_SIZE 间隔"自己判定：间隔很短就是用户正在拖，直接进冻结态。
     // 单次尺寸变化（还原、最大化、程序改尺寸）间隔大，走正常重排。
+    // 判据来自控件库（xmlframe::LiveResize）：连两次 WM_SIZE 间隔 <120ms 即正在拖。
+    // 单次尺寸变化（还原、最大化、程序改尺寸）间隔大，走正常重排。
     const ULONGLONG now = ::GetTickCount64();
-    const bool continuous = (m_lastSizeTick != 0 && now - m_lastSizeTick < 120);
-    m_lastSizeTick = now;
+    const bool continuous = m_live.noteSize(now);
 
     if (continuous || m_sizeMove)
     {
@@ -629,7 +632,7 @@ void DesignerPaneView::OnTimer(UINT_PTR nIDEvent)
         // 只有"尺寸真正静止"才收尾：定时器每隔 60ms 来看一次，但最后一次 WM_SIZE
         // 距今不足 200ms 就继续等。判据必须比单步处理时间宽，否则每步都会误判松手，
         // 变成"每帧重排重画"（拖动卡顿 + 拖影的根源）。
-        if (::GetTickCount64() - m_lastSizeTick < 200)
+        if (!m_live.settleDue(::GetTickCount64(), 200))
         {
             SetTimer(1, 60, nullptr);
             return;
@@ -1852,48 +1855,18 @@ void DesignerPaneView::OnPaint()
         return;
     }
     diagLog("[panePaint] full %dx%d back=%dx%d\n", client.Width(), client.Height(),
-            m_backSize.cx, m_backSize.cy);
+            m_back.width(), m_back.height());
 
-    // 双缓冲：D2D 先画到内存位图，一次 BitBlt 上屏。
-    // 位图常驻复用（只在客户区尺寸变化时重建），缩放时不再每帧申请 6MB 位图。
-    if (m_backDc.GetSafeHdc() == nullptr)
-        m_backDc.CreateCompatibleDC(&dc);
-    if (m_backSize.cx != client.Width() || m_backSize.cy != client.Height())
-    {
-        if (m_backOld != nullptr)
-        {
-            m_backDc.SelectObject(m_backOld);
-            m_backOld = nullptr;
-        }
-        m_backBmp.DeleteObject();
-        // 后台位图必须建 32bpp DIB Section：
-        //   1) DCRenderTarget 只能可靠绑定 DIB，Display 兼容位图在部分驱动上 BindDC 会失败
-        //      —— 表现就是"位图全黑、只剩子窗口可见"；
-        //   2) 不能用 CPaintDC 建（走 WM_PRINTCLIENT / PrintWindow 时它是重定向 DC，
-        //      可能只有 1bpp，建出来的位图是黑的，还会被缓存下来）。
-        HDC sdc = ::GetDC(nullptr);
-        BITMAPINFO bmi = {};
-        bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        bmi.bmiHeader.biWidth = client.Width();
-        bmi.bmiHeader.biHeight = -client.Height();      // top-down
-        bmi.bmiHeader.biPlanes = 1;
-        bmi.bmiHeader.biBitCount = 32;
-        bmi.bmiHeader.biCompression = BI_RGB;
-        void* bits = nullptr;
-        HBITMAP hbm = ::CreateDIBSection(sdc, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
-        if (hbm == nullptr)
-        {
-            ::ReleaseDC(nullptr, sdc);
-            return;                                       // 建不出来就不画，避免 BitBlt 一张空位图
-        }
-        m_backBmp.Attach(hbm);
-        ::ReleaseDC(nullptr, sdc);
-        m_backOld = m_backDc.SelectObject(&m_backBmp);
-        m_backSize = CSize(client.Width(), client.Height());
-    }
+    // 离屏缓冲由控件库负责（32bpp DIB、尺寸复用、BitBlt 上屏）：
+    // D2D 只能可靠绑 DIB Section，Display 兼容位图在部分驱动上 BindDC 直接失败，
+    // 表现就是"位图全黑、只剩真子窗口可见"。这条约束收在 XmlBackBuffer 里，
+    // 任何新建的宿主/预览器直接用它，不需要再记这个坑。
+    HDC mem = m_back.ensure(dc.GetSafeHdc(), client.Width(), client.Height());
+    if (mem == nullptr)
+        return;
 
-    paintSurface(m_backDc.GetSafeHdc());
+    paintSurface(mem);
 
-    dc.BitBlt(0, 0, client.Width(), client.Height(), &m_backDc, 0, 0, SRCCOPY);
+    m_back.present(dc.GetSafeHdc(), client.Width(), client.Height());
 }
 

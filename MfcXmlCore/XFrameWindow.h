@@ -244,3 +244,51 @@ inline LRESULT framelessNcProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp,
 }
 
 } // namespace xmlframe
+
+namespace xmlframe
+{
+
+// LiveResize —— 系统缩放循环期间"不布局、不重绘"的统一判据。
+//
+// Qt 靠 resizeEvent 的节流 + 一次 layout 完成；Win32 上 WM_ENTERSIZEMOVE / WM_EXITSIZEMOVE
+// 在自绘外壳和脚本驱动的 SetWindowPos 上会丢，所以判据只能从消息间隔推：
+//   * 两次 WM_SIZE 间隔 < 120ms  → 正在拖（进入冻结态，不重排不重画）
+//   * 最后一次 WM_SIZE 已过去 >= 200ms 且定时器到期 → 真静止，收尾一次
+// 阈值的下界必须大于单步处理时间，否则每步都误判"松手"，退化成每帧全量重绘。
+class LiveResize
+{
+public:
+    // OnSize 调用：返回 true = 当前处于拖动态（调用方应冻结绘制并 SetTimer 等收尾）
+    bool noteSize(ULONGLONG now)
+    {
+        const bool continuous = (m_last != 0 && now - m_last < 120);
+        m_last = now;
+        if (continuous || m_active)
+            m_active = true;
+        return m_active;
+    }
+
+    // OnTimer 调用：返回 true = 尺寸已静止，可以收尾（并已自动复位）
+    bool settleDue(ULONGLONG now, ULONGLONG quietMs = 200)
+    {
+        if (!m_active)
+            return false;
+        if (now - m_last < quietMs)
+            return false;
+        m_active = false;
+        return true;
+    }
+
+    // 系统循环显式通知（有就更好，没有也不影响）
+    void begin() { m_active = true; }
+    void end() { m_active = false; }
+
+    bool active() const { return m_active; }
+    void reset() { m_active = false; m_last = 0; }
+
+private:
+    bool      m_active = false;
+    ULONGLONG m_last = 0;
+};
+
+} // namespace xmlframe
