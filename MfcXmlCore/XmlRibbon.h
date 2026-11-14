@@ -27,12 +27,23 @@ namespace xmlctl {
 // ---------------------------------------------------------------- 数据模型
 struct XRibbonButton
 {
+    struct Item
+    {
+        std::wstring name, text, icon;
+    };
     std::wstring name;          // 动作名（与设计器命令同名，如 btnPaste）
     std::wstring text;          // 按钮标题
     std::wstring icon;          // PNG 路径（相对 exe）
     int width  = 58;
     bool tiny = false;         // 小按钮：图标在左、文字在右，纵向三层排
+    std::vector<Item> items;   // 下拉项（空 = 普通按钮）
 };
+
+// 按钮的下拉区（右下角小三角所在的位置）
+inline RECT ribbonDropdownRect(const RECT& btnRc)
+{
+    return RECT{ btnRc.right - 15, btnRc.bottom - 13, btnRc.right - 3, btnRc.bottom - 1 };
+}
 
 struct XRibbonGroup
 {
@@ -142,6 +153,16 @@ inline void ribbonParse(XmlElement& node, XRibbonModel& m)
                 btn.tiny = _wcsicmp(btnNode.get(L"Size").c_str(), L"Small") == 0;
                 const std::wstring w = btnNode.get(L"Width");
                 if (!w.empty()) btn.width = _wtoi(w.c_str());
+                // 下拉项：<XRibbonMenuItem Name Text Icon/>
+                for (auto& mi : btnNode.children)
+                {
+                    if (!ribbonTagIs(mi.tag, L"XRibbonMenuItem", L"RibbonMenuItem")) continue;
+                    XRibbonButton::Item item;
+                    item.name = mi.name;
+                    item.text = ribbonTextOf(mi);
+                    item.icon = mi.get(L"Icon");
+                    btn.items.push_back(item);
+                }
                 grp.buttons.push_back(btn);
             }
             if (grp.buttons.empty()) continue;
@@ -378,24 +399,35 @@ inline void ribbonDrawButton(XmlCanvas& cv, const RECT& rc, const XRibbonButton&
         cv.text(rc, btn.text, hot ? th.text : th.textDim, DT_CENTER | DT_VCENTER, ptSize,
                 std::wstring());
         cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
-        return;
+    }
+    else
+    {
+        const int side = mx.iconSide;
+        const int textH = ptSize + 12;
+        const int contentH = side + 4 + textH;
+        int top = rc.top + ((rc.bottom - rc.top) - contentH) / 2;
+        if (top < rc.top + 4) top = rc.top + 4;
+        const int cx = (rc.left + rc.right) / 2;
+        RECT ir = { cx - side / 2, top, cx - side / 2 + side, top + side };
+        cv.drawImage(ir, ribbonResolveIcon(btn.icon));
+
+        if (!btn.text.empty())
+        {
+            cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+            RECT tr = { rc.left + 2, top + side + 2, rc.right - 2, rc.bottom - 2 };
+            cv.text(tr, btn.text, hot ? th.text : th.textDim, DT_CENTER, ptSize, std::wstring());
+            cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+        }
     }
 
-    const int side = mx.iconSide;
-    const int textH = ptSize + 12;
-    const int contentH = side + 4 + textH;
-    int top = rc.top + ((rc.bottom - rc.top) - contentH) / 2;
-    if (top < rc.top + 4) top = rc.top + 4;
-    const int cx = (rc.left + rc.right) / 2;
-    RECT ir = { cx - side / 2, top, cx - side / 2 + side, top + side };
-    cv.drawImage(ir, ribbonResolveIcon(btn.icon));
-
-    if (!btn.text.empty())
+    // 有下拉项：右下角画一个小三角（点这块弹菜单）
+    if (!btn.items.empty())
     {
-        cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
-        RECT tr = { rc.left + 2, top + side + 2, rc.right - 2, rc.bottom - 2 };
-        cv.text(tr, btn.text, hot ? th.text : th.textDim, DT_CENTER, ptSize, std::wstring());
-        cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+        const RECT d = ribbonDropdownRect(rc);
+        const int cx = (d.left + d.right) / 2;
+        const int cy = (d.top + d.bottom) / 2;
+        const COLORREF c = hot ? th.text : th.textDim;
+        cv.fillPath(std::vector<POINT>{ { cx - 4, cy - 2 }, { cx + 4, cy - 2 }, { cx, cy + 3 } }, c);
     }
 }
 
@@ -670,6 +702,44 @@ inline void ribbonMenuLayout(const XRibbonModel& m, const XRibbonMetrics& mx, in
         iy += rowH;
     }
     (void)mx;
+}
+
+// 通用：按给定的项清单排一个下拉菜单（按钮的 split/dropdown、组溢出都走这里）
+inline void ribbonMenuLayoutItems(const std::vector<std::wstring>& names,
+                                   const std::vector<std::wstring>& texts,
+                                   const std::vector<std::wstring>& icons,
+                                   const RECT& anchor, int rightLimit, XRibbonMenu& out,
+                                   int tabIndex = -1)
+{
+    out.visible = false;
+    out.items.clear();
+    out.names = names;
+    out.texts = texts;
+    out.icons = icons;
+    out.tab = tabIndex;
+    if (names.empty()) return;
+
+    const int rowH = 32;
+    int w = 150;
+    for (const auto& t : texts)
+    {
+        const int need = 14 + 18 + 10 + (int)t.size() * 13;
+        if (need > w) w = need;
+    }
+    int x = anchor.left;
+    if (rightLimit > 0 && x + w > rightLimit - 4) x = rightLimit - 4 - w;
+    if (x < 4) x = 4;
+    const int y = anchor.bottom + 2;
+    const int h = 6 + (int)names.size() * rowH + 6;
+
+    out.rc = RECT{ x, y, x + w, y + h };
+    out.visible = true;
+    int iy = y + 6;
+    for (size_t i = 0; i < names.size(); ++i)
+    {
+        out.items.push_back(RECT{ x + 4, iy, x + w - 4, iy + rowH });
+        iy += rowH;
+    }
 }
 
 inline int ribbonMenuHit(const XRibbonMenu& menu, POINT pt)

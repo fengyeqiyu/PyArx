@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "../MfcXmlCore/controls/XmlMfcTags.h"   // 统一标签命名（X 前缀 -> 本意名）
 #include "DesignerPaneView.h"
 #include "DesignerPaneInternal.h"
@@ -394,6 +394,42 @@ void DesignerPaneView::paintMenuBar(XmlCanvas& cv, const RECT& rc, XmlElement* n
             }
         }
 
+        // ---- 快速访问工具栏：标题右侧一排小图标，点击即执行同名命令 ----
+        if (_wcsicmp(bare.c_str(), L"XQat") == 0 || _wcsicmp(bare.c_str(), L"Qat") == 0)
+        {
+            const int h = rc.bottom - rc.top;
+            const int side = 26;
+            int qx = x + 2;
+            for (auto& q : c.children)
+            {
+                const std::wstring bare2 = xmlmfc::BareTag(q.tag);
+                if (_wcsicmp(bare2.c_str(), L"XQatButton") != 0 &&
+                    _wcsicmp(bare2.c_str(), L"QatButton") != 0) continue;
+
+                RECT qr = { qx, rc.top + (h - side) / 2, qx + side, rc.top + (h - side) / 2 + side };
+                const int qi = (int)m_surfToolNames.size();
+                m_surfToolRects.push_back(qr);
+                m_surfToolNames.push_back(q.name);
+                const bool qhot = qi == m_surfHotTool;
+                if (qhot)
+                    cv.fillRoundRect(qr, RGB(58, 64, 72), RGB(58, 64, 72), 4);
+
+                std::wstring src = q.get(L"Icon");
+                if (!src.empty() && src.find(L':') == std::wstring::npos)
+                    src = exeDir() + L"\\" + src;
+                if (!src.empty())
+                {
+                    RECT ic = { qr.left + 4, qr.top + 4, qr.right - 4, qr.bottom - 4 };
+                    cv.drawImage(ic, src);
+                }
+                qx += side + 2;
+            }
+            // 与右侧菜单之间留一道细竖线（Office 的分隔）
+            cv.fillRect(RECT{ qx + 3, rc.top + 8, qx + 4, rc.bottom - 8 }, lk.line);
+            x = qx + 10;
+            continue;
+        }
+
         // ---- 菜单项 ----
         std::wstring hdr = c.get(L"Header");
         if (hdr.empty()) hdr = c.text;
@@ -607,6 +643,11 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
                 }
                 for (size_t bi = 0; bi < box.buttons.size() && bi < grp.buttons.size(); ++bi)
                 {
+                    if (!grp.buttons[bi].items.empty())   // 下拉三角区先登记，优先命中
+                    {
+                        m_surfToolRects.push_back(xmlctl::ribbonDropdownRect(box.buttons[bi]));
+                        m_surfToolNames.push_back(std::wstring(L"ribbon:dd:") + std::to_wstring(gi) + L":" + std::to_wstring(bi));
+                    }
                     m_surfToolRects.push_back(box.buttons[bi]);
                     m_surfToolNames.push_back(grp.buttons[bi].name);
                 }
@@ -1406,6 +1447,11 @@ void DesignerPaneView::paintRibbonOverlays(XmlCanvas& cv, const RECT& host)
                 }
                 for (size_t bi = 0; bi < box.buttons.size() && bi < grp.buttons.size(); ++bi)
                 {
+                    if (!grp.buttons[bi].items.empty())   // 下拉三角区先登记，优先命中
+                    {
+                        m_surfToolRects.push_back(xmlctl::ribbonDropdownRect(box.buttons[bi]));
+                        m_surfToolNames.push_back(std::wstring(L"ribbon:dd:") + std::to_wstring(gi) + L":" + std::to_wstring(bi));
+                    }
                     m_surfToolRects.push_back(box.buttons[bi]);
                     m_surfToolNames.push_back(grp.buttons[bi].name);
                 }

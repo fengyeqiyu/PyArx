@@ -198,6 +198,47 @@ void DesignerPaneView::surfaceToolClickByName(const std::wstring& nm)
     const std::wstring n = nm;
     const CString name(n.c_str());
 
+    // 按钮下拉：点右下角小三角弹出该按钮自己的菜单
+    if (name.Left(10).Compare(_T("ribbon:dd:")) == 0)
+    {
+        const std::wstring tail(n.c_str() + 10);
+        int gi = -1, bi = -1;
+        const size_t colon = tail.find(L':');
+        if (colon != std::wstring::npos)
+        {
+            gi = _wtoi(tail.substr(0, colon).c_str());
+            bi = _wtoi(tail.substr(colon + 1).c_str());
+        }
+        const int tab = (m_ribbonFlyoutTab >= 0) ? m_ribbonFlyoutTab : m_ribbon.selected;
+        if (tab >= 0 && tab < (int)m_ribbon.tabs.size() &&
+            gi >= 0 && gi < (int)m_ribbon.tabs[(size_t)tab].groups.size())
+        {
+            const xmlctl::XRibbonGroup& grp = m_ribbon.tabs[(size_t)tab].groups[(size_t)gi];
+            if (bi >= 0 && bi < (int)grp.buttons.size() && !grp.buttons[(size_t)bi].items.empty())
+            {
+                RECT anchor = { 0, 0, 0, 0 };
+                for (size_t i = 0; i < m_surfToolNames.size(); ++i)
+                    if (m_surfToolNames[i] == nm) { anchor = m_surfToolRects[i]; break; }
+
+                std::vector<std::wstring> names, texts, icons;
+                for (const auto& it : grp.buttons[(size_t)bi].items)
+                {
+                    names.push_back(it.name);
+                    texts.push_back(it.text.empty() ? it.name : it.text);
+                    icons.push_back(it.icon);
+                }
+                CRect client;
+                GetClientRect(&client);
+                m_ribbonMenu.visible = false;
+                m_ribbonMenuHot = -1;
+                xmlctl::ribbonMenuLayoutItems(names, texts, icons, anchor, client.Width(), m_ribbonMenu, tab);
+                Invalidate(FALSE);
+                return;
+            }
+        }
+        return;
+    }
+
     // Ribbon 折叠组的溢出菜单：弹一个该组按钮的下拉
     if (name.Left(13).Compare(_T("ribbon:group:")) == 0)
     {

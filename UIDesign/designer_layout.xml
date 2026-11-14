@@ -57,6 +57,14 @@
       <XImage Name="appLogo" Source="res\logo.png" Width="32" Height="32"/>
       <ShellTitle Name="winTitle" Text="PyArx"/>
 
+      <!-- 快速访问工具栏：标题右侧那排小图标（Office QAT），内容由 XML 决定 -->
+      <XQat Name="quickAccess">
+        <XQatButton Name="btnSave" Icon="res\save.png"/>
+        <XQatButton Name="btnOpen" Icon="res\open.png"/>
+        <XQatButton Name="btnUndo" Icon="res\undo.png"/>
+        <XQatButton Name="btnRedo" Icon="res\redo.png"/>
+      </XQat>
+
       <MenuItem Name="mnuEdit" Header="编辑">
         <MenuItem Name="mnuUndo"    Header="撤销"/>
         <MenuItem Name="mnuRedo"    Header="重做"/>
@@ -109,7 +117,10 @@
 
       <XRibbonTab Header="编辑">
         <XRibbonGroup Header="剪贴板">
-          <XRibbonButton Name="btnPaste" Icon="res/paste.png" Text="粘贴"/>
+          <XRibbonButton Name="btnPaste" Icon="res/paste.png" Text="粘贴">
+            <XRibbonMenuItem Name="btnPaste" Icon="res/paste.png" Text="粘贴"/>
+            <XRibbonMenuItem Name="btnPasteSpecial" Icon="res/paste.png" Text="选择性粘贴…"/>
+          </XRibbonButton>
           <XRibbonButton Name="btnCut" Icon="res/cut.png" Text="剪切"/>
           <XRibbonButton Name="btnCopy" Icon="res/copy.png" Text="复制"/>
           <XRibbonButton Name="btnDelete" Icon="res/del.png" Text="删除"/>

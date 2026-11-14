@@ -1095,9 +1095,25 @@
     <property name="Size" type="enum" options="Large|Small"/>
   </objectinfo>
 
+  <objectinfo tag="XRibbonMenuItem" display="RibbonMenuItem" w="150" h="32">
+    <property name="Name" type="text"/>
+    <property name="Text" type="string"/>
+    <property name="Icon" type="text"/>
+  </objectinfo>
+
   <objectinfo tag="XRibbonBackstage" display="RibbonBackstage" w="900" h="600">
     <property name="Name" type="text"/>
     <property name="Title" type="string"/>
+    <property name="Icon" type="text"/>
+  </objectinfo>
+
+  <!-- 快速访问工具栏：MenuBar 的子结构，只用于语义校验（无 category） -->
+  <objectinfo tag="XQat" display="Qat" w="120" h="26">
+    <property name="Name" type="text"/>
+  </objectinfo>
+
+  <objectinfo tag="XQatButton" display="QatButton" w="26" h="26">
+    <property name="Name" type="text"/>
     <property name="Icon" type="text"/>
   </objectinfo>
 
