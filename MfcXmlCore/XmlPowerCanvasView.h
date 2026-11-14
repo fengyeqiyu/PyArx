@@ -32,6 +32,11 @@ namespace xmlctl
         bool  loaded = false;
         bool  fitPending = true;        // 下一帧按客户区 fit
         int   lastW = 0, lastH = 0;     // 上次客户区尺寸（变了就重新 fit）
+        RECT  lastRc = { 0, 0, 0, 0 };  // 上次绘制矩形（小地图换算视口框要用）
+
+        // ---- 小地图：整张图铺满自己的矩形，并按主画布的视口画一个框 ----
+        bool  mini = false;
+        PowerCanvasView* viewRef = nullptr;   // 跟随的主画布（mini=true 时由宿主接上）
 
         // ---- 解析：'{' 开头按 JSON 处理（场景优先，其次 nodes 排版） ----
         bool load(const std::wstring& d)
@@ -80,6 +85,7 @@ namespace xmlctl
         {
             lastW = rc.right - rc.left;
             lastH = rc.bottom - rc.top;
+            lastRc = rc;
             fitPending = false;
             if (plan.width <= 0 || plan.height <= 0 || lastW <= 32 || lastH <= 32)
             {
@@ -102,8 +108,26 @@ namespace xmlctl
         void paint(XmlCanvas& cv, const RECT& rc, unsigned bg = 0x00000000)
         {
             if (rc.right <= rc.left || rc.bottom <= rc.top) return;
-            if (fitPending || (rc.right - rc.left) != lastW || (rc.bottom - rc.top) != lastH)
+            lastRc = rc;
+            if (mini)
+            {
+                paintMini(cv, rc, bg);
+                return;
+            }
+            if (fitPending || lastW <= 0 || lastH <= 0)
+            {
                 fitTo(rc);
+            }
+            else if ((rc.right - rc.left) != lastW || (rc.bottom - rc.top) != lastH)
+            {
+                // 客户区尺寸变了：保持缩放和"视图中心对应的模型点"不动，只补上差额的一半。
+                // 之前这里直接 re-fit，等于窗口/侧板一变尺寸就把用户的缩放和平移全部抹掉。
+                ox += ((rc.right - rc.left) - lastW) / 2;
+                oy += ((rc.bottom - rc.top) - lastH) / 2;
+                lastW = rc.right - rc.left;
+                lastH = rc.bottom - rc.top;
+                lastRc = rc;
+            }
             cv.fillRect(rc, bg);
             if (!loaded) return;
             // 真裁剪：放大后卡片不许溢出画布矩形（此前后端只做了"整项不可见就跳过"）
@@ -184,5 +208,82 @@ namespace xmlctl
         }
 
         void panBy(int dx, int dy) { ox += dx; oy += dy; }
+
+        // ---- 小地图：整图缩到自己的矩形里（不画电缆标注/网格/标尺，只保形） ----
+        // 小地图不持有自己的数据，永远画 viewRef 那张图；点了就把它换算成模型坐标交给宿主居中。
+        float miniScale(const RECT& rc) const
+        {
+            const PowerCanvasView* host = viewRef ? viewRef : this;
+            const xmlplan::PowerPlan& p = host->plan;
+            if (p.width <= 0 || p.height <= 0) return 1.0f;
+            const float fx = static_cast<float>(rc.right - rc.left - 10) / static_cast<float>(p.width);
+            const float fy = static_cast<float>(rc.bottom - rc.top - 10) / static_cast<float>(p.height);
+            return (fx < fy) ? fx : fy;
+        }
+
+        void miniOrigin(const RECT& rc, float& k, int& mx, int& my) const
+        {
+            const PowerCanvasView* host = viewRef ? viewRef : this;
+            k = miniScale(rc);
+            mx = rc.left + (rc.right - rc.left - static_cast<int>(lroundf(host->plan.width * k))) / 2;
+            my = rc.top + (rc.bottom - rc.top - static_cast<int>(lroundf(host->plan.height * k))) / 2;
+        }
+
+        void paintMini(XmlCanvas& cv, const RECT& rc, unsigned bg)
+        {
+            cv.fillRect(rc, bg);
+            const PowerCanvasView* host = viewRef ? viewRef : this;
+            const xmlplan::PowerPlan& p = host->plan;
+            if (p.width <= 0 || p.height <= 0) return;
+            float k = 0.0f;
+            int mx = 0, my = 0;
+            miniOrigin(rc, k, mx, my);
+            cv.clipPush(rc);
+            RECT clip = rc;
+            xmlplan::drawPlan(cv, p, k, mx, my, host->sel, false, &clip, false);
+            // 主画布的可见范围 → 模型坐标 → 小地图坐标，画一个蓝色视口框
+            const RECT& hr = host->lastRc;
+            if (hr.right > hr.left && host->zoom > 0.001f)
+            {
+                const float x0 = (static_cast<float>(hr.left) - host->ox) / host->zoom;
+                const float y0 = (static_cast<float>(hr.top) - host->oy) / host->zoom;
+                const float x1 = (static_cast<float>(hr.right) - host->ox) / host->zoom;
+                const float y1 = (static_cast<float>(hr.bottom) - host->oy) / host->zoom;
+                RECT vrc = { mx + static_cast<int>(lroundf(x0 * k)), my + static_cast<int>(lroundf(y0 * k)),
+                             mx + static_cast<int>(lroundf(x1 * k)), my + static_cast<int>(lroundf(y1 * k)) };
+                if (vrc.left < rc.left) vrc.left = rc.left;
+                if (vrc.top < rc.top) vrc.top = rc.top;
+                if (vrc.right > rc.right) vrc.right = rc.right;
+                if (vrc.bottom > rc.bottom) vrc.bottom = rc.bottom;
+                cv.strokeRect(vrc, RGB(0x2F, 0x6F, 0xE8), 1);
+                cv.strokeRect(RECT{ vrc.left - 1, vrc.top - 1, vrc.right + 1, vrc.bottom + 1 },
+                              RGB(0x9C, 0xBC, 0xF2), 1);
+            }
+            cv.clipPop();
+            cv.strokeRect(rc, RGB(0xCF, 0xD6, 0xDF), 1);
+        }
+
+        // 小地图上的一点 → 模型坐标（宿主据此把主画布居中过去）
+        bool miniPoint(int x, int y, float& modelX, float& modelY) const
+        {
+            const RECT& rc = lastRc;
+            if (rc.right <= rc.left) return false;
+            float k = 0.0f;
+            int mx = 0, my = 0;
+            miniOrigin(rc, k, mx, my);
+            if (k <= 0.0f) return false;
+            modelX = static_cast<float>(x - mx) / k;
+            modelY = static_cast<float>(y - my) / k;
+            return true;
+        }
+
+        // 让模型坐标 (mx, my) 落在自己客户区的正中
+        void centerOn(float modelX, float modelY)
+        {
+            const RECT& rc = lastRc;
+            if (rc.right <= rc.left) return;
+            ox = rc.left + (rc.right - rc.left) / 2 - static_cast<int>(lroundf(modelX * zoom));
+            oy = rc.top + (rc.bottom - rc.top) / 2 - static_cast<int>(lroundf(modelY * zoom));
+        }
     };
 }

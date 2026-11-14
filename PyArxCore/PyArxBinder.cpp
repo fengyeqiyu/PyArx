@@ -23,8 +23,14 @@
 //   Db(依赖 Rx 基类) → Ed(依赖 Ge) →
 //   Gi(依赖 Db) → Core → Utility → Debug
 // ===========================================================================
-PYBIND11_MODULE(PyArxCore, m) {
-    acutPrintf(L"\n[PyArx] PYBIND11_MODULE(PyArxCore) 入口执行\n");
+// 热编译：模块名可由 HotModuleName.h 覆盖，默认仍是 PyArxCore。
+// 构建成 PyArxCoreH<时间戳>.pyd 后，在 CAD 内 import 该新模块，
+// 其入口会把 sys.modules["PyArxCore"] 指向自身，即完成热替换。
+#include "HotModuleName.h"
+
+PYBIND11_MODULE(PYARX_HOT_MODULE, m) {
+    acutPrintf(L"\n[PyArx] PYBIND11_MODULE(%hs) 入口执行\n",
+               PyModule_GetName(m.ptr()) ? PyModule_GetName(m.ptr()) : "PyArxCore");
     m.doc() = "PyArxCore - AutoCAD ObjectARX pybind11 封装绑定（独立 pyd，可热替换）";
 
     // 先把主模块登记进 sys.modules，使子模块内 py::module_::import("PyArxCore.X") 命中

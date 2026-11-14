@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 // CDesignCanvas：设计器预览画布
 // 基于统一运行时 XmlElement 树渲染（GDI 预览 + 命中测试 + 选中控制点 + 网格点阵）。
 // 选中节点用路径（uidesign::Path，根到节点的 child 索引链）表达，避免值语义下指针失效。
@@ -114,6 +114,22 @@ namespace uidesign
     public:
         friend class DesignerPaneView;   // 画布内容由设计器整窗表面代画（paintInto）
         DesignCanvas() = default;
+
+        // 当前文档根：小地图要按 MiniOf 的名字找主画布元素（XmlElement 没有父指针，
+        // 所以由根节点按名字递归查，而不是从子节点往上爬）
+        inline static XmlElement* s_docRoot = nullptr;
+
+        static XmlElement* findByName(XmlElement* root, const std::wstring& name)
+        {
+            if (root == nullptr || name.empty()) return nullptr;
+            if (root->name == name) return root;
+            for (auto& c : root->children)
+            {
+                XmlElement* hit = findByName(&c, name);
+                if (hit != nullptr) return hit;
+            }
+            return nullptr;
+        }
 
         // 绑定编辑文档（XmlRuntime 持有 XmlElement 树）；node 为空表示未选中
 
@@ -1504,6 +1520,7 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
             CRect rc(node->previewX + origin.x, node->previewY + origin.y,
                      node->previewX + origin.x + node->previewW,
                      node->previewY + origin.y + node->previewH);
+            if (isRoot) s_docRoot = node;   // 每帧记住文档根（小地图按名字查主画布）
             // 视口裁剪：整棵子树都在可见矩形外时直接跳过（根窗是锚点，不裁）
             if (!isRoot && vp != nullptr &&
                 (rc.right < vp->left || rc.bottom < vp->top ||
@@ -1652,21 +1669,38 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                 // 设计器画布只传文档坐标下的矩形，与 Viewer / 运行时同一份画法。
                 static std::map<XmlElement*, xmlctl::PowerCanvasView> s_powerCvs;
                 xmlctl::PowerCanvasView& v = s_powerCvs[node];
-                const std::wstring data = node->get(L"Data");
-                if (v.data != data)
+                const bool isMini = node->get(L"Mini") == L"1";
+                if (isMini)
                 {
-                    v.load(data);
-                    v.sel.clear();
+                    // 小地图：不写 Data，跟随 MiniOf 指定的主画布。主画布的 view 在
+                    // 同一张表里（父容器先画），这里只挂个引用，不复制 plan。
+                    XmlElement* hostEl = findByName(s_docRoot, node->get(L"MiniOf"));
+                    if (hostEl == nullptr || hostEl == node) return;
+                    auto& hv = s_powerCvs[hostEl];
+                    v.mini = true;
+                    v.viewRef = &hv;
+                    v.loaded = hv.loaded;
                 }
-                v.showCable = _wcsicmp(node->get(L"ShowCable").c_str(), L"0") != 0;
-                v.showGrid = node->get(L"Grid") == L"1";
-                v.showRuler = node->get(L"Ruler") == L"1";
+                else
+                {
+                    v.mini = false;
+                    v.viewRef = nullptr;
+                    const std::wstring data = node->get(L"Data");
+                    if (v.data != data)
+                    {
+                        v.load(data);
+                        v.sel.clear();
+                    }
+                    v.showCable = _wcsicmp(node->get(L"ShowCable").c_str(), L"0") != 0;
+                    v.showGrid = node->get(L"Grid") == L"1";
+                    v.showRuler = node->get(L"Ruler") == L"1";
+                }
                 // 画布 cv 已带"整体缩放 + 平移"的 transform，这里必须传文档坐标矩形，
                 // 否则库内 fit/偏移的像素会被外层再乘一次缩放（双重缩放、错位）。
                 RECT drc = { node->previewX, node->previewY,
                              node->previewX + node->previewW, node->previewY + node->previewH };
-                v.paint(cv, drc, RGB(0xF3, 0xF5, 0xF8));
-                if (!v.loaded && !v.error.empty())
+                v.paint(cv, drc, isMini ? RGB(0xF7, 0xF9, 0xFB) : RGB(0xF3, 0xF5, 0xF8));
+                if (!isMini && !v.loaded && !v.error.empty())
                 {
                     RECT trc = { rc.left + 12, rc.top + 12, rc.right - 12, rc.top + 36 };
                     cv.text(trc, v.error, RGB(0xC0, 0x1B, 0x1B), DT_LEFT, 12, L"Microsoft YaHei");

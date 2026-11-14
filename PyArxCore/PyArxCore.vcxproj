@@ -55,7 +55,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalLibraryDirectories>G:\ObjectArx\2024\lib-x64;G:\ObjectArx\2024\utils\brep\lib-x64;G:\PyArx\third_party\python315t\PCbuild\amd64;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>G:\PyArx\X64\Release\python315t.lib;G:\PyArx\third_party\python315t\PCbuild\amd64\python3.lib;acdb24.lib;acge24.lib;ac1st24.lib;AcPal.lib;acad.lib;rxapi.lib;AcUi24.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/MANIFEST:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
 

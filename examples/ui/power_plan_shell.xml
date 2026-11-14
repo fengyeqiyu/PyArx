@@ -77,6 +77,9 @@
         <XLabel Content="中键拖动：平移" Height="24"/>
         <XLabel Content="左键单击：选中设备/回路" Height="24"/>
         <XLabel Content="Ribbon「视图 → 适应窗口」复位" Height="24"/>
+        <XDivider Height="1"/>
+        <XLabel Content="小地图" Height="28"/>
+        <PowerCanvas Name="Mini" Width="316" Height="160" Mini="1" MiniOf="Plan"/>
       </XStackPanel>
     </XStackPanel>
 

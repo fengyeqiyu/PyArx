@@ -1,4 +1,4 @@
-﻿// XmlViewer —— XML 预览与校验器（控制台 exe）
+// XmlViewer —— XML 预览与校验器（控制台 exe）
 //
 // 用法：
 //   XmlViewer.exe <file.xml>            解析 + 校验 + 打开窗口渲染
@@ -628,24 +628,49 @@ static const wchar_t* g_backend = L"未初始化";
 // 只记录"上一帧画到哪、模型是什么"，命中与业务全部交给控件库：
 // 画布 = xmlctl::PowerCanvasView，Ribbon = ribbonHitTest + 按钮 name 命令表。
 // ---------------------------------------------------------------------------
-static xmlctl::PowerCanvasView g_powerView;      // 当前文档的配电画布
-static RECT   g_powerRc = { 0, 0, 0, 0 };        // 画布最后一帧的客户区矩形
+struct PowerSlot
+{
+    xmlctl::PowerCanvasView view;
+    RECT rc = { 0, 0, 0, 0 };          // 最后一帧的客户区矩形
+    std::wstring name;                  // XML Name
+};
+static std::map<XmlElement*, PowerSlot> g_powerSlots;   // 一张文档可有多张（主 + 小地图）
+static std::map<std::wstring, XmlElement*> g_powerByName;
+static XmlElement* g_powerMainEl = nullptr;             // 第一张非 mini 画布 = 主画布
 static bool   g_powerShowCable = true;
 static bool   g_powerGridFlip = false;    // Ribbon「网格」按过一次就翻转一次
 static bool   g_powerRulerFlip = false;
+static bool   g_powerMiniHidden = false; // Ribbon「小地图」：整张迷你画布显示/隐藏
 static bool   g_panning = false;
 static POINT  g_panLast = { 0, 0 };
+static XmlElement* g_panEl = nullptr;   // 正在平移的画布（多画布时不能只认全局那一张）
 
-static xmlctl::XRibbonModel  g_ribbonModel;
-static xmlctl::XRibbonLayout g_ribbonLayout;
-static bool   g_ribbonValid = false;
-static int    g_ribbonSel = -1;     // 用户在预览器里切换的选项卡（-1 = 用 XML 的 SelectedTab）
+static xmlctl::PowerCanvasView* mainPowerView()
+{
+    auto it = g_powerSlots.find(g_powerMainEl);
+    return (it == g_powerSlots.end()) ? nullptr : &it->second.view;
+}
 
 static bool inRectPt(const RECT& r, POINT p)
 {
     return r.right > r.left && r.bottom > r.top &&
            p.x >= r.left && p.x < r.right && p.y >= r.top && p.y < r.bottom;
 }
+
+// 哪张画布吃掉了这个点（小地图排在主画布之后，命中时按矩形判定）
+static PowerSlot* powerSlotAt(POINT p)
+{
+    for (auto& kv : g_powerSlots)
+        if (inRectPt(kv.second.rc, p)) return &kv.second;
+    return nullptr;
+}
+
+static xmlctl::XRibbonModel  g_ribbonModel;
+static xmlctl::XRibbonLayout g_ribbonLayout;
+static bool   g_ribbonValid = false;
+static int    g_ribbonSel = -1;     // 用户在预览器里切换的选项卡（-1 = 用 XML 的 SelectedTab）
+
+
 
 // 名字比对要同时认 "GroupBox" 与 "XGroupBox"：XML 里统一是 X 前缀，
 // 绘制分支按本意名分派，两边都要命中（否则预览器会静默漏画一类控件）。
@@ -837,24 +862,59 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
         if (_wcsicmp(shellTag.c_str(), L"PowerCanvas") == 0)
         {
             // 配电规划画布：解析/布局/绘制全在控件库（xmlctl::PowerCanvasView），
-            // 这里只按 XML 的 Data 属性喂数据，不再自己算排版 —— 与设计器同一份画法。
+            // 这里只按 XML 属性喂数据。一个文档可以有多张（主画布 + 小地图），
+            // 视图状态按元素指针各存一份，互不影响。
+            PowerSlot& slot = g_powerSlots[el];
+            slot.name = el->get(L"Name");
+            xmlctl::PowerCanvasView& v = slot.view;
+            const bool isMini = el->get(L"Mini") == L"1";
+            v.mini = isMini;
+            if (isMini && g_powerMiniHidden) return;
+            if (isMini)
+            {
+                // 小地图不写 Data：跟随 MiniOf 指定的主画布（缺省 = 文档里第一张）
+                std::wstring target = el->get(L"MiniOf");
+                XmlElement* hostEl = nullptr;
+                if (!target.empty())
+                {
+                    auto it = g_powerByName.find(target);
+                    if (it != g_powerByName.end()) hostEl = it->second;
+                }
+                else if (g_powerMainEl != nullptr)
+                {
+                    hostEl = g_powerMainEl;
+                }
+                if (hostEl != nullptr)
+                {
+                    v.viewRef = &g_powerSlots[hostEl].view;
+                    v.loaded = true;
+                    slot.rc = rc;
+                    v.paint(cv, rc, RGB(0xF7, 0xF9, 0xFB));
+                }
+                return;
+            }
+
+            if (!slot.name.empty()) g_powerByName[slot.name] = el;
+            if (g_powerMainEl == nullptr) g_powerMainEl = el;
+
             const std::wstring data = el->get(L"Data");
             const bool showCable = _wcsicmp(el->get(L"ShowCable").c_str(), L"0") != 0;
             // 只在 Data 换版本时重建视图状态（重绘不清用户的选择）
-            if (data != g_powerView.data)
+            if (data != v.data)
             {
-                g_powerView.load(data);
-                g_powerView.sel.clear();
+                v.load(data);
+                v.sel.clear();
             }
-            else if (!g_powerView.loaded)
+            else if (!v.loaded)
             {
-                g_powerView.load(data);
+                v.load(data);
             }
-            g_powerView.showCable = showCable && g_powerShowCable;
-            g_powerView.showGrid = (el->get(L"Grid") == L"1") != g_powerGridFlip;
-            g_powerView.showRuler = (el->get(L"Ruler") == L"1") != g_powerRulerFlip;
-            g_powerRc = rc;
-            g_powerView.paint(cv, rc, RGB(0xF3, 0xF5, 0xF8));
+            v.viewRef = nullptr;
+            v.showCable = showCable && g_powerShowCable;
+            v.showGrid = (el->get(L"Grid") == L"1") != g_powerGridFlip;
+            v.showRuler = (el->get(L"Ruler") == L"1") != g_powerRulerFlip;
+            slot.rc = rc;
+            v.paint(cv, rc, RGB(0xF3, 0xF5, 0xF8));
             return;
         }
     }
@@ -895,17 +955,21 @@ static bool setLabelByName(XmlElement& el, const std::wstring& name, const std::
 static void viewerSyncSelection()
 {
     if (g_root == nullptr) return;
+    static const xmlplan::PowerPlan kEmptyPlan;
+    xmlctl::PowerCanvasView* pv = mainPowerView();
+    const xmlplan::PowerPlan& plan = pv ? pv->plan : kEmptyPlan;
     const xmlplan::PowerNode* node = nullptr;
-    for (const xmlplan::PowerNode& n : g_powerView.plan.nodes)
+    const std::wstring sel = pv ? pv->sel : std::wstring();
+    for (const xmlplan::PowerNode& n : plan.nodes)
     {
-        if (n.code == g_powerView.sel)
+        if (n.code == sel)
         {
             node = &n;
             break;
         }
     }
-    const int total = (int)g_powerView.plan.boxes.size();
-    const int links = (int)g_powerView.plan.links.size();
+    const int total = (int)plan.boxes.size();
+    const int links = (int)plan.links.size();
     wchar_t buf[256];
     if (node == nullptr)
     {
@@ -949,24 +1013,28 @@ static void viewerSyncSelection()
 static void viewerCommand(HWND hwnd, const std::wstring& name)
 {
     if (name.empty()) return;
-    const int cx = g_powerRc.left + (g_powerRc.right - g_powerRc.left) / 2;
-    const int cy = g_powerRc.top + (g_powerRc.bottom - g_powerRc.top) / 2;
+    xmlctl::PowerCanvasView* pv = mainPowerView();
+    if (pv == nullptr) return;
+    RECT prc = { 0, 0, 0, 0 };
+    if (auto it = g_powerSlots.find(g_powerMainEl); it != g_powerSlots.end()) prc = it->second.rc;
+    const int cx = prc.left + (prc.right - prc.left) / 2;
+    const int cy = prc.top + (prc.bottom - prc.top) / 2;
     bool changed = true;
     if (name == L"btnZoomFit")
     {
-        g_powerView.fitPending = true;
+        pv->fitPending = true;
     }
     else if (name == L"btnZoomIn")
     {
-        g_powerView.wheelAt(cx, cy, 120);
+        pv->wheelAt(cx, cy, 120);
     }
     else if (name == L"btnZoomOut")
     {
-        g_powerView.wheelAt(cx, cy, -120);
+        pv->wheelAt(cx, cy, -120);
     }
     else if (name == L"btnZoomReset")
     {
-        g_powerView.setZoomAbout(cx, cy, 1.0f);
+        pv->setZoomAbout(cx, cy, 1.0f);
     }
     else if (name == L"btnCable")
     {
@@ -980,11 +1048,15 @@ static void viewerCommand(HWND hwnd, const std::wstring& name)
     {
         g_powerRulerFlip = !g_powerRulerFlip;
     }
+    else if (name == L"btnMini")
+    {
+        g_powerMiniHidden = !g_powerMiniHidden;   // 显示/隐藏小地图整块
+    }
     else
     {
         changed = false;   // 设备表 / 导出 / 打印等留给运行时宿主，预览器不假装实现
     }
-    if (changed) ::InvalidateRect(hwnd, &g_powerRc, FALSE);
+    if (changed) ::InvalidateRect(hwnd, nullptr, FALSE);
 }
 static bool g_inSizeMove = false;   // 系统拖动/缩放循环中：只擦底色，松手后一次重画
 
@@ -1153,6 +1225,9 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         // 直接合成，反而不受裁剪，最终所有控件都被"糊掉"）。
         ensureControlsBuilt(hwnd);
 
+        // 每帧重建"名字 → 元素"索引：文档重开时元素指针会换，旧指针不能留
+        g_powerByName.clear();
+
         static D2DDcCanvas d2d;
         if (d2d.bind(dc, client) && d2d.begin(cw, ch))
         {
@@ -1196,9 +1271,20 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_LBUTTONDOWN:
     {
         POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
-        if (inRectPt(g_powerRc, p))
+        if (PowerSlot* slot = powerSlotAt(p))
         {
-            g_powerView.sel = g_powerView.hit(p.x, p.y);
+            if (slot->view.mini)
+            {
+                // 小地图：点哪就把主画布居中到哪（模型坐标由控件库换算）
+                float mx = 0.0f, my = 0.0f;
+                if (slot->view.miniPoint(p.x, p.y, mx, my))
+                {
+                    if (xmlctl::PowerCanvasView* pv = mainPowerView()) pv->centerOn(mx, my);
+                    ::InvalidateRect(hwnd, nullptr, FALSE);
+                }
+                return 0;
+            }
+            slot->view.sel = slot->view.hit(p.x, p.y);
             viewerSyncSelection();
             ::InvalidateRect(hwnd, nullptr, FALSE);
             return 0;
@@ -1233,8 +1319,10 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_MBUTTONDOWN:
     {
         POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
-        if (inRectPt(g_powerRc, p))
+        if (PowerSlot* slot = powerSlotAt(p); slot != nullptr && !slot->view.mini)
         {
+            g_panEl = g_powerSlots.empty() ? nullptr : nullptr;
+            for (auto& kv : g_powerSlots) if (&kv.second == slot) g_panEl = kv.first;
             g_panning = true;
             g_panLast = p;
             ::SetCapture(hwnd);
@@ -1247,17 +1335,21 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         if (g_panning)
         {
             g_panning = false;
+            g_panEl = nullptr;
             if (::GetCapture() == hwnd) ::ReleaseCapture();
             return 0;
         }
         break;
     case WM_MOUSEMOVE:
-        if (g_panning)
+        if (g_panning && g_panEl != nullptr)
         {
             POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
-            g_powerView.panBy(p.x - g_panLast.x, p.y - g_panLast.y);
-            g_panLast = p;
-            ::InvalidateRect(hwnd, &g_powerRc, FALSE);
+            if (auto it = g_powerSlots.find(g_panEl); it != g_powerSlots.end())
+            {
+                it->second.view.panBy(p.x - g_panLast.x, p.y - g_panLast.y);
+                g_panLast = p;
+                ::InvalidateRect(hwnd, nullptr, FALSE);
+            }
             return 0;
         }
         break;
@@ -1265,10 +1357,10 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     {
         POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
         ::ScreenToClient(hwnd, &p);
-        if (inRectPt(g_powerRc, p))
+        if (PowerSlot* slot = powerSlotAt(p); slot != nullptr && !slot->view.mini)
         {
-            g_powerView.wheelAt(p.x, p.y, static_cast<short>(GET_WHEEL_DELTA_WPARAM(wp)));
-            ::InvalidateRect(hwnd, &g_powerRc, FALSE);
+            slot->view.wheelAt(p.x, p.y, static_cast<short>(GET_WHEEL_DELTA_WPARAM(wp)));
+            ::InvalidateRect(hwnd, nullptr, FALSE);
             return 0;
         }
         break;
@@ -1776,6 +1868,11 @@ static int runViewer(int argc, wchar_t** argv)
         return 1;
     }
     g_root = root;
+    // 新文档：画布槽表重来（旧树已释放，指针不能复用）
+    g_powerSlots.clear();
+    g_powerByName.clear();
+    g_powerMainEl = nullptr;
+    g_panEl = nullptr;
     int contentW = (root->w > 0 ? root->w : 640) + 40;
     int contentH = (root->h > 0 ? root->h : 480) + 40;
     if (contentW < 320) contentW = 320;

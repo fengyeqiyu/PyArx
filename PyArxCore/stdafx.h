@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+// 热编译开关：必须早于任何 pybind11 头文件，统一各 TU 的模块名与 internals 命名空间。
+#include "HotModuleName.h"
+
 #pragma pack(push, 8)
 #pragma warning(disable: 4786 4996 26812)
 
