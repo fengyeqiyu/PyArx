@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- CAD 风格起始页（框架能力示例）：应用图标 + 工程名 + 快捷命令区 + 最近文档区 + 底部按钮。
+     整页只有 XML，没有任何 C++ 布局代码；换配色/换项/换宽度都只改这份文件。
+     对应多数桌面程序（AutoCAD / Office / IDE）的“开始页”骨架：
+       顶栏：圆形应用图标 + 当前工程名 + 右侧共享类动作
+       左栏：大尺寸命令项（新建/打开/保存/输入输出/发布/打印/工具/关闭）
+       右栏：最近文档列表 + 底部“选项/退出”
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
+        Title="PyMfc Studio — 起始页" Width="980" Height="690" Theme="dark">
+
+    <XStackPanel>
+        <!-- 顶栏 -->
+        <XStackPanel Orientation="Horizontal" Height="48">
+            <XImage x:Name="appLogo" Source="res/logo.png" Width="30" Height="30"/>
+            <XLabel x:Name="lblDocTitle" Content="二次配电用电点位" Height="48"/>
+            <XButton x:Name="btnShare" Content="共享" Width="90" Height="30"/>
+        </XStackPanel>
+
+        <XDivider Height="1"/>
+
+        <!-- 主体：左命令区 / 右最近文档区 -->
+        <XStackPanel Orientation="Horizontal" Height="600">
+
+            <!-- 左：大命令项 -->
+            <XStackPanel Width="232">
+                <XButton x:Name="cmdNew"     Content="新建"       Height="46"/>
+                <XButton x:Name="cmdOpen"    Content="打开"       Height="46"/>
+                <XButton x:Name="cmdSave"    Content="保存"       Height="46"/>
+                <XButton x:Name="cmdSaveAs"  Content="另存为"     Height="46"/>
+                <XDivider Height="1"/>
+                <XButton x:Name="cmdImport"  Content="输入"       Height="46"/>
+                <XButton x:Name="cmdExport"  Content="输出"       Height="46"/>
+                <XDivider Height="1"/>
+                <XButton x:Name="cmdPublish" Content="发布"       Height="46"/>
+                <XButton x:Name="cmdPrint"   Content="打印"       Height="46"/>
+                <XDivider Height="1"/>
+                <XButton x:Name="cmdTools"   Content="图形实用工具" Height="46"/>
+                <XDivider Height="1"/>
+                <XButton x:Name="cmdClose"   Content="关闭"       Height="46"/>
+            </XStackPanel>
+
+            <XDivider Orientation="Vertical" Width="1"/>
+
+            <!-- 右：最近使用的文档 + 底部动作 -->
+            <XStackPanel>
+                <XLabel x:Name="lblRecent" Content="最近使用的文档" Height="36"/>
+                <XListBox x:Name="lstRecent" Height="450"
+                          Items="汇总图-1002.dwg|涂布三件套LAYOUT(含厂房信息)-260911_mu2cp893.dwg|2-101#中试车间扩建-建筑 t3.dwg|BLDG 1 ELECTRICAL ROOM LAYOUT AND SCHEMATIC DIAGRAM.dwg|GENERAL(通用图).t3.dwg|101-UT-PIP-020_一层A区蒸汽、凝结水系统.dwg|101#中试车间-供电20260529_t3.dwg|BLDG 1 PANEL SCHEDULE.t3.dwg"/>
+                <XDivider Height="1"/>
+                <XStackPanel Orientation="Horizontal" Height="52">
+                    <XButton x:Name="btnOptions" Content="选项" Width="120" Height="32"/>
+                    <XButton x:Name="btnExit"    Content="退出" Width="160" Height="32"/>
+                </XStackPanel>
+            </XStackPanel>
+
+        </XStackPanel>
+    </XStackPanel>
+</XWindow>
