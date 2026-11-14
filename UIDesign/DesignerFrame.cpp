@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "DesignerFrame.h"
+#include "XFrameWindow.h"      // 无框外壳能力（DWM 描边剥离 / 系统移动缩放 / 贴边命中）
 #include <stdio.h>
 
 using namespace uidesign;
@@ -263,24 +264,9 @@ int DesignerFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 // 用动态加载，不额外给工程加 dwmapi.lib 依赖。
 void DesignerFrame::stripWindowFrame()
 {
-    HMODULE dwm = ::LoadLibraryW(L"dwmapi.dll");
-    if (dwm == nullptr) return;
-    typedef HRESULT(WINAPI* SetAttr)(HWND, DWORD, LPCVOID, DWORD);
-    SetAttr fn = reinterpret_cast<SetAttr>(::GetProcAddress(dwm, "DwmSetWindowAttribute"));
-    HRESULT hr[4] = {E_FAIL, E_FAIL, E_FAIL, E_FAIL};
-    if (fn != nullptr && m_hWnd != nullptr)
-    {
-        DWORD doNotRound = 1;        // DWMWA_WINDOW_CORNER_PREFERENCE = DWMWCP_DONOTROUND
-        hr[0] = fn(m_hWnd, 33, &doNotRound, sizeof(doNotRound));
-        DWORD colorNone = 0xFFFFFFFE; // DWMWA_BORDER_COLOR = DWMWA_COLOR_NONE
-        hr[1] = fn(m_hWnd, 34, &colorNone, sizeof(colorNone));
-        DWORD thin = 0;              // DWMWA_VISIBLE_FRAME_BORDER_THICKNESS = 0，去掉那圈描边
-        hr[2] = fn(m_hWnd, 37, &thin, sizeof(thin));
-        // 兜底：整块非客户区渲染交给 DWM 关掉（连失焦时那圈描边一起不再画）
-        DWORD ncDisabled = 1;        // DWMWA_NCRENDERING_POLICY = DWMNCRP_DISABLED
-        hr[3] = fn(m_hWnd, 2, &ncDisabled, sizeof(ncDisabled));
-    }
-    ::FreeLibrary(dwm);
+    // 具体属性与顺序在核心库里（XFrameWindow.h），和预览器共用同一套。
+    HRESULT hr[4] = { S_OK, S_OK, S_OK, S_OK };
+    xmlframe::stripDwmFrame(m_hWnd, hr);
     hostLog(L"[dwm] corner=%08lX border=%08lX thickness=%08lX ncrender=%08lX\n",
             (unsigned long)hr[0], (unsigned long)hr[1],
             (unsigned long)hr[2], (unsigned long)hr[3]);

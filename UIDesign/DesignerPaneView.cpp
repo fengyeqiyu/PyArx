@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "DesignerPaneView.h"
 #include "ControlCatalog.h"
+#include "XFrameWindow.h"                       // 无框外壳能力（贴边命中 / 缩放光标 / 系统移动缩放）
 #include "../MfcXmlCore/controls/XmlMfcTags.h"   // 统一标签命名（去 X 前缀比较）
 #include <shellapi.h>
 #include <algorithm>
@@ -491,13 +492,8 @@ BOOL DesignerPaneView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
     const int fe = frameEdgesAt(pt);
     if (fe != 0)
     {
-        LPCWSTR id = IDC_ARROW;
-        if ((fe & 1) && (fe & 4)) id = IDC_SIZENWSE;
-        else if ((fe & 2) && (fe & 8)) id = IDC_SIZENWSE;
-        else if ((fe & 2) && (fe & 4)) id = IDC_SIZENESW;
-        else if ((fe & 1) && (fe & 8)) id = IDC_SIZENESW;
-        else if (fe & 3) id = IDC_SIZEWE;
-        else id = IDC_SIZENS;
+        LPCWSTR id = xmlframe::cursorForEdges(fe);
+        if (id == nullptr) id = IDC_ARROW;
         ::SetCursor(::LoadCursor(nullptr, id));
         return TRUE;
     }

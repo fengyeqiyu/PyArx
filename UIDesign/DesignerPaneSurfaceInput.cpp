@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "DesignerPaneView.h"
 #include "DesignerPaneInternal.h"
+#include "XFrameWindow.h"      // 无框外壳能力（命中 / 系统移动缩放 / DWM 描边剥离）
 #include <algorithm>
 #include <unordered_map>
 
@@ -146,23 +147,18 @@ bool DesignerPaneView::tryFrameChrome(CPoint pt)
     return true;
 }
 
-// 1=左 2=右 4=上 8=下（相对顶层窗口）
+// 1=左 2=右 4=上 8=下（相对顶层窗口）。命中/光标/系统循环的规则统一在
+// MfcXmlCore/XFrameWindow.h 里，设计器与预览器共用，避免两端手感跑偏。
 int DesignerPaneView::frameEdgesAt(CPoint pt)
 {
     HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
     if (root == nullptr || ::IsZoomed(root))
-        return 0;
+        return xmlframe::kEdgeNone;
     RECT wr = {};
     ::GetWindowRect(root, &wr);
     POINT sp = pt;
     ::ClientToScreen(m_hWnd, &sp);
-    const int edge = 6;
-    int edges = 0;
-    if (sp.x - wr.left < edge) edges |= 1;
-    if (wr.right - sp.x < edge) edges |= 2;
-    if (sp.y - wr.top < edge) edges |= 4;
-    if (wr.bottom - sp.y < edge) edges |= 8;
-    return edges;
+    return xmlframe::edgesAtScreen(wr, sp);
 }
 
 // Qt 的 QWindow::startSystemMove / startSystemResize（windows 平台）就是这个动作：
@@ -174,20 +170,6 @@ void DesignerPaneView::startSystemChrome(CPoint pt, int edges)
     HWND root = ::GetAncestor(m_hWnd, GA_ROOT);
     if (root == nullptr)
         return;
-    // HTCAPTION 不缩放但要能移动；四边/四角按位组合映射成系统命中码
-    int hit = HTCAPTION;
-    switch (edges)
-    {
-    case 1:  hit = HTLEFT; break;
-    case 2:  hit = HTRIGHT; break;
-    case 4:  hit = HTTOP; break;
-    case 8:  hit = HTBOTTOM; break;
-    case 5:  hit = HTTOPLEFT; break;
-    case 6:  hit = HTTOPRIGHT; break;
-    case 9:  hit = HTBOTTOMLEFT; break;
-    case 10: hit = HTBOTTOMRIGHT; break;
-    default: hit = HTCAPTION; break;
-    }
 
     POINT sp = pt;
     ::ClientToScreen(m_hWnd, &sp);
@@ -195,11 +177,14 @@ void DesignerPaneView::startSystemChrome(CPoint pt, int edges)
     m_frameEdges = edges;
     m_frameStart = CPoint(sp.x, sp.y);
     ::GetWindowRect(root, &m_frameRect);
-    // 让系统循环自己跑：必须先放开 capture，否则它拿不到鼠标
-    if (::GetCapture() == m_hWnd)
-        ::ReleaseCapture();
-    ::PostMessageW(root, WM_NCLBUTTONDOWN, static_cast<WPARAM>(hit),
-                   MAKELPARAM(sp.x, sp.y));
+
+    // 系统循环的实际发起在核心库里（XFrameWindow.h），与 Qt 的 startSystemMove /
+    // startSystemResize 是同一套：ReleaseCapture + WM_NCLBUTTONDOWN，由 DefWindowProc
+    // 跑模态循环、DWM 合成整窗。我们这边只记状态，不做自绘贴图。
+    if (edges == 0)
+        xmlframe::startSystemMove(m_hWnd, CPoint(sp.x, sp.y));
+    else
+        xmlframe::startSystemResize(m_hWnd, CPoint(sp.x, sp.y), edges);
 }
 
 void DesignerPaneView::surfaceToolClick(int idx)
