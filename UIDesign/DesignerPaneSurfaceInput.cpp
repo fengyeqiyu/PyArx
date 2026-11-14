@@ -220,19 +220,20 @@ void DesignerPaneView::surfaceToolClickByName(const std::wstring& nm)
         return;
     }
 
-    // Ribbon 选项卡："文件"有文件页时打开 Backstage，其余切页
+    // 应用图标（左上 ARX 圆形 LOGO）：文件入口，点开文件页（Office 的"文件"按钮位）
+    if (name.Compare(_T("appLogo")) == 0 || name.Compare(_T("appIcon")) == 0)
+    {
+        setRibbonBackstage(true);
+        return;
+    }
+
+    // Ribbon 选项卡：切页（选中态归控件库模型，重绘即可）
     if (name.Left(11).Compare(_T("ribbon:tab:")) == 0)
     {
         const int tab = _wtoi((LPCWSTR)name.Mid(11));
         if (tab >= 0 && tab < (int)m_ribbon.tabs.size())
         {
             m_ribbonMenu.visible = false;
-            if (tab == 0 && !m_ribbon.backstage.empty())
-            {
-                setRibbonBackstage(true);   // 文件页铺满整窗
-                Invalidate(FALSE);
-                return;
-            }
             m_ribbon.selected = tab;
             if (m_ribbon.bodyCollapsed)
                 m_ribbonFlyoutTab = tab;   // 收起状态：临时浮出这一页，点别处收回

@@ -344,6 +344,14 @@ void DesignerPaneView::paintMenuBar(XmlCanvas& cv, const RECT& rc, XmlElement* n
             int ih = (c.previewH > 0) ? c.previewH : iw;
             if (ih > h) { ih = h; iw = h; }
             RECT ir = { x + 4, rc.top + (h - ih) / 2, x + 4 + iw, rc.top + (h - ih) / 2 + ih };
+            // 应用图标就是"文件"入口：登记命中，hover 时垫一圈浅底（先垫底再贴图）
+            const int logoIdx = (int)m_surfToolNames.size();
+            m_surfToolRects.push_back(ir);
+            m_surfToolNames.push_back(c.name);
+            const bool logoHot = logoIdx == m_surfHotTool;
+            if (logoHot)
+                cv.fillRoundRect(RECT{ ir.left - 2, ir.top - 2, ir.right + 2, ir.bottom + 2 },
+                                 RGB(58, 64, 72), RGB(58, 64, 72), 4);
             if (!src.empty())
             {
                 if (src.find(L':') == std::wstring::npos)   // 相对路径按 exe 目录解析

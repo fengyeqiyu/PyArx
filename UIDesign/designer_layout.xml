@@ -57,14 +57,6 @@
       <XImage Name="appLogo" Source="res\logo.png" Width="32" Height="32"/>
       <ShellTitle Name="winTitle" Text="PyArx"/>
 
-      <MenuItem Name="mnuFile" Header="文件">
-        <MenuItem Name="mnuNew"     Header="新建"/>
-        <MenuItem Name="mnuOpen"    Header="打开 XML…"/>
-        <MenuItem Name="mnuSave"    Header="保存"/>
-        <MenuItem Name="mnuSaveAs"  Header="另存为…"/>
-        <MenuItem Name="mnuExit"    Header="退出"/>
-      </MenuItem>
-
       <MenuItem Name="mnuEdit" Header="编辑">
         <MenuItem Name="mnuUndo"    Header="撤销"/>
         <MenuItem Name="mnuRedo"    Header="重做"/>
@@ -113,16 +105,7 @@
     <!-- ==================== Ribbon（控件库 XRibbon：选项卡 / 分组 / 大按钮 / 组名） ====================
          结构见 MfcXmlCore\XmlRibbon.h：选项卡 → 分组 → 按钮。要增删按钮只改这份 XML，
          绘制、命中、切页都由控件库完成，设计器只负责把命中转成动作名。 -->
-    <XRibbon Name="mainRibbon" Grid.Row="1" SelectedTab="1">
-
-      <XRibbonTab Header="文件">
-        <XRibbonGroup Header="文件">
-          <XRibbonButton Name="btnNew" Icon="res/new.png" Text="新建"/>
-          <XRibbonButton Name="btnOpen" Icon="res/open.png" Text="打开"/>
-          <XRibbonButton Name="btnSave" Icon="res/save.png" Text="保存"/>
-          <XRibbonButton Name="btnExit" Text="退出"/>
-        </XRibbonGroup>
-      </XRibbonTab>
+    <XRibbon Name="mainRibbon" Grid.Row="1" SelectedTab="0">
 
       <XRibbonTab Header="编辑">
         <XRibbonGroup Header="剪贴板">
