@@ -172,10 +172,10 @@
 
       <!-- 文件页（Backstage）：点"文件"选项卡铺满整窗 -->
       <XRibbonBackstage Title="PyArx" Icon="res\back.png">
-        <XRibbonBackstageItem Name="btnNew" Header="新建" Text="新建一个 XML 界面文档"/>
-        <XRibbonBackstageItem Name="btnOpen" Header="打开" Text="打开已有的 XML 界面文档"/>
-        <XRibbonBackstageItem Name="btnSave" Header="保存" Text="保存当前文档的修改"/>
-        <XRibbonBackstageItem Name="btnExit" Header="退出" Text="关闭设计器"/>
+        <XRibbonBackstageItem Name="btnNew" Header="新建" Icon="res\new.png" Text="新建一个 XML 界面文档"/>
+        <XRibbonBackstageItem Name="btnOpen" Header="打开" Icon="res\open.png" Text="打开已有的 XML 界面文档"/>
+        <XRibbonBackstageItem Name="btnSave" Header="保存" Icon="res\save.png" Text="保存当前文档的修改"/>
+        <XRibbonBackstageItem Name="btnExit" Header="退出" Icon="res\exit.png" Text="关闭设计器"/>
       </XRibbonBackstage>
 
     </XRibbon>

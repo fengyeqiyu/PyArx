@@ -788,13 +788,22 @@ inline void ribbonBackstageDraw(XmlCanvas& cv, const XRibbonModel& m, const XRib
                 th.text, DT_LEFT | DT_VCENTER, ptSize + 2, std::wstring());
     }
 
-    // 项
+    // 项：可带图标（XML 里 Icon="res\new.png"）
     for (size_t i = 0; i < m.backstage.size(); ++i)
     {
         const RECT& it = m.backstage[i].rc;
         if (hotItem == (int)i)
             cv.fillRect(it, th.panelAlt);
-        RECT tr = { it.left + 14, it.top, it.right - 6, it.bottom };
+        int tx = it.left + 14;
+        if (!m.backstage[i].icon.empty())
+        {
+            const int side = 18;
+            const int cyi = (it.top + it.bottom) / 2;
+            RECT ic = { tx, cyi - side / 2, tx + side, cyi + side / 2 };
+            cv.drawImage(ic, ribbonResolveIcon(m.backstage[i].icon));
+            tx += side + 10;
+        }
+        RECT tr = { tx, it.top, it.right - 6, it.bottom };
         cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"VCenter");
         cv.text(tr, m.backstage[i].header, hotItem == (int)i ? th.text : th.textDim,
                 DT_LEFT | DT_VCENTER, ptSize, std::wstring());
