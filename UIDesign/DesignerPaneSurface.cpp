@@ -545,6 +545,18 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
 
         const std::wstring role = node->get(L"Role");
         const bool hot = idx == m_surfHotTool;
+
+        // Ribbon 选项卡（文件/开始/插入…）：选中态由 XML 的 Selected 属性决定，
+        // 高亮样式统一由 xmlctl::xmlDrawRibbonTab 画，设计器里不写死配色。
+        if (_wcsicmp(role.c_str(), L"Tab") == 0)
+        {
+            const std::wstring sel = node->get(L"Selected");
+            const bool on = (sel == L"1" || _wcsicmp(sel.c_str(), L"true") == 0);
+            xmlctl::xmlDrawRibbonTab(cv, rc, std::wstring(uiNodeText(node).GetString()), on, hot,
+                                       fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 10));
+            return;
+        }
+
         if (_wcsicmp(role.c_str(), L"Primary") == 0 || _wcsicmp(role.c_str(), L"Ghost") == 0)
         {
             xmlctl::xmlDrawPillButton(cv, rc, std::wstring(uiNodeText(node).GetString()),
@@ -562,9 +574,13 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
         const std::wstring content = uiNodeText(node).GetString();
         if (!path.empty() && !content.empty() && node->previewH >= 36)
         {
+            // Office Ribbon 大按钮：高 ≥ 56 时用 30px 图标并整体居中，否则退回 18px 小图标
+            const int btnH = rc.bottom - rc.top;
+            const int iconSide = (btnH >= 56) ? (std::min)(30, btnH - 34) : 0;
             xmlctl::xmlDrawToolButtonCaption(cv, rc, path, content, hot, false, false,
                                                xmlctl::ToolButtonStyle(),
-                                               fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 10));
+                                               fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 10),
+                                               std::wstring(), iconSide);
             return;
         }
 
@@ -634,6 +650,15 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
         if (content.empty()) content = node->get(L"Title");
         if (content.empty()) content = node->get(L"Content");
         if (content.empty()) content = node->text;
+
+        // Ribbon 组名：纯小字居中，不画底色块（Office 的"剪贴板/字体/段落"）
+        if (_wcsicmp(node->get(L"Role").c_str(), L"GroupTitle") == 0)
+        {
+            xmlctl::xmlDrawRibbonGroupTitle(cv, rc, content,
+                                              fontPtOf(node, m_surfInheritPt > 0 ? m_surfInheritPt : 8));
+            return;
+        }
+
         COLORREF bg = ParseColor(CString(node->get(L"Background").c_str()));
         COLORREF fg = ParseColor(CString(node->get(L"Foreground").c_str()));
         if ((int)bg == -1) bg = xmlctl::shell().header;

@@ -955,7 +955,7 @@ inline void xmlDrawToolButtonCaption(XmlCanvas& cv, const RECT& rc, const std::w
                                       const std::wstring& caption, bool hot = false,
                                       bool pressed = false, bool active = false,
                                       const ToolButtonStyle& st = ToolButtonStyle(), int ptSize = 0,
-                                      const std::wstring& face = std::wstring())
+                                      const std::wstring& face = std::wstring(), int iconSide = 0)
 {
     if (rc.right <= rc.left || rc.bottom <= rc.top) return;
     const ShellTheme& th = shell();
@@ -963,20 +963,62 @@ inline void xmlDrawToolButtonCaption(XmlCanvas& cv, const RECT& rc, const std::w
                               : (pressed ? RGB(32, 39, 49) : (hot ? th.panelAlt : th.header));
     cv.fillRoundRect(rc, b, b, 5);
 
-    const int side = 18;
     const int cx = (rc.left + rc.right) / 2;
-    RECT ir = { cx - side / 2, rc.top + 7, cx - side / 2 + side, rc.top + 7 + side };
-    if (ir.bottom > rc.bottom - 12) ir.bottom = rc.bottom - 12;
+    const int side = iconSide > 0 ? iconSide : 18;
+    int iconTop = rc.top + 7;
+    int textTop = rc.top + 26;
+    if (iconSide > 0)
+    {
+        // 大图标按钮（Office Ribbon 样式）：图标 + 标题整体垂直居中
+        const int textH = (ptSize > 0 ? ptSize : 9) + 12;
+        const int contentH = side + 4 + textH;
+        iconTop = rc.top + ((rc.bottom - rc.top) - contentH) / 2;
+        if (iconTop < rc.top + 4) iconTop = rc.top + 4;
+        textTop = iconTop + side + 2;
+    }
+    RECT ir = { cx - side / 2, iconTop, cx - side / 2 + side, iconTop + side };
+    if (iconSide == 0 && ir.bottom > rc.bottom - 12) ir.bottom = rc.bottom - 12;
     if (ir.right > ir.left && ir.bottom > ir.top && !iconPath.empty())
         cv.drawImage(ir, iconPath);
 
     if (!caption.empty())
     {
         cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
-        RECT tr = { rc.left + 2, rc.top + 26, rc.right - 2, rc.bottom - 2 };
+        RECT tr = { rc.left + 2, textTop, rc.right - 2, rc.bottom - 2 };
         cv.text(tr, caption, active ? RGB(255, 255, 255) : (hot ? th.text : th.textDim),
                 DT_CENTER, ptSize > 0 ? ptSize : 8, face);
     }
+}
+
+// Office 风格选项卡（Ribbon 的"文件 / 开始 / 插入…"）：
+// 选中项白字 + 底部强调线，未选中暗字，悬停给浅底。颜色/字号都从 XML 属性传入。
+inline void xmlDrawRibbonTab(XmlCanvas& cv, const RECT& rc, const std::wstring& text,
+                             bool selected, bool hot = false, int ptSize = 0,
+                             const std::wstring& face = std::wstring())
+{
+    if (rc.right <= rc.left || rc.bottom <= rc.top) return;
+    const ShellTheme& th = shell();
+    if (selected)
+        cv.fillRect(rc, RGB(38, 44, 54));
+    else if (hot)
+        cv.fillRect(rc, th.panelAlt);
+    if (selected)
+        cv.fillRect(RECT{ rc.left + 6, rc.bottom - 2, rc.right - 6, rc.bottom }, th.accent);
+    cv.setTextStyle(selected ? L"SemiBold" : L"Normal", L"Normal", L"NoWrap", L"Center");
+    cv.text(rc, text, selected ? RGB(255, 255, 255) : (hot ? th.text : th.textDim),
+            DT_CENTER, ptSize > 0 ? ptSize : 10, face);
+    cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+}
+
+// Ribbon 组名（组底部居中，Office 里"剪贴板 / 字体 / 段落"那行小字）
+inline void xmlDrawRibbonGroupTitle(XmlCanvas& cv, const RECT& rc, const std::wstring& text,
+                                    int ptSize = 0, const std::wstring& face = std::wstring())
+{
+    if (rc.right <= rc.left || rc.bottom <= rc.top || text.empty()) return;
+    const ShellTheme& th = shell();
+    cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+    cv.text(rc, text, th.textDim, DT_CENTER | DT_VCENTER, ptSize > 0 ? ptSize : 8, face);
+    cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
 }
 
 // 胶囊按钮（工具栏右端的"预览 / 校验"）：primary = 实心强调色，否则描边幽灵按钮

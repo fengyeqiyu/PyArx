@@ -40,7 +40,8 @@
   <XGrid Name="rootGrid" Background="#15181D">
     <XGrid.RowDefinitions>
       <RowDefinition Height="38"/>     <!-- 标题 + 菜单栏（单表面自绘，窗体无边框） -->
-      <RowDefinition Height="54"/>     <!-- 工具栏（图标 + 标题，分组） -->
+      <RowDefinition Height="34"/>     <!-- 选项卡条（Ribbon 的 文件/开始/插入…） -->
+      <RowDefinition Height="92"/>     <!-- Ribbon 功能区（分组 + 大图标按钮 + 组名） -->
       <RowDefinition Height="*"/>      <!-- 主体三栏 -->
       <RowDefinition Height="5"/>      <!-- 水平 Splitter（拖动调整代码坞高度） -->
       <RowDefinition Height="196"/>    <!-- XML 源码坞 -->
@@ -107,56 +108,62 @@
 
     </MenuBar>
 
-    <!-- ==================== 工具栏（分组 + 图标标题 + 右侧动作） ==================== -->
-    <ToolBar Grid.Row="1" Background="#20242C" Foreground="#E4E9F0"
-             BorderColor="#39404B" Spacing="2" Padding="12,3,12,0" FontSize="9">
+    <!-- ==================== 选项卡条（Ribbon：文件 / 开始 / 插入 …） ==================== -->
+    <ToolBar Grid.Row="1" Background="#232830" Foreground="#C8D2DF" FontSize="10"
+             BorderColor="#39404B" Spacing="0" Padding="10,0,10,0">
+      <XButton Name="tabFile" Role="Tab" Text="文件" Width="66" Height="32"/>
+      <XButton Name="tabHome" Role="Tab" Text="开始" Width="66" Height="32" Selected="1"/>
+      <XButton Name="tabInsert" Role="Tab" Text="插入" Width="66" Height="32"/>
+      <XButton Name="tabLayout" Role="Tab" Text="布局" Width="66" Height="32"/>
+      <XButton Name="tabView" Role="Tab" Text="视图" Width="66" Height="32"/>
+      <XButton Name="tabHelp" Role="Tab" Text="帮助" Width="66" Height="32"/>
+      <XButton Name="btnCheck" Text="校验" Role="Ghost" Dock="Right" Width="68" Height="26" Margin="0,3,10,0" FontSize="10"/>
+      <XButton Name="btnPreview" Text="预览" Role="Primary" Dock="Right" Width="80" Height="26" Margin="0,3,16,0" FontSize="10"/>
+    </ToolBar>
 
-      <!-- 文件 -->
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnNew" FontSize="10"  Icon="res/new.png"  Text="新建" Width="46" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnOpen" FontSize="10" Icon="res/open.png" Text="打开" Width="46" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnSave" FontSize="10" Icon="res/save.png" Text="保存" Width="46" Height="48"/>
-      <XDivider Width="11" Height="44" Thickness="2" Orientation="Vertical" Background="#4A5361"/>
-
-      <!-- 撤销 / 重做 -->
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnUndo" FontSize="10" Icon="res/undo.png" Text="撤销" Width="46" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnRedo" FontSize="10" Icon="res/redo.png" Text="重做" Width="46" Height="48"/>
-      <XDivider Width="11" Height="44" Thickness="2" Orientation="Vertical" Background="#4A5361"/>
-
-      <!-- 剪贴板 -->
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnCut" FontSize="10"    Icon="res/cut.png"   Text="剪切" Width="46" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnCopy" FontSize="10"   Icon="res/copy.png"  Text="复制" Width="46" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnPaste" FontSize="10"  Icon="res/paste.png" Text="粘贴" Width="46" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnDelete" FontSize="10" Icon="res/del.png"   Text="删除" Width="46" Height="48"/>
-      <XDivider Width="11" Height="44" Thickness="2" Orientation="Vertical" Background="#4A5361"/>
-
-      <!-- 对齐 / 均匀分布（Qt Designer 同组语义：多选按选区外接框，单选按父容器） -->
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnAlignLeft" FontSize="10"     Icon="res/alignleft.png"    Text="左"     Width="34" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnAlignHCenter"  Icon="res/alignhcenter.png" Text="居中" Width="34" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnAlignRight" FontSize="10"    Icon="res/alignright.png"   Text="右"     Width="34" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnAlignTop" FontSize="10"      Icon="res/aligntop.png"     Text="上"     Width="34" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnAlignVCenter"  Icon="res/alignvcenter.png" Text="居中" Width="34" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnAlignBottom" FontSize="10"   Icon="res/alignbottom.png"  Text="下"     Width="34" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnDistH" FontSize="10"         Icon="res/disth.png"        Text="横分布" Width="56" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnDistV" FontSize="10"         Icon="res/distv.png"        Text="纵分布" Width="56" Height="48"/>
-      <XDivider Width="11" Height="44" Thickness="2" Orientation="Vertical" Background="#4A5361"/>
-
-      <!-- 视图 -->
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnGrid" FontSize="10"  Icon="res/grid.png"  Text="网格" Width="46" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnRuler" FontSize="10" Icon="res/ruler.png" Text="标尺" Width="46" Height="48"/>
-      <XDivider Width="11" Height="44" Thickness="2" Orientation="Vertical" Background="#4A5361"/>
-
-      <!-- 缩放 -->
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnZoomOut" FontSize="10" Icon="res/zoomout.png" Text="缩小" Width="46" Height="48"/>
-      <XButton Background="#20242C" BorderColor="#20242C" Radius="0" Name="btnZoomIn" FontSize="10"  Icon="res/zoomin.png"  Text="放大" Width="46" Height="48"/>
-
-      <!-- 右端动作：预览 / 校验（胶囊按钮，Dock 靠右） -->
-      <XButton Name="btnCheck" FontSize="10"   Role="Ghost"   Text="校验" Dock="Right" Width="68" Height="26" Margin="0,12,10,12"/>
-      <XButton Name="btnPreview" FontSize="10" Role="Primary" Text="预览" Dock="Right" Width="80" Height="26" Margin="0,12,16,12"/>
-
+    <!-- ==================== Ribbon 功能区（分组 + 大图标按钮 + 组名） ====================
+         结构全部写在 XML：组的位置/宽度由 Left/Width 决定，组名是 Role="GroupTitle" 的 XLabel，
+         按钮图标与标题来自 Icon/Text。要增删组只改这里，C++ 不需要动。 -->
+    <ToolBar Grid.Row="2" Background="#20242C" Foreground="#E4E9F0" BorderColor="#39404B" Height="92">
+      <XButton Name="btnNew" Icon="res/new.png" Text="新建" Left="12" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnOpen" Icon="res/open.png" Text="打开" Left="70" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnSave" Icon="res/save.png" Text="保存" Left="128" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XLabel Name="lblGroupQuickAccess" Role="GroupTitle" Text="快速访问" Left="12" Top="68" Width="174" Height="16" FontSize="9"/>
+      <XDivider Left="191" Top="8" Width="1" Height="64" Thickness="1" Orientation="Vertical" Background="#39404B"/>
+      <XButton Name="btnPaste" Icon="res/paste.png" Text="粘贴" Left="199" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnCut" Icon="res/cut.png" Text="剪切" Left="257" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnCopy" Icon="res/copy.png" Text="复制" Left="315" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnDelete" Icon="res/del.png" Text="删除" Left="373" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XLabel Name="lblGroupClip" Role="GroupTitle" Text="剪贴板" Left="199" Top="68" Width="232" Height="16" FontSize="9"/>
+      <XDivider Left="436" Top="8" Width="1" Height="64" Thickness="1" Orientation="Vertical" Background="#39404B"/>
+      <XButton Name="btnUndo" Icon="res/undo.png" Text="撤销" Left="444" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnRedo" Icon="res/redo.png" Text="重做" Left="502" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XLabel Name="lblGroupEdit" Role="GroupTitle" Text="编辑" Left="444" Top="68" Width="116" Height="16" FontSize="9"/>
+      <XDivider Left="565" Top="8" Width="1" Height="64" Thickness="1" Orientation="Vertical" Background="#39404B"/>
+      <XButton Name="btnAlignLeft" Icon="res/alignleft.png" Text="左" Left="573" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnAlignHCenter" Icon="res/alignhcenter.png" Text="居中" Left="631" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnAlignRight" Icon="res/alignright.png" Text="右" Left="689" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnAlignTop" Icon="res/aligntop.png" Text="上" Left="747" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnAlignVCenter" Icon="res/alignvcenter.png" Text="居中" Left="805" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnAlignBottom" Icon="res/alignbottom.png" Text="下" Left="863" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XLabel Name="lblGroupAlign" Role="GroupTitle" Text="对齐" Left="573" Top="68" Width="348" Height="16" FontSize="9"/>
+      <XDivider Left="926" Top="8" Width="1" Height="64" Thickness="1" Orientation="Vertical" Background="#39404B"/>
+      <XButton Name="btnDistH" Icon="res/disth.png" Text="横分布" Left="934" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnDistV" Icon="res/distv.png" Text="纵分布" Left="992" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XLabel Name="lblGroupDist" Role="GroupTitle" Text="分布" Left="934" Top="68" Width="116" Height="16" FontSize="9"/>
+      <XDivider Left="1055" Top="8" Width="1" Height="64" Thickness="1" Orientation="Vertical" Background="#39404B"/>
+      <XButton Name="btnGrid" Icon="res/grid.png" Text="网格" Left="1063" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnRuler" Icon="res/ruler.png" Text="标尺" Left="1121" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XLabel Name="lblGroupView" Role="GroupTitle" Text="视图" Left="1063" Top="68" Width="116" Height="16" FontSize="9"/>
+      <XDivider Left="1184" Top="8" Width="1" Height="64" Thickness="1" Orientation="Vertical" Background="#39404B"/>
+      <XButton Name="btnZoomOut" Icon="res/zoomout.png" Text="缩小" Left="1192" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XButton Name="btnZoomIn" Icon="res/zoomin.png" Text="放大" Left="1250" Top="4" Width="58" Height="60" FontSize="9"/>
+      <XLabel Name="lblGroupZoom" Role="GroupTitle" Text="缩放" Left="1192" Top="68" Width="116" Height="16" FontSize="9"/>
+      <XDivider Left="1313" Top="8" Width="1" Height="64" Thickness="1" Orientation="Vertical" Background="#39404B"/>
     </ToolBar>
 
     <!-- ==================== 主体三栏 ==================== -->
-    <XGrid Grid.Row="2" Background="#15181D">
+    <XGrid Grid.Row="3" Background="#15181D">
       <XGrid.ColumnDefinitions>
         <ColumnDefinition Width="260"/>   <!-- 控件箱 -->
         <ColumnDefinition Width="5"/>     <!-- 垂直 Splitter -->
@@ -344,10 +351,10 @@
     </XGrid>
 
     <!-- 主体与代码坞之间的水平分隔条（上下拖动改变代码坞高度） -->
-    <XSplitView Grid.Row="3"/>
+    <XSplitView Grid.Row="4"/>
 
     <!-- ==================== XML 源码坞 ==================== -->
-    <XGrid Name="codeDock" Grid.Row="4" Background="#14171C">
+    <XGrid Name="codeDock" Grid.Row="5" Background="#14171C">
       <XGrid.RowDefinitions>
         <RowDefinition Height="34"/>
         <RowDefinition Height="*"/>
@@ -359,7 +366,7 @@
     </XGrid>
 
     <!-- ==================== 状态栏 ==================== -->
-    <StatusBar Grid.Row="5" Background="#252A33" Foreground="#C7D0DC"
+    <StatusBar Grid.Row="6" Background="#252A33" Foreground="#C7D0DC"
              BorderColor="#39404B" FontSize="9" Spacing="0">
       <XLabel Name="statusBrand" Text="PyArx" Width="64"/>
       <XLabel Name="statusText"  Text="就绪"        Width="620"/>
