@@ -1,4 +1,4 @@
-﻿// XmlRibbon.h —— Office 风格 Ribbon 控件（三端共用）
+// XmlRibbon.h —— Office 风格 Ribbon 控件（三端共用）
 //
 // 为什么下沉到控件库：Ribbon 不是"一堆绝对坐标按钮"，它有固定结构
 // （选项卡 → 分组 → 按钮 + 组名）和固定行为（互斥选中、悬停、点击、宽度不足折叠）。
@@ -28,14 +28,16 @@ namespace xmlctl {
 struct XRibbonButton
 {
     std::wstring name;          // 动作名（与设计器命令同名，如 btnPaste）
-    std::wstring text;          // 按钮下方标题
+    std::wstring text;          // 按钮标题
     std::wstring icon;          // PNG 路径（相对 exe）
     int width  = 58;
+    bool tiny = false;         // 小按钮：图标在左、文字在右，纵向三层排
 };
 
 struct XRibbonGroup
 {
     std::wstring header;        // 组名（底部小字）
+    std::wstring dialog;        // 组对话启动器（右下角斜箭头），空 = 没有
     std::vector<XRibbonButton> buttons;
 };
 
@@ -45,9 +47,22 @@ struct XRibbonTab
     std::vector<XRibbonGroup> groups;
 };
 
+// 文件页（Backstage）的左侧导航项
+struct XRibbonBackstageItem
+{
+    std::wstring name;          // 命令名（btnNew / btnOpen / btnSave / btnExit …）
+    std::wstring header;        // 左侧导航文字
+    std::wstring text;          // 右侧说明（可选）
+    std::wstring icon;
+    RECT rc = { 0, 0, 0, 0 };   // 由 ribbonBackstageLayout 填
+};
+
 struct XRibbonModel
 {
     std::vector<XRibbonTab> tabs;
+    std::vector<XRibbonBackstageItem> backstage;
+    std::wstring backstageTitle;      // 左上标题，默认"文件"
+    bool backstageOpen = false;       // 文件页是否展开（铺满整窗）
     int selected = 0;
     bool bodyCollapsed = false;   // 功能区是否收起（只留选项卡条），由调用方翻转
 
@@ -72,6 +87,8 @@ struct XRibbonMetrics
     int titleTop = 68;  // 组名的 y（相对功能区）
     int titleH  = 16;
     int iconSide = 30;
+    int smallW  = 104;  // 小按钮宽
+    int smallH  = 20;   // 小按钮高（三层叠起来 = 大按钮高）
     int foldW   = 46;   // 折叠组的宽度（三个点 + 组名）
     int toggleW = 26;   // 选项卡条右端的收起/展开三角
 };
@@ -91,9 +108,15 @@ inline std::wstring ribbonTextOf(XmlElement& n)
     return t;
 }
 
+inline void ribbonBackstageParse(XmlElement& node, XRibbonModel& m);
+
 inline void ribbonParse(XmlElement& node, XRibbonModel& m)
 {
     m.tabs.clear();
+    // 结构每帧重建，但"当前选中页"与"收起状态"由调用方持有，不被 XML 覆盖
+    const int keepSel = m.selected;
+    const bool keepCollapsed = m.bodyCollapsed;
+
     for (auto& tabNode : node.children)
     {
         if (!ribbonTagIs(tabNode.tag, L"XRibbonTab", L"RibbonTab")) continue;
@@ -106,6 +129,7 @@ inline void ribbonParse(XmlElement& node, XRibbonModel& m)
             if (!ribbonTagIs(grpNode.tag, L"XRibbonGroup", L"RibbonGroup")) continue;
             XRibbonGroup grp;
             grp.header = ribbonTextOf(grpNode);
+            grp.dialog = grpNode.get(L"Dialog");
 
             for (auto& btnNode : grpNode.children)
             {
@@ -114,6 +138,7 @@ inline void ribbonParse(XmlElement& node, XRibbonModel& m)
                 btn.name  = btnNode.name;
                 btn.text  = ribbonTextOf(btnNode);
                 btn.icon  = btnNode.get(L"Icon");
+                btn.tiny = _wcsicmp(btnNode.get(L"Size").c_str(), L"Small") == 0;
                 const std::wstring w = btnNode.get(L"Width");
                 if (!w.empty()) btn.width = _wtoi(w.c_str());
                 grp.buttons.push_back(btn);
@@ -126,7 +151,35 @@ inline void ribbonParse(XmlElement& node, XRibbonModel& m)
     }
 
     const std::wstring sel = node.get(L"SelectedTab");
-    m.selected = sel.empty() ? 0 : _wtoi(sel.c_str());
+    m.selected = keepSel ? keepSel : (sel.empty() ? 0 : _wtoi(sel.c_str()));
+    if (m.selected < 0 || m.selected >= (int)m.tabs.size()) m.selected = 0;
+    m.bodyCollapsed = keepCollapsed;
+    ribbonBackstageParse(node, m);
+}
+
+// 文件页（Backstage）：单独一段，节点是 <XRibbonBackstage>，子项 <XRibbonBackstageItem>
+inline void ribbonBackstageParse(XmlElement& node, XRibbonModel& m)
+{
+    m.backstage.clear();
+    m.backstageTitle.clear();
+    for (auto& bs : node.children)
+    {
+        if (!ribbonTagIs(bs.tag, L"XRibbonBackstage", L"RibbonBackstage")) continue;
+        m.backstageTitle = bs.get(L"Title");
+        for (auto& it : bs.children)
+        {
+            if (!ribbonTagIs(it.tag, L"XRibbonBackstageItem", L"RibbonBackstageItem")) continue;
+            XRibbonBackstageItem item;
+            item.name   = it.name;
+            item.header = ribbonTextOf(it);
+            item.text   = it.get(L"Text");
+            item.icon   = it.get(L"Icon");
+            if (item.header.empty()) item.header = item.text;
+            m.backstage.push_back(item);
+        }
+        break;
+    }
+    if (m.backstage.empty()) m.backstageOpen = false;
 }
 
 // ---------------------------------------------------------------- 布局结果
@@ -134,9 +187,70 @@ struct XRibbonGroupBox
 {
     RECT rc;                 // 整组矩形（含组名）
     RECT titleRc;            // 组名矩形
+    RECT dialogRc = { 0, 0, 0, 0 };  // 组对话启动器（右下角斜箭头）
     std::vector<RECT> buttons;
     bool collapsed = false;  // 宽度不足时整组收成窄块（不裁掉）
 };
+
+// 组的自然宽度：大按钮各占一列，连续的小按钮每 3 个一列（三层叠起来）
+inline int ribbonGroupWidth(const XRibbonGroup& g, const XRibbonMetrics& mx)
+{
+    int w = 0;
+    int i = 0;
+    const int n = (int)g.buttons.size();
+    while (i < n)
+    {
+        if (!g.buttons[i].tiny)
+        {
+            w += (g.buttons[i].width > 0 ? g.buttons[i].width : mx.btnW);
+            ++i;
+        }
+        else
+        {
+            int sub = 0;
+            while (i < n && g.buttons[i].tiny) { ++sub; ++i; }
+            w += ((sub + 2) / 3) * mx.smallW;
+        }
+    }
+    return w;
+}
+
+// 组内每个按钮的矩形：大按钮一整块，小按钮按三层从 col 起向下排
+inline std::vector<RECT> ribbonGroupRects(const XRibbonGroup& g, const XRibbonMetrics& mx,
+                                           int left, int top)
+{
+    std::vector<RECT> out(g.buttons.size());
+    int cx = left;
+    int i = 0;
+    const int n = (int)g.buttons.size();
+    const int rowBase = top + mx.btnTop;
+    while (i < n)
+    {
+        if (!g.buttons[i].tiny)
+        {
+            const int bw = g.buttons[i].width > 0 ? g.buttons[i].width : mx.btnW;
+            out[(size_t)i] = RECT{ cx, rowBase, cx + bw, rowBase + mx.btnH };
+            cx += bw;
+            ++i;
+        }
+        else
+        {
+            int sub = 0;
+            while (i < n && g.buttons[i].tiny)
+            {
+                const int col = sub / 3;
+                const int row = sub % 3;
+                const int x = cx + col * mx.smallW;
+                const int y = rowBase + row * mx.smallH;
+                out[(size_t)i] = RECT{ x, y, x + mx.smallW, y + mx.smallH };
+                ++sub;
+                ++i;
+            }
+            cx += ((sub + 2) / 3) * mx.smallW;
+        }
+    }
+    return out;
+}
 
 struct XRibbonLayout
 {
@@ -178,12 +292,7 @@ inline void ribbonLayout(const XRibbonModel& m, const XRibbonMetrics& mx,
     const int avail = (bodyRc.right - mx.padX) - (bodyRc.left + mx.padX);
     std::vector<int> want(tab->groups.size());
     for (size_t gi = 0; gi < tab->groups.size(); ++gi)
-    {
-        int w = 0;
-        for (const auto& b : tab->groups[gi].buttons)
-            w += (b.width > 0 ? b.width : mx.btnW);
-        want[gi] = w;
-    }
+        want[gi] = ribbonGroupWidth(tab->groups[gi], mx);
 
     std::vector<bool> folded(tab->groups.size(), false);
     auto totalWidth = [&]() -> int
@@ -220,15 +329,13 @@ inline void ribbonLayout(const XRibbonModel& m, const XRibbonMetrics& mx,
         else
         {
             box.rc = RECT{ gx, bodyRc.top, gx + want[gi], bodyRc.bottom };
-            int bx = gx;
-            for (size_t bi = 0; bi < grp.buttons.size(); ++bi)
-            {
-                const int bw = grp.buttons[bi].width > 0 ? grp.buttons[bi].width : mx.btnW;
-                box.buttons.push_back(RECT{ bx, bodyRc.top + mx.btnTop, bx + bw, bodyRc.top + mx.btnTop + mx.btnH });
-                bx += bw;
-            }
+            box.buttons = ribbonGroupRects(grp, mx, gx, bodyRc.top);
             box.titleRc = RECT{ box.rc.left, bodyRc.top + mx.titleTop,
                                 box.rc.right, bodyRc.top + mx.titleTop + mx.titleH };
+            // 组对话启动器（右下角斜箭头）
+            if (!grp.dialog.empty())
+                box.dialogRc = RECT{ box.rc.right - 18, bodyRc.top + mx.titleTop - 16,
+                                     box.rc.right - 4, bodyRc.top + mx.titleTop };
         }
 
         out.groups.push_back(box);
@@ -308,6 +415,32 @@ inline void ribbonDrawTab(XmlCanvas& cv, const RECT& rc, const std::wstring& tex
     cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
 }
 
+// 小按钮：图标在左、文字在右，只占一行（三层叠起来与大按钮等高）
+inline void ribbonDrawSmallButton(XmlCanvas& cv, const RECT& rc, const XRibbonButton& btn,
+                                   bool hot, bool pressed, const XRibbonMetrics& mx, int ptSize)
+{
+    const ShellTheme& th = shell();
+    (void)mx;
+    RECT face = { rc.left + 1, rc.top, rc.right - 1, rc.bottom - 1 };
+    if (pressed)
+        cv.fillRoundRect(face, RGB(70, 86, 108), RGB(70, 86, 108), 3);
+    else if (hot)
+        cv.fillRoundRect(face, RGB(52, 62, 78), RGB(52, 62, 78), 3);
+
+    const int cy = (face.top + face.bottom) / 2;
+    if (!btn.icon.empty())
+    {
+        const std::wstring path = ribbonResolveIcon(btn.icon);
+        RECT ic = { face.left + 4, cy - 8, face.left + 20, cy + 8 };
+        cv.drawImage(ic, path);
+    }
+    RECT tr = { face.left + 24, face.top, face.right - 4, face.bottom };
+    cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"VCenter");
+    cv.text(tr, btn.text, (hot || pressed) ? th.text : th.textDim,
+            DT_LEFT | DT_VCENTER, ptSize, std::wstring());
+    cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+}
+
 // 只画功能区（选项卡条以下）。正常绘制和"收起状态下临时浮出的功能区"共用这一段。
 inline void ribbonDrawBody(XmlCanvas& cv, const RECT& bodyRc, const XRibbonModel& m,
                             const XRibbonMetrics& mx, const XRibbonLayout& lay,
@@ -354,7 +487,22 @@ inline void ribbonDrawBody(XmlCanvas& cv, const RECT& bodyRc, const XRibbonModel
                 const XRibbonButton& b = grp.buttons[bi];
                 const bool hot = !hotButton.empty() && _wcsicmp(hotButton.c_str(), b.name.c_str()) == 0;
                 const bool press = !pressedButton.empty() && _wcsicmp(pressedButton.c_str(), b.name.c_str()) == 0;
-                ribbonDrawButton(cv, box.buttons[bi], b, hot, press, mx, btnPt);
+                if (b.tiny)
+                    ribbonDrawSmallButton(cv, box.buttons[bi], b, hot, press, mx, 8);
+                else
+                    ribbonDrawButton(cv, box.buttons[bi], b, hot, press, mx, btnPt);
+            }
+
+            // 组对话启动器：右下角斜箭头（点了由调用方开对话框）
+            if (box.dialogRc.right > box.dialogRc.left)
+            {
+                const std::wstring dn = std::wstring(L"ribbon:dialog:") + std::to_wstring(gi);
+                const bool dhot = !hotButton.empty() && _wcsicmp(hotButton.c_str(), dn.c_str()) == 0;
+                const COLORREF c = dhot ? th.text : th.textDim;
+                cv.fillRect(RECT{ box.dialogRc.left, box.dialogRc.bottom - 3,
+                                  box.dialogRc.right, box.dialogRc.bottom - 1 }, c);
+                cv.fillRect(RECT{ box.dialogRc.right - 3, box.dialogRc.top,
+                                  box.dialogRc.right - 1, box.dialogRc.bottom }, c);
             }
 
             // 组名（居中暗字）
@@ -570,4 +718,101 @@ inline void ribbonMenuDraw(XmlCanvas& cv, const XRibbonMenu& menu, int hotItem, 
     }
 }
 
+// ---------------------------------------------------------------- 文件页（Backstage）
+// 占满整个宿主矩形：左侧深色导航列（顶部返回 + 项列表），右侧内容页。
+struct XRibbonBackstageLayout
+{
+    RECT rc      = { 0, 0, 0, 0 };
+    RECT navRc   = { 0, 0, 0, 0 };
+    RECT closeRc = { 0, 0, 0, 0 };   // 左上"←"返回
+    RECT contentRc = { 0, 0, 0, 0 };
+};
+
+inline int ribbonBackstageNavW() { return 210; }
+
+inline XRibbonBackstageLayout ribbonBackstageLayout(XRibbonModel& m, const RECT& host)
+{
+    XRibbonBackstageLayout lay;
+    lay.rc = host;
+    lay.navRc = RECT{ host.left, host.top, host.left + ribbonBackstageNavW(), host.bottom };
+    lay.closeRc = RECT{ lay.navRc.left + 10, lay.navRc.top + 8, lay.navRc.left + 38, lay.navRc.top + 36 };
+    lay.contentRc = RECT{ lay.navRc.right, host.top, host.right, host.bottom };
+
+    int y = lay.navRc.top + 52;
+    for (auto& it : m.backstage)
+    {
+        it.rc = RECT{ lay.navRc.left + 8, y, lay.navRc.right - 8, y + 44 };
+        y += 46;
+    }
+    return lay;
+}
+
+inline void ribbonBackstageDraw(XmlCanvas& cv, const XRibbonModel& m, const XRibbonBackstageLayout& lay,
+                                 int hotItem, bool hotClose, int ptSize)
+{
+    const ShellTheme& th = shell();
+
+    // 整块底 + 左列
+    cv.fillRect(lay.rc, th.base);
+    cv.fillRect(lay.navRc, th.panel);
+    cv.fillRect(RECT{ lay.navRc.right - 1, lay.navRc.top, lay.navRc.right, lay.navRc.bottom }, th.line);
+
+    // 返回箭头
+    {
+        const COLORREF c = hotClose ? th.text : th.textDim;
+        RECT a = lay.closeRc;
+        const int cx = (a.left + a.right) / 2;
+        const int cy = (a.top + a.bottom) / 2;
+        cv.fillRect(RECT{ a.left, cy - 1, a.right - 6, cy + 1 }, c);           // 横
+        cv.fillRect(RECT{ a.left, cy - 7, a.left + 2, cy + 7 }, c);            // 竖
+        cv.fillRect(RECT{ a.left, cy - 7, a.left + 8, cy - 5 }, c);            // 上斜
+        cv.fillRect(RECT{ a.left, cy + 5, a.left + 8, cy + 7 }, c);            // 下斜
+    }
+    {
+        RECT tr = { lay.closeRc.right + 6, lay.closeRc.top, lay.navRc.right - 8, lay.closeRc.bottom };
+        cv.text(tr, m.backstageTitle.empty() ? std::wstring(L"文件") : m.backstageTitle,
+                th.text, DT_LEFT | DT_VCENTER, ptSize + 2, std::wstring());
+    }
+
+    // 项
+    for (size_t i = 0; i < m.backstage.size(); ++i)
+    {
+        const RECT& it = m.backstage[i].rc;
+        if (hotItem == (int)i)
+            cv.fillRect(it, th.panelAlt);
+        RECT tr = { it.left + 14, it.top, it.right - 6, it.bottom };
+        cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"VCenter");
+        cv.text(tr, m.backstage[i].header, hotItem == (int)i ? th.text : th.textDim,
+                DT_LEFT | DT_VCENTER, ptSize, std::wstring());
+        cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+    }
+
+    // 右侧内容：(hotItem 有则显示该项说明)
+    {
+        const int idx = (hotItem >= 0 && hotItem < (int)m.backstage.size()) ? hotItem
+                        : (m.backstage.empty() ? -1 : 0);
+        RECT tr = { lay.contentRc.left + 48, lay.contentRc.top + 56,
+                    lay.contentRc.right - 48, lay.contentRc.top + 96 };
+        const std::wstring title = idx >= 0 ? m.backstage[(size_t)idx].header
+                                     : (m.backstageTitle.empty() ? std::wstring(L"文件") : m.backstageTitle);
+        cv.text(tr, title, th.text, DT_LEFT | DT_VCENTER, ptSize + 10, std::wstring());
+        if (idx >= 0 && !m.backstage[(size_t)idx].text.empty())
+        {
+            RECT d = { tr.left, tr.bottom + 4, tr.right, tr.bottom + 4 + 40 };
+            cv.text(d, m.backstage[(size_t)idx].text, th.textDim, DT_LEFT | DT_TOP | DT_WORDBREAK,
+                    ptSize + 1, std::wstring());
+        }
+    }
+}
+
+// 命中：>=0 项序号；-1 空白（点空白也当返回）；-2 返回按钮
+inline int ribbonBackstageHit(const XRibbonModel& m, const XRibbonBackstageLayout& lay, POINT pt)
+{
+    if (PtInRect(&lay.closeRc, pt)) return -2;
+    for (size_t i = 0; i < m.backstage.size(); ++i)
+        if (PtInRect(&m.backstage[i].rc, pt)) return (int)i;
+    return -1;
+}
+
 }  // namespace xmlctl
+

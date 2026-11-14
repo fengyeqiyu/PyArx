@@ -295,7 +295,11 @@ namespace uidesign
         int m_ribbonMenuHot = -1;
         int m_ribbonFlyoutTab = -1;
         RECT m_ribbonBand = { 0, 0, 0, 0 };   // 上帧选项卡条的位置（浮层锚点）
-        void paintRibbonOverlays(XmlCanvas& cv);
+        int m_ribbonBackstageHot = -1;
+        bool m_ribbonBackstageHotClose = false;
+        std::wstring m_codeRowBackup;   // 文件页展开前的源码坞行高
+
+        void paintRibbonOverlays(XmlCanvas& cv, const RECT& host);
         void openRibbonGroupMenu(int gi, const RECT& anchor);
         int m_surfHotSplit = -1;     // 悬停的分割条
         int m_surfSelWidgetRow = -1; // 控件箱选中行
@@ -333,6 +337,7 @@ namespace uidesign
         bool m_codeCollapsed = false; // XML 代码坞是否收起
         void toggleCodeDock();
         void toggleRibbon();
+        void setRibbonBackstage(bool open);
         void previewCurrent();
         void checkCurrent();
         void copyXmlToClipboard();

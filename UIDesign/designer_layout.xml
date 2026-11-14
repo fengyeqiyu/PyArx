@@ -166,13 +166,16 @@
       </XRibbonTab>
 
       <XRibbonTab Header="视图">
-        <XRibbonGroup Header="显示">
-          <XRibbonButton Name="btnGrid" Icon="res/grid.png" Text="网格"/>
-          <XRibbonButton Name="btnRuler" Icon="res/ruler.png" Text="标尺"/>
+        <XRibbonGroup Header="显示" Dialog="view">
+          <XRibbonButton Name="btnGrid" Icon="res/grid.png" Text="网格" Size="Small"/>
+          <XRibbonButton Name="btnRuler" Icon="res/ruler.png" Text="标尺" Size="Small"/>
+          <XRibbonButton Name="btnZoomIn" Icon="res/zoomin.png" Text="放大" Size="Small"/>
+          <XRibbonButton Name="btnZoomOut" Icon="res/zoomout.png" Text="缩小" Size="Small"/>
+          <XRibbonButton Name="btnZoomFit" Icon="res/zoomfit.png" Text="适应窗口" Size="Small"/>
+          <XRibbonButton Name="btnFullScreen" Icon="res/fullscreen.png" Text="全屏" Size="Small"/>
         </XRibbonGroup>
         <XRibbonGroup Header="缩放">
-          <XRibbonButton Name="btnZoomOut" Icon="res/zoomout.png" Text="缩小"/>
-          <XRibbonButton Name="btnZoomIn" Icon="res/zoomin.png" Text="放大"/>
+          <XRibbonButton Name="btnZoomReset" Icon="res/zoomreset.png" Text="100%"/>
         </XRibbonGroup>
       </XRibbonTab>
 
@@ -183,6 +186,14 @@
           <XRibbonButton Name="btnFeedback" Icon="res/ok.png" Text="反馈"/>
         </XRibbonGroup>
       </XRibbonTab>
+
+      <!-- 文件页（Backstage）：点"文件"选项卡铺满整窗 -->
+      <XRibbonBackstage Title="PyArx">
+        <XRibbonBackstageItem Name="btnNew" Header="新建" Text="新建一个 XML 界面文档"/>
+        <XRibbonBackstageItem Name="btnOpen" Header="打开" Text="打开已有的 XML 界面文档"/>
+        <XRibbonBackstageItem Name="btnSave" Header="保存" Text="保存当前文档的修改"/>
+        <XRibbonBackstageItem Name="btnExit" Header="退出" Text="关闭设计器"/>
+      </XRibbonBackstage>
 
     </XRibbon>
 

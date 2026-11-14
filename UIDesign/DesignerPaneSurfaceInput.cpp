@@ -220,18 +220,44 @@ void DesignerPaneView::surfaceToolClickByName(const std::wstring& nm)
         return;
     }
 
-    // Ribbon 选项卡：切页（选中态归控件库模型，重绘即可）
+    // Ribbon 选项卡："文件"有文件页时打开 Backstage，其余切页
     if (name.Left(11).Compare(_T("ribbon:tab:")) == 0)
     {
         const int tab = _wtoi((LPCWSTR)name.Mid(11));
         if (tab >= 0 && tab < (int)m_ribbon.tabs.size())
         {
             m_ribbonMenu.visible = false;
+            if (tab == 0 && !m_ribbon.backstage.empty())
+            {
+                setRibbonBackstage(true);   // 文件页铺满整窗
+                Invalidate(FALSE);
+                return;
+            }
             m_ribbon.selected = tab;
             if (m_ribbon.bodyCollapsed)
                 m_ribbonFlyoutTab = tab;   // 收起状态：临时浮出这一页，点别处收回
             Invalidate(FALSE);
         }
+        return;
+    }
+
+    // 文件页：左上返回 / 点导航项
+    if (name.Left(17).Compare(_T("ribbon:backstage:")) == 0)
+    {
+        const std::wstring tail(n.c_str() + 17);
+        setRibbonBackstage(false);
+        if (tail != L"close" && !tail.empty())
+        {
+            const int idx = _wtoi(tail.c_str());
+            if (idx >= 0 && idx < (int)m_ribbon.backstage.size())
+            {
+                const std::wstring cmd = m_ribbon.backstage[(size_t)idx].name;
+                Invalidate(FALSE);
+                if (!cmd.empty()) surfaceToolClickByName(cmd);   // 先关门再执行命令
+                return;
+            }
+        }
+        Invalidate(FALSE);
         return;
     }
 
@@ -271,6 +297,21 @@ void DesignerPaneView::surfaceLButtonDown(CPoint pt)
     // 有内联编辑框时先落定上一次编辑：点别处即提交
     if (m_surfPropEditRow != -1) commitPropEditSurface();
     if (m_codeEditing) commitCodeEdit();
+
+    // 文件页（Backstage）优先：整窗都被它盖住，点项执行、点返回/空白关闭
+    if (m_ribbon.backstageOpen && !m_ribbon.backstage.empty())
+    {
+        CRect client;
+        GetClientRect(&client);
+        const RECT host = { 0, 0, client.Width(), client.Height() };
+        const xmlctl::XRibbonBackstageLayout lay = xmlctl::ribbonBackstageLayout(m_ribbon, host);
+        const int idx = xmlctl::ribbonBackstageHit(m_ribbon, lay, POINT{ pt.x, pt.y });
+        if (idx >= 0)
+            surfaceToolClickByName(std::wstring(L"ribbon:backstage:") + std::to_wstring(idx));
+        else
+            surfaceToolClickByName(L"ribbon:backstage:close");
+        return;
+    }
 
     // Ribbon 浮层排在所有命中之前：菜单点项即执行、点别处关掉；
     // 收起状态下临时浮出的功能区，点外面就收回（与 Office 的临展行为一致）。

@@ -1092,6 +1092,19 @@
     <property name="Text" type="string"/>
     <property name="Icon" type="text"/>
     <property name="Width" type="int"/>
+    <property name="Size" type="enum" options="Large|Small"/>
+  </objectinfo>
+
+  <objectinfo tag="XRibbonBackstage" display="RibbonBackstage" w="900" h="600">
+    <property name="Name" type="text"/>
+    <property name="Title" type="string"/>
+  </objectinfo>
+
+  <objectinfo tag="XRibbonBackstageItem" display="RibbonBackstageItem" w="194" h="44">
+    <property name="Name" type="text"/>
+    <property name="Header" type="string"/>
+    <property name="Text" type="string"/>
+    <property name="Icon" type="text"/>
   </objectinfo>
 
   <objectinfo tag="XRibbon" display="Ribbon" category="Function Bar" w="900" h="126">

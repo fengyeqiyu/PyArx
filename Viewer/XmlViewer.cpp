@@ -416,7 +416,8 @@ static void validateElement(IXMLDOMElement* el,
     // 名字就是命令名，跨选项卡复用是 Office 的常规做法，不是错误。
     const bool ribbonChild = _wcsicmp(tag.c_str(), L"XRibbonButton") == 0 ||
                              _wcsicmp(tag.c_str(), L"XRibbonTab") == 0 ||
-                             _wcsicmp(tag.c_str(), L"XRibbonGroup") == 0;
+                             _wcsicmp(tag.c_str(), L"XRibbonGroup") == 0 ||
+                             _wcsicmp(tag.c_str(), L"XRibbonBackstageItem") == 0;
     if (!name.empty() && !ribbonChild && seenNames.count(name) > 0)
     {
         Issue is;

@@ -158,7 +158,7 @@ void DesignerPaneView::paintSurface(HDC hdc)
     const ULONGLONG pt2 = ::GetTickCount64();
 
     // 浮层最后画：折叠组溢出菜单 / 收起状态下临时浮出的功能区（都在控件库里画）
-    paintRibbonOverlays(*cv);
+    paintRibbonOverlays(*cv, RECT{ 0, 0, client.Width(), client.Height() });
 
     cv->end();
     const ULONGLONG pt3 = ::GetTickCount64();
@@ -601,6 +601,11 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
                 {
                     m_surfToolRects.push_back(box.buttons[bi]);
                     m_surfToolNames.push_back(grp.buttons[bi].name);
+                }
+                if (box.dialogRc.right > box.dialogRc.left)   // 组对话启动器（右下角斜箭头）
+                {
+                    m_surfToolRects.push_back(box.dialogRc);
+                    m_surfToolNames.push_back(std::wstring(L"ribbon:dialog:") + std::to_wstring(gi));
                 }
             }
         }
@@ -1336,8 +1341,24 @@ void DesignerPaneView::openRibbonGroupMenu(int gi, const RECT& anchor)
     Invalidate(FALSE);
 }
 
-void DesignerPaneView::paintRibbonOverlays(XmlCanvas& cv)
+void DesignerPaneView::paintRibbonOverlays(XmlCanvas& cv, const RECT& host)
 {
+    // 文件页（Backstage）铺满整窗，画完就不再画别的浮层
+    if (m_ribbon.backstageOpen && !m_ribbon.backstage.empty())
+    {
+        const xmlctl::XRibbonBackstageLayout lay = xmlctl::ribbonBackstageLayout(m_ribbon, host);
+        xmlctl::ribbonBackstageDraw(cv, m_ribbon, lay, m_ribbonBackstageHot, m_ribbonBackstageHotClose, 9);
+
+        m_surfToolRects.push_back(lay.closeRc);
+        m_surfToolNames.push_back(L"ribbon:backstage:close");
+        for (size_t i = 0; i < m_ribbon.backstage.size(); ++i)
+        {
+            m_surfToolRects.push_back(m_ribbon.backstage[i].rc);
+            m_surfToolNames.push_back(std::wstring(L"ribbon:backstage:") + std::to_wstring(i));
+        }
+        return;
+    }
+
     const RECT band = m_ribbonBand;
     if (band.right <= band.left) return;
 
@@ -1379,6 +1400,11 @@ void DesignerPaneView::paintRibbonOverlays(XmlCanvas& cv)
                 {
                     m_surfToolRects.push_back(box.buttons[bi]);
                     m_surfToolNames.push_back(grp.buttons[bi].name);
+                }
+                if (box.dialogRc.right > box.dialogRc.left)
+                {
+                    m_surfToolRects.push_back(box.dialogRc);
+                    m_surfToolNames.push_back(std::wstring(L"ribbon:dialog:") + std::to_wstring(gi));
                 }
             }
         }

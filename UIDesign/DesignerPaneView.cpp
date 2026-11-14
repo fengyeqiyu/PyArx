@@ -1088,6 +1088,23 @@ void DesignerPaneView::OnMouseMove(UINT nFlags, CPoint pt)
     if (m_sizeMove && ::GetCapture() == nullptr)
         endSizeMovePreview();
 
+    // 文件页（Backstage）的悬停反馈
+    if (m_ribbon.backstageOpen && !m_ribbon.backstage.empty())
+    {
+        CRect client;
+        GetClientRect(&client);
+        const RECT host = { 0, 0, client.Width(), client.Height() };
+        const xmlctl::XRibbonBackstageLayout lay = xmlctl::ribbonBackstageLayout(m_ribbon, host);
+        const int idx = xmlctl::ribbonBackstageHit(m_ribbon, lay, POINT{ pt.x, pt.y });
+        const bool hc = (idx == -2);
+        if (idx != m_ribbonBackstageHot || hc != m_ribbonBackstageHotClose)
+        {
+            m_ribbonBackstageHot = idx;
+            m_ribbonBackstageHotClose = hc;
+            Invalidate(FALSE);
+        }
+    }
+
     // 溢出菜单的悬停项（菜单是浮层，命中不走 m_surfTool* 表）
     if (m_ribbonMenu.visible)
     {
@@ -1682,6 +1699,44 @@ void DesignerPaneView::toggleCodeDock()
             el.set(L"Text", m_codeCollapsed ? L"展开" : L"收起");
     });
     relayoutUi();
+    Invalidate(FALSE);
+}
+
+// Ribbon 文件页（Backstage）铺满整窗：把画布、源码坞这些真实子窗口收起，
+// 否则它们是独立 HWND，D2D 表面画不到它们上面，文件页会被"穿透"。
+void DesignerPaneView::setRibbonBackstage(bool open)
+{
+    if (m_ribbon.backstageOpen == open) return;
+    m_ribbon.backstageOpen = open;
+    m_ribbonBackstageHot = -1;
+    m_ribbonBackstageHotClose = false;
+
+    XmlElement* root = m_ui.root();
+    XmlElement* grid = (root != nullptr && !root->children.empty()) ? &root->children[0] : nullptr;
+    const bool isGrid = grid != nullptr &&
+                        _wcsicmp(xmlmfc::BareTag(grid->tag).c_str(), L"Grid") == 0 &&
+                        grid->gridRows.size() >= 5;
+    if (isGrid)
+    {
+        if (open)
+        {
+            if (m_codeRowBackup.empty()) m_codeRowBackup = grid->gridRows[4].second;
+            grid->gridRows[4].second = L"0";   // 源码坞
+            grid->gridRows[3].second = L"0";   // 水平 splitter
+        }
+        else
+        {
+            grid->gridRows[4].second = m_codeRowBackup.empty() ? L"196" : m_codeRowBackup;
+            grid->gridRows[3].second = L"5";
+        }
+    }
+    relayoutUi();
+
+    if (m_canvas != nullptr && m_canvas->m_hWnd != nullptr)
+        ::ShowWindow(m_canvas->m_hWnd, open ? SW_HIDE : SW_SHOW);
+    if (m_codeEditor != nullptr && m_codeEditor->hwnd() != nullptr)
+        ::ShowWindow(m_codeEditor->hwnd(), open ? SW_HIDE : SW_SHOW);
+
     Invalidate(FALSE);
 }
 
