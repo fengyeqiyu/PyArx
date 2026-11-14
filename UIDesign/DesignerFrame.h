@@ -32,6 +32,9 @@ namespace uidesign
     afx_msg void OnExitSizeMove();
     afx_msg void OnClose();
         afx_msg void OnTimer(UINT_PTR nIDEvent);
+        afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
+        afx_msg BOOL OnNcActivate(BOOL bActive);
+        afx_msg LRESULT OnNcUahDraw(WPARAM wParam, LPARAM lParam);
         void RecalcLayout(BOOL bNotify = TRUE) override;   // 停靠体系每次布局后立刻收掉 4px 滑块
         void hideDockSliders();
         void postChromeFix();     // 隐藏 MFC 停靠面板的 AFX_SLIDER 滑块（右缘那条 4px 白条，也是抢鼠标的元凶）

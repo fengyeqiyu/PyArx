@@ -32,6 +32,10 @@ BEGIN_MESSAGE_MAP(DesignerFrame, CFrameWndEx)
     ON_WM_CREATE()
     ON_WM_SIZE()
     ON_WM_ERASEBKGND()
+    ON_WM_ACTIVATE()
+    ON_WM_NCACTIVATE()
+    ON_MESSAGE(0x00AE, &DesignerFrame::OnNcUahDraw)   // WM_NCUAHDRAWCAPTION
+    ON_MESSAGE(0x00AF, &DesignerFrame::OnNcUahDraw)   // WM_NCUAHDRAWFRAME
     ON_WM_NCCALCSIZE()
     ON_WM_GETMINMAXINFO()
     ON_WM_TIMER()
@@ -263,16 +267,23 @@ void DesignerFrame::stripWindowFrame()
     if (dwm == nullptr) return;
     typedef HRESULT(WINAPI* SetAttr)(HWND, DWORD, LPCVOID, DWORD);
     SetAttr fn = reinterpret_cast<SetAttr>(::GetProcAddress(dwm, "DwmSetWindowAttribute"));
+    HRESULT hr[4] = {E_FAIL, E_FAIL, E_FAIL, E_FAIL};
     if (fn != nullptr && m_hWnd != nullptr)
     {
         DWORD doNotRound = 1;        // DWMWA_WINDOW_CORNER_PREFERENCE = DWMWCP_DONOTROUND
-        fn(m_hWnd, 33, &doNotRound, sizeof(doNotRound));
+        hr[0] = fn(m_hWnd, 33, &doNotRound, sizeof(doNotRound));
         DWORD colorNone = 0xFFFFFFFE; // DWMWA_BORDER_COLOR = DWMWA_COLOR_NONE
-        fn(m_hWnd, 34, &colorNone, sizeof(colorNone));
+        hr[1] = fn(m_hWnd, 34, &colorNone, sizeof(colorNone));
         DWORD thin = 0;              // DWMWA_VISIBLE_FRAME_BORDER_THICKNESS = 0，去掉那圈描边
-        fn(m_hWnd, 37, &thin, sizeof(thin));
+        hr[2] = fn(m_hWnd, 37, &thin, sizeof(thin));
+        // 兜底：整块非客户区渲染交给 DWM 关掉（连失焦时那圈描边一起不再画）
+        DWORD ncDisabled = 1;        // DWMWA_NCRENDERING_POLICY = DWMNCRP_DISABLED
+        hr[3] = fn(m_hWnd, 2, &ncDisabled, sizeof(ncDisabled));
     }
     ::FreeLibrary(dwm);
+    hostLog(L"[dwm] corner=%08lX border=%08lX thickness=%08lX ncrender=%08lX\n",
+            (unsigned long)hr[0], (unsigned long)hr[1],
+            (unsigned long)hr[2], (unsigned long)hr[3]);
 }
 
 // MFC 停靠体系会在面板右缘留一个 4px 的 AFX_SLIDER 滑块窗口：
@@ -357,6 +368,30 @@ void DesignerFrame::OnTimer(UINT_PTR nIDEvent)
     CFrameWndEx::OnTimer(nIDEvent);
 }
 
+// 激活/失活切换时 DWM 会按新状态重画窗口描边（失焦那一圈白框就是这么冒出来的），
+// 每次切换后重新压一遍属性，让它没有可画的边框。
+void DesignerFrame::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
+{
+    CFrameWndEx::OnActivate(nState, pWndOther, bMinimized);
+    stripWindowFrame();
+}
+
+// 无边框窗口失焦时那圈白框，是 DefWindowProc 在 WM_NCACTIVATE 里按"非激活边框"重画非客户区造成的。
+// 我们的非客户区已经被 OnNcCalcSize 压成 0，它没地方画正面，就靠这条消息把状态画到窗口描边上。
+// 直接吃掉、不交给默认处理，外壳才完全由 XML 的像素决定。
+BOOL DesignerFrame::OnNcActivate(BOOL bActive)
+{
+    (void)bActive;
+    return TRUE;
+}
+
+// Win10/11 的 UAH（用户账户控制相关绘制）还会单独发这两条消息补画标题/边框，一并吃掉。
+LRESULT DesignerFrame::OnNcUahDraw(WPARAM wParam, LPARAM lParam)
+{
+    (void)wParam; (void)lParam;
+    return 0;
+}
+
 BOOL DesignerFrame::OnEraseBkgnd(CDC* pDC)
 {
     CRect rc;
@@ -384,6 +419,8 @@ void DesignerFrame::OnSize(UINT nType, int cx, int cy)
                             SWP_NOZORDER | SWP_NOACTIVATE);
         hideDockSliders();
         postChromeFix();
+        // 尺寸变化后 DWM 会重算非客户区，把刚设的"无边框"属性重新画回去 —— 这里再压一次
+        stripWindowFrame();
     }
 }
 
