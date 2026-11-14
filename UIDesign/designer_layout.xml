@@ -188,7 +188,7 @@
 
       <XRibbonTab Header="帮助">
         <XRibbonGroup Header="支持">
-          <XRibbonButton Name="btnAbout" Icon="res/logo.png" Text="关于"/>
+          <XRibbonButton Name="btnAbout" Icon="res/about.png" Text="关于"/>
           <XRibbonButton Name="btnHelpDoc" Icon="res/open.png" Text="文档"/>
           <XRibbonButton Name="btnFeedback" Icon="res/ok.png" Text="反馈"/>
         </XRibbonGroup>
