@@ -290,6 +290,13 @@ namespace uidesign
         std::wstring m_ribbonHotBtn; // 悬停的 Ribbon 按钮名
         int m_ribbonHotTab = -1;     // 悬停的选项卡序号
         bool m_ribbonInited = false;
+        // 浮层：折叠组的溢出菜单 + 收起状态下临时浮出的功能区（都在控件库里画）
+        xmlctl::XRibbonMenu m_ribbonMenu;
+        int m_ribbonMenuHot = -1;
+        int m_ribbonFlyoutTab = -1;
+        RECT m_ribbonBand = { 0, 0, 0, 0 };   // 上帧选项卡条的位置（浮层锚点）
+        void paintRibbonOverlays(XmlCanvas& cv);
+        void openRibbonGroupMenu(int gi, const RECT& anchor);
         int m_surfHotSplit = -1;     // 悬停的分割条
         int m_surfSelWidgetRow = -1; // 控件箱选中行
         int m_surfSelPropRow = -1;   // 属性表选中行
@@ -308,6 +315,7 @@ namespace uidesign
         void surfaceMouseMove(CPoint pt, UINT flags);
         BOOL surfaceMouseWheel(CPoint pt, short delta);
         void surfaceToolClick(int idx);
+        void surfaceToolClickByName(const std::wstring& name);
         bool surfaceScrollRect(const RECT& rc, CPoint pt, int& scroll, int total, int pageH, short delta);
         void clampSurfaceScroll();
         CString m_surfStatus[4];     // 状态栏四格文本（surface 模式由 updateStatus 填）

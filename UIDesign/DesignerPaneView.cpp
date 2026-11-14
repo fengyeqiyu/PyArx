@@ -1087,6 +1087,17 @@ void DesignerPaneView::OnMouseMove(UINT nFlags, CPoint pt)
     // 一收就退回全量绘制，等于又开始逐帧重画整窗。
     if (m_sizeMove && ::GetCapture() == nullptr)
         endSizeMovePreview();
+
+    // 溢出菜单的悬停项（菜单是浮层，命中不走 m_surfTool* 表）
+    if (m_ribbonMenu.visible)
+    {
+        const int mi = xmlctl::ribbonMenuHit(m_ribbonMenu, POINT{ pt.x, pt.y });
+        if (mi != m_ribbonMenuHot)
+        {
+            m_ribbonMenuHot = mi;
+            Invalidate(FALSE);
+        }
+    }
     surfaceMouseMove(pt, nFlags);
 }
 
@@ -1683,6 +1694,9 @@ void DesignerPaneView::toggleRibbon()
     if (_wcsicmp(xmlmfc::BareTag(grid->tag).c_str(), L"Grid") != 0 || grid->gridRows.size() < 2) return;
 
     m_ribbon.bodyCollapsed = !m_ribbon.bodyCollapsed;
+    m_ribbonFlyoutTab = -1;          // 收起/展开时浮层一并作废
+    m_ribbonMenu.visible = false;
+    m_ribbonMenuHot = -1;
     if (_wcsicmp(grid->gridRows[1].first.c_str(), L"Height") == 0)
         grid->gridRows[1].second = m_ribbon.bodyCollapsed ? L"34" : L"126";
     relayoutUi();

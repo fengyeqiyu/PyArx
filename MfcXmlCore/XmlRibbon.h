@@ -308,41 +308,13 @@ inline void ribbonDrawTab(XmlCanvas& cv, const RECT& rc, const std::wstring& tex
     cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
 }
 
-// hotTab <0 表示无；hotButton 是按钮名（空 = 无悬停）；pressedButton 同理
-inline void ribbonDraw(XmlCanvas& cv, const RECT& tabRc, const RECT& bodyRc, const XRibbonModel& m,
-                        const XRibbonMetrics& mx, const XRibbonLayout& lay,
-                        int hotTab, const std::wstring& hotButton, const std::wstring& pressedButton,
-                        int tabPt = 10, int btnPt = 9)
+// 只画功能区（选项卡条以下）。正常绘制和"收起状态下临时浮出的功能区"共用这一段。
+inline void ribbonDrawBody(XmlCanvas& cv, const RECT& bodyRc, const XRibbonModel& m,
+                            const XRibbonMetrics& mx, const XRibbonLayout& lay,
+                            const std::wstring& hotButton, const std::wstring& pressedButton,
+                            int btnPt = 9)
 {
     const ShellTheme& th = shell();
-
-    // 选项卡条
-    cv.fillRect(tabRc, RGB(35, 40, 48));
-    cv.fillRect(RECT{ tabRc.left, tabRc.bottom - 1, tabRc.right, tabRc.bottom }, th.line);
-    for (size_t i = 0; i < lay.tabs.size() && i < m.tabs.size(); ++i)
-        ribbonDrawTab(cv, lay.tabs[i], m.tabs[i].header, (int)i == m.selected, (int)i == hotTab, tabPt);
-
-    // 收起/展开三角：展开时朝下（点它收起），收起时朝上
-    if (lay.toggleRc.right > lay.toggleRc.left)
-    {
-        const bool hot = _wcsicmp(hotButton.c_str(), L"ribbon:toggle") == 0;
-        if (hot)
-        {
-            COLORREF back = RGB(52, 60, 72);
-            cv.fillRoundRect(lay.toggleRc, back, back, 4);
-        }
-        const int cx = (lay.toggleRc.left + lay.toggleRc.right) / 2;
-        const int cy = (lay.toggleRc.top + lay.toggleRc.bottom) / 2;
-        const COLORREF c = hot ? th.text : th.textDim;
-        if (m.bodyCollapsed)
-            cv.fillPath({ POINT{ cx - 5, cy + 3 }, POINT{ cx + 5, cy + 3 }, POINT{ cx, cy - 4 } }, c);
-        else
-            cv.fillPath({ POINT{ cx - 5, cy - 3 }, POINT{ cx + 5, cy - 3 }, POINT{ cx, cy + 4 } }, c);
-    }
-
-    // 功能区（收起时不画）
-    if (m.bodyCollapsed || bodyRc.bottom <= bodyRc.top) return;
-
     cv.fillRect(bodyRc, RGB(32, 36, 44));
     cv.fillRect(RECT{ bodyRc.left, bodyRc.bottom - 1, bodyRc.right, bodyRc.bottom }, th.line);
 
@@ -399,6 +371,43 @@ inline void ribbonDraw(XmlCanvas& cv, const RECT& tabRc, const RECT& bodyRc, con
     }
 }
 
+// hotTab <0 表示无；hotButton 是按钮名（空 = 无悬停）；pressedButton 同理
+inline void ribbonDraw(XmlCanvas& cv, const RECT& tabRc, const RECT& bodyRc, const XRibbonModel& m,
+                        const XRibbonMetrics& mx, const XRibbonLayout& lay,
+                        int hotTab, const std::wstring& hotButton, const std::wstring& pressedButton,
+                        int tabPt = 10, int btnPt = 9)
+{
+    const ShellTheme& th = shell();
+
+    // 选项卡条
+    cv.fillRect(tabRc, RGB(35, 40, 48));
+    cv.fillRect(RECT{ tabRc.left, tabRc.bottom - 1, tabRc.right, tabRc.bottom }, th.line);
+    for (size_t i = 0; i < lay.tabs.size() && i < m.tabs.size(); ++i)
+        ribbonDrawTab(cv, lay.tabs[i], m.tabs[i].header, (int)i == m.selected, (int)i == hotTab, tabPt);
+
+    // 收起/展开三角：展开时朝下（点它收起），收起时朝上
+    if (lay.toggleRc.right > lay.toggleRc.left)
+    {
+        const bool hot = _wcsicmp(hotButton.c_str(), L"ribbon:toggle") == 0;
+        if (hot)
+        {
+            COLORREF back = RGB(52, 60, 72);
+            cv.fillRoundRect(lay.toggleRc, back, back, 4);
+        }
+        const int cx = (lay.toggleRc.left + lay.toggleRc.right) / 2;
+        const int cy = (lay.toggleRc.top + lay.toggleRc.bottom) / 2;
+        const COLORREF c = hot ? th.text : th.textDim;
+        if (m.bodyCollapsed)
+            cv.fillPath({ POINT{ cx - 5, cy + 3 }, POINT{ cx + 5, cy + 3 }, POINT{ cx, cy - 4 } }, c);
+        else
+            cv.fillPath({ POINT{ cx - 5, cy - 3 }, POINT{ cx + 5, cy - 3 }, POINT{ cx, cy + 4 } }, c);
+    }
+
+    // 功能区（收起时不画）
+    if (m.bodyCollapsed || bodyRc.bottom <= bodyRc.top) return;
+    ribbonDrawBody(cv, bodyRc, m, mx, lay, hotButton, pressedButton, btnPt);
+}
+
 // ---------------------------------------------------------------- 命中
 struct XRibbonHit
 {
@@ -451,6 +460,114 @@ inline XRibbonHit ribbonHitTest(const XRibbonLayout& lay, POINT pt)
         }
     }
     return hit;
+}
+
+// ---------------------------------------------------------------- 折叠组溢出菜单
+// 宽度不足被折成窄块的分组：点一下在块下方弹出该组的按钮列表（Office 的做法）。
+struct XRibbonMenu
+{
+    bool visible = false;
+    RECT rc = { 0, 0, 0, 0 };
+    int tab = -1;                                  // 菜单属于哪个选项卡
+    int group = -1;                                // 菜单属于哪个组
+    std::wstring header;                           // 组名（菜单标题）
+    std::vector<std::wstring> names;               // 每项按钮的 Name
+    std::vector<std::wstring> texts;               // 每项按钮的 Text
+    std::vector<std::wstring> icons;               // 每项按钮的 Icon
+    std::vector<RECT> items;                       // 每项的矩形
+};
+
+inline void ribbonMenuLayout(const XRibbonModel& m, const XRibbonMetrics& mx, int tabIndex,
+                              int group, const RECT& anchor, int rightLimit, XRibbonMenu& out)
+{
+    out.visible = false;
+    out.items.clear();
+    out.names.clear();
+    out.texts.clear();
+    out.icons.clear();
+
+    if (tabIndex < 0 || tabIndex >= (int)m.tabs.size()) return;
+    const XRibbonTab& t = m.tabs[(size_t)tabIndex];
+    if (group < 0 || group >= (int)t.groups.size()) return;
+    const XRibbonGroup& g = t.groups[(size_t)group];
+
+    const int rowH = 32;
+    int w = 150;
+    for (const auto& b : g.buttons)
+    {
+        const int need = 14 + 18 + 10 + (int)b.text.size() * 13;
+        if (need > w) w = need;
+    }
+    int x = anchor.left;
+    if (rightLimit > 0 && x + w > rightLimit - 4) x = rightLimit - 4 - w;
+    if (x < 4) x = 4;
+    const int y = anchor.bottom + 2;
+    const int h = 6 + (int)g.buttons.size() * rowH + 6;
+
+    out.rc = RECT{ x, y, x + w, y + h };
+    out.visible = true;
+    out.tab = tabIndex;
+    out.group = group;
+    out.header = g.header;
+
+    int iy = y + 6;
+    for (const auto& b : g.buttons)
+    {
+        out.items.push_back(RECT{ x + 4, iy, x + w - 4, iy + rowH });
+        out.names.push_back(b.name);
+        out.texts.push_back(b.text.empty() ? b.name : b.text);
+        out.icons.push_back(b.icon);
+        iy += rowH;
+    }
+    (void)mx;
+}
+
+inline int ribbonMenuHit(const XRibbonMenu& menu, POINT pt)
+{
+    if (!menu.visible) return -1;
+    const RECT& r = menu.rc;
+    if (pt.x < r.left || pt.x >= r.right || pt.y < r.top || pt.y >= r.bottom) return -1;
+    for (size_t i = 0; i < menu.items.size(); ++i)
+    {
+        const RECT& it = menu.items[i];
+        if (pt.x >= it.left && pt.x < it.right && pt.y >= it.top && pt.y < it.bottom) return (int)i;
+    }
+    return -2;   // 在菜单内但不在任何项上
+}
+
+inline void ribbonMenuDraw(XmlCanvas& cv, const XRibbonMenu& menu, int hotItem, int ptSize = 9)
+{
+    if (!menu.visible) return;
+    const ShellTheme& th = shell();
+
+    const RECT& rc = menu.rc;
+    RECT shadow = { rc.left + 2, rc.top + 3, rc.right + 2, rc.bottom + 3 };
+    cv.fillRoundRect(shadow, RGB(16, 19, 24), RGB(16, 19, 24), 6);
+    cv.fillRoundRect(rc, RGB(40, 46, 56), RGB(74, 82, 96), 6);
+
+    for (size_t i = 0; i < menu.items.size(); ++i)
+    {
+        const RECT& it = menu.items[i];
+        if ((int)i == hotItem)
+        {
+            COLORREF back = RGB(58, 70, 88);
+            cv.fillRoundRect(it, back, back, 4);
+        }
+
+        int tx = it.left + 6;
+        if (i < menu.icons.size() && !menu.icons[i].empty())
+        {
+            const std::wstring path = ribbonResolveIcon(menu.icons[i]);
+            RECT ic = { it.left + 6, (it.top + it.bottom) / 2 - 9, it.left + 24, (it.top + it.bottom) / 2 + 9 };
+            cv.drawImage(ic, path);
+            tx = it.left + 30;
+        }
+        RECT tr = { tx, it.top, it.right - 6, it.bottom };
+        cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"VCenter");
+        cv.text(tr, i < menu.texts.size() ? menu.texts[i] : std::wstring(), th.text,
+                DT_LEFT | DT_VCENTER, ptSize, std::wstring());
+        cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Center");
+    }
 }
 
 }  // namespace xmlctl

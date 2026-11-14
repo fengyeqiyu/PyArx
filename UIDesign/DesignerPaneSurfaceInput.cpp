@@ -190,7 +190,28 @@ void DesignerPaneView::startSystemChrome(CPoint pt, int edges)
 void DesignerPaneView::surfaceToolClick(int idx)
 {
     if (idx < 0 || idx >= (int)m_surfToolNames.size()) return;
-    const CString name(m_surfToolNames[idx].c_str());
+    surfaceToolClickByName(m_surfToolNames[(size_t)idx]);
+}
+
+void DesignerPaneView::surfaceToolClickByName(const std::wstring& nm)
+{
+    const std::wstring n = nm;
+    const CString name(n.c_str());
+
+    // Ribbon 折叠组的溢出菜单：弹一个该组按钮的下拉
+    if (name.Left(13).Compare(_T("ribbon:group:")) == 0)
+    {
+        const int gi = _wtoi((LPCWSTR)name.Mid(13));
+        RECT anchor = { 0, 0, 0, 0 };
+        for (size_t i = 0; i < m_surfToolNames.size(); ++i)
+            if (m_surfToolNames[i] == nm)
+            {
+                anchor = m_surfToolRects[i];   // 折叠块的位置就是菜单锚点
+                break;
+            }
+        openRibbonGroupMenu(gi, anchor);
+        return;
+    }
 
     // Ribbon 右端三角：收起 / 展开功能区（像 Office 那样只留选项卡条）
     if (name.Compare(_T("ribbon:toggle")) == 0)
@@ -205,9 +226,10 @@ void DesignerPaneView::surfaceToolClick(int idx)
         const int tab = _wtoi((LPCWSTR)name.Mid(11));
         if (tab >= 0 && tab < (int)m_ribbon.tabs.size())
         {
-            if (m_ribbon.bodyCollapsed)   // 收起状态下点选项卡 = 展开（否则点了看不到内容）
-                toggleRibbon();
+            m_ribbonMenu.visible = false;
             m_ribbon.selected = tab;
+            if (m_ribbon.bodyCollapsed)
+                m_ribbonFlyoutTab = tab;   // 收起状态：临时浮出这一页，点别处收回
             Invalidate(FALSE);
         }
         return;
@@ -249,6 +271,37 @@ void DesignerPaneView::surfaceLButtonDown(CPoint pt)
     // 有内联编辑框时先落定上一次编辑：点别处即提交
     if (m_surfPropEditRow != -1) commitPropEditSurface();
     if (m_codeEditing) commitCodeEdit();
+
+    // Ribbon 浮层排在所有命中之前：菜单点项即执行、点别处关掉；
+    // 收起状态下临时浮出的功能区，点外面就收回（与 Office 的临展行为一致）。
+    if (m_ribbonMenu.visible)
+    {
+        const int mi = xmlctl::ribbonMenuHit(m_ribbonMenu, POINT{ pt.x, pt.y });
+        if (mi >= 0 && mi < (int)m_ribbonMenu.names.size())
+        {
+            const std::wstring nm = m_ribbonMenu.names[(size_t)mi];
+            m_ribbonMenu.visible = false;
+            m_ribbonMenuHot = -1;
+            Invalidate(FALSE);
+            surfaceToolClickByName(nm);
+            return;
+        }
+        m_ribbonMenu.visible = false;
+        m_ribbonMenuHot = -1;
+        Invalidate(FALSE);
+        return;
+    }
+    if (m_ribbonFlyoutTab >= 0)
+    {
+        const int fh = 92;
+        if (!(pt.x >= m_ribbonBand.left && pt.x < m_ribbonBand.right &&
+              pt.y >= m_ribbonBand.bottom && pt.y < m_ribbonBand.bottom + fh))
+        {
+            m_ribbonFlyoutTab = -1;
+            Invalidate(FALSE);
+            return;
+        }
+    }
 
     // 无边框窗体（对齐 Qt FramelessWindowHint + startSystemResize/startSystemMove）：
     // 贴边 → 交给系统缩放循环；标题行空白 → 交给系统移动循环，都是 DWM 合成。

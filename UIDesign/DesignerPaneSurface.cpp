@@ -112,6 +112,20 @@ void DesignerPaneView::paintSurface(HDC hdc)
 
     cv->fillRect(client, xmlctl::shell().base);
 
+    // 鼠标不在窗口里时清掉 Ribbon 悬停态：鼠标移出后收不到 mousemove，
+    // 不清就会把上一帧的悬停高亮留在某个选项卡上（看起来像"选错了页"）。
+    {
+        POINT cur;
+        ::GetCursorPos(&cur);
+        ::ScreenToClient(m_hWnd, &cur);
+        if (!::PtInRect(&client, cur))
+        {
+            m_ribbonHotBtn.clear();
+            m_ribbonHotTab = -1;
+            m_ribbonMenuHot = -1;
+        }
+    }
+
     // 命中表随每帧重建（19 个按钮 + 几个分割条 + 树行指针，成本可忽略）
     m_surfToolRects.clear();
     m_surfToolNames.clear();
@@ -142,6 +156,9 @@ void DesignerPaneView::paintSurface(HDC hdc)
         }
     }
     const ULONGLONG pt2 = ::GetTickCount64();
+
+    // 浮层最后画：折叠组溢出菜单 / 收起状态下临时浮出的功能区（都在控件库里画）
+    paintRibbonOverlays(*cv);
 
     cv->end();
     const ULONGLONG pt3 = ::GetTickCount64();
@@ -546,6 +563,7 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
         const int tabH = 34;
         RECT tabRc{ rc.left, rc.top, rc.right, rc.top + tabH };
         RECT bodyRc{ rc.left, rc.top + tabH, rc.right, rc.bottom };
+        m_ribbonBand = tabRc;   // 浮层（临时浮出 / 溢出菜单）的锚点
 
         xmlctl::XRibbonMetrics mx;
         mx.bodyH = bodyRc.bottom - bodyRc.top;
@@ -1302,4 +1320,70 @@ void DesignerPaneView::buildPropRows(XmlElement* node, std::vector<xmlctl::PropR
             else         propDiag(L"[row%d] %s = %s", (int)i, r.key.c_str(), r.val.c_str());
         }
     }
+}
+// ---------------------------------------------------------------- Ribbon 浮层
+// 折叠组的溢出菜单 + 收起状态下临时浮出的功能区。两者都是"盖在内容上的一层"，
+// 所以在整棵节点树画完之后再画（paintSurface 末尾），命中表也在此时补登记。
+void DesignerPaneView::openRibbonGroupMenu(int gi, const RECT& anchor)
+{
+    CRect client;
+    GetClientRect(&client);
+    RECT a = anchor;
+    if (a.right <= a.left || a.bottom <= a.top) a = m_ribbonBand;
+    xmlctl::XRibbonMetrics mx;
+    xmlctl::ribbonMenuLayout(m_ribbon, mx, m_ribbon.selected, gi, a, client.right, m_ribbonMenu);
+    m_ribbonMenuHot = -1;
+    Invalidate(FALSE);
+}
+
+void DesignerPaneView::paintRibbonOverlays(XmlCanvas& cv)
+{
+    const RECT band = m_ribbonBand;
+    if (band.right <= band.left) return;
+
+    // 换页之后原来那个组的菜单就没有意义了
+    if (m_ribbonMenu.visible && m_ribbonMenu.tab != m_ribbon.selected)
+    {
+        m_ribbonMenu.visible = false;
+        m_ribbonMenuHot = -1;
+    }
+
+    if (m_ribbonFlyoutTab >= 0 && m_ribbon.bodyCollapsed &&
+        m_ribbonFlyoutTab < (int)m_ribbon.tabs.size())
+    {
+        xmlctl::XRibbonModel fm = m_ribbon;
+        fm.bodyCollapsed = false;          // 只为算布局，画出来的是功能区
+        fm.selected = m_ribbonFlyoutTab;
+
+        RECT bodyRc = { band.left, band.bottom, band.right, band.bottom + 92 };
+        xmlctl::XRibbonMetrics mx;
+        mx.bodyH = 92;
+        mx.titleTop = 68;
+        xmlctl::XRibbonLayout lay;
+        xmlctl::ribbonLayout(fm, mx, RECT{ 0, 0, 0, 0 }, bodyRc, lay);
+        xmlctl::ribbonDrawBody(cv, bodyRc, fm, mx, lay, m_ribbonHotBtn, std::wstring(), 9);
+
+        if (const xmlctl::XRibbonTab* tab = fm.current())
+        {
+            for (size_t gi = 0; gi < lay.groups.size() && gi < tab->groups.size(); ++gi)
+            {
+                const xmlctl::XRibbonGroupBox& box = lay.groups[gi];
+                const xmlctl::XRibbonGroup& grp = tab->groups[gi];
+                if (box.collapsed)
+                {
+                    m_surfToolRects.push_back(box.rc);
+                    m_surfToolNames.push_back(std::wstring(L"ribbon:group:") + std::to_wstring(gi));
+                    continue;
+                }
+                for (size_t bi = 0; bi < box.buttons.size() && bi < grp.buttons.size(); ++bi)
+                {
+                    m_surfToolRects.push_back(box.buttons[bi]);
+                    m_surfToolNames.push_back(grp.buttons[bi].name);
+                }
+            }
+        }
+    }
+
+    if (m_ribbonMenu.visible)
+        xmlctl::ribbonMenuDraw(cv, m_ribbonMenu, m_ribbonMenuHot, 9);
 }
