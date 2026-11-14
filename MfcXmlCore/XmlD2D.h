@@ -663,6 +663,16 @@ public:
         m_opacityRt = nullptr;
     }
 
+    // 视图变换由后端持有：pushRotate / popTransform 都基于 m_matrix 叠加或回退，
+    // 调用方不再对着 render target 直接 SetTransform（那样一 pop 就丢外层缩放）。
+    void setViewTransform(float scale, float tx, float ty) override
+    {
+        m_matrix = D2D1::Matrix3x2F::Scale(scale, scale) *
+                   D2D1::Matrix3x2F::Translation(tx, ty);
+        m_matrixStack.clear();
+        if (m_rt != nullptr) m_rt->SetTransform(m_matrix);
+    }
+
     void pushRotate(int angleDeg, const POINT& center) override
     {
         if (m_rt == nullptr) return;

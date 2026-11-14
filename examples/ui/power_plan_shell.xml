@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 配电规划图 —— 完整的 XML 外壳（新底层逻辑）：
+     外观 = 这份 XML；能力 = 控件库（Ribbon / PowerCanvas / 面板 / 状态行）；
+     业务 = 运行时绑定的命令。设计器里打开、Viewer 里预览、Python 里运行是同一份文件。
+     画布数据 Data 只用 nodes（不动坐标），排版/命中/缩放全部由控件库算。 -->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
+        Title="配电规划图" Width="1320" Height="820" Background="#FFF3F5F8">
+
+  <XStackPanel>
+        <XRibbon Name="ppRibbon" Height="126" SelectedTab="0">
+      <XRibbonTab Header="编辑">
+        <XRibbonGroup Header="导入">
+          <XRibbonButton Name="btnImport" Icon="res/open.png" Text="导入"/>
+          <XRibbonButton Name="btnExport" Icon="res/save.png" Text="导出"/>
+          <XRibbonButton Name="btnExportPdf" Icon="res/save.png" Text="导出 PDF"/>
+        </XRibbonGroup>
+        <XRibbonGroup Header="打印">
+          <XRibbonButton Name="btnPrint" Icon="res/ok.png" Text="打印"/>
+          <XRibbonButton Name="btnPreview" Icon="res/fullscreen.png" Text="预览"/>
+        </XRibbonGroup>
+        <XRibbonGroup Header="编辑">
+          <XRibbonButton Name="btnUndo" Icon="res/undo.png" Text="撤销"/>
+          <XRibbonButton Name="btnRedo" Icon="res/redo.png" Text="重做"/>
+        </XRibbonGroup>
+      </XRibbonTab>
+      <XRibbonTab Header="视图">
+        <XRibbonGroup Header="缩放">
+          <XRibbonButton Name="btnZoomFit" Icon="res/zoomfit.png" Text="适应窗口"/>
+          <XRibbonButton Name="btnZoomIn" Icon="res/zoomin.png" Text="放大"/>
+          <XRibbonButton Name="btnZoomOut" Icon="res/zoomout.png" Text="缩小"/>
+          <XRibbonButton Name="btnZoomReset" Icon="res/zoomreset.png" Text="100%"/>
+        </XRibbonGroup>
+        <XRibbonGroup Header="显示">
+          <XRibbonButton Name="btnCable" Icon="res/ok.png" Text="电缆标注"/>
+          <XRibbonButton Name="btnGrid" Icon="res/grid.png" Text="网格"/>
+          <XRibbonButton Name="btnRuler" Icon="res/ruler.png" Text="标尺"/>
+          <XRibbonButton Name="btnMini" Icon="res/fullscreen.png" Text="小地图"/>
+        </XRibbonGroup>
+      </XRibbonTab>
+      <XRibbonTab Header="数据">
+        <XRibbonGroup Header="设备">
+          <XRibbonButton Name="btnDevice" Icon="res/grid.png" Text="设备表"/>
+          <XRibbonButton Name="btnLoop" Icon="res/paste.png" Text="回路表"/>
+          <XRibbonButton Name="btnRelayout" Icon="res/alignleft.png" Text="重新排版"/>
+        </XRibbonGroup>
+        <XRibbonGroup Header="校验">
+          <XRibbonButton Name="btnCross" Icon="res/ok.png" Text="交叉校验"/>
+          <XRibbonButton Name="btnStat" Icon="res/about.png" Text="统计"/>
+        </XRibbonGroup>
+      </XRibbonTab>
+      <XRibbonTab Header="帮助">
+        <XRibbonGroup Header="支持">
+          <XRibbonButton Name="btnDoc" Icon="res/open.png" Text="使用说明"/>
+          <XRibbonButton Name="btnAbout" Icon="res/about.png" Text="关于"/>
+        </XRibbonGroup>
+      </XRibbonTab>
+    </XRibbon>
+
+    <!-- 主区：左画布 / 右信息板 -->
+    <XStackPanel Orientation="Horizontal" Height="660">
+      <PowerCanvas Name="Plan" Width="978" Height="660" ShowCable="1" Data="{&quot;dir&quot;:&quot;h&quot;,&quot;nodes&quot;:[{&quot;code&quot;:&quot;P0&quot;,&quot;name&quot;:&quot;10kV 总进线&quot;,&quot;upstream&quot;:&quot;&quot;,&quot;cable&quot;:&quot;YJV22-3×70&quot;,&quot;loadKw&quot;:0,&quot;voltage&quot;:&quot;10kV&quot;,&quot;length&quot;:0},{&quot;code&quot;:&quot;P1&quot;,&quot;name&quot;:&quot;1# 双电源柜&quot;,&quot;upstream&quot;:&quot;P0&quot;,&quot;cable&quot;:&quot;YJV22-4×95&quot;,&quot;loadKw&quot;:45,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:22},{&quot;code&quot;:&quot;P2&quot;,&quot;name&quot;:&quot;2# 配电柜&quot;,&quot;upstream&quot;:&quot;P0&quot;,&quot;cable&quot;:&quot;YJV22-4×70&quot;,&quot;loadKw&quot;:36,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:18},{&quot;code&quot;:&quot;T11&quot;,&quot;name&quot;:&quot;中试车间照明&quot;,&quot;upstream&quot;:&quot;P1&quot;,&quot;cable&quot;:&quot;YJV22-4×35&quot;,&quot;loadKw&quot;:11,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:12},{&quot;code&quot;:&quot;T12&quot;,&quot;name&quot;:&quot;车间动力 1#&quot;,&quot;upstream&quot;:&quot;P1&quot;,&quot;cable&quot;:&quot;YJV22-4×50&quot;,&quot;loadKw&quot;:22,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:26},{&quot;code&quot;:&quot;T13&quot;,&quot;name&quot;:&quot;涂布机主控&quot;,&quot;upstream&quot;:&quot;P1&quot;,&quot;cable&quot;:&quot;YJV22-4×25&quot;,&quot;loadKw&quot;:8.5,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:10},{&quot;code&quot;:&quot;T21&quot;,&quot;name&quot;:&quot;空压站&quot;,&quot;upstream&quot;:&quot;P2&quot;,&quot;cable&quot;:&quot;YJV22-4×35&quot;,&quot;loadKw&quot;:15,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:14},{&quot;code&quot;:&quot;T22&quot;,&quot;name&quot;:&quot;空调机房&quot;,&quot;upstream&quot;:&quot;P2&quot;,&quot;cable&quot;:&quot;YJV22-4×50&quot;,&quot;loadKw&quot;:30,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:32},{&quot;code&quot;:&quot;T23&quot;,&quot;name&quot;:&quot;办公区照明&quot;,&quot;upstream&quot;:&quot;P2&quot;,&quot;cable&quot;:&quot;YJV22-4×16&quot;,&quot;loadKw&quot;:6,&quot;voltage&quot;:&quot;220V&quot;,&quot;length&quot;:6},{&quot;code&quot;:&quot;T24&quot;,&quot;name&quot;:&quot;UPS 机房&quot;,&quot;upstream&quot;:&quot;P2&quot;,&quot;cable&quot;:&quot;YJV22-4×25&quot;,&quot;loadKw&quot;:9,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:8},{&quot;code&quot;:&quot;L111&quot;,&quot;name&quot;:&quot;车间插座回路&quot;,&quot;upstream&quot;:&quot;T11&quot;,&quot;cable&quot;:&quot;YJV22-4×16&quot;,&quot;loadKw&quot;:3.5,&quot;voltage&quot;:&quot;220V&quot;,&quot;length&quot;:3},{&quot;code&quot;:&quot;L112&quot;,&quot;name&quot;:&quot;应急照明&quot;,&quot;upstream&quot;:&quot;T11&quot;,&quot;cable&quot;:&quot;YJV22-4×10&quot;,&quot;loadKw&quot;:1.5,&quot;voltage&quot;:&quot;220V&quot;,&quot;length&quot;:2}]}"/>
+
+      <XStackPanel Width="336" Height="660">
+        <XStackPanel Orientation="Horizontal" Height="34">
+          <XLabel Content="选中设备" Width="120" Height="34"/>
+          <XLabel Name="lblSelCode" Content="（未选中）" Height="34"/>
+        </XStackPanel>
+        <XDivider Height="1"/>
+        <XLabel Name="lblSelName" Content="名称" Height="26"/>
+        <XLabel Name="lblSelVolt" Content="电压等级" Height="26"/>
+        <XLabel Name="lblSelLoad" Content="负荷" Height="26"/>
+        <XLabel Name="lblSelCable" Content="电缆" Height="26"/>
+        <XLabel Name="lblSelLen" Content="长度" Height="26"/>
+        <XDivider Height="1"/>
+        <XLabel Content="操作提示" Height="30"/>
+        <XLabel Content="滚轮：缩放（以光标为锚点）" Height="24"/>
+        <XLabel Content="中键拖动：平移" Height="24"/>
+        <XLabel Content="左键单击：选中设备/回路" Height="24"/>
+        <XLabel Content="Ribbon「视图 → 适应窗口」复位" Height="24"/>
+      </XStackPanel>
+    </XStackPanel>
+
+    <!-- 底部状态行 -->
+    <XStackPanel Orientation="Horizontal" Height="26">
+      <XLabel Name="lblState" Content="就绪 · 12 台设备 · 11 条回路" Height="26"/>
+    </XStackPanel>
+  </XStackPanel>
+</XWindow>

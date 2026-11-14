@@ -593,6 +593,7 @@ static bool isContainerTag(const std::wstring& tag)
 #include "XmlD2D.h"
 #include "XmlControls.h"
 #include "../MfcXmlCore/XmlRibbon.h"      // 控件库 Ribbon：预览器与设计器画同一份
+#include "../MfcXmlCore/XmlPowerCanvasView.h"  // 控件库配电画布：解析/布局/绘制/命中
 
 // MFC 控件封装 + 实体化层：控件是真控件（能打字/下拉/勾选），外观仍由 D2D 画。
 // 注意：afxwin.h 必须放在 windows.h 之后；本项目已用 (std::min) 形式避开 MFC 的 min/max 宏。
@@ -800,6 +801,24 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
             xmlctl::XRibbonLayout lay;
             xmlctl::ribbonLayout(model, mx, tabRc, bodyRc, lay);
             xmlctl::ribbonDraw(cv, tabRc, bodyRc, model, mx, lay, -1, std::wstring(), std::wstring(), 10, 9);
+            return;
+        }
+        if (_wcsicmp(shellTag.c_str(), L"PowerCanvas") == 0)
+        {
+            // 配电规划画布：解析/布局/绘制全在控件库（xmlctl::PowerCanvasView），
+            // 这里只按 XML 的 Data 属性喂数据，不再自己算排版 —— 与设计器同一份画法。
+            static std::wstring cachedData;
+            static xmlctl::PowerCanvasView cachedView;
+            const std::wstring data = el->get(L"Data");
+            const bool showCable = _wcsicmp(el->get(L"ShowCable").c_str(), L"0") != 0;
+            if (data != cachedData || !cachedView.loaded)
+            {
+                cachedData = data;
+                cachedView.load(data);
+                cachedView.sel.clear();
+            }
+            cachedView.showCable = showCable;
+            cachedView.paint(cv, rc, RGB(0xF3, 0xF5, 0xF8));
             return;
         }
     }

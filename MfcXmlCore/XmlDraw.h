@@ -121,6 +121,9 @@ struct XmlCanvas
     // 几何变换（绕 center 旋转 angleDeg）。成对调用；默认不平移不旋转。
     virtual void pushRotate(int /*angleDeg*/, const POINT& /*center*/) {}
     virtual void popTransform() {}
+    // 视图变换（缩放 + 平移）：后端自己保存矩阵，随后的 push/pop 在它之上叠加，
+    // 不会再"恢复 Identity"把外层缩放抹掉。调用方（设计器画布等）用它代替直接 SetTransform。
+    virtual void setViewTransform(float /*scale*/, float /*tx*/, float /*ty*/) {}
 
     // 位图（PNG）：工具栏图标、控件背景图都走这里（D2D 后端用 WIC 解码后 DrawBitmap）。
     // 给默认空实现而不是纯虚：自定义后端缺图标能力时也能编译，

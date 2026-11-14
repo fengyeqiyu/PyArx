@@ -17,6 +17,8 @@
 #include "XmlControls.h"
 #include "DesignerTools.h"
 #include "../MfcXmlCore/controls/XmlMfcOrder.h"   // Level 排序与运行时/预览器同源
+#include "../MfcXmlCore/XmlPowerCanvasView.h"     // 配电规划画布（解析/排版/绘制/命中，三端共用）
+#include "../MfcXmlCore/XmlRibbon.h"              // Ribbon 控件库（文档里的 XRibbon 真实绘制）
 
 namespace uidesign
 {
@@ -542,9 +544,10 @@ namespace uidesign
 
             // 缩放 + 平移：背景位图已经画过（不缩放/不平移），
             // 从这里开始文档树与装饰层统一乘倍率并跟随 m_panX/m_panY 走。
+            // 不能直接 rt->SetTransform：XmlCanvas 内部的 pushRotate / popTransform
+            // 会按自己的矩阵栈恢复，绕过后就被重置成 Identity（配电画布的卡片会跑位）。
             if (rt != nullptr)
-                rt->SetTransform(D2D1::Matrix3x2F::Scale(m_zoom, m_zoom) *
-                                 D2D1::Matrix3x2F::Translation(m_panX, m_panY));
+                m_d2dCv->setViewTransform(m_zoom, m_panX, m_panY);
 
             if (root != nullptr)
             {
@@ -1623,6 +1626,50 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                 const bool vertical = node->previewW <= node->previewH;
                 xmlctl::xmlDrawSplitter(cv, rc, vertical, false, false,
                                           ::GetSysColor(COLOR_BTNFACE));
+            }
+            else if (tagIs(node, L"Ribbon"))
+            {
+                // Ribbon：同一份控件库（XmlRibbon.h）解析 + 布局 + 绘制，文档里写的 XRibbon
+                // 在设计器画布、预览器、运行时看到的是同一块功能区，不是占位占位框。
+                xmlctl::XRibbonModel model;
+                xmlctl::ribbonParse(*node, model);
+                model.bodyCollapsed = _wcsicmp(node->get(L"Collapsed").c_str(), L"true") == 0;
+                const int tabH = 34;
+                RECT tabRc  = { rc.left, rc.top, rc.right, rc.top + tabH };
+                RECT bodyRc = { rc.left, rc.top + tabH, rc.right, rc.bottom };
+                xmlctl::XRibbonMetrics mx;
+                mx.bodyH = bodyRc.bottom - bodyRc.top;
+                mx.titleTop = (std::max)(36, mx.bodyH - 24);
+                xmlctl::XRibbonLayout lay;
+                xmlctl::ribbonLayout(model, mx, tabRc, bodyRc, lay);
+                xmlctl::ribbonDraw(cv, tabRc, bodyRc, model, mx, lay, -1, std::wstring(),
+                                   std::wstring(), 10, 9);
+                return;
+            }
+            else if (tagIs(node, L"PowerCanvas"))
+            {
+                // 配电规划画布：解析/排版/绘制全在控件库（xmlctl::PowerCanvasView），
+                // 设计器画布只传文档坐标下的矩形，与 Viewer / 运行时同一份画法。
+                static std::map<XmlElement*, xmlctl::PowerCanvasView> s_powerCvs;
+                xmlctl::PowerCanvasView& v = s_powerCvs[node];
+                const std::wstring data = node->get(L"Data");
+                if (v.data != data)
+                {
+                    v.load(data);
+                    v.sel.clear();
+                }
+                v.showCable = _wcsicmp(node->get(L"ShowCable").c_str(), L"0") != 0;
+                // 画布 cv 已带"整体缩放 + 平移"的 transform，这里必须传文档坐标矩形，
+                // 否则库内 fit/偏移的像素会被外层再乘一次缩放（双重缩放、错位）。
+                RECT drc = { node->previewX, node->previewY,
+                             node->previewX + node->previewW, node->previewY + node->previewH };
+                v.paint(cv, drc, RGB(0xF3, 0xF5, 0xF8));
+                if (!v.loaded && !v.error.empty())
+                {
+                    RECT trc = { rc.left + 12, rc.top + 12, rc.right - 12, rc.top + 36 };
+                    cv.text(trc, v.error, RGB(0xC0, 0x1B, 0x1B), DT_LEFT, 12, L"Microsoft YaHei");
+                }
+                return;
             }
             else if (tagIs(node, L"StatusBar"))
             {
