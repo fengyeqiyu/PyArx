@@ -104,7 +104,10 @@ void DesignerPaneView::paintSurface(HDC hdc)
     const RECT target = {0, 0, client.Width(), client.Height()};
     cv->bind(hdc, target);
     if (!cv->begin(client.Width(), client.Height()))
+    {
+        diagLog("[paneSurface] begin FAIL %dx%d hdc=%p\n", client.Width(), client.Height(), (void*)hdc);
         return;   // 硬件与 WARP 都起不来时这里什么都不画（不再回退 GDI 绘制）
+    }
     const ULONGLONG pt1 = ::GetTickCount64();
 
     cv->fillRect(client, xmlctl::shell().base);

@@ -1,15 +1,12 @@
-// XFrameWnd.h —— 无框/有框顶层窗口（控件库里的窗口 Frame）。
+// XFrameWnd.h —— 框架库（MfcXmlFrame）里的顶层窗口：无边/有边两态。
 //
 // 这是 Qt 里 QQuickWindow / ApplicationWindow + FramelessWindowHint 的等价物：
 //   * FrameFrameless：客户区铺满整窗（非客户区压成 0），外观完全由内容窗口的 XML 像素决定；
-//     四边 6px 交回系统缩放循环，标题栏交回系统移动循环，DWM 圆角/描边稳定后统一剥离；
-//   * FrameNative：交给系统画标题栏/边框，内容窗口仍是唯一客户区子窗口（三端观感一致的兜底）。
+//     四边 6px 交回系统缩放循环，标题栏交回系统移动循环，DWM 圆角/描边在尺寸稳定后统一剥离；
+//   * FrameNative：交给系统画标题栏/边框，内容窗口仍是唯一客户区子窗口（兜底形态）。
 //
-// 放在 MfcXmlCore：外壳是渲染库能力，设计器 / 预览器 / 运行时共用同一实现，
-// 各程序只做"调用者"（装配内容窗口、按业务重写关闭询问与快捷键）。
-//
-// 实现见 XFrameWnd.inl。MFC 的消息映射要求一个进程内只在一个编译单元里展开，
-// 因此调用方在自己的"外壳装配 TU"里 #include "XFrameWnd.inl"，其它 TU 只用本头。
+// 设计器（UIDesign）、预览器（Viewer）、运行时共用同一个框架库实现；
+// 各程序只做"调用者"：创建内容窗口、告诉框架标题栏拖动区、按业务重写关闭询问与快捷键。
 #pragma once
 
 #ifndef _AFXWIN_H_

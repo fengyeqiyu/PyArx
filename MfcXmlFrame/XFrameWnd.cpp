@@ -1,5 +1,4 @@
-// XFrameWnd.inl —— XFrameWnd 的实现（MFC 消息映射只能在一个编译单元里展开）。
-// 每个程序指定唯一一个"外壳装配 TU"包含本文件，其余 TU 只用 XFrameWnd.h。
+// XFrameWnd.cpp —— 框架库实现（MFC 消息映射在本静态库的单一编译单元里展开）。
 #include "XFrameWnd.h"
 #include <stdio.h>
 

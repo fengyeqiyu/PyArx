@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Viewer", "Viewer\Viewer.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MfcXmlCore", "MfcXmlCore\MfcXmlCore.vcxproj", "{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MfcXmlFrame", "MfcXmlFrame\MfcXmlFrame.vcxproj", "{7A1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D}"
+EndProject
 EndProject
 EndProject
 EndProject
@@ -35,6 +37,8 @@ Global
 		{5B0F7E44-8C41-4A36-9F1D-2B0C7A8D9E10}.Release|x64.Build.0 = Release|x64
 		{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}.Release|x64.ActiveCfg = Release|x64
 		{2C4A6E8B-1D3F-4A59-8B7C-9E0F1A2B3C4D}.Release|x64.Build.0 = Release|x64
+		{7A1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D}.Release|x64.ActiveCfg = Release|x64
+		{7A1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

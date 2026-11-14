@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "DesignerShell.h"
-#include "XFrameWnd.inl"      // 外壳实现：本 TU 是 UIDesign 唯一展开消息映射的地方
+// 外壳实现来自框架库 MfcXmlFrame.lib（XFrameWnd / 无框命中 / 系统缩放循环 / DWM 剥离），
+// 这里不再包含任何实现文件。
 
 using namespace uidesign;
 
