@@ -448,7 +448,7 @@ void DesignerPaneView::OnLButtonDown(UINT nFlags, CPoint pt)
     (void)nFlags;
     // 兜底：系统循环因异常没发 WM_EXITSIZEMOVE 时，下一次按下就地解冻，
     // 不让画布/代码坞停在 WM_SETREDRAW(FALSE) 的冻结态。
-    if (m_sizeMove && ::GetCapture() == nullptr)
+    if (m_sizeMove)
         endSizeMovePreview();
     // 贴窗口四边 6px：交系统缩放循环（Qt startSystemResize 等价）
     if (tryFrameChrome(pt))
@@ -1036,6 +1036,9 @@ CString DesignerPaneView::widgetTagFor(const CString& display)
 
 void DesignerPaneView::OnMouseMove(UINT nFlags, CPoint pt)
 {
+    // 系统循环里本窗口收不到鼠标消息；能走到这里就说明循环已经结束，预览态该收了。
+    if (m_sizeMove)
+        endSizeMovePreview();
     surfaceMouseMove(pt, nFlags);
 }
 
@@ -1793,9 +1796,15 @@ void DesignerPaneView::OnPaint()
     GetClientRect(&client);
     if (client.Width() <= 0 || client.Height() <= 0) return;
 
-    // 系统移动/缩放循环期间本来就不会给我们 WM_PAINT（DWM 合成上一帧），
-    // 这里不再 return：一旦 WM_EXITSIZEMOVE 因故没到，整窗就会永远黑着不画。
-    // 重排只由 OnSize 的 m_sizeMove 分支挡掉，绘制本身随时可以走。
+    // 系统移动/缩放循环期间只擦一遍底色，不做双缓冲全量合成：
+    // 每帧跑整棵节点树 + inflate 整块位图，就是"一直在画"，拖动/缩放必然卡。
+    // 松手后由 endSizeMovePreview() 一次性重排重画（Qt 也是这个节奏）。
+    // 这里有兜底（OnLButtonDown / OnMouseMove / 定时器），万一退出消息漏了也会自拔。
+    if (m_sizeMove)
+    {
+        dc.FillSolidRect(&client, RGB(21, 24, 29));
+        return;
+    }
 
     // 双缓冲：D2D 先画到内存位图，一次 BitBlt 上屏。
     // 位图常驻复用（只在客户区尺寸变化时重建），缩放时不再每帧申请 6MB 位图。

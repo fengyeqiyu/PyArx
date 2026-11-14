@@ -248,9 +248,9 @@ int DesignerFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
     ModifyStyle(0, WS_CLIPCHILDREN);
     stripWindowFrame();
     hideDockSliders();
-    // 停靠体系在消息泵空闲时还会把 4px 滑块和 1356 宽的停靠条重新摆回来，
-    // RecalcLayout / OnSize 都堵不住；用一个低频定时器持续压平最稳（每 300ms 两次 SetWindowPos，开销可忽略）。
-    SetTimer(7, 300, nullptr);
+    // 停靠体系在消息泵空闲时偶尔会把 4px 滑块和停靠条重新摆回来，RecalcLayout / OnSize 都堵不住；
+    // 定时器只做"状态检查"，已经归位就直接跳过 SetWindowPos（不再周期性触发重排/重绘）。
+    SetTimer(7, 1000, nullptr);
     return 0;
 }
 
@@ -311,9 +311,17 @@ void DesignerFrame::hideDockSliders()
 
     // 滑块不只隐藏，还要把它挪到屏幕外并压成 0 尺寸：
     // 停靠体系下一轮 RecalcLayout 会重新 ShowWindow，只隐藏会被它再显示出来。
+    // 已经在屏外且是 0 尺寸就不再调 SetWindowPos —— 每次调用都会走一遍窗口重排/重绘。
     if (slider != nullptr)
-        ::SetWindowPos(slider, nullptr, -10000, -10000, 0, 0,
-                       SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+    {
+        RECT sr = {};
+        ::GetWindowRect(slider, &sr);
+        const bool alreadyParked = (sr.right - sr.left == 0 && sr.bottom - sr.top == 0 &&
+                                    sr.left <= -9000);
+        if (!alreadyParked)
+            ::SetWindowPos(slider, nullptr, -10000, -10000, 0, 0,
+                           SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+    }
     // 停靠条自己被 MFC 留出 4px 给滑块：把它铺满客户区，那 4px 就回到画面上。
     // 只在尺寸真的不对时才改 —— 每 300ms 无条件 SetWindowPos 会触发停靠重排，整窗重画，看起来就是抖。
     if (controlBar != nullptr)
@@ -349,12 +357,11 @@ void DesignerFrame::OnTimer(UINT_PTR nIDEvent)
     if (nIDEvent == 7)
     {
         hideDockSliders();
-        // 兜底：系统移动/缩放循环结束时偶发不派 WM_EXITSIZEMOVE（MFC 自己的 NC 处理路径），
-        // 预览态卡住会让整窗停在"不重排、子窗口冻结"的状态 —— 这里按真实按键/捕获状态收尾。
-        DesignerPaneView& view = m_pane.view();
-        if (view.isSizeMoving() && ::GetCapture() == nullptr &&
-            (::GetKeyState(VK_LBUTTON) & 0x8000) == 0)
-            view.endSizeMovePreview();
+        // 注意：不要用定时器猜"系统循环结束"。DefWindowProc 的移动/缩放循环并不保证
+        // 让 GetCapture() 非空，拖动超过一秒就会被误判成结束 —— 一误判就恢复全量绘制，
+        // 变成拖动期间每帧重画整窗（这正是"一直在绘制"的来源）。
+        // 可靠的判据只有一个：系统循环里本窗口收不到鼠标消息，所以解冻由
+        // OnMouseMove / OnLButtonDown 触发，正式结束走 WM_EXITSIZEMOVE。
         return;
     }
     CFrameWndEx::OnTimer(nIDEvent);
