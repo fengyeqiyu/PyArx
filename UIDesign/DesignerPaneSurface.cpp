@@ -81,6 +81,20 @@ static void drawPanelScrollBar(XmlCanvas& cv, const RECT& rc, int total, int vie
     cv.fillRect(thumb, RGB(98, 112, 132));
 }
 
+// 整窗唯一的那张 D2D 画布（按 HWND 缓存；宿主重建窗口时旧画布要换掉）
+static D2DDcCanvas* surfaceCanvas(HWND hwnd)
+{
+    static D2DDcCanvas* cv = nullptr;
+    static HWND cvHwnd = nullptr;
+    if (cv == nullptr || cvHwnd != hwnd)
+    {
+        delete cv;
+        cv = new D2DDcCanvas();
+        cvHwnd = hwnd;
+    }
+    return cv;
+}
+
 void DesignerPaneView::paintSurface(HDC hdc)
 {
     CRect client;
@@ -92,14 +106,8 @@ void DesignerPaneView::paintSurface(HDC hdc)
     // 会把所有真实子窗口（画布、源码编辑框）整个盖死 —— 这是"控件看不见"的唯一根因。
     // 必须 new：类内静态对象会为每个编译单元各建一份，渲染目标互相顶掉。
     // 同时按 HWND 校验：宿主重建窗口时旧 canvas 还绑着已销毁的 HWND，会画出黑屏。
-    static D2DDcCanvas* cv = nullptr;
-    static HWND cvHwnd = nullptr;
-    if (cv == nullptr || cvHwnd != m_hWnd)
-    {
-        delete cv;
-        cv = new D2DDcCanvas();
-        cvHwnd = m_hWnd;
-    }
+    D2DDcCanvas* cv = surfaceCanvas(m_hWnd);
+    if (cv == nullptr) return;
     const ULONGLONG pt0 = ::GetTickCount64();
     const RECT target = {0, 0, client.Width(), client.Height()};
     cv->bind(hdc, target);
@@ -478,15 +486,14 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
     // 统一命名：X + 本意名，外壳构件按本意名分派
     const std::wstring bareTag = xmlmfc::BareTag(tag);
 
-    // ---- 画布：内容直接画进父表面 ----
-    // 父表面的 HwndRenderTarget 不透明呈现会盖住画布子窗口（DWM 合成不受
-    // WS_CLIPCHILDREN 约束），所以画布内容必须由这张唯一的表面自己画。
+    // ---- 画布：内容由画布子窗口那套 D2D 绘制路径上屏 ----
+    // 父窗带 WS_CLIPCHILDREN，父表面画到画布区域会被系统裁掉（画布子窗口是独立 HWND），
+    // 在这里再画一遍整棵文档纯属白算 —— 中键平移/缩放时这里是最大的浪费项。
+    // 只把这块铺成工作台底色（万一子窗口被隐藏/移开，露出的是底色而不是旧像素）。
     if (m_canvas != nullptr && node->name == L"canvasHost")
     {
-        const ULONGLONG ca = ::GetTickCount64();
-        m_canvas->paintInto(cv, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
-        paintLog("[canvas] %llu ms %dx%d\n", (unsigned long long)(::GetTickCount64() - ca),
-                 rc.right - rc.left, rc.bottom - rc.top);
+        m_surfCanvasRc = rc;
+        cv.fillRect(rc, RGB(160, 160, 160));
         return;
     }
 
@@ -1466,4 +1473,32 @@ void DesignerPaneView::paintRibbonOverlays(XmlCanvas& cv, const RECT& host)
 
     if (m_ribbonMenu.visible)
         xmlctl::ribbonMenuDraw(cv, m_ribbonMenu, m_ribbonMenuHot, 9);
+}
+
+// 画布局部重绘：只有失效区域整个落在画布矩形内、且画布子窗口被隐藏（文件页展开等）时才需要，
+// 常规平移/缩放由画布子窗口自己重绘，不经过这里。只铺工作台底色，不重画整棵文档。
+bool DesignerPaneView::paintCanvasRegion(HDC hdc, const RECT& clip)
+{
+    if (m_canvas == nullptr) return false;
+    const RECT& cr = m_surfCanvasRc;
+    if (cr.right <= cr.left || cr.bottom <= cr.top) return false;
+
+    CRect client;
+    GetClientRect(&client);
+    if (client.Width() <= 0 || client.Height() <= 0) return false;
+
+    RECT dst;
+    if (!::IntersectRect(&dst, &clip, &cr)) return false;
+    if (dst.right <= dst.left || dst.bottom <= dst.top) return false;
+
+    D2DDcCanvas* cv = surfaceCanvas(m_hWnd);
+    if (cv == nullptr) return false;
+    const RECT target = { 0, 0, client.Width(), client.Height() };
+    cv->bind(hdc, target);
+    if (!cv->begin(client.Width(), client.Height())) return false;
+
+    cv->fillRect(dst, RGB(160, 160, 160));
+
+    cv->end();
+    return !FAILED(cv->lastError());
 }

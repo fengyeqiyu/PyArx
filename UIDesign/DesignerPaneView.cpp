@@ -597,6 +597,7 @@ void DesignerPaneView::computeLayoutZones(const CRect& rc)
 void DesignerPaneView::OnSize(UINT type, int cx, int cy)
 {
     CWnd::OnSize(type, cx, cy);
+    m_surfCanvasValid = false;   // 尺寸变了：离屏缓冲要重建，下一帧必须整窗重画
 
     // 窗口移动/缩放期间不做完整重排，也不重绘：系统循环里 DWM 合成上一帧，
     // 我们自己每帧 Invalidate 只会插进空 WM_PAINT，反而让边缘闪。
@@ -1949,8 +1950,28 @@ void DesignerPaneView::OnPaint()
     if (mem == nullptr)
         return;
 
+    // 画布局部重绘：WM_PAINT 的失效区域整个落在画布矩形内时（中键平移、滚轮缩放、
+    // 拖动中的十字框），不重画整窗外壳，只重画画布那块再块拷贝上屏。
+    // 历史做法是每次鼠标移动都重画菜单/Ribbon/两棵树/属性表/代码区 —— 那才是"不丝滑"的根因。
+    // 画布局部重绘：WM_PAINT 的失效区域整个落在画布矩形内时（中键平移、滚轮缩放、
+    // 拖动中的十字框），不重画整窗外壳，只重画画布那块再块拷贝上屏。
+    // 历史做法是每次鼠标移动都重画菜单/Ribbon/两棵树/属性表/代码区 —— 那才是"不丝滑"的根因。
+    // 别的面板或窗口本身也失效时 rcPaint 会超出画布 → 自动退回整窗重画，不会漏画。
+    if (m_surfCanvasValid)
+    {
+        const RECT pr = dc.m_ps.rcPaint;
+        const RECT& cr = m_surfCanvasRc;
+        if (pr.left >= cr.left && pr.top >= cr.top && pr.right <= cr.right && pr.bottom <= cr.bottom &&
+            paintCanvasRegion(mem, pr))
+        {
+            m_back.presentRect(dc.GetSafeHdc(), pr);
+            return;
+        }
+    }
+
     paintSurface(mem);
 
     m_back.present(dc.GetSafeHdc(), client.Width(), client.Height());
+    m_surfCanvasValid = true;
 }
 

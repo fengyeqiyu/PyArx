@@ -311,8 +311,8 @@ namespace uidesign
             const int W = client.Width(), H = client.Height();
             if (W <= 0 || H <= 0) return;
 
-            // 只有 Direct2D 一套绘制：DCRenderTarget（硬件）画到内存 DC，再 BitBlt 上屏。
-            // 不再保留 GDI 回退路径；D2D 起不来时填一次灰底（与画布工作台底色一致），避免客户区留旧像素。
+            // 画布是独立子窗口，内容由自己这套 D2D 路径上屏（父表面那块只是兜底）。
+            // 中键平移/滚轮缩放的每帧重绘就落在这里，父表面不参与 —— 这就是"丝滑"的关键。
             if (!paintD2D(dc, W, H))
                 dc.FillSolidRect(client, RGB(160, 160, 160));
         }
@@ -3017,19 +3017,11 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
             return tagIs(n, L"ComboBox") || tagIs(n, L"ListBox") || tagIs(n, L"Choice") || tagIs(n, L"DatePicker");
         }
 
-        // 画布内容实际由父表面 paintInto 绘制：改完必须让父表面重画，本窗口 Invalidate 看不到效果
+        // 画布自己就是一个独立的 D2D 子窗口：平移/缩放只让本窗口重画，
+        // 不再让父表面（菜单/Ribbon/控件箱/对象树/属性表/代码区）跟着整窗重画 ——
+        // 那正是"拖动不丝滑"的根因。父表面下一帧自然重绘时会用最新的 m_panX/m_zoom。
         void invalidateSurface()
         {
-            CWnd* p = GetParent();
-            if (p != nullptr && ::IsWindow(p->m_hWnd))
-            {
-                // 只让父表面重画"画布这一块"：整窗外壳（菜单/工具栏/两棵树/属性表/代码区）
-                // 在拖动时每帧重画是拖影的主因，电力设计应用也是只重画自己的画布窗口。
-                CRect me;
-                GetWindowRect(&me);
-                p->ScreenToClient(&me);
-                p->InvalidateRect(&me, FALSE);
-            }
             Invalidate(FALSE);
         }
 

@@ -86,6 +86,20 @@ public:
         ::BitBlt(clientDc, 0, 0, cx, cy, m_memDc, 0, 0, SRCCOPY);
     }
 
+    // 只把指定区域上屏：局部重绘（画布平移/缩放）只拷这一块，不再整窗拷贝
+    void presentRect(HDC clientDc, const RECT& r)
+    {
+        if (m_memDc == nullptr || m_bmp == nullptr) return;
+        RECT dst = r;
+        if (dst.left < 0) dst.left = 0;
+        if (dst.top < 0) dst.top = 0;
+        if (dst.right > m_w) dst.right = m_w;
+        if (dst.bottom > m_h) dst.bottom = m_h;
+        if (dst.right <= dst.left || dst.bottom <= dst.top) return;
+        ::BitBlt(clientDc, dst.left, dst.top, dst.right - dst.left, dst.bottom - dst.top,
+                 m_memDc, dst.left, dst.top, SRCCOPY);
+    }
+
     HDC dc() const { return m_memDc; }
     int width() const { return m_w; }
     int height() const { return m_h; }

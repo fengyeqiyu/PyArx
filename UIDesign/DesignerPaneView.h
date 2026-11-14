@@ -301,6 +301,11 @@ namespace uidesign
 
         void paintRibbonOverlays(XmlCanvas& cv, const RECT& host);
         void openRibbonGroupMenu(int gi, const RECT& anchor);
+        // 画布局部重绘：命中表与其它面板都沿用上一帧，只把画布那一块重画并上屏。
+        // 中键平移 / 滚轮缩放走的都是这条路径（整窗重画是"不丝滑"的根因）。
+        RECT m_surfCanvasRc = { 0, 0, 0, 0 };   // 画布在父表面里的矩形
+        bool m_surfCanvasValid = false;          // 至少完整画过一帧
+        bool paintCanvasRegion(HDC hdc, const RECT& clip);
         int m_surfHotSplit = -1;     // 悬停的分割条
         int m_surfSelWidgetRow = -1; // 控件箱选中行
         int m_surfSelPropRow = -1;   // 属性表选中行
