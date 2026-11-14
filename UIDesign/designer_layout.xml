@@ -52,7 +52,7 @@
          不再出现系统标题栏，也不会和下面的暗色外壳撞色。 -->
     <MenuBar Grid.Row="0" Background="#252A33" Foreground="#E8EDF4" MutedColor="#9AA7B8"
            BorderColor="#39404B" AccentColor="#4C8DFF"
-           FontSize="10" TitleWidth="230" WinButtonWidth="46" ItemGap="10">
+           FontSize="10" TitleWidth="120" WinButtonWidth="46" ItemGap="10">
 
       <ShellTitle Name="winTitle" Text="PyMfc Studio"/>
 
