@@ -248,9 +248,9 @@ int DesignerFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
     ModifyStyle(0, WS_CLIPCHILDREN);
     stripWindowFrame();
     hideDockSliders();
-    // 停靠体系在消息泵空闲时偶尔会把 4px 滑块和停靠条重新摆回来，RecalcLayout / OnSize 都堵不住；
-    // 定时器只做"状态检查"，已经归位就直接跳过 SetWindowPos（不再周期性触发重排/重绘）。
-    SetTimer(7, 1000, nullptr);
+    // 不需要定时器：滑块只会在布局之后被停靠体系重新显示，
+    // RecalcLayout（重写）、OnSize 末尾各调一次 hideDockSliders，并把 hide 排到消息队尾（postChromeFix），
+    // 覆盖"MFC 在 OnIdle 里再排一次布局"的情况。空闲时不再周期性碰窗口，完全不产生绘制。
     return 0;
 }
 
@@ -354,16 +354,6 @@ void DesignerFrame::OnClose()
 
 void DesignerFrame::OnTimer(UINT_PTR nIDEvent)
 {
-    if (nIDEvent == 7)
-    {
-        hideDockSliders();
-        // 注意：不要用定时器猜"系统循环结束"。DefWindowProc 的移动/缩放循环并不保证
-        // 让 GetCapture() 非空，拖动超过一秒就会被误判成结束 —— 一误判就恢复全量绘制，
-        // 变成拖动期间每帧重画整窗（这正是"一直在绘制"的来源）。
-        // 可靠的判据只有一个：系统循环里本窗口收不到鼠标消息，所以解冻由
-        // OnMouseMove / OnLButtonDown 触发，正式结束走 WM_EXITSIZEMOVE。
-        return;
-    }
     CFrameWndEx::OnTimer(nIDEvent);
 }
 

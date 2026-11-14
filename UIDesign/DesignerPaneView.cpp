@@ -448,7 +448,7 @@ void DesignerPaneView::OnLButtonDown(UINT nFlags, CPoint pt)
     (void)nFlags;
     // 兜底：系统循环因异常没发 WM_EXITSIZEMOVE 时，下一次按下就地解冻，
     // 不让画布/代码坞停在 WM_SETREDRAW(FALSE) 的冻结态。
-    if (m_sizeMove)
+    if (m_sizeMove && ::GetCapture() == nullptr)
         endSizeMovePreview();
     // 贴窗口四边 6px：交系统缩放循环（Qt startSystemResize 等价）
     if (tryFrameChrome(pt))
@@ -1036,8 +1036,10 @@ CString DesignerPaneView::widgetTagFor(const CString& display)
 
 void DesignerPaneView::OnMouseMove(UINT nFlags, CPoint pt)
 {
-    // 系统循环里本窗口收不到鼠标消息；能走到这里就说明循环已经结束，预览态该收了。
-    if (m_sizeMove)
+    // 系统循环里 DefWindowProc 会持有鼠标捕获；拿不到捕获说明循环已经结束（或压根没进入），
+    // 这时才收预览态。不能无条件收 —— 缩放时鼠标常位于窗口边缘，系统会持续发 WM_MOUSEMOVE，
+    // 一收就退回全量绘制，等于又开始逐帧重画整窗。
+    if (m_sizeMove && ::GetCapture() == nullptr)
         endSizeMovePreview();
     surfaceMouseMove(pt, nFlags);
 }
