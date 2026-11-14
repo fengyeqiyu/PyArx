@@ -27,6 +27,8 @@ namespace xmlctl
         float zoom = 1.0f;              // 视图缩放
         int   ox = 0, oy = 0;           // 视口偏移（客户区像素）
         bool  showCable = true;         // 连线标注电缆
+        bool  showGrid = false;         // 纸面网格（每 100 单位）
+        bool  showRuler = false;        // 左/上标尺
         bool  loaded = false;
         bool  fitPending = true;        // 下一帧按客户区 fit
         int   lastW = 0, lastH = 0;     // 上次客户区尺寸（变了就重新 fit）
@@ -107,7 +109,8 @@ namespace xmlctl
             // 真裁剪：放大后卡片不许溢出画布矩形（此前后端只做了"整项不可见就跳过"）
             cv.clipPush(rc);
             RECT clip = rc;
-            xmlplan::drawPlan(cv, plan, zoom, ox, oy, sel, showCable, &clip);
+            xmlplan::drawPlan(cv, plan, zoom, ox, oy, sel, showCable, &clip, showGrid);
+            if (showRuler) xmlplan::drawRuler(cv, plan, zoom, ox, oy, rc);
             cv.clipPop();
         }
 

@@ -631,6 +631,8 @@ static const wchar_t* g_backend = L"未初始化";
 static xmlctl::PowerCanvasView g_powerView;      // 当前文档的配电画布
 static RECT   g_powerRc = { 0, 0, 0, 0 };        // 画布最后一帧的客户区矩形
 static bool   g_powerShowCable = true;
+static bool   g_powerGridFlip = false;    // Ribbon「网格」按过一次就翻转一次
+static bool   g_powerRulerFlip = false;
 static bool   g_panning = false;
 static POINT  g_panLast = { 0, 0 };
 
@@ -849,6 +851,8 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
                 g_powerView.load(data);
             }
             g_powerView.showCable = showCable && g_powerShowCable;
+            g_powerView.showGrid = (el->get(L"Grid") == L"1") != g_powerGridFlip;
+            g_powerView.showRuler = (el->get(L"Ruler") == L"1") != g_powerRulerFlip;
             g_powerRc = rc;
             g_powerView.paint(cv, rc, RGB(0xF3, 0xF5, 0xF8));
             return;
@@ -967,6 +971,14 @@ static void viewerCommand(HWND hwnd, const std::wstring& name)
     else if (name == L"btnCable")
     {
         g_powerShowCable = !g_powerShowCable;
+    }
+    else if (name == L"btnGrid")
+    {
+        g_powerGridFlip = !g_powerGridFlip;
+    }
+    else if (name == L"btnRuler")
+    {
+        g_powerRulerFlip = !g_powerRulerFlip;
     }
     else
     {

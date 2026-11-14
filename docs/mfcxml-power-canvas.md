@@ -17,12 +17,13 @@
 ## 用法（XML）
 
 ```xml
-<PowerCanvas Name="Plan" Width="978" Height="660" ShowCable="1"
+<PowerCanvas Name="Plan" Width="978" Height="660" ShowCable="1" Grid="1" Ruler="1"
              Data="{&quot;dir&quot;:&quot;h&quot;,&quot;nodes&quot;:[…]}"/>
 ```
 
 `Data` 以 `{` 开头：先按"已算好坐标的场景"（`parseScene`）读，失败再按 `nodes` 由
-`buildPlan` 排版。控件不要求调用方写坐标。
+`buildPlan` 排版。控件不要求调用方写坐标。`Grid` = 纸面网格（每 100 模型单位，
+缩放后每格小于 8px 就自动不画），`Ruler` = 左/上 18px 刻度带（每 100 一小格、每 500 标数字）。
 
 ## 三层各做什么
 
@@ -52,6 +53,7 @@
 | 画布左键 | `PowerCanvasView::hit` → `sel`（卡片优先，其次回路折线容差 8/zoom） |
 | Ribbon 点选项卡 | `ribbonHitTest` → 覆盖 XML 的 `SelectedTab`（否则重绘就被打回原页） |
 | 适应窗口 / 放大 / 缩小 / 100% / 电缆标注 | 按钮 `Name` 直接当命令名，转成视图状态 |
+| 网格 / 标尺 | 同上，翻转 `Grid` / `Ruler` 的开关态（XML 里写的是初值） |
 
 选中结果不是"预览器自己再画一块信息板"，而是写回外壳 XML 里那几个 `XLabel` 的
 `Content`（注意解析期已把 Content 收进 `XmlElement::text`，两处都要改），所以右侧

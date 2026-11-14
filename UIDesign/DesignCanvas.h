@@ -1659,6 +1659,8 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                     v.sel.clear();
                 }
                 v.showCable = _wcsicmp(node->get(L"ShowCable").c_str(), L"0") != 0;
+                v.showGrid = node->get(L"Grid") == L"1";
+                v.showRuler = node->get(L"Ruler") == L"1";
                 // 画布 cv 已带"整体缩放 + 平移"的 transform，这里必须传文档坐标矩形，
                 // 否则库内 fit/偏移的像素会被外层再乘一次缩放（双重缩放、错位）。
                 RECT drc = { node->previewX, node->previewY,

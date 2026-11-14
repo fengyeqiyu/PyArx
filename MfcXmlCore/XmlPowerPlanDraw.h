@@ -18,7 +18,8 @@ namespace xmlplan
     // terminal 浅蓝底）/ 电压角标 / 三行文字 / 折叠 +N。
     inline void drawPlan(XmlCanvas& cv, const PowerPlan& plan,
                          float k, int ox, int oy, const std::wstring& sel,
-                         bool showCable = true, const RECT* clip = nullptr)
+                         bool showCable = true, const RECT* clip = nullptr,
+                         bool showGrid = false)
     {
         if (k <= 0.0f) k = 1.0f;
         auto offClip = [&](int x0, int y0, int x1, int y1) {
@@ -43,6 +44,26 @@ namespace xmlplan
         const RECT paper = { ox, oy, X(plan.width), Y(plan.height) };
         cv.fillRect(paper, RGB(0xFF, 0xFF, 0xFF));
         cv.strokeRect(paper, RGB(0xCF, 0xD6, 0xDF), 1);
+
+        // 网格：每 100 模型单位一条，缩得太密就不画（否则放大时满屏线）
+        if (showGrid)
+        {
+            const int stepM = 100;
+            const int stepPx = static_cast<int>(lroundf(static_cast<float>(stepM) * k));
+            if (stepPx >= 8)
+            {
+                for (int gx = stepM; gx < plan.width; gx += stepM)
+                {
+                    const int px = X(gx);
+                    cv.fillRect(RECT{ px, paper.top, px + 1, paper.bottom }, RGB(0xE6, 0xEB, 0xF2));
+                }
+                for (int gy = stepM; gy < plan.height; gy += stepM)
+                {
+                    const int py = Y(gy);
+                    cv.fillRect(RECT{ paper.left, py, paper.right, py + 1 }, RGB(0xE6, 0xEB, 0xF2));
+                }
+            }
+        }
 
         // 选中联动：父链 + 整棵子树的边高亮
         std::map<std::wstring, size_t> idx;
@@ -271,6 +292,59 @@ namespace xmlplan
                 cv.setTextStyle(L"Normal", L"Normal", L"NoWrap", L"Right");
                 cv.text(RECT{ X(b.x + b.w - 46), Y(b.y + 1), X(b.x + b.w - 6), Y(b.y + 14) },
                         buf, RGB(0x8A, 0x94, 0xA6), DT_RIGHT, ptOf(9.0), face);
+            }
+        }
+    }
+
+    // 标尺：贴画布左/上边缘的一条 18px 带，刻度按模型单位（每 100 一小格、每 500 标数字）。
+    // 画在最上层（网格与卡片之后），所以调用方要在 drawPlan 之后调它。
+    inline void drawRuler(XmlCanvas& cv, const PowerPlan& plan, float k, int ox, int oy,
+                          const RECT& rc)
+    {
+        if (k <= 0.0f) return;
+        const int band = 18;
+        const RECT bandV = { rc.left, rc.top, rc.left + band, rc.bottom };
+        const RECT bandH = { rc.left, rc.top, rc.right, rc.top + band };
+        cv.fillRect(bandV, RGB(0xF7, 0xF9, 0xFB));
+        cv.fillRect(bandH, RGB(0xF7, 0xF9, 0xFB));
+        cv.fillRect(RECT{ rc.left + band - 1, rc.top, rc.left + band, rc.bottom }, RGB(0xD7, 0xDE, 0xE7));
+        cv.fillRect(RECT{ rc.left, rc.top + band - 1, rc.right, rc.top + band }, RGB(0xD7, 0xDE, 0xE7));
+
+        auto X = [&](double v) { return ox + static_cast<int>(lroundf(static_cast<float>(v) * k)); };
+        auto Y = [&](double v) { return oy + static_cast<int>(lroundf(static_cast<float>(v) * k)); };
+        const int stepM = 100;
+        const int stepPx = static_cast<int>(lroundf(static_cast<float>(stepM) * k));
+        const bool dense = stepPx >= 6;
+        wchar_t buf[32];
+
+        // 竖向：刻度线更长的那一格带数字
+        for (int g = 0; g <= plan.height; g += (dense ? stepM : 200))
+        {
+            const int py = Y(g);
+            if (py < rc.top + band || py > rc.bottom - 2) continue;
+            const bool major = (g % 500) == 0;
+            cv.fillRect(RECT{ rc.left + (major ? 2 : 7), py, rc.left + band - 3, py + 1 },
+                        RGB(0x9A, 0xA4, 0xB0));
+            if (major && k >= 0.35f)
+            {
+                swprintf_s(buf, L"%d", g);
+                cv.text(RECT{ rc.left + band + 2, py - 6, rc.left + band + 40, py + 8 },
+                        buf, RGB(0x6B, 0x74, 0x80), DT_LEFT, 7, L"Microsoft YaHei");
+            }
+        }
+        // 横向
+        for (int g = 0; g <= plan.width; g += (dense ? stepM : 200))
+        {
+            const int px = X(g);
+            if (px < rc.left + band || px > rc.right - 2) continue;
+            const bool major = (g % 500) == 0;
+            cv.fillRect(RECT{ px, rc.top + (major ? 2 : 7), px + 1, rc.top + band - 3 },
+                        RGB(0x9A, 0xA4, 0xB0));
+            if (major && k >= 0.35f)
+            {
+                swprintf_s(buf, L"%d", g);
+                cv.text(RECT{ px + 3, rc.top + 2, px + 60, rc.top + band - 2 },
+                        buf, RGB(0x6B, 0x74, 0x80), DT_LEFT, 7, L"Microsoft YaHei");
             }
         }
     }
