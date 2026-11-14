@@ -1902,6 +1902,112 @@ static void dumpTracks(XmlElement* el, int depth)
 }
 
 // ---------------------------------------------------------------------------
+// 离屏渲染：--render out.png [--size WxH]
+// 不建窗口、不建 MFC 真控件（叶子全走 xmlleaf::drawLeaf 软件绘制），
+// 与设计器画布同一份画法，所以产物就是"XML 语义渲染出来长什么样"的标准答案。
+// 用途：给 AI / CI / 文档截图 —— 不需要桌面会话，也不依赖 PrintWindow。
+// ---------------------------------------------------------------------------
+
+// DIB 的 BGRA 像素 → PNG（WIC 编码，COM 已在进程初始化）
+static bool saveBgraToPng(const void* bits, int w, int h, const std::wstring& path)
+{
+    IWICImagingFactory* f = nullptr;
+    if (FAILED(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER,
+                                  __uuidof(IWICImagingFactory),
+                                  reinterpret_cast<void**>(&f))) || f == nullptr)
+        return false;
+
+    IWICStream* st = nullptr;
+    IWICBitmapEncoder* enc = nullptr;
+    IWICBitmapFrameEncode* frame = nullptr;
+    IPropertyBag2* props = nullptr;
+    bool ok = false;
+    do
+    {
+        if (FAILED(f->CreateStream(&st))) break;
+        if (FAILED(st->InitializeFromFilename(path.c_str(), GENERIC_WRITE))) break;
+        if (FAILED(f->CreateEncoder(GUID_ContainerFormatPng, nullptr, &enc))) break;
+        if (FAILED(enc->Initialize(st, WICBitmapEncoderNoCache))) break;
+        if (FAILED(enc->CreateNewFrame(&frame, &props))) break;
+        if (FAILED(frame->Initialize(props))) break;
+        if (FAILED(frame->SetSize((UINT)w, (UINT)h))) break;
+        WICPixelFormatGUID fmt = GUID_WICPixelFormat32bppBGRA;
+        if (FAILED(frame->SetPixelFormat(&fmt))) break;
+        const UINT stride = (UINT)w * 4;
+        const UINT bufSize = stride * (UINT)h;
+        const HRESULT wr = frame->WritePixels((UINT)h, stride, bufSize,
+                                              static_cast<BYTE*>(const_cast<void*>(bits)));
+        if (FAILED(wr)) break;
+        if (FAILED(frame->Commit())) break;
+        if (FAILED(enc->Commit())) break;
+        ok = true;
+    } while (false);
+
+    if (props != nullptr) props->Release();
+    if (frame != nullptr) frame->Release();
+    if (enc != nullptr) enc->Release();
+    if (st != nullptr) st->Release();
+    f->Release();
+    return ok;
+}
+
+static bool renderToPng(const std::wstring& outPath, int w, int h)
+{
+    if (g_root == nullptr || w <= 0 || h <= 0) return false;
+
+    HDC screen = ::GetDC(nullptr);
+    HDC mem = ::CreateCompatibleDC(screen);
+    ::ReleaseDC(nullptr, screen);
+    if (mem == nullptr) return false;
+
+    BITMAPINFO bi = {};
+    bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bi.bmiHeader.biWidth = w;
+    bi.bmiHeader.biHeight = -h;          // 自顶向下：与 WIC 行序一致
+    bi.bmiHeader.biPlanes = 1;
+    bi.bmiHeader.biBitCount = 32;
+    bi.bmiHeader.biCompression = BI_RGB;
+    void* bits = nullptr;
+    HBITMAP bmp = ::CreateDIBSection(mem, &bi, DIB_RGB_COLORS, &bits, nullptr, 0);
+    if (bmp == nullptr || bits == nullptr)
+    {
+        ::DeleteDC(mem);
+        return false;
+    }
+    HGDIOBJ old = ::SelectObject(mem, bmp);
+
+    // 每帧从空表开始画（与 WM_PAINT 的顺序一致），否则命中表会留上一次的指针
+    g_powerByName.clear();
+    g_buttonHits.clear();
+    g_tableHits.clear();
+
+    RECT client = { 0, 0, w, h };
+    bool drawn = false;
+    {
+        D2DDcCanvas d2d;
+        if (d2d.bind(mem, client) && d2d.begin(w, h))
+        {
+            d2d.fillRect(client, RGB(238, 240, 243));
+            drawElement(d2d, g_root, 20, 20, kPageBack);
+            d2d.end();
+            drawn = true;
+        }
+    }
+    ::GdiFlush();                        // D2D 走 GDI 落地，落完再取像素
+    // D2D 的 DC 目标会顺手写 alpha 通道（抗锯齿处 <255），PNG 里就成了"半透明白"。
+    // 截图语义是不透明位图：统一拍成 255，免得填充色看着像没画。
+    BYTE* px = static_cast<BYTE*>(bits);
+    const size_t count = (size_t)w * (size_t)h;
+    for (size_t i = 0; i < count; ++i) px[i * 4 + 3] = 255;
+    const bool saved = drawn && saveBgraToPng(bits, w, h, outPath);
+
+    ::SelectObject(mem, old);
+    ::DeleteObject(bmp);
+    ::DeleteDC(mem);
+    return saved;
+}
+
+// ---------------------------------------------------------------------------
 // 主流程
 // ---------------------------------------------------------------------------
 static void printUsage()
@@ -1913,6 +2019,8 @@ static void printUsage()
     wprintf(L"  XmlViewer.exe --check --dump <file>    同时打印布局结果\n");
     wprintf(L"  XmlViewer.exe --check --layout <file>  额外做布局越界检查（诊断用）\n");
     wprintf(L"  XmlViewer.exe --catalog <path> ...     指定控件目录（默认 exe 同目录 control_catalog.xml）\n");
+    wprintf(L"  XmlViewer.exe --render <out.png> [--size WxH] <file.xml>\n");
+    wprintf(L"                                        无窗口离屏渲染成 PNG（设计器同一份画法，AI/CI 用）\n");
 }
 
 static int runViewer(int argc, wchar_t** argv)
@@ -1924,6 +2032,8 @@ static int runViewer(int argc, wchar_t** argv)
     bool checkOnly = false;
     bool dumpLayout = false;
     bool layoutCheck = false;
+    std::wstring renderPath;      // --render：离屏渲染目标 PNG
+    int renderW = 0, renderH = 0; // --size：像素尺寸（不给就按根节点 + 20px 边距）
 
     for (int i = 1; i < argc; ++i)
     {
@@ -1931,6 +2041,20 @@ static int runViewer(int argc, wchar_t** argv)
         if (a == L"--check")
         {
             checkOnly = true;
+        }
+        else if (a == L"--render" && i + 1 < argc)
+        {
+            renderPath = argv[++i];
+        }
+        else if (a == L"--size" && i + 1 < argc)
+        {
+            std::wstring s = argv[++i];
+            const size_t x = s.find(L'x');
+            if (x != std::wstring::npos)
+            {
+                renderW = _wtoi(s.substr(0, x).c_str());
+                renderH = _wtoi(s.substr(x + 1).c_str());
+            }
         }
         else if (a == L"--dump")
         {
@@ -2227,6 +2351,28 @@ static int runViewer(int argc, wchar_t** argv)
     g_tableHits.clear();
     g_buttonHits.clear();
     g_layoutDirty = true;
+    // 离屏渲染：出图就返回，不进消息循环（不建窗口、不建真控件）
+    if (!renderPath.empty())
+    {
+        const int docW = root->w > 0 ? root->w : 640;
+        const int docH = root->h > 0 ? root->h : 480;
+        runtime.layout(0, 0, docW, docH);
+        const int pw = renderW > 0 ? renderW : docW + 40;
+        const int ph = renderH > 0 ? renderH : docH + 40;
+        g_powerByName.clear();
+        g_buttonHits.clear();
+        g_tableHits.clear();
+        const bool ok = renderToPng(renderPath, pw, ph);
+        ::CoUninitialize();
+        if (!ok)
+        {
+            fwprintf(stderr, L"[错误] 离屏渲染失败（D2D 不可用或写文件失败）\n");
+            return 3;
+        }
+        wprintf(L"已渲染 %dx%d -> %s\n", pw, ph, renderPath.c_str());
+        return 0;
+    }
+
     int contentW = (root->w > 0 ? root->w : 640) + 40;
     int contentH = (root->h > 0 ? root->h : 480) + 40;
     if (contentW < 320) contentW = 320;
