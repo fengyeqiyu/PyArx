@@ -557,6 +557,11 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
                            std::wstring(), 10, 9);
 
         // 命中登记：选项卡 -> "ribbon:tab:N"，按钮 -> 按钮 Name（与工具栏命令同名）
+        if (lay.toggleRc.right > lay.toggleRc.left)
+        {
+            m_surfToolRects.push_back(lay.toggleRc);
+            m_surfToolNames.push_back(L"ribbon:toggle");
+        }
         for (size_t i = 0; i < lay.tabs.size(); ++i)
         {
             m_surfToolRects.push_back(lay.tabs[i]);

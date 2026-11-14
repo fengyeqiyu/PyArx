@@ -324,6 +324,7 @@ namespace uidesign
         CString m_widgetFilter;       // 控件箱分类过滤（空 = 全部）
         bool m_codeCollapsed = false; // XML 代码坞是否收起
         void toggleCodeDock();
+        void toggleRibbon();
         void previewCurrent();
         void checkCurrent();
         void copyXmlToClipboard();

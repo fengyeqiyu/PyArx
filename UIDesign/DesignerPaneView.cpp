@@ -1674,6 +1674,21 @@ void DesignerPaneView::toggleCodeDock()
     Invalidate(FALSE);
 }
 
+// Ribbon 功能区收起：折叠状态在控件库模型里，行高由调用方翻档（行高仍来自 XML 的轨道具名）
+void DesignerPaneView::toggleRibbon()
+{
+    XmlElement* root = m_ui.root();
+    if (root == nullptr || root->children.empty()) return;
+    XmlElement* grid = &root->children[0];
+    if (_wcsicmp(xmlmfc::BareTag(grid->tag).c_str(), L"Grid") != 0 || grid->gridRows.size() < 2) return;
+
+    m_ribbon.bodyCollapsed = !m_ribbon.bodyCollapsed;
+    if (_wcsicmp(grid->gridRows[1].first.c_str(), L"Height") == 0)
+        grid->gridRows[1].second = m_ribbon.bodyCollapsed ? L"34" : L"126";
+    relayoutUi();
+    Invalidate(FALSE);
+}
+
 void DesignerPaneView::copyXmlToClipboard()
 {
     const std::wstring xml = m_doc.toXml();

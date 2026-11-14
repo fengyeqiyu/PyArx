@@ -192,12 +192,21 @@ void DesignerPaneView::surfaceToolClick(int idx)
     if (idx < 0 || idx >= (int)m_surfToolNames.size()) return;
     const CString name(m_surfToolNames[idx].c_str());
 
+    // Ribbon 右端三角：收起 / 展开功能区（像 Office 那样只留选项卡条）
+    if (name.Compare(_T("ribbon:toggle")) == 0)
+    {
+        toggleRibbon();
+        return;
+    }
+
     // Ribbon 选项卡：切页（选中态归控件库模型，重绘即可）
     if (name.Left(11).Compare(_T("ribbon:tab:")) == 0)
     {
         const int tab = _wtoi((LPCWSTR)name.Mid(11));
         if (tab >= 0 && tab < (int)m_ribbon.tabs.size())
         {
+            if (m_ribbon.bodyCollapsed)   // 收起状态下点选项卡 = 展开（否则点了看不到内容）
+                toggleRibbon();
             m_ribbon.selected = tab;
             Invalidate(FALSE);
         }

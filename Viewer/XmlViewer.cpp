@@ -787,9 +787,12 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
                 xmlctl::ribbonIconBase() = exeDir();
             xmlctl::XRibbonModel model;
             xmlctl::ribbonParse(*el, model);
+            // Collapsed="true"：只显示选项卡条（与设计器点右端三角收起后的观感一致）
+            model.bodyCollapsed = _wcsicmp(el->get(L"Collapsed").c_str(), L"true") == 0;
             const int tabH = 34;
             RECT tabRc  = { rc.left, rc.top, rc.right, rc.top + tabH };
-            RECT bodyRc = { rc.left, rc.top + tabH, rc.right, rc.bottom };
+            RECT bodyRc = { rc.left, rc.top + tabH, rc.right,
+                            model.bodyCollapsed ? rc.top + tabH : rc.bottom };
             xmlctl::XRibbonMetrics mx;
             mx.bodyH = bodyRc.bottom - bodyRc.top;
             mx.titleTop = (std::max)(36, mx.bodyH - 24);

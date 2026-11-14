@@ -49,6 +49,7 @@ struct XRibbonModel
 {
     std::vector<XRibbonTab> tabs;
     int selected = 0;
+    bool bodyCollapsed = false;   // 功能区是否收起（只留选项卡条），由调用方翻转
 
     const XRibbonTab* current() const
     {
@@ -72,6 +73,7 @@ struct XRibbonMetrics
     int titleH  = 16;
     int iconSide = 30;
     int foldW   = 46;   // 折叠组的宽度（三个点 + 组名）
+    int toggleW = 26;   // 选项卡条右端的收起/展开三角
 };
 
 // ---------------------------------------------------------------- 解析
@@ -140,6 +142,7 @@ struct XRibbonLayout
 {
     std::vector<RECT> tabs;                  // 每个选项卡的矩形
     std::vector<XRibbonGroupBox> groups;     // 当前选项卡的组
+    RECT toggleRc = { 0, 0, 0, 0 };          // 选项卡条右端的收起/展开三角
     int contentWidth = 0;                    // 功能区实际占用宽度
 };
 
@@ -160,6 +163,13 @@ inline void ribbonLayout(const XRibbonModel& m, const XRibbonMetrics& mx,
         out.tabs.push_back(RECT{ x, tabRc.top, x + w, tabRc.bottom });
         x += w;
     }
+
+    // 选项卡条右端的收起/展开三角（Office 的"折叠功能区"按钮）
+    out.toggleRc = RECT{ tabRc.right - mx.toggleW - 4, tabRc.top,
+                         tabRc.right - 4, tabRc.bottom };
+
+    // 功能区被收起时不做组布局（调用方已把行高压到选项卡条高度）
+    if (m.bodyCollapsed || bodyRc.bottom <= bodyRc.top) return;
 
     const XRibbonTab* tab = m.current();
     if (tab == nullptr) return;
@@ -312,7 +322,27 @@ inline void ribbonDraw(XmlCanvas& cv, const RECT& tabRc, const RECT& bodyRc, con
     for (size_t i = 0; i < lay.tabs.size() && i < m.tabs.size(); ++i)
         ribbonDrawTab(cv, lay.tabs[i], m.tabs[i].header, (int)i == m.selected, (int)i == hotTab, tabPt);
 
-    // 功能区
+    // 收起/展开三角：展开时朝下（点它收起），收起时朝上
+    if (lay.toggleRc.right > lay.toggleRc.left)
+    {
+        const bool hot = _wcsicmp(hotButton.c_str(), L"ribbon:toggle") == 0;
+        if (hot)
+        {
+            COLORREF back = RGB(52, 60, 72);
+            cv.fillRoundRect(lay.toggleRc, back, back, 4);
+        }
+        const int cx = (lay.toggleRc.left + lay.toggleRc.right) / 2;
+        const int cy = (lay.toggleRc.top + lay.toggleRc.bottom) / 2;
+        const COLORREF c = hot ? th.text : th.textDim;
+        if (m.bodyCollapsed)
+            cv.fillPath({ POINT{ cx - 5, cy + 3 }, POINT{ cx + 5, cy + 3 }, POINT{ cx, cy - 4 } }, c);
+        else
+            cv.fillPath({ POINT{ cx - 5, cy - 3 }, POINT{ cx + 5, cy - 3 }, POINT{ cx, cy + 4 } }, c);
+    }
+
+    // 功能区（收起时不画）
+    if (m.bodyCollapsed || bodyRc.bottom <= bodyRc.top) return;
+
     cv.fillRect(bodyRc, RGB(32, 36, 44));
     cv.fillRect(RECT{ bodyRc.left, bodyRc.bottom - 1, bodyRc.right, bodyRc.bottom }, th.line);
 
@@ -375,11 +405,18 @@ struct XRibbonHit
     int tab = -1;             // 命中的选项卡序号（-1 = 未命中）
     int group = -1;           // 命中的组序号
     int button = -1;          // 命中的按钮序号
+    bool toggle = false;      // 命中收起/展开三角
 };
 
 inline XRibbonHit ribbonHitTest(const XRibbonLayout& lay, POINT pt)
 {
     XRibbonHit hit;
+    const RECT& tg = lay.toggleRc;
+    if (tg.right > tg.left && pt.x >= tg.left && pt.x < tg.right && pt.y >= tg.top && pt.y < tg.bottom)
+    {
+        hit.toggle = true;
+        return hit;
+    }
     for (size_t i = 0; i < lay.tabs.size(); ++i)
     {
         const RECT& r = lay.tabs[i];
