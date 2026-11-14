@@ -499,9 +499,11 @@ public:
         return it == m_themes.end() ? std::wstring() : it->second;
     }
 
+    // 真控件的窗口句柄：宿主需要显示/隐藏或挪动某个已经实体化的控件时用它
+    HWND ctrlHwnd(int id) const { return get(id); }
+
     // 控件都建好后统一排一次：边建边排会把还没建出来的兄弟排除在外
-    void applyOrder()
-    {
+    void applyOrder()    {
         if (m_parent != nullptr)
             m_order.applyZOrder(m_parent->GetSafeHwnd());
     }

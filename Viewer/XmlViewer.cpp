@@ -571,6 +571,10 @@ static void validateElement(IXMLDOMElement* el,
 // 渲染（GDI，按 XML 布局结果绘制）
 // ---------------------------------------------------------------------------
 static XmlElement* g_root = nullptr;
+// 布局只在"脏"时重排：外观属性被改（如侧板宽度）就置脏，下一帧 layout 一次，
+// 绘制统一读 preview 矩形 —— 这样 XML 属性与画面永远是同一份数据。
+static XmlRuntime* g_runtime = nullptr;
+static bool g_layoutDirty = true;
 
 static bool isContainerTag(const std::wstring& tag)
 {
@@ -647,6 +651,15 @@ static POINT  g_panLast = { 0, 0 };
 static XmlElement* g_panEl = nullptr;   // 正在平移的画布（多画布时不能只认全局那一张）
 static XmlElement* g_miniDragEl = nullptr;  // 正在小地图上拖动视口的迷你画布
 
+// 节点编辑侧板：XML 里是一块 Width=0 的 XStackPanel，展开时把主画布同步收窄
+static bool         g_editOpen = false;
+static std::wstring g_editCode;             // 正在编辑的节点编号
+static double       g_editLoad = 0.0;       // 待应用的负载（kW）
+// 每帧重建的命中表：自绘 Button 的矩形、表格布局与选中行
+static std::map<XmlElement*, RECT> g_buttonHits;
+static std::map<XmlElement*, xmltable::Table> g_tableHits;
+static std::map<XmlElement*, int> g_tableSel;
+
 static xmlctl::PowerCanvasView* mainPowerView()
 {
     auto it = g_powerSlots.find(g_powerMainEl);
@@ -673,6 +686,175 @@ static XmlElement* powerElOf(PowerSlot* slot)
     for (auto& kv : g_powerSlots)
         if (&kv.second == slot) return kv.first;
     return nullptr;
+}
+
+// XmlElement 没有 parent 指针，只能从根按 Name 递归找（Name 解析进的是 name 成员）
+static XmlElement* findByName(XmlElement* root, const std::wstring& name)
+{
+    if (root == nullptr) return nullptr;
+    if (root->name == name) return root;
+    for (auto& c : root->children)
+        if (XmlElement* r = findByName(&c, name)) return r;
+    return nullptr;
+}
+
+// 下面两个助手定义在后面（选中回写 / 表单回写），这里先声明
+static bool setLabelByName(XmlElement& el, const std::wstring& name, const std::wstring& text);
+static void viewerSyncSelection();
+
+// 把编辑态写到侧板那几个 XLabel 上（选中节点 → 表单外观）
+static void editorSyncLabels()
+{
+    const xmlplan::PowerNode* node = nullptr;
+    if (xmlctl::PowerCanvasView* pv = mainPowerView())
+        for (auto& n : pv->plan.nodes)
+            if (n.code == g_editCode) { node = &n; break; }
+
+    auto put = [](const wchar_t* name, const std::wstring& value) {
+        if (g_root != nullptr) setLabelByName(*g_root, name, value);
+    };
+    if (node == nullptr)
+    {
+        put(L"lblEdCode", L"编号　—");
+        put(L"lblEdName", L"名称　—");
+        put(L"lblEdUp", L"上游　—");
+        put(L"lblEdCable", L"电缆　—");
+        put(L"lblEdVolt", L"电压　—");
+        put(L"lblEdLoad", L"负载　— kW");
+        put(L"lblEdLen", L"长度　— m");
+        return;
+    }
+    put(L"lblEdCode", L"编号　" + node->code);
+    put(L"lblEdName", L"名称　" + node->name);
+    put(L"lblEdUp", L"上游　" + (node->upstream.empty() ? std::wstring(L"—") : node->upstream));
+    put(L"lblEdCable", L"电缆　" + (node->cable.empty() ? std::wstring(L"—") : node->cable));
+    put(L"lblEdVolt", L"电压　" + (node->voltage.empty() ? std::wstring(L"—") : node->voltage));
+    wchar_t buf[64] = {};
+    swprintf_s(buf, L"%.2f", g_editLoad);
+    std::wstring loadText(buf);
+    if (loadText.find(L'.') != std::wstring::npos)
+    {
+        while (!loadText.empty() && loadText.back() == L'0') loadText.pop_back();
+        if (!loadText.empty() && loadText.back() == L'.') loadText.pop_back();
+    }
+    put(L"lblEdLoad", L"负载　" + loadText + L" kW");
+    put(L"lblEdLen", L"长度　" + (node->length > 0 ? std::to_wstring((int)node->length) + L" m" : std::wstring(L"—")));
+}
+
+// 选中一个节点：表格行、画布、表单三处同步
+static void editorSelectNode(const std::wstring& code)
+{
+    g_editCode = code;
+    if (xmlctl::PowerCanvasView* pv = mainPowerView())
+    {
+        pv->sel = code;
+        for (auto& n : pv->plan.nodes)
+            if (n.code == code) { g_editLoad = n.loadKw; break; }
+    }
+    editorSyncLabels();
+    viewerSyncSelection();
+}
+
+static void editorShowButtons(bool show);   // 定义在控件建好之后（要用 g_host / g_bindings）
+
+// 侧板展开/收起：改三处 Width（解析期已把 Width 收进 w 成员，两处都要写）
+// 收起时 Width=0 会被"内容自适应"重新撑开，所以同时把 Left 移出可视区 ——
+// 面板是绝对锚定的，退到窗口外就不参与任何排版，也不必靠额外的显隐开关。
+static void editorToggle(HWND hwnd, bool open)
+{
+    g_editOpen = open;
+    const int planW    = open ? 560 : 978;
+    const int rightW   = open ? 0   : 336;
+    const int editorW  = open ? 632 : 0;
+    const int editorL  = open ? 668 : 2400;
+    auto apply = [&](const wchar_t* name, int w) {
+        XmlElement* el = findByName(g_root, name);
+        if (el == nullptr) return;
+        el->w = w;
+        el->set(L"Width", std::to_wstring(w));
+    };
+    auto moveTo = [&](const wchar_t* name, int left) {
+        if (XmlElement* el = findByName(g_root, name))
+        {
+            // Left 与 Width 一样在解析期收进成员（x / hasX），只 set 属性不会重排
+            el->x = left;
+            el->hasX = true;
+            el->set(L"Left", std::to_wstring(left));
+        }
+    };
+    apply(L"Plan", planW);
+    apply(L"RightPanel", rightW);
+    apply(L"NodeEditor", editorW);
+    moveTo(L"NodeEditor", editorL);
+    // 侧板里的按钮是 MFC 真控件（子 HWND），收起来必须一起藏掉，
+    // 否则它们不会被父面板的裁剪管住，留在窗口底部当幽灵按钮。
+    editorShowButtons(open);
+    g_layoutDirty = true;
+    editorSyncLabels();
+    ::InvalidateRect(hwnd, nullptr, FALSE);
+}
+
+// 侧板表格从当前 Data 重建一次 Rows：应用回写后表格里的数是新的，
+// 不让"表单说 47、表格还写 45"。列与外壳 XML 的 Columns 一一对应。
+static void editorRefreshTable()
+{
+    XmlElement* tbl = findByName(g_root, L"tblNodes");
+    XmlElement* pe = g_powerMainEl;
+    if (tbl == nullptr || pe == nullptr) return;
+
+    std::vector<xmlplan::PowerNode> nodes;
+    std::wstring title, err;
+    bool horizontal = false;
+    if (!xmlplan::parseJson(pe->get(L"Data"), nodes, title, err, &horizontal)) return;
+
+    auto num = [](double v) {
+        std::wstring s = std::to_wstring(v);
+        const size_t dot = s.find(L'.');
+        if (dot != std::wstring::npos)
+        {
+            while (!s.empty() && s.back() == L'0') s.pop_back();
+            if (!s.empty() && s.back() == L'.') s.pop_back();
+        }
+        return s;
+    };
+    std::wstring rows;
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        const auto& n = nodes[i];
+        if (i) rows += L"|";
+        rows += n.code + L"\t" + n.name + L"\t"
+             + (n.upstream.empty() ? std::wstring(L"—") : n.upstream) + L"\t"
+             + (n.cable.empty() ? std::wstring(L"—") : n.cable) + L"\t"
+             + (n.voltage.empty() ? std::wstring(L"—") : n.voltage) + L"\t"
+             + num(n.loadKw);
+    }
+    tbl->set(L"Rows", rows);
+}
+
+// 应用：改负载 → 重排版 → 写回 XML 的 Data（外壳里的数据就是这一份 JSON）
+static void editorApply()
+{
+    XmlElement* pe = g_powerMainEl;
+    if (pe == nullptr || g_editCode.empty()) return;
+
+    std::vector<xmlplan::PowerNode> nodes;
+    std::wstring title, err;
+    bool horizontal = false;
+    if (!xmlplan::parseJson(pe->get(L"Data"), nodes, title, err, &horizontal)) return;
+
+    bool touched = false;
+    for (auto& n : nodes)
+        if (n.code == g_editCode) { n.loadKw = g_editLoad; touched = true; }
+    if (!touched) return;
+
+    xmlplan::PowerPlan plan;
+    xmlplan::PowerPlanStyle style;
+    if (!xmlplan::buildPlan(nodes, plan, style, err, horizontal)) return;
+
+    pe->set(L"Data", xmlplan::toJson(plan));
+    if (xmlctl::PowerCanvasView* pv = mainPowerView()) pv->sel = g_editCode;
+    editorRefreshTable();
+    editorSyncLabels();
 }
 
 static xmlctl::XRibbonModel  g_ribbonModel;
@@ -772,6 +954,9 @@ static COLORREF drawContainer(XmlCanvas& cv, XmlElement* el, const RECT& rc,
 
 static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF parentBack)
 {
+    // 编辑侧板收起时（Width=0）整棵子树不画：宽 0 的容器会被内容"撑开"，
+    // 否则它的按钮/表格会留在窗口里。判据只看宽度，与设计器画布一致。
+    if (el != nullptr && el->name == L"NodeEditor" && el->w <= 0) return;
     RECT rc;
     rc.left = ox + el->previewX;
     rc.top = oy + el->previewY;
@@ -880,9 +1065,16 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
             st.grid = RGB(0xDC, 0xE2, 0xEA);
             st.border = kLine;
             cv.fillRect(rc, RGB(0xFF, 0xFF, 0xFF));
-            if (xmltable::drawTable(cv, rc, el->get(L"Columns"), el->get(L"Rows"),
-                                    el->get(L"Sort"), st))
+            xmltable::Table layout;
+            if (xmltable::buildTable(rc, el->get(L"Columns"), el->get(L"Rows"),
+                                     el->get(L"Sort"), st.pt, layout))
             {
+                // 布局留一份：点击时按同一份几何反查行号
+                g_tableHits[el] = layout;
+                int selRow = -1;
+                auto it = g_tableSel.find(el);
+                if (it != g_tableSel.end()) selRow = it->second;
+                xmltable::drawTable(cv, rc, layout, st, selRow);
                 cv.strokeRect(rc, kLine, 1);
                 return;
             }
@@ -921,7 +1113,7 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
                     v.viewRef = &g_powerSlots[hostEl].view;
                     v.loaded = true;
                     slot.rc = rc;
-                    v.paint(cv, rc, RGB(0xF7, 0xF9, 0xFB));
+                    v.paint(cv, rc, xmlctl::miniBack());
                 }
                 return;
             }
@@ -935,7 +1127,8 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
             if (data != v.data)
             {
                 v.load(data);
-                v.sel.clear();
+                // 数据变版本（应用编辑）后仍保留正在编辑的选中，否则一应用选择就丢
+                v.sel = g_editCode;
             }
             else if (!v.loaded)
             {
@@ -946,7 +1139,7 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
             v.showGrid = (el->get(L"Grid") == L"1") != g_powerGridFlip;
             v.showRuler = (el->get(L"Ruler") == L"1") != g_powerRulerFlip;
             slot.rc = rc;
-            v.paint(cv, rc, RGB(0xF3, 0xF5, 0xF8));
+            v.paint(cv, rc, xmlmfc::theme::track);
             return;
         }
     }
@@ -962,6 +1155,8 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
     }
     else
     {
+        // 普通按钮也要能点：几何就在这里，顺手记一份命中矩形
+        if (_wcsicmp(el->tag.c_str(), L"Button") == 0) g_buttonHits[el] = rc;
         drawLeaf(cv, el, rc, ap, styled, parentBack);
     }
 }
@@ -1045,6 +1240,33 @@ static void viewerSyncSelection()
 static void viewerCommand(HWND hwnd, const std::wstring& name)
 {
     if (name.empty()) return;
+
+    // 侧板命令不依赖画布，先处理（画布不存在时也要能开关）
+    if (name == L"btnNodeEdit")
+    {
+        editorToggle(hwnd, !g_editOpen);
+        return;
+    }
+    if (name == L"btnClose")
+    {
+        editorToggle(hwnd, false);
+        return;
+    }
+    if (name == L"btnLoadUp" || name == L"btnLoadDown")
+    {
+        g_editLoad += (name == L"btnLoadUp") ? 1.0 : -1.0;
+        if (g_editLoad < 0.0) g_editLoad = 0.0;
+        editorSyncLabels();
+        ::InvalidateRect(hwnd, nullptr, FALSE);
+        return;
+    }
+    if (name == L"btnApply")
+    {
+        editorApply();
+        ::InvalidateRect(hwnd, nullptr, FALSE);
+        return;
+    }
+
     xmlctl::PowerCanvasView* pv = mainPowerView();
     if (pv == nullptr) return;
     RECT prc = { 0, 0, 0, 0 };
@@ -1083,6 +1305,15 @@ static void viewerCommand(HWND hwnd, const std::wstring& name)
     else if (name == L"btnMini")
     {
         g_powerMiniHidden = !g_powerMiniHidden;   // 显示/隐藏小地图整块
+    }
+    else if (name == L"btnDevice")
+    {
+        editorToggle(hwnd, true);                 // 数据页「设备表」= 打开节点编辑侧板
+        return;
+    }
+    else if (name == L"btnRelayout")
+    {
+        pv->fitPending = true;                    // 重新排版 = 按当前 XML 重算并适应窗口
     }
     else
     {
@@ -1161,6 +1392,26 @@ static void ensureControlsBuilt(HWND hwnd)
         g_bindings[b.id] = b;
     // 控件全部建好后再排一次叠放：边建边排会漏掉后建的兄弟
     g_host->applyOrder();
+    // 建好这一刻侧板可能还收着：先把它的按钮按当前状态藏起来
+    editorShowButtons(g_editOpen);
+}
+
+// 侧板上的四个按钮是实体控件：跟着侧板的开合显隐（绘制层管不到子 HWND）
+static void editorShowButtons(bool show)
+{
+    if (g_host == nullptr || g_root == nullptr) return;
+    for (const wchar_t* name : { L"btnLoadDown", L"btnLoadUp", L"btnApply", L"btnClose" })
+    {
+        XmlElement* el = findByName(g_root, name);
+        if (el == nullptr) continue;
+        for (auto& kv : g_bindings)
+        {
+            if (kv.second.element != el) continue;
+            const HWND h = g_host->ctrlHwnd(kv.second.id);
+            if (h != nullptr) ::ShowWindow(h, show ? SW_SHOW : SW_HIDE);
+            break;
+        }
+    }
 }
 
 static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -1257,8 +1508,18 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         // 直接合成，反而不受裁剪，最终所有控件都被"糊掉"）。
         ensureControlsBuilt(hwnd);
 
+        // 布局：属性（Width/Height/Left/Top）是唯一真源，改了名字下的属性就重排一次
+        if (g_layoutDirty && g_runtime != nullptr && g_root != nullptr)
+        {
+            g_layoutDirty = false;
+            g_runtime->layout(0, 0, g_root->w > 0 ? g_root->w : 640,
+                                    g_root->h > 0 ? g_root->h : 480);
+        }
+
         // 每帧重建"名字 → 元素"索引：文档重开时元素指针会换，旧指针不能留
         g_powerByName.clear();
+        g_buttonHits.clear();
+        g_tableHits.clear();
 
         static D2DDcCanvas d2d;
         if (d2d.bind(dc, client) && d2d.begin(cw, ch))
@@ -1303,6 +1564,34 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_LBUTTONDOWN:
     {
         POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
+        // 表格行（节点编辑侧板）：点一行 = 选中该设备，表单与画布同步
+        for (auto& kv : g_tableHits)
+        {
+            // 侧板收着只认右板的表；展开后只认侧板的表（另一块宽度为 0，看不见但矩形还在）
+            if (kv.first->name == L"tblNodes" && !g_editOpen) continue;
+            if (kv.first->name != L"tblNodes" && g_editOpen) continue;
+            const int row = xmltable::hitRow(kv.second, p);
+            if (row < 0) continue;
+            g_tableSel[kv.first] = row;
+            if (kv.first->name == L"tblNodes" && row < (int)kv.second.rows.size())
+            {
+                const std::vector<std::wstring>& cells = kv.second.rows[(size_t)row];
+                if (!cells.empty()) editorSelectNode(cells[0]);
+            }
+            ::InvalidateRect(hwnd, nullptr, FALSE);
+            return 0;
+        }
+        // 自绘普通按钮（侧板上的 -1/+1/应用/关闭）
+        for (auto& kv : g_buttonHits)
+        {
+            if (!inRectPt(kv.second, p)) continue;
+            const bool onEditor = (kv.first->name == L"btnLoadUp" || kv.first->name == L"btnLoadDown" ||
+                                   kv.first->name == L"btnApply" || kv.first->name == L"btnClose");
+            if (onEditor && !g_editOpen) continue;
+            viewerCommand(hwnd, kv.first->name);
+            ::InvalidateRect(hwnd, nullptr, FALSE);
+            return 0;
+        }
         if (PowerSlot* slot = powerSlotAt(p))
         {
             if (slot->view.mini)
@@ -1931,6 +2220,13 @@ static int runViewer(int argc, wchar_t** argv)
     g_powerByName.clear();
     g_powerMainEl = nullptr;
     g_panEl = nullptr;
+    g_editOpen = false;
+    g_editCode.clear();
+    g_editLoad = 0.0;
+    g_tableSel.clear();
+    g_tableHits.clear();
+    g_buttonHits.clear();
+    g_layoutDirty = true;
     int contentW = (root->w > 0 ? root->w : 640) + 40;
     int contentH = (root->h > 0 ? root->h : 480) + 40;
     if (contentW < 320) contentW = 320;
@@ -1962,8 +2258,12 @@ static int runViewer(int argc, wchar_t** argv)
     }
     else
         title += filePath;
+    // 预览期间把文档对象挂到全局：窗口过程按需调 layout（属性改了要能重排）
+    g_runtime = &runtime;
+    g_layoutDirty = true;
     int rc = showPreview(title, contentW, contentH,
                          (root != nullptr) ? root->icon : std::wstring());
+    g_runtime = nullptr;
     ::CoUninitialize();
     return rc;
 }

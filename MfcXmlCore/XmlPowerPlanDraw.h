@@ -10,9 +10,17 @@
 #include <vector>
 
 #include "XmlPowerPlan.h"
+#include "XmlTheme.h"
 
 namespace xmlplan
 {
+    // 画布配色：面/线/字全部取主题，语义色（电缆蓝、选中红、双电源红）单独留在这里。
+    // 之前纸面/网格/标尺各写一个硬编码色，改主题时它们最先漂。
+    inline COLORREF clrPaper()    { return xmlmfc::theme::field; }        // 纸面
+    inline COLORREF clrPaperEdge(){ return xmlmfc::theme::grid; }         // 纸边
+    inline COLORREF clrGridLine() { return RGB(0xE9, 0xEC, 0xF0); }       // 纸面网格（比主题 track 更淡）
+    inline COLORREF clrRulerBand(){ return xmlmfc::theme::surface; }      // 标尺带底
+    inline COLORREF clrRulerEdge(){ return xmlmfc::theme::grid; }         // 标尺分界
     // k = 缩放，(ox, oy) = 视口偏移；clip 为客户区矩形（视口裁剪用），nullptr = 不裁剪。
     // 与 HTML 版 power-plan.html 逐项对齐：纸面 / 回路 / 电缆标注 / 卡片（root 深边加粗、
     // terminal 浅蓝底）/ 电压角标 / 三行文字 / 折叠 +N。
@@ -42,8 +50,8 @@ namespace xmlplan
 
         // 纸面
         const RECT paper = { ox, oy, X(plan.width), Y(plan.height) };
-        cv.fillRect(paper, RGB(0xFF, 0xFF, 0xFF));
-        cv.strokeRect(paper, RGB(0xCF, 0xD6, 0xDF), 1);
+        cv.fillRect(paper, clrPaper());
+        cv.strokeRect(paper, clrPaperEdge(), 1);
 
         // 网格：每 100 模型单位一条，缩得太密就不画（否则放大时满屏线）
         if (showGrid)
@@ -55,12 +63,12 @@ namespace xmlplan
                 for (int gx = stepM; gx < plan.width; gx += stepM)
                 {
                     const int px = X(gx);
-                    cv.fillRect(RECT{ px, paper.top, px + 1, paper.bottom }, RGB(0xE6, 0xEB, 0xF2));
+                    cv.fillRect(RECT{ px, paper.top, px + 1, paper.bottom }, clrGridLine());
                 }
                 for (int gy = stepM; gy < plan.height; gy += stepM)
                 {
                     const int py = Y(gy);
-                    cv.fillRect(RECT{ paper.left, py, paper.right, py + 1 }, RGB(0xE6, 0xEB, 0xF2));
+                    cv.fillRect(RECT{ paper.left, py, paper.right, py + 1 }, clrGridLine());
                 }
             }
         }
@@ -218,7 +226,7 @@ namespace xmlplan
             if (isDual) border = RGB(0xE0, 0x24, 0x24);
             if (isSel) border = RGB(0xE1, 0x57, 0x59);
             const COLORREF fill = isTerm ? RGB(0xEA, 0xF2, 0xFB)
-                                         : (isDual ? RGB(0xFF, 0xF3, 0xF3) : RGB(0xFF, 0xFF, 0xFF));
+                                         : (isDual ? RGB(0xFF, 0xF3, 0xF3) : xmlmfc::theme::field);
             cv.fillRoundRect(brc, fill, border, radius);
             const int spanPx = brc.right - brc.left;
             if (spanPx < 10)
@@ -305,10 +313,10 @@ namespace xmlplan
         const int band = 18;
         const RECT bandV = { rc.left, rc.top, rc.left + band, rc.bottom };
         const RECT bandH = { rc.left, rc.top, rc.right, rc.top + band };
-        cv.fillRect(bandV, RGB(0xF7, 0xF9, 0xFB));
-        cv.fillRect(bandH, RGB(0xF7, 0xF9, 0xFB));
-        cv.fillRect(RECT{ rc.left + band - 1, rc.top, rc.left + band, rc.bottom }, RGB(0xD7, 0xDE, 0xE7));
-        cv.fillRect(RECT{ rc.left, rc.top + band - 1, rc.right, rc.top + band }, RGB(0xD7, 0xDE, 0xE7));
+        cv.fillRect(bandV, clrRulerBand());
+        cv.fillRect(bandH, clrRulerBand());
+        cv.fillRect(RECT{ rc.left + band - 1, rc.top, rc.left + band, rc.bottom }, clrRulerEdge());
+        cv.fillRect(RECT{ rc.left, rc.top + band - 1, rc.right, rc.top + band }, clrRulerEdge());
 
         auto X = [&](double v) { return ox + static_cast<int>(lroundf(static_cast<float>(v) * k)); };
         auto Y = [&](double v) { return oy + static_cast<int>(lroundf(static_cast<float>(v) * k)); };
@@ -324,12 +332,12 @@ namespace xmlplan
             if (py < rc.top + band || py > rc.bottom - 2) continue;
             const bool major = (g % 500) == 0;
             cv.fillRect(RECT{ rc.left + (major ? 2 : 7), py, rc.left + band - 3, py + 1 },
-                        RGB(0x9A, 0xA4, 0xB0));
+                        xmlmfc::theme::muted);
             if (major && k >= 0.35f)
             {
                 swprintf_s(buf, L"%d", g);
                 cv.text(RECT{ rc.left + band + 2, py - 6, rc.left + band + 40, py + 8 },
-                        buf, RGB(0x6B, 0x74, 0x80), DT_LEFT, 7, L"Microsoft YaHei");
+                        buf, xmlmfc::theme::muted, DT_LEFT, 7, L"Microsoft YaHei");
             }
         }
         // 横向
@@ -339,12 +347,12 @@ namespace xmlplan
             if (px < rc.left + band || px > rc.right - 2) continue;
             const bool major = (g % 500) == 0;
             cv.fillRect(RECT{ px, rc.top + (major ? 2 : 7), px + 1, rc.top + band - 3 },
-                        RGB(0x9A, 0xA4, 0xB0));
+                        xmlmfc::theme::muted);
             if (major && k >= 0.35f)
             {
                 swprintf_s(buf, L"%d", g);
                 cv.text(RECT{ px + 3, rc.top + 2, px + 60, rc.top + band - 2 },
-                        buf, RGB(0x6B, 0x74, 0x80), DT_LEFT, 7, L"Microsoft YaHei");
+                        buf, xmlmfc::theme::muted, DT_LEFT, 7, L"Microsoft YaHei");
             }
         }
     }

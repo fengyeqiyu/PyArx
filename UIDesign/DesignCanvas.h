@@ -1522,6 +1522,9 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                      node->previewX + origin.x + node->previewW,
                      node->previewY + origin.y + node->previewH);
             if (isRoot) s_docRoot = node;   // 每帧记住文档根（小地图按名字查主画布）
+            // 收起态的编辑侧板（Width=0）整棵子树不画：它是运行时的浮出面板，
+            // 宽 0 时会被内容"撑开"画出界面外的东西（预览器同理，按同一个名字判定）
+            if (node->name == L"NodeEditor" && node->w <= 0) return;
             // 视口裁剪：整棵子树都在可见矩形外时直接跳过（根窗是锚点，不裁）
             if (!isRoot && vp != nullptr &&
                 (rc.right < vp->left || rc.bottom < vp->top ||
@@ -1700,7 +1703,7 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                 // 否则库内 fit/偏移的像素会被外层再乘一次缩放（双重缩放、错位）。
                 RECT drc = { node->previewX, node->previewY,
                              node->previewX + node->previewW, node->previewY + node->previewH };
-                v.paint(cv, drc, isMini ? RGB(0xF7, 0xF9, 0xFB) : RGB(0xF3, 0xF5, 0xF8));
+                v.paint(cv, drc, isMini ? xmlmfc::theme::surface : xmlmfc::theme::track);
                 if (!isMini && !v.loaded && !v.error.empty())
                 {
                     RECT trc = { rc.left + 12, rc.top + 12, rc.right - 12, rc.top + 36 };

@@ -22,6 +22,9 @@
           <XRibbonButton Name="btnUndo" Icon="res/undo.png" Text="撤销"/>
           <XRibbonButton Name="btnRedo" Icon="res/redo.png" Text="重做"/>
         </XRibbonGroup>
+        <XRibbonGroup Header="节点">
+          <XRibbonButton Name="btnNodeEdit" Icon="res/alignleft.png" Text="节点编辑"/>
+        </XRibbonGroup>
       </XRibbonTab>
       <XRibbonTab Header="视图">
         <XRibbonGroup Header="缩放">
@@ -60,7 +63,7 @@
     <XStackPanel Orientation="Horizontal" Height="660">
       <PowerCanvas Name="Plan" Width="978" Height="660" ShowCable="1" Grid="1" Ruler="1" Data="{&quot;dir&quot;:&quot;h&quot;,&quot;nodes&quot;:[{&quot;code&quot;:&quot;P0&quot;,&quot;name&quot;:&quot;10kV 总进线&quot;,&quot;upstream&quot;:&quot;&quot;,&quot;cable&quot;:&quot;YJV22-3×70&quot;,&quot;loadKw&quot;:0,&quot;voltage&quot;:&quot;10kV&quot;,&quot;length&quot;:0},{&quot;code&quot;:&quot;P1&quot;,&quot;name&quot;:&quot;1# 双电源柜&quot;,&quot;upstream&quot;:&quot;P0&quot;,&quot;cable&quot;:&quot;YJV22-4×95&quot;,&quot;loadKw&quot;:45,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:22},{&quot;code&quot;:&quot;P2&quot;,&quot;name&quot;:&quot;2# 配电柜&quot;,&quot;upstream&quot;:&quot;P0&quot;,&quot;cable&quot;:&quot;YJV22-4×70&quot;,&quot;loadKw&quot;:36,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:18},{&quot;code&quot;:&quot;T11&quot;,&quot;name&quot;:&quot;中试车间照明&quot;,&quot;upstream&quot;:&quot;P1&quot;,&quot;cable&quot;:&quot;YJV22-4×35&quot;,&quot;loadKw&quot;:11,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:12},{&quot;code&quot;:&quot;T12&quot;,&quot;name&quot;:&quot;车间动力 1#&quot;,&quot;upstream&quot;:&quot;P1&quot;,&quot;cable&quot;:&quot;YJV22-4×50&quot;,&quot;loadKw&quot;:22,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:26},{&quot;code&quot;:&quot;T13&quot;,&quot;name&quot;:&quot;涂布机主控&quot;,&quot;upstream&quot;:&quot;P1&quot;,&quot;cable&quot;:&quot;YJV22-4×25&quot;,&quot;loadKw&quot;:8.5,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:10},{&quot;code&quot;:&quot;T21&quot;,&quot;name&quot;:&quot;空压站&quot;,&quot;upstream&quot;:&quot;P2&quot;,&quot;cable&quot;:&quot;YJV22-4×35&quot;,&quot;loadKw&quot;:15,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:14},{&quot;code&quot;:&quot;T22&quot;,&quot;name&quot;:&quot;空调机房&quot;,&quot;upstream&quot;:&quot;P2&quot;,&quot;cable&quot;:&quot;YJV22-4×50&quot;,&quot;loadKw&quot;:30,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:32},{&quot;code&quot;:&quot;T23&quot;,&quot;name&quot;:&quot;办公区照明&quot;,&quot;upstream&quot;:&quot;P2&quot;,&quot;cable&quot;:&quot;YJV22-4×16&quot;,&quot;loadKw&quot;:6,&quot;voltage&quot;:&quot;220V&quot;,&quot;length&quot;:6},{&quot;code&quot;:&quot;T24&quot;,&quot;name&quot;:&quot;UPS 机房&quot;,&quot;upstream&quot;:&quot;P2&quot;,&quot;cable&quot;:&quot;YJV22-4×25&quot;,&quot;loadKw&quot;:9,&quot;voltage&quot;:&quot;380V&quot;,&quot;length&quot;:8},{&quot;code&quot;:&quot;L111&quot;,&quot;name&quot;:&quot;车间插座回路&quot;,&quot;upstream&quot;:&quot;T11&quot;,&quot;cable&quot;:&quot;YJV22-4×16&quot;,&quot;loadKw&quot;:3.5,&quot;voltage&quot;:&quot;220V&quot;,&quot;length&quot;:3},{&quot;code&quot;:&quot;L112&quot;,&quot;name&quot;:&quot;应急照明&quot;,&quot;upstream&quot;:&quot;T11&quot;,&quot;cable&quot;:&quot;YJV22-4×10&quot;,&quot;loadKw&quot;:1.5,&quot;voltage&quot;:&quot;220V&quot;,&quot;length&quot;:2}]}"/>
 
-      <XStackPanel Width="336" Height="660">
+      <XStackPanel Name="RightPanel" Width="336" Height="660">
         <XStackPanel Orientation="Horizontal" Height="34">
           <XLabel Content="选中设备" Width="120" Height="34"/>
           <XLabel Name="lblSelCode" Content="（未选中）" Height="34"/>
@@ -83,6 +86,7 @@
         <XDivider Height="1"/>
         <XLabel Content="设备清单（数据页）" Height="28"/>
         <TableView Width="316" Height="182" Columns="设备:56|名称:104|kW:44|电缆:110" Rows="P0	10kV 总进线	0	YJV22-3x70|P1	1# 双电源柜	45	YJV22-4x95|P2	2# 配电柜	36	YJV22-4x70|T11	中试车间照明	11	YJV22-4x35|T12	车间动力 1#	22	YJV22-4x50|T13	涂布机主控	8.5	YJV22-4x25|T21	空压站	15	YJV22-4x35|T22	空调机房	30	YJV22-4x50|T23	办公区照明	6	YJV22-4x16|T24	UPS 机房	9	YJV22-4x25|L111	车间插座回路	3.5	YJV22-4x16|L112	应急照明	1.5	YJV22-4x10"/>
+
       </XStackPanel>
     </XStackPanel>
 
@@ -91,4 +95,22 @@
       <XLabel Name="lblState" Content="就绪 · 12 台设备 · 11 条回路" Height="26"/>
     </XStackPanel>
   </XStackPanel>
+
+        <XStackPanel Name="NodeEditor" Left="668" Top="150" Width="0" Height="660" Background="#FFFFFFFF" BorderColor="#FFD7DEE7">
+          <XLabel Left="20" Top="14" Width="592" Height="34" Content="节点编辑"/>
+          <XLabel Name="lblEdHint" Left="20" Top="50" Width="592" Height="22" Content="点表格一行选中设备，改负载后按「应用」回写画布"/>
+          <TableView Name="tblNodes" Left="16" Top="78" Width="600" Height="280" Columns="编号:56|名称:146|上游:84|电缆:134|电压:60|负载:68" Rows="P0	10kV 总进线	—	YJV22-3x70	10kV	0	—|P1	1# 双电源柜	P0	YJV22-4x95	380V	45	22|P2	2# 配电柜	P0	YJV22-4x70	380V	36	18|T11	中试车间照明	P1	YJV22-4x35	380V	11	12|T12	车间动力 1#	P1	YJV22-4x50	380V	22	26|T13	涂布机主控	P1	YJV22-4x25	380V	8.5	10|T21	空压站	P2	YJV22-4x35	380V	15	14|T22	空调机房	P2	YJV22-4x50	380V	30	32|T23	办公区照明	P2	YJV22-4x16	220V	6	6|T24	UPS 机房	P2	YJV22-4x25	380V	9	8|L111	车间插座回路	T12	YJV22-4x16	220V	3.5	3|L112	应急照明	T11	YJV22-4x10	220V	1.5	2"/>
+          <XLabel Name="lblEdCode" Left="20" Top="366" Width="592" Height="28" Content="编号　—"/>
+          <XLabel Name="lblEdName" Left="20" Top="396" Width="592" Height="28" Content="名称　—"/>
+          <XLabel Name="lblEdUp" Left="20" Top="426" Width="592" Height="28" Content="上游　—"/>
+          <XLabel Name="lblEdCable" Left="20" Top="456" Width="592" Height="28" Content="电缆　—"/>
+          <XLabel Name="lblEdVolt" Left="20" Top="486" Width="592" Height="28" Content="电压　—"/>
+          <XLabel Name="lblEdLoad" Left="20" Top="516" Width="592" Height="28" Content="负载　— kW"/>
+          <XLabel Name="lblEdLen" Left="20" Top="546" Width="592" Height="28" Content="长度　— m"/>
+          <Button Name="btnLoadDown" Left="20" Top="586" Width="88" Height="30" Content="-1 kW"/>
+          <Button Name="btnLoadUp" Left="116" Top="586" Width="88" Height="30" Content="+1 kW"/>
+          <Button Name="btnApply" Left="212" Top="586" Width="88" Height="30" Content="应用"/>
+          <Button Name="btnClose" Left="308" Top="586" Width="88" Height="30" Content="关闭"/>
+        </XStackPanel>
+
 </XWindow>

@@ -15,9 +15,15 @@
 #include "XmlDraw.h"
 #include "XmlPowerPlan.h"
 #include "XmlPowerPlanDraw.h"
+#include "XmlTheme.h"
 
 namespace xmlctl
 {
+    // 小地图的配色一律取主题，不在这里自造色（否则改主题时它是最先漂的那块）
+    inline COLORREF miniBack()     { return xmlmfc::theme::surface; }
+    inline COLORREF miniBorder()   { return xmlmfc::theme::grid; }
+    inline COLORREF miniViewport() { return xmlmfc::theme::accent; }
+    inline COLORREF miniViewportHalo() { return RGB(0xC9, 0xDC, 0xF4); }   // accent 的淡色光晕
     struct PowerCanvasView
     {
         xmlplan::PowerPlan plan;
@@ -255,12 +261,12 @@ namespace xmlctl
                 if (vrc.top < rc.top) vrc.top = rc.top;
                 if (vrc.right > rc.right) vrc.right = rc.right;
                 if (vrc.bottom > rc.bottom) vrc.bottom = rc.bottom;
-                cv.strokeRect(vrc, RGB(0x2F, 0x6F, 0xE8), 1);
+                cv.strokeRect(vrc, miniViewport(), 1);
                 cv.strokeRect(RECT{ vrc.left - 1, vrc.top - 1, vrc.right + 1, vrc.bottom + 1 },
-                              RGB(0x9C, 0xBC, 0xF2), 1);
+                              miniViewportHalo(), 1);
             }
             cv.clipPop();
-            cv.strokeRect(rc, RGB(0xCF, 0xD6, 0xDF), 1);
+            cv.strokeRect(rc, miniBorder(), 1);
         }
 
         // 小地图上的一点 → 模型坐标（宿主据此把主画布居中过去）

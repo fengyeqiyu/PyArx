@@ -1,12 +1,13 @@
 #pragma once
-// XmlTableDraw —— 表格类控件的唯一画法（控件库，header-only，无 MFC 依赖）。
+// XmlTableDraw —— 表格类控件的唯一画法（控件库，header-only，无 MFC 窗口依赖）。
 //
 // XML 语法（与引擎一致）：
 //   Columns="名称:180|状态:100"       列标题 + 可选列宽（冒号后纯数字）
 //   Rows="甲<TAB>1|乙<TAB>2"          行用 | 分隔，单元格用 TAB 分隔
 //   Sort="名称:desc,状态:asc"         多键排序，键 = 列标题或 0 基列序号，缺省升序
 //
-// 设计器画布、预览器、运行时都调这一份，观感不可能再分叉。
+// 拆成三段：buildTable（算几何，含排序）→ hitRow / rowRect（命中与选中）→ drawTable（上色）。
+// 设计器、预览器、运行时都调这一份，观感和命中不可能再分叉。
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -30,6 +31,31 @@ namespace xmltable
         return out;
     }
 
+    struct Col
+    {
+        std::wstring title;
+        int w = 120;
+    };
+
+    // 一次布局的全部几何：命中、绘制、行高亮都从它取，避免两处各算一遍
+    struct Table
+    {
+        std::vector<Col> cols;
+        std::vector<std::vector<std::wstring>> rows;
+        std::vector<int> sortCol;
+        std::vector<bool> sortDesc;
+        int headH = 22;
+        int rowH = 20;
+        int left = 0, top = 0, availW = 0, bottom = 0;
+        bool empty() const { return cols.empty(); }
+        int visibleRows() const
+        {
+            if (rowH <= 0) return 0;
+            const int h = bottom - (top + headH);
+            return h <= 0 ? 0 : h / rowH;
+        }
+    };
+
     struct Style
     {
         COLORREF bg      = RGB(0xFF, 0xFF, 0xFF);
@@ -37,17 +63,21 @@ namespace xmltable
         COLORREF headBg  = RGB(0xF3, 0xF5, 0xF8);
         COLORREF grid    = RGB(0xDC, 0xE2, 0xEA);
         COLORREF border  = RGB(0xCF, 0xD6, 0xDF);
+        COLORREF selBg   = RGB(0xE8, 0xF0, 0xFE);   // 选中行底色
+        COLORREF selInk  = RGB(0x14, 0x3C, 0x8B);   // 选中行文字
         int      pt      = 9;
         std::wstring family = L"Microsoft YaHei";
     };
 
-    // 画一张表；返回 false 表示 Columns 没声明（调用方按自己的占位方式处理）
-    inline bool drawTable(XmlCanvas& cv, const RECT& rc,
-                          const std::wstring& colsAttr, const std::wstring& rowsAttr,
-                          const std::wstring& sortAttr, const Style& st = Style())
+    // 算几何（列宽压缩、多键排序都在这里做完）。列没声明时返回 false。
+    inline bool buildTable(const RECT& rc, const std::wstring& colsAttr, const std::wstring& rowsAttr,
+                           const std::wstring& sortAttr, int pt, Table& t)
     {
-        struct Col { std::wstring title; int w; };
-        std::vector<Col> cols;
+        t.cols.clear();
+        t.rows.clear();
+        t.sortCol.clear();
+        t.sortDesc.clear();
+
         for (auto& seg : splitBy(colsAttr, L'|'))
         {
             Col c;
@@ -63,13 +93,11 @@ namespace xmltable
                     c.title = seg.substr(0, colon);
                 }
             }
-            cols.push_back(c);
+            t.cols.push_back(c);
         }
-        if (cols.empty()) return false;
+        if (t.cols.empty()) return false;
 
-        // 多键排序：两边都是数字时按数值比，否则按字符串比；写法顺序即优先级
-        struct SortKey { int col; bool desc; };
-        std::vector<SortKey> sortKeys;
+        // 多键排序：两边都是数字时按数值比，否则按字符串比；书写顺序即优先级
         for (auto& seg : splitBy(sortAttr, L','))
         {
             std::wstring item = seg;
@@ -89,21 +117,20 @@ namespace xmltable
             if (!item.empty() && item.find_first_not_of(L"0123456789") == std::wstring::npos)
             {
                 colIdx = _wtoi(item.c_str());
-                if (colIdx < 0 || colIdx >= (int)cols.size()) colIdx = -1;
+                if (colIdx < 0 || colIdx >= (int)t.cols.size()) colIdx = -1;
             }
             if (colIdx < 0)
             {
-                for (size_t ci = 0; ci < cols.size(); ++ci)
-                    if (_wcsicmp(cols[ci].title.c_str(), item.c_str()) == 0) { colIdx = (int)ci; break; }
+                for (size_t ci = 0; ci < t.cols.size(); ++ci)
+                    if (_wcsicmp(t.cols[ci].title.c_str(), item.c_str()) == 0) { colIdx = (int)ci; break; }
             }
-            if (colIdx >= 0) sortKeys.push_back({ colIdx, desc });
+            if (colIdx >= 0) { t.sortCol.push_back(colIdx); t.sortDesc.push_back(desc); }
         }
 
-        std::vector<std::vector<std::wstring>> data;
         for (auto& rtext : splitBy(rowsAttr, L'|'))
-            data.push_back(splitBy(rtext, L'\t'));
+            t.rows.push_back(splitBy(rtext, L'\t'));
 
-        if (!sortKeys.empty() && data.size() > 1)
+        if (!t.sortCol.empty() && t.rows.size() > 1)
         {
             auto numOf = [](const std::wstring& s, double& out) -> bool {
                 if (s.empty()) return false;
@@ -115,86 +142,122 @@ namespace xmltable
                 static const std::wstring kEmpty;
                 return (ci >= 0 && ci < (int)row.size()) ? row[ci] : kEmpty;
             };
-            std::stable_sort(data.begin(), data.end(),
+            std::stable_sort(t.rows.begin(), t.rows.end(),
                 [&](const std::vector<std::wstring>& A, const std::vector<std::wstring>& B) {
-                    for (const auto& k : sortKeys)
+                    for (size_t k = 0; k < t.sortCol.size(); ++k)
                     {
-                        const std::wstring& a = cellOf(A, k.col);
-                        const std::wstring& b = cellOf(B, k.col);
+                        const std::wstring& a = cellOf(A, t.sortCol[k]);
+                        const std::wstring& b = cellOf(B, t.sortCol[k]);
                         double na = 0, nb = 0;
                         const bool an = numOf(a, na);
                         const bool bn = numOf(b, nb);
                         int cmp = 0;
                         if (an && bn) cmp = (na < nb) ? -1 : ((na > nb) ? 1 : 0);
                         else cmp = _wcsicmp(a.c_str(), b.c_str());
-                        if (cmp != 0) return k.desc ? (cmp > 0) : (cmp < 0);
+                        if (cmp != 0) return t.sortDesc[k] ? (cmp > 0) : (cmp < 0);
                     }
                     return false;
                 });
         }
 
         const int padX = 4, padY = 4;
-        const int left = rc.left + padX;
-        const int availW = (std::max<int>)(1, (int)(rc.right - rc.left) - padX * 2);
+        t.left = (int)rc.left + padX;
+        t.availW = (std::max)(1, (int)(rc.right - rc.left) - padX * 2);
         int total = 0;
-        for (auto& c : cols) total += c.w;
-        if (total > availW && total > 0)
+        for (auto& c : t.cols) total += c.w;
+        if (total > t.availW && total > 0)
         {
-            for (auto& c : cols) c.w = (std::max)(20, c.w * availW / total);
+            for (auto& c : t.cols) c.w = (std::max)(20, c.w * t.availW / total);
             total = 0;
-            for (auto& c : cols) total += c.w;
+            for (auto& c : t.cols) total += c.w;
         }
-        if (total < availW) cols.back().w += availW - total;
+        if (total < t.availW) t.cols.back().w += t.availW - total;
 
-        const int headH = (std::max)(20, st.pt + 12);
-        const int rowH = (std::max)(18, st.pt + 10);
-        const int top = rc.top + padY;
-        const int bottom = rc.bottom - padY;
+        t.headH = (std::max)(20, pt + 12);
+        t.rowH = (std::max)(18, pt + 10);
+        t.top = (int)rc.top + padY;
+        t.bottom = (int)rc.bottom - padY;
+        return true;
+    }
 
+    // 光标落在第几行（表头以上或空白处返回 -1）
+    inline int hitRow(const Table& t, POINT p)
+    {
+        if (t.empty() || t.rowH <= 0) return -1;
+        if (p.x < t.left || p.x > t.left + t.availW) return -1;
+        if (p.y < t.top + t.headH || p.y >= t.bottom) return -1;
+        const int idx = (p.y - (t.top + t.headH)) / t.rowH;
+        if (idx < 0 || idx >= (int)t.rows.size() || idx >= t.visibleRows()) return -1;
+        return idx;
+    }
+
+    inline RECT rowRect(const Table& t, int row)
+    {
+        RECT r = { t.left, t.top + t.headH + row * t.rowH, t.left + t.availW, 0 };
+        r.bottom = r.top + t.rowH;
+        return r;
+    }
+
+    inline void drawTable(XmlCanvas& cv, const RECT& rc, const Table& t, const Style& st, int selRow = -1)
+    {
+        if (t.empty()) return;
         cv.clipPush(rc);
-        cv.fillRect(RECT{ left, top, left + availW, top + headH }, st.headBg);
-        int x = left;
-        for (size_t ci = 0; ci < cols.size(); ++ci)
+        cv.fillRect(RECT{ t.left, t.top, t.left + t.availW, t.top + t.headH }, st.headBg);
+
+        int x = t.left;
+        for (size_t ci = 0; ci < t.cols.size(); ++ci)
         {
-            Col& c = cols[ci];
-            RECT cell = { x + 6, top, x + c.w - 4, top + headH };
+            const Col& c = t.cols[ci];
+            RECT cell = { x + 6, t.top, x + c.w - 4, t.top + t.headH };
             cv.clipPush(cell);
             cv.text(cell, c.title, st.ink, DT_LEFT, st.pt, st.family);
             cv.clipPop();
             // 排序标记：▲升 / ▼降，多键时带优先级序号
-            for (size_t ki = 0; ki < sortKeys.size(); ++ki)
+            for (size_t ki = 0; ki < t.sortCol.size(); ++ki)
             {
-                if (sortKeys[ki].col != (int)ci) continue;
-                std::wstring mark = sortKeys[ki].desc ? L"\u25BC" : L"\u25B2";
-                if (sortKeys.size() > 1) mark += std::to_wstring(ki + 1);
-                RECT mr = { x + c.w - 34, top, x + c.w - 4, top + headH };
+                if (t.sortCol[ki] != (int)ci) continue;
+                std::wstring mark = t.sortDesc[ki] ? L"\u25BC" : L"\u25B2";
+                if (t.sortCol.size() > 1) mark += std::to_wstring(ki + 1);
+                RECT mr = { x + c.w - 34, t.top, x + c.w - 4, t.top + t.headH };
                 cv.text(mr, mark, st.ink, DT_RIGHT, 0, std::wstring());
                 break;
             }
-            if (x > left)
-                cv.strokeLine(POINT{ x, top }, POINT{ x, bottom }, st.grid, 1);
+            if (x > t.left) cv.strokeLine(POINT{ x, t.top }, POINT{ x, t.bottom }, st.grid, 1);
             x += c.w;
         }
-        cv.strokeLine(POINT{ left, top + headH }, POINT{ left + availW, top + headH }, st.grid, 1);
+        cv.strokeLine(POINT{ t.left, t.top + t.headH }, POINT{ t.left + t.availW, t.top + t.headH }, st.grid, 1);
 
-        int y = top + headH;
-        for (auto& cells : data)
+        int y = t.top + t.headH;
+        for (size_t ri = 0; ri < t.rows.size(); ++ri)
         {
-            if (y + rowH > bottom) break;
-            x = left;
-            for (size_t ci = 0; ci < cols.size(); ++ci)
+            if (y + t.rowH > t.bottom) break;
+            const bool sel = (selRow == (int)ri);
+            if (sel)
+                cv.fillRect(RECT{ t.left, y, t.left + t.availW, y + t.rowH }, st.selBg);
+            x = t.left;
+            for (size_t ci = 0; ci < t.cols.size(); ++ci)
             {
-                RECT cell = { x + 6, y, x + cols[ci].w - 4, y + rowH };
+                RECT cell = { x + 6, y, x + t.cols[ci].w - 4, y + t.rowH };
                 cv.clipPush(cell);
-                const std::wstring val = ci < cells.size() ? cells[ci] : std::wstring();
-                if (!val.empty()) cv.text(cell, val, st.ink, DT_LEFT, st.pt, st.family);
+                const std::wstring val = ci < t.rows[ri].size() ? t.rows[ri][ci] : std::wstring();
+                if (!val.empty()) cv.text(cell, val, sel ? st.selInk : st.ink, DT_LEFT, st.pt, st.family);
                 cv.clipPop();
-                x += cols[ci].w;
+                x += t.cols[ci].w;
             }
-            y += rowH;
-            cv.strokeLine(POINT{ left, y }, POINT{ left + availW, y }, st.grid, 1);
+            y += t.rowH;
+            cv.strokeLine(POINT{ t.left, y }, POINT{ t.left + t.availW, y }, st.grid, 1);
         }
         cv.clipPop();
+    }
+
+    // 便捷版：算 + 画一次完成（不给选中态时的老调用点用这个）
+    inline bool drawTable(XmlCanvas& cv, const RECT& rc,
+                          const std::wstring& colsAttr, const std::wstring& rowsAttr,
+                          const std::wstring& sortAttr, const Style& st = Style(), int selRow = -1)
+    {
+        Table t;
+        if (!buildTable(rc, colsAttr, rowsAttr, sortAttr, st.pt, t)) return false;
+        drawTable(cv, rc, t, st, selRow);
         return true;
     }
 }
