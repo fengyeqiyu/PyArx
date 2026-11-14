@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "cad": {
+      "args": [
+        "G:\\PyArx\\tools\\cadmcp\\server.py"
+      ],
+      "command": "G:\\PyArx\\X64\\Release\\python.exe"
+    }
+  }
+}
