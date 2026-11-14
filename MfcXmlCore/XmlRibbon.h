@@ -62,6 +62,7 @@ struct XRibbonModel
     std::vector<XRibbonTab> tabs;
     std::vector<XRibbonBackstageItem> backstage;
     std::wstring backstageTitle;      // 左上标题，默认"文件"
+    std::wstring backstageIcon;       // 左上返回箭头图标（相对 exe），空 = 内置矢量
     bool backstageOpen = false;       // 文件页是否展开（铺满整窗）
     int selected = 0;
     bool bodyCollapsed = false;   // 功能区是否收起（只留选项卡条），由调用方翻转
@@ -166,6 +167,7 @@ inline void ribbonBackstageParse(XmlElement& node, XRibbonModel& m)
     {
         if (!ribbonTagIs(bs.tag, L"XRibbonBackstage", L"RibbonBackstage")) continue;
         m.backstageTitle = bs.get(L"Title");
+        m.backstageIcon  = bs.get(L"Icon");
         for (auto& it : bs.children)
         {
             if (!ribbonTagIs(it.tag, L"XRibbonBackstageItem", L"RibbonBackstageItem")) continue;
@@ -757,16 +759,28 @@ inline void ribbonBackstageDraw(XmlCanvas& cv, const XRibbonModel& m, const XRib
     cv.fillRect(lay.navRc, th.panel);
     cv.fillRect(RECT{ lay.navRc.right - 1, lay.navRc.top, lay.navRc.right, lay.navRc.bottom }, th.line);
 
-    // 返回箭头
+    // 返回箭头：优先用 XML 指的图标（抗锯齿、线条细），没有才用内置矢量
     {
-        const COLORREF c = hotClose ? th.text : th.textDim;
         RECT a = lay.closeRc;
-        const int cx = (a.left + a.right) / 2;
-        const int cy = (a.top + a.bottom) / 2;
-        cv.fillRect(RECT{ a.left, cy - 1, a.right - 6, cy + 1 }, c);           // 横
-        cv.fillRect(RECT{ a.left, cy - 7, a.left + 2, cy + 7 }, c);            // 竖
-        cv.fillRect(RECT{ a.left, cy - 7, a.left + 8, cy - 5 }, c);            // 上斜
-        cv.fillRect(RECT{ a.left, cy + 5, a.left + 8, cy + 7 }, c);            // 下斜
+        if (hotClose)
+            cv.fillRoundRect(RECT{ a.left - 4, a.top - 4, a.right + 4, a.bottom + 4 },
+                             RGB(45, 54, 66), RGB(45, 54, 66), 4);
+        if (!m.backstageIcon.empty())
+        {
+            const std::wstring path = ribbonResolveIcon(m.backstageIcon);
+            RECT ic = { a.left + 4, a.top + 4, a.right - 4, a.bottom - 4 };
+            cv.drawImage(ic, path);
+        }
+        else
+        {
+            const COLORREF c = hotClose ? th.text : th.textDim;
+            const int cx = a.left + 8;
+            const int cy = (a.top + a.bottom) / 2;
+            const int len = 14;
+            cv.strokeLine({ cx, cy }, { cx + len, cy }, c, 2);              // 横
+            cv.strokeLine({ cx, cy }, { cx + 7, cy - 7 }, c, 2);            // 上斜
+            cv.strokeLine({ cx, cy }, { cx + 7, cy + 7 }, c, 2);            // 下斜
+        }
     }
     {
         RECT tr = { lay.closeRc.right + 6, lay.closeRc.top, lay.navRc.right - 8, lay.closeRc.bottom };

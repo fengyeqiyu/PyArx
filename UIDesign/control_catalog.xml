@@ -1098,6 +1098,7 @@
   <objectinfo tag="XRibbonBackstage" display="RibbonBackstage" w="900" h="600">
     <property name="Name" type="text"/>
     <property name="Title" type="string"/>
+    <property name="Icon" type="text"/>
   </objectinfo>
 
   <objectinfo tag="XRibbonBackstageItem" display="RibbonBackstageItem" w="194" h="44">
