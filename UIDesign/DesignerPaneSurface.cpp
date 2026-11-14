@@ -299,10 +299,41 @@ void DesignerPaneView::paintMenuBar(XmlCanvas& cv, const RECT& rc, XmlElement* n
             if (t.empty()) t = c.text;
             int w = (c.previewW > 0) ? c.previewW : lk.titleW;
             if (w <= 0 || w > (rc.right - rc.left) / 2) w = lk.titleW;   // 标题只占固定一列，不能吃掉整条菜单
+            // 标题列按文字实际宽度收窄：不留空白，菜单条紧跟标题末尾（左侧图标同理）
+            if (!t.empty())
+            {
+                SIZE tsz = {};
+                ::GetTextExtentPoint32W(hdc, t.c_str(), (int)t.size(), &tsz);
+                if (tsz.cx + 16 < w)
+                    w = tsz.cx + 16;
+            }
             RECT tr = { x, rc.top, x + w, rc.bottom };
             cv.text(tr, t, lk.fore,
                     DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS, lk.fontPt, L"");
             x += w;
+            continue;
+        }
+
+        // ---- 应用图标：圆形 LOGO ----
+        // 对标 CAD / Qt 起始页左上角的应用图标：外观全部由 XML 声明
+        // （<XImage Source="res\logo.png" Width="26" Height="26"/>），贴图本身是圆形透明 PNG，
+        // 这里只按尺寸贴到菜单条左端，不写死任何图形/颜色。
+        if (_wcsicmp(bare.c_str(), L"XImage") == 0 || _wcsicmp(bare.c_str(), L"Image") == 0)
+        {
+            std::wstring src = c.get(L"Source");
+            if (src.empty()) src = c.get(L"Image");
+            const int h = rc.bottom - rc.top;
+            int iw = (c.previewW > 0) ? c.previewW : 26;
+            int ih = (c.previewH > 0) ? c.previewH : iw;
+            if (ih > h) { ih = h; iw = h; }
+            RECT ir = { x + 4, rc.top + (h - ih) / 2, x + 4 + iw, rc.top + (h - ih) / 2 + ih };
+            if (!src.empty())
+            {
+                if (src.find(L':') == std::wstring::npos)   // 相对路径按 exe 目录解析
+                    src = exeDir() + L"\\" + src;
+                cv.drawImage(ir, src);
+            }
+            x += iw + 10;
             continue;
         }
 

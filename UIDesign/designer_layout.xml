@@ -54,6 +54,7 @@
            BorderColor="#39404B" AccentColor="#4C8DFF"
            FontSize="10" TitleWidth="120" WinButtonWidth="46" ItemGap="10">
 
+      <XImage Name="appLogo" Source="res\logo.png" Width="26" Height="26"/>
       <ShellTitle Name="winTitle" Text="PyMfc Studio"/>
 
       <MenuItem Name="mnuFile" Header="文件">
