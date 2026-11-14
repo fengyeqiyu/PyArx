@@ -3,6 +3,7 @@
 
 BEGIN_MESSAGE_MAP(uidesign::DesignCanvas, CWnd)
     ON_WM_PAINT()
+    ON_WM_TIMER()
     ON_WM_SIZE()
     ON_WM_ERASEBKGND()
     ON_WM_SETCURSOR()

@@ -179,6 +179,8 @@ namespace uidesign
         {
             if (z < 0.25f) z = 0.25f;
             if (z > 4.0f) z = 4.0f;
+            m_zoomAnimActive = false;
+            m_zoomTarget = z;
             if (z == m_zoom) return;
             m_zoom = z;
             Invalidate(FALSE);
@@ -188,23 +190,58 @@ namespace uidesign
         float panX() const { return m_panX; }
         float panY() const { return m_panY; }
         void setPan(float px, float py) { m_panX = px; m_panY = py; invalidateSurface(); }
-        void resetView() { m_panX = 0; m_panY = 0; Invalidate(FALSE); }
+        void resetView() { m_panX = 0; m_panY = 0; m_zoomAnimActive = false; m_zoomTarget = m_zoom; Invalidate(FALSE); }
 
-        // 以画布客户坐标 localPt 为锚点缩放：缩放前后同一文档点仍落在光标下（鼠标滚轮用）
+        // 以画布客户坐标 localPt 为锚点缩放（滚轮）：缩放前后同一文档点始终落在光标下。
+        // 滚轮只登记"目标倍率"，由 16ms 定时器把倍率平滑推过去 —— 一次滚轮就是一次 15%
+        // 的硬跳变会有明显的"顿"感（用户要的是电力设计/CAD 那种连续的缩放）。
+        // 触控板会发细分 delta，按 delta/120 折算成倍率，天然就是连续平滑的。
         void zoomAt(CPoint localPt, short delta)
         {
-            const float z0 = (m_zoom <= 0.0f) ? 1.0f : m_zoom;
-            float z1 = z0 * ((delta > 0) ? 1.2f : (1.0f / 1.2f));
+            const float z0 = (m_zoomTarget > 0.0f) ? m_zoomTarget : ((m_zoom > 0.0f) ? m_zoom : 1.0f);
+            const double k = std::pow(1.15, (double)delta / 120.0);
+            float z1 = z0 * (float)k;
             if (z1 < 0.05f) z1 = 0.05f;
             if (z1 > 8.0f) z1 = 8.0f;
             if (z1 == z0) return;
-            const float dx = (float)localPt.x - m_panX;
-            const float dy = (float)localPt.y - m_panY;
-            m_zoom = z1;
-            m_panX = (float)localPt.x - dx * (z1 / z0);
-            m_panY = (float)localPt.y - dy * (z1 / z0);
-            invalidateSurface();
+            // 锚点每次按当前实际倍率/位移重算，连续滚轮也不会累积漂移
+            m_zoomAnchor = localPt;
+            m_zoomDocX = ((float)localPt.x - m_panX) / ((m_zoom > 0.0f) ? m_zoom : 1.0f);
+            m_zoomDocY = ((float)localPt.y - m_panY) / ((m_zoom > 0.0f) ? m_zoom : 1.0f);
+            m_zoomTarget = z1;
+            m_zoomAnimActive = true;
+            SetTimer(kZoomTimer, 16, nullptr);
         }
+
+    protected:
+        // 缩放动画：每 16ms 把倍率向目标推进 1/4，锚点（光标下的文档点）保持不动
+        void stepZoomAnim()
+        {
+            if (!m_zoomAnimActive)
+            {
+                KillTimer(kZoomTimer);
+                return;
+            }
+            const float dz = m_zoomTarget - m_zoom;
+            if (fabs(dz) <= 0.0025f * m_zoomTarget)
+            {
+                m_zoom = m_zoomTarget;
+            }
+            else
+            {
+                m_zoom += dz * 0.25f;
+            }
+            m_panX = (float)m_zoomAnchor.x - m_zoomDocX * m_zoom;
+            m_panY = (float)m_zoomAnchor.y - m_zoomDocY * m_zoom;
+            if (m_zoom == m_zoomTarget)
+            {
+                m_zoomAnimActive = false;
+                KillTimer(kZoomTimer);
+            }
+            Invalidate(FALSE);
+        }
+
+    public:
 
         // 标尺：窗口坐标下画顶部/左侧刻度条，不参与缩放
         void setShowRuler(bool on) { m_showRuler = on; Invalidate(FALSE); }
@@ -301,6 +338,17 @@ namespace uidesign
             if (fit > 1.0f) fit = 1.0f;
             if (fit < 0.2f) fit = 0.2f;
             m_zoom = fit;
+            m_zoomTarget = fit;
+        }
+
+        afx_msg void OnTimer(UINT_PTR nIDEvent)
+        {
+            if (nIDEvent == kZoomTimer)
+            {
+                stepZoomAnim();
+                return;
+            }
+            CWnd::OnTimer(nIDEvent);
         }
 
         afx_msg void OnPaint()
@@ -3198,6 +3246,12 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
         bool  m_panning = false;              // 中键拖动平移中
         CPoint m_panStart = CPoint(0, 0);     // 按下点（窗口坐标）
         float  m_panX0 = 0.0f, m_panY0 = 0.0f;
+        // 缩放动画（滚轮平滑）：目标倍率 + 定时器逐步逼近，锚点保持光标下的文档点不动
+        static const UINT_PTR kZoomTimer = 3;
+        float  m_zoomTarget = 1.0f;
+        bool   m_zoomAnimActive = false;
+        CPoint m_zoomAnchor = CPoint(0, 0);
+        float  m_zoomDocX = 0.0f, m_zoomDocY = 0.0f;
         bool m_autoFit = true;                // 打开文档时按视口自动缩放到可见                 // 画布缩放倍率（0.25 ~ 4.0）
         bool m_showRuler = false;            // 标尺开关（顶部/左侧刻度条）
         ID2D1Bitmap* m_bgD2DBmp = nullptr;   // 背景（白底+网格）烘成的 D2D 位图
