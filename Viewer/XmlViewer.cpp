@@ -644,6 +644,7 @@ static bool   g_powerMiniHidden = false; // Ribbon「小地图」：整张迷你
 static bool   g_panning = false;
 static POINT  g_panLast = { 0, 0 };
 static XmlElement* g_panEl = nullptr;   // 正在平移的画布（多画布时不能只认全局那一张）
+static XmlElement* g_miniDragEl = nullptr;  // 正在小地图上拖动视口的迷你画布
 
 static xmlctl::PowerCanvasView* mainPowerView()
 {
@@ -662,6 +663,14 @@ static PowerSlot* powerSlotAt(POINT p)
 {
     for (auto& kv : g_powerSlots)
         if (inRectPt(kv.second.rc, p)) return &kv.second;
+    return nullptr;
+}
+
+// 反查槽表里的元素指针（拖动时要用元素做键）
+static XmlElement* powerElOf(PowerSlot* slot)
+{
+    for (auto& kv : g_powerSlots)
+        if (&kv.second == slot) return kv.first;
     return nullptr;
 }
 
@@ -869,7 +878,11 @@ static void drawElement(XmlCanvas& cv, XmlElement* el, int ox, int oy, COLORREF 
             xmlctl::PowerCanvasView& v = slot.view;
             const bool isMini = el->get(L"Mini") == L"1";
             v.mini = isMini;
-            if (isMini && g_powerMiniHidden) return;
+            if (isMini && g_powerMiniHidden)
+            {
+                slot.rc = { 0, 0, 0, 0 };   // 隐藏时清命中矩形，否则看不见的地方还能点
+                return;
+            }
             if (isMini)
             {
                 // 小地图不写 Data：跟随 MiniOf 指定的主画布（缺省 = 文档里第一张）
@@ -1275,7 +1288,9 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         {
             if (slot->view.mini)
             {
-                // 小地图：点哪就把主画布居中到哪（模型坐标由控件库换算）
+                // 小地图：按下即居中，按住拖动则连续跟随（模型坐标由控件库换算）
+                g_miniDragEl = powerElOf(slot);
+                ::SetCapture(hwnd);
                 float mx = 0.0f, my = 0.0f;
                 if (slot->view.miniPoint(p.x, p.y, mx, my))
                 {
@@ -1316,6 +1331,15 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         }
         break;
     }
+    case WM_LBUTTONUP:
+        if (g_miniDragEl != nullptr)
+        {
+            g_miniDragEl = nullptr;
+            if (::GetCapture() == hwnd) ::ReleaseCapture();
+            return 0;
+        }
+        break;
+
     case WM_MBUTTONDOWN:
     {
         POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
@@ -1341,6 +1365,21 @@ static LRESULT CALLBACK viewerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         }
         break;
     case WM_MOUSEMOVE:
+        if (g_miniDragEl != nullptr)
+        {
+            // 小地图拖动：光标离开小地图也继续跟（SetCapture 保证消息还到这里）
+            POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
+            if (auto it = g_powerSlots.find(g_miniDragEl); it != g_powerSlots.end())
+            {
+                float mx = 0.0f, my = 0.0f;
+                if (it->second.view.miniPoint(p.x, p.y, mx, my))
+                {
+                    if (xmlctl::PowerCanvasView* pv = mainPowerView()) pv->centerOn(mx, my);
+                    ::InvalidateRect(hwnd, nullptr, FALSE);
+                }
+            }
+            return 0;
+        }
         if (g_panning && g_panEl != nullptr)
         {
             POINT p{ GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
