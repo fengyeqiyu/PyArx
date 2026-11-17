@@ -6,9 +6,9 @@ PyWrapper_Cpp(DbSymbolTableRecord);
 
 bool  PyDbSymbolTableRecord::setName(const AcString& name) { return PyWarnIfError(impObj()->setName(name.kwszPtr()), L"AcDbSymbolTableRecord::setName"); }
 AcString PyDbSymbolTableRecord::getName() const { AcString s; if(!PyWarnIfError(impObj()->getName(s), L"AcDbSymbolTableRecord::getName")) return AcString(); return s; }
-bool PyDbSymbolTableRecord::isDependent() const { return impObj()->isDependent(); }
-bool PyDbSymbolTableRecord::isResolved() const { return impObj()->isResolved(); }
-bool PyDbSymbolTableRecord::isRenamable() const { return impObj()->isRenamable(); }
+bool PyDbSymbolTableRecord::isDependent() const { return impObj() ? impObj()->isDependent() : false; }
+bool PyDbSymbolTableRecord::isResolved() const { return impObj() ? impObj()->isResolved() : false; }
+bool PyDbSymbolTableRecord::isRenamable() const { return impObj() ? impObj()->isRenamable() : false; }
 bool PyDbSymbolTableRecord::upgradeOpen() { return PyWarnIfError(impObj()->upgradeOpen(), L"SymbolTableRecord.upgradeOpen"); }
 
 void bind_PyDbSymbolTableRecord(pym& m) {

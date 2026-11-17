@@ -10,6 +10,7 @@ void bind_PyDbDgnReference(pym& m) {
 		PyWrapper_BIND(DbDgnReference)
 		// ---- setXrefDepth ----
 		.def("setXrefDepth", [](PyDbDgnReference& s, int v) -> bool {
+			if (!s.impObj()) return false;
 			s.impObj()->setXrefDepth(v);
 			return true;
 		}, py::arg("v"))

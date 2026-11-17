@@ -13,6 +13,7 @@ void bind_PyDbDgnDefinition(pym& m) {
 			return s.impObj()->useMasterUnits();
 		})
 		.def("setUseMasterUnits", [](PyDbDgnDefinition& s, bool v) -> bool {
+			if (!s.impObj()) return false;
 			s.impObj()->setUseMasterUnits(v);
 			return true;
 		}, py::arg("v"))
@@ -21,6 +22,7 @@ void bind_PyDbDgnDefinition(pym& m) {
 			return s.impObj()->xrefDepth();
 		})
 		.def("setXrefDepth", [](PyDbDgnDefinition& s, int v) -> bool {
+			if (!s.impObj()) return false;
 			s.impObj()->setXrefDepth(v);
 			return true;
 		}, py::arg("v"))
@@ -29,6 +31,7 @@ void bind_PyDbDgnDefinition(pym& m) {
 			return s.impObj()->showRasterRef();
 		})
 		.def("setShowRasterRef", [](PyDbDgnDefinition& s, bool v) -> bool {
+			if (!s.impObj()) return false;
 			s.impObj()->setShowRasterRef(v);
 			return true;
 		}, py::arg("v"))
