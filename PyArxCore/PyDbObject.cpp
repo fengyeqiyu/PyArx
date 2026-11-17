@@ -1,9 +1,12 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "dbObject.h"
 #include "PyDbObject.h"
+#include "PyDbOpenCache.h"
 #include "PyDbObjectReactor.h"
 #include "PyDbDatabase.h"
+#include "PyDbBlockReference.h"
 #include "PyDbTypeCaster.h"
+#include "PyDbField.h"
 #include "PyResbuf.h"
 #include "PyErrorStatusException.h"
 
@@ -45,6 +48,7 @@ Acad::ErrorStatus PyDbObject::close(void)
 {
 	// 防御：getAt/open 失败时包装可能持有 nullptr，close 不应解引用空指针
 	if (!impObj()) return Acad::eNullObjectPointer;
+	PyDbOpenCache::Close(impObj());
 	return impObj()->close();
 }
 
@@ -213,6 +217,60 @@ void bind_PyDbObject(pym& m)
 		.def(py::init<AcDbObject*>(), py::arg("object"),
 			"Wrap an existing AcDbObject pointer")
 		PyWrapper_BIND(DbObject)
+		// PyRx 在几乎每个 Db 类上都挂了一个 staticmethod cloneFrom(PyRx.RxObject)，
+		// 语义 = 校验 isKindOf 后 clone() 并接管所有权（PyRxCore/PyDbObject.h:135）。
+		// 这里挂在基类上，全部派生类一次继承，避免 98 个类各写一遍。
+		// 注意：返回的是通用 PyDbObject 包装，不是调用处的派生类型（PyRx 走模板返回派生类）。
+		.def_static("cloneFrom", [](const PyRxObject& src) -> PyDbObject* {
+			if (src.impObj() == nullptr || !src.impObj()->isKindOf(AcDbObject::desc()))
+				throw py::value_error("cloneFrom: otherObject is not an AcDbObject");
+			return new PyDbObject(static_cast<AcDbObject*>(src.impObj()->clone()));
+		}, py::arg("otherObject"))
+		// ---- PyRx DbObject 侧的缺口批量补齐（挂在基类，派生类自动继承）----
+		.def("getHandle", [](PyDbObject& self) {
+			AcDbHandle h;
+			self.impObj()->getAcDbHandle(h);
+			return h;
+		}, "返回 Db.Handle")
+		.def("setOwnerId", [](PyDbObject& self, const AcDbObjectId& owner) {
+			return static_cast<int>(self.impObj()->setOwnerId(owner));
+		}, py::arg("owner"))
+		.def("addPersistentReactor", [](PyDbObject& self, const AcDbObjectId& id) {
+			self.impObj()->addPersistentReactor(id);
+		}, py::arg("id"))
+		.def("removePersistentReactor", [](PyDbObject& self, const AcDbObjectId& id) {
+			self.impObj()->removePersistentReactor(id);
+		}, py::arg("id"))
+		.def("isAcDbObjectIdsInFlux", [](PyDbObject& self) {
+			return static_cast<bool>(self.impObj()->isAcDbObjectIdsInFlux());
+		})
+		.def("hasFields", [](PyDbObject& self) { return self.impObj()->hasFields(); })
+		.def("getFieldDictionary", [](PyDbObject& self) {
+			return self.impObj()->getFieldDictionary();
+		})
+		.def("getField", [](PyDbObject& self, const AcString& prop) {
+			AcDbObjectId fieldId;
+			if (self.impObj()->getField(prop, fieldId) != Acad::eOk)
+				return AcDbObjectId::kNull;
+			return fieldId;
+		}, py::arg("prop") = "TEXT")
+		.def("setField", [](PyDbObject& self, const AcString& prop, PyDbField& field) {
+			AcDbObjectId fieldId;
+			Acad::ErrorStatus es = self.impObj()->setField(prop, field.impObj(), fieldId);
+			if (es != Acad::eOk)
+				throw py::value_error("setField failed");
+			return fieldId;
+		}, py::arg("prop"), py::arg("field"))
+		.def("removeField", [](PyDbObject& self, const AcDbObjectId& fieldId) {
+			self.impObj()->removeField(fieldId);
+		}, py::arg("id"))
+
+		// 实例属性：块定义内部的 INSERT 在 Python 侧只拿到 PyDbObject，
+		// cast 到 PyDbBlockReference 一律失败；这里统一在 C++ 里 cast 后取属性，
+		// 非块参照对象返回空列表。
+		.def("attribData", [](PyDbObject& self) -> py::list {
+			return PyAttribDataFromObject(self.impObj());
+		}, "实例属性列表（仅块参照有值）：{tag,txt,x,y,ax,ay,h,rot,ha,va,inv,ly,ci}")
 
 		// ---- identity & navigation: ObjectId exposed as uint64 (asOldId) ----
 		.def("objectId", [](const PyDbObject& self) -> uint64_t {

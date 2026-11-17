@@ -13,6 +13,10 @@ void RegisterPythonControl(const std::string& tag, py::object factory);
 py::object Guiload(const std::string& path, py::object target, py::object context,
                    py::object names, int firstId, py::object palette);
 
+// XML 字符串 → 控件树（guiload_text；同一套运行时，不落盘）
+py::object GuiloadText(const std::string& xmlText, py::object target, py::object context,
+                       py::object names, int firstId, py::object palette);
+
 // 只跑布局、返回各 x:Name 矩形（xmlLayout）
 py::dict XmlLayoutRects(const std::string& path, int width, int height,
                          py::object overrides);

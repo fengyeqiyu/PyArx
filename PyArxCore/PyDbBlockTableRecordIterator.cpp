@@ -3,6 +3,7 @@
 #include "PyDbBlockTableRecordIterator.h"
 #include "PyDbBlockTableRecord.h"
 #include "PyDbEntity.h"
+#include "PyDbOpenCache.h"
 
 PyDbBlockTableRecordIterator::PyDbBlockTableRecordIterator(PyDbBlockTableRecord& owner, bool atBeginning, bool skipDeleted) {
     if (!owner.impObj()) { m_pIter = nullptr; return; }
@@ -51,19 +52,54 @@ uint64_t PyDbBlockTableRecordIterator::__next__() {
     return id;
 }
 
+PyDbBlockTableRecordEntityIter::PyDbBlockTableRecordEntityIter(PyDbBlockTableRecord& owner, int mode, bool skipDeleted) : m_mode(mode) {
+	if (!owner.impObj()) return;
+	AcDbBlockTableRecordIterator* p = nullptr;
+	if (!PyWarnIfError(owner.impObj()->newIterator(p, true, skipDeleted),
+	                   L"AcDbBlockTableRecord::newIterator")) return;
+	m_pIter = p;
+}
+
+PyDbBlockTableRecordEntityIter::~PyDbBlockTableRecordEntityIter() {
+	if (m_pEnt) { PyDbOpenCache::Close(m_pEnt); m_pEnt->close(); }
+	delete m_pIter;
+}
+
+PyDbEntity PyDbBlockTableRecordEntityIter::__next__() {
+	if (!m_pIter) throw py::stop_iteration();
+	// 上一个遍历对象先关闭再取下一个，避免 AcDb 同一对象被连续打开两次。
+	if (m_pEnt) { PyDbOpenCache::Close(m_pEnt); m_pEnt->close(); m_pEnt = nullptr; }
+	// 打不开的单个对象只跳过，不能终止整个 for 循环；
+	// 请求写模式但对象已被别处写打开时，降级为只读产出，保证遍历不丢元素。
+	while (!m_pIter->done()) {
+		AcDbEntity* pEnt = nullptr;
+		Acad::ErrorStatus es = m_pIter->getEntity(pEnt, static_cast<AcDb::OpenMode>(m_mode), false);
+		if ((es != Acad::eOk || !pEnt) && m_mode != 0) {
+			pEnt = nullptr;
+			es = m_pIter->getEntity(pEnt, AcDb::kForRead, false);
+			if (es == Acad::eOk && pEnt) {
+				m_pIter->step(true, true);
+				PyDbOpenCache::Track(pEnt, AcDb::kForRead);
+				m_pEnt = pEnt;
+				return PyDbEntity(pEnt);
+			}
+		}
+		m_pIter->step(true, true);
+		if (es != Acad::eOk || !pEnt) continue;
+		PyDbOpenCache::Track(pEnt, static_cast<AcDb::OpenMode>(m_mode));
+		m_pEnt = pEnt;
+		return PyDbEntity(pEnt);
+	}
+	throw py::stop_iteration();
+}
+
 void bind_PyDbBlockTableRecordIterator(pym& m) {
-    py::class_<PyDbBlockTableRecordIterator>(m, "PyDbBlockTableRecordIterator")
-        .def(py::init<PyDbBlockTableRecord&, bool, bool>(),
-             py::arg("owner"), py::arg("atBeginning") = true, py::arg("skipDeleted") = true,
-             "从 PyDbBlockTableRecord 创建实体迭代器")
-        .def(py::init<AcDbBlockTableRecordIterator*>(), py::arg("p"), "指针接管构造（析构 delete）")
-        .def("done", &PyDbBlockTableRecordIterator::done)
-        .def("step", &PyDbBlockTableRecordIterator::step,
-             py::arg("forward") = true, py::arg("skipDeleted") = true)
-        .def("currentId", &PyDbBlockTableRecordIterator::currentId, "当前实体 ObjectId（uint64）；失败返回 0")
-        .def("getEntity", &PyDbBlockTableRecordIterator::getEntity,
-             py::arg("mode") = 0, py::arg("openErasedEntity") = false,
-             "直接打开当前实体包装；mode 0读/1写/2通知；失败返回空包装")
-        .def("__iter__", [](PyDbBlockTableRecordIterator& it) -> PyDbBlockTableRecordIterator& { return it; })
-        .def("__next__", &PyDbBlockTableRecordIterator::__next__);
+    // 公开迭代器类已退役：遍历只挂块表记录本体（for ent in btr）。
+    // PyDbBlockTableRecordIterator 与 PyDbBlockTableRecordEntityIter 保留为内部实现，
+    // EntityIter 仅以私有绑定名暴露给 BTR.__iter__ 返回值类型使用。
+    py::class_<PyDbBlockTableRecordEntityIter>(m, "_PyDbBlockTableRecordEntityIter")
+        .def(py::init<PyDbBlockTableRecord&, int, bool>(),
+             py::arg("owner"), py::arg("mode") = 1, py::arg("skipDeleted") = true)
+        .def("__iter__", [](PyDbBlockTableRecordEntityIter& it) -> PyDbBlockTableRecordEntityIter& { return it; })
+        .def("__next__", &PyDbBlockTableRecordEntityIter::__next__);
 }

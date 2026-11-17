@@ -5,6 +5,7 @@
 // 对应 PyArx.Gi 子模块（依赖 PyRxObject/AcDbObjectId/PyDbEntity，须在 PyArx.Db 之后初始化）。
 
 // 调用 PyArx.Gi 子模块全部公共绑定；由 bind_PyGi 统一调用。
+void bind_PyGiEnums(pym& m);
 void bind_PyGiSubEntityTraits(pym& m);
 void bind_PyGiDrawableTraits(pym& m);
 void bind_PyGiCommonDraw(pym& m);
@@ -14,6 +15,10 @@ void bind_PyGiGeometry(pym& m);
 void bind_PyGiWorldGeometry(pym& m);
 void bind_PyGiViewportGeometry(pym& m);
 void bind_PyGiDrawable(pym& m);
+
+// PyArx.Gi 文字矢量化（AcGiTextEngine / AcGiTextStyle）
+void bind_PyGiTextStyle(pym& m);
+void bind_PyGiTextEngine(pym& m);
 
 // bind_PyGi: PyArx.Gi 子模块入口，由 PyArxBinder.cpp 调用。
 void bind_PyGi(pym& m);

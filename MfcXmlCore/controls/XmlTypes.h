@@ -178,6 +178,33 @@ namespace xmlprop2
     // 加载期把"声明了但控件不认"的属性收起来，供设计器/测试查。
     // 默认只入内存表；设 PYARX_PROP_DIAG=1 时同时落 log\xml_prop_diag.log，
     // 避免布局属性（Left/Top/Grid.Row 等由运行时消费）在控制台刷屏。
+    inline const std::wstring& LogDir()
+    {
+        static const std::wstring s_dir = []() -> std::wstring {
+            // 允许外部改日志目录；缺省落在系统临时目录，不再写死盘符
+            wchar_t env[MAX_PATH] = {};
+            if (::GetEnvironmentVariableW(L"PYARX_LOG_DIR", env, MAX_PATH) >= 1)
+                return std::wstring(env);
+            wchar_t tmp[MAX_PATH] = {};
+            ::GetTempPathW(MAX_PATH, tmp);
+            return std::wstring(tmp) + L"pyarx";
+        }();
+        return s_dir;
+    }
+
+    inline bool EnvFlagOn(const wchar_t* name)
+    {
+        wchar_t env[8] = {};
+        return ::GetEnvironmentVariableW(name, env, 8) >= 1 && env[0] == L'1';
+    }
+
+    // 严格模式：写错的 XML 在加载期直接失败，而不是留一个永远不触发的回调
+    inline bool StrictXmlEnabled()
+    {
+        static const bool s_strict = EnvFlagOn(L"PYARX_STRICT_XML");
+        return s_strict;
+    }
+
     struct PropWarning
     {
         std::wstring Control;
@@ -206,7 +233,8 @@ namespace xmlprop2
         if (s_logToFile)
         {
             FILE* f = nullptr;
-            _wfopen_s(&f, L"G:\\PyArx\\log\\xml_prop_diag.log", L"a");
+            std::wstring path = LogDir() + L"\\xml_prop_diag.log";
+            _wfopen_s(&f, path.c_str(), L"a");
             if (f != nullptr)
             {
                 std::fprintf(f, "%ls.%ls\n", control.c_str(), property.c_str());
@@ -218,6 +246,51 @@ namespace xmlprop2
     inline const std::vector<PropWarning>& Warnings() { return WarningSink(); }
 
     inline void ClearWarnings() { WarningSink().clear(); }
+
+    // -----------------------------------------------------------------------
+    // 事件契约诊断：控件声明了它自己不会产生的事件（死绑定）。
+    // 以前这类写法静默失效，现在进诊断表，PYARX_EVENT_DIAG=1 时落文件。
+    // -----------------------------------------------------------------------
+    struct EventWarning
+    {
+        std::wstring Control;
+        std::wstring Event;
+        std::wstring Callback;
+    };
+
+    inline std::vector<EventWarning>& EventWarningSink()
+    {
+        static std::vector<EventWarning> s_events;
+        return s_events;
+    }
+
+    inline void WarnUnsupportedEvent(const std::wstring& control, const std::wstring& event,
+                                     const std::wstring& callback)
+    {
+        // 同 (控件,事件,回调) 只记一次
+        for (const EventWarning& w : EventWarningSink())
+        {
+            if (w.Control == control && w.Event == event && w.Callback == callback)
+                return;
+        }
+        EventWarningSink().push_back({control, event, callback});
+        if (EnvFlagOn(L"PYARX_EVENT_DIAG"))
+        {
+            std::wstring path = LogDir() + L"\\xml_event_diag.log";
+            FILE* f = nullptr;
+            _wfopen_s(&f, path.c_str(), L"a");
+            if (f != nullptr)
+            {
+                std::fprintf(f, "%ls.%ls -> %ls  (控件不会产生该事件)\n",
+                             control.c_str(), event.c_str(), callback.c_str());
+                std::fclose(f);
+            }
+        }
+    }
+
+    inline const std::vector<EventWarning>& EventWarnings() { return EventWarningSink(); }
+
+    inline void ClearEventWarnings() { EventWarningSink().clear(); }
 }  // namespace xmlprop2
 
 #endif // XML_TYPES_H

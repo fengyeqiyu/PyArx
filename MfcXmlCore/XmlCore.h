@@ -323,6 +323,10 @@ XML_CORE_API std::vector<std::wstring> xmlSplit(const std::wstring& s, wchar_t s
 // 对任意子树做布局（宿主处理 PaletteSet 多页等场景时使用）
 XML_CORE_API void xmlLayoutSubtree(XmlElement& root, int rootX, int rootY, int rootW, int rootH);
 
+// 内容自然高：容器没写 Height 时"按子项排出来"有多高（横排取最高，竖排累加 + 间距 + 内边距）。
+// 片段根自动定窗口高度、横排容器不纵向撑满，都走这一个量法。
+XML_CORE_API int xmlNaturalHeight(const XmlElement& el);
+
 // ---------------------------------------------------------------------------
 // 布局缺省值（由 control_catalog.xml 注入，避免 C++ 里硬编码控件尺寸等常量）
 // ---------------------------------------------------------------------------

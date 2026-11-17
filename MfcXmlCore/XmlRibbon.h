@@ -21,6 +21,7 @@
 
 #include "XmlControls.h"
 #include "XmlCore.h"
+#include "controls/XmlMfcTags.h"
 
 namespace xmlctl {
 

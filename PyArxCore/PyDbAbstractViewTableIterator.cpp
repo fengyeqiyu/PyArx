@@ -34,14 +34,6 @@ uint64_t PyDbAbstractViewTableIterator::__next__() {
     return id;
 }
 
-void bind_PyDbAbstractViewTableIterator(pym& m) {
-    py::class_<PyDbAbstractViewTableIterator>(m, "PyDbAbstractViewTableIterator")
-        .def(py::init<AcDbAbstractViewTableIterator*>(), py::arg("p"), "指针接管构造（析构 delete）")
-        .def("done", &PyDbAbstractViewTableIterator::done, "迭代器是否已到末尾")
-        .def("step", &PyDbAbstractViewTableIterator::step,
-             py::arg("forward") = true, py::arg("skipDeleted") = true, "前进一格；失败返回 false")
-        .def("currentId", &PyDbAbstractViewTableIterator::currentId,
-             "当前记录 ObjectId（uint64）；失败返回 0")
-        .def("__iter__", [](PyDbAbstractViewTableIterator& it) -> PyDbAbstractViewTableIterator& { return it; })
-        .def("__next__", &PyDbAbstractViewTableIterator::__next__);
+void bind_PyDbAbstractViewTableIterator(pym&) {
+    // 公开迭代器已退役；视图/视口表遍历由 PyDbSymbolTable 容器协议覆盖。
 }

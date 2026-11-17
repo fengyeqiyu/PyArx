@@ -9,6 +9,8 @@
 
 #include <string>
 
+class XmlElement;
+
 namespace xmlapp
 {
     struct XmlAppearance;
@@ -134,17 +136,41 @@ struct IXmlMfcHost
     virtual void setPowerCanvasScene(int /*id*/, const std::wstring& /*json*/) {}
     // 传 SVG 文本，走同一条绘制路径（几何 + 文字都已解析成场景）。
     virtual void setPowerCanvasSvg(int /*id*/, const std::wstring& /*svgText*/) {}
+    // 叠加层 SVG：只重解析这一层（选中框/橡皮筋/光标），底图保持不变。
+    virtual void setPowerCanvasOverlay(int /*id*/, const std::wstring& /*svgText*/) {}
     virtual void setPowerCanvasView(int /*id*/, float /*zoom*/, int /*offsetX*/, int /*offsetY*/) {}
     virtual float getPowerCanvasZoom(int /*id*/) const { return 1.0f; }
     virtual std::wstring getPowerCanvasSelection(int /*id*/) const { return {}; }
     // 画布选项：电缆标注开关 / 小地图模式（mini 时本画布只做缩略图并画主画布的视口红框）
     virtual void setPowerCanvasOptions(int /*id*/, bool /*showCable*/, bool /*mini*/, int /*miniOf*/) {}
+
+    // ---- Ribbon（控件库 xmlctl::XRibbon 模型 + 布局 + 绘制 + 命中，宿主只建自绘窗口）----
+    virtual void addRibbon(int /*id*/, int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
+    // 把 Ribbon 的 XML 子树（Tab/Group/Button）交给宿主解析成模型；el 为 XmlElement*
+    virtual void setRibbonElement(int /*id*/, const XmlElement* /*el*/) {}
     virtual void getPowerCanvasView(int /*id*/, float& zoom, int& ox, int& oy) const
     {
         zoom = 1.0f;
         ox = oy = 0;
     }
     virtual bool skinBoxMouse(HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wp*/, LPARAM /*lp*/) { return false; }
+
+    // ---- 三维视图画布（View3D）----
+    // 宿主建自绘窗口；几何以文本记录喂进去（见 XmlView3D.h 的 Data 格式），
+    // 相机（yaw/pitch/zoom/pan）留在宿主里，鼠标拖动旋转、滚轮缩放都在宿主处理。
+    virtual void addView3D(int /*id*/, int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
+    virtual void setView3DModel(int /*id*/, const std::wstring& /*geom*/) {}
+    virtual void setView3DCamera(int /*id*/, float /*yaw*/, float /*pitch*/, float /*zoom*/,
+                                 int /*panX*/, int /*panY*/) {}
+    virtual void getView3DCamera(int /*id*/, float& yaw, float& pitch, float& zoom,
+                                 int& panX, int& panY) const
+    {
+        yaw = 35.0f; pitch = 22.0f; zoom = 1.0f; panX = panY = 0;
+    }
+    virtual void view3DFit(int /*id*/) {}
+    // 造型：背景色 + 是否画坐标轴 + 是否画网格地面
+    virtual void setView3DStyle(int /*id*/, COLORREF /*bg*/, bool /*axes*/, bool /*grid*/) {}
+
     virtual void setRangeValues(int /*id*/, int /*low*/, int /*high*/) {}
     virtual int getRangeLow(int /*id*/) const { return 0; }
     virtual int getRangeHigh(int /*id*/) const { return 0; }

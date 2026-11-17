@@ -276,6 +276,10 @@ LRESULT CALLBACK PyMfcGridProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
                                     WPARAM wParam, LPARAM lParam, bool& handled);
 
+// 三维视图画布的鼠标状态机（左键旋转 / 滚轮缩放 / 中键平移 / 双击复位）
+LRESULT PyMfcView3DMouse(PyMfcHost* host, HWND hwnd, UINT msg,
+                         WPARAM wParam, LPARAM lParam, bool& handled);
+
 
 // 滚轮拦截：把顶层窗口的窗口过程换成 PyMfcWheelProc，并登记宿主指针与原过程。
 // 定义在 PyMfcProcs.cpp；返回原窗口过程，供未命中注册区域的滚轮原样转回。

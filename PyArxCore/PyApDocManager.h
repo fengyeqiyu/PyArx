@@ -20,6 +20,7 @@
 
 #include "stdafx.h"
 #include <acdocman.h>
+#include <vector>
 #include "PyApDocument.h"
 
 class PyApDocManager {
@@ -34,6 +35,16 @@ public:
     PyApDocument mdiActiveDocument() const;
     PyApDocument curDocument() const;
     PyApDocument getDocument(const PyDbDatabase& db) const;
+
+    // 本文档管理器扩展（MCP / 自动化用）
+    //   documents() -> 全部已打开文档（按 AcApDocumentIterator 顺序）
+    //   documentAt(i)-> 第 i 个文档
+    //   saveAll()    -> 逐个同步保存，返回 ["<路径> -> eOk", ...]
+    //   quit()       -> 给 MDI 活动文档发 _.QUIT（脏文档会弹保存提示，先 saveAll）
+    std::vector<PyApDocument> documents() const;
+    PyApDocument documentAt(int index) const;
+    std::vector<std::wstring> saveAll();
+    std::wstring quit();
 
     std::wstring lockDocument(PyApDocument doc);
     std::wstring unlockDocument(PyApDocument doc);

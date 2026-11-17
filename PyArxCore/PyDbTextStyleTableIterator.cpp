@@ -12,20 +12,6 @@ PyDbTextStyleTableIterator::PyDbTextStyleTableIterator(PyDbTextStyleTable& owner
 	m_pObj = p;
 }
 
-void bind_PyDbTextStyleTableIterator(pym& m) {
-	py::class_<PyDbTextStyleTableIterator, PyDbSymbolTableIterator>(m, "PyDbTextStyleTableIterator")
-		.def(py::init<PyDbTextStyleTable&, bool, bool>(),
-			py::arg("owner"), py::arg("atBeginning") = true, py::arg("skipDeleted") = true,
-			"从持有者 TextStyleTable 创建迭代器（接管指针，析构 delete）")
-		.def(py::init<AcDbTextStyleTableIterator*>(), py::arg("p"), "接管裸指针")
-		.def("__next__", [](PyDbTextStyleTableIterator& s) -> PyDbTextStyleTableRecord {
-			auto* pIter = static_cast<AcDbTextStyleTableIterator*>(s.impObj());
-			if (pIter->done()) throw py::stop_iteration();
-			AcDbTextStyleTableRecord* pRec = nullptr;
-			if (!PyWarnIfError(pIter->getRecord(pRec, AcDb::kForRead, false), L"AcDbTextStyleTableIterator::getRecord"))
-				pRec = nullptr;
-			pIter->step();
-			return PyDbTextStyleTableRecord(pRec);
-		}, "返回当前 TextStyleTableRecord 包装；失败返回空包装")
-		;
+void bind_PyDbTextStyleTableIterator(pym&) {
+	// 公开迭代器已退役；文字样式表遍历由 PyDbSymbolTable 容器协议覆盖。
 }

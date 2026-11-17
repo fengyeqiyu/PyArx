@@ -1,0 +1,16 @@
+11:35:00  NO_INSTANCE: Method invocation failed because [System.Runtime.InteropServices.Marshal] does not contain a method named 'GetActiveObject'.
+11:35:57  attached to running AutoCAD instance
+11:35:59  occupancy wait total = 0s; busy=False
+11:35:59  === open G:\PyArx\tests\楼层平面-10KV电缆桥架.dwg
+11:36:06  opened: 楼层平面-10KV电缆桥架.dwg
+11:36:06  SaveAs type=64 -> G:\PyArx\tests\dwg\楼层平面-10KV电缆桥架.dxf
+11:36:09  SaveAs type=61 -> G:\PyArx\tests\dwg\楼层平面-10KV电缆桥架.dxf
+11:36:11  saved type=61
+11:36:11  closed without save
+11:36:13  === open G:\PyArx\tests\楼层平面-强电.dwg
+11:36:23  opened: 楼层平面-强电.dwg
+11:36:23  SaveAs type=64 -> G:\PyArx\tests\dwg\楼层平面-强电.dxf
+11:36:26  SaveAs type=61 -> G:\PyArx\tests\dwg\楼层平面-强电.dxf
+11:36:29  saved type=61
+11:36:32  closed without save
+11:36:34  DONE

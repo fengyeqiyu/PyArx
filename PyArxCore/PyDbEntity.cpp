@@ -15,6 +15,19 @@ bool  PyDbEntity::setLayer(const AcString& name, bool doSubents) {
 	return PyWarnIfError(impObj()->setLayer(name.kwszPtr(), doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setLayer");
 }
 
+bool  PyDbEntity::setLayerId(uint64_t layerId, bool doSubents) {
+	// 与 setBlockTableRecord / openAttribute 一致：Python 侧用 oldId(uint64) 表示
+	// 对象 ID，这里还原成 AcDbObjectId 走 id 版 setLayer，绕开字符串转换。
+	if (layerId == 0) {
+		throw std::runtime_error("setLayerId: layerId 无效(0)，"
+			"请先 lt.getAt(name).objectId() 取图层 id");
+	}
+	AcDbObjectId id;
+	id.setFromOldId(static_cast<Adesk::IntDbId>(layerId));
+	return PyWarnIfError(impObj()->setLayer(id, doSubents ? Adesk::kTrue : Adesk::kFalse),
+		L"AcDbEntity::setLayer(id)");
+}
+
 AcString PyDbEntity::linetype() const { AcString s; if(!PyWarnIfError(impObj()->linetype(s), L"AcDbEntity::linetype")) return AcString(); return s; }
 uint64_t PyDbEntity::linetypeId() const { return static_cast<uint64_t>(impObj()->linetypeId().asOldId()); }
 bool  PyDbEntity::setLinetype(const AcString& name, bool doSubents) {
@@ -182,6 +195,8 @@ void bind_PyDbEntity(pym& m) {
 		.def("layer", &PyDbEntity::layer)
 		.def("layerId", &PyDbEntity::layerId)
 		.def("setLayer", &PyDbEntity::setLayer, py::arg("name"), py::arg("doSubents") = true)
+		.def("setLayerId", &PyDbEntity::setLayerId, py::arg("layerId"), py::arg("doSubents") = true,
+			"按图层 ObjectId（oldId uint64）设置图层，绕开图层名编码问题")
 		.def("linetype", &PyDbEntity::linetype)
 		.def("linetypeId", &PyDbEntity::linetypeId)
 		.def("setLinetype", &PyDbEntity::setLinetype, py::arg("name"), py::arg("doSubents") = true)

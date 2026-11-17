@@ -1,4 +1,4 @@
-﻿#include "RegisterPyMfcControls.h"
+#include "RegisterPyMfcControls.h"
 
 #include "XmlCore.h"
 #include "XmlMfcControlBase.h"
@@ -26,6 +26,8 @@
 #include "XmlMenuItem.h"
 #include "XmlMenuSeparator.h"
 #include "XmlItemView.h"
+#include "XmlView3D.h"
+#include "XmlRibbon.h"
 
 #include <functional>
 #include <vector>
@@ -201,4 +203,10 @@ void RegisterPyMfcControls()
                 {L"XMenuSeparator"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlItemView(); },
                 {L"XItemView"});
+    // 三维视图画布：透视投影 + 视口旋转（左键拖动）+ 缩放（滚轮）+ 平移（中键）
+    RegisterOne(reg, []() -> IXmlControl* { return new XmlView3D(); },
+                {L"XView3D"});
+    // 命令功能区（复用控件库 xmlctl::XRibbon：模型/布局/绘制/命中成套）
+    RegisterOne(reg, []() -> IXmlControl* { return new XmlRibbon(); },
+                {L"XRibbon"});
 }

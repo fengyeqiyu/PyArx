@@ -22,25 +22,6 @@ bool PyDbXrecordIterator::step() {
 	return PyWarnIfError(m_p->next(), L"AcDbXrecordIterator::next");
 }
 
-void bind_PyDbXrecordIterator(pym& m) {
-	py::class_<PyDbXrecordIterator>(m, "PyDbXrecordIterator")
-		.def(py::init([](PyDbXrecord& owner, bool /*atBeginning*/) {
-			return std::make_unique<PyDbXrecordIterator>(owner.impObj()).release();
-		}), py::arg("owner"), py::arg("atBeginning") = true,
-			"从 PyDbXrecord 创建迭代器（本包装接管并析构 delete）。")
-		.def(py::init<AcDbXrecordIterator*>(), py::arg("p"),
-			"接管已创建的迭代器指针（析构 delete）。")
-		.def("done", &PyDbXrecordIterator::done, "迭代是否到达末尾。")
-		.def("step", &PyDbXrecordIterator::step, "前进一位，返回是否仍有元素。")
-		.def("__iter__", [](PyDbXrecordIterator& self) -> PyDbXrecordIterator& {
-			if (self.impObj()) self.impObj()->start();
-			return self;
-		})
-		.def("__next__", [](PyDbXrecordIterator& self) -> int {
-			auto* p = self.impObj();
-			if (!p || p->done()) throw py::stop_iteration();
-			int restype = p->curRestype();
-			p->next();
-			return restype;
-		});
+void bind_PyDbXrecordIterator(pym&) {
+	// 公开迭代器已退役；Xrecord 遍历折叠进 PyDbXrecord 本体字典协议（内部类保留）。
 }

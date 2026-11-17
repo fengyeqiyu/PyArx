@@ -46,6 +46,7 @@ namespace xmlsvg
         COLORREF color = 0;
         int weight = 400;            // font-weight
         int anchor = 0;              // 0=start 1=middle 2=end
+        float rotate = 0.0f;         // 文字旋转角（度，SVG 语义：正值顺时针），绕锚点旋转
         std::wstring family;         // 首个可用字族名
         float opacity = 1.0f;
     };

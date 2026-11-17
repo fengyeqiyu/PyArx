@@ -37,15 +37,36 @@ AcDbObjectId  PyDbDatabase::addAcDbObject(PyDbObject& pObj)
 
 // --- 便捷方法：添加入库 ---
 uint64_t PyDbDatabase::addToBlock(uint64_t blockId, PyDbObject& entity) {
+	// 防呆：id 为 0、对象不是实体时立刻抛可读错误，避免拿空 id 去 append 触发 ARX 致命断言。
+	if (!blockId)
+		throw std::runtime_error("addToBlock: blockId 无效(0)，请先用 db.currentSpaceId() 或 bt.getIdAt(name) 取有效 id");
+	AcDbEntity* pEnt = dynamic_cast<AcDbEntity*>(entity.impObj());
+	if (!pEnt)
+		throw std::runtime_error("addToBlock: 传入对象不是 AcDbEntity（块表记录/符号表记录不能作为实体入库）");
+
 	AcDbObjectId btrId;
 	btrId.setFromOldId(static_cast<Adesk::IntDbId>(blockId));
 	AcDbBlockTableRecordPointer btr(btrId, AcDb::kForWrite);
 	if (btr.openStatus() != Acad::eOk) {
-		FILE* pf=nullptr; if (_wfopen_s(&pf,pyarxLogFile(L"rawdb.log", L"PyArxCore.pyd").c_str(),L"a, ccs=UTF-8")==0 && pf){ fwprintf(pf,L"btr open fail=%d\n",(int)btr.openStatus()); fclose(pf);} return 0; }
+		AcString errText = acadErrorStatusText(btr.openStatus());
+		const char* errUtf8 = errText.utf8Ptr();
+		throw std::runtime_error(std::string("addToBlock: 块表记录打不开(kForWrite): ") +
+			(errUtf8 ? errUtf8 : "") + "；可能该记录已被别处写打开，或属于其它图形");
+	}
+
+	// 经典 ARX 写法：appendAcDbEntity + 关闭实体，不碰事务管理器。
+	// 旧实现走 startTransaction/addNewlyCreatedDBRObject/endTransaction，函数体全部成功但返回后
+	// pybind 报 unknown exception 且实体未入库（2026-11-17 实测）。
 	AcDbObjectId newId;
-	Acad::ErrorStatus es = btr->appendAcDbEntity(newId, static_cast<AcDbEntity*>(entity.impObj()));
-	{ FILE* pf=nullptr; if (_wfopen_s(&pf,pyarxLogFile(L"rawdb.log", L"PyArxCore.pyd").c_str(),L"a, ccs=UTF-8")==0 && pf){ fwprintf(pf,L"append es=%d btrOpen=%d\\n",(int)es,(int)btr.openStatus()); fclose(pf);} }
-	if (es != Acad::eOk) return 0;
+	Acad::ErrorStatus es = btr->appendAcDbEntity(newId, pEnt);
+	if (es != Acad::eOk) {
+		AcString errText = acadErrorStatusText(es);
+		const char* errUtf8 = errText.utf8Ptr();
+		throw std::runtime_error(std::string("addToBlock: appendAcDbEntity 失败: ") +
+			(errUtf8 ? errUtf8 : "") + "（实体可能已入库，或块记录正处于其它打开状态）");
+	}
+	pEnt->close();             // 入库后必须关闭，否则对象保持打开态，后续属性写入报 eWasOpenForWrite
+	entity.detachDbObject();   // 包装释放所有权，避免 Python 侧析构 delete 已入库实体
 	return static_cast<uint64_t>(newId.asOldId());
 }
 

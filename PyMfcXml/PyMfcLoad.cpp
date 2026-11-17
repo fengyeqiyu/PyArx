@@ -708,10 +708,21 @@ namespace
             if (tag == "rowdefinitions" || tag == "columndefinitions" ||
                 tag == "resources" || tag == "style")
                 continue;  // 布局/资源定义，不是控件
+            // Ribbon 内部结构节点（Tab/Group/Button/MenuItem/Backstage）由 ribbonParse
+            // 自行遍历子树，运行时加载层不为它们创建原生控件
+            if (tag == "ribbontab" || tag == "ribbongroup" || tag == "ribbonbutton" ||
+                tag == "ribbonmenuitem" || tag == "ribbonbackstage" ||
+                tag == "ribbonbackstageitem")
+                continue;
 
             // 容器：不创建原生控件，递归子树（坐标已在布局阶段算好）
+            // 注意 <ToolBar> 是历史布局容器名，而 <XToolBar> 是自绘工具条控件——
+            // 两者归一到同一个 tag，必须靠原始标签区分，否则 XToolBar 会落进这里
+            // 被当成容器吃掉（只递归子节点，自己永远不创建）。
+            const bool legacyToolbar = (tag == "toolbar") &&
+                ::_stricmp(rawTag.c_str(), "ToolBar") == 0;
             if (tag == "stackpanel" || tag == "grid" || tag == "dockpanel" ||
-                tag == "wrappanel" || tag == "canvas" || tag == "toolbar" ||
+                tag == "wrappanel" || tag == "canvas" || legacyToolbar ||
                 tag == "menubar" || tag == "statusbar")
             {
                 // 容器的 Background 没有原生控件可承载，交宿主按矩形铺底
@@ -726,14 +737,18 @@ namespace
                 continue;
             }
 
-            // 标准控件一律用 x:Name 命名，ID 由 guiload 自动分配
+            // 标准控件的 ID 由 guiload 自动分配；Name 可写可不写（HTML 式写法）
             // 例外：ControlTemplate 实例化出来的内部节点（templateChild）属于模板实现细节，
-            // 不要求用户命名，也不登记到 names（否则多处复用会互相覆盖）。
-            const std::string name = Utf8Of(child.name);
-            if (name.empty() && !child.templateChild)
-                throw std::runtime_error("guiload: <" + rawTag + "> 需要 x:Name 属性");
+            // 不登记到 names（否则多处复用会互相覆盖）。
             if (nextId == nullptr)
                 throw std::runtime_error("guiload: 缺少自动 ID 计数器");
+            std::string name = Utf8Of(child.name);
+            if (name.empty() && !child.templateChild)
+            {
+                // 不写 Name：按标签 + 序号自动命名，仍登记进 names（Python 侧可回查）
+                name = tag + "_" + std::to_string(*nextId);
+                child.name = Utf8ToWide(name);
+            }
             const int id = (*nextId)++;
             if (names != nullptr && !name.empty())
                 (*names)[py::str(name)] = id;
@@ -771,6 +786,10 @@ namespace
                     window->Host()->noteCreated(id);
                 else if (page != nullptr)
                     page->Host()->noteCreated(id);
+
+                // Ribbon：把整棵 Tab/Group/Button 子树交给宿主 ribbonParse 建模型
+                if (tag == "ribbon" && host != nullptr)
+                    host->setRibbonElement(id, &child);
 
                 // Icon="res/xxx.png" 相对 exe 目录：解析成绝对路径推给宿主，
                 // 由宿主在 owner-draw 时画，与设计器/预览器走同一条 drawImage 通路
@@ -840,6 +859,19 @@ namespace
                               id, ctrl->type(), info.property, cbName.c_str());
                     continue;
                 }
+                // 控件类型本身不产生该事件：绑定即使成功也永远不触发。
+                // 缺省只告警（存量 XML 不因此崩），PYARX_STRICT_XML=1 时升格为加载期错误。
+                if (!xmlTypeSupportsEvent(ctrl->type(), info.kind))
+                {
+                    const std::string why = std::string("<") + rawTag + "> id=" + idText +
+                        " 声明了 " + Utf8Of(info.property) + "，但控件类型 " +
+                        Utf8Of(std::wstring(ctrl->type())) + " 不会产生该事件";
+                    xmlprop2::WarnUnsupportedEvent(std::wstring(ctrl->type()), info.key, cbName);
+                    if (xmlprop2::StrictXmlEnabled())
+                        throw std::runtime_error("guiload: " + why);
+                    debugLogf(L"[event] %ls", Utf8ToWide(why).c_str());
+                    continue;
+                }
                 const std::string cbNameA = Utf8Of(cbName);
                 if (!context.contains(cbNameA.c_str()))
                     throw std::runtime_error(std::string("guiload: 控件 id=") + idText +
@@ -850,7 +882,8 @@ namespace
             // 控件内部还嵌着子控件（<Panel>、<GridCtrl> 的 <children> 等）：
             // 以前这里只遍历 node.children 一层，Panel 里的按钮/标签一个都不会创建，
             // 容器就只剩一个空矩形。XML 阶段坐标已算成绝对坐标，直接在同一宿主上继续建。
-            if (!child.children.empty())
+            // Ribbon 子节点（Tab/Group/Button）由 ribbonParse 解析，不再逐个当独立控件建
+            if (!child.children.empty() && tag != "ribbon")
                 LoadControlsFromElement(child, window, page, context, nextId, names);
         }
     }
@@ -939,6 +972,12 @@ namespace
             if (tag == "rowdefinitions" || tag == "columndefinitions" ||
                 tag == "resources" || tag == "style")
                 continue;  // 布局/资源定义，不是控件
+            // Ribbon 内部结构节点（Tab/Group/Button/MenuItem/Backstage）由 ribbonParse
+            // 自行遍历子树，运行时加载层不为它们创建原生控件
+            if (tag == "ribbontab" || tag == "ribbongroup" || tag == "ribbonbutton" ||
+                tag == "ribbonmenuitem" || tag == "ribbonbackstage" ||
+                tag == "ribbonbackstageitem")
+                continue;
             const py::dict attrs = child.attr("attrib").cast<py::dict>();
 
             const std::wstring text = AttrWStringL(attrs, {"Text", "Content", "Header"});
@@ -1178,6 +1217,45 @@ namespace
             {
                 if (window) window->addSlider(id, minValue, maxValue, x, y, w, h);
                 else page->addSlider(id, minValue, maxValue, x, y, w, h);
+            }
+            else if (tag == "toolbar" || tag == "xtoolbar" || tag == "toolstrip")
+            {
+                // 自绘工具条按钮条（kind 11 = XmlSkinKind::ToolBar）：
+                // 宿主负责画按钮格子、选中态和悬停，条目由 Items 用 | 分隔。
+                // 以前这个标签没有创建分支，整条 ToolBar 会被静默丢弃。
+                if (window) window->addSkinBox(id, 11, x, y, w, h);
+                else page->addSkinBox(id, 11, x, y, w, h);
+
+                const std::wstring items = AttrWStringL(attrs, {"Items"});
+                std::wstring buffer;
+                for (wchar_t c : items)
+                {
+                    if (c == L'|' || c == L'\n' || c == L'\r')
+                    {
+                        if (!buffer.empty())
+                        {
+                            if (window) window->addToolBarItem(id, buffer);
+                            else page->addToolBarItem(id, buffer);
+                            buffer.clear();
+                        }
+                    }
+                    else
+                    {
+                        buffer.push_back(c);
+                    }
+                }
+                if (!buffer.empty())
+                {
+                    if (window) window->addToolBarItem(id, buffer);
+                    else page->addToolBarItem(id, buffer);
+                }
+
+                if (AttrHas(attrs, {"SelectedIndex"}))
+                {
+                    const int sel = AttrIntL(attrs, {"SelectedIndex"}, -1);
+                    if (window) window->setToolBarSelected(id, sel);
+                    else page->setToolBarSelected(id, sel);
+                }
             }
 
             // 控件初始值：Value 对 ProgressBar/Slider 是位置
@@ -1512,18 +1590,37 @@ bool PyMfcRebuildItemView(PyMfcHost* host, const std::wstring& name)
             throw std::runtime_error("register_control: 标签已注册或注册失败 <" + tag + ">");
     }
 
-    py::object Guiload(const std::string& path, py::object target, py::object context,
-                       py::object names, int firstId, py::object palette)
+    // 片段根没写 Height：按内容算（量法和布局同源，都在 XmlCore 的 xmlNaturalHeight）
+    static int FragmentRootHeight(XmlRuntime&, XmlElement& root, int width)
+    {
+        (void)width;
+        return xmlNaturalHeight(root);
+    }
+
+    // path 为空、xmlText 非空 = 从字符串建界面（HTML 式一行出控件用这条路）
+    static py::object GuiloadImpl(const std::string& path, const std::string& xmlText,
+                                  py::object target, py::object context,
+                                  py::object names, int firstId, py::object palette)
     {
         // 统一运行时：XmlRuntime 解析 + 布局，控件经注册表创建。
         // 用 shared_ptr 而不是栈上对象：加载完要交给宿主持管，
-        // 否则改一个 Width 也没人能把表达式重算、把控件挪位（runtime 一析构就全丢）。
+        // 否则改一个 Width 也没人能表达式重算、把控件挪位（runtime 一析构就全丢）。
         auto runtimeOwned = std::make_shared<XmlRuntime>();
         XmlRuntime& runtime = *runtimeOwned;
         std::wstring loadError;
-        std::wstring widePath = Utf8ToWide(path);
-        if (!runtime.loadFile(widePath.c_str(), loadError))
-            throw std::runtime_error("guiload: " + Utf8Of(loadError));
+        if (!xmlText.empty())
+        {
+            // 字符串入口没有文件基准目录：ResourceDictionary 的 Source 相对路径不可用，
+            // 需要跨文件样式时仍走 guiload(path)。
+            if (!runtime.loadString(Utf8ToWide(xmlText).c_str(), loadError))
+                throw std::runtime_error("guiload_text: " + Utf8Of(loadError));
+        }
+        else
+        {
+            std::wstring widePath = Utf8ToWide(path);
+            if (!runtime.loadFile(widePath.c_str(), loadError))
+                throw std::runtime_error("guiload: " + Utf8Of(loadError));
+        }
         XmlElement* root = runtime.root();
         if (root == nullptr)
             throw std::runtime_error("guiload: XML 根节点无效");
@@ -1535,20 +1632,21 @@ bool PyMfcRebuildItemView(PyMfcHost* host, const std::wstring& name)
         const std::wstring rootRawTag = root->tag;
         const std::string rootKind = StdTagKind(Utf8Of(rootRawTag));
 
-        // 根节点只用标签决定类型：<Window> 或 <PaletteSet>
+        // 根节点决定容器类型；除此之外一律按"片段根"处理（HTML 式写法）：
+        // 直接写 <XStackPanel>… 或一个控件，都自动包一层 Window，高度按内容量。
         const std::string type = rootKind;
-        if (type != "window" && type != "palette")
-            throw std::runtime_error("guiload: 根节点必须是 <Window> 或 <PaletteSet>，收到 <" +
-                                     Utf8Of(rootRawTag) + ">");
+        const bool fragmentRoot = (type != "window" && type != "palette");
 
         py::dict ctx = py::isinstance<py::dict>(context) ? context.cast<py::dict>() : CallerGlobals();
         py::dict nameMap = py::isinstance<py::dict>(names) ? names.cast<py::dict>() : py::dict();
         int nextId = firstId < 1000 ? 1000 : firstId;
 
-        if (type == "window")
+        if (type == "window" || fragmentRoot)
         {
-            const int rootWidth = AttrIntOf(*root, L"Width", 420);
-            const int rootHeight = AttrIntOf(*root, L"Height", 320);
+            const int rootWidth = AttrIntOf(*root, L"Width", fragmentRoot ? 320 : 420);
+            const int rootHeight = fragmentRoot
+                ? FragmentRootHeight(runtime, *root, rootWidth)
+                : AttrIntOf(*root, L"Height", 320);
             PyMfcWindow* window = nullptr;
             if (!target.is_none())
             {
@@ -1605,9 +1703,25 @@ bool PyMfcRebuildItemView(PyMfcHost* host, const std::wstring& name)
                     window->Host()->addContainerBackdrop(0, 0, rc.Width(), rc.Height(), rootAp);
                 COLORREF pageBg = 0;
                 if (!rootAp.backColor.empty() && xmlapp::ParseColor(rootAp.backColor, pageBg))
+                {
                     window->Host()->setPageBackdrop(pageBg, true);
+                    window->setBackground(GetRValue(pageBg), GetGValue(pageBg), GetBValue(pageBg));
+                }
 
-                LoadControlsFromElement(*root, window, nullptr, ctx, &nextId, &nameMap);
+                if (fragmentRoot)
+                {
+                    // 片段根：根本身可能就是一个控件，也可能是个容器。
+                    // 统一当成"唯一的子节点"交给同一套加载逻辑，容器照旧只递归不建控件。
+                    XmlElement holder;
+                    holder.spacing = 0;
+                    holder.padL = holder.padT = holder.padR = holder.padB = 0;
+                    holder.children.push_back(*root);
+                    LoadControlsFromElement(holder, window, nullptr, ctx, &nextId, &nameMap);
+                }
+                else
+                {
+                    LoadControlsFromElement(*root, window, nullptr, ctx, &nextId, &nameMap);
+                }
 
                 // 运行时交接：宿主拿住 runtime + name→id，之后改属性就能真切重排
                 std::map<std::wstring, int> ids;
@@ -1713,4 +1827,20 @@ bool PyMfcRebuildItemView(PyMfcHost* host, const std::wstring& name)
 
 
         throw std::runtime_error("guiload: 不支持的根节点 <" + Utf8Of(rootRawTag) + ">");
+    }
+
+    // 文件入口（原 guiload）
+    py::object Guiload(const std::string& path, py::object target, py::object context,
+                       py::object names, int firstId, py::object palette)
+    {
+        return GuiloadImpl(path, std::string(), target, context, names, firstId, palette);
+    }
+
+    // 字符串入口（guiload_text）：同一套解析/布局/注册表，只是不落盘
+    py::object GuiloadText(const std::string& xmlText, py::object target, py::object context,
+                           py::object names, int firstId, py::object palette)
+    {
+        if (xmlText.empty())
+            throw std::runtime_error("guiload_text: XML 字符串为空");
+        return GuiloadImpl(std::string(), xmlText, target, context, names, firstId, palette);
     }

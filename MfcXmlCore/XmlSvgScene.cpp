@@ -360,6 +360,21 @@ namespace xmlsvg
                         if (v == "middle") t.anchor = 1;
                         else if (v == "end") t.anchor = 2;
                     }
+                    // rotate="角度[ 中心x 中心y]"，只取首个数（逐字旋转列表按整段角度画）
+                    if (attrOf(tag, "rotate", v))
+                        t.rotate = numOf(v, 0.0f);
+                    else if (attrOf(tag, "transform", v))
+                    {
+                        // 兼容 transform="rotate(a cx cy)"：绕自身锚点旋转时可忽略中心
+                        size_t rp = v.find("rotate(");
+                        if (rp != std::string::npos)
+                        {
+                            const char* p = v.c_str() + rp + 7;
+                            char* end = nullptr;
+                            const double a = strtod(p, &end);
+                            if (end != p) t.rotate = static_cast<float>(a);
+                        }
+                    }
                     if (attrOf(tag, "font-family", v))
                         t.family = firstFamily(v);
 
@@ -595,7 +610,17 @@ namespace xmlsvg
             const int alpha = static_cast<int>(t.opacity * 255.0f);
             if (t.opacity < 0.999f)
                 canvas.pushOpacity(alpha);
+            // 旋转：绕锚点 (cx, cy)。CAD 旋转角是逆时针、SVG 是顺时针，导出侧已换算成负角，
+            // 这里只按 SVG 语义交给后端（D2D 正值顺时针）。
+            const bool rotated = fabsf(t.rotate) > 0.01f;
+            if (rotated)
+            {
+                POINT piv = { static_cast<LONG>(lroundf(cx)), static_cast<LONG>(lroundf(cy)) };
+                canvas.pushRotate(static_cast<int>(lroundf(t.rotate)), piv);
+            }
             canvas.text(rc, t.text, t.color, DT_LEFT, pt, family);
+            if (rotated)
+                canvas.popTransform();
             if (t.opacity < 0.999f)
                 canvas.popOpacity();
         }

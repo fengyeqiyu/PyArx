@@ -571,8 +571,12 @@ void bind_PyEd(pym& m) {
     m.def("sssetfirst", &pyedSetFirst, py::arg("object_ids"),
         "仿 (sssetfirst ...)：设首选集；object_ids 为 ObjectId 列表或 None");
 
-    m.def("entget", [](const PyAdsName& ename) {
-        PyResbuf rb = PyEdEntGet(ename);
+    m.def("entget", [](const py::object& ename) -> py::object {
+        // None 入参（根因修复）：旧签名强转 PyAdsName，pybind 在类型转换阶段直接抛
+        // TypeError "incompatible function arguments"；现在 None 归一为失败返回 None。
+        if (ename.is_none()) return py::object(py::none());
+        PyAdsName n = ename.cast<PyAdsName>();
+        PyResbuf rb = PyEdEntGet(n);
         if (rb.isNull()) return py::object(py::none());
         py::dict d;
         for (const auto& tv : rb.toList()) {
@@ -604,13 +608,20 @@ void bind_PyEd(pym& m) {
         return PyEdEntMakeX(tv);
     }, py::arg("dxf"), "仿 (entmake dxf)：按 {code:value} 建实体，返回新 AdsName");
 
-    m.def("entdel", &PyEdEntDel, py::arg("ename"), "仿 (entdel e)：删除/恢复实体");
-    m.def("entupd", &PyEdEntUpd, py::arg("ename"), "仿 (entupd e)：重生成实体图形");
-    m.def("handent", [](const AcString& h) {
-        PyAdsName n = PyEdHandEnt(h);
+    m.def("entdel", [](const py::object& ename) -> bool {
+        if (ename.is_none()) return false;
+        return PyEdEntDel(ename.cast<PyAdsName>());
+    }, py::arg("ename"), "仿 (entdel e)：删除/恢复实体；None 返回 False");
+    m.def("entupd", [](const py::object& ename) -> bool {
+        if (ename.is_none()) return false;
+        return PyEdEntUpd(ename.cast<PyAdsName>());
+    }, py::arg("ename"), "仿 (entupd e)：重生成实体图形；None 返回 False");
+    m.def("handent", [](const py::object& h) -> py::object {
+        if (h.is_none()) return py::object(py::none());
+        PyAdsName n = PyEdHandEnt(h.cast<AcString>());
         if (n.isEmpty()) return py::object(py::none());
         return py::cast(n);
-    }, py::arg("handle"), "仿 (handent handle)：句柄转 AdsName，失败返回 None");
+    }, py::arg("handle"), "仿 (handent handle)：句柄转 AdsName，失败/None 返回 None");
     m.def("entnext", [](const py::object& ename) {
         PyAdsName n = ename.is_none() ? PyEdEntNext(PyAdsName{}) : PyEdEntNext(ename.cast<PyAdsName>());
         if (n.isEmpty()) return py::object(py::none());

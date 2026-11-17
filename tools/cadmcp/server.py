@@ -25,9 +25,13 @@ import uuid
 from datetime import datetime
 
 BASE = r"G:\PyArx\tools\cadmcp"
-API_JSON = r"G:\PyArx\docs\pyarx_api_raw.json"
-GUIDE = r"G:\PyArx\docs\PYARX_USAGE.md"
-PROJECTS = r"G:\PyArx\docs\PYARX_PROJECTS.md"
+# 知识源原先指向 G:\PyArx\docs（已随归档搬到 _attic），路径失效会让
+# pyarx_guide / pyarx_api_search / pyarx_projects 直接报 missing。
+# 现改为本工具目录 + docs_notes，_attic 删了也不影响。
+API_JSON = os.path.join(BASE, "api", "pyarx_api_raw.json")
+GUIDE = r"G:\PyArx\docs_notes\PYARX_USAGE.md"
+FAULT = r"G:\PyArx\docs_notes\PYARX_防错手册.md"
+PROJECTS = r"G:\PyArx\docs_notes\PYARX_PROJECTS.md"
 REQ = os.path.join(BASE, "req.json")
 # bridge 只有一个 req/res 插槽，并发调用会互相覆盖/抢占结果，必须串行化
 RUN_LOCK = threading.Lock()
@@ -36,7 +40,13 @@ CAD_COM = os.path.join(BASE, "cad_com.ps1")        # COM 通道：保存/退出/
 CAD_EXE = r"C:\Program Files\Autodesk\AutoCAD 2024\acad.exe"
 MSBUILD = r"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe"
 SLN = r"G:\PyArx\PyArx.sln"
-CONSOLE = r"C:\Program Files\Autodesk\AutoCAD 2024\accoreconsole.exe"
+# 无头控制台路径：优先项目自带的免安装副本（G:\PyArx\ACAD），回退到本机安装。
+# 环境变量 PYARX_CONSOLE 可强制指定。
+CONSOLE = os.environ.get("PYARX_CONSOLE") or (
+    r"G:\PyArx\ACAD\accoreconsole.exe"
+    if os.path.isfile(r"G:\PyArx\ACAD\accoreconsole.exe")
+    else r"C:\Program Files\Autodesk\AutoCAD 2024\accoreconsole.exe"
+)
 
 # 崩溃守卫：检测并关闭 AutoCAD 错误报告/断言框（纯 Win32，不依赖 CAD 存活）
 sys.path.insert(0, BASE)
@@ -44,6 +54,12 @@ try:
     import cad_guard
 except Exception:      # 守卫不可用时退化为空实现
     cad_guard = None
+# 业务工具层：把 PyArx 裸 API 收敛成受约束的原子操作（见 cad_ops.py）
+try:
+    import cad_ops
+except Exception as ex:      # 工具层不可用时只剩 pyarx_run 逃生舱
+    cad_ops = None
+    sys.stderr.write("[cadmcp] cad_ops import failed: %r\n" % (ex,))
 GUARD_LOG = r"G:\PyArx\log\cad_guard.log"
 
 
@@ -322,6 +338,11 @@ TOOLS = [
     },
 ]
 
+# cad_* 业务工具：模型只填坐标/字高/图层，事务与写模式由 cad_ops 保证。
+CAD_NAMES = cad_ops.NAMES if cad_ops is not None else set()
+if cad_ops is not None:
+    TOOLS += cad_ops.SCHEMAS
+
 
 def log(msg):
     sys.stderr.write("[cadmcp] " + str(msg) + "\n")
@@ -390,6 +411,42 @@ def _call_run(args):
     if payload.get("error"):
         return {"ok": False, "error": payload["error"], "out": payload.get("out", "")}
     return {"ok": True, "result": payload.get("result"), "out": payload.get("out", "")}
+
+
+def call_cad(name, args):
+    """业务工具层入口：cad_* → 生成脚本 → 复用同一条 bridge 通道 → 结构化结果。
+
+    模型不再自己写 pyarx_run 代码，也就不需要记事务/kForWrite/AcGePoint。
+    build 阶段出错（参数不合法）在这里就返回，不下发到 CAD。
+    """
+    if cad_ops is None:
+        return {"ok": False, "error": "cad_ops 未加载，检查 tools/cadmcp/cad_ops.py"}
+    try:
+        if name == "cad_batch":
+            code = cad_ops.script_for("cad_batch", args)
+        elif name == "cad_stats":
+            code = cad_ops.stats_script(args.get("max_scan", 5000))
+        elif name == "cad_query":
+            code = cad_ops.query_script(args.get("cls", ""), args.get("layer", ""),
+                                        args.get("limit", 200))
+        elif name == "cad_erase":
+            code = cad_ops.erase_script(args.get("handles"), args.get("layer", ""),
+                                        bool(args.get("all")), args.get("confirm", ""))
+        else:
+            code = cad_ops.script_for(name, args)
+    except Exception as ex:
+        return {"ok": False, "error": str(ex), "stage": "build_script"}
+    payload = {"code": code, "timeout_sec": int(args.get("timeout_sec", 120))}
+    if args.get("doc"):
+        payload["doc"] = args["doc"]
+    out = call_run(payload)
+    if not out.get("ok"):
+        return {"ok": False, "error": out.get("error", "bridge failed"),
+                "out": out.get("out", ""), "stage": "bridge"}
+    res = out.get("result")
+    if isinstance(res, dict):
+        return res
+    return {"ok": True, "raw": res, "out": out.get("out", "")}
 
 
 def call_api_search(args):
@@ -834,6 +891,8 @@ def watch_loop(interval=10):
 
 
 def dispatch(name, args):
+    if name in CAD_NAMES:
+        return call_cad(name, args)
     if name == "pyarx_headless":
         return call_headless(args)
     if name == "pyarx_guard":

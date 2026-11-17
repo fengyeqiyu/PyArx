@@ -3,6 +3,8 @@
 #include "PyErrorStatusException.h"
 #include "PyUtils.h"
 #include "PyDbBlockTableRecord.h"
+#include "PyDbBlockTableRecordIterator.h"
+#include "PyDbOpenCache.h"
 
 PyWrapper_Cpp(DbBlockTableRecord);
 
@@ -61,31 +63,85 @@ int PyDbBlockTableRecord::postProcessAnnotativeBTR(bool bqueryOnly, bool bScale)
 bool  PyDbBlockTableRecord::addAnnoScalestoBlkRefs(bool bScale) { return PyWarnIfError(impObj()->addAnnoScalestoBlkRefs(bScale), L"AcDbBlockTableRecord::addAnnoScalestoBlkRefs"); }
 
 bool  PyDbBlockTableRecord::appendEntity(PyDbEntity& pEntity) {
-	// 一个调用完成 C++ 三步：appendAcDbEntity + addNewlyCreatedDBRObject + close。
-	// Python 顶层/非 ARX 命令回调无命令级事务，故无显式事务时自动启动一个事务并在提交后释放。
+	// 经典 ARX 写法：块记录以 kForWrite 打开时直接 appendAcDbEntity，随后关闭实体。
+	// 旧实现用 startTransaction + addNewlyCreatedDBRObject + detach + endTransaction 五步，
+	// 每一步都返回成功，但函数返回后 pybind 仍报 "Caught an unknown exception"，实体也没进库
+	// （2026-11-17 实测：同序列包 try/catch 捕获不到，异常在帧外抛出；改经典写法后
+	// numEntities 3→4、objectId 可取回、entityIds 能看到新对象）。
 	AcDbObjectId outId;
-	AcDbDatabase* db = impObj()->database();
-	AcDbTransactionManager* pTm = db ? db->transactionManager() : nullptr;
-	AcTransaction* pTrans = pTm ? pTm->startTransaction() : nullptr;
 	Acad::ErrorStatus es = impObj()->appendAcDbEntity(outId, pEntity.impObj());
-	if (es == Acad::eOk && pTm) pTm->addNewlyCreatedDBRObject(pEntity.impObj());
-	pEntity.detachDbObject();
-	if (pTrans) pTm->endTransaction();
 	if (es != Acad::eOk) { PyWarnIfError(es, L"AcDbBlockTableRecord::appendEntity"); return false; }
-	return true;
+	pEntity.impObj()->close();   // 入库后必须关闭，否则对象保持打开态，后续 setLayer 等报 eWasOpenForWrite
+	pEntity.detachDbObject();    // 包装不再持有对象，避免 Python 侧析构 delete 已入库实体
+	return !outId.isNull();
 }
 
 uint64_t PyDbBlockTableRecord::appendAcDbEntityId(PyDbEntity& pEntity) {
 	AcDbObjectId outId;
-	AcDbDatabase* db = impObj()->database();
-	AcDbTransactionManager* pTm = db ? db->transactionManager() : nullptr;
-	AcTransaction* pTrans = pTm ? pTm->startTransaction() : nullptr;
 	Acad::ErrorStatus es = impObj()->appendAcDbEntity(outId, pEntity.impObj());
-	if (es == Acad::eOk && pTm) pTm->addNewlyCreatedDBRObject(pEntity.impObj());
-	pEntity.detachDbObject();
-	if (pTrans) pTm->endTransaction();
 	if (es != Acad::eOk) { PyWarnIfError(es, L"AcDbBlockTableRecord::appendAcDbEntityId"); return 0ULL; }
+	pEntity.impObj()->close();
+	pEntity.detachDbObject();
 	return outId.isNull() ? 0ULL : static_cast<uint64_t>(outId.asOldId());
+}
+
+// 块内实体数量（不含已删除）：直接数 iterator，避免依赖 AcDbBlockTableRecord 内部计数
+int PyDbBlockTableRecord::numEntities() const {
+	if (!impObj()) return 0;
+	AcDbBlockTableRecordIterator* it = nullptr;
+	if (impObj()->newIterator(it) != Acad::eOk || !it) return 0;
+	int n = 0;
+	for (it->start(true, true); !it->done(); it->step(true, true)) {
+		AcDbObjectId eid;
+		if (it->getEntityId(eid) == Acad::eOk && !eid.isNull()) ++n;
+	}
+	delete it;
+	return n;
+}
+
+// 按 ObjectId(oldId) 打开块内实体；mode 0=只读 1=写（默认写，符合图元操作习惯）
+PyDbEntity PyDbBlockTableRecord::getEntityById(uint64_t id, int mode) const {
+	if (!id) return PyDbEntity(nullptr);
+	AcDbObjectId oid;
+	oid.setFromOldId(static_cast<Adesk::IntDbId>(id));
+	AcDbEntity* pEnt = nullptr;
+	if (acdbOpenObject(pEnt, oid, static_cast<AcDb::OpenMode>(mode), false) != Acad::eOk || !pEnt)
+		return PyDbEntity(nullptr);
+	PyDbOpenCache::Track(pEnt, static_cast<AcDb::OpenMode>(mode));
+	return PyDbEntity(pEnt);
+}
+
+// 块定义内 ATTDEF 数据：openObject 只能拿到基类，Python 侧 cast 不到 PyDbAttributeDefinition，
+// 故在 C++ 内 AcDbAttributeDefinition::cast 后导出常用字段
+py::list PyDbBlockTableRecord::attdefData() const {
+	py::list out;
+	if (!impObj()) return out;
+	AcDbBlockTableRecordIterator* it = nullptr;
+	if (impObj()->newIterator(it) != Acad::eOk || !it) return out;
+	for (it->start(true, true); !it->done(); it->step(true, true)) {
+		AcDbObjectId eid;
+		if (it->getEntityId(eid) != Acad::eOk || eid.isNull()) continue;
+		AcDbEntity* pEnt = nullptr;
+		if (acdbOpenObject(pEnt, eid, AcDb::kForRead, false) != Acad::eOk || !pEnt) continue;
+		AcDbAttributeDefinition* pAd = AcDbAttributeDefinition::cast(pEnt);
+		if (!pAd) { pEnt->close(); continue; }
+		AcGePoint3d pos = pAd->position();
+		py::dict d;
+		d["tag"] = pAd->tag();
+		d["txt"] = pAd->textString();
+		d["x"] = pos.x; d["y"] = pos.y; d["z"] = pos.z;
+		d["h"] = pAd->height();
+		d["rot"] = pAd->rotation();
+		d["ha"] = (int)pAd->horizontalMode();
+		d["va"] = (int)pAd->verticalMode();
+		d["inv"] = pAd->isInvisible();
+		d["ly"] = pAd->layer();
+		d["ci"] = (int)pAd->colorIndex();
+		out.append(d);
+		pEnt->close();
+	}
+	delete it;
+	return out;
 }
 
 std::vector<uint8_t> PyDbBlockTableRecord::getPreviewIcon() const {
@@ -146,8 +202,15 @@ void bind_PyDbBlockTableRecord(pym& m) {
 		.def("addAnnoScalestoBlkRefs", &PyDbBlockTableRecord::addAnnoScalestoBlkRefs, py::arg("bScale") = false)
 		.def("appendEntity", &PyDbBlockTableRecord::appendEntity, py::arg("entity"), "向该块记录（模型/图纸空间）追加一个实体")
 		.def("appendAcDbEntity", [](PyDbBlockTableRecord& self, PyDbEntity& entity) {
-			return PyWarnIfError(self.impObj()->appendAcDbEntity(entity.impObj()), L"AcDbBlockTableRecord::appendAcDbEntity");
-		}, py::arg("entity"), "向该块记录追加一个实体（ARX 原名别名，返回 bool）")
+			// 不能直接用 ARX 原名别名：两参重载入库后实体仍保持打开态，后续遍历/改属性会
+			// eWasOpenForWrite 打不开。这里与 appendEntity 一致——入库即关闭并释放包装。
+			AcDbObjectId outId;
+			Acad::ErrorStatus es = self.impObj()->appendAcDbEntity(outId, entity.impObj());
+			if (es != Acad::eOk) return PyWarnIfError(es, L"AcDbBlockTableRecord::appendAcDbEntity");
+			entity.impObj()->close();
+			entity.detachDbObject();
+			return true;
+		}, py::arg("entity"), "向该块记录追加一个实体（ARX 原名别名，返回 bool；入库后自动关闭）")
 		.def("appendAcDbEntityId", &PyDbBlockTableRecord::appendAcDbEntityId, py::arg("entity"), "追加实体并返回新实体 ObjectId（oldId），失败返回 0")
 		.def("getPreviewIcon", &PyDbBlockTableRecord::getPreviewIcon, "返回预览图标原始字节（BMP），失败返回空 list")
 		.def("setPreviewIcon", &PyDbBlockTableRecord::setPreviewIcon, py::arg("bytes"), "设置预览图标原始字节（BMP）")
@@ -164,5 +227,27 @@ void bind_PyDbBlockTableRecord(pym& m) {
 			delete it;
 			return out;
 		}, "遍历块记录内所有实体的 ObjectId 列表")
+		.def("numEntities", &PyDbBlockTableRecord::numEntities, "块内实体数量（不含已删除）")
+		.def("__len__", &PyDbBlockTableRecord::numEntities, "len(btr)：块内实体数量")
+		.def("attdefData", &PyDbBlockTableRecord::attdefData,
+			"块内 ATTDEF 列表：[{tag, txt, x, y, z, h, rot, ha, va, inv, ly, ci}]")
+		.def("getEntityById", &PyDbBlockTableRecord::getEntityById,
+			py::arg("id"), py::arg("mode") = 1,
+			"按 ObjectId(oldId) 打开块内实体；mode 0=只读 1=写（默认写），失败返回空包装")
+		.def("__getitem__", [](PyDbBlockTableRecord& self, uint64_t id) {
+			return self.getEntityById(id, 1);
+		}, py::arg("id"), "btr[id]：按 id 打开实体（写模式）")
+		.def("__contains__", [](PyDbBlockTableRecord& self, uint64_t id) {
+			return self.getEntityById(id, 0).impObj() != nullptr;
+		}, py::arg("id"), "id in btr：该 id 是否为块内可打开实体")
+		.def("__iter__", [](PyDbBlockTableRecord& self) {
+			return py::cast(new PyDbBlockTableRecordEntityIter(self, 1, true),
+				py::return_value_policy::take_ownership);
+		}, "for ent in btr：直接遍历实体包装")
+		.def("iterEntities", [](PyDbBlockTableRecord& self, int mode, bool skipDeleted) {
+			return py::cast(new PyDbBlockTableRecordEntityIter(self, mode, skipDeleted),
+				py::return_value_policy::take_ownership);
+		}, py::arg("mode") = 1, py::arg("skipDeleted") = true,
+			"显式取实体遍历器；mode 0=只读 1=写")
 		;
 }

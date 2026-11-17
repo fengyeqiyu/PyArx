@@ -1,4 +1,4 @@
-﻿// PyMfcWrap.cpp —— PyMfcTopWnd / PyMfcWindow / PyMfcPanel 的实现。
+// PyMfcWrap.cpp —— PyMfcTopWnd / PyMfcWindow / PyMfcPanel 的实现。
 
 #include "PyMfcWrap.h"
 
@@ -10,7 +10,10 @@ void PyMfcTopWnd::OnSize(UINT nType, int cx, int cy)
 {
     CWnd::OnSize(nType, cx, cy);
     if (host != nullptr && host->GetSafeHwnd() != nullptr)
+    {
         host->MoveWindow(0, 0, cx, cy, TRUE);
+        host->reflowXml();   // 客户区尺寸变化后按新宽高重排 XML 控件
+    }
     if (resize)
         resize(cx, cy);
 }
@@ -136,8 +139,12 @@ bool PyMfcWindow::savePng(const std::wstring& path)
         if (dib != nullptr && mem != nullptr && bits != nullptr)
         {
             HGDIOBJ old = ::SelectObject(mem, dib);
-            ok = ::BitBlt(mem, 0, 0, w, h, screen, rc.left, rc.top,
-                          SRCCOPY | CAPTUREBLT) != FALSE;
+            // 先试 PrintWindow：直接让窗口把自己的内容画进来，被别的浮窗遮住也照样
+            // 是干净的一帧；不支持时（老控件/某些 D2D 表面）退回屏幕 BitBlt。
+            ok = ::PrintWindow(hwnd, mem, 2 /*PW_RENDERFULLCONTENT*/) != FALSE;
+            if (!ok)
+                ok = ::BitBlt(mem, 0, 0, w, h, screen, rc.left, rc.top,
+                              SRCCOPY | CAPTUREBLT) != FALSE;
             ::SelectObject(mem, old);
         }
         if (ok)
@@ -207,6 +214,16 @@ std::pair<int, int> PyMfcWindow::ClientSize() const
         m_wnd.GetClientRect(&rc);
         return {rc.Width(), rc.Height()};
     }
+
+void PyMfcWindow::setBackground(int r, int g, int b)
+{
+    m_host.setBackgroundColor(RGB(r, g, b));
+}
+
+std::pair<int, int> PyMfcWindow::getSize(int id) const
+{
+    return m_host.controlClientSize(id);
+}
 
 void PyMfcWindow::notifyResize(int w, int h)
 {
@@ -477,6 +494,10 @@ void PyMfcWindow::setSelection(int id, int from, int to) const
 
 void PyMfcWindow::onClick(int id, py::object cb)
 { m_host.onClick(id, std::move(cb)); }
+
+
+void PyMfcWindow::onCanvasEvent(int id, py::object cb)
+{ m_host.onCanvasEvent(id, std::move(cb)); }
 
 
 void PyMfcWindow::setWheelRegion(int x, int y, int w, int h, int step)
@@ -852,6 +873,9 @@ void PyMfcWindow::setTreeSelectedRow(int id, int r)
 void PyMfcWindow::addToolBarItem(int id, const std::wstring& s)
 { m_host.addToolBarItem(id, s); }
 
+void PyMfcWindow::addSkinBox(int id, int kind, int x, int y, int w, int h)
+{ m_host.addSkinBox(id, kind, x, y, w, h); }
+
 
 void PyMfcWindow::clearToolBarItems(int id)
 { m_host.clearToolBarItems(id); }
@@ -967,12 +991,58 @@ void PyMfcWindow::loadPowerSvg(int id, const std::wstring& svg)
 { m_host.setPowerCanvasSvg(id, svg); }
 
 
+void PyMfcWindow::loadPlanOverlay(int id, const std::wstring& svg)
+{ m_host.setPowerCanvasOverlay(id, svg); }
+
+
 void PyMfcWindow::setPlanView(int id, float zoom, int ox, int oy)
 { m_host.setPowerCanvasView(id, zoom, ox, oy); }
 
 
 float PyMfcWindow::getPlanZoom(int id) const
 { return m_host.getPowerCanvasZoom(id); }
+
+// ---- 三维视图画布（Window 版）----
+void PyMfcWindow::addView3D(int id, int x, int y, int w, int h)
+{ m_host.addView3D(id, x, y, w, h); }
+
+void PyMfcWindow::view3DLoad(int id, const std::wstring& geom)
+{ m_host.setView3DModel(id, geom); }
+
+void PyMfcWindow::view3DAppendBox(int id, float x0, float y0, float z0,
+                                  float x1, float y1, float z1, unsigned color)
+{
+    wchar_t rec[128] = {};
+    swprintf_s(rec, L"box %.3f %.3f %.3f %.3f %.3f %.3f %06X;",
+               x0, y0, z0, x1, y1, z1, color & 0xFFFFFFu);
+    m_host.view3DAddRecord(id, std::wstring(rec));
+}
+
+void PyMfcWindow::view3DAppendLine(int id, float x0, float y0, float z0,
+                                   float x1, float y1, float z1, unsigned color, float width)
+{
+    wchar_t rec[160] = {};
+    swprintf_s(rec, L"line %.3f %.3f %.3f %.3f %.3f %.3f %06X %.1f;",
+               x0, y0, z0, x1, y1, z1, color & 0xFFFFFFu, width);
+    m_host.view3DAddRecord(id, std::wstring(rec));
+}
+
+void PyMfcWindow::view3DSetCamera(int id, float yaw, float pitch, float zoom, int panX, int panY)
+{ m_host.setView3DCamera(id, yaw, pitch, zoom, panX, panY); }
+
+py::object PyMfcWindow::view3DGetCamera(int id) const
+{
+    float yaw = 0.0f, pitch = 0.0f, zoom = 1.0f;
+    int panX = 0, panY = 0;
+    m_host.getView3DCamera(id, yaw, pitch, zoom, panX, panY);
+    return py::make_tuple(yaw, pitch, zoom, panX, panY);
+}
+
+void PyMfcWindow::view3DFitView(int id)
+{ m_host.view3DFit(id); }
+
+void PyMfcWindow::view3DSetStyle(int id, unsigned bg, bool axes, bool grid)
+{ m_host.setView3DStyle(id, RGB((bg >> 16) & 0xFF, (bg >> 8) & 0xFF, bg & 0xFF), axes, grid); }
 
 
 std::wstring PyMfcWindow::getPlanSelection(int id) const
@@ -1811,6 +1881,9 @@ void PyMfcPanel::setTreeSelectedRow(int id, int r)
 void PyMfcPanel::addToolBarItem(int id, const std::wstring& s)
 { m_host->addToolBarItem(id, s); }
 
+void PyMfcPanel::addSkinBox(int id, int kind, int x, int y, int w, int h)
+{ m_host->addSkinBox(id, kind, x, y, w, h); }
+
 
 void PyMfcPanel::clearToolBarItems(int id)
 { m_host->clearToolBarItems(id); }
@@ -1926,6 +1999,10 @@ void PyMfcPanel::loadPowerSvg(int id, const std::wstring& svg)
 { m_host->setPowerCanvasSvg(id, svg); }
 
 
+void PyMfcPanel::loadPlanOverlay(int id, const std::wstring& svg)
+{ m_host->setPowerCanvasOverlay(id, svg); }
+
+
 void PyMfcPanel::setPlanView(int id, float zoom, int ox, int oy)
 { m_host->setPowerCanvasView(id, zoom, ox, oy); }
 
@@ -1940,6 +2017,48 @@ std::wstring PyMfcPanel::getPlanSelection(int id) const
 
 void PyMfcPanel::setPlanOptions(int id, bool showCable, bool mini, int miniOf)
 { m_host->setPowerCanvasOptions(id, showCable, mini, miniOf); }
+
+// ---- 三维视图画布（Panel 版）----
+void PyMfcPanel::addView3D(int id, int x, int y, int w, int h)
+{ m_host->addView3D(id, x, y, w, h); }
+
+void PyMfcPanel::view3DLoad(int id, const std::wstring& geom)
+{ m_host->setView3DModel(id, geom); }
+
+void PyMfcPanel::view3DAppendBox(int id, float x0, float y0, float z0,
+                                 float x1, float y1, float z1, unsigned color)
+{
+    wchar_t rec[128] = {};
+    swprintf_s(rec, L"box %.3f %.3f %.3f %.3f %.3f %.3f %06X;",
+               x0, y0, z0, x1, y1, z1, color & 0xFFFFFFu);
+    m_host->view3DAddRecord(id, std::wstring(rec));
+}
+
+void PyMfcPanel::view3DAppendLine(int id, float x0, float y0, float z0,
+                                  float x1, float y1, float z1, unsigned color, float width)
+{
+    wchar_t rec[160] = {};
+    swprintf_s(rec, L"line %.3f %.3f %.3f %.3f %.3f %.3f %06X %.1f;",
+               x0, y0, z0, x1, y1, z1, color & 0xFFFFFFu, width);
+    m_host->view3DAddRecord(id, std::wstring(rec));
+}
+
+void PyMfcPanel::view3DSetCamera(int id, float yaw, float pitch, float zoom, int panX, int panY)
+{ m_host->setView3DCamera(id, yaw, pitch, zoom, panX, panY); }
+
+py::object PyMfcPanel::view3DGetCamera(int id) const
+{
+    float yaw = 0.0f, pitch = 0.0f, zoom = 1.0f;
+    int panX = 0, panY = 0;
+    m_host->getView3DCamera(id, yaw, pitch, zoom, panX, panY);
+    return py::make_tuple(yaw, pitch, zoom, panX, panY);
+}
+
+void PyMfcPanel::view3DFitView(int id)
+{ m_host->view3DFit(id); }
+
+void PyMfcPanel::view3DSetStyle(int id, unsigned bg, bool axes, bool grid)
+{ m_host->setView3DStyle(id, RGB((bg >> 16) & 0xFF, (bg >> 8) & 0xFF, bg & 0xFF), axes, grid); }
 
 
 py::object PyMfcPanel::getPlanView(int id) const

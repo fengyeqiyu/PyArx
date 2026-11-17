@@ -30,6 +30,15 @@ public:
 	std::tuple<AcGePlane, int> getPlane() const;
 	bool isPlanar() const;
 	PyDbAttribute openAttribute(uint64_t attId, AcDb::OpenMode mode, bool openErasedOne = false) const;
+	int attributeCount() const;
+
+	// 实例属性（ATTRIB）数据：tag/txt/pos/alignPoint/h/rot/ha/va/inv/ly/ci
+	py::list attribData() const;
 };
 
 void bind_PyDbBlockReference(pym& m);
+
+// 任意 AcDbObject 的实例属性导出（内部 AcDbBlockReference::cast）。
+// 供 PyDbObject 绑定调用——块定义内部的 INSERT 在 Python 侧只拿到基类，
+// 无法 cast 到 PyDbBlockReference，只能从这里统一取属性。
+py::list PyAttribDataFromObject(AcDbObject* pObj);

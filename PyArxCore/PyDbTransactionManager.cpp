@@ -42,6 +42,14 @@ std::vector<PyDbObject> PyDbTransactionManager::getAllObjects() {
 
 PyDbObject PyDbTransactionManager::getObject(uint64_t objId, int mode, bool openErased) {
 	if (!m_ptr) return PyDbObject(nullptr);
+	if (objId == 0) {
+		PyWarnIfError(Acad::eNullObjectPointer, L"TransactionManager.getObject(null objectId)");
+		return PyDbObject(nullptr);
+	}
+	if (mode < 0 || mode > 2) {
+		PyWarnIfError(Acad::eInvalidInput, L"TransactionManager.getObject(mode must be 0/1/2)");
+		return PyDbObject(nullptr);
+	}
 	AcDbObjectId id; id.setFromOldId(objId);
 	AcDbObject* pObj = nullptr;
 	if (!PyWarnIfError(m_ptr->getObject(pObj, id, static_cast<AcDb::OpenMode>(mode), openErased),
@@ -75,7 +83,7 @@ void bind_PyDbTransactionManager(pym& m) {
 		.def("getAllObjects", &PyDbTransactionManager::getAllObjects,
 			"返回当前事务托管的所有对象列表")
 		.def("getObject", &PyDbTransactionManager::getObject,
-			py::arg("objId"), py::arg("mode") = 0, py::arg("openErased") = false,
+			py::arg("objId"), py::arg("mode") = 1, py::arg("openErased") = false,
 			"按 ObjectId 打开对象（事务托管）；mode 0读/1写/2通知")
 		.def("markObjectPageable", &PyDbTransactionManager::markObjectPageable,
 			py::arg("obj"), "标记对象可分页换出")

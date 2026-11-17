@@ -236,6 +236,12 @@ bool XmlMfcControlBase::setProperty(const wchar_t* name, const std::wstring& val
     const std::wstring kind = EventKind(key);
     if (!kind.empty())
     {
+        // 契约校验：控件本身不产生这个事件时，绑定是"永远不会触发"的死绑定。
+        // 以前这种行为完全静默（events() 从没被消费过），现在进诊断表；
+        // 是否升格为错误由加载器按 PYARX_STRICT_XML 决定（本层只如实记录）。
+        XmlEventKind evk = XmlEventKind::Click;
+        if (xmlEventKindOfKey(kind, evk) && !xmlTypeSupportsEvent(m_type, evk))
+            xmlprop2::WarnUnsupportedEvent(m_type, kind, value);
         for (auto& kv : m_eventNames)
         {
             if (kv.first == kind)

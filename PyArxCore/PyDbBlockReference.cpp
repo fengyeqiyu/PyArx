@@ -16,6 +16,10 @@ bool  PyDbBlockReference::setRotation(double r) { return PyWarnIfError(impObj()-
 uint64_t PyDbBlockReference::blockTableRecordId() const { return static_cast<uint64_t>(impObj()->blockTableRecord().asOldId()); }
 
 bool  PyDbBlockReference::setBlockTableRecord(uint64_t blockRecordId) {
+	// 防御：id 为 0 时立刻抛可读错误，避免后续入库触发 ARX 致命断言 eWrongDatabase。
+	if (blockRecordId == 0)
+		throw std::runtime_error("setBlockTableRecord: blockRecordId 无效(0)，"
+			"请先 bt.getIdAt(blockName) 取有效块定义 id（新建块定义需在事务 commit 之后取）");
 	AcDbObjectId id;
 	id.setFromOldId(static_cast<Adesk::IntDbId>(blockRecordId));
 	return PyWarnIfError(impObj()->setBlockTableRecord(id), L"AcDbBlockReference::setBlockTableRecord");
@@ -68,6 +72,57 @@ PyDbAttribute PyDbBlockReference::openAttribute(uint64_t attId, AcDb::OpenMode m
 	return PyDbAttribute(pAttr);
 }
 
+int PyDbBlockReference::attributeCount() const {
+	AcDbObjectIterator* it = impObj() ? impObj()->attributeIterator() : nullptr;
+	if (!it) return -1;
+	int n = 0;
+	for (; !it->done(); it->step()) ++n;
+	delete it;
+	return n;
+}
+
+py::list PyAttribDataFromObject(AcDbObject* pObj) {
+	py::list out;
+	AcDbBlockReference* br = pObj ? AcDbBlockReference::cast(pObj) : nullptr;
+	if (!br) return out;
+	AcDbObjectIterator* it = br->attributeIterator();
+	if (!it) return out;
+	for (; !it->done(); it->step()) {
+		AcDbObjectId aid = it->objectId();
+		AcDbAttribute* pa = nullptr;
+		if (acdbOpenObject(pa, aid, AcDb::kForRead) != Acad::eOk || !pa)
+			continue;
+		AcString tag, tv, ly;
+		pa->tag(tag);
+		pa->textString(tv);
+		pa->layer(ly);
+		AcGePoint3d p = pa->position();
+		AcGePoint3d ap = pa->alignmentPoint();
+		py::dict d;
+		d["tag"] = tag;
+		d["txt"] = tv;
+		d["x"] = p.x;
+		d["y"] = p.y;
+		d["ax"] = ap.x;
+		d["ay"] = ap.y;
+		d["h"] = pa->height();
+		d["rot"] = pa->rotation();
+		d["ha"] = static_cast<int>(pa->horizontalMode());
+		d["va"] = static_cast<int>(pa->verticalMode());
+		d["inv"] = pa->isInvisible() ? true : false;
+		d["ly"] = ly;
+		d["ci"] = static_cast<int>(pa->colorIndex());
+		out.append(d);
+		pa->close();
+	}
+	delete it;
+	return out;
+}
+
+py::list PyDbBlockReference::attribData() const {
+	return PyAttribDataFromObject(impObj());
+}
+
 void bind_PyDbBlockReference(pym& m) {
 	py::class_<PyDbBlockReference, PyDbEntity>(m, "PyDbBlockReference")
 		.def(py::init<>())
@@ -105,6 +160,10 @@ void bind_PyDbBlockReference(pym& m) {
 			delete it;
 			return out;
 		}, "返回块参照上所有属性的 id 列表")
+		.def("hasAttributes", []() { return false; }, "占位：ARX 无 hasAttributes，请用 attributeCount")
+		.def("attributeCount", &PyDbBlockReference::attributeCount, "属性数量（-1 表示迭代器创建失败）")
+		.def("attribData", &PyDbBlockReference::attribData,
+		     "实例属性列表：{tag,txt,x,y,ax,ay,h,rot,ha,va,inv,ly,ci}")
 		.def("appendAttribute", [](PyDbBlockReference& self, PyDbAttribute& attr) {
 			return PyWarnIfError(self.impObj()->appendAttribute(attr.impObj()), L"appendAttribute");
 		}, py::arg("attribute"), "向块参照追加一个属性")

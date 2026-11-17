@@ -64,6 +64,8 @@ void setTheme(bool dark);
 
 void setResizeCallback(py::object cb);
 std::pair<int, int> ClientSize() const;
+void setBackground(int r, int g, int b);
+std::pair<int, int> getSize(int id) const;
 void notifyResize(int w, int h);
 
 void show();
@@ -199,6 +201,7 @@ void setColumnWidths(int id, const std::vector<int>& widths);
 py::object getTableMetrics(int id);
 void onBlur(int id, py::object cb);
 void onDrag(int id, py::object cb);
+void onCanvasEvent(int id, py::object cb);
 py::object cellRect(int id, int row, int col);
 void onGridAction(py::object cb);
     void onGridActionFor(int id, py::object cb);
@@ -227,6 +230,7 @@ void tableSetFilter(int id, int col, const std::wstring& s);
 void tableClearFilters(int id);
 void tableSort(int id, int col, bool desc);
 int tableViewRows(int id) const;
+void addSkinBox(int id, int kind, int x, int y, int w, int h);
 void addTreeItem(int id, const std::wstring& s, int level, bool kids);
 void clearTreeItems(int id);
 int getTreeSelectedRow(int id) const;
@@ -271,6 +275,8 @@ void loadPowerPlan(int id, const std::wstring& json);
 void loadPowerScene(int id, const std::wstring& json);
     void copyPowerScene(int toId, int fromId);
 void loadPowerSvg(int id, const std::wstring& svg);
+    // 叠加层（选中框/橡皮筋/光标）：底图不动，只换这一层
+void loadPlanOverlay(int id, const std::wstring& svg);
 void setPlanView(int id, float zoom, int ox, int oy);
 float getPlanZoom(int id) const;
 std::wstring getPlanSelection(int id) const;
@@ -280,6 +286,18 @@ void setPlanOptions(int id, bool showCable, bool mini, int miniOf);
 py::object getPlanView(int id) const;
     // 画布鼠标诊断：返回 (lastMsg, upX, upY, wasDrag, moved_now, lastHit)
 py::object planProbe(int id);
+
+    // ---- 三维视图画布 ----
+    // 建窗 + 喂几何（box/line/tri 文本记录）+ 读写相机（yaw/pitch/zoom/pan）
+void addView3D(int id, int x, int y, int w, int h);
+void view3DLoad(int id, const std::wstring& geom);
+void view3DAppendBox(int id, float x0, float y0, float z0, float x1, float y1, float z1, unsigned color);
+void view3DAppendLine(int id, float x0, float y0, float z0, float x1, float y1, float z1,
+                      unsigned color, float width);
+void view3DSetCamera(int id, float yaw, float pitch, float zoom, int panX, int panY);
+py::object view3DGetCamera(int id) const;
+void view3DFitView(int id);
+void view3DSetStyle(int id, unsigned bg, bool axes, bool grid);
     // 命中测试（客户端坐标）：返回卡片编号，空 = 没命中。搜索/外部联动用
 std::wstring hitPlan(int id, int x, int y);
 bool selectPlan(int id, const std::wstring& code);
@@ -470,6 +488,7 @@ void setColumnWidths(int id, const std::vector<int>& widths);
 py::object getTableMetrics(int id);
 void onBlur(int id, py::object cb);
 void onDrag(int id, py::object cb);
+void onCanvasEvent(int id, py::object cb);
 py::object cellRect(int id, int row, int col);
 void onGridAction(py::object cb);
     void onGridActionFor(int id, py::object cb);
@@ -498,6 +517,7 @@ void tableSetFilter(int id, int col, const std::wstring& s);
 void tableClearFilters(int id);
 void tableSort(int id, int col, bool desc);
 int tableViewRows(int id) const;
+void addSkinBox(int id, int kind, int x, int y, int w, int h);
 void addTreeItem(int id, const std::wstring& s, int level, bool kids);
 void clearTreeItems(int id);
 int getTreeSelectedRow(int id) const;
@@ -541,6 +561,8 @@ void loadPowerPlan(int id, const std::wstring& json);
 void loadPowerScene(int id, const std::wstring& json);
     void copyPowerScene(int toId, int fromId);
 void loadPowerSvg(int id, const std::wstring& svg);
+    // 叠加层（选中框/橡皮筋/光标）：底图不动，只换这一层
+void loadPlanOverlay(int id, const std::wstring& svg);
 void setPlanView(int id, float zoom, int ox, int oy);
 float getPlanZoom(int id) const;
 std::wstring getPlanSelection(int id) const;
@@ -561,6 +583,16 @@ void repaint(int id);
 void sendToBack(int id);
 int getTabIndex(int id) const;
 void setTabIndex(int id, int n);
+    // ---- 三维视图画布（面板版）----
+void addView3D(int id, int x, int y, int w, int h);
+void view3DLoad(int id, const std::wstring& geom);
+void view3DAppendBox(int id, float x0, float y0, float z0, float x1, float y1, float z1, unsigned color);
+void view3DAppendLine(int id, float x0, float y0, float z0, float x1, float y1, float z1,
+                      unsigned color, float width);
+void view3DSetCamera(int id, float yaw, float pitch, float zoom, int panX, int panY);
+py::object view3DGetCamera(int id) const;
+void view3DFitView(int id);
+void view3DSetStyle(int id, unsigned bg, bool axes, bool grid);
 int getCanvasItemCount(int id) const;
 std::wstring getCanvasItemOp(int id, int index) const;
 std::vector<int> getCanvasItemBox(int id, int index) const;

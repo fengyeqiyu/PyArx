@@ -44,32 +44,46 @@ public:
 	bool dxfOut(const std::string& filename, int precision = 16);
 
 	template <typename SymbolTableType>
-	SymbolTableType* getSymbolTable(OpenMode mode = OpenMode::kForRead) {
+	SymbolTableType* getSymbolTable(OpenMode mode = OpenMode::kForWrite) {
 		SymbolTableType* pTable = nullptr;
-		CheckErrorStatus(impObj()->getSymbolTable(pTable, mode));
+		Acad::ErrorStatus es = impObj()->getSymbolTable(pTable, mode);
+		if (es != Acad::eOk) {
+			// 护栏：写打开失败（库只读 / 记录只读 / xref）抛清晰 Python 异常，
+			// 不再让 ARX 内部弹 !dbobji.cpp eNotOpenForWrite 对话框。
+			AcString esText = acadErrorStatusText(es);
+			const char* esUtf8 = esText.utf8Ptr();
+			throw std::runtime_error(std::string("getSymbolTable(kForWrite) 失败: ") +
+				(esUtf8 ? esUtf8 : "") +
+				"；需以可写方式打开数据库或另存副本（纯查询请显式传 kForRead=0）");
+		}
 		return pTable;
 	}
-	AcDbBlockTable* getBlockTable(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbLayerTable* getLayerTable(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbTextStyleTable* getTextStyleTable(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbLinetypeTable* getLinetypeTable(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbViewTable* getViewTable(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbUCSTable* getUCSTable(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbViewportTable* getViewportTable(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbRegAppTable* getRegAppTable(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDimStyleTable* getDimStyleTable(AcDb::OpenMode mode = AcDb::kForRead);
+	AcDbBlockTable* getBlockTable(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbLayerTable* getLayerTable(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbTextStyleTable* getTextStyleTable(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbLinetypeTable* getLinetypeTable(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbViewTable* getViewTable(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbUCSTable* getUCSTable(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbViewportTable* getViewportTable(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbRegAppTable* getRegAppTable(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDimStyleTable* getDimStyleTable(AcDb::OpenMode mode = AcDb::kForWrite);
 
-	AcDbDictionary* getGroupDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionary* getMLStyleDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionary* getLayoutDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionaryWithDefault* getPlotStyleNameDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionary* getMaterialDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionary* getVisualStyleDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionary* getColorDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionary* getScaleListDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionary* getNamedObjectsDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionary* getPlotSettingsDictionary(AcDb::OpenMode mode = AcDb::kForRead);
-	AcDbDictionary* getDataLinkDictionary(AcDb::OpenMode mode = AcDb::kForRead);
+	// C++ 式手工打开对象（等价 acdbOpenObject）：不需要 PyDbTrans 也能拿对象，
+	// 用完必须自己 obj.close()。mode: 0=读 1=写 2=通知（0/1 对应 kForRead/kForWrite）
+	// 默认写模式：图元/表/符号表的增改默认以 kForWrite 打开，纯查询请显式传 0。
+	PyDbObject openObject(uint64_t objectId, int mode = 1);
+
+	AcDbDictionary* getGroupDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionary* getMLStyleDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionary* getLayoutDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionaryWithDefault* getPlotStyleNameDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionary* getMaterialDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionary* getVisualStyleDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionary* getColorDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionary* getScaleListDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionary* getNamedObjectsDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionary* getPlotSettingsDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
+	AcDbDictionary* getDataLinkDictionary(AcDb::OpenMode mode = AcDb::kForWrite);
 	// 数据库对象管理器相关 
 	AcDbObjectId getSectionManager() const;
 
@@ -736,7 +750,7 @@ public:
 	void setIntersectColor(Adesk::UInt16 val);
 
 	// For the ACAD_TABLESTYLE dictionary
-	void getTableStyleDictionary(AcDbDictionary*& pDict, AcDb::OpenMode mode = AcDb::kForRead);
+	void getTableStyleDictionary(AcDbDictionary*& pDict, AcDb::OpenMode mode = AcDb::kForWrite);
 	AcDbObjectId tableStyleDictionaryId() const;
 
 	// The following functions are similar to setDimstyle/dimstyle

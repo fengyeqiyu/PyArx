@@ -25,7 +25,9 @@ import xml.etree.ElementTree as ET
 
 import PyMfcXml as M
 
-PLUGIN_DIR = r'G:\PyArx\plugins'
+# 插件目录不再写死盘符：优先环境变量，其次本包所在仓库的 plugins\
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PLUGIN_DIR = os.environ.get('PYARX_PLUGIN_DIR') or os.path.join(_ROOT, 'plugins')
 
 # XML 标签 → (宿主建控件的方法, 传参形态)。加一种基础控件只需要往这里补一行。
 # text = (id, text, x, y, w, h) / rect = (id, x, y, w, h) / slider = 带量程
@@ -197,11 +199,13 @@ class Composite(object):
     EVENTS = (('on_click', 'click'), ('on_dblclick', 'doubleclick'),
               ('on_change', 'change'), ('on_commit', 'commit'), ('on_grid', 'grid'))
 
-    def __init__(self, app, xml, x, y, w, h, id_base=None, scope=None):
+    def __init__(self, app, xml, x, y, w, h, id_base=None, scope=None, root=None):
         self.app = app
         self.win = app.win if hasattr(app, 'win') else app
         self.name = os.path.splitext(os.path.basename(xml))[0]
         self.xml = xml
+        self.diagnostics = []     # 被静默跳过的东西，加载完一次性报出来
+        self._root = root         # 复用调用方已经解析好的树（不重复解析 XML）
 
         if id_base is None:
             id_base = _ID_BASE + _ID_STEP * Composite._used[0]
@@ -225,7 +229,7 @@ class Composite(object):
     # ---------- 建控件：几何全部来自 xmlLayout ----------
     def _build(self, x, y, w, h):
         rel = M.xmlLayout(self.xml, w, h)
-        root = ET.parse(self.xml).getroot()
+        root = self._root if self._root is not None else ET.parse(self.xml).getroot()
 
         idx = 0
         for el in root.iter():
@@ -234,11 +238,17 @@ class Composite(object):
             if not name or tag in ('Window', 'Grid', 'RowDefinition', 'ColumnDefinition'):
                 continue
             spec = _TAG_SPEC.get(tag)
-            if spec is None or name not in rel:
+            if spec is None:
+                # 没有这个标签的建法：以前直接 continue，用户只看到控件没出现
+                self.diagnostics.append('%s: 标签 <%s> 没有对应的创建方法' % (name, tag))
+                continue
+            if name not in rel:
+                self.diagnostics.append('%s: xmlLayout 没有给出 <%s> 的矩形' % (name, tag))
                 continue
             method, shape = spec
             if not hasattr(self.win, method):
-                continue        # 宿主没这个控件就跳过，别整块炸掉
+                self.diagnostics.append('%s: 宿主缺少 %s()，<%s> 未创建'
+                                        % (name, method, tag))
 
             rx, ry, rw, rh = rel[name]
             cid = self.id_base + idx
@@ -262,6 +272,12 @@ class Composite(object):
             self.ids[name] = cid
             self.kinds[name] = tag
             self.texts[name] = text
+
+        if self.diagnostics:
+            print('[MfcXmlRuntime] %s：%d 个控件未创建'
+                  % (self.name, len(self.diagnostics)), file=sys.stderr)
+            for d in self.diagnostics[:10]:
+                print('  - ' + d, file=sys.stderr)
 
     def _bind_declared(self, el, name):
         """把 XML 里声明的 on_xxx="fn" / Click="fn" 记下来并挂上路由。"""
@@ -524,11 +540,12 @@ def xmlload(path, w=None, h=None, app=None, scope=None, x=0, y=0):
     """
     if not os.path.isabs(path):
         path = os.path.join(PLUGIN_DIR, path)
+    root = ET.parse(path).getroot()          # 只解析一次：尺寸与控件树共用同一棵树
     if w is None or h is None:
-        root = ET.parse(path).getroot()
         w = int(root.get('Width') or 480)
         h = int(root.get('Height') or 320)
-    comp = Composite(app, path, x, y, w, h, scope=scope if scope is not None else _scope_here(2))
+    comp = Composite(app, path, x, y, w, h, scope=scope if scope is not None else _scope_here(2),
+                     root=root)
     return comp
 
 

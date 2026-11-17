@@ -55,6 +55,10 @@ public:
     bool setFocus();          // 对齐 C#：文档窗口获得输入焦点
     std::wstring activate();  // 激活文档（acDocManager->activateDocument）
 
+    // 保存（同步，走 AcDbDatabase::save / saveAs）
+    std::wstring save();                          // 按当前文件名保存（.dxf 走 DXF）
+    std::wstring saveAs(const std::wstring& path); // 另存
+
     long long windowHandle() const;
     AcString toString() const;
 };

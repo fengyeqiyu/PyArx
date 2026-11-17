@@ -935,6 +935,51 @@ namespace
             node.text = node.get(L"Content");   // Popup 的正文
         if (node.text.empty())
             node.text = node.get(L"Header");
+
+        // 文本即内容（HTML 式写法）：<XLabel>标题</XLabel> 等价于 Text="标题"。
+        // 只看"第一个子节点且是纯文本"，避免把容器的后代文本全吸进来。
+        if (node.text.empty())
+        {
+            IXMLDOMNode* firstChild = nullptr;
+            element->get_firstChild(&firstChild);
+            if (firstChild != nullptr)
+            {
+                DOMNodeType nt = NODE_ELEMENT;
+                firstChild->get_nodeType(&nt);
+                if (nt == NODE_TEXT || nt == NODE_CDATA_SECTION)
+                {
+                    VARIANT cv;
+                    VariantInit(&cv);
+                    firstChild->get_nodeValue(&cv);
+                    if (cv.vt == VT_BSTR && cv.bstrVal != nullptr)
+                    {
+                        // 折掉换行/制表/连续空格，剩下就是控件文本
+                        std::wstring out;
+                        bool pendingSpace = false;
+                        for (const wchar_t c : std::wstring(cv.bstrVal))
+                        {
+                            if (c == L'\r' || c == L'\n' || c == L'\t' || c == L' ')
+                            {
+                                pendingSpace = true;
+                                continue;
+                            }
+                            if (pendingSpace && !out.empty())
+                                out += L' ';
+                            pendingSpace = false;
+                            out += c;
+                        }
+                        if (!out.empty())
+                        {
+                            node.text = out;
+                            // 落成一条本地 Text 声明，下游属性下发走同一条路（不再单独补丁）
+                            node.attrs.emplace_back(L"Text", out);
+                        }
+                    }
+                    ::VariantClear(&cv);
+                }
+                firstChild->Release();
+            }
+        }
         node.icon = node.get(L"Icon");   // 图标路径（res/xxx.png，相对 exe 目录）
 
         node.x = IntAttr(node.get(L"Left"), 0);
@@ -1657,12 +1702,27 @@ namespace
             else if (tag == L"rowdefinition" || tag == L"columndefinition")
                 continue;
 
+            // 容器没写 Height：横排容器按内容给高（横排不该纵向撑满父容器），
+            // 竖排容器保持原有"占满可用高"的语义（既有布局依赖它）。
             const int defH = IsContainer(tag)
-                ? (flow.height > 0 ? flow.height : 160)
+                ? ((child.horizontal && !child.hasH)
+                       ? xmlNaturalHeight(child)
+                       : (flow.height > 0 ? flow.height : 160))
                 : DefaultHeight(tag);
             int h = child.hasH ? child.h : defH;
-            int w = child.hasW ? child.w
-                               : (std::max)(1, flow.width - flow.margin * 2 - flow.padding * 2);
+            // 没写宽：竖排 = 撑满一行；横排 = 用控件自然宽（HTML 行内元素的行为）
+            int w = 0;
+            if (child.hasW)
+                w = child.w;
+            else if (flow.horizontal)
+            {
+                int dw = 96, dh = 28;
+                if (!xmlGetDefaultSize(tag.c_str(), dw, dh))
+                    dw = DefaultHeight(tag) * 3;
+                w = (std::max)(16, dw);
+            }
+            else
+                w = (std::max)(1, flow.width - flow.margin * 2 - flow.padding * 2);
 
             // 坐标：默认流式，写全 Left/Top 用绝对
             const bool useGridX = !flow.gridCols.empty();
@@ -2001,7 +2061,8 @@ namespace
                     else
                         fixedMain += flow.horizontal ? p->previewW : p->previewH;
                 }
-                const int rest = availH - fixedMain - gapTotal;
+                const int mainSpace = flow.horizontal ? availW : availH;
+                const int rest = mainSpace - fixedMain - gapTotal;
                 const int eachMain = nFillMain > 0 ? (std::max)(24, rest / nFillMain) : 0;
 
                 int cursor = flow.horizontal ? flow.padding : flow.paddingY;
@@ -2239,6 +2300,29 @@ namespace
 void xmlLayoutSubtree(XmlElement& root, int rootX, int rootY, int rootW, int rootH)
 {
     LayoutNodeAt(root, rootX, rootY, rootW, rootH);
+}
+
+int xmlNaturalHeight(const XmlElement& el)
+{
+    if (el.hasH)
+        return el.h;
+    const std::wstring tag = KindOf(el.tag);
+    if (el.children.empty())
+        return DefaultHeight(tag);
+    int content = 0;
+    int count = 0;
+    for (const XmlElement& child : el.children)
+    {
+        const std::wstring ct = KindOf(child.tag);
+        if (ct == L"rowdefinition" || ct == L"columndefinition" || ct == L"page" ||
+            ct == L"style" || ct == L"resources")
+            continue;
+        const int ch = xmlNaturalHeight(child);
+        content = el.horizontal ? (std::max)(content, ch) : content + ch;
+        ++count;
+    }
+    const int gap = el.horizontal ? 0 : el.spacing * (std::max)(0, count - 1);
+    return (std::max)(1, content + gap + el.padT + el.padB);
 }
 
 void xmlSetDefaultSize(const wchar_t* tag, int w, int h)

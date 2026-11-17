@@ -42,16 +42,6 @@ uint64_t PyDbUCSTableIterator::__next__() {
     return id;
 }
 
-void bind_PyDbUCSTableIterator(pym& m) {
-    py::class_<PyDbUCSTableIterator>(m, "PyDbUCSTableIterator")
-        .def(py::init<PyDbUCSTable&, bool, bool>(),
-             py::arg("owner"), py::arg("atBeginning") = true, py::arg("skipDeleted") = true,
-             "从 PyDbUCSTable 创建迭代器")
-        .def(py::init<AcDbUCSTableIterator*>(), py::arg("p"), "指针接管构造（析构 delete）")
-        .def("done", &PyDbUCSTableIterator::done)
-        .def("step", &PyDbUCSTableIterator::step,
-             py::arg("forward") = true, py::arg("skipDeleted") = true)
-        .def("currentId", &PyDbUCSTableIterator::currentId, "当前记录 ObjectId（uint64）；失败返回 0")
-        .def("__iter__", [](PyDbUCSTableIterator& it) -> PyDbUCSTableIterator& { return it; })
-        .def("__next__", &PyDbUCSTableIterator::__next__);
+void bind_PyDbUCSTableIterator(pym&) {
+    // 公开迭代器已退役；UCS 表遍历由 PyDbSymbolTable 容器协议覆盖。
 }

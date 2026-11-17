@@ -1,4 +1,4 @@
-﻿// PyMfcHost.h —— 宿主类 PyMfcHost 的接口（控件库 / 皮肤 / 事件 / XML 桥）。
+// PyMfcHost.h —— 宿主类 PyMfcHost 的接口（控件库 / 皮肤 / 事件 / XML 桥）。
 // 这里只放声明、嵌套类型、数据成员与类内宏；实现全部在 PyMfcHost.cpp（312 个成员）。
 // 改接口改这个文件，改实现改 PyMfcHost.cpp。
 #pragma once
@@ -6,6 +6,7 @@
 #include "PyMfcCommon.h"
 #include "Table.h"
 #include "controls/XmlTypes.h"   // XmlSkinKind：自绘件种类号的唯一定义（控件侧也用它）
+#include "XmlRibbon.h"          // 控件库 Ribbon 模型/布局/绘制/命中（xmlctl 命名空间）
 
 // S1 渲染表面抽象（MfcXmlCore）：这里只前向声明，d3d11/dxgi/d2d1 类型不进宿主头。
 class IXmlSurface;
@@ -113,6 +114,8 @@ static constexpr const wchar_t* kOldProcProp = L"PyMfcOldWndProc";
 // 配电画布：窗口属性里存宿主指针，鼠标消息交给宿主自己的状态机处理。
 // owner-draw 过程定义在 PyMfcHost 之前，拿不到成员函数，所以走"属性 + 自由函数"。
 static constexpr const wchar_t* kPlanHostProp = L"PyMfcPlanHost";
+// 三维视图画布：同一套"属性 + 自由函数"转发（左键旋转、滚轮缩放、中键平移）
+static constexpr const wchar_t* kView3DHostProp = L"PyMfcView3DHost";
 
 // 控件级事件（鼠标/键盘/焦点）：在控件创建末尾挂一层子类化过程，
 // 用窗口属性存回宿主指针与"上一层窗口过程"，事件转发不打断原有绘制/交互链。
@@ -591,17 +594,18 @@ void lvClampScroll(int id);
         COLORREF color = RGB(32, 36, 42);
     };
 
-    static constexpr float kPlanZoomMin = 0.05f;
-    static constexpr float kPlanZoomMax = 4.0f;
+    static constexpr float kPlanZoomMin = 1e-6f;   // 仅防除零，不限制放大上限
+    static constexpr float kPlanZoomMax = 1e9f;
     static float clampPlanZoom(float zoom)
     {
-        return zoom < kPlanZoomMin ? kPlanZoomMin : (zoom > kPlanZoomMax ? kPlanZoomMax : zoom);
+        return zoom < kPlanZoomMin ? kPlanZoomMin : zoom;
     }
 
     struct PlanCanvasState
     {
         xmlplan::PowerPlan plan;
         xmlsvg::SvgScene svg;
+        xmlsvg::SvgScene ovl;      // 叠加层（选中/橡皮筋/十字光标）：整图只灌一次，每帧只换这一层
         int mode = 0;             // 0=空 1=plan 2=svg
         float zoom = 1.0f;
         int ox = 0, oy = 0;
@@ -610,6 +614,8 @@ void lvClampScroll(int id);
         POINT down = {};          // 按下点（客户区坐标）
         int downOx = 0, downOy = 0;
         bool moved = false;
+        int dragBtn = 0;          // 0=无 1=左键（绘图/选择） 2=中键（平移）
+        bool leftConsumed = false; // 左键按下时 Python 已接管（本次左键不做平移）
         bool showCable = true;    // 连线标注电缆（工具栏复选框）
         bool mini = false;        // 小地图：按客户区 fit 铺满、不画文字、画视口红框
         int miniOf = -1;          // 小地图对应的主画布 id
@@ -638,6 +644,10 @@ void copyPowerCanvasScene(int toId, int fromId);
 
 void setPowerCanvasSvg(int id, const std::wstring& svgText) override;
 
+    // 叠加层：只换选中框/橡皮筋/十字光标这类每帧都变的小场景，
+    // 底图（st.svg）保持不动，避免每帧重新解析十几 MB 的整图 SVG。
+void setPowerCanvasOverlay(int id, const std::wstring& svgText) override;
+
 void setPowerCanvasView(int id, float zoom, int offsetX, int offsetY) override;
 
 float getPowerCanvasZoom(int id) const override;
@@ -661,6 +671,73 @@ bool detailHit(int id, int clientX, int clientY) const;
     // 用途：外部脚本定位、编辑表格"点行高亮图表"、自动化测试里的点击坐标。
 bool planCardRect(int id, const std::wstring& code, RECT& out) const;
 
+    // ---- 三维视图画布（View3D）----
+    // 几何按图元存（box/line/tri），每帧做一次旋转 + 透视投影 + 画家算法排序后画。
+    // 相机状态（yaw 绕 Z、pitch 绕 X、zoom、pan）在这里，鼠标改的是这里，重绘由这里发起。
+    struct V3Prim
+    {
+        int kind = 0;            // 0=box 1=line 2=tri
+        float p[9] = {};         // box 用 6 个（lo/hi），line 用 6 个，tri 用 9 个
+        COLORREF color = RGB(0xA8, 0xC6, 0xE2);
+        float width = 1.0f;      // line 线宽
+    };
+
+    struct View3DState
+    {
+        std::vector<V3Prim> prims;
+        float lo[3] = { 0, 0, 0 };
+        float hi[3] = { 0, 0, 0 };
+        float yaw = 35.0f;       // 绕 Z 轴（平面转角）
+        float pitch = 22.0f;     // 俯仰（0=平视, 90=俯视）
+        float zoom = 1.0f;
+        int panX = 0, panY = 0;
+        bool axes = true;
+        bool grid = false;
+        COLORREF bg = RGB(0xF7, 0xFA, 0xFD);
+        // 交互
+        int dragMode = 0;        // 0=无 1=旋转 2=平移
+        POINT down = {};
+        float downYaw = 0.0f, downPitch = 0.0f;
+        int downPanX = 0, downPanY = 0;
+        bool autoFit = true;     // 首次 / 窗口尺寸变化后自动 fit，用户手动动过就关掉
+        bool empty = true;
+        std::wstring src;        // 原始几何文本（追加图元时拼接用）
+    };
+    std::map<int, View3DState> m_view3D;
+
+void addView3D(int id, int x, int y, int w, int h) override;
+void setView3DModel(int id, const std::wstring& geom) override;
+    // 追加一条图元记录（box/line/tri），不清空已有内容
+void view3DAddRecord(int id, const std::wstring& rec);
+void setView3DCamera(int id, float yaw, float pitch, float zoom, int panX, int panY) override;
+void getView3DCamera(int id, float& yaw, float& pitch, float& zoom, int& panX, int& panY) const override;
+void view3DFit(int id) override;
+void setView3DStyle(int id, COLORREF bg, bool axes, bool grid) override;
+
+void drawView3D(XmlCanvas& cv, int id, const RECT& rc);
+bool view3DHit(int id) const { return m_view3D.find(id) != m_view3D.end(); }
+
+    // ---- Ribbon（复用控件库 xmlctl::XRibbon，宿主只建自绘窗口 + 持有模型/布局状态）----
+    struct RibbonState
+    {
+        xmlctl::XRibbonModel model;
+        xmlctl::XRibbonLayout lay;
+        int hotTab = -1;
+        std::wstring hotBtn;
+        std::wstring pressedBtn;
+        bool pressed = false;
+    };
+    std::map<int, RibbonState> m_ribbon;
+
+    void addRibbon(int id, int x, int y, int w, int h) override;
+    void setRibbonElement(int id, const XmlElement* el) override;
+    void drawRibbon(XmlCanvas& cv, int id, const RECT& rc);
+    bool ribbonHas(int id) const { return m_ribbon.find(id) != m_ribbon.end(); }
+    // 鼠标：返回是否消费；tab 切换自重绘，按钮命中把 Name 经 fireRibbonButton 派发
+    bool ribbonMouse(int id, UINT msg, int x, int y, WPARAM flags);
+    void fireRibbonButton(int id, const std::wstring& name);
+
+
 
     // ---- 控件级导出（基类能力，任意控件都能调）----
     // PrintWindow 让控件按正常绘制路径画进内存 DIB，再交给 WIC 写 PNG。
@@ -676,6 +753,9 @@ bool selectPlanItem(int id, const std::wstring& code);
 void firePlanSelect(int id, const std::wstring& /*code*/);
 
 void firePlanDoubleClick(int id, const std::wstring& /*code*/);
+
+    // 工具条条目点击：回调带条目序号（一个控件只挂一条 onClick，靠序号区分点了哪项）
+void fireToolBarItem(int id, int index);
 
     // 画整体内容：页面底 → （SVG 场景 | 配电图）全部交给同一套绘制函数
 void drawPlanCanvas(XmlCanvas& cv, int id, const RECT& rc);
@@ -1004,6 +1084,8 @@ static COLORREF contrastText(COLORREF bg);
     // 页/窗口背景：控件自己没声明背景时，用它垫底（否则会退回主题底色，
     // 白底页面上就出现一条条深色块）。也用于 OnEraseBkgnd 的默认底色。
 void setPageBackdrop(COLORREF c, bool valid);
+void setBackgroundColor(COLORREF c);
+std::pair<int, int> controlClientSize(int id) const;
 
     // 容器铺底：容器不建原生控件，由其宿主在 OnEraseBkgnd 里按声明画底色
 void addContainerBackdrop(int x, int y, int w, int h,
@@ -1048,6 +1130,14 @@ void fireGridAction(int ctlId, const char* action, int row, int col, const std::
     std::map<int, py::object> m_drag;
 void onDrag(int id, py::object cb);
 void fireDrag(int id, const char* phase, int x);
+
+    // 画布原始鼠标事件：cb(phase, x, y, flags) -> bool
+    //   phase: "down" / "move" / "up" / "dblclick" / "wheel"
+    //   返回 True = Python 已消费（例如正在定点画线），宿主不再把它当平移。
+    // 这是绘图命令的前提：PowerCanvas 原本把左键独占成平移，Python 永远拿不到点击。
+    std::map<int, py::object> m_canvasEvt;
+void onCanvasEvent(int id, py::object cb);
+bool fireCanvasEvent(int id, const char* phase, int x, int y, int flags);
 
     // 原地编辑：EDIT 失焦 → 提交（点别处就等于确认，和 Excel 一致）
     std::map<int, py::object> m_blur;

@@ -50,9 +50,42 @@ py::object PyEdGetVar(const AcString& sym) {
     }
 }
 
-bool PyEdSetVar(const AcString& sym, const TypedValue& value) {
-    PyResbuf holder(TVList{ value });
-    return edWarn(::acedSetVar(sym.kwszPtr(), holder.data()), L"acedSetVar");
+bool PyEdSetVar(const AcString& sym, const py::object& value) {
+    // PyRx 口径：setVar(name, value) 直接吃 Python 值（str/int/float/bool/点），
+    // 也兼容显式传 TypedValue。逐类型映射为 resbuf，避免用户被迫手工构造 TypedValue。
+    if (py::isinstance<TypedValue>(value)) {
+        PyResbuf holder(TVList{ value.cast<TypedValue>() });
+        return edWarn(::acedSetVar(sym.kwszPtr(), holder.data()), L"acedSetVar");
+    }
+    struct resbuf rb;
+    if (py::isinstance<py::bool_>(value)) {
+        rb.restype = RTSHORT;
+        rb.resval.rint = value.cast<bool>() ? 1 : 0;
+    } else if (py::isinstance<py::int_>(value)) {
+        rb.restype = RTSHORT;
+        rb.resval.rint = value.cast<int>();
+    } else if (py::isinstance<py::float_>(value)) {
+        rb.restype = RTREAL;
+        rb.resval.rreal = value.cast<double>();
+    } else if (py::isinstance<py::str>(value)) {
+        AcString s = value.cast<AcString>();
+        rb.restype = RTSTR;
+        rb.resval.rstring = const_cast<ACHAR*>(s.constPtr());
+    } else if (py::isinstance<AcGePoint3d>(value)) {
+        const AcGePoint3d& p = value.cast<const AcGePoint3d&>();
+        rb.restype = RT3DPOINT;
+        rb.resval.rpoint[0] = p.x;
+        rb.resval.rpoint[1] = p.y;
+        rb.resval.rpoint[2] = p.z;
+    } else if (py::isinstance<AcGePoint2d>(value)) {
+        const AcGePoint2d& p = value.cast<const AcGePoint2d&>();
+        rb.restype = RTPOINT;
+        rb.resval.rpoint[0] = p.x;
+        rb.resval.rpoint[1] = p.y;
+    } else {
+        return false;
+    }
+    return ::acedSetVar(sym.kwszPtr(), &rb) == RTNORM;
 }
 
 AcString PyEdGetEnv(const AcString& sym) {

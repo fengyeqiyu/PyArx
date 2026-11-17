@@ -17,5 +17,6 @@ void bind_PyDbBlockTable(pym& m) {
 		.def(py::init<AcDbBlockTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbBlockTable)
 		.def("has", &PyDbBlockTable::has, py::arg("name"))
-		.def("getAt", &PyDbBlockTable::getAt, py::arg("name"), py::arg("mode") = 0);
+		.def("getAt", &PyDbBlockTable::getAt, py::arg("name"), py::arg("mode") = 1,
+			"按名称取块表记录；mode 默认 1=写，纯查询传 0=读");
 }

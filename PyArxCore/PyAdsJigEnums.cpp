@@ -10,6 +10,8 @@ void bind_JigEnums(pym& m) {
 		.value("kOther", AcEdJig::kOther)
 		.value("kNull", AcEdJig::kNull)
 		.value("kNormal", AcEdJig::kNormal)
+		.value("eNormal", AcEdJig::kNormal) // PyRx 同义名
+		.value("eOk", AcEdJig::kNormal)     // PyRx 同义名
 		.value("kKW1", AcEdJig::kKW1)
 		.value("kKW2", AcEdJig::kKW2)
 		.value("kKW3", AcEdJig::kKW3)

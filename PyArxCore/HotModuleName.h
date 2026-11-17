@@ -1,0 +1,9 @@
+#pragma once
+
+#ifndef PYARX_HOT_INTERNALS
+#define PYARX_HOT_INTERNALS "_dev"
+#endif
+
+#ifndef PYBIND11_INTERNALS_KIND
+#define PYBIND11_INTERNALS_KIND PYARX_HOT_INTERNALS
+#endif

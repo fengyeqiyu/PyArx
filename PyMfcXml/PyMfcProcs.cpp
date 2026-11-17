@@ -1639,12 +1639,23 @@ HCURSOR pyMfcGrabDownCursor()
     return cur != nullptr ? cur : pyMfcGrabCursor();
 }
 
-// 画布当前该用的光标：左键按住 + 本窗口捕获 = 拖动中 → 握住的；否则 grab
+// 画布当前该用的光标：平时由 Python 自绘全屏十字线，系统指针隐藏；
+// 左/中键按住拖动中 → 握住的爪型
 HCURSOR pyMfcCanvasCursor(HWND hwnd)
 {
     const bool pressed = (::GetCapture() == hwnd) &&
-                         ((::GetKeyState(VK_LBUTTON) & 0x8000) != 0);
-    return pressed ? pyMfcGrabDownCursor() : pyMfcGrabCursor();
+                         (((::GetKeyState(VK_LBUTTON) & 0x8000) != 0) ||
+                          ((::GetKeyState(VK_MBUTTON) & 0x8000) != 0));
+    if (pressed) return pyMfcGrabDownCursor();
+    static HCURSOR blank = nullptr;
+    if (blank == nullptr)
+    {
+        unsigned char andMask = 0xFF;   // 1×1 全透明
+        unsigned char xorMask = 0x00;
+        blank = ::CreateCursor(::GetModuleHandleW(nullptr), 0, 0, 1, 1,
+                               &andMask, &xorMask);
+    }
+    return blank;
 }
 static LRESULT CALLBACK PyMfcWheelProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
@@ -1742,7 +1753,12 @@ LRESULT CALLBACK PyMfcHost::PyMfcSkinWindowProc(HWND hwnd, UINT msg, WPARAM wPar
         if (ph != nullptr)
         {
             PyMfcHost* host = reinterpret_cast<PyMfcHost*>(ph);
-            host->fitPlanCanvas(::GetDlgCtrlID(hwnd));
+            const int cid = ::GetDlgCtrlID(hwnd);
+            auto it = host->m_planCv.find(cid);
+            // 仅 plan 卡片画布(mode1)随尺寸 fit；SVG 图纸场景(mode2)保留用户平移/缩放，
+            // 不能在重排时把 ox/oy/zoom 清零，否则拖完/缩放后视图跳回原位。
+            if (it != host->m_planCv.end() && it->second.mode == 1)
+                host->fitPlanCanvas(cid);
             ::InvalidateRect(hwnd, nullptr, FALSE);
         }
     }
@@ -1909,6 +1925,17 @@ LRESULT CALLBACK PyMfcHost::PyMfcSkinWindowProc(HWND hwnd, UINT msg, WPARAM wPar
         }
     }
 
+    // 画布自绘 STATIC：ESC 回抛给 Python 取消当前绘制命令（C++ 只转发按键，业务归回调）。
+    if (host != nullptr && msg == WM_KEYDOWN && wParam == VK_ESCAPE)
+    {
+        const int kid = ::GetDlgCtrlID(hwnd);
+        if (host->m_planCv.find(kid) != host->m_planCv.end())
+        {
+            host->fireCanvasEvent(kid, "key", 0, 0, static_cast<int>(wParam));
+            return 0;
+        }
+    }
+
     // 状态类消息之后重画自己：内容/选中/滚动/焦点都会改变外观。
     // 注意不要把 WM_MOUSEMOVE / WM_SETCURSOR 放进来：这两个在鼠标划过时每秒能来几十次，
     // 等于让整个控件跟着鼠标不停重画 —— 表现出来就是"选项卡切换卡顿/闪"。
@@ -2070,6 +2097,22 @@ void PyMfcHost::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lp)
     if (m_planCv.find(cid) != m_planCv.end())
     {
         drawPlanCanvas(*cv, cid, itemRc);
+        cv->end();
+        dc.Detach();
+        return;
+    }
+    // 三维视图画布：相机（yaw/pitch/zoom）也每帧现算，不走声明式外观
+    if (m_view3D.find(cid) != m_view3D.end())
+    {
+        drawView3D(*cv, cid, itemRc);
+        cv->end();
+        dc.Detach();
+        return;
+    }
+    // Ribbon：模型/布局/绘制/命中全走控件库 xmlctl，宿主只按矩形把整条 Ribbon 画上去
+    if (ribbonHas(cid))
+    {
+        drawRibbon(*cv, cid, itemRc);
         cv->end();
         dc.Detach();
         return;
@@ -2394,6 +2437,122 @@ LRESULT CALLBACK PyMfcGridProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     return ::DefWindowProcW(hwnd, msg, wParam, lParam);
 }
 
+LRESULT PyMfcView3DMouse(PyMfcHost* host, HWND hwnd, UINT msg,
+                         WPARAM wParam, LPARAM lParam, bool& handled)
+{
+    handled = false;
+    if (host == nullptr)
+        return 0;
+    const int id = ::GetDlgCtrlID(hwnd);
+    auto it = host->m_view3D.find(id);
+    if (it == host->m_view3D.end())
+        return 0;
+    PyMfcHost::View3DState& st = it->second;
+
+    switch (msg)
+    {
+    case WM_MOUSEWHEEL:
+    {
+        POINT pt = {};
+        pt.x = GET_X_LPARAM(lParam);
+        pt.y = GET_Y_LPARAM(lParam);
+        ::ScreenToClient(hwnd, &pt);
+        const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+        const float step = (delta > 0) ? 1.12f : (1.0f / 1.12f);
+        float nz = st.zoom * step;
+        if (nz < 0.05f) nz = 0.05f;
+        if (nz > 40.0f) nz = 40.0f;
+        // 以光标为锚点缩放：光标下的像素位置保持不动
+        RECT rc = {};
+        ::GetClientRect(hwnd, &rc);
+        const float cx = (rc.right - rc.left) * 0.5f + static_cast<float>(st.panX);
+        const float cy = (rc.bottom - rc.top) * 0.5f + static_cast<float>(st.panY);
+        const float fx = (pt.x - cx) * (nz / st.zoom);
+        const float fy = (pt.y - cy) * (nz / st.zoom);
+        st.panX = static_cast<int>(lroundf(pt.x - fx - (rc.right - rc.left) * 0.5f));
+        st.panY = static_cast<int>(lroundf(pt.y - fy - (rc.bottom - rc.top) * 0.5f));
+        st.zoom = nz;
+        st.autoFit = false;
+        ::InvalidateRect(hwnd, nullptr, FALSE);
+        handled = true;
+        return 0;
+    }
+    case WM_LBUTTONDOWN:
+    case WM_MBUTTONDOWN:
+    {
+        ::SetFocus(hwnd);
+        ::SetCapture(hwnd);
+        st.dragMode = (msg == WM_MBUTTONDOWN) ? 2 : 1;
+        st.down.x = GET_X_LPARAM(lParam);
+        st.down.y = GET_Y_LPARAM(lParam);
+        st.downYaw = st.yaw;
+        st.downPitch = st.pitch;
+        st.downPanX = st.panX;
+        st.downPanY = st.panY;
+        st.autoFit = false;
+        handled = true;
+        return 0;
+    }
+    case WM_MOUSEMOVE:
+    {
+        if (st.dragMode != 0 && ::GetCapture() == hwnd)
+        {
+            const int x = GET_X_LPARAM(lParam);
+            const int y = GET_Y_LPARAM(lParam);
+            const int dx = x - st.down.x;
+            const int dy = y - st.down.y;
+            if (st.dragMode == 1)
+            {
+                st.yaw = st.downYaw + static_cast<float>(dx) * 0.35f;
+                float np = st.downPitch + static_cast<float>(dy) * 0.35f;
+                if (np > 89.0f) np = 89.0f;
+                if (np < -89.0f) np = -89.0f;
+                st.pitch = np;
+                ::SetCursor(::LoadCursorW(nullptr, IDC_SIZEALL));
+            }
+            else
+            {
+                st.panX = st.downPanX + dx;
+                st.panY = st.downPanY + dy;
+                ::SetCursor(::LoadCursorW(nullptr, IDC_SIZEALL));
+            }
+            ::InvalidateRect(hwnd, nullptr, FALSE);
+            handled = true;
+            return 0;
+        }
+        TRACKMOUSEEVENT tme = {};
+        tme.cbSize = sizeof(tme);
+        tme.dwFlags = TME_LEAVE;
+        tme.hwndTrack = hwnd;
+        ::TrackMouseEvent(&tme);
+        handled = true;
+        return 0;
+    }
+    case WM_LBUTTONUP:
+    case WM_MBUTTONUP:
+    {
+        if (::GetCapture() == hwnd)
+            ::ReleaseCapture();
+        st.dragMode = 0;
+        handled = true;
+        return 0;
+    }
+    case WM_LBUTTONDBLCLK:
+        st.dragMode = 0;
+        host->view3DFit(id);
+        handled = true;
+        return 0;
+    case WM_MOUSELEAVE:
+        ::SetCursor(::LoadCursorW(nullptr, IDC_ARROW));
+        handled = true;
+        return 0;
+    default:
+        break;
+    }
+    return 0;
+}
+
+
 LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
                                     WPARAM wParam, LPARAM lParam, bool& handled)
 {
@@ -2403,13 +2562,17 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
     const int id = ::GetDlgCtrlID(hwnd);
     auto it = host->m_planCv.find(id);
     if (it == host->m_planCv.end())
+    {
+        debugLogf(L"[plan-mouse] id=%d 未注册 planCv, msg=0x%04X", id, msg);
         return 0;
+    }
     PyMfcHost::PlanCanvasState& st = it->second;
 
-    if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_MOUSEWHEEL)
-        debugLogf(L"[plan-mouse] msg=0x%04X pt=(%d,%d) wp=0x%04X drag=%d moved=%d",
-                  msg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),
-                  static_cast<unsigned>(wParam), st.drag ? 1 : 0, st.moved ? 1 : 0);
+    if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_MOUSEWHEEL ||
+        msg == WM_MBUTTONDOWN || msg == WM_MBUTTONUP || msg == WM_MOUSEMOVE)
+        debugLogf(L"[plan-mouse] id=%d msg=0x%04X pt=(%d,%d) wp=0x%04X drag=%d btn=%d moved=%d",
+                  id, msg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),
+                  static_cast<unsigned>(wParam), st.drag ? 1 : 0, st.dragBtn, st.moved ? 1 : 0);
 
     switch (msg)
     {
@@ -2422,14 +2585,19 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
         ::ScreenToClient(hwnd, &pt);
 
         const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+        if (host->fireCanvasEvent(id, "wheel", pt.x, pt.y, delta))
+        {
+            handled = true;
+            return 0;
+        }
         float k = st.zoom;
         const float step = (delta > 0) ? 1.12f : (1.0f / 1.12f);
         float nk = k * step;
         wchar_t surfBuf[16] = {};
         const bool surfOn = (::GetEnvironmentVariableW(L"PYARX_SURFACE", surfBuf, 16) > 0)
                             && surfBuf[0] == L'1';
-        nk = surfOn ? ((nk < 0.05f) ? 0.05f : (nk > 4.0f ? 4.0f : nk))
-                    : ((nk < 0.2f) ? 0.2f : (nk > 4.0f ? 4.0f : nk));
+        // 视图缩放不设上下限，可无限放大/缩小；仅保留极小地板防止除零。
+        nk = std::max(nk, 1e-6f);
         if (std::abs(nk - k) < 0.0001f)
         {
             handled = true;
@@ -2448,8 +2616,34 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
     case WM_LBUTTONDOWN:
     {
         ::SetFocus(hwnd);
+        const int x = GET_X_LPARAM(lParam);
+        const int y = GET_Y_LPARAM(lParam);
+        // 先把原始点击交给 Python：绘图命令要用它定点。
+        // 返回 True 表示"这一击归 Python"，本次左键就不当平移用了。
+        st.leftConsumed = host->fireCanvasEvent(id, "down", x, y,
+            static_cast<int>(MK_LBUTTON));
+        if (!st.leftConsumed)
+        {
+            ::SetCapture(hwnd);
+            st.drag = true;
+            st.dragBtn = 1;
+            st.moved = false;
+            st.down.x = x;
+            st.down.y = y;
+            st.downOx = st.ox;
+            st.downOy = st.oy;
+            ::SetCursor(pyMfcGrabDownCursor());
+        }
+        handled = true;
+        return 0;
+    }
+    case WM_MBUTTONDOWN:
+    {
+        // AutoCAD 习惯：中键拖动平移
+        ::SetFocus(hwnd);
         ::SetCapture(hwnd);
         st.drag = true;
+        st.dragBtn = 2;
         st.moved = false;
         st.down.x = GET_X_LPARAM(lParam);
         st.down.y = GET_Y_LPARAM(lParam);
@@ -2461,10 +2655,14 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
     }
     case WM_MOUSEMOVE:
     {
-        if (st.drag && ::GetCapture() == hwnd)
+        const int x = GET_X_LPARAM(lParam);
+        const int y = GET_Y_LPARAM(lParam);
+        // 移动事件照发：橡皮筋预览、坐标栏都靠它，Python 自己决定要不要重画
+        host->fireCanvasEvent(id, "move", x, y, static_cast<int>(wParam));
+
+        if (st.drag && ::GetCapture() == hwnd &&
+            (st.dragBtn == 2 || (st.dragBtn == 1 && !st.leftConsumed)))
         {
-            const int x = GET_X_LPARAM(lParam);
-            const int y = GET_Y_LPARAM(lParam);
             const int dx = x - st.down.x;
             const int dy = y - st.down.y;
             if (!st.moved && (std::abs(dx) > 3 || std::abs(dy) > 3))
@@ -2490,6 +2688,16 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
         handled = true;
         return 0;
     }
+    case WM_MBUTTONUP:
+    {
+        st.drag = false;
+        st.dragBtn = 0;
+        if (::GetCapture() == hwnd)
+            ::ReleaseCapture();
+        ::SetCursor(pyMfcCanvasCursor(hwnd));
+        handled = true;
+        return 0;
+    }
     case WM_MOUSELEAVE:
         ::SetCursor(::LoadCursorW(nullptr, IDC_ARROW));
         handled = true;
@@ -2500,7 +2708,10 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
         // 那个分支会把 st.drag 清成 false —— 先 Release 再读，这一击就被当成
         // "从没按下过"，卡片永远选不中。所以先把状态取下来再释放捕获。
         const bool wasDrag = st.drag;
+        const bool consumed = st.leftConsumed;
         st.drag = false;
+        st.dragBtn = 0;
+        st.leftConsumed = false;
         st.upWasDrag = wasDrag;
         st.lastMsg = WM_LBUTTONUP;
         st.upX = GET_X_LPARAM(lParam);
@@ -2508,8 +2719,16 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
         st.lastHit.clear();
         if (::GetCapture() == hwnd)
             ::ReleaseCapture();
-        // 松开立即回到 grab，不必等下一次 WM_SETCURSOR（拖动状态已结束）
-        ::SetCursor(pyMfcGrabCursor());
+        // 松开立即回到十字，不必等下一次 WM_SETCURSOR（拖动状态已结束）
+        ::SetCursor(pyMfcCanvasCursor(hwnd));
+        // Python 接管了这一击：只把它当"点完一个点"，不跑卡片命中逻辑
+        if (consumed)
+        {
+            host->fireCanvasEvent(id, "up", st.upX, st.upY, 0);
+            handled = true;
+            return 0;
+        }
+        host->fireCanvasEvent(id, "up", st.upX, st.upY, 0);
         if (wasDrag && !st.moved)
         {
             // 没拖动 = 单击：命中卡片就选中并上报（Python 侧可取回编号）
@@ -2564,6 +2783,11 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
     {
         const int x = GET_X_LPARAM(lParam);
         const int y = GET_Y_LPARAM(lParam);
+        if (host->fireCanvasEvent(id, "dblclick", x, y, 0))
+        {
+            handled = true;
+            return 0;
+        }
         const std::wstring code = host->planHit(id, x, y);
         if (!code.empty())
             host->firePlanDoubleClick(id, code);
@@ -2572,6 +2796,7 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
     }
     case WM_CAPTURECHANGED:
         st.drag = false;
+        st.dragBtn = 0;
         handled = true;
         return 0;
     case WM_SETCURSOR:

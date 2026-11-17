@@ -2,10 +2,8 @@
 #include "PyRxClass.h"
 #include "PyRxObject.h"
 #include "PyGiSubEntityTraits.h"
+#include "PyGiFill.h"
 #include "PyDbEntity.h"
-
-//#include "PyGiMapper.h"
-//#include "PyGiFill.h"
 
 
 PyWrapper_Cpp(GiSubEntityTraits)
@@ -51,10 +49,9 @@ void PyGiSubEntityTraits::setPlotStyleName(AcDb::PlotStyleNameType pltType, cons
 void PyGiSubEntityTraits::setMaterial(const AcDbObjectId materialId) {
 	impObj()->setMaterial(materialId);
 }
-
-//void PyGiSubEntityTraits::setMapper(const PyGiMapper& mapper) {
-//	impObj()->setMapper(mapper.impObj());
-//}
+void PyGiSubEntityTraits::setMapper(const AcGiMapper& mapper) {
+	impObj()->setMapper(&mapper);
+}
 void PyGiSubEntityTraits::setSectionable(bool bSectionable) {
 	impObj()->setSectionable(bSectionable);
 }
@@ -70,10 +67,9 @@ void PyGiSubEntityTraits::setSelectionGeom(bool bSelectionflag) {
 void PyGiSubEntityTraits::setTransparency(const AcCmTransparency& transparency) {
 	impObj()->setTransparency(transparency);
 }
-
-//void PyGiSubEntityTraits::setFill(const PyGiFill& pFill) {
-//	impObj()->setFill(pFill.impObj());
-//}
+void PyGiSubEntityTraits::setFill(const PyGiFill& pFill) {
+	impObj()->setFill(pFill.impObj());
+}
 
 // Return current settings.
 //
@@ -94,7 +90,7 @@ AcGiFillType PyGiSubEntityTraits::fillType(void) const {
 }
 AcDb::LineWeight PyGiSubEntityTraits::lineWeight(void) const {
 	return impObj()->lineWeight();
-} 
+}
 double PyGiSubEntityTraits::lineTypeScale(void) const {
 	return impObj()->lineTypeScale();
 }
@@ -104,13 +100,17 @@ double PyGiSubEntityTraits::thickness(void) const {
 AcDbObjectId PyGiSubEntityTraits::visualStyle(void) const {
 	return impObj()->visualStyle();
 }
-
+AcDb::PlotStyleNameType PyGiSubEntityTraits::getPlotStyleNameId(AcDbObjectId& idResult) const {
+	return impObj()->getPlotStyleNameId(idResult);
+}
 AcDbObjectId PyGiSubEntityTraits::materialId(void) const {
 	return impObj()->materialId();
 }
-//const PyGiMapper& PyGiSubEntityTraits::mapper(void) const {
-//	return impObj()->mapper();
-//}
+std::optional<AcGiMapper> PyGiSubEntityTraits::mapper(void) const {
+	const AcGiMapper* p = impObj()->mapper();
+	if (!p) return std::nullopt;
+	return *p;
+}
 bool PyGiSubEntityTraits::sectionable(void) const {
 	return impObj()->sectionable();
 }
@@ -126,11 +126,46 @@ bool PyGiSubEntityTraits::selectionGeom(void) const {
 AcCmTransparency PyGiSubEntityTraits::transparency(void) const {
 	return impObj()->transparency();
 }
-//const PyGiFill& PyGiSubEntityTraits::fill(void) const {
-//	return impObj()->fill();
-//}
 
-void PyGiDrawableTraits::setupForEntity(PyDbEntity& pEntity) 
+void PyGiSubEntityTraits::pushMarkerOverride(bool flag, const Adesk::LongPtr markerId) {
+	impObj()->pushMarkerOverride(flag, markerId);
+}
+void PyGiSubEntityTraits::popMarkerOverride(void) {
+	impObj()->popMarkerOverride();
+}
+void PyGiSubEntityTraits::clearMarkerOverride(void) {
+	impObj()->clearMarkerOverride();
+}
+
+void PyGiDrawableTraits::setupForEntity(PyDbEntity& pEntity)
 {
 	impObj()->setupForEntity(pEntity.impObj());
+}
+
+void PyGiDrawableTraits::addLight(const AcDbObjectId& lightId) {
+	static_cast<AcGiDrawableTraits*>(impObj())->addLight(lightId);
+}
+
+void PyGiDrawableTraits::setLinePattern(int linePattern) {
+	static_cast<AcGiDrawableTraits*>(impObj())->setLinePattern(static_cast<AcGiLineType>(linePattern));
+}
+
+int PyGiDrawableTraits::linePattern() const {
+	return static_cast<int>(static_cast<AcGiDrawableTraits*>(impObj())->linePattern());
+}
+
+Acad::ErrorStatus PyGiDrawableTraits::setSelectionFlags(AcGiSubEntityTraits::SelectionFlags flags) {
+	return static_cast<AcGiDrawableTraits*>(impObj())->setSelectionFlags(flags);
+}
+
+AcGiSubEntityTraits::SelectionFlags PyGiDrawableTraits::selectionFlags() const {
+	return static_cast<AcGiDrawableTraits*>(impObj())->selectionFlags();
+}
+
+Acad::ErrorStatus PyGiDrawableTraits::setHighlightProperty(AcGiDrawableTraits::HighlightProperty property, AcGiVariant& value) {
+	return static_cast<AcGiDrawableTraits*>(impObj())->setHighlightProperty(property, value);
+}
+
+AcGiVariant PyGiDrawableTraits::highlightProperty(AcGiDrawableTraits::HighlightProperty property) const {
+	return static_cast<AcGiDrawableTraits*>(impObj())->highlightProperty(property);
 }

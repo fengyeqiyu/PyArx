@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""MfcXmlRuntime：复合控件的运行机制框架。
+r"""MfcXmlRuntime：复合控件的运行机制框架。
 
     from MfcXmlRuntime import xmlload, Runtime
 
@@ -9,6 +9,7 @@
 """
 from .runtime import (Composite, Child, Runtime, available, import_plugin,
                       load, xmlload, PLUGIN_DIR)
+from .html import html, Ui, DEFAULT_HEIGHT
 
 __all__ = ['Composite', 'Child', 'Runtime', 'available', 'import_plugin',
-           'load', 'xmlload', 'PLUGIN_DIR']
+           'load', 'xmlload', 'PLUGIN_DIR', 'html', 'Ui', 'DEFAULT_HEIGHT']

@@ -24,10 +24,6 @@ const AcDbViewTableIterator* PyDbViewTableIterator::impObj() const {
     return static_cast<const AcDbViewTableIterator*>(PyDbAbstractViewTableIterator::impObj());
 }
 
-void bind_PyDbViewTableIterator(pym& m) {
-    py::class_<PyDbViewTableIterator, PyDbAbstractViewTableIterator>(m, "PyDbViewTableIterator")
-        .def(py::init<PyDbViewTable&, bool, bool>(),
-             py::arg("owner"), py::arg("atBeginning") = true, py::arg("skipDeleted") = true,
-             "从 PyDbViewTable 创建迭代器")
-        .def(py::init<AcDbViewTableIterator*>(), py::arg("p"), "指针接管构造（析构 delete）");
+void bind_PyDbViewTableIterator(pym&) {
+    // 公开迭代器已退役；视图表遍历由 PyDbSymbolTable 容器协议覆盖。
 }

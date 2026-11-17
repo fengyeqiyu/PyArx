@@ -4,6 +4,9 @@
 #include "PyMfcHost.h"
 #include "PyMfcPlanGL.h"
 #include "XmlSurface.h"
+#include <sstream>
+#include <cmath>
+#include <algorithm>
 
 PyMfcHost::~PyMfcHost()
 {
@@ -347,15 +350,36 @@ LRESULT CALLBACK PyMfcHost::PyMfcOwnerDrawProc(HWND hwnd, UINT msg, WPARAM wPara
 
     // 配电画布先接管鼠标：它要自己处理滚轮缩放与拖动平移，不能再转给 Static 的类过程
     if (msg == WM_MOUSEWHEEL || msg == WM_LBUTTONDOWN || msg == WM_MOUSEMOVE ||
-        msg == WM_LBUTTONUP || msg == WM_LBUTTONDBLCLK || msg == WM_SETCURSOR ||
+        msg == WM_LBUTTONUP || msg == WM_LBUTTONDBLCLK || msg == WM_MBUTTONDOWN ||
+        msg == WM_MBUTTONUP || msg == WM_SETCURSOR ||
         msg == WM_MOUSELEAVE || msg == WM_CAPTURECHANGED)
     {
         HANDLE prop = ::GetPropW(hwnd, kPlanHostProp);
         if (prop != nullptr)
         {
+            PyMfcHost* host = reinterpret_cast<PyMfcHost*>(prop);
+            const int cid = ::GetDlgCtrlID(hwnd);
+            debugLogf(L"[mouse-dispatch] cid=%d msg=0x%04X", cid, msg);
+            // Ribbon：命中/选中/命令全部走控件库 xmlctl，先于配电画布接管
+            if (host->ribbonHas(cid))
+            {
+                const int rx = GET_X_LPARAM(lParam);
+                const int ry = GET_Y_LPARAM(lParam);
+                host->ribbonMouse(cid, msg, rx, ry, static_cast<WPARAM>(wParam));
+                return 0;
+            }
             bool handled = false;
-            const LRESULT r = PyMfcPlanCanvasMouse(
-                reinterpret_cast<PyMfcHost*>(prop), hwnd, msg, wParam, lParam, handled);
+            const LRESULT r = PyMfcPlanCanvasMouse(host, hwnd, msg, wParam, lParam, handled);
+            if (handled)
+                return r;
+        }
+        // 三维画布：左键拖动旋转视口、滚轮缩放、中键平移、双击复位
+        HANDLE p3 = ::GetPropW(hwnd, kView3DHostProp);
+        if (p3 != nullptr)
+        {
+            bool handled = false;
+            const LRESULT r = PyMfcView3DMouse(
+                reinterpret_cast<PyMfcHost*>(p3), hwnd, msg, wParam, lParam, handled);
             if (handled)
                 return r;
         }
@@ -388,9 +412,24 @@ LRESULT CALLBACK PyMfcHost::PyMfcOwnerDrawProc(HWND hwnd, UINT msg, WPARAM wPara
 
     if (msg == WM_SIZE)
     {
-        HANDLE szProp = ::GetPropW(hwnd, kPlanHostProp);        if (szProp != nullptr)
+        HANDLE szProp = ::GetPropW(hwnd, kPlanHostProp);
+        if (szProp != nullptr)
         {
-            reinterpret_cast<PyMfcHost*>(szProp)->fitPlanCanvas(::GetDlgCtrlID(hwnd));
+            // 仅 plan 卡片画布(mode1)随尺寸自适应；SVG 图纸场景(mode2)保留用户平移/缩放视图，
+            // 不能在布局重排时把 ox/oy/zoom 清零，否则拖完/缩放后视图立马跳回原位。
+            PyMfcHost* h = reinterpret_cast<PyMfcHost*>(szProp);
+            const int cid = ::GetDlgCtrlID(hwnd);
+            auto it = h->m_planCv.find(cid);
+            if (it != h->m_planCv.end() && it->second.mode == 1)
+                h->fitPlanCanvas(cid);
+        }
+        HANDLE sz3 = ::GetPropW(hwnd, kView3DHostProp);
+        if (sz3 != nullptr)
+        {
+            PyMfcHost* host = reinterpret_cast<PyMfcHost*>(sz3);
+            auto it = host->m_view3D.find(::GetDlgCtrlID(hwnd));
+            if (it != host->m_view3D.end() && it->second.autoFit && !it->second.empty)
+                host->view3DFit(::GetDlgCtrlID(hwnd));
         }
     }
     if (msg == WM_PAINT)
@@ -424,6 +463,8 @@ LRESULT CALLBACK PyMfcHost::PyMfcOwnerDrawProc(HWND hwnd, UINT msg, WPARAM wPara
         // 拖动/缩放时每帧先擦一遍父背景再画，屏幕上就是整块画布白闪一下。
         // 画布自己会覆盖全部像素，所以这里声明"已擦除"即可，不填任何东西。
         if (::GetPropW(hwnd, kPlanHostProp) != nullptr)
+            return 1;
+        if (::GetPropW(hwnd, kView3DHostProp) != nullptr)
             return 1;
         // 自绘控件也不再在这里填父背景：填充已经挪进 WM_PAINT 的离屏缓冲里，
         // 和内容一笔合成后整块 BitBlt。分两步做（先擦成底色、再画内容）在拖动/
@@ -1615,7 +1656,7 @@ HCURSOR PyMfcHost::hoverCursor(HWND hwnd) const
         {
             switch (itKind->second)
             {
-            case kSkinBoxQCanvas:                 // 画布：静止 grab，按住拖动 grabbing
+            case kSkinBoxQCanvas:                 // 画布：静止十字，按住拖动 grabbing
             case kSkinBoxFlick:
                 return pyMfcCanvasCursor(hwnd);
             case kSkinBoxScrollBar:
@@ -2454,6 +2495,9 @@ bool PyMfcHost::skinBoxMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
                 {
                     m_tbSel[id] = i;
                     ::InvalidateRect(hwnd, nullptr, TRUE);
+                    // 点条目要能让 Python 知道（否则工具条只是画出来的死图）。
+                    // 回调带条目序号：同一个控件只有一个 onClick，靠序号区分点了哪个。
+                    fireToolBarItem(id, i);
                 }
                 return true;
             }
@@ -4197,6 +4241,21 @@ void PyMfcHost::fitPlanCanvas(int id)
                       id, rc.right, rc.bottom, w, h);
             return;
         }
+        if (st.mode == 2)
+        {
+            // SVG 场景按声明宽高等比适配客户区并居中：面板 SVG 与控件同尺寸时
+            // 缩放≈1、偏移≈0，仍是 1:1；大工程图 SVG 很大时缩到视口内，避免只
+            // 显示左上角一片。地板放宽到 0.001，容纳大坐标 DWG。
+            const float kw = static_cast<float>(rc.right) / w;
+            const float kh = static_cast<float>(rc.bottom) / h;
+            const float raw = (std::min)(kw, kh);
+            st.zoom = raw < 1e-6f ? 1e-6f : raw;
+            st.ox = static_cast<int>(lroundf((rc.right - w * st.zoom) * 0.5f));
+            st.oy = static_cast<int>(lroundf((rc.bottom - h * st.zoom) * 0.5f));
+            debugLogf(L"[plan-fit] id=%d svg fit client=%dx%d svg=%gx%g rawZoom=%.4f fitZoom=%.4f ox=%d oy=%d",
+                      id, rc.right, rc.bottom, w, h, raw, st.zoom, st.ox, st.oy);
+            return;
+        }
         const float kw = (static_cast<float>(rc.right) - 8.0f) / w;
         const float kh = (static_cast<float>(rc.bottom) - 8.0f) / h;
         const float raw = (std::min)(kw, kh);
@@ -4225,7 +4284,7 @@ void PyMfcHost::addPowerCanvas(int id, int x, int y, int w, int h)
 {
         // 登记早于创建：创建过程里就有首帧 WM_PAINT，晚登记会按"普通标签"画一次
         m_planCv[id];
-        HWND hwnd = createControl(L"STATIC", L"", SS_OWNERDRAW | WS_HSCROLL, x, y, w, h, id);
+        HWND hwnd = createControl(L"STATIC", L"", SS_OWNERDRAW | WS_CLIPSIBLINGS, x, y, w, h, id);
         if (hwnd != nullptr)
         {
             ::SetPropW(hwnd, kPlanHostProp, reinterpret_cast<HANDLE>(this));
@@ -4238,6 +4297,41 @@ void PyMfcHost::addPowerCanvas(int id, int x, int y, int w, int h)
                       static_cast<void*>(hwnd), st.mode, st.zoom);
         }
     }
+
+void PyMfcHost::addRibbon(int id, int x, int y, int w, int h)
+{
+    // 与 PowerCanvas 同一套自绘 STATIC：状态留宿主，模型/布局/绘制/命中全走控件库 xmlctl。
+    m_ribbon[id];
+    HWND hwnd = createControl(L"STATIC", L"", SS_OWNERDRAW | WS_CLIPSIBLINGS, x, y, w, h, id);
+    if (hwnd != nullptr)
+        ::SetPropW(hwnd, kPlanHostProp, reinterpret_cast<HANDLE>(this));
+}
+
+void PyMfcHost::setRibbonElement(int id, const XmlElement* el)
+{
+    RibbonState& st = m_ribbon[id];
+    if (el != nullptr)
+        xmlctl::ribbonParse(*const_cast<XmlElement*>(el), st.model);
+    if (xmlctl::ribbonIconBase().empty())
+        xmlctl::ribbonIconBase() = pymfcDir();
+    ::InvalidateRect(::GetDlgItem(m_hWnd, id), nullptr, TRUE);
+}
+
+void PyMfcHost::drawRibbon(XmlCanvas& cv, int id, const RECT& rc)
+{
+    auto it = m_ribbon.find(id);
+    if (it == m_ribbon.end()) return;
+    RibbonState& st = it->second;
+    const int tabH = 34;
+    RECT tabRc  = { rc.left, rc.top, rc.right, rc.top + tabH };
+    RECT bodyRc = { rc.left, rc.top + tabH, rc.right, rc.bottom };
+    xmlctl::XRibbonMetrics mx;
+    mx.bodyH = bodyRc.bottom - bodyRc.top;
+    mx.titleTop = (std::max)(36, mx.bodyH - 24);
+    xmlctl::ribbonLayout(st.model, mx, tabRc, bodyRc, st.lay);
+    xmlctl::ribbonDraw(cv, tabRc, bodyRc, st.model, mx, st.lay,
+                        st.hotTab, st.hotBtn, st.pressedBtn, 10, 9);
+}
 
 void PyMfcHost::setPowerCanvasPlan(int id, const std::wstring& json)
 {
@@ -4322,6 +4416,9 @@ void PyMfcHost::setPowerCanvasSvg(int id, const std::wstring& svgText)
             }
         }
         PlanCanvasState& st = m_planCv[id];
+        // 仅首次喂图才按 1:1 初始化视图；之后平移/缩放产生的 ox/oy/zoom 必须保留，
+        // 否则 Python 重绘 SVG 喂回时会把用户视图清零，表现为"拖完/缩放立马跳回原位"。
+        const bool firstLoad = st.svg.shapes.empty() && st.svg.texts.empty() && st.svg.width <= 0.0f;
         std::wstring err;
         if (!xmlsvg::parseSvgText(utf8, st.svg, err))
         {
@@ -4329,7 +4426,8 @@ void PyMfcHost::setPowerCanvasSvg(int id, const std::wstring& svgText)
             return;
         }
         st.mode = 2;
-        fitPlanCanvas(id);
+        if (firstLoad)
+            fitPlanCanvas(id);
         debugLogf(L"[plan-cv] id=%d svg shapes=%d texts=%d size=%.0fx%.0f zoom=%.2f",
                   id, static_cast<int>(st.svg.shapes.size()),
                   static_cast<int>(st.svg.texts.size()),
@@ -4337,13 +4435,49 @@ void PyMfcHost::setPowerCanvasSvg(int id, const std::wstring& svgText)
         ::InvalidateRect(::GetDlgItem(m_hWnd, id), nullptr, TRUE);
     }
 
+void PyMfcHost::setPowerCanvasOverlay(int id, const std::wstring& svgText)
+{
+        std::string utf8;
+        if (!svgText.empty())
+        {
+            const int n = ::WideCharToMultiByte(CP_UTF8, 0, svgText.c_str(),
+                                                static_cast<int>(svgText.size()), nullptr, 0, nullptr, nullptr);
+            if (n > 0)
+            {
+                utf8.resize(static_cast<size_t>(n));
+                ::WideCharToMultiByte(CP_UTF8, 0, svgText.c_str(), static_cast<int>(svgText.size()),
+                                      utf8.data(), n, nullptr, nullptr);
+            }
+        }
+        PlanCanvasState& st = m_planCv[id];
+        st.ovl.shapes.clear();
+        st.ovl.texts.clear();
+        st.ovl.width = st.ovl.height = 0.0f;
+        if (!utf8.empty())
+        {
+            std::wstring err;
+            xmlsvg::SvgScene parsed;
+            if (xmlsvg::parseSvgText(utf8, parsed, err))
+            {
+                st.ovl.shapes.swap(parsed.shapes);
+                st.ovl.texts.swap(parsed.texts);
+                st.ovl.width = parsed.width;
+                st.ovl.height = parsed.height;
+            }
+            else
+            {
+                debugLogf(L"[plan-cv] id=%d overlay 解析失败: %ls", id, err.c_str());
+            }
+        }
+        // 只重绘，不动 zoom/ox/oy，也不重新 fit
+        ::InvalidateRect(::GetDlgItem(m_hWnd, id), nullptr, FALSE);
+}
+
 void PyMfcHost::setPowerCanvasView(int id, float zoom, int offsetX, int offsetY)
 {
         PlanCanvasState& st = m_planCv[id];
-        if (m_newSurface)
-            st.zoom = clampPlanZoom(zoom);
-        else
-            st.zoom = (zoom < 0.2f) ? 0.2f : (zoom > 4.0f ? 4.0f : zoom);
+        // 缩放不设上下限，仅保留极小地板防止除零。
+        st.zoom = zoom < 1e-6f ? 1e-6f : zoom;
         st.ox = offsetX;
         st.oy = offsetY;
         ::InvalidateRect(::GetDlgItem(m_hWnd, id), nullptr, FALSE);
@@ -4602,6 +4736,100 @@ bool PyMfcHost::selectPlanItem(int id, const std::wstring& code)
         return true;
     }
 
+void PyMfcHost::fireRibbonButton(int id, const std::wstring& name)
+{
+    auto it = m_click.find(id);
+    if (it == m_click.end() || !it->second) return;
+    py::gil_scoped_acquire gil;
+    try
+    {
+        std::string utf8;
+        if (!name.empty())
+        {
+            const int n = ::WideCharToMultiByte(CP_UTF8, 0, name.c_str(),
+                                                static_cast<int>(name.size()), nullptr, 0, nullptr, nullptr);
+            if (n > 0)
+            {
+                utf8.resize(static_cast<size_t>(n));
+                ::WideCharToMultiByte(CP_UTF8, 0, name.c_str(), static_cast<int>(name.size()),
+                                      utf8.data(), n, nullptr, nullptr);
+            }
+        }
+        it->second(py::str(utf8));
+    }
+    catch (py::error_already_set& e)
+    {
+        debugLogf(L"[ribbon] Python 回调抛异常: %hs", e.what());
+        e.restore();
+        PyErr_Print();
+    }
+    catch (...)
+    {
+        debugLogf(L"[ribbon] Python 回调抛未知异常");
+    }
+}
+
+bool PyMfcHost::ribbonMouse(int id, UINT msg, int x, int y, WPARAM /*flags*/)
+{
+    auto it = m_ribbon.find(id);
+    if (it == m_ribbon.end()) return false;
+    RibbonState& st = it->second;
+    HWND hw = ::GetDlgItem(m_hWnd, id);
+    const POINT pt{ x, y };
+    const xmlctl::XRibbonHit hit = xmlctl::ribbonHitTest(st.lay, pt);
+
+    auto buttonName = [&]() -> std::wstring
+    {
+        const xmlctl::XRibbonTab* tab = st.model.current();
+        if (tab == nullptr || hit.group < 0 || hit.group >= (int)tab->groups.size()) return {};
+        const xmlctl::XRibbonGroup& g = tab->groups[(size_t)hit.group];
+        if (hit.button < 0 || hit.button >= (int)g.buttons.size()) return {};
+        return g.buttons[(size_t)hit.button].name;
+    };
+
+    switch (msg)
+    {
+    case WM_MOUSEMOVE:
+        st.hotTab = hit.tab;
+        st.hotBtn = (hit.button >= 0) ? buttonName() : std::wstring();
+        if (hw != nullptr) ::InvalidateRect(hw, nullptr, FALSE);
+        return true;
+    case WM_LBUTTONDOWN:
+        st.pressed = true;
+        st.pressedBtn = (hit.button >= 0) ? buttonName() : std::wstring();
+        if (hw != nullptr) { ::SetCapture(hw); ::InvalidateRect(hw, nullptr, FALSE); }
+        return true;
+    case WM_LBUTTONUP:
+    {
+        const bool wasPressed = st.pressed;
+        st.pressed = false;
+        st.pressedBtn.clear();
+        if (hw != nullptr) ::ReleaseCapture();
+        if (wasPressed)
+        {
+            if (hit.tab >= 0)
+            {
+                st.model.selected = hit.tab;
+                st.hotTab = hit.tab;
+            }
+            else if (hit.button >= 0)
+            {
+                fireRibbonButton(id, buttonName());
+            }
+        }
+        if (hw != nullptr) ::InvalidateRect(hw, nullptr, FALSE);
+        return true;
+    }
+    case WM_MOUSELEAVE:
+        st.hotTab = -1;
+        st.hotBtn.clear();
+        if (hw != nullptr) ::InvalidateRect(hw, nullptr, FALSE);
+        return true;
+    default:
+        return true;
+    }
+}
+
 void PyMfcHost::firePlanSelect(int id, const std::wstring& /*code*/)
 {
         auto it = m_click.find(id);
@@ -4616,13 +4844,414 @@ void PyMfcHost::firePlanDoubleClick(int id, const std::wstring& /*code*/)
             invokePython(it->second);
     }
 
+void PyMfcHost::fireToolBarItem(int id, int index)
+{
+        auto it = m_click.find(id);
+        if (it == m_click.end() || !it->second)
+            return;
+        py::gil_scoped_acquire gil;
+        try
+        {
+            it->second(py::int_(index));
+        }
+        catch (py::error_already_set& e)
+        {
+            debugLogf(L"[toolbar] Python 回调抛异常：%hs", e.what());
+            e.restore();
+            PyErr_Print();
+        }
+        catch (...)
+        {
+            debugLogf(L"[toolbar] Python 回调抛未知异常");
+        }
+    }
+
+// ==================== 三维视图画布（View3D） ====================
+// 渲染：每帧把图元转成三角形，绕 Z（yaw）+ 绕 X（pitch）旋转，轻度透视，按深度从远到近画。
+// 缩放是乘在投影尺度上（不改相机距离），所以放大时线宽也跟着放大，和 CAD 视图一致。
+
+namespace
+{
+inline COLORREF v3Shade(COLORREF c, float k)
+{
+    if (k < 0.0f) k = 0.0f;
+    if (k > 1.6f) k = 1.6f;
+    int r = static_cast<int>(GetRValue(c) * k);
+    int g = static_cast<int>(GetGValue(c) * k);
+    int b = static_cast<int>(GetBValue(c) * k);
+    return RGB(r > 255 ? 255 : r, g > 255 ? 255 : g, b > 255 ? 255 : b);
+}
+
+inline bool v3ParseColor(const std::wstring& s, COLORREF& out)
+{
+    if (s.size() != 6) return false;
+    unsigned v = 0;
+    for (wchar_t ch : s)
+    {
+        int d;
+        if (ch >= L'0' && ch <= L'9') d = ch - L'0';
+        else if (ch >= L'a' && ch <= L'f') d = ch - L'a' + 10;
+        else if (ch >= L'A' && ch <= L'F') d = ch - L'A' + 10;
+        else return false;
+        v = v * 16 + static_cast<unsigned>(d);
+    }
+    out = RGB((v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
+    return true;
+}
+}
+
+void PyMfcHost::addView3D(int id, int x, int y, int w, int h)
+{
+    m_view3D[id];
+    HWND hwnd = createControl(L"STATIC", L"", SS_OWNERDRAW, x, y, w, h, id);
+    if (hwnd != nullptr)
+    {
+        ::SetPropW(hwnd, kView3DHostProp, reinterpret_cast<HANDLE>(this));
+        View3DState& st = m_view3D[id];
+        if (!st.prims.empty())
+            view3DFit(id);
+        debugLogf(L"[view3d] id=%d hwnd=%p prims=%d yaw=%.1f pitch=%.1f",
+                  id, static_cast<void*>(hwnd), static_cast<int>(st.prims.size()),
+                  st.yaw, st.pitch);
+    }
+}
+
+void PyMfcHost::setView3DModel(int id, const std::wstring& geom)
+{
+    View3DState& st = m_view3D[id];
+    st.src = geom;
+    st.prims.clear();
+
+    size_t pos = 0;
+    while (pos < geom.size())
+    {
+        while (pos < geom.size() && (geom[pos] == L';' || geom[pos] == L'\n' ||
+                                     geom[pos] == L'\r' || geom[pos] == L' ' || geom[pos] == L'\t'))
+            ++pos;
+        if (pos >= geom.size()) break;
+        size_t end = pos;
+        while (end < geom.size() && geom[end] != L';' && geom[end] != L'\n' && geom[end] != L'\r')
+            ++end;
+        const std::wstring rec = geom.substr(pos, end - pos);
+        pos = end;
+
+        std::wstringstream ss(rec);
+        std::wstring head;
+        ss >> head;
+        V3Prim pr;
+        bool ok = true;
+        int need = 0;
+        if (head == L"box")
+        {
+            pr.kind = 0;
+            need = 6;
+        }
+        else if (head == L"line")
+        {
+            pr.kind = 1;
+            need = 6;
+        }
+        else if (head == L"tri")
+        {
+            pr.kind = 2;
+            need = 9;
+        }
+        else
+            ok = false;
+        for (int i = 0; ok && i < need; ++i)
+        {
+            std::wstring tok;
+            if (!(ss >> tok)) { ok = false; break; }
+            wchar_t* endp = nullptr;
+            const double v = wcstod(tok.c_str(), &endp);
+            if (endp == tok.c_str()) { ok = false; break; }
+            pr.p[i] = static_cast<float>(v);
+        }
+        std::wstring col;
+        ss >> col;
+        if (ok && !col.empty())
+            v3ParseColor(col, pr.color);
+        if (ok && pr.kind == 1)
+        {
+            std::wstring wtok;
+            if (ss >> wtok)
+                pr.width = static_cast<float>(wcstod(wtok.c_str(), nullptr));
+        }
+        if (ok)
+            st.prims.push_back(pr);
+    }
+
+    // 包围盒
+    float lo[3] = { 1e18f, 1e18f, 1e18f }, hi[3] = { -1e18f, -1e18f, -1e18f };
+    auto acc = [&](float x, float y, float z) {
+        lo[0] = (std::min)(lo[0], x); hi[0] = (std::max)(hi[0], x);
+        lo[1] = (std::min)(lo[1], y); hi[1] = (std::max)(hi[1], y);
+        lo[2] = (std::min)(lo[2], z); hi[2] = (std::max)(hi[2], z);
+    };
+    for (const V3Prim& pr : st.prims)
+    {
+        if (pr.kind == 0)
+        {
+            acc(pr.p[0], pr.p[1], pr.p[2]);
+            acc(pr.p[3], pr.p[4], pr.p[5]);
+        }
+        else if (pr.kind == 1)
+        {
+            acc(pr.p[0], pr.p[1], pr.p[2]);
+            acc(pr.p[3], pr.p[4], pr.p[5]);
+        }
+        else
+        {
+            acc(pr.p[0], pr.p[1], pr.p[2]);
+            acc(pr.p[3], pr.p[4], pr.p[5]);
+            acc(pr.p[6], pr.p[7], pr.p[8]);
+        }
+    }
+    if (!st.prims.empty())
+    {
+        for (int i = 0; i < 3; ++i) { st.lo[i] = lo[i]; st.hi[i] = hi[i]; }
+    }
+    st.empty = st.prims.empty();
+    st.autoFit = true;
+    if (!st.empty)
+        view3DFit(id);
+    debugLogf(L"[view3d] id=%d prims=%d bbox=(%.1f,%.1f,%.1f)-(%.1f,%.1f,%.1f)",
+              id, static_cast<int>(st.prims.size()), st.lo[0], st.lo[1], st.lo[2],
+              st.hi[0], st.hi[1], st.hi[2]);
+    ::InvalidateRect(::GetDlgItem(m_hWnd, id), nullptr, TRUE);
+}
+
+void PyMfcHost::view3DAddRecord(int id, const std::wstring& rec)
+{
+    View3DState& st = m_view3D[id];
+    st.src += rec;
+    if (st.src.size() > 32u * 1024u * 1024u)
+        st.src = rec;
+    setView3DModel(id, st.src);
+}
+
+void PyMfcHost::view3DFit(int id)
+{
+    auto it = m_view3D.find(id);
+    if (it == m_view3D.end()) return;
+    View3DState& st = it->second;
+    st.yaw = 35.0f;
+    st.pitch = 22.0f;
+    st.zoom = 1.0f;
+    st.panX = st.panY = 0;
+    st.autoFit = true;
+    ::InvalidateRect(::GetDlgItem(m_hWnd, id), nullptr, TRUE);
+}
+
+void PyMfcHost::setView3DCamera(int id, float yaw, float pitch, float zoom, int panX, int panY)
+{
+    View3DState& st = m_view3D[id];
+    st.yaw = yaw;
+    st.pitch = (std::max)(-89.0f, (std::min)(89.0f, pitch));
+    st.zoom = (std::max)(0.05f, (std::min)(40.0f, zoom));
+    st.panX = panX;
+    st.panY = panY;
+    st.autoFit = false;
+    ::InvalidateRect(::GetDlgItem(m_hWnd, id), nullptr, TRUE);
+}
+
+void PyMfcHost::getView3DCamera(int id, float& yaw, float& pitch, float& zoom,
+                                int& panX, int& panY) const
+{
+    auto it = m_view3D.find(id);
+    if (it == m_view3D.end())
+    {
+        yaw = 35.0f; pitch = 22.0f; zoom = 1.0f; panX = panY = 0;
+        return;
+    }
+    const View3DState& st = it->second;
+    yaw = st.yaw; pitch = st.pitch; zoom = st.zoom; panX = st.panX; panY = st.panY;
+}
+
+void PyMfcHost::setView3DStyle(int id, COLORREF bg, bool axes, bool grid)
+{
+    View3DState& st = m_view3D[id];
+    st.bg = bg;
+    st.axes = axes;
+    st.grid = grid;
+    ::InvalidateRect(::GetDlgItem(m_hWnd, id), nullptr, TRUE);
+}
+
+void PyMfcHost::drawView3D(XmlCanvas& cv, int id, const RECT& rc)
+{
+    auto it = m_view3D.find(id);
+    if (it == m_view3D.end())
+        return;
+    View3DState& st = it->second;
+    cv.fillRect(rc, st.bg);
+    const float w = static_cast<float>(rc.right - rc.left);
+    const float h = static_cast<float>(rc.bottom - rc.top);
+    cv.text(rc, L"", RGB(0, 0, 0), DT_CENTER, 10, L"Microsoft YaHei");
+    if (st.empty || w < 8.0f || h < 8.0f)
+    {
+        cv.text(rc, L"（三维画布：等待模型）", RGB(0x8A, 0x94, 0xA6), DT_CENTER, 10, L"Microsoft YaHei");
+        return;
+    }
+
+    const float cxw = (st.lo[0] + st.hi[0]) * 0.5f;
+    const float cyw = (st.lo[1] + st.hi[1]) * 0.5f;
+    const float czw = (st.lo[2] + st.hi[2]) * 0.5f;
+    const float dx = st.hi[0] - st.lo[0], dy = st.hi[1] - st.lo[1], dz = st.hi[2] - st.lo[2];
+    const float radius = 0.5f * std::sqrt(dx * dx + dy * dy + dz * dz);
+    if (radius <= 0.0f) return;
+
+    const float yaw = st.yaw * 3.14159265f / 180.0f;
+    const float pit = st.pitch * 3.14159265f / 180.0f;
+    const float cyaw = std::cos(yaw), syaw = std::sin(yaw);
+    const float cpit = std::cos(pit), spit = std::sin(pit);
+    const float dist = radius * 3.0f;
+    // 缩放系数按"旋转后包围盒的投影半宽/半高"算：用 min(w,h) 会让长条形模型只占半个屏幕。
+    float maxRx = 1e-6f, maxRz = 1e-6f;
+    for (int i = 0; i < 8; ++i)
+    {
+        const float vx = ((i & 1) ? st.hi[0] : st.lo[0]) - cxw;
+        const float vy = ((i & 2) ? st.hi[1] : st.lo[1]) - cyw;
+        const float vz = ((i & 4) ? st.hi[2] : st.lo[2]) - czw;
+        const float rx = vx * cyaw - vy * syaw;
+        const float ry0 = vx * syaw + vy * cyaw;
+        const float rz = ry0 * spit + vz * cpit;
+        maxRx = (std::max)(maxRx, std::fabs(rx));
+        maxRz = (std::max)(maxRz, std::fabs(rz));
+    }
+    const float kx = w * 0.46f / maxRx;
+    const float ky = h * 0.46f / maxRz;
+    const float k = (std::min)(kx, ky) * st.zoom;
+    const float scx = w * 0.5f + static_cast<float>(st.panX);
+    const float scy = h * 0.5f + static_cast<float>(st.panY);
+
+    auto project = [&](float x, float y, float z, POINT& outPt, float& depth) {
+        const float vx = x - cxw, vy = y - cyw, vz = z - czw;
+        const float rx = vx * cyaw - vy * syaw;
+        const float ry0 = vx * syaw + vy * cyaw;
+        const float ry = ry0 * cpit - vz * spit;
+        const float rz = ry0 * spit + vz * cpit;
+        float f = dist / (dist + ry);
+        if (f < 0.05f) f = 0.05f;
+        if (f > 6.0f) f = 6.0f;
+        outPt.x = static_cast<LONG>(scx + rx * k * f);
+        outPt.y = static_cast<LONG>(scy - rz * k * f);
+        depth = ry;
+    };
+
+    struct V3Tri { POINT p[3]; float depth; COLORREF col; };
+    std::vector<V3Tri> tris;
+    tris.reserve(st.prims.size() * 12);
+
+    auto pushTri = [&](float ax, float ay, float az, float bx, float by, float bz,
+                       float cx2, float cy2, float cz2, COLORREF col, float nx, float ny, float nz) {
+        // 法向按同一套旋转转到视空间，用来做朗伯明暗
+        const float rx = nx * cyaw - ny * syaw;
+        const float ry0 = nx * syaw + ny * cyaw;
+        const float ry = ry0 * cpit - nz * spit;
+        const float rz = ry0 * spit + nz * cpit;
+        const float lit = 0.42f + 0.58f * std::fabs(rz * 0.72f + rx * 0.35f + ry * 0.60f);
+        V3Tri t;
+        float d1, d2, d3;
+        project(ax, ay, az, t.p[0], d1);
+        project(bx, by, bz, t.p[1], d2);
+        project(cx2, cy2, cz2, t.p[2], d3);
+        t.depth = (d1 + d2 + d3) / 3.0f;
+        t.col = v3Shade(col, lit);
+        tris.push_back(t);
+    };
+
+    auto pushQuad = [&](const float* v0, const float* v1, const float* v2, const float* v3,
+                        COLORREF col, float nx, float ny, float nz) {
+        pushTri(v0[0], v0[1], v0[2], v1[0], v1[1], v1[2], v2[0], v2[1], v2[2], col, nx, ny, nz);
+        pushTri(v0[0], v0[1], v0[2], v2[0], v2[1], v2[2], v3[0], v3[1], v3[2], col, nx, ny, nz);
+    };
+
+    std::vector<std::pair<std::vector<POINT>, std::pair<COLORREF, float>>> lines;
+    for (const V3Prim& pr : st.prims)
+    {
+        if (pr.kind == 1)
+        {
+            POINT a, b;
+            float da, db;
+            project(pr.p[0], pr.p[1], pr.p[2], a, da);
+            project(pr.p[3], pr.p[4], pr.p[5], b, db);
+            std::vector<POINT> pts = { a, b };
+            lines.push_back({ pts, { pr.color, pr.width } });
+            continue;
+        }
+        if (pr.kind == 2)
+        {
+            pushTri(pr.p[0], pr.p[1], pr.p[2], pr.p[3], pr.p[4], pr.p[5],
+                    pr.p[6], pr.p[7], pr.p[8], pr.color, 0.0f, 0.0f, 1.0f);
+            continue;
+        }
+        // box：6 个面
+        const float x0 = pr.p[0], y0 = pr.p[1], z0 = pr.p[2];
+        const float x1 = pr.p[3], y1 = pr.p[4], z1 = pr.p[5];
+        const float v000[3] = { x0, y0, z0 }, v100[3] = { x1, y0, z0 };
+        const float v110[3] = { x1, y1, z0 }, v010[3] = { x0, y1, z0 };
+        const float v001[3] = { x0, y0, z1 }, v101[3] = { x1, y0, z1 };
+        const float v111[3] = { x1, y1, z1 }, v011[3] = { x0, y1, z1 };
+        pushQuad(v001, v101, v111, v011, pr.color, 0.0f, 0.0f, 1.0f);    // 顶
+        pushQuad(v000, v100, v110, v010, pr.color, 0.0f, 0.0f, -1.0f);   // 底
+        pushQuad(v010, v110, v111, v011, pr.color, 0.0f, 1.0f, 0.0f);    // +Y
+        pushQuad(v000, v100, v101, v001, pr.color, 0.0f, -1.0f, 0.0f);   // -Y
+        pushQuad(v100, v110, v111, v101, pr.color, 1.0f, 0.0f, 0.0f);    // +X
+        pushQuad(v000, v010, v011, v001, pr.color, -1.0f, 0.0f, 0.0f);   // -X
+    }
+
+    // 画家算法：远的先画
+    std::sort(tris.begin(), tris.end(), [](const V3Tri& a, const V3Tri& b) {
+        return a.depth > b.depth;
+    });
+    for (const V3Tri& t : tris)
+    {
+        std::vector<POINT> pts = { t.p[0], t.p[1], t.p[2] };
+        cv.fillPath(pts, t.col);
+    }
+    for (const auto& ln : lines)
+        cv.strokePath(ln.first, ln.second.first,
+                      (std::max)(1, static_cast<int>(ln.second.second)), false);
+
+    // 坐标轴三角标（左下角）
+    if (st.axes)
+    {
+        const float ax = 12.0f;
+        const float ay = h - 58.0f;
+        const float len = 42.0f;
+        const struct { float dx, dy, dz; COLORREF c; const wchar_t* lab; } kAxes[3] = {
+            { 1, 0, 0, RGB(0xC0, 0x3A, 0x2B), L"X" },
+            { 0, 1, 0, RGB(0x27, 0x8A, 0x45), L"Y" },
+            { 0, 0, 1, RGB(0x1D, 0x5F, 0xB4), L"Z" } };
+        for (const auto& a : kAxes)
+        {
+            const float vx = a.dx, vy = a.dy, vz = a.dz;
+            const float rx = vx * cyaw - vy * syaw;
+            const float ry0 = vx * syaw + vy * cyaw;
+            const float ry = ry0 * cpit - vz * spit;
+            const float rz = ry0 * spit + vz * cpit;
+            POINT p0 = { static_cast<LONG>(ax), static_cast<LONG>(ay) };
+            POINT p1 = { static_cast<LONG>(ax + rx * len), static_cast<LONG>(ay - rz * len) };
+            cv.strokeLine(p0, p1, a.c, 2);
+            RECT tr = { p1.x + 3, p1.y - 8, p1.x + 24, p1.y + 10 };
+            cv.text(tr, a.lab, a.c, DT_LEFT, 9, L"Microsoft YaHei");
+        }
+        wchar_t hud[128] = {};
+        swprintf_s(hud, L"yaw %.0f°  pitch %.0f°  zoom %.2f   图元 %d",
+                   st.yaw, st.pitch, st.zoom, static_cast<int>(st.prims.size()));
+        RECT hr = { 10, 6, static_cast<LONG>(w) - 10, 26 };
+        cv.text(hr, hud, RGB(0x4F, 0x6F, 0x8A), DT_LEFT, 9, L"Microsoft YaHei");
+    }
+}
+
 void PyMfcHost::drawPlanCanvas(XmlCanvas& cv, int id, const RECT& rc)
 {
         auto it = m_planCv.find(id);
         if (it == m_planCv.end())
             return;
         PlanCanvasState& st = it->second;
-        cv.fillRect(rc, RGB(0xF3, 0xF5, 0xF8));
+        // SVG 排版面板走深色主题（自带全屏底色矩形），铺深底；plan 卡片画布/空画布用浅底
+        cv.fillRect(rc, st.mode == 2 ? RGB(0x26, 0x29, 0x2D) : RGB(0xF3, 0xF5, 0xF8));
         // OpenGL 画布后端（PYARX_CANVAS_GL=1）：属于阶段一，先验证 WGL 上下文与呈现链路，
         // 矢量批处理（卡片/连线/字形图集）在此之后接入；失败自动落回下面的 GDI 路径。
         // OpenGL 画布后端（阶段二）尚未完成：字形重影、与 owner-draw 双缓冲互相覆盖、
@@ -4647,6 +5276,9 @@ void PyMfcHost::drawPlanCanvas(XmlCanvas& cv, int id, const RECT& rc)
         if (st.mode == 2)
         {
             xmlsvg::drawSvgScene(cv, st.svg, st.zoom, st.ox, st.oy);
+            // 叠加层与底图同一坐标系、同一视图参数，画在最上面
+            if (!st.ovl.shapes.empty() || !st.ovl.texts.empty())
+                xmlsvg::drawSvgScene(cv, st.ovl, st.zoom, st.ox, st.oy);
             return;
         }
         if (st.mini)
@@ -6340,6 +6972,24 @@ void PyMfcHost::setPageBackdrop(COLORREF c, bool valid)
         Invalidate(FALSE);
     }
 
+void PyMfcHost::setBackgroundColor(COLORREF c)
+{
+    m_bg = c;
+    m_pageBg = c;
+    m_hasPageBg = true;
+    Invalidate(FALSE);
+}
+
+std::pair<int, int> PyMfcHost::controlClientSize(int id) const
+{
+    HWND hwnd = findByIdDeep(m_hWnd, id);
+    if (hwnd == nullptr)
+        return {0, 0};
+    CRect rc;
+    ::GetClientRect(hwnd, &rc);
+    return {rc.Width(), rc.Height()};
+}
+
 void PyMfcHost::addContainerBackdrop(int x, int y, int w, int h,
                               const xmlapp::XmlAppearance& ap)
 {
@@ -6505,6 +7155,31 @@ void PyMfcHost::fireDrag(int id, const char* phase, int x)
 
 void PyMfcHost::onBlur(int id, py::object cb)
 { m_blur[id] = std::move(cb); }
+
+
+void PyMfcHost::onCanvasEvent(int id, py::object cb)
+{ m_canvasEvt[id] = std::move(cb); }
+
+
+bool PyMfcHost::fireCanvasEvent(int id, const char* phase, int x, int y, int flags)
+{
+    auto it = m_canvasEvt.find(id);
+    if (it == m_canvasEvt.end())
+        return false;
+    py::gil_scoped_acquire gil;
+    try
+    {
+        py::object r = it->second(std::string(phase), x, y, flags);
+        if (r.is_none())
+            return false;
+        return r.cast<bool>();
+    }
+    catch (const py::error_already_set& e)
+    {
+        debugLogf(L"[canvas] %hs", e.what());
+        return false;
+    }
+}
 
 
 void PyMfcHost::fireBlur(int id)

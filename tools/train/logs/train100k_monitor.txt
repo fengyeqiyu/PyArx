@@ -1,0 +1,32 @@
+[2026-11-17 22:41:34] RUN step=26/300000 0.0% loss=17.319 spd=0.28/s eta=301.3h rss=1743M ckpt=0 画线 (850,170) -> (120,120)
+[2026-11-17 22:42:10] RUN step=35/300000 0.0% loss=12.391 spd=0.28/s eta=302.3h rss=1763M ckpt=0 (85,-85,10) 的模是多少
+[2026-11-17 22:43:11] RUN step=52/300000 0.0% loss=12.458 spd=0.27/s eta=306.0h rss=1775M ckpt=0 矩形：角点 (510,180) 和 (590,460)
+[2026-11-17 22:44:11] RUN step=68/300000 0.0% loss=8.119 spd=0.27/s eta=305.1h rss=1788M ckpt=0 写代码建单行文字，最后提交事务
+[2026-11-17 22:45:11] RUN step=84/300000 0.0% loss=9.431 spd=0.27/s eta=306.5h rss=1805M ckpt=0 对 PyDbDatabase 执行 disableUndoRecording
+[2026-11-17 22:46:11] RUN step=100/300000 0.0% loss=8.266 spd=0.27/s eta=308.2h rss=1804M ckpt=0 画矩形 (940,90) (100,650)，竖着四等分
+[2026-11-17 22:47:11] RUN step=117/300000 0.0% loss=8.741 spd=0.27/s eta=306.1h rss=1829M ckpt=0 PyDbHyperlink 的 subLocation 怎么调
+[2026-11-17 22:48:14] RUN step=133/300000 0.0% loss=8.331 spd=0.27/s eta=305.6h rss=1830M ckpt=0 把 6135 从图上移除
+[2026-11-17 22:49:15] RUN step=145/300000 0.0% loss=7.284 spd=0.26/s eta=316.5h rss=1819M ckpt=0 来段圆弧 (400,730) r135 235°~295°
+[2026-11-17 22:50:15] RUN step=162/300000 0.1% loss=6.356 spd=0.26/s eta=316.2h rss=1829M ckpt=0 用 AcGeVector3d 求 (90,30,10) 的长度
+[2026-11-17 22:51:15] RUN step=177/300000 0.1% loss=7.396 spd=0.26/s eta=316.2h rss=1831M ckpt=0 在 (100,120) 插入块 WINDOW
+[2026-11-17 22:52:15] RUN step=194/300000 0.1% loss=7.468 spd=0.26/s eta=315.5h rss=1834M ckpt=0 偏移 13247，距离 20
+[2026-11-17 22:53:15] RUN step=211/300000 0.1% loss=7.772 spd=0.27/s eta=313.4h rss=1827M ckpt=0 TypedValue 的 gt 怎么调
+[2026-11-17 22:54:15] RUN step=227/300000 0.1% loss=6.871 spd=0.27/s eta=312.9h rss=1824M ckpt=0 对 PyDbPolyline 调用 setPointAt 设置值
+[2026-11-17 22:55:15] RUN step=243/300000 0.1% loss=6.973 spd=0.27/s eta=313.2h rss=1838M ckpt=0 在 (450,570) 放文字“10KV”，高 0
+[2026-11-17 22:56:16] RUN step=259/300000 0.1% loss=5.866 spd=0.27/s eta=313.4h rss=1876M ckpt=0 一次事务里：先画矩形 {p1}-{p2}，再在 {p2} 写“{t}”
+[2026-11-17 22:57:16] RUN step=275/300000 0.1% loss=5.281 spd=0.27/s eta=313.0h rss=1876M ckpt=0 用 PyArxCore 画一个引线，参数自己定
+[2026-11-17 22:58:16] RUN step=291/300000 0.1% loss=6.115 spd=0.27/s eta=313.3h rss=1858M ckpt=0 (10,65,5) 的模是多少
+[2026-11-17 22:59:16] RUN step=307/300000 0.1% loss=4.987 spd=0.27/s eta=313.2h rss=1867M ckpt=0 射线 怎么用代码画出来
+[2026-11-17 23:00:16] RUN step=323/300000 0.1% loss=6.636 spd=0.27/s eta=313.1h rss=1878M ckpt=0 LIVE_TEST 层给 (250,530)、(810,740)、(90,150
+[2026-11-17 23:01:16] RUN step=339/300000 0.1% loss=7.341 spd=0.27/s eta=312.6h rss=1857M ckpt=0 对 PyEdResult 执行 acedRetName
+[2026-11-17 23:02:16] RUN step=356/300000 0.1% loss=6.099 spd=0.27/s eta=312.4h rss=1865M ckpt=0 用 AcGeVector3d 求 (-20,60,5) 的长度
+[2026-11-17 23:03:17] RUN step=372/300000 0.1% loss=7.336 spd=0.27/s eta=312.3h rss=1875M ckpt=0 0 层 (460,210) 插块 WINDOW
+[2026-11-17 23:04:17] RUN step=388/300000 0.1% loss=6.057 spd=0.27/s eta=312.3h rss=1877M ckpt=0 算这个向量的长度：(-90,15,10)
+[2026-11-17 23:05:17] RUN step=404/300000 0.1% loss=4.615 spd=0.27/s eta=312.3h rss=1869M ckpt=0 射线 怎么用代码画出来
+[2026-11-17 23:06:17] RUN step=421/300000 0.1% loss=7.580 spd=0.27/s eta=311.3h rss=1861M ckpt=0 PyDbDatabase 的 blipmode 要什么参数
+[2026-11-17 23:07:17] RUN step=438/300000 0.1% loss=5.953 spd=0.27/s eta=310.8h rss=1912M ckpt=0 算这个向量的长度：(-80,60,10)
+[2026-11-17 23:08:17] RUN step=454/300000 0.2% loss=7.223 spd=0.27/s eta=310.5h rss=1893M ckpt=0 PyGiGeometry.clearMarkerOverride 的调用写法
+[2026-11-17 23:09:17] RUN step=471/300000 0.2% loss=4.922 spd=0.27/s eta=310.4h rss=1898M ckpt=0 写代码建引线，最后提交事务
+[2026-11-17 23:10:18] RUN step=487/300000 0.2% loss=7.151 spd=0.27/s eta=310.4h rss=1889M ckpt=0 Resbuf.asInt16 的调用写法
+[2026-11-17 23:11:18] RUN step=503/300000 0.2% loss=7.509 spd=0.27/s eta=310.3h rss=1928M ckpt=0 EntityValue 用 setMessage 改属性
+[2026-11-17 23:12:21] RUN step=515/300000 0.2% loss=7.543 spd=0.27/s eta=310.1h rss=1922M ckpt=0 17605 这个对象的属性

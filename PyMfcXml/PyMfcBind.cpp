@@ -1,4 +1,4 @@
-﻿// PyMfcBind.cpp —— PYBIND11_MODULE(PyMfcXml)：全部 Python 接口定义。
+// PyMfcBind.cpp —— PYBIND11_MODULE(PyMfcXml)：全部 Python 接口定义。
 // 原名 parts\06-bind.inc。整个工程只有这一处模块定义。
 
 #include "PyMfcCommon.h"
@@ -113,6 +113,8 @@ PYBIND11_MODULE(PyMfcXml, m)
         .def("setTheme", &PyMfcWindow::setTheme, py::arg("dark"))
         .def("onResize", &PyMfcWindow::setResizeCallback)
         .def("clientSize", &PyMfcWindow::ClientSize)
+        .def("setBackground", &PyMfcWindow::setBackground, py::arg("r"), py::arg("g"), py::arg("b"))
+        .def("getSize", &PyMfcWindow::getSize, py::arg("id"))
         .def("show", &PyMfcWindow::show)
         .def("close", &PyMfcWindow::close)
         .def("addButton", &PyMfcWindow::addButton)
@@ -174,6 +176,10 @@ PYBIND11_MODULE(PyMfcXml, m)
         .def("setSelection", &PyMfcWindow::setSelection, py::arg("id"), py::arg("from"),
              py::arg("to"), "设置文本控件选区")
         .def("onClick", &PyMfcWindow::onClick)
+        .def("onCanvasEvent", &PyMfcWindow::onCanvasEvent, py::arg("id"), py::arg("cb"),
+             "画布原始鼠标事件：cb(phase, x, y, flags) -> bool；"
+             "phase 为 down/move/up/dblclick/wheel，x,y 是画布客户区坐标，"
+             "返回 True 表示已消费（正在定点画图），宿主就不再当平移处理")
         .def("setWheelRegion", &PyMfcWindow::setWheelRegion, py::arg("x"), py::arg("y"),
              py::arg("w"), py::arg("h"), py::arg("step") = 3,
              "注册收滚轮的区域（客户区坐标）：鼠标在里面滚动就回调 onWheel(±step)")
@@ -336,9 +342,31 @@ PYBIND11_MODULE(PyMfcXml, m)
              "喂布局结果（powerplan.toJson 的 JSON 文本），自动重排并按窗口大小 fit")
         .def("loadPowerSvg", &PyMfcWindow::loadPowerSvg, py::arg("id"), py::arg("svg"),
              "喂 SVG 文本，走同一条绘制路径")
+        .def("loadPlanOverlay", &PyMfcWindow::loadPlanOverlay, py::arg("id"), py::arg("svg"),
+             "叠加层 SVG（选中框/橡皮筋/光标）：底图不重解析，只换这一层")
         .def("setPlanView", &PyMfcWindow::setPlanView, py::arg("id"), py::arg("zoom"),
              py::arg("offset_x"), py::arg("offset_y"))
         .def("getPlanZoom", &PyMfcWindow::getPlanZoom)
+        // 三维视图画布：透视投影 + 左键拖动旋转 + 滚轮缩放 + 中键平移 + 双击复位
+        .def("addView3D", &PyMfcWindow::addView3D, py::arg("id"),
+             py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"),
+             "建一块三维画布（box/line/tri 图元，左键旋转、滚轮缩放、中键平移）")
+        .def("view3DLoad", &PyMfcWindow::view3DLoad, py::arg("id"), py::arg("geom"),
+             "喂几何文本：box x0 y0 z0 x1 y1 z1 rrggbb; line ...; 用 ; 或换行分隔")
+        .def("view3DAppendBox", &PyMfcWindow::view3DAppendBox, py::arg("id"),
+             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
+             py::arg("z1"), py::arg("color") = 0xA8C6E2, "追加一个轴对齐盒子")
+        .def("view3DAppendLine", &PyMfcWindow::view3DAppendLine, py::arg("id"),
+             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
+             py::arg("z1"), py::arg("color") = 0x30507A, py::arg("width") = 1.0f)
+        .def("view3DSetCamera", &PyMfcWindow::view3DSetCamera, py::arg("id"),
+             py::arg("yaw") = 35.0f, py::arg("pitch") = 22.0f, py::arg("zoom") = 1.0f,
+             py::arg("pan_x") = 0, py::arg("pan_y") = 0)
+        .def("view3DGetCamera", &PyMfcWindow::view3DGetCamera,
+             "返回 (yaw, pitch, zoom, pan_x, pan_y)")
+        .def("view3DFit", &PyMfcWindow::view3DFitView, py::arg("id"), "复位相机并重新适配")
+        .def("view3DSetStyle", &PyMfcWindow::view3DSetStyle, py::arg("id"),
+             py::arg("bg") = 0xF7FAFD, py::arg("axes") = true, py::arg("grid") = false)
         .def("getPlanSelection", &PyMfcWindow::getPlanSelection,
              "当前选中的卡片编号（未选中返回空串）")
         .def("saveControlPng", &PyMfcWindow::saveControlPng,
@@ -615,9 +643,30 @@ PYBIND11_MODULE(PyMfcXml, m)
         .def("loadPowerPlan", &PyMfcPanel::loadPowerPlan, py::arg("id"), py::arg("json"))
         .def("loadPowerScene", &PyMfcPanel::loadPowerScene, py::arg("id"), py::arg("scene"))
         .def("loadPowerSvg", &PyMfcPanel::loadPowerSvg, py::arg("id"), py::arg("svg"))
+        .def("loadPlanOverlay", &PyMfcPanel::loadPlanOverlay, py::arg("id"), py::arg("svg"))
         .def("setPlanView", &PyMfcPanel::setPlanView, py::arg("id"), py::arg("zoom"),
              py::arg("offset_x"), py::arg("offset_y"))
         .def("getPlanZoom", &PyMfcPanel::getPlanZoom)
+        // 三维视图画布：透视投影 + 左键拖动旋转 + 滚轮缩放 + 中键平移 + 双击复位
+        .def("addView3D", &PyMfcPanel::addView3D, py::arg("id"),
+             py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"),
+             "建一块三维画布（box/line/tri 图元，左键旋转、滚轮缩放、中键平移）")
+        .def("view3DLoad", &PyMfcPanel::view3DLoad, py::arg("id"), py::arg("geom"),
+             "喂几何文本：box x0 y0 z0 x1 y1 z1 rrggbb; line ...; 用 ; 或换行分隔")
+        .def("view3DAppendBox", &PyMfcPanel::view3DAppendBox, py::arg("id"),
+             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
+             py::arg("z1"), py::arg("color") = 0xA8C6E2, "追加一个轴对齐盒子")
+        .def("view3DAppendLine", &PyMfcPanel::view3DAppendLine, py::arg("id"),
+             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
+             py::arg("z1"), py::arg("color") = 0x30507A, py::arg("width") = 1.0f)
+        .def("view3DSetCamera", &PyMfcPanel::view3DSetCamera, py::arg("id"),
+             py::arg("yaw") = 35.0f, py::arg("pitch") = 22.0f, py::arg("zoom") = 1.0f,
+             py::arg("pan_x") = 0, py::arg("pan_y") = 0)
+        .def("view3DGetCamera", &PyMfcPanel::view3DGetCamera,
+             "返回 (yaw, pitch, zoom, pan_x, pan_y)")
+        .def("view3DFit", &PyMfcPanel::view3DFitView, py::arg("id"), "复位相机并重新适配")
+        .def("view3DSetStyle", &PyMfcPanel::view3DSetStyle, py::arg("id"),
+             py::arg("bg") = 0xF7FAFD, py::arg("axes") = true, py::arg("grid") = false)
         .def("getPlanSelection", &PyMfcPanel::getPlanSelection)
         .def("saveControlPng", &PyMfcPanel::saveControlPng,
              "把控件按当前外观导出成 PNG（截图取证）")
@@ -684,6 +733,14 @@ PYBIND11_MODULE(PyMfcXml, m)
           "  根 <Window title=...> 返回 Window；根 <PaletteSet> 需 palette=PyArxCore.Ap.PaletteSet\n"
           "  target 传入已有 Window/Page 时按 XML 追加控件；context 解析 Click 等回调名\n"
           "  names 传 dict 可回传 x:Name -> 控件 id 的映射；first_id 是自动分配 ID 的起点");
+    m.def("guiload_text", &GuiloadText,
+          py::arg("xml"), py::arg("target") = py::none(), py::arg("context") = py::none(),
+          py::arg("names") = py::none(), py::arg("first_id") = 1000,
+          py::arg("palette") = py::none(),
+          "从 XML 字符串生成界面（与 guiload 同一套解析/布局/注册表，不落盘）：\n"
+          "  M.guiload_text('<XWindow Width=300 Height=120><XButton x:Name=\"Ok\" Text=\"确定\"/></XWindow>')\n"
+          "  字符串入口没有文件基准目录，ResourceDictionary 的 Source 相对路径不可用"
+          "（需要跨文件样式时用 guiload(path)）");
     m.def("xmlLayout", &XmlLayoutRects, py::arg("path"), py::arg("width"), py::arg("height"),
           py::arg("overrides") = py::none(),
           "读 XML 按客户区尺寸算布局，返回 {x:Name: (x, y, w, h)}；overrides 可运行时改行列尺寸");
@@ -691,6 +748,51 @@ PYBIND11_MODULE(PyMfcXml, m)
           "全部已注册控件的属性 schema（JSON 字符串）：设计器属性面板与 Python 内省共用。\n"
           "  结构：{\"version\":1,\"controls\":[{\"tag\":\"Button\",\"properties\":\n"
           "        [{\"name\":\"Text\",\"type\":\"String\",\"readOnly\":false,\"enum\":\"\"}]}]}");
+
+    // ---- 事件契约 + 加载期诊断：把 XML → 界面 的写错从"静默"变成"可查" ----
+    auto w2u = [](const std::wstring& w) -> std::string {
+        if (w.empty())
+            return std::string();
+        int n = ::WideCharToMultiByte(CP_UTF8, 0, w.data(), (int)w.size(),
+                                      nullptr, 0, nullptr, nullptr);
+        std::string out((size_t)n, '\0');
+        ::WideCharToMultiByte(CP_UTF8, 0, w.data(), (int)w.size(),
+                              out.data(), n, nullptr, nullptr);
+        return out;
+    };
+    m.def("event_schema", [w2u]() -> std::string {
+        return w2u(xmlEventSchemaJson());
+    }, "事件契约表（JSON）：XML 属性名 / 内部键 / 回调负载 / 宿主当前是否已派发");
+
+    m.def("control_events", [w2u](const std::string& type) {
+        std::vector<std::string> out;
+        for (XmlEventKind k : xmlDefaultEvents(std::wstring(type.begin(), type.end())))
+            out.push_back(w2u(xmlEventKey(k)));
+        return out;
+    }, py::arg("type"),
+        "某控件类型（type()，如 textbox / button / gridctrl）按契约表该有的事件键列表；\n"
+        "  空列表 = 该类型没有登记契约（XML 里声明的事件一律不会触发）");
+
+    m.def("event_warnings", [w2u]() {
+        py::list out;
+        for (const xmlprop2::EventWarning& w : xmlprop2::EventWarnings())
+            out.append(py::make_tuple(w2u(w.Control), w2u(w.Event), w2u(w.Callback)));
+        return out;
+    }, "本次进程里加载期发现的\"死绑定\"：[(控件类型, 事件键, 回调名)]。\n"
+        "  例：('label','change','on_x') —— XLabel 不会产生 TextChanged，那条绑定永远不触发");
+
+    m.def("prop_warnings", [w2u]() {
+        py::list out;
+        for (const xmlprop2::PropWarning& w : xmlprop2::Warnings())
+            out.append(py::make_tuple(w2u(w.Control), w2u(w.Property)));
+        return out;
+    }, "本次进程里被拒绝的未知属性：[(控件类型, 属性名)]");
+
+    m.def("clear_diagnostics", []() {
+        xmlprop2::ClearWarnings();
+        xmlprop2::ClearEventWarnings();
+    }, "清空属性 / 事件诊断表（测试用例之间互不串台）");
+
     m.def("register_control", &RegisterPythonControl,
           py::arg("tag"), py::arg("factory"),
           "注册自定义控件：register_control('MyControl', factory)。\n"

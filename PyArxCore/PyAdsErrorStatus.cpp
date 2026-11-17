@@ -4,6 +4,7 @@
 void bind_PyErrorStatus(pym& m) {
 	py::enum_<Acad::ErrorStatus>(m, "ErrorStatus")
 		.value("eOk", Acad::eOk)
+		.value("Ok", Acad::eOk) // PyRx 同义名：Db.ErrorStatus.Ok
 		.value("eNotImplementedYet", Acad::eNotImplementedYet)
 		.value("eNotApplicable", Acad::eNotApplicable)
 		.value("eInvalidInput", Acad::eInvalidInput)

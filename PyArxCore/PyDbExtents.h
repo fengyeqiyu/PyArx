@@ -34,8 +34,9 @@ public:
 	void transformBy(const AcGeMatrix2d& mat) {
 		m_Extents.transformBy(mat);
 	}
-	bool operator==(const PyDbExtents2d& other) {
-		return m_Extents == other.m_Extents;
+	bool operator==(const PyDbExtents2d& other) const {
+		return m_Extents.minPoint() == other.m_Extents.minPoint()
+			&& m_Extents.maxPoint() == other.m_Extents.maxPoint();
 	}
 private:
 	AcDbExtents2d m_Extents;
@@ -113,10 +114,12 @@ public:
 		if (!m_isEmpty) m_Extents.transformBy(mat);
 	}
 
-	// 运算符重载 
+	// 运算符重载（AcDbExtents::operator== 未从库导出，这里按角点比较）
 	bool operator==(const PyDbExtents3d& other) const {
-		return (m_isEmpty && other.m_isEmpty) ||
-			(!m_isEmpty && !other.m_isEmpty && m_Extents == other.impObj());
+		if (m_isEmpty || other.m_isEmpty)
+			return m_isEmpty == other.m_isEmpty;
+		return m_Extents.minPoint() == other.m_Extents.minPoint()
+			&& m_Extents.maxPoint() == other.m_Extents.maxPoint();
 	}
 
 private:

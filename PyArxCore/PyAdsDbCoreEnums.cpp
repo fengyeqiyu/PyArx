@@ -5,8 +5,11 @@ void bind_PyOpenMode(pym& m)
 {
 	py::enum_<AcDb::OpenMode>(m, "OpenMode")
 		.value("kForRead", AcDb::kForRead)
+		.value("ForRead", AcDb::kForRead) // PyRx 同义名
 		.value("kForWrite", AcDb::kForWrite)
+		.value("ForWrite", AcDb::kForWrite) // PyRx 同义名
 		.value("kForNotify", AcDb::kForNotify)
+		.value("ForNotify", AcDb::kForNotify) // PyRx 同义名
 		.export_values();
 }
 

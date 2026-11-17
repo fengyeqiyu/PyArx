@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -83,6 +83,7 @@
     <ClCompile Include="controls\XmlPathView.cpp" />
     <ClCompile Include="controls\XmlPopup.cpp" />
     <ClCompile Include="controls\XmlPowerCanvas.cpp" />
+    <ClCompile Include="controls\XmlRibbon.cpp" />
     <ClCompile Include="controls\XmlQCanvas.cpp" />
     <ClCompile Include="controls\XmlRangeSlider.cpp" />
     <ClCompile Include="controls\XmlRichText.cpp" />
@@ -96,6 +97,7 @@
     <ClCompile Include="controls\XmlSwipeView.cpp" />
     <ClCompile Include="controls\XmlSwitch.cpp" />
     <ClCompile Include="controls\XmlItemView.cpp" />
+    <ClCompile Include="controls\XmlView3D.cpp" />
     <ClCompile Include="controls\XmlFrame.cpp" />
     <ClCompile Include="controls\XmlDialog.cpp" />
     <ClCompile Include="controls\XmlDrawer.cpp" />
@@ -171,6 +173,7 @@
     <ClInclude Include="controls\XmlPathView.h" />
     <ClInclude Include="controls\XmlPopup.h" />
     <ClInclude Include="controls\XmlPowerCanvas.h" />
+    <ClInclude Include="controls\XmlRibbon.h" />
     <ClInclude Include="controls\XmlProgressBar.h" />
     <ClInclude Include="controls\XmlPropUtil.h" />
     <ClInclude Include="controls\XmlQCanvas.h" />

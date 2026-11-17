@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -84,6 +84,25 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PyArxBinder.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="PyArxExtraEnums.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="PyArxCompat.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="PyDbIdTypes.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="PyDbField.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="PyDbValueTypes.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="PyEdEditor.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PyClipBoard.cpp" />
@@ -348,9 +367,22 @@
     <ClCompile Include="PyGeVector2d.cpp" />
     <ClCompile Include="PyGeVector3d.cpp" />
     <ClCompile Include="PyGiBinder.cpp" />
+  <ClCompile Include="PyGiTextEngine.cpp" />
+  <ClCompile Include="PyGiTextStyle.cpp" />
     <ClCompile Include="PyGiDrawable.cpp" />
     <ClCompile Include="PyGiSubEntityTraits.cpp" />
     <ClCompile Include="PyGiWorldGeometry.cpp" />
+    <ClCompile Include="PyGiTypes.cpp" />
+    <ClCompile Include="PyGiColor.cpp" />
+    <ClCompile Include="PyGiFill.cpp" />
+    <ClCompile Include="PyGiPolyline.cpp" />
+    <ClCompile Include="PyGiImage.cpp" />
+    <ClCompile Include="PyGiViewport.cpp" />
+    <ClCompile Include="PyGiTransient.cpp" />
+    <ClCompile Include="PyGiMeshData.cpp" />
+    <ClCompile Include="PyGiContextGdi.cpp" />
+    <ClCompile Include="PyGiStreamStyle.cpp" />
+    <ClCompile Include="PyGiMaterialLight.cpp" />
     <ClCompile Include="PyObjectIdGraph.cpp" />
     <ClCompile Include="PyResbuf.cpp" />
     <ClCompile Include="PyRxClass.cpp" />
@@ -380,6 +412,13 @@
     <ClInclude Include="PyApDocument.h" />
     <ClInclude Include="PyApp.h" />
     <ClInclude Include="PyPaletteSet.h" />
+    <ClInclude Include="PyArxCompat.h" />
+    <ClInclude Include="PyArxExtraEnums.h" />
+    <ClInclude Include="PyDbIdTypes.h" />
+    <ClInclude Include="PyDbValueTypes.h" />
+    <ClInclude Include="PyDbField.h" />
+    <ClInclude Include="PyEnumArg.h" />
+    <ClInclude Include="PyEdEditor.h" />
 
     <ClInclude Include="PyArrayCaster.h" />
     <ClInclude Include="PyClipBoard.h" />
@@ -652,9 +691,22 @@
     <ClInclude Include="PyGeVector2d.h" />
     <ClInclude Include="PyGeVector3d.h" />
     <ClInclude Include="PyGiBinder.h" />
+  <ClInclude Include="PyGiTextEngine.h" />
+  <ClInclude Include="PyGiTextStyle.h" />
     <ClInclude Include="PyGiDrawable.h" />
     <ClInclude Include="PyGiSubEntityTraits.h" />
     <ClInclude Include="PyGiWorldGeometry.h" />
+    <ClInclude Include="PyGiTypes.h" />
+    <ClInclude Include="PyGiColor.h" />
+    <ClInclude Include="PyGiFill.h" />
+    <ClInclude Include="PyGiPolyline.h" />
+    <ClInclude Include="PyGiImage.h" />
+    <ClInclude Include="PyGiViewport.h" />
+    <ClInclude Include="PyGiTransient.h" />
+    <ClInclude Include="PyGiMeshData.h" />
+    <ClInclude Include="PyGiContextGdi.h" />
+    <ClInclude Include="PyGiStreamStyle.h" />
+    <ClInclude Include="PyGiMaterialLight.h" />
     <ClInclude Include="PyObjectIdGraph.h" />
     <ClInclude Include="PyResbuf.h" />
     <ClInclude Include="PyRxBinder.h" />

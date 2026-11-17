@@ -9,6 +9,9 @@ class PyDbLayerTableRecord : public PyDbSymbolTableRecord {
 public:
 	PyWrapper_H(DbLayerTableRecord)
 	PyDbLayerTableRecord(AcDbLayerTableRecord* ptr) : PyDbSymbolTableRecord(ptr) {}
+	// 新建一条图层表记录（AcDbLayerTableRecord 默认构造在 ObjectARX 里是公开的；
+	// 之前只绑了拷贝/指针构造，导致 Python 无法新建图层，只能退回 -LAYER 命令通道）
+	static PyDbLayerTableRecord* newRecord();
 	bool isFrozen() const;
 	bool setIsFrozen(bool frozen);
 	bool isOff() const;

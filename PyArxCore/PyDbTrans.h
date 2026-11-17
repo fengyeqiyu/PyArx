@@ -44,9 +44,9 @@ public:
 	void abort();
 
 	template <class T = AcDbEntity>
-	T* getObject(AcDbObjectId objid, AcDb::OpenMode mode = AcDb::kForRead, bool openErased = false);
+	T* getObject(AcDbObjectId objid, AcDb::OpenMode mode = AcDb::kForWrite, bool openErased = false);
 
-	py::object openObject(AcDbObjectId objId, int mode = 0, bool openErased = false);
+	py::object openObject(AcDbObjectId objId, int mode = 1, bool openErased = false);
 
 	AcDbBlockTableRecord* currentSpace();
 	bool addEntity(AcDbBlockTableRecord* btr, PyDbEntity& ent);

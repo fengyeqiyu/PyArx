@@ -21,7 +21,8 @@ public:
     uint64_t currentId() const;
 
     // 直接打开当前实体包装；mode: 0=kForRead, 1=kForWrite, 2=kForNotify；失败返回空包装
-    PyDbEntity getEntity(int mode = 0, bool openErasedEntity = false) const;
+    // 默认 1=写：图元操作默认写模式，纯查询显式传 0
+    PyDbEntity getEntity(int mode = 1, bool openErasedEntity = false) const;
 
     PyDbBlockTableRecordIterator& __iter__() { return *this; }
     uint64_t __next__();
@@ -34,3 +35,22 @@ private:
 };
 
 void bind_PyDbBlockTableRecordIterator(pym& m);
+
+// 块表记录内实体的「直接遍历」迭代器：`for ent in btr` 用，直接产出 PyDbEntity。
+// 与 PyDbBlockTableRecordIterator 的分工：后者只吐 ObjectId，本类直接吐实体包装。
+class PyDbBlockTableRecordEntityIter {
+public:
+	PyDbBlockTableRecordEntityIter(PyDbBlockTableRecord& owner, int mode = 1, bool skipDeleted = true);
+	~PyDbBlockTableRecordEntityIter();
+
+	PyDbBlockTableRecordEntityIter(const PyDbBlockTableRecordEntityIter&) = delete;
+	PyDbBlockTableRecordEntityIter& operator=(const PyDbBlockTableRecordEntityIter&) = delete;
+
+	PyDbBlockTableRecordEntityIter& __iter__() { return *this; }
+	PyDbEntity __next__();
+
+private:
+	AcDbBlockTableRecordIterator* m_pIter = nullptr;
+	AcDbEntity* m_pEnt = nullptr;
+	int m_mode = 1;
+};

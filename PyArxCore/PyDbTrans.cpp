@@ -6,6 +6,7 @@
 #include "PyDbEntity.h"
 #include "stdafx.h"
 #include "PyDbObject.h"
+#include "PyErrorStatusException.h"
 #include "stdafx.h"
 #include "PyDbBlockTableRecord.h"
 #include "stdafx.h"
@@ -213,14 +214,41 @@ AcDbBlockTableRecord* PyDbTrans::currentSpace() {
 
 // Python 可调用：事务内按 ObjectId 打开对象，自动类型推导
 py::object PyDbTrans::openObject(AcDbObjectId id, int mode, bool openErased) {
-	if (id.isNull() || !pTrans) return py::none();
+	if (!pTrans) return py::none();
+	if (id.isNull()) {
+		m_es = Acad::eNullObjectPointer;
+		PyWarnIfError(m_es, L"PyDbTrans::openObject(null objectId)");
+		return py::none();
+	}
+	if (mode < 0 || mode > 2) {
+		m_es = Acad::eInvalidInput;
+		PyWarnIfError(m_es, L"PyDbTrans::openObject(mode must be 0/1/2)");
+		return py::none();
+	}
 	AcDbObject* p = nullptr;
-	m_es = pTrans->getObject(p, id, static_cast<AcDb::OpenMode>(mode), openErased);
+	try {
+		m_es = pTrans->getObject(p, id, static_cast<AcDb::OpenMode>(mode), openErased);
+	} catch (...) {
+		m_es = Acad::eNullObjectPointer;
+		PyWarnIfError(m_es, L"PyDbTrans::openObject(illegal objectId)");
+		return py::none();
+	}
 	if (!IsOk() || !p) return py::none();
 
-	auto it = g_classMap.find(p->isA());
-	if (it != g_classMap.end()) {
-		return it->second.attr("cast")(PyDbObject(p));
+	// 类型还原：先按精确类查，查不到就沿 AcRxClass 继承链向上找。
+	// 只按精确类查的后果：块定义内部的 INSERT/ATTDEF 等对象落到基类 PyDbObject，
+	// Python 侧拿不到 attributeIds/openAttribute，属性块文字永远读不出来。
+	for (AcRxClass* pc = p->isA(); pc; pc = pc->myParent()) {
+		auto hit = g_classMap.find(pc);
+		if (hit == g_classMap.end())
+			continue;
+		try {
+			py::object obj = hit->second.attr("cast")(PyDbObject(p));
+			if (!obj.is_none())
+				return obj;
+		} catch (...) {
+			// 该层的 Python 类 not registered for this pointer type，继续向上
+		}
 	}
 	return py::cast(PyDbObject(p));
 }
@@ -277,7 +305,13 @@ void PyDbTrans::flushScreen() {
 // Python with 支持
 PyDbTrans* PyDbTrans::enter() { return this; }
 
-void PyDbTrans::exit(py::object, py::object, py::object) {
+void PyDbTrans::exit(py::object excType, py::object, py::object) {
+	// 根因修复：with 块内 Python 异常向上传播时必须 abort 事务回滚，
+	// 旧实现无条件 commit，导致异常路径下已追加到当前空间的实体被持久化。
+	if (!excType.is_none()) {
+		abort();
+		return;
+	}
 	commit();
 }
 
@@ -288,7 +322,7 @@ void bind_PyDbTrans(py::module& m) {
 			return new PyDbTrans(static_cast<AcDbDatabase*>(db.impObj()));
 		}), py::arg("db"), "按指定数据库创建事务（独立库，跳过文档锁）")
 		.def("openObject", &PyDbTrans::openObject,
-			py::arg("object_id"), py::arg("mode") = 0, py::arg("open_erased") = false,
+			py::arg("object_id"), py::arg("mode") = 1, py::arg("open_erased") = false,
 			"事务内按 ObjectId 打开对象；mode 0=读 1=写 2=通知")
 		.def("addEntity", py::overload_cast<PyDbEntity&>(&PyDbTrans::addEntity),
 			py::arg("entity"), "追加实体到当前空间")

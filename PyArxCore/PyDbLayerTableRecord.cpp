@@ -4,6 +4,10 @@
 
 PyWrapper_Cpp(DbLayerTableRecord);
 
+PyDbLayerTableRecord* PyDbLayerTableRecord::newRecord() {
+	return new PyDbLayerTableRecord(new AcDbLayerTableRecord());
+}
+
 bool PyDbLayerTableRecord::isFrozen() const { return impObj()->isFrozen(); }
 bool  PyDbLayerTableRecord::setIsFrozen(bool frozen) { return PyWarnIfError(impObj()->setIsFrozen(frozen), L"AcDbLayerTableRecord::setIsFrozen"); }
 bool PyDbLayerTableRecord::isOff() const { return impObj()->isOff(); }
@@ -133,6 +137,8 @@ bool PyDbLayerTableRecord::setTransparency(int trans) {
 void bind_PyDbLayerTableRecord(pym& m) {
 	py::class_<PyDbLayerTableRecord, PyDbSymbolTableRecord>(m, "PyDbLayerTableRecord")
 		.def(py::init<AcDbLayerTableRecord*>(), py::arg("p"))
+		.def_static("newRecord", &PyDbLayerTableRecord::newRecord,
+			py::return_value_policy::take_ownership, "新建图层表记录（未入库，需 lt.add(rec)）")
 		PyWrapper_BIND(DbLayerTableRecord)
 		.def("isFrozen", &PyDbLayerTableRecord::isFrozen)
 		.def("setIsFrozen", &PyDbLayerTableRecord::setIsFrozen, py::arg("frozen"))

@@ -5,6 +5,8 @@
 
 
 class PyDbEntity;
+class PyGiFill;
+class PyGiMapper;
 //class PyGiMapper;
 //class PyGiFill;
 class PyGiSubEntityTraits : public PyRxObject
@@ -33,7 +35,9 @@ public:
 	Acad::ErrorStatus setShadowFlags(AcGiSubEntityTraits::ShadowFlags flags);
 	void setSelectionGeom(bool bSelectionflag);
 	void setTransparency(const AcCmTransparency& transparency);
-	/*void setFill(const PyGiFill& pFill);*/
+	// [ADD] SDK: setFill / setMapper —— 填充（图案/渐变）与材质映射
+	void setFill(const PyGiFill& pFill);
+	void setMapper(const AcGiMapper& mapper);
 
 	// Return current settings.
 	//
@@ -46,24 +50,21 @@ public:
 	double lineTypeScale(void) const;
 	double thickness(void) const;
 	AcDbObjectId visualStyle(void) const;
-	AcDb::PlotStyleNameType getPlotStyleNameId(AcDbObjectId& idResult) const
-	{
-		return AcDb::kPlotStyleNameByLayer;
-	}
+	// [FIX] 原来写死返回 kPlotStyleNameByLayer，现直通 SDK（出参 id 一并返回）
+	AcDb::PlotStyleNameType getPlotStyleNameId(AcDbObjectId& idResult) const;
 	AcDbObjectId materialId(void) const;
+	std::optional<AcGiMapper> mapper(void) const;
 
 	bool sectionable(void) const;
 	Adesk::UInt32 drawFlags(void) const;
 	AcGiSubEntityTraits::ShadowFlags shadowFlags(void) const;
 	bool selectionGeom(void) const;
 	AcCmTransparency transparency(void) const;
-	//const PyGiFill& fill(void) const;
 
-	void pushMarkerOverride(bool flag, const Adesk::LongPtr markerId) {}
-	void popMarkerOverride(void) {}
-	void clearMarkerOverride(void) {}
-
-
+	// [FIX] 原来三个方法都是空实现，现直通 SDK
+	void pushMarkerOverride(bool flag, const Adesk::LongPtr markerId);
+	void popMarkerOverride(void);
+	void clearMarkerOverride(void);
 };
 
 class PyGiDrawableTraits : public PyGiSubEntityTraits
@@ -76,5 +77,12 @@ public:
 
 	~PyGiDrawableTraits() override = default;
 	void setupForEntity(PyDbEntity& pEntity);
-
+	// [ADD] SDK: addLight / setLinePattern / setSelectionFlags / setHighlightProperty
+	void addLight(const AcDbObjectId& lightId);
+	void setLinePattern(int linePattern);
+	int linePattern() const;
+	Acad::ErrorStatus setSelectionFlags(AcGiSubEntityTraits::SelectionFlags flags);
+	AcGiSubEntityTraits::SelectionFlags selectionFlags() const;
+	Acad::ErrorStatus setHighlightProperty(AcGiDrawableTraits::HighlightProperty property, AcGiVariant& value);
+	AcGiVariant highlightProperty(AcGiDrawableTraits::HighlightProperty property) const;
 };

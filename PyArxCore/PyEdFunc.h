@@ -14,7 +14,7 @@
 bool        PyEdPrompt(const AcString& s);
 bool        PyEdAlert(const AcString& s);
 py::object  PyEdGetVar(const AcString& sym);
-bool        PyEdSetVar(const AcString& sym, const TypedValue& value);
+bool        PyEdSetVar(const AcString& sym, const py::object& value);
 AcString    PyEdGetEnv(const AcString& sym);
 bool        PyEdSetEnv(const AcString& sym, const AcString& val);
 AcString    PyEdFindFile(const AcString& fname);

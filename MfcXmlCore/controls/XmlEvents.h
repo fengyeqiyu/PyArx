@@ -124,10 +124,10 @@ inline bool xmlEventFromProperty(const std::wstring& name, XmlEventKind& out)
 // 数据驱动（一张表），不再用 if 链逐个类型名分支；控件类可用 events() 覆盖。
 //
 // 类型名用小写短名，与各 XmlXxx 构造函数里传给 XmlMfcControlBase 的一致。
-inline const std::vector<XmlEventKind>& xmlDefaultEvents(const std::wstring& type)
+// 契约总表（全项目唯一一份）：控件契约名 -> 该控件该有的事件。
+// 键 = 控件 type()（= 注册标签小写），一个控件一个名字，不写别名。
+inline const std::map<std::wstring, std::vector<XmlEventKind>>& xmlEventTable()
 {
-    static const std::vector<XmlEventKind> kNone;
-
     static const std::vector<XmlEventKind> kPointer = {
         XmlEventKind::Click, XmlEventKind::DoubleClick, XmlEventKind::MouseDown,
         XmlEventKind::MouseUp, XmlEventKind::MouseMove, XmlEventKind::KeyDown,
@@ -235,12 +235,72 @@ inline const std::vector<XmlEventKind>& xmlDefaultEvents(const std::wstring& typ
         {L"menuitem", {XmlEventKind::Click, XmlEventKind::CheckedChanged}},
         {L"menuseparator", kPointer},
 
+        // -------------------------------------------------------------------
+        // 补齐：这些键对应各控件构造函数传给 XmlMfcControlBase 的 type()，
+        // 之前缺键 ⇒ xmlDefaultEvents 返回空集 ⇒ 该控件声明的所有事件都被
+        // 当成"不支持"（典型受害者：XTextField 的 type 是 textbox、XTableView
+        // 是 tableview 之外的 gridctrl、XView3D 是 view3d）。
+        // 一个 type 只写一次，不在别处再列。
+        // -------------------------------------------------------------------
+        {L"textbox", kText},          // XmlTextBox  —— XTextField 的本体
+        {L"richtext", kText},         // XmlRichText —— XTextArea
+        {L"bitmapbutton", kPointer},  // XmlBitmapButton —— XIconButton
+        {L"gridctrl", kSelect},       // XmlGrid
+        {L"itemview", kSelect},       // XmlItemView
+        {L"panel", kPointer},         // XmlPanel
+        {L"staticbitmap", kPointer},  // XmlStaticBitmap —— XImage
+        {L"staticline", {XmlEventKind::Click, XmlEventKind::DoubleClick}},  // XDivider
+        {L"scrolledwindow", {XmlEventKind::Click, XmlEventKind::Scroll,
+                             XmlEventKind::GotFocus, XmlEventKind::LostFocus}},
+        {L"splitter", {XmlEventKind::Click, XmlEventKind::MouseDown,
+                       XmlEventKind::MouseUp, XmlEventKind::MouseMove}},
+        {L"view3d", kCanvas},         // XmlView3D
+        {L"xribbon", kPointer},       // XmlRibbon
+
     };
+    return kTable;
+}
+
+inline const std::vector<XmlEventKind>& xmlDefaultEvents(const std::wstring& type)
+{
+    static const std::vector<XmlEventKind> kNone;
+    const std::map<std::wstring, std::vector<XmlEventKind>>& kTable = xmlEventTable();
 
     std::wstring t = type;
     for (auto& c : t) c = (wchar_t)towlower(c);
     auto it = kTable.find(t);
     return it == kTable.end() ? kNone : it->second;
+}
+
+// 该控件契约是否包含某种事件（type 大小写不敏感）。
+inline bool xmlTypeSupportsEvent(const std::wstring& type, XmlEventKind kind)
+{
+    const std::vector<XmlEventKind>& evs = xmlDefaultEvents(type);
+    for (XmlEventKind k : evs)
+        if (k == kind)
+            return true;
+    return false;
+}
+
+// 内部键（click / change / …）-> kind（反向查表，唯一实现在这里）
+inline bool xmlEventKindOfKey(const std::wstring& key, XmlEventKind& out)
+{
+    for (XmlEventKind k : {XmlEventKind::Click, XmlEventKind::DoubleClick,
+                           XmlEventKind::TextChanged, XmlEventKind::SelectionChanged,
+                           XmlEventKind::ValueChanged, XmlEventKind::CheckedChanged,
+                           XmlEventKind::DropDown, XmlEventKind::Scroll,
+                           XmlEventKind::MouseDown, XmlEventKind::MouseUp,
+                           XmlEventKind::MouseMove, XmlEventKind::KeyDown,
+                           XmlEventKind::KeyUp, XmlEventKind::GotFocus,
+                           XmlEventKind::LostFocus})
+    {
+        if (key == xmlEventKey(k))
+        {
+            out = k;
+            return true;
+        }
+    }
+    return false;
 }
 
 // 兼容旧名（外部若有引用仍可用）
@@ -288,6 +348,35 @@ inline const std::vector<XmlEventInfo>& xmlEventInfos()
     return kInfos;
 }
 
+// 控件类型 -> 事件键 的 JSON（与上面 events 表同源，设计器/加载器都能查知道自己能挂什么）
+inline std::wstring xmlEventTypesJson()
+{
+    std::wstring out = L"{";
+    bool firstType = true;
+    for (const auto& kv : xmlEventTable())
+    {
+        if (!firstType)
+            out += L",";
+        firstType = false;
+        out += L"\"";
+        out += kv.first;
+        out += L"\":[";
+        bool firstKey = true;
+        for (XmlEventKind k : kv.second)
+        {
+            if (!firstKey)
+                out += L",";
+            firstKey = false;
+            out += L"\"";
+            out += xmlEventKey(k);
+            out += L"\"";
+        }
+        out += L"]";
+    }
+    out += L"}";
+    return out;
+}
+
 // 事件表 -> JSON（ASCII 结构 + 中文说明按 UTF-8 存，供 runtime.py / 设计器生成）
 inline std::wstring xmlEventSchemaJson()
 {
@@ -308,7 +397,9 @@ inline std::wstring xmlEventSchemaJson()
         out += info.hostDispatch ? L"true" : L"false";
         out += L"}";
     }
-    out += L"]}";
+    out += L"],\"types\":";
+    out += xmlEventTypesJson();
+    out += L"}";
     return out;
 }
 

@@ -62,3 +62,6 @@ GITEE令牌/
 __pycache__/
 *.pyc
 docs/_probe_profile/
+
+# 免安装 CAD 运行时（AutoCAD 2024 完整镜像，2.9 GB，不入库）
+ACAD/

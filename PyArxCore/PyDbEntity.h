@@ -17,6 +17,7 @@ public:
 	AcString layer() const;
 	uint64_t layerId() const;
 	bool setLayer(const AcString& name, bool doSubents = true);
+	bool setLayerId(uint64_t layerId, bool doSubents = true);
 
 	AcString linetype() const;
 	uint64_t linetypeId() const;

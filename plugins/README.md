@@ -21,6 +21,18 @@
 | 文件 | 控件 | 子控件 | XML 声明的回调 |
 |---|---|---|---|
 | `side_panel.xml` | 编辑侧板 | `Title` / `Table`（ListCtrl）/ `BtnApply` / `BtnLoad` / `BtnClose` | `on_click="on_apply"` `on_load` `on_close` |
+| `draw_toolbar.xml` | 竖向绘图工具条 | 21 个图标单元（`I_*`）+ 4 个 8px 分隔（`Sep*`） | 无 XML 回调；加载后由 `draw_toolbar.py` 统一 `on_cmd(cmd)` |
+
+`draw_toolbar.py` 用法（图标 PNG 在 `plugins/icons/`，21 张 36×32 透明底）：
+
+```python
+import draw_toolbar
+bar = draw_toolbar.ToolBar(win, 8, 8, on_cmd=lambda cmd: print('绘图命令', cmd))
+# cmd 依次为 osnap/line/pline/arc/polygon/rect/arc3p/circle/revcloud/spline/
+#             ellipse/donut/copy/move/point/hatch/imageattach/insert/table/text/color
+```
+
+图标重生成：`python G:\PyArx\tools\make_toolbar_icons.py`（PIL 4× 超采样，改完 line 宽/坐标自动出全套）。
 
 ## 三、什么时候把它编进 C++
 

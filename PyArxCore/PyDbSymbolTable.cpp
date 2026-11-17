@@ -2,6 +2,7 @@
 #include "PyErrorStatusException.h"
 #include "PyUtils.h"
 #include "PyDbSymbolTable.h"
+#include "PyDbOpenCache.h"
 
 PyWrapper_Cpp(DbSymbolTable);
 
@@ -9,9 +10,27 @@ bool PyDbSymbolTable::has(const AcString& name) const {
 	return impObj()->has(name.kwszPtr());
 }
 
-PyDbSymbolTableRecord PyDbSymbolTable::getAt(const AcString& name) const {
+PyDbSymbolTableRecord PyDbSymbolTable::getAt(const AcString& name, int mode) const {
+	AcDbObjectId id;
+	if (impObj()->getIdAt(name.kwszPtr(), id) == Acad::eOk) {
+		Acad::ErrorStatus cacheEs = Acad::eOk;
+		AcDbObject* existing = PyDbOpenCache::Get(id, static_cast<AcDb::OpenMode>(mode), cacheEs);
+		if (cacheEs == Acad::eOk && existing) {
+			return PyDbSymbolTableRecord(static_cast<AcDbSymbolTableRecord*>(existing));
+		}
+	}
+
 	AcDbSymbolTableRecord* rec = nullptr;
-	if(!PyWarnIfError(impObj()->getAt(name.kwszPtr(), rec, AcDb::kForRead), L"SymbolTable.getAt")) return PyDbSymbolTableRecord(nullptr);
+	const Acad::ErrorStatus es = impObj()->getAt(name.kwszPtr(), rec, static_cast<AcDb::OpenMode>(mode));
+	if (es != Acad::eOk) {
+		AcString esText = acadErrorStatusText(es);
+		const char* esUtf8 = esText.utf8Ptr();
+		const char* nameUtf8 = name.utf8Ptr();
+		throw std::runtime_error(std::string("SymbolTable.getAt(\"") + (nameUtf8 ? nameUtf8 : "") +
+			"\", mode=" + std::to_string(mode) + ") 失败: " + (esUtf8 ? esUtf8 : "") +
+			"；需以可写方式打开数据库或另存副本（纯查询请显式传 kForRead=0）");
+	}
+	PyDbOpenCache::Track(rec, static_cast<AcDb::OpenMode>(mode));
 	return PyDbSymbolTableRecord(rec);
 }
 
@@ -52,7 +71,8 @@ py::list PyDbSymbolTable::names() const {
 	return out;
 }
 
-py::list PyDbSymbolTable::records() const {
+py::list PyDbSymbolTable::records(int mode) const {
+	(void)mode;
 	py::list out;
 	AcDbSymbolTableIterator* pIter = nullptr;
 	if(!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return py::list();
@@ -60,10 +80,47 @@ py::list PyDbSymbolTable::records() const {
 	for (; !pIter->done(); pIter->step(true, true)) {
 		AcDbSymbolTableRecord* pRec = nullptr;
 		if(!PyWarnIfError(pIter->getRecord(pRec, AcDb::kForRead), L"SymbolTable.getRecord")) return py::list();
+		PyDbOpenCache::Track(pRec, AcDb::kForRead);
 		out.append(py::cast(PyDbSymbolTableRecord(pRec)));
 	}
 	delete pIter;
 	return out;
+}
+
+py::list PyDbSymbolTable::keys() const {
+	return names();
+}
+
+py::list PyDbSymbolTable::values(int mode) const {
+	return records(mode);
+}
+
+py::list PyDbSymbolTable::items(int mode) const {
+	(void)mode;
+	py::list out;
+	AcDbSymbolTableIterator* pIter = nullptr;
+	if(!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return py::list();
+	pIter->start(true, true);
+	for (; !pIter->done(); pIter->step(true, true)) {
+		AcDbSymbolTableRecord* pRec = nullptr;
+		if(!PyWarnIfError(pIter->getRecord(pRec, AcDb::kForRead), L"SymbolTable.getRecord")) return py::list();
+		AcString sName;
+		if (pRec->getName(sName) == Acad::eOk) {
+			PyDbOpenCache::Track(pRec, AcDb::kForRead);
+			out.append(py::make_tuple(py::cast(sName), py::cast(PyDbSymbolTableRecord(pRec))));
+		} else {
+			pRec->close();
+		}
+	}
+	delete pIter;
+	return out;
+}
+
+py::object PyDbSymbolTable::get(const AcString& name, py::object defaultValue) const {
+	if (!has(name)) return defaultValue;
+	PyDbSymbolTableRecord rec = getAt(name, 1);
+	if (!rec.impObj()) return defaultValue;
+	return py::cast(rec);
 }
 
 std::vector<PyDbSymbolTableRecord> PyDbSymbolTable::toVector() const {
@@ -97,7 +154,14 @@ uint64_t PyDbSymbolTable::getIdAt(const AcString& name) const {
 }
 
 bool PyDbSymbolTable::add(PyDbSymbolTableRecord& rec) {
-	return PyWarnIfError(impObj()->add(rec.impObj()), L"SymbolTable.add");
+	// 与实体入库同源的问题：裸 add() 不 close 记录时，记录保持写打开，
+	// 之后 getAt(kForRead) 返回空包装、keys()/records() 迭代静默返回空列表
+	//（实测：同一会话内新图层按名读不到，重启后被丢弃的旧记录才会消失）。
+	AcDbSymbolTableRecord* pRec = static_cast<AcDbSymbolTableRecord*>(rec.impObj());
+	if (!PyWarnIfError(impObj()->add(rec.impObj()), L"SymbolTable.add")) return false;
+	// add 之后记录已入库并被表接管：关闭打开状态，避免写锁残留。
+	if (pRec && !pRec->objectId().isNull() && pRec->isWriteEnabled()) pRec->close();
+	return true;
 }
 
 void bind_PyDbSymbolTable(pym& m) {
@@ -105,17 +169,17 @@ void bind_PyDbSymbolTable(pym& m) {
 		.def(py::init<AcDbSymbolTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbSymbolTable)
 		.def("has", &PyDbSymbolTable::has, py::arg("name"))
-		.def("getAt", [](PyDbSymbolTable& self, const AcString& name, int mode) {
-			AcDbSymbolTableRecord* rec = nullptr;
-			if (self.impObj()->getAt(name.kwszPtr(), rec, static_cast<AcDb::OpenMode>(mode)) != Acad::eOk)
-				return PyDbSymbolTableRecord(nullptr);
-			return PyDbSymbolTableRecord(rec);
-		}, py::arg("name"), py::arg("mode") = 0, "按名称打开记录；mode 0读/1写/2通知")
+		.def("getAt", &PyDbSymbolTable::getAt, py::arg("name"), py::arg("mode") = 1, "按名称打开记录；mode 默认 1=写，纯查询传 0=读，2=通知；失败抛清晰 Python 异常")
 		.def("getIdAt", &PyDbSymbolTable::getIdAt, py::arg("name"), "按名称取记录 ObjectId，失败返回 0")
 		.def("add", &PyDbSymbolTable::add, py::arg("rec"), "向符号表追加一条记录")
 		.def("toDict", &PyDbSymbolTable::toDict)
 		.def("names", &PyDbSymbolTable::names)
-		.def("records", &PyDbSymbolTable::records, "返回所有记录列表")
+		.def("records", &PyDbSymbolTable::records, py::arg("mode") = 1, "返回所有记录列表（默认写模式，纯查询传 0）")
+		.def("keys", &PyDbSymbolTable::keys, "记录名列表")
+		.def("values", &PyDbSymbolTable::values, py::arg("mode") = 1, "记录对象列表")
+		.def("items", &PyDbSymbolTable::items, py::arg("mode") = 1, "(名, 记录) 列表")
+		.def("get", &PyDbSymbolTable::get, py::arg("name"), py::arg("default") = py::none())
+		.def("__contains__", &PyDbSymbolTable::has, py::arg("name"), "'name' in table")
 		.def("numRecords", &PyDbSymbolTable::numRecords)
 		.def("__iter__", [](PyDbSymbolTable& self) {
 			return self.records().attr("__iter__")();

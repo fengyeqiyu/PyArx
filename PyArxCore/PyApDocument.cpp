@@ -10,6 +10,8 @@
 #include "PyApDocument.h"
 #include <acdocman.h>
 #include <AcApDocWindow.h>
+#include <algorithm>
+#include <cwctype>
 
 namespace
 {
@@ -177,6 +179,44 @@ std::wstring PyApDocument::activate()
     return ErrName(DocMgr()->activateDocument(m_ptr, false));
 }
 
+std::wstring PyApDocument::save()
+{
+    if (!m_ptr || !DocMgr()) return L"eNullObjectPointer";
+    const ACHAR* f = m_ptr->fileName();
+    if (!f || !*f) return L"eInvalidInput";   // 未命名图形没有文件名
+
+    // 文档库不能直接 db->save()（实测 eFileInternalErr=74）；
+    // 但 db->saveAs(当前文件名) 是同步落盘、不弹任何对话框的，实测 eOk。
+    // DXF 图形走 dxfOut，避免把 DWG 字节写进 .dxf。
+    AcDbDatabase* db = m_ptr->database();
+    if (!db) return L"eNullObjectPointer";
+
+    std::wstring path(f);
+    const std::wstring low = [&] {
+        std::wstring s = path;
+        std::transform(s.begin(), s.end(), s.begin(), ::towlower);
+        return s;
+    }();
+    Acad::ErrorStatus es;
+    if (low.size() >= 4 && low.compare(low.size() - 4, 4, L".dxf") == 0)
+        es = db->dxfOut(path.c_str());
+    else
+        // 必须用默认的 bBakAndRename=true：传 false 对文档库返回非 eOk（实测 eUnknown/访问错误）；
+        // 默认档实测同步落盘且无任何对话框。
+        es = db->saveAs(path.c_str());
+
+    return ErrName(es);
+}
+
+std::wstring PyApDocument::saveAs(const std::wstring& path)
+{
+    if (!m_ptr || !DocMgr()) return L"eNullObjectPointer";
+    // SAVEAS 先问"文件格式"，给空串会一直停在提示上（实测会卡死命令上下文）；
+    // 必须显式给格式，再给路径，结尾留空格表示回车。
+    std::wstring cmd = L"_.SAVEAS 2018 \"" + path + L"\" ";
+    return ErrName(DocMgr()->sendStringToExecute(m_ptr, cmd.c_str(), false, true, false));
+}
+
 AcString PyApDocument::toString() const
 {
     if (!m_ptr)
@@ -215,5 +255,7 @@ void bind_PyApDocument(pym& m)
         .def("downgradeDocOpen", &PyApDocument::downgradeDocOpen, py::arg("prompt_for_save") = true)
         .def("setFocus", &PyApDocument::setFocus, "文档窗口获得输入焦点")
         .def("activate", &PyApDocument::activate, "激活文档，返回 ErrorStatus 字符串")
+        .def("save", &PyApDocument::save, "按当前文件名同步保存，返回 ErrorStatus 字符串")
+        .def("saveAs", &PyApDocument::saveAs, py::arg("path"), "另存为，返回 ErrorStatus 字符串")
         .def("__repr__", &PyApDocument::toString);
 }

@@ -49,6 +49,44 @@ PyApDocument PyApDocManager::getDocument(const PyDbDatabase& db) const {
     return PyApDocument(impObj()->document(db.impObj()));
 }
 
+std::vector<PyApDocument> PyApDocManager::documents() const {
+    std::vector<PyApDocument> out;
+    AcApDocManager* mgr = impObj() ? impObj() : ::acDocManager;
+    if (!mgr) return out;
+    auto it = mgr->getDocumentIterator();
+    if (!it) return out;
+    for (; !it->done(); it->step()) {
+        AcApDocument* d = it->document();
+        if (d) out.emplace_back(d);
+    }
+    return out;
+}
+
+PyApDocument PyApDocManager::documentAt(int index) const {
+    if (index < 0) return PyApDocument(nullptr);
+    auto docs = documents();
+    if (static_cast<std::size_t>(index) >= docs.size()) return PyApDocument(nullptr);
+    return docs[static_cast<std::size_t>(index)];
+}
+
+std::vector<std::wstring> PyApDocManager::saveAll() {
+    std::vector<std::wstring> out;
+    for (auto& d : documents()) {
+        std::wstring nm = d.name();
+        std::wstring st = d.save();
+        out.push_back(nm + L" -> " + st);
+    }
+    return out;
+}
+
+std::wstring PyApDocManager::quit() {
+    AcApDocManager* mgr = impObj() ? impObj() : ::acDocManager;
+    if (!mgr) return L"eNullObjectPointer";
+    AcApDocument* d = mgr->mdiActiveDocument();
+    if (!d) return L"eNoDocument";
+    return ErrName(mgr->sendStringToExecute(d, L"_.QUIT ", true, false, false));
+}
+
 std::wstring PyApDocManager::lockDocument(PyApDocument doc) {
     if (!impObj() || !doc.impObj()) return L"eNullObjectPointer";
     return ErrName(impObj()->lockDocument(doc.impObj(), AcAp::kWrite));
@@ -107,6 +145,14 @@ void bind_PyApDocManager(pym& m) {
             "当前上下文文档（PyArxCore.Ap.Document）")
         .def("getDocument", &PyApDocManager::getDocument, py::arg("database"),
             "按数据库对象取关联文档")
+        .def_property_readonly("documents", &PyApDocManager::documents,
+            "全部已打开文档（list[Ap.Document]）")
+        .def("documentAt", &PyApDocManager::documentAt, py::arg("index"),
+            "按序号取文档，越界返回空文档")
+        .def("saveAll", &PyApDocManager::saveAll,
+            "逐个同步保存所有文档，返回 [\"路径 -> ErrorStatus\"]")
+        .def("quit", &PyApDocManager::quit,
+            "向 MDI 活动文档发送 _.QUIT 关闭 AutoCAD（有脏文档会弹保存提示，先 saveAll）")
         .def("lockDocument", &PyApDocManager::lockDocument, py::arg("document"),
             "锁定文档，返回 ErrorStatus 字符串")
         .def("unlockDocument", &PyApDocManager::unlockDocument, py::arg("document"),

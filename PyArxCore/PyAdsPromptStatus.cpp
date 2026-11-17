@@ -6,6 +6,8 @@ void bind_PyPromptStatus(pym& m) {
 		.value("eNone", Acad::eNone)
 		.value("eModeless", Acad::eModeless)
 		.value("eNormal", Acad::eNormal)
+		.value("eOk", static_cast<Acad::PromptStatus>(5100))   // PyRx 同义名
+		.value("kNormal", static_cast<Acad::PromptStatus>(5100)) // PyRx 同义名
 		.value("eError", Acad::eError)
 		.value("eCancel", Acad::eCancel)
 		.value("eRejected", Acad::eRejected)
