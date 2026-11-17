@@ -4,20 +4,22 @@
 
 PyWrapper_Cpp(DbRegion)
 AcString PyDbRegion::toString() const { return AcString(std::format("AcDbRegion[area={:.3f}]", this->area()).c_str(), AcString::Utf8); }
-double PyDbRegion::area() const { double v = 0.0; if(!PyWarnIfError(impObj()->getArea(v), L"AcDbRegion::getArea")) return 0.0; return v; }
-double PyDbRegion::perimeter() const { double v = 0.0; if(!PyWarnIfError(impObj()->getPerimeter(v), L"AcDbRegion::getPerimeter")) return 0.0; return v; }
-AcGeVector3d PyDbRegion::normal() const { AcGeVector3d n; if(!PyWarnIfError(impObj()->getNormal(n), L"AcDbRegion::getNormal")) return AcGeVector3d(); return n; }
-bool PyDbRegion::isNull() const { return impObj()->isNull() != Adesk::kFalse; }
-unsigned int PyDbRegion::numChanges() const { return impObj()->numChanges(); }
+double PyDbRegion::area() const { double v = 0.0; if(!impObj()) return 0.0; if(!PyWarnIfError(impObj()->getArea(v), L"AcDbRegion::getArea")) return 0.0; return v; }
+double PyDbRegion::perimeter() const { double v = 0.0; if(!impObj()) return 0.0; if(!PyWarnIfError(impObj()->getPerimeter(v), L"AcDbRegion::getPerimeter")) return 0.0; return v; }
+AcGeVector3d PyDbRegion::normal() const { AcGeVector3d n; if(!impObj()) return AcGeVector3d(); if(!PyWarnIfError(impObj()->getNormal(n), L"AcDbRegion::getNormal")) return AcGeVector3d(); return n; }
+bool PyDbRegion::isNull() const { return impObj() ? (impObj()->isNull() != Adesk::kFalse) : true; }
+unsigned int PyDbRegion::numChanges() const { return impObj() ? impObj()->numChanges() : 0u; }
 std::tuple<AcGePlane, int> PyDbRegion::getPlane() const {
 	AcGePlane plane; AcDb::Planarity type;
+	if(!impObj()) return { AcGePlane(), 0 };
 	if(!PyWarnIfError(impObj()->getPlane(plane, type), L"AcDbRegion::getPlane")) return { AcGePlane(), 0 };
 	return { plane, static_cast<int>(type) };
 }
 bool PyDbRegion::booleanOper(int operation, PyDbRegion& other) {
+	if(!impObj() || !other.impObj()) return false;
 	return PyWarnIfError(impObj()->booleanOper(static_cast<AcDb::BoolOperType>(operation), other.impObj()), L"AcDbRegion::booleanOper");
 }
-bool PyDbRegion::usesGraphicsCache() const { return impObj()->usesGraphicsCache(); }
+bool PyDbRegion::usesGraphicsCache() const { return impObj() ? impObj()->usesGraphicsCache() : false; }
 std::tuple<AcGePoint2d, double, double,
 	double, double, double,
 	double, double,
@@ -28,6 +30,7 @@ std::tuple<AcGePoint2d, double, double,
 	double momInertia[2] = {0.0,0.0}, prinMoments[2] = {0.0,0.0}, radiiGyration[2] = {0.0,0.0};
 	AcGePoint2d centroid, extentsLow, extentsHigh;
 	AcGeVector2d prinAxes[2];
+	if(!impObj()) return {};
 	if(!PyWarnIfError(impObj()->getAreaProp(AcGePoint3d::kOrigin, AcGeVector3d::kXAxis, AcGeVector3d::kYAxis,
 		perimeter, area, centroid, momInertia, prodInertia, prinMoments, prinAxes,
 		radiiGyration, extentsLow, extentsHigh), L"AcDbRegion::getAreaProp")) return {};

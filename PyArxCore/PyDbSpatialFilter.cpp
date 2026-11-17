@@ -11,6 +11,7 @@ void bind_PyDbSpatialFilter(pym& m) {
 		PyWrapper_BIND(DbSpatialFilter)
 		// ---- clipVolumeIntersectsExtents(ext) -> bool ----
 		.def("clipVolumeIntersectsExtents", [](const PyDbSpatialFilter& s, const PyDbExtents3d& ext) -> bool {
+			if (!s.impObj() || !ext.impObj()) return false;
 			return s.impObj()->clipVolumeIntersectsExtents(ext.impObj()) != Adesk::kFalse;
 		}, py::arg("ext"), "裁剪体是否与给定包围盒相交")
 		// ---- getDefinition() -> (pts2d, normal, elevation, frontClip, backClip, enabled) ----
@@ -20,6 +21,7 @@ void bind_PyDbSpatialFilter(pym& m) {
 			AcGeVector3d normal;
 			double elevation = 0, frontClip = 0, backClip = 0;
 			Adesk::Boolean enabled = Adesk::kFalse;
+			if (!s.impObj()) return { AcGePoint2dArray(), AcGeVector3d::kZAxis, 0, 0, 0, false };
 			if (!PyWarnIfError(s.impObj()->getDefinition(pts, normal, elevation, frontClip, backClip, enabled),
 				L"AcDbSpatialFilter::getDefinition"))
 				return { AcGePoint2dArray(), AcGeVector3d::kZAxis, 0, 0, 0, false };
@@ -28,6 +30,7 @@ void bind_PyDbSpatialFilter(pym& m) {
 		// ---- setDefinition(pts, normal, elevation, frontClip, backClip, enabled) -> bool ----
 		.def("setDefinition", [](PyDbSpatialFilter& s, const AcGePoint2dArray& pts,
 			const AcGeVector3d& normal, double elevation, double frontClip, double backClip, bool enabled) -> bool {
+			if (!s.impObj()) return false;
 			return PyWarnIfError(
 				s.impObj()->setDefinition(pts, normal, elevation, frontClip, backClip,
 					enabled ? Adesk::kTrue : Adesk::kFalse),
@@ -41,6 +44,7 @@ void bind_PyDbSpatialFilter(pym& m) {
 			AcGePoint3d fromPt, toPt;
 			AcGeVector3d upDir;
 			AcGeVector2d viewField;
+			if (!s.impObj()) return { AcGePoint3d(), AcGePoint3d(), AcGeVector3d::kZAxis, AcGeVector2d() };
 			if (!PyWarnIfError(s.impObj()->getVolume(fromPt, toPt, upDir, viewField),
 				L"AcDbSpatialFilter::getVolume"))
 				return { AcGePoint3d::kOrigin, AcGePoint3d::kOrigin,

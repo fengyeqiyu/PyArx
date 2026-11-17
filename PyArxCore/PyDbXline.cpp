@@ -4,16 +4,16 @@
 
 PyWrapper_Cpp(DbXline)
 AcString PyDbXline::toString() const { return AcString(std::format("AcDbXline[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbXline::basePoint() const { return impObj()->basePoint(); }
+AcGePoint3d PyDbXline::basePoint() const { return impObj() ? impObj()->basePoint() : AcGePoint3d(); }
 
-void PyDbXline::setBasePoint(const AcGePoint3d& p) { impObj()->setBasePoint(p); }
+void PyDbXline::setBasePoint(const AcGePoint3d& p) { if (!impObj()) return; impObj()->setBasePoint(p); }
 
-AcGeVector3d PyDbXline::unitDir() const { return impObj()->unitDir(); }
+AcGeVector3d PyDbXline::unitDir() const { return impObj() ? impObj()->unitDir() : AcGeVector3d(); }
 
-void PyDbXline::setUnitDir(const AcGeVector3d& v) { impObj()->setUnitDir(v); }
+void PyDbXline::setUnitDir(const AcGeVector3d& v) { if (!impObj()) return; impObj()->setUnitDir(v); }
 
-AcGePoint3d PyDbXline::secondPoint() const { return impObj()->secondPoint(); }
-bool  PyDbXline::setSecondPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setSecondPoint(p), L"AcDbXline::setSecondPoint"); }
+AcGePoint3d PyDbXline::secondPoint() const { return impObj() ? impObj()->secondPoint() : AcGePoint3d(); }
+bool  PyDbXline::setSecondPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setSecondPoint(p), L"AcDbXline::setSecondPoint"); }
 
 void bind_PyDbXline(pym& m) {
 	py::class_<PyDbXline, PyDbCurve>(m, "PyDbXline")

@@ -4,16 +4,16 @@
 
 PyWrapper_Cpp(DbSolid)
 AcString PyDbSolid::toString() const { return AcString(std::format("AcDbSolid[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbSolid::getPointAt(Adesk::UInt16 i) const { AcGePoint3d p; if(!PyWarnIfError(impObj()->getPointAt(i, p), L"AcDbSolid::getPointAt")) return AcGePoint3d(); return p; }
+AcGePoint3d PyDbSolid::getPointAt(Adesk::UInt16 i) const { if (!impObj()) return AcGePoint3d(); AcGePoint3d p; if(!PyWarnIfError(impObj()->getPointAt(i, p), L"AcDbSolid::getPointAt")) return AcGePoint3d(); return p; }
 
-bool  PyDbSolid::setPointAt(Adesk::UInt16 i, const AcGePoint3d& p) { return PyWarnIfError(impObj()->setPointAt(i, p), L"AcDbSolid::setPointAt"); }
+bool  PyDbSolid::setPointAt(Adesk::UInt16 i, const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPointAt(i, p), L"AcDbSolid::setPointAt"); }
 
-double PyDbSolid::thickness() const { return impObj()->thickness(); }
+double PyDbSolid::thickness() const { return impObj() ? impObj()->thickness() : 0.0; }
 
-bool  PyDbSolid::setThickness(double t) { return PyWarnIfError(impObj()->setThickness(t), L"AcDbSolid::setThickness"); }
+bool  PyDbSolid::setThickness(double t) { if (!impObj()) return false; return PyWarnIfError(impObj()->setThickness(t), L"AcDbSolid::setThickness"); }
 
-AcGeVector3d PyDbSolid::normal() const { return impObj()->normal(); }
-bool  PyDbSolid::setNormal(const AcGeVector3d& n) { return PyWarnIfError(impObj()->setNormal(n), L"AcDbSolid::setNormal"); }
+AcGeVector3d PyDbSolid::normal() const { return impObj() ? impObj()->normal() : AcGeVector3d(); }
+bool  PyDbSolid::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbSolid::setNormal"); }
 // 注：AcDbSolid::elevation/setElevation 未被导入库导出（LNK2001），不绑定
 
 void bind_PyDbSolid(pym& m) {
