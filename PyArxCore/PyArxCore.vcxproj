@@ -540,6 +540,7 @@
     <ClInclude Include="PyDbMText.h" />
     <ClInclude Include="PyDbNurbSurface.h" />
     <ClInclude Include="PyDbObject.h" />
+    <ClInclude Include="PyDbOpenCache.h" />
     <ClInclude Include="PyDbObjectContext.h" />
     <ClInclude Include="PyDbObjectContextManager.h" />
     <ClInclude Include="PyDbObjectIterator.h" />
