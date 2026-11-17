@@ -4,26 +4,32 @@
 
 PyWrapper_Cpp(DbVisualStyle);
 
-int PyDbVisualStyle::type() const { return (int)impObj()->type(); }
+int PyDbVisualStyle::type() const { return impObj() ? (int)impObj()->type() : 0; }
 bool PyDbVisualStyle::setType(int type) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setType(static_cast<AcGiVisualStyle::Type>(type)), L"AcDbVisualStyle::setType");
 }
 bool PyDbVisualStyle::setDescription(const AcString& s) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setDescription(s.kwszPtr()), L"AcDbVisualStyle::setDescription");
 }
 bool PyDbVisualStyle::setTraitInt(int prop, int nVal, int op) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTrait(static_cast<AcGiVisualStyleProperties::Property>(prop), nVal,
 		static_cast<AcGiVisualStyleOperations::Operation>(op)), L"AcDbVisualStyle::setTrait(int)");
 }
 bool PyDbVisualStyle::setTraitBool(int prop, bool bVal, int op) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTrait(static_cast<AcGiVisualStyleProperties::Property>(prop), bVal,
 		static_cast<AcGiVisualStyleOperations::Operation>(op)), L"AcDbVisualStyle::setTrait(bool)");
 }
 bool PyDbVisualStyle::setTraitDouble(int prop, double dVal, int op) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTrait(static_cast<AcGiVisualStyleProperties::Property>(prop), dVal,
 		static_cast<AcGiVisualStyleOperations::Operation>(op)), L"AcDbVisualStyle::setTrait(double)");
 }
 bool PyDbVisualStyle::setTraitColorF(int prop, double r, double g, double b, int op) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTrait(static_cast<AcGiVisualStyleProperties::Property>(prop), r, g, b,
 		static_cast<AcGiVisualStyleOperations::Operation>(op)), L"AcDbVisualStyle::setTrait(color)");
 }
