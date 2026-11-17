@@ -2509,6 +2509,16 @@ void bind_PyDbDatabase(pym& m)
 		.def("setChamfera", &PyDbDatabase::setChamfera, py::arg("val"))
 		.def("chamferb", &PyDbDatabase::chamferb)
 		.def("setChamferb", &PyDbDatabase::setChamferb, py::arg("val"))
+		// PyRx 对齐：系统变量零参读取（走统一 getSysVar，类型由 resbuf 分支给出 int/float/str）
+		.def("angdir", [](PyDbDatabase& d){ return d.getSysVar("ANGDIR"); })
+		.def("celweight", [](PyDbDatabase& d){ return d.getSysVar("CELWEIGHT"); })
+		.def("chamferc", [](PyDbDatabase& d){ return d.getSysVar("CHAMFERC"); })
+		.def("chamferd", [](PyDbDatabase& d){ return d.getSysVar("CHAMFERD"); })
+		.def("cmljust", [](PyDbDatabase& d){ return d.getSysVar("CMLJUST"); })
+		.def("cmlscale", [](PyDbDatabase& d){ return d.getSysVar("CMLSCALE"); })
+		.def("dimfit", [](PyDbDatabase& d){ return d.getSysVar("DIMFIT"); })
+		.def("dimunit", [](PyDbDatabase& d){ return d.getSysVar("DIMUNIT"); })
+		.def("dimassoc", [](PyDbDatabase& d){ return d.getSysVar("DIMASSOC"); })
 		.def("celtscale", &PyDbDatabase::celtscale)
 		.def("setCeltscale", &PyDbDatabase::setCeltscale, py::arg("val"))
 		.def("angbase", &PyDbDatabase::angbase)
@@ -2592,6 +2602,10 @@ void bind_PyDbDatabase(pym& m)
 			auto id = d.addAcDbObject(obj);
 			return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 		}, py::arg("obj"), "向数据库追加一个已创建的对象，返回其 ObjectId(uint64)")
+		.def("addObject", [](PyDbDatabase& d, PyDbObject& obj) -> uint64_t {
+			auto id = d.addAcDbObject(obj);
+			return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
+		}, py::arg("object"), "PyRx 别名：addObject，等价 addAcDbObject")
 		// --- 便捷方法：添加入库 ---
 		.def("addToModelspace", &PyDbDatabase::addToModelspace, py::arg("entity"), "添加实体到模型空间，返回新 ObjectId")
 		.def("addToCurrentspace", &PyDbDatabase::addToCurrentspace, py::arg("entity"), "添加实体到当前空间，返回新 ObjectId")
@@ -2616,6 +2630,9 @@ void bind_PyDbDatabase(pym& m)
 		.def("getBlockTable", [](PyDbDatabase& d, int mode) -> PyDbBlockTable {
 			return PyDbBlockTable(d.getBlockTable(static_cast<AcDb::OpenMode>(mode)));
 		}, py::arg("mode") = 0)
+		.def("blockTable", [](PyDbDatabase& d, int mode) -> PyDbBlockTable {
+			return PyDbBlockTable(d.getBlockTable(static_cast<AcDb::OpenMode>(mode)));
+		}, py::arg("mode") = 0, "PyRx 别名：blockTable")
 		.def("getLayerTable", [](PyDbDatabase& d, int mode) -> PyDbLayerTable {
 			return PyDbLayerTable(d.getLayerTable(static_cast<AcDb::OpenMode>(mode)));
 		}, py::arg("mode") = 0)
