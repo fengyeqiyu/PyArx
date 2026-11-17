@@ -160,7 +160,7 @@ void bind_PyDbBlockReference(pym& m) {
 			delete it;
 			return out;
 		}, "返回块参照上所有属性的 id 列表")
-		.def("hasAttributes", []() { return false; }, "占位：ARX 无 hasAttributes，请用 attributeCount")
+		.def("hasAttributes", [](const PyDbBlockReference& d) { return d.attributeCount() > 0; }, "是否含属性（属性数 > 0）")
 		.def("attributeCount", &PyDbBlockReference::attributeCount, "属性数量（-1 表示迭代器创建失败）")
 		.def("attribData", &PyDbBlockReference::attribData,
 		     "实例属性列表：{tag,txt,x,y,ax,ay,h,rot,ha,va,inv,ly,ci}")
