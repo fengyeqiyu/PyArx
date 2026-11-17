@@ -1,0 +1,48 @@
+class=AcDbViewport getters=47 bound=85 missing=22
+
+background=AcDbObjectId
+brightness=double
+contrast=double
+customScale=double
+elevation=double
+isDefaultLightingOn=bool
+isGridAdaptive=bool
+isGridBoundToLimits=bool
+isGridFollow=bool
+isGridSubdivisionRestricted=bool
+isNonRectClipOn=bool
+isTransparent=bool
+isUcsSavedWithViewport=bool
+nonRectClipEntityId=AcDbObjectId
+plotAsRaster=bool
+plotWireframe=bool
+previousBackgroundForcedSwitch=bool
+shadePlotId=AcDbObjectId
+snapIsoPair=Adesk::UInt16
+sunId=AcDbObjectId
+ucsName=AcDbObjectId
+visualStyle=AcDbObjectId
+
+@@@CODE@@@
+.def("background", [](const PyDbViewport& o) -> uint64_t { auto id = o.impObj()->background(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+.def("brightness", [](const PyDbViewport& o) -> double { return o.impObj()->brightness(); })
+.def("contrast", [](const PyDbViewport& o) -> double { return o.impObj()->contrast(); })
+.def("customScale", [](const PyDbViewport& o) -> double { return o.impObj()->customScale(); })
+.def("elevation", [](const PyDbViewport& o) -> double { return o.impObj()->elevation(); })
+.def("isDefaultLightingOn", [](const PyDbViewport& o) -> bool { return o.impObj()->isDefaultLightingOn(); })
+.def("isGridAdaptive", [](const PyDbViewport& o) -> bool { return o.impObj()->isGridAdaptive(); })
+.def("isGridBoundToLimits", [](const PyDbViewport& o) -> bool { return o.impObj()->isGridBoundToLimits(); })
+.def("isGridFollow", [](const PyDbViewport& o) -> bool { return o.impObj()->isGridFollow(); })
+.def("isGridSubdivisionRestricted", [](const PyDbViewport& o) -> bool { return o.impObj()->isGridSubdivisionRestricted(); })
+.def("isNonRectClipOn", [](const PyDbViewport& o) -> bool { return o.impObj()->isNonRectClipOn(); })
+.def("isTransparent", [](const PyDbViewport& o) -> bool { return o.impObj()->isTransparent(); })
+.def("isUcsSavedWithViewport", [](const PyDbViewport& o) -> bool { return o.impObj()->isUcsSavedWithViewport(); })
+.def("nonRectClipEntityId", [](const PyDbViewport& o) -> uint64_t { auto id = o.impObj()->nonRectClipEntityId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+.def("plotAsRaster", [](const PyDbViewport& o) -> bool { return o.impObj()->plotAsRaster(); })
+.def("plotWireframe", [](const PyDbViewport& o) -> bool { return o.impObj()->plotWireframe(); })
+.def("previousBackgroundForcedSwitch", [](const PyDbViewport& o) -> bool { return o.impObj()->previousBackgroundForcedSwitch(); })
+.def("shadePlotId", [](const PyDbViewport& o) -> uint64_t { auto id = o.impObj()->shadePlotId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+.def("snapIsoPair", [](const PyDbViewport& o) -> int { return static_cast<int>(o.impObj()->snapIsoPair()); })
+.def("sunId", [](const PyDbViewport& o) -> uint64_t { auto id = o.impObj()->sunId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+.def("ucsName", [](const PyDbViewport& o) -> uint64_t { auto id = o.impObj()->ucsName(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+.def("visualStyle", [](const PyDbViewport& o) -> uint64_t { auto id = o.impObj()->visualStyle(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
