@@ -4,7 +4,7 @@
 
 PyWrapper_Cpp(DbPolyFaceMeshVertex);
 AcString PyDbPolyFaceMeshVertex::toString() const { return AcString(std::format("AcDbPolyFaceMeshVertex[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbPolyFaceMeshVertex::position() const { return impObj()->position(); }
+AcGePoint3d PyDbPolyFaceMeshVertex::position() const { return impObj() ? impObj()->position() : AcGePoint3d(); }
 bool PyDbPolyFaceMeshVertex::setPosition(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setPosition(p), L"AcDbPolyFaceMeshVertex::setPosition"); }
 
 void bind_PyDbPolyFaceMeshVertex(pym& m) {
