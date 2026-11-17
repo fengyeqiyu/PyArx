@@ -87,6 +87,17 @@ void bind_PyDbTable(pym& m) {
 		.def("setRotation", &PyDbTable::setRotation, py::arg("v"))
 		PyWrapper_BIND(DbTable)
 		.def("__repr__", &PyDbTable::toString)
+		// ---- PyRx getter 对齐补齐（自动生成，纯读无副作用） ----
+		.def("breakSpacing", [](const PyDbTable& o) -> double { return o.impObj()->breakSpacing(); })
+		.def("hasSubSelection", [](const PyDbTable& o) -> bool { return o.impObj()->hasSubSelection(); })
+		.def("horzCellMargin", [](const PyDbTable& o) -> double { return o.impObj()->horzCellMargin(); })
+		.def("isBreakEnabled", [](const PyDbTable& o) -> bool { return o.impObj()->isBreakEnabled(); })
+		.def("isHeaderSuppressed", [](const PyDbTable& o) -> bool { return o.impObj()->isHeaderSuppressed(); })
+		.def("isTitleSuppressed", [](const PyDbTable& o) -> bool { return o.impObj()->isTitleSuppressed(); })
+		.def("minimumTableHeight", [](const PyDbTable& o) -> double { return o.impObj()->minimumTableHeight(); })
+		.def("minimumTableWidth", [](const PyDbTable& o) -> double { return o.impObj()->minimumTableWidth(); })
+		.def("tableStyle", [](const PyDbTable& o) -> uint64_t { auto id = o.impObj()->tableStyle(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+		.def("vertCellMargin", [](const PyDbTable& o) -> double { return o.impObj()->vertCellMargin(); })
 		;
 }
 
