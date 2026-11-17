@@ -540,6 +540,8 @@
     <ClInclude Include="PyDbMText.h" />
     <ClInclude Include="PyDbNurbSurface.h" />
     <ClInclude Include="PyDbObject.h" />
+    <ClInclude Include="HotModName.h" />
+    <ClInclude Include="HotModuleName.h" />
     <ClInclude Include="PyDbOpenCache.h" />
     <ClInclude Include="PyDbObjectContext.h" />
     <ClInclude Include="PyDbObjectContextManager.h" />
