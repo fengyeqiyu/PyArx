@@ -52,7 +52,10 @@ void bind_AcGeMatrix3d(pybind11::module& m) {
 
 		// 变换操作
 		.def("setTranslation", &AcGeMatrix3d::setTranslation, py::arg("vec"))
-		.def("translation",
+		// PyRx 契约：translation 是静态工厂 Ge.Matrix3d.translation(Vector3d) -> Matrix3d
+		.def_static("translation", py::overload_cast<const AcGeVector3d&>(&AcGeMatrix3d::translation),
+			py::arg("vec"), "Creates a translation matrix from 3D vector")
+		.def("translationVector",
 			py::overload_cast<>(&AcGeMatrix3d::translation, py::const_),
 			"Returns the translation vector component of this matrix")
 		.def("setToTranslation", &AcGeMatrix3d::setToTranslation, py::arg("vec"))

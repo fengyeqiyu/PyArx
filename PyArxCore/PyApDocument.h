@@ -39,6 +39,7 @@ public:
     bool isNamedDrawing() const;
     bool isReadOnly() const;
     bool isQuiescent() const;
+    std::wstring fileName() const;
     std::wstring docTitle() const;
     void setDocTitle(const std::wstring& title);
 

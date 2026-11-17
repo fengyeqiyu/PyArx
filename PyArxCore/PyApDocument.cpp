@@ -70,8 +70,15 @@ bool PyApDocument::isQuiescent() const
     return m_ptr ? m_ptr->isQuiescent() : false;
 }
 
-std::wstring PyApDocument::docTitle() const
+// PyRx 契约 Ap.Document.fileName() -> str（完整路径名，未命名图形返回空串）
+std::wstring PyApDocument::fileName() const
 {
+    if (!m_ptr) return L"";
+    const ACHAR* f = m_ptr->fileName();
+    return f ? std::wstring(f) : L"";
+}
+
+std::wstring PyApDocument::docTitle() const{
     if (!m_ptr) return L"";
     const ACHAR* t = m_ptr->docTitle();
     return t ? std::wstring(t) : L"";
@@ -250,6 +257,7 @@ void bind_PyApDocument(pym& m)
         .def("lockMode", &PyApDocument::lockMode, py::arg("include_my_locks") = false,
              "文档锁定模式（AcAp::DocLockMode 值）")
         .def("pushDbmod", &PyApDocument::pushDbmod)
+        .def("fileName", &PyApDocument::fileName, "文档完整路径名（未命名图形返回空串）")
         .def("popDbmod", &PyApDocument::popDbmod)
         .def("upgradeDocOpen", &PyApDocument::upgradeDocOpen)
         .def("downgradeDocOpen", &PyApDocument::downgradeDocOpen, py::arg("prompt_for_save") = true)

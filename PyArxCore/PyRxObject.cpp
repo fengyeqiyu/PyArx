@@ -14,9 +14,45 @@
 #include <string>
 #include "stdafx.h"
 #include "PyDbObject.h"
+#include "PyDbOpenCache.h"   // 析构时摘除打开缓存，避免缓存留下已关闭的悬空指针
 
 
 PyWrapper_Cpp(RxObject)
+
+PyRxObject::~PyRxObject() {
+	if (m_ptr == nullptr) return;
+	if (m_isDbObject) {
+		AcDbObject* pDbo = static_cast<AcDbObject*>(m_ptr);
+		if (!m_autoDelete) {
+			// 非拥有视图（拷贝出来的临时包装）：既不再 close 也不 delete，
+			// 否则会把调用方正在使用的对象关掉。
+			m_ptr = nullptr;
+			return;
+		}
+		PyDbOpenCache::Close(pDbo);   // 先摘缓存，后续重新打开不会拿到已关闭的指针
+		if (!pDbo->objectId().isNull()) {
+			// 入库对象：包装只负责关闭，所有权归数据库。
+			// 注意：不能拿 isReallyClosing() 当「是否已关闭」判据 —— 无头实测它对
+			// 正常打开的对象恒返回 true，跳过 close 会让对象永远保持打开态，
+			// 后续再以 kForWrite 打开就永远 eWasOpenForRead。
+			// 已关闭时 close() 返回 eNotOpenForWrite，无副作用。
+			pDbo->close();
+		}
+		else if (m_autoDelete) {
+			// 未入库对象（clone 副本 / new 出来的图元）：包装持有所有权。
+			// 先 close 再 delete —— 直接 delete 打开态 AcDbObject 会造成 ARX 堆损坏
+			// （无头实测 0xC0000374）；已关闭时 close 返回 eNotOpenForWrite，无副作用。
+			pDbo->close();
+			delete pDbo;
+		}
+		m_ptr = nullptr;
+		return;
+	}
+	if (m_autoDelete) {
+		delete m_ptr;
+		m_ptr = nullptr;
+	}
+}
 
 
 
@@ -88,7 +124,15 @@ bool PyRxObject::operator!=(const PyRxObject& other) const
 
 PyRxObject PyRxObject::clone() const
 {
-	return impObj()->clone();
+	AcRxObject* pNew = impObj()->clone();
+	if (!pNew) throw std::runtime_error("clone: 该对象不支持克隆");
+	// 克隆出的 AcDbObject 处于「未入库但仍打开」状态；若直接交给自动 delete 的包装，
+	// 析构时会 delete 打开态对象 → ARX 堆损坏（无头实测 0xC0000374）。先关闭再交付。
+	if (pNew->isKindOf(AcDbObject::desc())) {
+		AcDbObject* pDbo = static_cast<AcDbObject*>(pNew);
+		if (pDbo->objectId().isNull()) pDbo->close();
+	}
+	return PyRxObject(pNew, true, false);
 }
 
 Acad::ErrorStatus PyRxObject::copyFrom(const PyRxObject& other)

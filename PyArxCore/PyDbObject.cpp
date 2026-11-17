@@ -64,7 +64,11 @@ Acad::ErrorStatus PyDbObject::closeAndPage(bool)
 
 PyRxObject PyDbObject::clone(void) const
 {
-	return impObj()->clone();
+	AcDbObject* pNew = static_cast<AcDbObject*>(impObj()->clone());
+	if (!pNew) throw std::runtime_error("clone: 该对象不支持克隆");
+	// 同 PyRxObject::clone：未入库克隆体仍打开，先关闭，否则析构 delete 打开态对象会堆损坏
+	if (pNew->objectId().isNull()) pNew->close();
+	return PyRxObject(pNew, true, false);
 }
 
 void PyDbObject::copied(const PyDbObject& dbobj, const PyDbObject& newObj)
@@ -224,7 +228,10 @@ void bind_PyDbObject(pym& m)
 		.def_static("cloneFrom", [](const PyRxObject& src) -> PyDbObject* {
 			if (src.impObj() == nullptr || !src.impObj()->isKindOf(AcDbObject::desc()))
 				throw py::value_error("cloneFrom: otherObject is not an AcDbObject");
-			return new PyDbObject(static_cast<AcDbObject*>(src.impObj()->clone()));
+			AcDbObject* pNew = static_cast<AcDbObject*>(src.impObj()->clone());
+			if (!pNew) throw std::runtime_error("cloneFrom: 克隆失败");
+			if (pNew->objectId().isNull()) pNew->close();  // 未入库克隆体先关闭，避免打开态析构
+			return new PyDbObject(pNew);
 		}, py::arg("otherObject"))
 		// ---- PyRx DbObject 侧的缺口批量补齐（挂在基类，派生类自动继承）----
 		.def("getHandle", [](PyDbObject& self) {
@@ -292,8 +299,16 @@ void bind_PyDbObject(pym& m)
 			"Database that owns this object")
 
 		// ---- clone / copy ----
-		.def("clone", &PyDbObject::clone,
-			"Deep copy of the object")
+		// 必须返回「指针 + take_ownership」：若按值返回 PyRxObject，临时的按值包装析构时会把
+		// 刚克隆出的对象 delete 掉，Python 侧拿到悬空指针（无头实测 0xC0000374 堆损坏）。
+		.def("clone", [](PyDbObject& self) -> PyDbObject* {
+			AcDbObject* pNew = static_cast<AcDbObject*>(self.impObj()->clone());
+			if (!pNew) throw std::runtime_error("clone: 该对象不支持克隆");
+			// 未入库克隆体处于打开态，先关闭，供后续 addToModelspace/addToBlock 入库
+			if (pNew->objectId().isNull()) pNew->close();
+			return new PyDbObject(pNew);
+		}, py::return_value_policy::take_ownership,
+			"Deep copy of the object（返回未入库副本，须 addToModelspace/addToBlock 入库）")
 		.def("copyFrom", [](PyDbObject& self, const PyDbObject& other) {
 			return PyWarnIfError(self.copyFrom(other), L"PyDbObject.copyFrom");
 		}, py::arg("other"),

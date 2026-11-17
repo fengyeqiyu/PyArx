@@ -53,6 +53,9 @@ public:
 
 	// 按 ObjectId(oldId) 直接打开块内实体；mode 默认 1=写，纯查询传 0
 	PyDbEntity getEntityById(uint64_t id, int mode = 1) const;
+	// 打开块内实体并交出所有权（供 pybind take_ownership 绑定，避免按值返回时
+	// 临时包装析构把刚打开的对象 close 掉）
+	PyDbEntity* openEntityById(uint64_t id, int mode = 1) const;
 
 	// 块内实体 ObjectId 列表（不打开实体）
 	py::list entityIds() const;

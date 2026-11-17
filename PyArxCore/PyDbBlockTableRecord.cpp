@@ -105,10 +105,33 @@ PyDbEntity PyDbBlockTableRecord::getEntityById(uint64_t id, int mode) const {
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(id));
 	AcDbEntity* pEnt = nullptr;
-	if (acdbOpenObject(pEnt, oid, static_cast<AcDb::OpenMode>(mode), false) != Acad::eOk || !pEnt)
-		return PyDbEntity(nullptr);
+	Acad::ErrorStatus es = acdbOpenObject(pEnt, oid, static_cast<AcDb::OpenMode>(mode), false);
+	if ((es != Acad::eOk || !pEnt) && (es == Acad::eWasOpenForRead || es == Acad::eWasOpenForWrite)) {
+		// 该对象已被别处打开：复用打开缓存里的指针，必要时 upgradeOpen 升级到写
+		Acad::ErrorStatus es2 = Acad::eOk;
+		AcDbObject* pObj = PyDbOpenCache::Get(oid, static_cast<AcDb::OpenMode>(mode), es2);
+		pEnt = (es2 == Acad::eOk && pObj) ? AcDbEntity::cast(pObj) : nullptr;
+	}
+	if (!pEnt) return PyDbEntity(nullptr);
 	PyDbOpenCache::Track(pEnt, static_cast<AcDb::OpenMode>(mode));
 	return PyDbEntity(pEnt);
+}
+
+// openEntityById：与 getEntityById 同一套打开/缓存逻辑，但交出所有权
+PyDbEntity* PyDbBlockTableRecord::openEntityById(uint64_t id, int mode) const {
+	if (!id) return nullptr;
+	AcDbObjectId oid;
+	oid.setFromOldId(static_cast<Adesk::IntDbId>(id));
+	AcDbEntity* pEnt = nullptr;
+	Acad::ErrorStatus es = acdbOpenObject(pEnt, oid, static_cast<AcDb::OpenMode>(mode), false);
+	if ((es != Acad::eOk || !pEnt) && (es == Acad::eWasOpenForRead || es == Acad::eWasOpenForWrite)) {
+		Acad::ErrorStatus es2 = Acad::eOk;
+		AcDbObject* pObj = PyDbOpenCache::Get(oid, static_cast<AcDb::OpenMode>(mode), es2);
+		pEnt = (es2 == Acad::eOk && pObj) ? AcDbEntity::cast(pObj) : nullptr;
+	}
+	if (!pEnt) return nullptr;
+	PyDbOpenCache::Track(pEnt, static_cast<AcDb::OpenMode>(mode));
+	return new PyDbEntity(pEnt);
 }
 
 // 块定义内 ATTDEF 数据：openObject 只能拿到基类，Python 侧 cast 不到 PyDbAttributeDefinition，
@@ -163,12 +186,19 @@ void bind_PyDbBlockTableRecord(pym& m) {
 	py::class_<PyDbBlockTableRecord, PyDbSymbolTableRecord>(m, "PyDbBlockTableRecord")
 		.def(py::init<>([]{ return new PyDbBlockTableRecord(new AcDbBlockTableRecord()); }), "创建新的空块表记录（用于建自定义块）")
 		.def(py::init<AcDbBlockTableRecord*>(), py::arg("p"))
-		// 从 ObjectId(oldId) 裸打开块表记录（对应 C++ acdbOpenObject，无事务；命令上下文命令级事务自动提交）
+		// 从 ObjectId(oldId) 打开块表记录（对应 C++ acdbOpenObject，无事务；命令上下文命令级事务自动提交）
+		// 抗重复打开：同一对象已被 Python 侧以读打开时，再请求写会拿到 eWasOpenForRead，
+		// 这里走打开缓存做 upgradeOpen，返回同一个底层指针（与 PyRx 的打开缓存语义一致）。
 		.def(py::init([](uint64_t oldId, int mode) {
-			AcDbObject* pObj = nullptr;
 			AcDbObjectId objId(reinterpret_cast<AcDbStub*>(oldId));
-			Acad::ErrorStatus es = acdbOpenObject(pObj, objId, static_cast<AcDb::OpenMode>(mode));
-			return new PyDbBlockTableRecord((es == Acad::eOk) ? static_cast<AcDbBlockTableRecord*>(pObj) : nullptr);
+			Acad::ErrorStatus es = Acad::eOk;
+			AcDbObject* pObj = PyDbOpenCache::Open(objId, static_cast<AcDb::OpenMode>(mode), es);
+			if ((es != Acad::eOk || !pObj) && (es == Acad::eWasOpenForRead || es == Acad::eWasOpenForWrite)) {
+				es = Acad::eOk;
+				pObj = PyDbOpenCache::Get(objId, static_cast<AcDb::OpenMode>(mode), es);
+			}
+			return new PyDbBlockTableRecord((es == Acad::eOk && pObj)
+				? static_cast<AcDbBlockTableRecord*>(pObj) : nullptr);
 		}), py::arg("old_id"), py::arg("mode") = 1, "从 ObjectId(oldId) 裸打开块表记录（无事务，命令上下文自动提交；失败返回空对象")
 		PyWrapper_BIND(DbBlockTableRecord)
 		.def("comments", &PyDbBlockTableRecord::comments)
@@ -231,8 +261,8 @@ void bind_PyDbBlockTableRecord(pym& m) {
 		.def("__len__", &PyDbBlockTableRecord::numEntities, "len(btr)：块内实体数量")
 		.def("attdefData", &PyDbBlockTableRecord::attdefData,
 			"块内 ATTDEF 列表：[{tag, txt, x, y, z, h, rot, ha, va, inv, ly, ci}]")
-		.def("getEntityById", &PyDbBlockTableRecord::getEntityById,
-			py::arg("id"), py::arg("mode") = 1,
+		.def("getEntityById", &PyDbBlockTableRecord::openEntityById,
+			py::arg("id"), py::arg("mode") = 1, py::return_value_policy::take_ownership,
 			"按 ObjectId(oldId) 打开块内实体；mode 0=只读 1=写（默认写），失败返回空包装")
 		.def("__getitem__", [](PyDbBlockTableRecord& self, uint64_t id) {
 			return self.getEntityById(id, 1);
