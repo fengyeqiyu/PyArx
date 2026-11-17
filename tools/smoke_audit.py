@@ -64,12 +64,12 @@ t("Entity.setColorIndex", t_edit)
 t("Ge.Point3d.distanceTo", lambda: Ge.Point3d(1, 2, 3).distanceTo(Ge.Point3d(0, 0, 0)))
 t("Ge.Vector3d.crossProduct", lambda: Ge.Vector3d(1, 0, 0).crossProduct(Ge.Vector3d(0, 1, 0)))
 t("Ge.LineSeg3d.length", lambda: Ge.LineSeg3d(Ge.Point3d(0, 0, 0), Ge.Point3d(1, 1, 1)).length())
-t("Ge.CircularArc3d", lambda: Ge.CircularArc3d(Ge.Point3d(0, 0, 0), Ge.Vector3d(0, 0, 1), 5.0))
+t("Ge.CircArc3d", lambda: Ge.CircArc3d(Ge.Point3d(0, 0, 0), Ge.Vector3d(0, 0, 1), 5.0))
 
 
 def t_mx():
     m = Ge.Matrix3d.translation(Ge.Vector3d(1, 0, 0))
-    p = m(Ge.Point3d(0, 0, 0))
+    p = Ge.Point3d(0, 0, 0).transformBy(m)
     assert p is not None
 t("Ge.Matrix3d.translation", t_mx)
 
