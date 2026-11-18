@@ -405,3 +405,8 @@ PyDbField.cpp:16-139:②已改
 PyDbImage.cpp:1:clean
 PyDbLinetypeTableRecord.cpp:1:clean
 PyDbLayerStateManager.cpp:1:clean
+PyDbFullSubentPath.cpp:65-115:②已改
+PyDbIdMapping.cpp:1:clean
+PyDbIdMappingIter.cpp:1:clean
+PyDbObjectContext.cpp:1:clean
+PyDbObjectContextManager.cpp:1:clean

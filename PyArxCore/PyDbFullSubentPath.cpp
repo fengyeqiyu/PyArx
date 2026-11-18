@@ -64,6 +64,8 @@ PyDbSubentId& PyDbSubentId::operator=(const PyDbSubentId& other)
 
 PyDbSubentId::operator AcDbSubentId() const
 {
+	if (m_ptr == nullptr)
+		return AcDbSubentId::kNull;
 	return *m_ptr;
 }
 
@@ -82,23 +84,35 @@ bool PyDbSubentId::operator!=(const PyDbSubentId& other) const
 
 
 AcDb::SubentType PyDbSubentId::type() const {
+	if (m_ptr == nullptr)
+		return AcDb::kNullSubentType;
 	return m_ptr->type();
 }
 bool PyDbSubentId::setType(AcDb::SubentType subtype) {
+	if (m_ptr == nullptr)
+		return false;
 	m_ptr->setType(subtype);
 	return true;
 }
 PyRxClass PyDbSubentId::typeClass() const {
+	if (m_ptr == nullptr)
+		return PyRxClass();
 	return m_ptr->typeClass();
 }
 bool PyDbSubentId::setTypeClass(PyRxClass& rxclass) {
+	if (m_ptr == nullptr || rxclass.impObj() == nullptr)
+		return false;
 	m_ptr->setTypeClass(rxclass.impObj());
 	return true;
 }
 Adesk::GsMarker PyDbSubentId::index() const {
+	if (m_ptr == nullptr)
+		return 0;
 	return m_ptr->index();
 }
 bool PyDbSubentId::setIndex(Adesk::GsMarker index) {
+	if (m_ptr == nullptr)
+		return false;
 	m_ptr->setIndex(index);
 	return true;
 }

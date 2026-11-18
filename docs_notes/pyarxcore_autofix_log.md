@@ -99,3 +99,4 @@
 2026-11-18 22:18 | PyDbDatabaseReactor.cpp:20-148 | ⑧ | 9 处 Python 回调 catch 与 9 处 catch(...) 补 acutPrintf 异常提示
 2026-11-19 00:18 | PyClipBoard.cpp:51-93 | ④ | getText/setText 6 处失败分支补 acutPrintf 原因提示
 2026-11-19 01:18 | PyDbField.cpp:16-139 | ② | 21 个成员函数补 if (!impObj()) 守卫并给默认返回
+2026-11-19 02:20 | PyDbFullSubentPath.cpp:65-115 | ② | PyDbSubentId 6 处裸解引用 m_ptr 补判空并给默认返回
