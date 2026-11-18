@@ -48,6 +48,7 @@ bool PyDbBlockReference::treatAsAcDbBlockRefForExplode() const { if (!impObj()) 
 bool  PyDbBlockReference::explodeToOwnerSpace() const { if (!impObj()) return false; return PyWarnIfError(impObj()->explodeToOwnerSpace(), L"AcDbBlockReference::explodeToOwnerSpace"); }
 
 std::tuple<AcGePoint3d, AcGePoint3d> PyDbBlockReference::geomExtentsBestFit(const AcGeMatrix3d& parentXform) const {
+	if (!impObj()) return {};
 	AcDbExtents ext;
 	if (!PyWarnIfError(impObj()->geomExtentsBestFit(ext, parentXform), L"AcDbBlockReference::geomExtentsBestFit"))
 		return std::make_tuple(AcGePoint3d(), AcGePoint3d());
@@ -60,6 +61,7 @@ bool  PyDbBlockReference::setBlockTransform(const AcGeMatrix3d& xform) {
 }
 
 std::tuple<AcGePlane, int> PyDbBlockReference::getPlane() const {
+	if (!impObj()) return {};
 	AcGePlane plane; AcDb::Planarity type;
 	if (!PyWarnIfError(impObj()->getPlane(plane, type), L"AcDbBlockReference::getPlane"))
 		return std::make_tuple(AcGePlane(), 0);
@@ -69,6 +71,7 @@ std::tuple<AcGePlane, int> PyDbBlockReference::getPlane() const {
 bool PyDbBlockReference::isPlanar() const { if (!impObj()) return false; return impObj()->isPlanar() != Adesk::kFalse; }
 
 PyDbAttribute PyDbBlockReference::openAttribute(uint64_t attId, AcDb::OpenMode mode, bool openErasedOne) const {
+	if (!impObj()) return {};
 	AcDbAttribute* pAttr = nullptr;
 	AcDbObjectId id;
 	id.setFromOldId(static_cast<Adesk::IntDbId>(attId));

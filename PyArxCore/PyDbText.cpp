@@ -54,6 +54,7 @@ bool  PyDbText::setTextStyle(uint64_t id) {
 bool PyDbText::adjustAlignment() { if (!impObj()) return false; return PyWarnIfError(impObj()->adjustAlignment(nullptr), L"AcDbText::adjustAlignment"); }
 
 std::vector<AcGePoint3d> PyDbText::getBoundingPoints() const {
+	if (!impObj()) return {};
 	AcGePoint3dArray arr;
 	impObj()->getBoundingPoints(arr);
 	std::vector<AcGePoint3d> out;

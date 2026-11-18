@@ -47,6 +47,7 @@ bool PyDbTableStyle::isCellStyleInUse(const AcString& cellStyle) const { if (!im
 
 // ---- 颜色 RGB（AcCmColor 未单独封装，按 (r,g,b) 出入参包装）----
 std::tuple<int,int,int> PyDbTableStyle::color(int rowType) const {
+	if (!impObj()) return {};
 	AcCmColor c = impObj()->color(static_cast<AcDb::RowType>(rowType));
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
@@ -56,6 +57,7 @@ bool PyDbTableStyle::setColor(int r, int g, int b, int rowTypes) {
 	return PyWarnIfError(impObj()->setColor(c, rowTypes), L"AcDbTableStyle::setColor");
 }
 std::tuple<int,int,int> PyDbTableStyle::backgroundColor(int rowType) const {
+	if (!impObj()) return {};
 	AcCmColor c = impObj()->backgroundColor(static_cast<AcDb::RowType>(rowType));
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
@@ -69,6 +71,7 @@ bool PyDbTableStyle::setBackgroundColorNone(bool b, int rowTypes) { if (!impObj(
 
 // ---- 数据类型 / 格式 ----
 std::tuple<int,int> PyDbTableStyle::getDataType() const {
+	if (!impObj()) return {};
 	AcValue::DataType dt; AcValue::UnitType ut;
 	if(!PyWarnIfError(impObj()->getDataType(dt, ut), L"AcDbTableStyle::getDataType")) return std::make_tuple(0, 0);
 	return std::make_tuple((int)dt, (int)ut);
@@ -84,6 +87,7 @@ bool PyDbTableStyle::setFormat(const AcString& fmt) { if (!impObj()) return fals
 int PyDbTableStyle::gridLineWeight(int glt, int rowType) const { if (!impObj()) return 0; return (int)impObj()->gridLineWeight(static_cast<AcDb::GridLineType>(glt), static_cast<AcDb::RowType>(rowType)); }
 bool PyDbTableStyle::setGridLineWeight(int lw, int glts, int rowTypes) { if (!impObj()) return false; return PyWarnIfError(impObj()->setGridLineWeight(static_cast<AcDb::LineWeight>(lw), glts, rowTypes), L"AcDbTableStyle::setGridLineWeight"); }
 std::tuple<int,int,int> PyDbTableStyle::gridColor(int glt, int rowType) const {
+	if (!impObj()) return {};
 	AcCmColor c = impObj()->gridColor(static_cast<AcDb::GridLineType>(glt), static_cast<AcDb::RowType>(rowType));
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }

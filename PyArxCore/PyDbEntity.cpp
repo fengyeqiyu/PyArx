@@ -79,6 +79,7 @@ py::list PyDbEntity::intersectWith(const PyDbEntity& other, int intType) const {
 
 // ---- 颜色 / 透明度（AcCm* 未单独绑定，提取为基本类型）----
 PyColor PyDbEntity::color() const {
+	if (!impObj()) return {};
 	return PyColor(impObj()->color());
 }
 bool PyDbEntity::setColor(const PyColor& color, bool doSubents) {
@@ -86,10 +87,12 @@ bool PyDbEntity::setColor(const PyColor& color, bool doSubents) {
 	return PyWarnIfError(impObj()->setColor(color.m_color, doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setColor");
 }
 std::tuple<int,int,int> PyDbEntity::entityColor() const {
+	if (!impObj()) return {};
 	AcCmEntityColor c = impObj()->entityColor();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
 std::tuple<int,int,int> PyDbEntity::colorRGB() const {
+	if (!impObj()) return {};
 	AcCmColor c = impObj()->color();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
@@ -102,6 +105,7 @@ bool PyDbEntity::setTransparency(int alpha, bool doSubents) {
 
 // ---- 包围盒 ----
 std::tuple<AcGePoint3d,AcGePoint3d> PyDbEntity::bounds() const {
+	if (!impObj()) return {};
 	AcDbExtents ext;
 	if(!impObj()->bounds(ext)) return std::make_tuple(AcGePoint3d(), AcGePoint3d());
 	return std::make_tuple(ext.minPoint(), ext.maxPoint());
@@ -109,6 +113,7 @@ std::tuple<AcGePoint3d,AcGePoint3d> PyDbEntity::bounds() const {
 
 // ---- 平面性 ----
 std::tuple<AcGePlane,int> PyDbEntity::getPlane() const {
+	if (!impObj()) return {};
 	AcGePlane pl; AcDb::Planarity pa;
 	if(!PyWarnIfError(impObj()->getPlane(pl, pa), L"AcDbEntity::getPlane")) return std::make_tuple(AcGePlane(), (int)-1);
 	return std::make_tuple(pl, (int)pa);

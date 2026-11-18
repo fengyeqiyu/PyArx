@@ -9,6 +9,7 @@ AcGePoint3d PyDbOle2Frame::location() const { if (!impObj()) return AcGePoint3d(
 void PyDbOle2Frame::setLocation(const AcGePoint3d& p) { if (!impObj()) return; impObj()->setLocation(p); }
 
 std::tuple<AcGePoint3d, AcGePoint3d, AcGePoint3d, AcGePoint3d> PyDbOle2Frame::position3d() const {
+	if (!impObj()) return {};
 	CRectangle3d r{};
 	impObj()->position(r);
 	return std::make_tuple(r.upLeft, r.upRight, r.lowLeft, r.lowRight);

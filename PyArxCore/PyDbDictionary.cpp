@@ -69,6 +69,7 @@ bool PyDbDictionary::rename(const AcString& oldName, const AcString& newName) {
 }
 
 std::tuple<bool, uint64_t> PyDbDictionary::setAt(const AcString& key, PyDbObject& obj) {
+	if (!impObj()) return {};
 	AcDbObjectId retId;
 	bool ok = PyWarnIfError(impObj()->setAt(key.kwszPtr(), obj.impObj(), retId), L"Dictionary.setAt");
 	uint64_t idv = (ok && !retId.isNull()) ? static_cast<uint64_t>(retId.asOldId()) : 0ULL;
@@ -76,6 +77,7 @@ std::tuple<bool, uint64_t> PyDbDictionary::setAt(const AcString& key, PyDbObject
 }
 
 AcDb::DuplicateRecordCloning PyDbDictionary::mergeStyle() const {
+	if (!impObj()) return {};
 	return impObj()->mergeStyle();
 }
 

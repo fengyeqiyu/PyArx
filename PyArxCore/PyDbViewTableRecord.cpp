@@ -75,6 +75,7 @@ std::tuple<bool, uint64_t> PyDbViewTableRecord::setSun(PyDbObject& sunObj) {
 	return setSun(sunObj, true);
 }
 std::tuple<bool, uint64_t> PyDbViewTableRecord::setSun(PyDbObject& sunObj, bool eraseOldSun) {
+	if (!impObj()) return {};
 	AcDbObject* pSun = sunObj.impObj();
 	if (!pSun) return std::make_tuple(false, 0ULL);
 	AcDbObjectId retId;

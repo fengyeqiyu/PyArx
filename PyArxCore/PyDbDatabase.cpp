@@ -545,10 +545,12 @@ Acad::ErrorStatus PyDbDatabase::saveAs(AcString fileName, const bool bBakAndRena
 
 
 Acad::ErrorStatus PyDbDatabase::saveAs(AcDwgFileHandle* pOutputFiler, const SecurityParams* pSecParams, bool crashing) {
+	if (!impObj()) return Acad::eNullObjectPointer;
 
 	return impObj()->saveAs(pOutputFiler, pSecParams, crashing);
 }
 Acad::ErrorStatus PyDbDatabase::save() {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	// 原地保存：直接 saveAs 到当前文件名（同步 API），不走 sendStringToExecute QSAVE。
 	// AcDbDatabase::save() 仅对新建空库有效；readDwgFile 打开的库和文档挂接库都必须用 saveAs。
 	AcString fn = getFilename();
@@ -558,13 +560,16 @@ Acad::ErrorStatus PyDbDatabase::save() {
 	return impObj()->save();
 }
 Acad::ErrorStatus PyDbDatabase::dxfIn(AcString dxfFilename, AcString logFilename) {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	return impObj()->dxfIn(dxfFilename.kwszPtr(), logFilename.kwszPtr());
 }
 Acad::ErrorStatus PyDbDatabase::dxfIn(IAcReadStream* pInputStream, AcString logFilename) {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	return impObj()->dxfIn(pInputStream, logFilename.kwszPtr());
 }
 
 Acad::ErrorStatus PyDbDatabase::dxfOut(AcString fileName, int precision, AcDb::AcDbDwgVersion dwgVer, bool saveThumbnailImage) {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	return impObj()->dxfOut(fileName.kwszPtr(), precision, dwgVer, saveThumbnailImage);
 }
 
@@ -575,6 +580,7 @@ Acad::ErrorStatus PyDbDatabase::dxfOutEx(AcString fileName, int precision, AcDb:
 }
 
 Acad::ErrorStatus PyDbDatabase::closeInput(bool bCloseFile) {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	return impObj()->closeInput(bCloseFile);
 }
 
@@ -591,21 +597,27 @@ AcString PyDbDatabase::originalFileName() const {
 	return AcString(impObj()->originalFileName());
 }
 AcDb::AcDbDwgVersion PyDbDatabase::lastSavedAsVersion() const {
+	if (!impObj()) return {};
 	return impObj()->lastSavedAsVersion();
 }
 AcDb::AcDbDwgVersion PyDbDatabase::originalFileVersion() const {
+	if (!impObj()) return {};
 	return impObj()->originalFileVersion();
 }
 AcDb::AcDbDwgVersion PyDbDatabase::originalFileSavedByVersion() const {
+	if (!impObj()) return {};
 	return impObj()->originalFileSavedByVersion();
 }
 AcDb::MaintenanceReleaseVersion PyDbDatabase::lastSavedAsMaintenanceVersion() const {
+	if (!impObj()) return {};
 	return impObj()->lastSavedAsMaintenanceVersion();
 }
 AcDb::MaintenanceReleaseVersion PyDbDatabase::originalFileMaintenanceVersion() const {
+	if (!impObj()) return {};
 	return impObj()->originalFileMaintenanceVersion();
 }
 AcDb::MaintenanceReleaseVersion PyDbDatabase::originalFileSavedByMaintenanceVersion() const {
+	if (!impObj()) return {};
 	return impObj()->originalFileSavedByMaintenanceVersion();
 }
 
@@ -717,6 +729,7 @@ bool PyDbDatabase::isAppRegistered(const AcString& pszAppName) const {
 
 // ������� 
 Acad::ErrorStatus PyDbDatabase::auditXData(AcDbAuditInfo* pInfo) {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	return impObj()->auditXData(pInfo);
 }
 
@@ -749,14 +762,17 @@ AcDb::MaintenanceReleaseVersion PyDbDatabase::maintenanceReleaseVersion() const
 
 
 Acad::ErrorStatus PyDbDatabase::restoreOriginalXrefSymbols() {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	return impObj()->restoreOriginalXrefSymbols();
 
 }
 Acad::ErrorStatus PyDbDatabase::restoreForwardingXrefSymbols() {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	return impObj()->restoreForwardingXrefSymbols();
 }
 
 AcDbObjectId PyDbDatabase::xrefBlockId() const {
+	if (!impObj()) return {};
 	return impObj()->xrefBlockId();
 }
 
@@ -1223,6 +1239,7 @@ void PyDbDatabase::setShadedif(Adesk::Int16 val) {
 
 // ��λϵͳ���� 
 AcDb::MeasurementValue PyDbDatabase::measurement() {
+	if (!impObj()) return {};
 	return impObj()->measurement();
 }
 
@@ -1333,6 +1350,7 @@ bool PyDbDatabase::setThickness(double thickness) {
 }
 
 AcDb::LineWeight PyDbDatabase::celweight() const {
+	if (!impObj()) return {};
 	return impObj()->celweight();
 }
 void PyDbDatabase::setCelweight(AcDb::LineWeight weight) {
@@ -1349,6 +1367,7 @@ AcDb::LineWeight PyDbDatabase::getNearestLineWeight(int weight) {
 }
 
 AcDb::EndCaps PyDbDatabase::endCaps() const {
+	if (!impObj()) return {};
 	return impObj()->endCaps();
 }
 void PyDbDatabase::setEndCaps(AcDb::EndCaps endCapstype) {
@@ -1357,6 +1376,7 @@ void PyDbDatabase::setEndCaps(AcDb::EndCaps endCapstype) {
 }
 
 AcDb::JoinStyle PyDbDatabase::joinStyle() const {
+	if (!impObj()) return {};
 	return impObj()->joinStyle();
 }
 void PyDbDatabase::setJoinStyle(AcDb::JoinStyle style) {
@@ -1527,24 +1547,30 @@ void PyDbDatabase::setHpOrigin(const AcGePoint2d& origin) {
 }
 // returns a local time
 const AcDbDate PyDbDatabase::tdcreate() const {
+	if (!impObj()) return AcDbDate();
 	return impObj()->tdcreate();
 }
 const AcDbDate PyDbDatabase::tdupdate() const {
+	if (!impObj()) return AcDbDate();
 	return impObj()->tdupdate();
 }
 // returns a universal time
 const AcDbDate PyDbDatabase::tducreate() const {
+	if (!impObj()) return AcDbDate();
 	return impObj()->tducreate();
 }
 const AcDbDate PyDbDatabase::tduupdate() const {
+	if (!impObj()) return AcDbDate();
 	return impObj()->tduupdate();
 }
 
 // returns a time delta
 const AcDbDate PyDbDatabase::tdindwg() const {
+	if (!impObj()) return AcDbDate();
 	return impObj()->tdindwg();
 }
 const AcDbDate PyDbDatabase::tdusrtimer() const {
+	if (!impObj()) return AcDbDate();
 	return impObj()->tdusrtimer();
 }
 
@@ -1554,6 +1580,7 @@ void PyDbDatabase::resetTimes() {
 }
 
 AcCmColor PyDbDatabase::cecolor() const {
+	if (!impObj()) return {};
 	return impObj()->cecolor();
 }
 void PyDbDatabase::setCecolor(const AcCmColor& color) {
@@ -1562,6 +1589,7 @@ void PyDbDatabase::setCecolor(const AcCmColor& color) {
 }
 
 AcCmTransparency PyDbDatabase::cetransparency() const {
+	if (!impObj()) return {};
 	return impObj()->cetransparency();
 }
 void PyDbDatabase::setCetransparency(const AcCmTransparency& transparency) {
@@ -1570,6 +1598,7 @@ void PyDbDatabase::setCetransparency(const AcCmTransparency& transparency) {
 }
 
 AcDbHandle PyDbDatabase::handseed() const {
+	if (!impObj()) return {};
 	return impObj()->handseed();
 }
 void PyDbDatabase::setHandseed(const AcDbHandle& handle) {
@@ -1578,6 +1607,7 @@ void PyDbDatabase::setHandseed(const AcDbHandle& handle) {
 }
 
 AcDbObjectId PyDbDatabase::clayer() const {
+	if (!impObj()) return {};
 	return impObj()->clayer();
 }
 
@@ -1587,6 +1617,7 @@ bool PyDbDatabase::setClayer(AcDbObjectId val) {
 }
 
 std::tuple<AcDb::PlotStyleNameType, AcDbObjectId> PyDbDatabase::getCePlotStyleNameId() const {
+	if (!impObj()) return {};
 	AcDbObjectId  val;
 	return { impObj()->getCePlotStyleNameId(val),val };
 }
@@ -1597,6 +1628,7 @@ void PyDbDatabase::setCePlotStyleName(AcDb::PlotStyleNameType plotsStyleNameType
 }
 
 AcDbObjectId PyDbDatabase::textstyle() const {
+	if (!impObj()) return {};
 	return impObj()->textstyle();
 }
 bool PyDbDatabase::setTextstyle(AcDbObjectId val) {
@@ -1605,6 +1637,7 @@ bool PyDbDatabase::setTextstyle(AcDbObjectId val) {
 }
 
 AcDbObjectId PyDbDatabase::celtype() const {
+	if (!impObj()) return {};
 	return impObj()->celtype();
 }
 bool PyDbDatabase::setCeltype(AcDbObjectId val) {
@@ -1613,6 +1646,7 @@ bool PyDbDatabase::setCeltype(AcDbObjectId val) {
 }
 
 AcDbObjectId PyDbDatabase::cmaterial() const {
+	if (!impObj()) return {};
 	return impObj()->cmaterial();
 }
 bool PyDbDatabase::setCmaterial(AcDbObjectId val) {
@@ -1621,6 +1655,7 @@ bool PyDbDatabase::setCmaterial(AcDbObjectId val) {
 }
 
 AcDbObjectId PyDbDatabase::dimstyle() const {
+	if (!impObj()) return {};
 	return impObj()->dimstyle();
 }
 bool PyDbDatabase::setDimstyle(AcDbObjectId styleId) {
@@ -1643,10 +1678,12 @@ AcDbDimStyleTableRecord* PyDbDatabase::getDimstyleChildData(const PyRxClass& pDi
 	return pRec;
 }
 AcDbObjectId PyDbDatabase::getDimstyleChildId(const PyRxClass& pDimClass, AcDbObjectId& parentStyle) const {
+	if (!impObj()) return {};
 	return impObj()->getDimstyleChildId(pDimClass.impObj(), parentStyle);
 }
 
 AcDbObjectId PyDbDatabase::getDimstyleParentId(AcDbObjectId& childStyle) const {
+	if (!impObj()) return {};
 	return impObj()->getDimstyleParentId(childStyle);
 }
 
@@ -1660,6 +1697,7 @@ void PyDbDatabase::setDimstyleData(AcDbObjectId id) {
 }
 
 AcDbObjectId PyDbDatabase::cmlstyleID() const {
+	if (!impObj()) return {};
 	return impObj()->cmlstyleID();
 }
 void PyDbDatabase::setCmlstyleID(AcDbObjectId val) {
@@ -1767,6 +1805,7 @@ void PyDbDatabase::setPucs(const AcGePoint3d& ucsOrigin, const AcGeVector3d& ucs
 }
 
 AcDbObjectId PyDbDatabase::pucsname() const {
+	if (!impObj()) return {};
 	return impObj()->pucsname();
 }
 
@@ -1778,6 +1817,7 @@ void PyDbDatabase::setPucsname(const AcDbObjectId& val) {
 }
 
 AcDbObjectId PyDbDatabase::pucsBase() const {
+	if (!impObj()) return {};
 	return AcDbObjectId(impObj()->pucsBase());
 }
 
@@ -1951,6 +1991,7 @@ void PyDbDatabase::setUcs(const AcGePoint3d& ucsOrigin, const AcGeVector3d& ucsX
 }
 
 AcDbObjectId PyDbDatabase::ucsname() const {
+	if (!impObj()) return {};
 	return impObj()->ucsname();
 }
 
@@ -1960,6 +2001,7 @@ void PyDbDatabase::setUcsname(const AcDbObjectId& ucsRecId) {
 }
 
 AcDbObjectId PyDbDatabase::ucsBase() const {
+	if (!impObj()) return {};
 	return impObj()->ucsBase();
 }
 void PyDbDatabase::setUcsBase(AcDbObjectId ucsid) {
@@ -2147,6 +2189,7 @@ void PyDbDatabase::setTStackSize(int val) {
 }
 
 AcDb::UnitsValue PyDbDatabase::insunits() const {
+	if (!impObj()) return {};
 	return impObj()->insunits();
 }
 bool PyDbDatabase::setInsunits(const AcDb::UnitsValue units) {
@@ -2279,6 +2322,7 @@ void PyDbDatabase::getTableStyleDictionary(AcDbDictionary*& pDict, AcDb::OpenMod
 }
 
 AcDbObjectId PyDbDatabase::tableStyleDictionaryId() const {
+	if (!impObj()) return {};
 	return impObj()->tableStyleDictionaryId();
 }
 
@@ -2286,6 +2330,7 @@ AcDbObjectId PyDbDatabase::tableStyleDictionaryId() const {
 // The following functions are similar to setDimstyle/dimstyle
 //
 AcDbObjectId PyDbDatabase::tablestyle() const {
+	if (!impObj()) return {};
 	return	 impObj()->tablestyle();
 }
 void PyDbDatabase::setTablestyle(AcDbObjectId val) {
@@ -2300,6 +2345,7 @@ AcDbDictionary* PyDbDatabase::getMLeaderStyleDictionary(AcDb::OpenMode mode = Ac
 	return pDict;
 }
 AcDbObjectId PyDbDatabase::mleaderStyleDictionaryId() const {
+	if (!impObj()) return {};
 	return impObj()->mleaderStyleDictionaryId();
 }
 
@@ -2308,6 +2354,7 @@ AcDbObjectId PyDbDatabase::mleaderStyleDictionaryId() const {
 // The following functions are similar to setDimstyle/dimstyle
 //
 AcDbObjectId PyDbDatabase::mleaderstyle() const {
+	if (!impObj()) return {};
 	return impObj()->mleaderstyle();
 }
 void PyDbDatabase::setMLeaderstyle(AcDbObjectId val) {
@@ -2322,9 +2369,11 @@ AcDbDictionary* PyDbDatabase::getDetailViewStyleDictionary(AcDb::OpenMode mode =
 	return pDict;
 }
 AcDbObjectId PyDbDatabase::detailViewStyleDictionaryId() const {
+	if (!impObj()) return {};
 	return	impObj()->detailViewStyleDictionaryId();
 }
 AcDbObjectId PyDbDatabase::detailViewStyle() const {
+	if (!impObj()) return {};
 	return	impObj()->detailViewStyle();
 }
 void PyDbDatabase::setDetailViewStyle(AcDbObjectId val)
@@ -2342,10 +2391,12 @@ AcDbDictionary* PyDbDatabase::getSectionViewStyleDictionary(AcDb::OpenMode mode 
 }
 
 AcDbObjectId  PyDbDatabase::sectionViewStyleDictionaryId() const {
+	if (!impObj()) return {};
 	return impObj()->sectionViewStyleDictionaryId();
 }
 
 AcDbObjectId PyDbDatabase::sectionViewStyle() const {
+	if (!impObj()) return {};
 	return impObj()->sectionViewStyle();
 }
 //Do not change format of setSectionViewStyle function! 
@@ -2357,6 +2408,7 @@ void PyDbDatabase::setSectionViewStyle(AcDbObjectId val) {
 
 // Get all AcDbViewports in all AcDbLayouts in the database
 PyDbObjectIdArray PyDbDatabase::getViewportArray(bool bGetPaperspaceVports = true) const {
+	if (!impObj()) return {};
 
 	AcDbObjectIdArray arr;
 	if (CheckErrorStatus(impObj()->getViewportArray(arr, bGetPaperspaceVports))) {
@@ -2368,6 +2420,7 @@ PyDbObjectIdArray PyDbDatabase::getViewportArray(bool bGetPaperspaceVports = tru
 // Get names of all visual styles in the database (visual styles for
 // internal use only are excluded)
 std::vector<AcString> PyDbDatabase::getVisualStyleList() {
+	if (!impObj()) return {};
 	AcArray<const wchar_t*> arr;
 	if (CheckErrorStatus(impObj()->getVisualStyleList(arr))) {
 		return	 AcArrayToVec<AcString>(arr);
@@ -2489,6 +2542,7 @@ void PyDbDatabase::setNorthDirection(double northdir) {
 	CheckErrorStatus(impObj()->setNorthDirection(northdir));
 }
 AcDb::TimeZone PyDbDatabase::timeZone() const {
+	if (!impObj()) return {};
 	return	 impObj()->timeZone();
 }
 void PyDbDatabase::setTimeZone(AcDb::TimeZone tz) {
@@ -2535,6 +2589,7 @@ void PyDbDatabase::setTileModeLightSynch(Adesk::UInt8 val) {
 }
 
 AcCmColor PyDbDatabase::interfereColor() const {
+	if (!impObj()) return {};
 	return	 impObj()->interfereColor();
 }
 void  PyDbDatabase::setInterfereColor(const AcCmColor& color) {
@@ -2543,6 +2598,7 @@ void  PyDbDatabase::setInterfereColor(const AcCmColor& color) {
 }
 
 AcDbObjectId PyDbDatabase::interfereObjVisStyle() const {
+	if (!impObj()) return {};
 	return	 impObj()->interfereObjVisStyle();
 }
 void  PyDbDatabase::setInterfereObjVisStyle(AcDbObjectId id) {
@@ -2551,6 +2607,7 @@ void  PyDbDatabase::setInterfereObjVisStyle(AcDbObjectId id) {
 }
 
 AcDbObjectId  PyDbDatabase::interfereVpVisStyle() const {
+	if (!impObj()) return {};
 	return	 impObj()->interfereVpVisStyle();
 }
 
@@ -2560,6 +2617,7 @@ void  PyDbDatabase::setInterfereVpVisStyle(AcDbObjectId id) {
 }
 
 AcDbObjectId PyDbDatabase::dragVisStyle() const {
+	if (!impObj()) return {};
 	return	 impObj()->dragVisStyle();
 }
 void PyDbDatabase::setDragVisStyle(AcDbObjectId id) {

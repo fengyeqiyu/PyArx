@@ -56,6 +56,7 @@ bool  PyDbMText::setShowBorders(bool v) { if (!impObj()) return false; return Py
 bool PyDbMText::backgroundFillOn() const { if (!impObj()) return false; return impObj()->backgroundFillOn(); }
 bool  PyDbMText::setBackgroundFill(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBackgroundFill(v), L"AcDbMText::setBackgroundFill"); }
 PyColor PyDbMText::backgroundFillColor() const {
+	if (!impObj()) return {};
 	AcCmColor c;
 	PyWarnIfError(impObj()->getBackgroundFillColor(c), L"AcDbMText::getBackgroundFillColor");
 	return PyColor(c);
@@ -82,6 +83,7 @@ bool  PyDbMText::setTextStyle(uint64_t id) {
 }
 
 std::vector<AcGePoint3d> PyDbMText::getBoundingPoints() const {
+	if (!impObj()) return {};
 	AcGePoint3dArray arr;
 	impObj()->getBoundingPoints(arr);
 	std::vector<AcGePoint3d> out;
@@ -91,6 +93,7 @@ std::vector<AcGePoint3d> PyDbMText::getBoundingPoints() const {
 }
 
 std::vector<std::vector<AcGePoint3d>> PyDbMText::getBoundingPointsByLine() const {
+	if (!impObj()) return {};
 	AcArray<AcGePoint3dArray> lines;
 	impObj()->getBoundingPointsByLine(lines);
 	std::vector<std::vector<AcGePoint3d>> out;

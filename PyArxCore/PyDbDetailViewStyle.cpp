@@ -5,6 +5,7 @@
 PyWrapper_Cpp(DbDetailViewStyle);
 
 std::tuple<int,int,int> PyDbDetailViewStyle::arrowSymbolColor() const {
+	if (!impObj()) return {};
 	AcCmColor c = impObj()->arrowSymbolColor();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
@@ -16,6 +17,7 @@ uint64_t PyDbDetailViewStyle::arrowSymbolId() const {
 double PyDbDetailViewStyle::arrowSymbolSize() const { if (!impObj()) return 0.0; return impObj()->arrowSymbolSize(); }
 
 std::tuple<int,int,int> PyDbDetailViewStyle::identifierColor() const {
+	if (!impObj()) return {};
 	AcCmColor c = impObj()->identifierColor();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }

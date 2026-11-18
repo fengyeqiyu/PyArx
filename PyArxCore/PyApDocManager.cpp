@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // PyApDocManager.cpp — PyArxCore 的 DocumentManager 包装，对齐 .NET
 //   Autodesk.AutoCAD.ApplicationServices.DocumentManager。
 //
@@ -39,14 +39,17 @@ bool PyApDocManager::isApplicationContext() const {
 }
 
 PyApDocument PyApDocManager::mdiActiveDocument() const {
+	if (!impObj()) return PyApDocument();
     return impObj() ? PyApDocument(impObj()->mdiActiveDocument()) : PyApDocument(nullptr);
 }
 
 PyApDocument PyApDocManager::curDocument() const {
+	if (!impObj()) return PyApDocument();
     return impObj() ? PyApDocument(impObj()->curDocument()) : PyApDocument(nullptr);
 }
 
 PyApDocument PyApDocManager::getDocument(const PyDbDatabase& db) const {
+	if (!impObj()) return PyApDocument();
     if (!impObj() || !db.impObj()) return PyApDocument(nullptr);
     return PyApDocument(impObj()->document(db.impObj()));
 }

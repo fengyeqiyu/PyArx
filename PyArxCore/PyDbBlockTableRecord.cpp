@@ -176,6 +176,7 @@ py::list PyDbBlockTableRecord::attdefData() const {
 }
 
 std::vector<uint8_t> PyDbBlockTableRecord::getPreviewIcon() const {
+	if (!impObj()) return {};
 	AcArray<Adesk::UInt8> bytes;
 	if (!PyWarnIfError(impObj()->getPreviewIcon(bytes), L"AcDbBlockTableRecord::getPreviewIcon"))
 		return {};

@@ -25,6 +25,7 @@ void PyDbLayerTable::generateUsageData() {
 }
 
 AcDbObjectIdArray PyDbLayerTable::getUnreconciledLayers() const {
+	if (!impObj()) return AcDbObjectIdArray();
 	AcDbObjectIdArray ids;
 	if (!PyWarnIfError(impObj()->getUnreconciledLayers(ids), L"LayerTable.getUnreconciledLayers"))
 		return AcDbObjectIdArray();

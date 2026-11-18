@@ -106,6 +106,7 @@ bool PyDbLayerTableRecord::isReconciled(uint64_t objectId) {
 }
 
 std::tuple<int, int, int, int> PyDbLayerTableRecord::color() const {
+	if (!impObj()) return {};
 	AcCmColor c = impObj()->color();
 	int ci = static_cast<int>(c.colorIndex());
 	int r = static_cast<int>(c.red());
@@ -122,6 +123,7 @@ void PyDbLayerTableRecord::setColor(int r, int g, int b) {
 }
 
 std::tuple<int, int, int, int> PyDbLayerTableRecord::entityColor() const {
+	if (!impObj()) return {};
 	AcCmEntityColor ec = impObj()->entityColor();
 	int ci = static_cast<int>(ec.colorIndex());
 	int r = static_cast<int>(ec.red());

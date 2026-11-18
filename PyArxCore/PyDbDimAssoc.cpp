@@ -20,6 +20,7 @@ uint64_t PyDbDimAssoc::dimObjId() const {
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 }
 AcDbObjectIdArray PyDbDimAssoc::getDimAssocGeomIds() const {
+	if (!impObj()) return AcDbObjectIdArray();
 	AcDbObjectIdArray ids;
 	PyWarnIfError(impObj()->getDimAssocGeomIds(ids), L"AcDbDimAssoc::getDimAssocGeomIds");
 	return ids;
@@ -29,6 +30,7 @@ bool PyDbDimAssoc::isAllGeomErased() const { if (!impObj()) return false; return
 bool PyDbDimAssoc::isTransSpatial() const { if (!impObj()) return false; return impObj()->isTransSpatial(); }
 
 std::tuple<bool, uint64_t> PyDbDimAssoc::post(uint64_t dimId, bool isActive) {
+	if (!impObj()) return {};
 	AcDbObjectId dim; dim.setFromOldId(static_cast<Adesk::UIntPtr>(dimId));
 	AcDbObjectId outId;
 	Acad::ErrorStatus es = impObj()->post(dim, outId, isActive);

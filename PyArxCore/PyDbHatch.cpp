@@ -35,6 +35,7 @@ bool PyDbHatch::patternDouble() const { if (!impObj()) return false; return impO
 bool PyDbHatch::setPatternDouble(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPatternDouble(v), L"AcDbHatch::setPatternDouble"); }
 int PyDbHatch::numPatternDefinitions() const { if (!impObj()) return 0; return impObj()->numPatternDefinitions(); }
 std::tuple<double, double, double, double, double, AcGeDoubleArray> PyDbHatch::getPatternDefinitionAt(int index) const {
+	if (!impObj()) return std::make_tuple(0.0, 0.0, 0.0, 0.0, 0.0, AcGeDoubleArray());
 	double angle = 0.0, baseX = 0.0, baseY = 0.0, offX = 0.0, offY = 0.0;
 	AcGeDoubleArray dashes;
 	if (impObj()->getPatternDefinitionAt(index, angle, baseX, baseY, offX, offY, dashes) != Acad::eOk)

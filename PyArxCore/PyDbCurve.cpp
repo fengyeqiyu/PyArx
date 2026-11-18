@@ -51,6 +51,7 @@ bool PyDbCurve::extendToPoint(bool extendStart, const AcGePoint3d& toPoint) {
 }
 
 std::vector<PyDbEntity> PyDbCurve::getSplitCurves(const std::vector<AcGePoint3d>& points) const {
+	if (!impObj()) return {};
 	std::vector<PyDbEntity> out;
 	AcGePoint3dArray arr;
 	for (const auto& p : points) arr.append(p);
@@ -61,6 +62,7 @@ std::vector<PyDbEntity> PyDbCurve::getSplitCurves(const std::vector<AcGePoint3d>
 }
 
 std::vector<PyDbEntity> PyDbCurve::getOffsetCurvesGivenPlaneNormal(const AcGeVector3d& normal, double offsetDist) const {
+	if (!impObj()) return {};
 	std::vector<PyDbEntity> out;
 	AcDbVoidPtrArray arr;
 	if (impObj()->getOffsetCurvesGivenPlaneNormal(normal, offsetDist, arr) != Acad::eOk) return out;

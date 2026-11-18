@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyRxObject.h"
 #include "PyRxClass.h"
 #include "PyGiWorldGeometry.h"
@@ -35,9 +35,11 @@ bool Is2dPoint(const py::handle& h) {
 // PyGiCommonDraw
 // ===========================================================================
 PyGiSubEntityTraits PyGiCommonDraw::subEntityTraits() const {
+	if (!impObj()) return PyGiSubEntityTraits(nullptr);
 	return PyGiSubEntityTraits(&impObj()->subEntityTraits(), false);
 }
 AcGiRegenType PyGiCommonDraw::regenType() const {
+	if (!impObj()) return {};
 	return impObj()->regenType();
 }
 bool PyGiCommonDraw::regenAbort() const {
@@ -65,12 +67,15 @@ GiContextRef* PyGiCommonDraw::context() {
 }
 
 PyGiWorldGeometry PyGiWorldDraw::geometry() const {
+	if (!impObj()) return PyGiWorldGeometry(nullptr);
 	return PyGiWorldGeometry(&impObj()->geometry());
 }
 PyGiViewportGeometry PyGiViewportDraw::geometry() const {
+	if (!impObj()) return PyGiViewportGeometry(nullptr);
 	return PyGiViewportGeometry(&impObj()->geometry());
 }
 PyGiViewport PyGiViewportDraw::viewport() const {
+	if (!impObj()) return PyGiViewport();
 	return PyGiViewport(&impObj()->viewport());
 }
 unsigned int PyGiViewportDraw::sequenceNumber() const {
@@ -82,6 +87,7 @@ bool PyGiViewportDraw::isValidId(unsigned long long acgiId) const {
 	return impObj()->isValidId(static_cast<Adesk::ULongPtr>(acgiId)) == Adesk::kTrue;
 }
 AcDbObjectId PyGiViewportDraw::viewportObjectId() const {
+	if (!impObj()) return {};
 	return impObj()->viewportObjectId();
 }
 

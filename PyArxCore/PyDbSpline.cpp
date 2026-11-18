@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbSpline.h"
 
@@ -30,6 +30,7 @@ bool  PyDbSpline::purgeFitData() { if (!impObj()) return false; return PyWarnIfE
 bool  PyDbSpline::updateFitData() { if (!impObj()) return false; return PyWarnIfError(impObj()->updateFitData(), L"AcDbSpline::updateFitData"); }
 
 std::tuple<AcGePoint3dArray, bool, AcGeVector3d, AcGeVector3d, int, int, double> PyDbSpline::getFitData() const {
+	if (!impObj()) return std::make_tuple(AcGePoint3dArray(), false, AcGeVector3d(), AcGeVector3d(), 0, 0, 0.0);
 	AcGePoint3dArray fitPoints;
 	Adesk::Boolean tangentsExist = Adesk::kFalse;
 	AcGeVector3d startTangent, endTangent;
@@ -43,6 +44,7 @@ std::tuple<AcGePoint3dArray, bool, AcGeVector3d, AcGeVector3d, int, int, double>
 }
 
 std::tuple<int, bool, bool, bool, AcGePoint3dArray, AcGeDoubleArray, AcGeDoubleArray, double, double> PyDbSpline::getNurbsData() const {
+	if (!impObj()) return std::make_tuple(0, false, false, false, AcGePoint3dArray(), AcGeDoubleArray(), AcGeDoubleArray(), 0.0, 0.0);
 	int degree = 0;
 	Adesk::Boolean rational = Adesk::kFalse, closed = Adesk::kFalse, periodic = Adesk::kFalse;
 	AcGePoint3dArray ctrlPts;
@@ -82,12 +84,14 @@ bool PyDbSpline::setNurbsData(int degree, bool rational, bool closed, bool perio
 
 // 样条近似为折线（新实体未入库，需 appendEntity）；maxSuggestedPrecision 出参省略
 PyDbCurve PyDbSpline::toPolyline(int precision, unsigned int numOfVerticesThreshold) const {
+	if (!impObj()) return PyDbCurve(nullptr);
 	AcDbCurve* pCurve = nullptr;
 	if (!PyWarnIfError(impObj()->toPolyline(pCurve, precision, nullptr, numOfVerticesThreshold), L"AcDbSpline::toPolyline")) return PyDbCurve(nullptr);
 	return PyDbCurve(pCurve);
 }
 
 PyDbCurve PyDbSpline::toPolylineAs(bool bConvertAsArcs, bool bToLWPolyline, int precision) const {
+	if (!impObj()) return PyDbCurve(nullptr);
 	AcDbCurve* pCurve = nullptr;
 	if (!PyWarnIfError(impObj()->toPolyline(pCurve,
 		bConvertAsArcs ? Adesk::kTrue : Adesk::kFalse,

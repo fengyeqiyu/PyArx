@@ -24,6 +24,7 @@ bool PyDbLine::setThickness(double t) { if (!impObj()) return false; return PyWa
 
 // 按指定平面法向偏移直线，返回新建曲线列表（未入库，需 appendEntity 入库，否则内存泄漏）
 std::vector<PyDbEntity> PyDbLine::getOffsetCurvesGivenPlaneNormal(const AcGeVector3d& nrm, double offsetDist) const {
+	if (!impObj()) return {};
 	std::vector<PyDbEntity> out;
 	AcDbVoidPtrArray arr;
 	if (!impObj() || impObj()->getOffsetCurvesGivenPlaneNormal(nrm, offsetDist, arr) != Acad::eOk) return out;

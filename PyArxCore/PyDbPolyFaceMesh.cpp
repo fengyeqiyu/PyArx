@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbSequenceEnd.h"
 #include "PyDbPolyFaceMesh.h"
@@ -6,6 +6,7 @@
 PyWrapper_Cpp(DbPolyFaceMesh);
 
 PyDbSequenceEnd PyDbPolyFaceMesh::openSequenceEnd(int mode) const {
+	if (!impObj()) return PyDbSequenceEnd(nullptr);
 	AcDbSequenceEnd* p = nullptr;
 	if (!PyWarnIfError(impObj()->openSequenceEnd(p, static_cast<AcDb::OpenMode>(mode)),
 		L"AcDbPolyFaceMesh::openSequenceEnd"))

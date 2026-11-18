@@ -22,9 +22,11 @@ Adesk::Boolean PyGiDrawable::isPersistent(void) const {
 	return impObj()->isPersistent();
 }
 AcDbObjectId    PyGiDrawable::ObjectId(void) const {
+	if (!impObj()) return {};
 	return impObj()->id();
 }
 PyDbExtents3d     PyGiDrawable::bounds() const {
+	if (!impObj()) return {};
 	AcDbExtents bounds;
 	auto res = impObj()->bounds(bounds);
 	if (res == true) {

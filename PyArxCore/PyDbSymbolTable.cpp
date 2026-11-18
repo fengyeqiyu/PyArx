@@ -130,6 +130,7 @@ py::object PyDbSymbolTable::get(const AcString& name, py::object defaultValue) c
 }
 
 std::vector<PyDbSymbolTableRecord> PyDbSymbolTable::toVector() const {
+	if (!impObj()) return {};
 	std::vector<PyDbSymbolTableRecord> out;
 	AcDbSymbolTableIterator* pIter = nullptr;
 	if(!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return {};

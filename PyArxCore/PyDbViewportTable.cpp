@@ -15,6 +15,7 @@ PyDbSymbolTableRecord PyDbViewportTable::getAt(const AcString& name) const {
 }
 
 std::vector<uint64_t> PyDbViewportTable::newIterator(bool atBeginning, bool skipDeleted) const {
+	if (!impObj()) return {};
 	std::vector<uint64_t> out;
 	AcDbViewportTableIterator* pIter = nullptr;
 	if(!PyWarnIfError(impObj()->newIterator(pIter, atBeginning, skipDeleted), L"AcDbViewportTable::newIterator")) return out;

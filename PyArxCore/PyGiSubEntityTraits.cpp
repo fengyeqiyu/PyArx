@@ -71,9 +71,11 @@ void PyGiSubEntityTraits::setSectionable(bool bSectionable) {
 	impObj()->setSectionable(bSectionable);
 }
 Acad::ErrorStatus PyGiSubEntityTraits::setDrawFlags(Adesk::UInt32 flags) {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	return impObj()->setDrawFlags(flags);
 }
 Acad::ErrorStatus PyGiSubEntityTraits::setShadowFlags(AcGiSubEntityTraits::ShadowFlags flags) {
+	if (!impObj()) return Acad::eNullObjectPointer;
 	return impObj()->setShadowFlags(flags);
 }
 void PyGiSubEntityTraits::setSelectionGeom(bool bSelectionflag) {
@@ -96,18 +98,23 @@ Adesk::UInt16 PyGiSubEntityTraits::color(void) const {
 	return impObj()->color();
 }
 AcCmEntityColor PyGiSubEntityTraits::trueColor(void) const {
+	if (!impObj()) return {};
 	return impObj()->trueColor();
 }
 AcDbObjectId PyGiSubEntityTraits::layerId(void) const {
+	if (!impObj()) return {};
 	return impObj()->layerId();
 }
 AcDbObjectId PyGiSubEntityTraits::lineTypeId(void) const {
+	if (!impObj()) return {};
 	return impObj()->lineTypeId();
 }
 AcGiFillType PyGiSubEntityTraits::fillType(void) const {
+	if (!impObj()) return {};
 	return impObj()->fillType();
 }
 AcDb::LineWeight PyGiSubEntityTraits::lineWeight(void) const {
+	if (!impObj()) return {};
 	return impObj()->lineWeight();
 }
 double PyGiSubEntityTraits::lineTypeScale(void) const {
@@ -119,15 +126,19 @@ double PyGiSubEntityTraits::thickness(void) const {
 	return impObj()->thickness();
 }
 AcDbObjectId PyGiSubEntityTraits::visualStyle(void) const {
+	if (!impObj()) return {};
 	return impObj()->visualStyle();
 }
 AcDb::PlotStyleNameType PyGiSubEntityTraits::getPlotStyleNameId(AcDbObjectId& idResult) const {
+	if (!impObj()) return {};
 	return impObj()->getPlotStyleNameId(idResult);
 }
 AcDbObjectId PyGiSubEntityTraits::materialId(void) const {
+	if (!impObj()) return {};
 	return impObj()->materialId();
 }
 std::optional<AcGiMapper> PyGiSubEntityTraits::mapper(void) const {
+	if (!impObj()) return {};
 	const AcGiMapper* p = impObj()->mapper();
 	if (!p) return std::nullopt;
 	return *p;
@@ -141,6 +152,7 @@ Adesk::UInt32 PyGiSubEntityTraits::drawFlags(void) const {
 	return impObj()->drawFlags();
 }
 AcGiSubEntityTraits::ShadowFlags PyGiSubEntityTraits::shadowFlags(void) const {
+	if (!impObj()) return {};
 	return impObj()->shadowFlags();
 }
 bool PyGiSubEntityTraits::selectionGeom(void) const {
@@ -148,6 +160,7 @@ bool PyGiSubEntityTraits::selectionGeom(void) const {
 	return impObj()->selectionGeom();
 }
 AcCmTransparency PyGiSubEntityTraits::transparency(void) const {
+	if (!impObj()) return {};
 	return impObj()->transparency();
 }
 

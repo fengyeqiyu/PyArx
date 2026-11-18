@@ -15,12 +15,14 @@ uint64_t PyDbSectionViewStyle::arrowStartSymbolId() const {
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 }
 std::tuple<int,int,int> PyDbSectionViewStyle::arrowSymbolColor() const {
+	if (!impObj()) return {};
 	AcCmColor c = impObj()->arrowSymbolColor();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
 double PyDbSectionViewStyle::arrowSymbolSize() const { if (!impObj()) return 0.0; return impObj()->arrowSymbolSize(); }
 
 std::tuple<int,int,int> PyDbSectionViewStyle::identifierColor() const {
+	if (!impObj()) return {};
 	AcCmColor c = impObj()->identifierColor();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }

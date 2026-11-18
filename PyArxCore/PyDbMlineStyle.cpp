@@ -44,6 +44,7 @@ int PyDbMlineStyle::addElement(double offset, int r, int g, int b, uint64_t line
 	return idx;
 }
 std::tuple<double, int, int, int, uint64_t> PyDbMlineStyle::getElementAt(int elem) const {
+	if (!impObj()) return {};
 	double offset = 0.0; AcCmColor c; AcDbObjectId ltId;
 	if (!PyWarnIfError(impObj()->getElementAt(elem, offset, c, ltId), L"AcDbMlineStyle::getElementAt"))
 		return std::make_tuple(0.0, 0, 0, 0, 0ULL);
@@ -64,6 +65,7 @@ bool PyDbMlineStyle::setFillColor(int r, int g, int b) {
 	return PyWarnIfError(impObj()->setFillColor(c), L"AcDbMlineStyle::setFillColor");
 }
 std::tuple<int, int, int> PyDbMlineStyle::fillColor() const {
+	if (!impObj()) return {};
 	const AcCmColor& c = impObj()->fillColor();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
