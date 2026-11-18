@@ -6,39 +6,42 @@
 
 PyWrapper_Cpp(DbAttribute)
 AcString PyDbAttribute::toString() const { return AcString(std::format("AcDbAttribute[wrapper]").c_str(), AcString::Utf8); }
-AcString PyDbAttribute::tag() const { AcString s; if(!PyWarnIfError(impObj()->tag(s), L"AcDbAttribute::tag")) return AcString(); return s; }
+AcString PyDbAttribute::tag() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->tag(s), L"AcDbAttribute::tag")) return AcString(); return s; }
 
-bool  PyDbAttribute::setTag(const AcString& t) { return PyWarnIfError(impObj()->setTag(t.kwszPtr()), L"AcDbAttribute::setTag"); }
+bool  PyDbAttribute::setTag(const AcString& t) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTag(t.kwszPtr()), L"AcDbAttribute::setTag"); }
 
-bool PyDbAttribute::isInvisible() const { return impObj()->isInvisible() == Adesk::kTrue; }
+bool PyDbAttribute::isInvisible() const { if (!impObj()) return false; return impObj()->isInvisible() == Adesk::kTrue; }
 
-bool  PyDbAttribute::setInvisible(bool v) { return PyWarnIfError(impObj()->setInvisible(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbAttribute::setInvisible"); }
+bool  PyDbAttribute::setInvisible(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setInvisible(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbAttribute::setInvisible"); }
 
-bool PyDbAttribute::isConstant() const { return impObj()->isConstant() != Adesk::kFalse; }
-bool PyDbAttribute::isVerifiable() const { return impObj()->isVerifiable() != Adesk::kFalse; }
-bool PyDbAttribute::isPreset() const { return impObj()->isPreset() != Adesk::kFalse; }
-int PyDbAttribute::fieldLength() const { return static_cast<int>(impObj()->fieldLength()); }
-bool  PyDbAttribute::setFieldLength(int v) { return PyWarnIfError(impObj()->setFieldLength(static_cast<Adesk::UInt16>(v)), L"AcDbAttribute::setFieldLength"); }
-bool PyDbAttribute::lockPositionInBlock() const { return impObj()->lockPositionInBlock(); }
-bool  PyDbAttribute::setLockPositionInBlock(bool v) { return PyWarnIfError(impObj()->setLockPositionInBlock(v), L"AcDbAttribute::setLockPositionInBlock"); }
-bool PyDbAttribute::isReallyLocked() const { return impObj()->isReallyLocked(); }
+bool PyDbAttribute::isConstant() const { if (!impObj()) return false; return impObj()->isConstant() != Adesk::kFalse; }
+bool PyDbAttribute::isVerifiable() const { if (!impObj()) return false; return impObj()->isVerifiable() != Adesk::kFalse; }
+bool PyDbAttribute::isPreset() const { if (!impObj()) return false; return impObj()->isPreset() != Adesk::kFalse; }
+int PyDbAttribute::fieldLength() const { if (!impObj()) return 0; return static_cast<int>(impObj()->fieldLength()); }
+bool  PyDbAttribute::setFieldLength(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFieldLength(static_cast<Adesk::UInt16>(v)), L"AcDbAttribute::setFieldLength"); }
+bool PyDbAttribute::lockPositionInBlock() const { if (!impObj()) return false; return impObj()->lockPositionInBlock(); }
+bool  PyDbAttribute::setLockPositionInBlock(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLockPositionInBlock(v), L"AcDbAttribute::setLockPositionInBlock"); }
+bool PyDbAttribute::isReallyLocked() const { if (!impObj()) return false; return impObj()->isReallyLocked(); }
 
-bool PyDbAttribute::convertIntoMTextAttribute(bool val) { return PyWarnIfError(impObj()->convertIntoMTextAttribute(val ? Adesk::kTrue : Adesk::kFalse), L"AcDbAttribute::convertIntoMTextAttribute"); }
-bool PyDbAttribute::isMTextAttribute() const { return impObj()->isMTextAttribute(); }
-bool PyDbAttribute::setAttributeFromBlock(const AcGeMatrix3d& blkXform) { return PyWarnIfError(impObj()->setAttributeFromBlock(blkXform), L"AcDbAttribute::setAttributeFromBlock"); }
+bool PyDbAttribute::convertIntoMTextAttribute(bool val) { if (!impObj()) return false; return PyWarnIfError(impObj()->convertIntoMTextAttribute(val ? Adesk::kTrue : Adesk::kFalse), L"AcDbAttribute::convertIntoMTextAttribute"); }
+bool PyDbAttribute::isMTextAttribute() const { if (!impObj()) return false; return impObj()->isMTextAttribute(); }
+bool PyDbAttribute::setAttributeFromBlock(const AcGeMatrix3d& blkXform) { if (!impObj()) return false; return PyWarnIfError(impObj()->setAttributeFromBlock(blkXform), L"AcDbAttribute::setAttributeFromBlock"); }
 bool PyDbAttribute::setAttributeFromBlock(const PyDbAttributeDefinition* pAttdef, const AcGeMatrix3d& blkXform) {
+	if (!impObj()) return false;
 	if (!pAttdef) return false;
 	return PyWarnIfError(impObj()->setAttributeFromBlock(pAttdef->impObj(), blkXform), L"AcDbAttribute::setAttributeFromBlock");
 }
 bool PyDbAttribute::setMTextAttribute(PyDbMText* pMText) {
+	if (!impObj()) return false;
 	if (!pMText) return false;
 	return PyWarnIfError(impObj()->setMTextAttribute(pMText->impObj()), L"AcDbAttribute::setMTextAttribute");
 }
 bool PyDbAttribute::setMTextAttributeConst(const PyDbMText* pMText) {
+	if (!impObj()) return false;
 	if (!pMText) return false;
 	return PyWarnIfError(impObj()->setMTextAttributeConst(pMText->impObj()), L"AcDbAttribute::setMTextAttributeConst");
 }
-bool PyDbAttribute::updateMTextAttribute() { return PyWarnIfError(impObj()->updateMTextAttribute(), L"AcDbAttribute::updateMTextAttribute"); }
+bool PyDbAttribute::updateMTextAttribute() { if (!impObj()) return false; return PyWarnIfError(impObj()->updateMTextAttribute(), L"AcDbAttribute::updateMTextAttribute"); }
 PyDbMText PyDbAttribute::getMTextAttribute() const { return PyDbMText(impObj()->getMTextAttribute()); }
 PyDbMText PyDbAttribute::getMTextAttributeConst() const { return PyDbMText(const_cast<AcDbMText*>(impObj()->getMTextAttributeConst())); }
 

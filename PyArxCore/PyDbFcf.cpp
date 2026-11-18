@@ -8,16 +8,16 @@ AcString PyDbFcf::toString() const { return AcString(std::format("AcDbFcf[wrappe
 AcString PyDbFcf::text(int lineNo) const { AcString s; if (!impObj()) return s; if(!PyWarnIfError(impObj()->text(s, lineNo), L"AcDbFcf::text")) return AcString(); return s; }
 
 bool PyDbFcf::setText(const AcString& s) { if (!impObj()) return false; impObj()->setText(s.kwszPtr()); return true; }
-AcGePoint3d PyDbFcf::location() const { return impObj() ? impObj()->location() : AcGePoint3d(); }
+AcGePoint3d PyDbFcf::location() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->location() : AcGePoint3d(); }
 bool PyDbFcf::setLocation(const AcGePoint3d& p) { if (!impObj()) return false; impObj()->setLocation(p); return true; }
-AcGeVector3d PyDbFcf::normal() const { return impObj() ? impObj()->normal() : AcGeVector3d(); }
-AcGeVector3d PyDbFcf::direction() const { return impObj() ? impObj()->direction() : AcGeVector3d(); }
+AcGeVector3d PyDbFcf::normal() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->normal() : AcGeVector3d(); }
+AcGeVector3d PyDbFcf::direction() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->direction() : AcGeVector3d(); }
 bool PyDbFcf::setOrientation(const AcGeVector3d& n, const AcGeVector3d& d) { if (!impObj()) return false; impObj()->setOrientation(n, d); return true; }
-double PyDbFcf::dimgap() const { return impObj() ? impObj()->dimgap() : 0.0; }
+double PyDbFcf::dimgap() const { if (!impObj()) return 0.0; return impObj() ? impObj()->dimgap() : 0.0; }
 bool  PyDbFcf::setDimgap(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimgap(v), L"AcDbFcf::setDimgap"); }
-double PyDbFcf::dimscale() const { return impObj() ? impObj()->dimscale() : 0.0; }
+double PyDbFcf::dimscale() const { if (!impObj()) return 0.0; return impObj() ? impObj()->dimscale() : 0.0; }
 bool  PyDbFcf::setDimscale(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimscale(v), L"AcDbFcf::setDimscale"); }
-double PyDbFcf::dimtxt() const { return impObj() ? impObj()->dimtxt() : 0.0; }
+double PyDbFcf::dimtxt() const { if (!impObj()) return 0.0; return impObj() ? impObj()->dimtxt() : 0.0; }
 bool  PyDbFcf::setDimtxt(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimtxt(v), L"AcDbFcf::setDimtxt"); }
 bool PyDbFcf::setDimVars() { if (!impObj()) return false; impObj()->setDimVars(); return true; }
 uint64_t PyDbFcf::dimensionStyle() const { if (!impObj()) return 0ULL; auto id = impObj()->dimensionStyle(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); }

@@ -4,27 +4,27 @@
 
 PyWrapper_Cpp(DbArc)
 AcString PyDbArc::toString() const { return AcString(std::format("AcDbArc[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbArc::center() const { return impObj() ? impObj()->center() : AcGePoint3d(); }
+AcGePoint3d PyDbArc::center() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->center() : AcGePoint3d(); }
 
 bool  PyDbArc::setCenter(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setCenter(p), L"AcDbArc::setCenter"); }
 
-double PyDbArc::radius() const { return impObj() ? impObj()->radius() : 0.0; }
+double PyDbArc::radius() const { if (!impObj()) return 0.0; return impObj() ? impObj()->radius() : 0.0; }
 
 bool  PyDbArc::setRadius(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setRadius(r), L"AcDbArc::setRadius"); }
 
-double PyDbArc::startAngle() const { return impObj() ? impObj()->startAngle() : 0.0; }
+double PyDbArc::startAngle() const { if (!impObj()) return 0.0; return impObj() ? impObj()->startAngle() : 0.0; }
 
 bool  PyDbArc::setStartAngle(double a) { if (!impObj()) return false; return PyWarnIfError(impObj()->setStartAngle(a), L"AcDbArc::setStartAngle"); }
 
-double PyDbArc::endAngle() const { return impObj() ? impObj()->endAngle() : 0.0; }
+double PyDbArc::endAngle() const { if (!impObj()) return 0.0; return impObj() ? impObj()->endAngle() : 0.0; }
 
 bool  PyDbArc::setEndAngle(double a) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEndAngle(a), L"AcDbArc::setEndAngle"); }
 
-double PyDbArc::totalAngle() const { return impObj() ? impObj()->totalAngle() : 0.0; }
-double PyDbArc::length() const { return impObj() ? impObj()->length() : 0.0; }
-double PyDbArc::thickness() const { return impObj() ? impObj()->thickness() : 0.0; }
+double PyDbArc::totalAngle() const { if (!impObj()) return 0.0; return impObj() ? impObj()->totalAngle() : 0.0; }
+double PyDbArc::length() const { if (!impObj()) return 0.0; return impObj() ? impObj()->length() : 0.0; }
+double PyDbArc::thickness() const { if (!impObj()) return 0.0; return impObj() ? impObj()->thickness() : 0.0; }
 bool  PyDbArc::setThickness(double t) { if (!impObj()) return false; return PyWarnIfError(impObj()->setThickness(t), L"AcDbArc::setThickness"); }
-AcGeVector3d PyDbArc::normal() const { return impObj() ? impObj()->normal() : AcGeVector3d(); }
+AcGeVector3d PyDbArc::normal() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->normal() : AcGeVector3d(); }
 bool  PyDbArc::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbArc::setNormal"); }
 
 void bind_PyDbArc(pym& m) {

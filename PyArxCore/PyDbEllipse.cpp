@@ -4,38 +4,38 @@
 
 PyWrapper_Cpp(DbEllipse)
 AcString PyDbEllipse::toString() const { return AcString(std::format("AcDbEllipse[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbEllipse::center() const { return impObj() ? impObj()->center() : AcGePoint3d(); }
+AcGePoint3d PyDbEllipse::center() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->center() : AcGePoint3d(); }
 
 bool  PyDbEllipse::setCenter(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setCenter(p), L"AcDbEllipse::setCenter"); }
 
-double PyDbEllipse::majorRadius() const { return impObj() ? impObj()->majorRadius() : 0.0; }
+double PyDbEllipse::majorRadius() const { if (!impObj()) return 0.0; return impObj() ? impObj()->majorRadius() : 0.0; }
 
 bool  PyDbEllipse::setMajorRadius(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setMajorRadius(r), L"AcDbEllipse::setMajorRadius"); }
 
-double PyDbEllipse::minorRadius() const { return impObj() ? impObj()->minorRadius() : 0.0; }
+double PyDbEllipse::minorRadius() const { if (!impObj()) return 0.0; return impObj() ? impObj()->minorRadius() : 0.0; }
 
 bool  PyDbEllipse::setMinorRadius(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setMinorRadius(r), L"AcDbEllipse::setMinorRadius"); }
 
-double PyDbEllipse::radiusRatio() const { return impObj() ? impObj()->radiusRatio() : 0.0; }
+double PyDbEllipse::radiusRatio() const { if (!impObj()) return 0.0; return impObj() ? impObj()->radiusRatio() : 0.0; }
 
 bool  PyDbEllipse::setRadiusRatio(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setRadiusRatio(v), L"AcDbEllipse::setRadiusRatio"); }
 
-double PyDbEllipse::startAngle() const { return impObj() ? impObj()->startAngle() : 0.0; }
+double PyDbEllipse::startAngle() const { if (!impObj()) return 0.0; return impObj() ? impObj()->startAngle() : 0.0; }
 
 bool  PyDbEllipse::setStartAngle(double a) { if (!impObj()) return false; return PyWarnIfError(impObj()->setStartAngle(a), L"AcDbEllipse::setStartAngle"); }
 
-double PyDbEllipse::endAngle() const { return impObj() ? impObj()->endAngle() : 0.0; }
+double PyDbEllipse::endAngle() const { if (!impObj()) return 0.0; return impObj() ? impObj()->endAngle() : 0.0; }
 
 bool  PyDbEllipse::setEndAngle(double a) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEndAngle(a), L"AcDbEllipse::setEndAngle"); }
 
-AcGeVector3d PyDbEllipse::normal() const { return impObj() ? impObj()->normal() : AcGeVector3d(); }
-AcGeVector3d PyDbEllipse::majorAxis() const { return impObj() ? impObj()->majorAxis() : AcGeVector3d(); }
-AcGeVector3d PyDbEllipse::minorAxis() const { return impObj() ? impObj()->minorAxis() : AcGeVector3d(); }
+AcGeVector3d PyDbEllipse::normal() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->normal() : AcGeVector3d(); }
+AcGeVector3d PyDbEllipse::majorAxis() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->majorAxis() : AcGeVector3d(); }
+AcGeVector3d PyDbEllipse::minorAxis() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->minorAxis() : AcGeVector3d(); }
 bool  PyDbEllipse::setStartParam(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setStartParam(v), L"AcDbEllipse::setStartParam"); }
 bool  PyDbEllipse::setEndParam(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEndParam(v), L"AcDbEllipse::setEndParam"); }
-double PyDbEllipse::paramAtAngle(double angle) const { return impObj() ? impObj()->paramAtAngle(angle) : 0.0; }
-double PyDbEllipse::angleAtParam(double param) const { return impObj() ? impObj()->angleAtParam(param) : 0.0; }
-bool PyDbEllipse::isNull() const { return impObj() ? (impObj()->isNull() != Adesk::kFalse) : true; }
+double PyDbEllipse::paramAtAngle(double angle) const { if (!impObj()) return 0.0; return impObj() ? impObj()->paramAtAngle(angle) : 0.0; }
+double PyDbEllipse::angleAtParam(double param) const { if (!impObj()) return 0.0; return impObj() ? impObj()->angleAtParam(param) : 0.0; }
+bool PyDbEllipse::isNull() const { if (!impObj()) return false; return impObj() ? (impObj()->isNull() != Adesk::kFalse) : true; }
 
 std::tuple<AcGePoint3d, AcGeVector3d, AcGeVector3d, double, double, double> PyDbEllipse::get() const {
 	AcGePoint3d center;

@@ -4,11 +4,11 @@
 
 PyWrapper_Cpp(DbUCSTableRecord);
 
-AcGePoint3d PyDbUCSTableRecord::origin() const { return impObj() ? impObj()->origin() : AcGePoint3d(); }
+AcGePoint3d PyDbUCSTableRecord::origin() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->origin() : AcGePoint3d(); }
 bool PyDbUCSTableRecord::setOrigin(const AcGePoint3d& pt) { if (!impObj()) return false; impObj()->setOrigin(pt); return true; }
-AcGeVector3d PyDbUCSTableRecord::xAxis() const { return impObj() ? impObj()->xAxis() : AcGeVector3d(); }
+AcGeVector3d PyDbUCSTableRecord::xAxis() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->xAxis() : AcGeVector3d(); }
 bool PyDbUCSTableRecord::setXAxis(const AcGeVector3d& v) { if (!impObj()) return false; impObj()->setXAxis(v); return true; }
-AcGeVector3d PyDbUCSTableRecord::yAxis() const { return impObj() ? impObj()->yAxis() : AcGeVector3d(); }
+AcGeVector3d PyDbUCSTableRecord::yAxis() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->yAxis() : AcGeVector3d(); }
 bool PyDbUCSTableRecord::setYAxis(const AcGeVector3d& v) { if (!impObj()) return false; impObj()->setYAxis(v); return true; }
 
 AcGePoint3d PyDbUCSTableRecord::ucsBaseOrigin(int view) const {

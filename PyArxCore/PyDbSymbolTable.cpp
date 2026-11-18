@@ -37,6 +37,7 @@ PyDbSymbolTableRecord PyDbSymbolTable::getAt(const AcString& name, int mode) con
 }
 
 py::dict PyDbSymbolTable::toDict() const {
+	if (!impObj()) return py::dict();
 	py::dict out;
 	AcDbSymbolTableIterator* pIter = nullptr;
 	if(!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return py::dict();
@@ -58,6 +59,7 @@ py::dict PyDbSymbolTable::toDict() const {
 }
 
 py::list PyDbSymbolTable::names() const {
+	if (!impObj()) return py::list();
 	py::list out;
 	AcDbSymbolTableIterator* pIter = nullptr;
 	if(!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return py::list();
@@ -74,6 +76,7 @@ py::list PyDbSymbolTable::names() const {
 }
 
 py::list PyDbSymbolTable::records(int mode) const {
+	if (!impObj()) return py::list();
 	(void)mode;
 	py::list out;
 	AcDbSymbolTableIterator* pIter = nullptr;
@@ -98,6 +101,7 @@ py::list PyDbSymbolTable::values(int mode) const {
 }
 
 py::list PyDbSymbolTable::items(int mode) const {
+	if (!impObj()) return py::list();
 	(void)mode;
 	py::list out;
 	AcDbSymbolTableIterator* pIter = nullptr;
@@ -140,6 +144,7 @@ std::vector<PyDbSymbolTableRecord> PyDbSymbolTable::toVector() const {
 }
 
 int PyDbSymbolTable::numRecords() const {
+	if (!impObj()) return 0;
 	AcDbSymbolTableIterator* pIter = nullptr;
 	if(!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return 0;
 	int n = 0;
@@ -150,12 +155,14 @@ int PyDbSymbolTable::numRecords() const {
 }
 
 uint64_t PyDbSymbolTable::getIdAt(const AcString& name) const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id;
 	if (!PyWarnIfError(impObj()->getIdAt(name.kwszPtr(), id), L"SymbolTable.getIdAt")) return 0ULL;
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 }
 
 bool PyDbSymbolTable::add(PyDbSymbolTableRecord& rec) {
+	if (!impObj()) return false;
 	// 与实体入库同源的问题：裸 add() 不 close 记录时，记录保持写打开，
 	// 之后 getAt(kForRead) 返回空包装、keys()/records() 迭代静默返回空列表
 	//（实测：同一会话内新图层按名读不到，重启后被丢弃的旧记录才会消失）。

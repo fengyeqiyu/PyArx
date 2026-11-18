@@ -10,7 +10,7 @@
 
 PyWrapper_Cpp(DbPolyline)
 AcString PyDbPolyline::toString() const { return AcString(std::format("AcDbPolyline[wrapper]").c_str(), AcString::Utf8); }
-unsigned int PyDbPolyline::numVerts() const { return impObj() ? impObj()->numVerts() : 0; }
+unsigned int PyDbPolyline::numVerts() const { if (!impObj()) return 0; return impObj() ? impObj()->numVerts() : 0; }
 
 // 顶点索引边界校验（根因修复）：SDK 对越界索引不报错或返回默认值，
 // 旧封装直接透传，空表读点/读凸度得到伪造的原点与 0。
@@ -24,30 +24,36 @@ static bool plReadIndexOk(const AcDbPolyline* p, unsigned int i) {
 }
 
 AcGePoint2d PyDbPolyline::getPointAt(unsigned int i) const {
+	if (!impObj()) return AcGePoint2d();
 	if (!plReadIndexOk(impObj(), i)) return AcGePoint2d();
 	AcGePoint2d pt; if(!PyWarnIfError(impObj()->getPointAt(i, pt), L"AcDbPolyline::getPointAt")) return AcGePoint2d(); return pt;
 }
 
 bool  PyDbPolyline::setPointAt(unsigned int i, const AcGePoint2d& pt) {
+	if (!impObj()) return false;
 	if (!plReadIndexOk(impObj(), i)) return false;
 	return PyWarnIfError(impObj()->setPointAt(i, pt), L"AcDbPolyline::setPointAt");
 }
 
-void PyDbPolyline::setClosed(bool c) { impObj()->setClosed(c ? Adesk::kTrue : Adesk::kFalse); }
+void PyDbPolyline::setClosed(bool c) { if (!impObj()) return; impObj()->setClosed(c ? Adesk::kTrue : Adesk::kFalse); }
 
 double PyDbPolyline::getBulgeAt(unsigned int i) const {
+	if (!impObj()) return 0.0;
 	if (!plReadIndexOk(impObj(), i)) return 0.0;
 	double v = 0.0; if(!PyWarnIfError(impObj()->getBulgeAt(i, v), L"AcDbPolyline::getBulgeAt")) return 0.0; return v;
 }
 bool  PyDbPolyline::setBulgeAt(unsigned int i, double b) {
+	if (!impObj()) return false;
 	if (!plReadIndexOk(impObj(), i)) return false;
 	return PyWarnIfError(impObj()->setBulgeAt(i, b), L"AcDbPolyline::setBulgeAt");
 }
 py::tuple PyDbPolyline::getWidthsAt(unsigned int i) const {
+	if (!impObj()) return py::tuple();
 	if (!plReadIndexOk(impObj(), i)) return py::make_tuple(0.0, 0.0);
 	double s = 0.0, e = 0.0; if(!PyWarnIfError(impObj()->getWidthsAt(i, s, e), L"AcDbPolyline::getWidthsAt")) return py::tuple(); return py::make_tuple(s, e);
 }
 bool  PyDbPolyline::setWidthsAt(unsigned int i, double sw, double ew) {
+	if (!impObj()) return false;
 	if (!plReadIndexOk(impObj(), i)) return false;
 	return PyWarnIfError(impObj()->setWidthsAt(i, sw, ew), L"AcDbPolyline::setWidthsAt");
 }
@@ -62,25 +68,27 @@ bool  PyDbPolyline::addVertexAt(unsigned int i, const AcGePoint2d& pt, double bu
 	return PyWarnIfError(p->addVertexAt(i, pt, bulge, sw, ew), L"AcDbPolyline::addVertexAt");
 }
 bool  PyDbPolyline::removeVertexAt(unsigned int i) {
+	if (!impObj()) return false;
 	if (!plReadIndexOk(impObj(), i)) return false;
 	return PyWarnIfError(impObj()->removeVertexAt(i), L"AcDbPolyline::removeVertexAt");
 }
 
-double PyDbPolyline::elevation() const { return impObj()->elevation(); }
-void PyDbPolyline::setElevation(double v) { impObj()->setElevation(v); }
-double PyDbPolyline::thickness() const { return impObj()->thickness(); }
-bool  PyDbPolyline::setThickness(double v) { return PyWarnIfError(impObj()->setThickness(v), L"AcDbPolyline::setThickness"); }
-double PyDbPolyline::constantWidth() const { double v = 0.0; if(!PyWarnIfError(impObj()->getConstantWidth(v), L"AcDbPolyline::getConstantWidth")) return 0.0; return v; }
-bool  PyDbPolyline::setConstantWidth(double v) { return PyWarnIfError(impObj()->setConstantWidth(v), L"AcDbPolyline::setConstantWidth"); }
-AcGeVector3d PyDbPolyline::normal() const { return impObj()->normal(); }
-bool  PyDbPolyline::setNormal(const AcGeVector3d& n) { return PyWarnIfError(impObj()->setNormal(n), L"AcDbPolyline::setNormal"); }
-void PyDbPolyline::setPlinegen(bool on) { impObj()->setPlinegen(on ? Adesk::kTrue : Adesk::kFalse); }
-bool PyDbPolyline::hasBulges() const { return impObj()->hasBulges() != Adesk::kFalse; }
-bool PyDbPolyline::hasWidth() const { return impObj()->hasWidth() != Adesk::kFalse; }
-bool PyDbPolyline::hasPlinegen() const { return impObj()->hasPlinegen() != Adesk::kFalse; }
-bool PyDbPolyline::isOnlyLines() const { return impObj()->isOnlyLines() != Adesk::kFalse; }
-bool PyDbPolyline::hasVertexIdentifiers() const { return impObj()->hasVertexIdentifiers() != Adesk::kFalse; }
+double PyDbPolyline::elevation() const { if (!impObj()) return 0.0; return impObj()->elevation(); }
+void PyDbPolyline::setElevation(double v) { if (!impObj()) return; impObj()->setElevation(v); }
+double PyDbPolyline::thickness() const { if (!impObj()) return 0.0; return impObj()->thickness(); }
+bool  PyDbPolyline::setThickness(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setThickness(v), L"AcDbPolyline::setThickness"); }
+double PyDbPolyline::constantWidth() const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->getConstantWidth(v), L"AcDbPolyline::getConstantWidth")) return 0.0; return v; }
+bool  PyDbPolyline::setConstantWidth(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setConstantWidth(v), L"AcDbPolyline::setConstantWidth"); }
+AcGeVector3d PyDbPolyline::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
+bool  PyDbPolyline::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbPolyline::setNormal"); }
+void PyDbPolyline::setPlinegen(bool on) { if (!impObj()) return; impObj()->setPlinegen(on ? Adesk::kTrue : Adesk::kFalse); }
+bool PyDbPolyline::hasBulges() const { if (!impObj()) return false; return impObj()->hasBulges() != Adesk::kFalse; }
+bool PyDbPolyline::hasWidth() const { if (!impObj()) return false; return impObj()->hasWidth() != Adesk::kFalse; }
+bool PyDbPolyline::hasPlinegen() const { if (!impObj()) return false; return impObj()->hasPlinegen() != Adesk::kFalse; }
+bool PyDbPolyline::isOnlyLines() const { if (!impObj()) return false; return impObj()->isOnlyLines() != Adesk::kFalse; }
+bool PyDbPolyline::hasVertexIdentifiers() const { if (!impObj()) return false; return impObj()->hasVertexIdentifiers() != Adesk::kFalse; }
 int PyDbPolyline::segType(unsigned int index) const {
+	if (!impObj()) return 0;
 	if (!plReadIndexOk(impObj(), index)) return -1;
 	return static_cast<int>(impObj()->segType(index));
 }
@@ -101,16 +109,19 @@ std::tuple<bool, double> PyDbPolyline::onSegAt(unsigned int index, const AcGePoi
 }
 
 void PyDbPolyline::reset(bool reuse, unsigned int numVerts) {
+	if (!impObj()) return;
 	impObj()->reset(reuse ? Adesk::kTrue : Adesk::kFalse, numVerts);
 }
 
 bool PyDbPolyline::makeClosedIfStartAndEndVertexCoincide(double distTol) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->makeClosedIfStartAndEndVertexCoincide(distTol), L"AcDbPolyline::makeClosedIfStartAndEndVertexCoincide");
 }
 
 // 由 AcDb2dPolyline(或兼容实体) 填充本多段线。调用前本对象应尚未驻留数据库；
 // transferId=true 成功后源实体被删除并置空，本对象接管其 ObjectId/句柄，源包装不可再用。
 bool PyDbPolyline::convertFrom(const PyDbEntity& src, bool transferId) {
+	if (!impObj()) return false;
 	AcDbEntity* pSrc = src.impObj();
 	return PyWarnIfError(impObj()->convertFrom(pSrc, transferId ? Adesk::kTrue : Adesk::kFalse), L"AcDbPolyline::convertFrom");
 }

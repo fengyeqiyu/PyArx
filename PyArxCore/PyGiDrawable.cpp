@@ -18,6 +18,7 @@ PyWrapper_Cpp(GiDrawable)
 
 
 Adesk::Boolean PyGiDrawable::isPersistent(void) const {
+	if (!impObj()) return Adesk::kFalse;
 	return impObj()->isPersistent();
 }
 AcDbObjectId    PyGiDrawable::ObjectId(void) const {
@@ -33,6 +34,7 @@ PyDbExtents3d     PyGiDrawable::bounds() const {
 }
 
 bool PyGiDrawable::bounds(AcDbExtents& bounds) const {
+	if (!impObj()) return false;
 	return impObj()->bounds(bounds);
 }
 AcGiDrawable::DrawableType  PyGiDrawable::drawableType(void) const {
@@ -80,5 +82,6 @@ Adesk::UInt32 PyGiDrawable::subSetAttributes(PyGiDrawableTraits& traits)
 }
 
 Adesk::Boolean  PyGiDrawable::rolloverHit(Adesk::ULongPtr nSubentId, Adesk::ULongPtr nMouseFlags, Adesk::Boolean bReset) {
+	if (!impObj()) return Adesk::kFalse;
 	return impObj()->rolloverHit(nSubentId, nMouseFlags, bReset);
 }

@@ -8,17 +8,18 @@
 
 PyWrapper_Cpp(DbBlockReference)
 AcString PyDbBlockReference::toString() const { return AcString(std::format("AcDbBlockReference[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbBlockReference::position() const { return impObj()->position(); }
+AcGePoint3d PyDbBlockReference::position() const { if (!impObj()) return AcGePoint3d(); return impObj()->position(); }
 
-bool  PyDbBlockReference::setPosition(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setPosition(p), L"AcDbBlockReference::setPosition"); }
+bool  PyDbBlockReference::setPosition(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPosition(p), L"AcDbBlockReference::setPosition"); }
 
-double PyDbBlockReference::rotation() const { return impObj()->rotation(); }
+double PyDbBlockReference::rotation() const { if (!impObj()) return 0.0; return impObj()->rotation(); }
 
-bool  PyDbBlockReference::setRotation(double r) { return PyWarnIfError(impObj()->setRotation(r), L"AcDbBlockReference::setRotation"); }
+bool  PyDbBlockReference::setRotation(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setRotation(r), L"AcDbBlockReference::setRotation"); }
 
-uint64_t PyDbBlockReference::blockTableRecordId() const { return static_cast<uint64_t>(impObj()->blockTableRecord().asOldId()); }
+uint64_t PyDbBlockReference::blockTableRecordId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->blockTableRecord().asOldId()); }
 
 bool  PyDbBlockReference::setBlockTableRecord(uint64_t blockRecordId) {
+	if (!impObj()) return false;
 	// 防御：id 为 0 时立刻抛可读错误，避免后续入库触发 ARX 致命断言 eWrongDatabase。
 	if (blockRecordId == 0)
 		throw std::runtime_error("setBlockTableRecord: blockRecordId 无效(0)，"
@@ -30,7 +31,7 @@ bool  PyDbBlockReference::setBlockTableRecord(uint64_t blockRecordId) {
 
 AcGeScale3d PyDbBlockReference::scaleFactors() const { return impObj()->scaleFactors(); }
 
-bool  PyDbBlockReference::setScaleFactors(const AcGeScale3d& s) { return PyWarnIfError(impObj()->setScaleFactors(s), L"AcDbBlockReference::setScaleFactors"); }
+bool  PyDbBlockReference::setScaleFactors(const AcGeScale3d& s) { if (!impObj()) return false; return PyWarnIfError(impObj()->setScaleFactors(s), L"AcDbBlockReference::setScaleFactors"); }
 
 AcGeScale3d PyDbBlockReference::nonAnnotationScaleFactors() const { return impObj()->nonAnnotationScaleFactors(); }
 
@@ -38,13 +39,13 @@ AcGeMatrix3d PyDbBlockReference::blockTransform() const { return impObj()->block
 
 AcGeMatrix3d PyDbBlockReference::nonAnnotationBlockTransform() const { return impObj()->nonAnnotationBlockTransform(); }
 
-AcGeVector3d PyDbBlockReference::normal() const { return impObj()->normal(); }
+AcGeVector3d PyDbBlockReference::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
 
-bool  PyDbBlockReference::setNormal(const AcGeVector3d& n) { return PyWarnIfError(impObj()->setNormal(n), L"AcDbBlockReference::setNormal"); }
+bool  PyDbBlockReference::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbBlockReference::setNormal"); }
 
-bool PyDbBlockReference::treatAsAcDbBlockRefForExplode() const { return impObj()->treatAsAcDbBlockRefForExplode() != Adesk::kFalse; }
+bool PyDbBlockReference::treatAsAcDbBlockRefForExplode() const { if (!impObj()) return false; return impObj()->treatAsAcDbBlockRefForExplode() != Adesk::kFalse; }
 
-bool  PyDbBlockReference::explodeToOwnerSpace() const { return PyWarnIfError(impObj()->explodeToOwnerSpace(), L"AcDbBlockReference::explodeToOwnerSpace"); }
+bool  PyDbBlockReference::explodeToOwnerSpace() const { if (!impObj()) return false; return PyWarnIfError(impObj()->explodeToOwnerSpace(), L"AcDbBlockReference::explodeToOwnerSpace"); }
 
 std::tuple<AcGePoint3d, AcGePoint3d> PyDbBlockReference::geomExtentsBestFit(const AcGeMatrix3d& parentXform) const {
 	AcDbExtents ext;
@@ -54,6 +55,7 @@ std::tuple<AcGePoint3d, AcGePoint3d> PyDbBlockReference::geomExtentsBestFit(cons
 }
 
 bool  PyDbBlockReference::setBlockTransform(const AcGeMatrix3d& xform) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setBlockTransform(xform), L"AcDbBlockReference::setBlockTransform");
 }
 
@@ -64,7 +66,7 @@ std::tuple<AcGePlane, int> PyDbBlockReference::getPlane() const {
 	return std::make_tuple(plane, static_cast<int>(type));
 }
 
-bool PyDbBlockReference::isPlanar() const { return impObj()->isPlanar() != Adesk::kFalse; }
+bool PyDbBlockReference::isPlanar() const { if (!impObj()) return false; return impObj()->isPlanar() != Adesk::kFalse; }
 
 PyDbAttribute PyDbBlockReference::openAttribute(uint64_t attId, AcDb::OpenMode mode, bool openErasedOne) const {
 	AcDbAttribute* pAttr = nullptr;
@@ -76,6 +78,7 @@ PyDbAttribute PyDbBlockReference::openAttribute(uint64_t attId, AcDb::OpenMode m
 }
 
 int PyDbBlockReference::attributeCount() const {
+	if (!impObj()) return 0;
 	AcDbObjectIterator* it = impObj() ? impObj()->attributeIterator() : nullptr;
 	if (!it) return -1;
 	int n = 0;

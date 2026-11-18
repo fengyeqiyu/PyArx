@@ -15,6 +15,7 @@ PyDbSymbolTableRecord PyDbRegAppTable::getAt(const AcString& name) const {
 }
 
 uint64_t PyDbRegAppTable::addReturnId(PyDbSymbolTableRecord& rec) {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id;
 	if (!PyWarnIfError(impObj()->add(id, static_cast<AcDbRegAppTableRecord*>(rec.impObj())), L"RegAppTable.addReturnId")) return 0ULL;
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());

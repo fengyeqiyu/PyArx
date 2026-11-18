@@ -4,18 +4,21 @@
 
 PyWrapper_Cpp(DbEntity)
 
-unsigned short PyDbEntity::colorIndex() const { return impObj()->colorIndex(); }
+unsigned short PyDbEntity::colorIndex() const { if (!impObj()) return 0; return impObj()->colorIndex(); }
 bool  PyDbEntity::setColorIndex(unsigned short colorIndex, bool doSubents) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setColorIndex(static_cast<Adesk::UInt16>(colorIndex), doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setColorIndex");
 }
 
-AcString PyDbEntity::layer() const { AcString s; if(!PyWarnIfError(impObj()->layer(s), L"AcDbEntity::layer")) return AcString(); return s; }
-uint64_t PyDbEntity::layerId() const { return static_cast<uint64_t>(impObj()->layerId().asOldId()); }
+AcString PyDbEntity::layer() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->layer(s), L"AcDbEntity::layer")) return AcString(); return s; }
+uint64_t PyDbEntity::layerId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->layerId().asOldId()); }
 bool  PyDbEntity::setLayer(const AcString& name, bool doSubents) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setLayer(name.kwszPtr(), doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setLayer");
 }
 
 bool  PyDbEntity::setLayerId(uint64_t layerId, bool doSubents) {
+	if (!impObj()) return false;
 	// 与 setBlockTableRecord / openAttribute 一致：Python 侧用 oldId(uint64) 表示
 	// 对象 ID，这里还原成 AcDbObjectId 走 id 版 setLayer，绕开字符串转换。
 	if (layerId == 0) {
@@ -28,38 +31,45 @@ bool  PyDbEntity::setLayerId(uint64_t layerId, bool doSubents) {
 		L"AcDbEntity::setLayer(id)");
 }
 
-AcString PyDbEntity::linetype() const { AcString s; if(!PyWarnIfError(impObj()->linetype(s), L"AcDbEntity::linetype")) return AcString(); return s; }
-uint64_t PyDbEntity::linetypeId() const { return static_cast<uint64_t>(impObj()->linetypeId().asOldId()); }
+AcString PyDbEntity::linetype() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->linetype(s), L"AcDbEntity::linetype")) return AcString(); return s; }
+uint64_t PyDbEntity::linetypeId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->linetypeId().asOldId()); }
 bool  PyDbEntity::setLinetype(const AcString& name, bool doSubents) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setLinetype(name.kwszPtr(), doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setLinetype");
 }
 
-int PyDbEntity::lineWeight() const { return static_cast<int>(impObj()->lineWeight()); }
+int PyDbEntity::lineWeight() const { if (!impObj()) return 0; return static_cast<int>(impObj()->lineWeight()); }
 bool  PyDbEntity::setLineWeight(int newVal, bool doSubents) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setLineWeight(static_cast<AcDb::LineWeight>(newVal), doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setLineWeight");
 }
 
-int PyDbEntity::visibility() const { return static_cast<int>(impObj()->visibility()); }
+int PyDbEntity::visibility() const { if (!impObj()) return 0; return static_cast<int>(impObj()->visibility()); }
 bool  PyDbEntity::setVisibility(int newVal, bool doSubents) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setVisibility(static_cast<AcDb::Visibility>(newVal), doSubents), L"AcDbEntity::setVisibility");
 }
 
-double PyDbEntity::linetypeScale() const { return impObj()->linetypeScale(); }
+double PyDbEntity::linetypeScale() const { if (!impObj()) return 0.0; return impObj()->linetypeScale(); }
 bool  PyDbEntity::setLinetypeScale(double newval, bool doSubents) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setLinetypeScale(newval, doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setLinetypeScale");
 }
 
 py::object PyDbEntity::getGeomExtents() const {
+	if (!impObj()) return py::object();
 	AcDbExtents ext;
 	if(!PyWarnIfError(impObj()->getGeomExtents(ext), L"AcDbEntity::getGeomExtents")) return py::none();
 	return py::make_tuple(ext.minPoint(), ext.maxPoint());
 }
 
 bool  PyDbEntity::transformBy(const AcGeMatrix3d& xform) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->transformBy(xform), L"AcDbEntity::transformBy");
 }
 
 py::list PyDbEntity::intersectWith(const PyDbEntity& other, int intType) const {
+	if (!impObj()) return py::list();
 	py::list out;
 	AcGePoint3dArray pts;
 	if(!PyWarnIfError(impObj()->intersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), pts), L"AcDbEntity::intersectWith")) return out;
@@ -72,6 +82,7 @@ PyColor PyDbEntity::color() const {
 	return PyColor(impObj()->color());
 }
 bool PyDbEntity::setColor(const PyColor& color, bool doSubents) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setColor(color.m_color, doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setColor");
 }
 std::tuple<int,int,int> PyDbEntity::entityColor() const {
@@ -82,8 +93,9 @@ std::tuple<int,int,int> PyDbEntity::colorRGB() const {
 	AcCmColor c = impObj()->color();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
-int  PyDbEntity::transparency() const { return (int)impObj()->transparency().alpha(); }
+int  PyDbEntity::transparency() const { if (!impObj()) return 0; return (int)impObj()->transparency().alpha(); }
 bool PyDbEntity::setTransparency(int alpha, bool doSubents) {
+	if (!impObj()) return false;
 	AcCmTransparency t(static_cast<Adesk::UInt8>(alpha));
 	return PyWarnIfError(impObj()->setTransparency(t, doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setTransparency");
 }
@@ -101,50 +113,55 @@ std::tuple<AcGePlane,int> PyDbEntity::getPlane() const {
 	if(!PyWarnIfError(impObj()->getPlane(pl, pa), L"AcDbEntity::getPlane")) return std::make_tuple(AcGePlane(), (int)-1);
 	return std::make_tuple(pl, (int)pa);
 }
-bool PyDbEntity::isPlanar() const { return impObj()->isPlanar() != Adesk::kFalse; }
-bool PyDbEntity::isContentSnappable() const { return impObj()->isContentSnappable(); }
+bool PyDbEntity::isPlanar() const { if (!impObj()) return false; return impObj()->isPlanar() != Adesk::kFalse; }
+bool PyDbEntity::isContentSnappable() const { if (!impObj()) return false; return impObj()->isContentSnappable(); }
 
 // ---- 材质 ----
-AcString PyDbEntity::material() const { AcString s; if(!PyWarnIfError(impObj()->material(s), L"AcDbEntity::material")) return AcString(); return s; }
-uint64_t PyDbEntity::materialId() const { return static_cast<uint64_t>(impObj()->materialId().asOldId()); }
+AcString PyDbEntity::material() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->material(s), L"AcDbEntity::material")) return AcString(); return s; }
+uint64_t PyDbEntity::materialId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->materialId().asOldId()); }
 bool  PyDbEntity::setMaterial(const AcString& name, bool doSubents) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setMaterial(name.kwszPtr(), doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setMaterial");
 }
 
 // ---- 数据库默认值 / 属性复制 ----
-void PyDbEntity::setDatabaseDefaults() { impObj()->setDatabaseDefaults(); }
+void PyDbEntity::setDatabaseDefaults() { if (!impObj()) return; impObj()->setDatabaseDefaults(); }
 bool PyDbEntity::setPropertiesFrom(const PyDbEntity& src, bool doSubents) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setPropertiesFrom(src.impObj(), doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setPropertiesFrom");
 }
 
 // ---- 阴影 ----
-bool PyDbEntity::castShadows() const { return impObj()->castShadows(); }
-bool PyDbEntity::setCastShadows(bool newVal) { impObj()->setCastShadows(newVal); return true; }
-bool PyDbEntity::receiveShadows() const { return impObj()->receiveShadows(); }
-bool PyDbEntity::setReceiveShadows(bool newVal) { impObj()->setReceiveShadows(newVal); return true; }
+bool PyDbEntity::castShadows() const { if (!impObj()) return false; return impObj()->castShadows(); }
+bool PyDbEntity::setCastShadows(bool newVal) { if (!impObj()) return false; impObj()->setCastShadows(newVal); return true; }
+bool PyDbEntity::receiveShadows() const { if (!impObj()) return false; return impObj()->receiveShadows(); }
+bool PyDbEntity::setReceiveShadows(bool newVal) { if (!impObj()) return false; impObj()->setReceiveShadows(newVal); return true; }
 
 // ---- 其它显示 / 图形状态 ----
-int  PyDbEntity::collisionType() const { return static_cast<int>(impObj()->collisionType()); }
-void PyDbEntity::recordGraphicsModified(bool setModified) { impObj()->recordGraphicsModified(setModified ? Adesk::kTrue : Adesk::kFalse); }
-uint64_t PyDbEntity::visualStyleId() const { return static_cast<uint64_t>(impObj()->visualStyleId().asOldId()); }
+int  PyDbEntity::collisionType() const { if (!impObj()) return 0; return static_cast<int>(impObj()->collisionType()); }
+void PyDbEntity::recordGraphicsModified(bool setModified) { if (!impObj()) return; impObj()->recordGraphicsModified(setModified ? Adesk::kTrue : Adesk::kFalse); }
+uint64_t PyDbEntity::visualStyleId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->visualStyleId().asOldId()); }
 bool PyDbEntity::setVisualStyle(uint64_t visualStyleId, bool doSubents) {
+	if (!impObj()) return false;
 	AcDbObjectId oid; oid.setFromOldId(static_cast<Adesk::IntDbId>(visualStyleId));
 	return PyWarnIfError(impObj()->setVisualStyle(oid, AcDbEntity::kFullVisualStyle, doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setVisualStyle");
 }
-uint64_t PyDbEntity::blockId() const { return static_cast<uint64_t>(impObj()->blockId().asOldId()); }
+uint64_t PyDbEntity::blockId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->blockId().asOldId()); }
 AcGeMatrix3d PyDbEntity::getEcs() const { AcGeMatrix3d m; impObj()->getEcs(m); return m; }
 
 // ---- 打印样式 ----
-AcString PyDbEntity::plotStyleName() const { AcString s; impObj()->plotStyleName(s); return s; }
+AcString PyDbEntity::plotStyleName() const { if (!impObj()) return AcString(); AcString s; impObj()->plotStyleName(s); return s; }
 bool PyDbEntity::setPlotStyleName(const AcString& name) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setPlotStyleName(name.kwszPtr()), L"AcDbEntity::setPlotStyleName");
 }
 
 // ---- 其它 ----
-void PyDbEntity::list() const { impObj()->list(); }
-void PyDbEntity::draw() const { impObj()->draw(); }
+void PyDbEntity::list() const { if (!impObj()) return; impObj()->list(); }
+void PyDbEntity::draw() const { if (!impObj()) return; impObj()->draw(); }
 
 py::tuple PyDbEntity::getGripPoints() const {
+	if (!impObj()) return py::tuple();
 	AcGePoint3dArray gripPoints;
 	AcDbIntArray osnapModes, geomIds;
 	impObj()->getGripPoints(gripPoints, osnapModes, geomIds);
@@ -156,6 +173,7 @@ py::tuple PyDbEntity::getGripPoints() const {
 }
 
 void PyDbEntity::moveGripPointsAt(const std::vector<int>& indices, const AcGeVector3d& offset) {
+	if (!impObj()) return;
 	AcDbIntArray idx;
 	for (int i : indices) idx.append(i);
 	impObj()->moveGripPointsAt(idx, offset);
@@ -163,17 +181,20 @@ void PyDbEntity::moveGripPointsAt(const std::vector<int>& indices, const AcGeVec
 
 // --- 高亮 ---
 bool PyDbEntity::pushHighlight(int style) {
+	if (!impObj()) return false;
 	AcDbFullSubentPath path;
 	return impObj()->highlight(path, Adesk::kTrue) == Acad::eOk;
 }
 
 bool PyDbEntity::popHighlight() {
+	if (!impObj()) return false;
 	AcDbFullSubentPath path;
 	return impObj()->highlight(path, Adesk::kFalse) == Acad::eOk;
 }
 
 // --- 拉伸点 ---
 py::tuple PyDbEntity::getStretchPoints() const {
+	if (!impObj()) return py::tuple();
 	AcGePoint3dArray pts;
 	if (impObj()->getStretchPoints(pts) != Acad::eOk) return py::make_tuple(py::list());
 	py::list out;
@@ -182,6 +203,7 @@ py::tuple PyDbEntity::getStretchPoints() const {
 }
 
 void PyDbEntity::moveStretchPointsAt(const std::vector<int>& indices, const AcGeVector3d& offset) {
+	if (!impObj()) return;
 	AcDbIntArray idx;
 	for (int i : indices) idx.append(i);
 	impObj()->moveStretchPointsAt(idx, offset);

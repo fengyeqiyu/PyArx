@@ -4,7 +4,7 @@
 
 PyWrapper_Cpp(DbVisualStyle);
 
-int PyDbVisualStyle::type() const { return impObj() ? (int)impObj()->type() : 0; }
+int PyDbVisualStyle::type() const { if (!impObj()) return 0; return impObj() ? (int)impObj()->type() : 0; }
 bool PyDbVisualStyle::setType(int type) {
 	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setType(static_cast<AcGiVisualStyle::Type>(type)), L"AcDbVisualStyle::setType");

@@ -105,6 +105,7 @@ Acad::ErrorStatus PyDbObject::deepClone(PyDbObject*, PyDbObject*&, AcDbIdMapping
 	return Acad::eNotImplementedYet;
 }
 bool PyDbObject::disableUndoRecording(bool disable) {
+	if (!impObj()) return false;
 	impObj()->disableUndoRecording(disable);
 	return true;
 }
@@ -123,8 +124,9 @@ Acad::ErrorStatus	PyDbObject::dxfOutFields(AcDbDxfFiler*)const { return Acad::eN
 Acad::ErrorStatus	PyDbObject::erase(bool eraseIt) { return impObj()->erase(eraseIt); }
 void	PyDbObject::erased(PyDbObject	const*, bool) {}
 AcDbObjectId	PyDbObject::extensionDictionary(void)const { return impObj()->extensionDictionary(); }
-void	PyDbObject::getAcDbHandle(AcDbHandle& h)const { impObj()->getAcDbHandle(h); }
+void	PyDbObject::getAcDbHandle(AcDbHandle& h)const { if (!impObj()) return; impObj()->getAcDbHandle(h); }
 Adesk::UInt64	PyDbObject::handle(void)const {
+	if (!impObj()) return 0ULL;
 	AcDbHandle h; impObj()->getAcDbHandle(h);
 	return h.isNull() ? 0ULL : static_cast<Adesk::UInt64>(h.get64BitVal());
 }
@@ -137,30 +139,30 @@ Acad::ErrorStatus	PyDbObject::getFieldDictionary(AcDbDictionary*& pFieldDict, Ac
 Acad::ErrorStatus	PyDbObject::getObjectBirthVersion(AcDb::AcDbDwgVersion& ver, AcDb::MaintenanceReleaseVersion& maintVer) { return impObj()->getObjectBirthVersion(ver, maintVer); }
 Acad::ErrorStatus	PyDbObject::getObjectSaveVersion(AcDbDwgFiler const* pFiler, AcDb::AcDbDwgVersion& ver, AcDb::MaintenanceReleaseVersion& maintVer) { return impObj()->getObjectSaveVersion(pFiler, ver, maintVer); }
 Acad::ErrorStatus	PyDbObject::getObjectSaveVersion(AcDbDxfFiler const* pFiler, AcDb::AcDbDwgVersion& ver, AcDb::MaintenanceReleaseVersion& maintVer) { return impObj()->getObjectSaveVersion(pFiler, ver, maintVer); }
-void	PyDbObject::goodbye(PyDbObject const* dbObj) { impObj()->goodbye(static_cast<const AcDbObject*>(dbObj->impObj())); }
+void	PyDbObject::goodbye(PyDbObject const* dbObj) { if (!impObj()) return; impObj()->goodbye(static_cast<const AcDbObject*>(dbObj->impObj())); }
 Acad::ErrorStatus	PyDbObject::handOverTo(PyDbObject* newObj, Adesk::Boolean keepObj, Adesk::Boolean eraseIt) { return impObj()->handOverTo(newObj->impObj(), keepObj, eraseIt); }
-bool	PyDbObject::hasFields(void)const { return impObj()->hasFields(); }
-bool	PyDbObject::hasPersistentReactor(AcDbObjectId objId)const { return impObj()->hasPersistentReactor(objId); }
-bool	PyDbObject::hasSaveVersionOverride(void) { return impObj()->hasSaveVersionOverride(); }
+bool	PyDbObject::hasFields(void)const { if (!impObj()) return false; return impObj()->hasFields(); }
+bool	PyDbObject::hasPersistentReactor(AcDbObjectId objId)const { if (!impObj()) return false; return impObj()->hasPersistentReactor(objId); }
+bool	PyDbObject::hasSaveVersionOverride(void) { if (!impObj()) return false; return impObj()->hasSaveVersionOverride(); }
 AcDbObjectId	PyDbObject::id(void)const { return impObj()->id(); }
-bool	PyDbObject::isAProxy(void)const { return impObj()->isAProxy(); }
+bool	PyDbObject::isAProxy(void)const { if (!impObj()) return false; return impObj()->isAProxy(); }
 bool	PyDbObject::isAcDbObjectIdsInFlux(void)const { return false; }
-bool	PyDbObject::isCancelling(void)const { return impObj()->isCancelling(); }
-bool	PyDbObject::isEraseStatusToggled(void)const { return impObj()->isEraseStatusToggled(); }
-bool	PyDbObject::isErased(void)const { return impObj()->isErased(); }
-bool	PyDbObject::isModified(void)const { return impObj()->isModified(); }
-bool	PyDbObject::isModifiedGraphics(void)const { return impObj()->isModifiedGraphics(); }
-bool	PyDbObject::isModifiedXData(void)const { return impObj()->isModifiedXData(); }
-bool	PyDbObject::isNewObject(void)const { return impObj()->isNewObject(); }
-bool	PyDbObject::isNotifyEnabled(void)const { return impObj()->isNotifyEnabled(); }
-bool	PyDbObject::isNotifying(void)const { return impObj()->isNotifying(); }
-bool	PyDbObject::isPersistent(void)const { return impObj()->isPersistent(); }
-bool	PyDbObject::isReadEnabled(void)const { return impObj()->isReadEnabled(); }
-bool	PyDbObject::isReallyClosing(void)const { return impObj()->isReallyClosing(); }
-bool	PyDbObject::isTransactionResident(void)const { return impObj()->isTransactionResident(); }
-bool	PyDbObject::isUndoRecordingDisabled(void)const { return impObj()->isUndoRecordingDisabled(); }
-bool	PyDbObject::isUndoing(void)const { return impObj()->isUndoing(); }
-bool	PyDbObject::isWriteEnabled(void)const { return impObj()->isWriteEnabled(); }
+bool	PyDbObject::isCancelling(void)const { if (!impObj()) return false; return impObj()->isCancelling(); }
+bool	PyDbObject::isEraseStatusToggled(void)const { if (!impObj()) return false; return impObj()->isEraseStatusToggled(); }
+bool	PyDbObject::isErased(void)const { if (!impObj()) return false; return impObj()->isErased(); }
+bool	PyDbObject::isModified(void)const { if (!impObj()) return false; return impObj()->isModified(); }
+bool	PyDbObject::isModifiedGraphics(void)const { if (!impObj()) return false; return impObj()->isModifiedGraphics(); }
+bool	PyDbObject::isModifiedXData(void)const { if (!impObj()) return false; return impObj()->isModifiedXData(); }
+bool	PyDbObject::isNewObject(void)const { if (!impObj()) return false; return impObj()->isNewObject(); }
+bool	PyDbObject::isNotifyEnabled(void)const { if (!impObj()) return false; return impObj()->isNotifyEnabled(); }
+bool	PyDbObject::isNotifying(void)const { if (!impObj()) return false; return impObj()->isNotifying(); }
+bool	PyDbObject::isPersistent(void)const { if (!impObj()) return false; return impObj()->isPersistent(); }
+bool	PyDbObject::isReadEnabled(void)const { if (!impObj()) return false; return impObj()->isReadEnabled(); }
+bool	PyDbObject::isReallyClosing(void)const { if (!impObj()) return false; return impObj()->isReallyClosing(); }
+bool	PyDbObject::isTransactionResident(void)const { if (!impObj()) return false; return impObj()->isTransactionResident(); }
+bool	PyDbObject::isUndoRecordingDisabled(void)const { if (!impObj()) return false; return impObj()->isUndoRecordingDisabled(); }
+bool	PyDbObject::isUndoing(void)const { if (!impObj()) return false; return impObj()->isUndoing(); }
+bool	PyDbObject::isWriteEnabled(void)const { if (!impObj()) return false; return impObj()->isWriteEnabled(); }
 AcDb::DuplicateRecordCloning	PyDbObject::mergeStyle(void)const { return AcDb::kDrcNotApplicable; }
 void	PyDbObject::modified(PyDbObject	const*) {}
 void	PyDbObject::modifiedGraphics(AcDbEntity	const*) {}
@@ -182,10 +184,10 @@ Acad::ErrorStatus	PyDbObject::releaseExtensionDictionary(void) { return impObj()
 Acad::ErrorStatus	PyDbObject::removeField(wchar_t const* propName) { return impObj()->removeField(propName); }
 Acad::ErrorStatus	PyDbObject::removeField(wchar_t const* propName, AcDbObjectId& returnId) { return impObj()->removeField(propName, returnId); }
 Acad::ErrorStatus	PyDbObject::removeField(AcDbObjectId fieldId) { return impObj()->removeField(fieldId); }
-void	PyDbObject::setAcDbObjectIdsInFlux(void) { impObj()->setAcDbObjectIdsInFlux(); }
+void	PyDbObject::setAcDbObjectIdsInFlux(void) { if (!impObj()) return; impObj()->setAcDbObjectIdsInFlux(); }
 Acad::ErrorStatus	PyDbObject::setBinaryData(wchar_t const* key, int dataSize, char const* data) { return impObj()->setBinaryData(key, dataSize, data); }
 Acad::ErrorStatus	PyDbObject::setField(wchar_t const* propName, AcDbField* pField, AcDbObjectId& retId) { return impObj()->setField(propName, pField, retId); }
-void	PyDbObject::setHasSaveVersionOverride(bool bSetIt) { impObj()->setHasSaveVersionOverride(bSetIt); }
+void	PyDbObject::setHasSaveVersionOverride(bool bSetIt) { if (!impObj()) return; impObj()->setHasSaveVersionOverride(bSetIt); }
 Acad::ErrorStatus	PyDbObject::setOwnerId(AcDbObjectId objId) { return impObj()->setOwnerId(objId); }
 Acad::ErrorStatus	PyDbObject::setXData(struct resbuf const* xdata) { return impObj()->setXData(xdata); }
 // sub* 系列：子类钩子，空实现合理（封装类不重写）

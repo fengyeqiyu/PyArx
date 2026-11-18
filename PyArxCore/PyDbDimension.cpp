@@ -5,95 +5,101 @@
 PyWrapper_Cpp(DbDimension)
 
 AcString PyDbDimension::toString() const { return AcString(std::format("AcDbDimension[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbDimension::textPosition() const { return impObj()->textPosition(); }
-bool  PyDbDimension::setTextPosition(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setTextPosition(p), L"AcDbDimension::setTextPosition"); }
-AcString PyDbDimension::dimensionText() const { AcString s; if(!PyWarnIfError(impObj()->dimensionText(s), L"AcDbDimension::dimensionText")) return AcString(); return s; }
-bool  PyDbDimension::setDimensionText(const AcString& s) { return PyWarnIfError(impObj()->setDimensionText(s.kwszPtr()), L"AcDbDimension::setDimensionText"); }
-AcGeVector3d PyDbDimension::normal() const { return impObj()->normal(); }
-bool  PyDbDimension::setNormal(const AcGeVector3d& n) { return PyWarnIfError(impObj()->setNormal(n), L"AcDbDimension::setNormal"); }
-double PyDbDimension::elevation() const { return impObj()->elevation(); }
-bool  PyDbDimension::setElevation(double v) { return PyWarnIfError(impObj()->setElevation(v), L"AcDbDimension::setElevation"); }
-double PyDbDimension::textRotation() const { return impObj()->textRotation(); }
-bool  PyDbDimension::setTextRotation(double v) { return PyWarnIfError(impObj()->setTextRotation(v), L"AcDbDimension::setTextRotation"); }
-double PyDbDimension::horizontalRotation() const { return impObj()->horizontalRotation(); }
-bool  PyDbDimension::setHorizontalRotation(double v) { return PyWarnIfError(impObj()->setHorizontalRotation(v), L"AcDbDimension::setHorizontalRotation"); }
-double PyDbDimension::measurement() { double v = 0.0; if(!PyWarnIfError(impObj()->measurement(v), L"AcDbDimension::measurement")) return 0.0; return v; }
-bool PyDbDimension::isUsingDefaultTextPosition() const { return impObj()->isUsingDefaultTextPosition() != Adesk::kFalse; }
-bool  PyDbDimension::useSetTextPosition() { return PyWarnIfError(impObj()->useSetTextPosition(), L"AcDbDimension::useSetTextPosition"); }
-bool  PyDbDimension::useDefaultTextPosition() { return PyWarnIfError(impObj()->useDefaultTextPosition(), L"AcDbDimension::useDefaultTextPosition"); }
-bool  PyDbDimension::recomputeDimBlock(bool forceUpdate) { return PyWarnIfError(impObj()->recomputeDimBlock(forceUpdate), L"AcDbDimension::recomputeDimBlock"); }
-bool  PyDbDimension::generateLayout() { return PyWarnIfError(impObj()->generateLayout(), L"AcDbDimension::generateLayout"); }
-bool PyDbDimension::isDynamicDimension() const { return impObj()->isDynamicDimension(); }
-bool  PyDbDimension::setDynamicDimension(bool v) { return PyWarnIfError(impObj()->setDynamicDimension(v), L"AcDbDimension::setDynamicDimension"); }
+AcGePoint3d PyDbDimension::textPosition() const { if (!impObj()) return AcGePoint3d(); return impObj()->textPosition(); }
+bool  PyDbDimension::setTextPosition(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTextPosition(p), L"AcDbDimension::setTextPosition"); }
+AcString PyDbDimension::dimensionText() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->dimensionText(s), L"AcDbDimension::dimensionText")) return AcString(); return s; }
+bool  PyDbDimension::setDimensionText(const AcString& s) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimensionText(s.kwszPtr()), L"AcDbDimension::setDimensionText"); }
+AcGeVector3d PyDbDimension::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
+bool  PyDbDimension::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbDimension::setNormal"); }
+double PyDbDimension::elevation() const { if (!impObj()) return 0.0; return impObj()->elevation(); }
+bool  PyDbDimension::setElevation(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setElevation(v), L"AcDbDimension::setElevation"); }
+double PyDbDimension::textRotation() const { if (!impObj()) return 0.0; return impObj()->textRotation(); }
+bool  PyDbDimension::setTextRotation(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTextRotation(v), L"AcDbDimension::setTextRotation"); }
+double PyDbDimension::horizontalRotation() const { if (!impObj()) return 0.0; return impObj()->horizontalRotation(); }
+bool  PyDbDimension::setHorizontalRotation(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHorizontalRotation(v), L"AcDbDimension::setHorizontalRotation"); }
+double PyDbDimension::measurement() { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->measurement(v), L"AcDbDimension::measurement")) return 0.0; return v; }
+bool PyDbDimension::isUsingDefaultTextPosition() const { if (!impObj()) return false; return impObj()->isUsingDefaultTextPosition() != Adesk::kFalse; }
+bool  PyDbDimension::useSetTextPosition() { if (!impObj()) return false; return PyWarnIfError(impObj()->useSetTextPosition(), L"AcDbDimension::useSetTextPosition"); }
+bool  PyDbDimension::useDefaultTextPosition() { if (!impObj()) return false; return PyWarnIfError(impObj()->useDefaultTextPosition(), L"AcDbDimension::useDefaultTextPosition"); }
+bool  PyDbDimension::recomputeDimBlock(bool forceUpdate) { if (!impObj()) return false; return PyWarnIfError(impObj()->recomputeDimBlock(forceUpdate), L"AcDbDimension::recomputeDimBlock"); }
+bool  PyDbDimension::generateLayout() { if (!impObj()) return false; return PyWarnIfError(impObj()->generateLayout(), L"AcDbDimension::generateLayout"); }
+bool PyDbDimension::isDynamicDimension() const { if (!impObj()) return false; return impObj()->isDynamicDimension(); }
+bool  PyDbDimension::setDynamicDimension(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDynamicDimension(v), L"AcDbDimension::setDynamicDimension"); }
 
 // ---- 标注样式 ID ----
 uint64_t PyDbDimension::dimensionStyle() const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id = impObj()->dimensionStyle();
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 }
 bool PyDbDimension::setDimensionStyle(uint64_t styleId) {
+	if (!impObj()) return false;
 	AcDbObjectId id; id.setFromOldId(static_cast<Adesk::IntDbId>(styleId));
 	return PyWarnIfError(impObj()->setDimensionStyle(id), L"AcDbDimension::setDimensionStyle");
 }
 
 // ---- 默认文字位置开关 ----
 bool PyDbDimension::setUsingDefaultTextPosition(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setUsingDefaultTextPosition(v), L"AcDbDimension::setUsingDefaultTextPosition");
 }
 
 // ---- 文字附着方式（AcDbMText::AttachmentPoint，int 透出）----
-int  PyDbDimension::textAttachment() const { return static_cast<int>(impObj()->textAttachment()); }
+int  PyDbDimension::textAttachment() const { if (!impObj()) return 0; return static_cast<int>(impObj()->textAttachment()); }
 bool PyDbDimension::setTextAttachment(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTextAttachment(static_cast<AcDbMText::AttachmentPoint>(v)), L"AcDbDimension::setTextAttachment");
 }
 
 // ---- 前缀 / 后缀 ----
-AcString PyDbDimension::prefix() const { AcString s; if(!PyWarnIfError(impObj()->prefix(s), L"AcDbDimension::prefix")) return AcString(); return s; }
-bool PyDbDimension::setPrefix(const AcString& s) { return PyWarnIfError(impObj()->setPrefix(s), L"AcDbDimension::setPrefix"); }
-AcString PyDbDimension::suffix() const { AcString s; if(!PyWarnIfError(impObj()->suffix(s), L"AcDbDimension::suffix")) return AcString(); return s; }
-bool PyDbDimension::setSuffix(const AcString& s) { return PyWarnIfError(impObj()->setSuffix(s), L"AcDbDimension::setSuffix"); }
+AcString PyDbDimension::prefix() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->prefix(s), L"AcDbDimension::prefix")) return AcString(); return s; }
+bool PyDbDimension::setPrefix(const AcString& s) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPrefix(s), L"AcDbDimension::setPrefix"); }
+AcString PyDbDimension::suffix() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->suffix(s), L"AcDbDimension::suffix")) return AcString(); return s; }
+bool PyDbDimension::setSuffix(const AcString& s) { if (!impObj()) return false; return PyWarnIfError(impObj()->setSuffix(s), L"AcDbDimension::setSuffix"); }
 
 // ---- 箭头翻转 ----
-bool PyDbDimension::getArrowFirstIsFlipped() const { return impObj()->getArrowFirstIsFlipped(); }
-bool PyDbDimension::getArrowSecondIsFlipped() const { return impObj()->getArrowSecondIsFlipped(); }
-bool PyDbDimension::setArrowFirstIsFlipped(bool v) { return PyWarnIfError(impObj()->setArrowFirstIsFlipped(v), L"AcDbDimension::setArrowFirstIsFlipped"); }
-bool PyDbDimension::setArrowSecondIsFlipped(bool v) { return PyWarnIfError(impObj()->setArrowSecondIsFlipped(v), L"AcDbDimension::setArrowSecondIsFlipped"); }
+bool PyDbDimension::getArrowFirstIsFlipped() const { if (!impObj()) return false; return impObj()->getArrowFirstIsFlipped(); }
+bool PyDbDimension::getArrowSecondIsFlipped() const { if (!impObj()) return false; return impObj()->getArrowSecondIsFlipped(); }
+bool PyDbDimension::setArrowFirstIsFlipped(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setArrowFirstIsFlipped(v), L"AcDbDimension::setArrowFirstIsFlipped"); }
+bool PyDbDimension::setArrowSecondIsFlipped(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setArrowSecondIsFlipped(v), L"AcDbDimension::setArrowSecondIsFlipped"); }
 
 // ---- 高频标注变量覆写（dbdimvar.h）----
-double PyDbDimension::dimtxt() const { return impObj()->dimtxt(); }
-bool   PyDbDimension::setDimtxt(double v) { return PyWarnIfError(impObj()->setDimtxt(v), L"AcDbDimension::setDimtxt"); }
-double PyDbDimension::dimgap() const { return impObj()->dimgap(); }
-bool   PyDbDimension::setDimgap(double v) { return PyWarnIfError(impObj()->setDimgap(v), L"AcDbDimension::setDimgap"); }
-double PyDbDimension::dimasz() const { return impObj()->dimasz(); }
-bool   PyDbDimension::setDimasz(double v) { return PyWarnIfError(impObj()->setDimasz(v), L"AcDbDimension::setDimasz"); }
-int    PyDbDimension::dimdec() const { return impObj()->dimdec(); }
-bool   PyDbDimension::setDimdec(int v) { return PyWarnIfError(impObj()->setDimdec(v), L"AcDbDimension::setDimdec"); }
-bool   PyDbDimension::dimtol() const { return impObj()->dimtol(); }
-bool   PyDbDimension::setDimtol(bool v) { return PyWarnIfError(impObj()->setDimtol(v), L"AcDbDimension::setDimtol"); }
-double PyDbDimension::dimtp() const { return impObj()->dimtp(); }
-bool   PyDbDimension::setDimtp(double v) { return PyWarnIfError(impObj()->setDimtp(v), L"AcDbDimension::setDimtp"); }
-double PyDbDimension::dimtm() const { return impObj()->dimtm(); }
-bool   PyDbDimension::setDimtm(double v) { return PyWarnIfError(impObj()->setDimtm(v), L"AcDbDimension::setDimtm"); }
-double PyDbDimension::dimscale() const { return impObj()->dimscale(); }
-bool   PyDbDimension::setDimscale(double v) { return PyWarnIfError(impObj()->setDimscale(v), L"AcDbDimension::setDimscale"); }
+double PyDbDimension::dimtxt() const { if (!impObj()) return 0.0; return impObj()->dimtxt(); }
+bool   PyDbDimension::setDimtxt(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimtxt(v), L"AcDbDimension::setDimtxt"); }
+double PyDbDimension::dimgap() const { if (!impObj()) return 0.0; return impObj()->dimgap(); }
+bool   PyDbDimension::setDimgap(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimgap(v), L"AcDbDimension::setDimgap"); }
+double PyDbDimension::dimasz() const { if (!impObj()) return 0.0; return impObj()->dimasz(); }
+bool   PyDbDimension::setDimasz(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimasz(v), L"AcDbDimension::setDimasz"); }
+int    PyDbDimension::dimdec() const { if (!impObj()) return 0; return impObj()->dimdec(); }
+bool   PyDbDimension::setDimdec(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimdec(v), L"AcDbDimension::setDimdec"); }
+bool   PyDbDimension::dimtol() const { if (!impObj()) return false; return impObj()->dimtol(); }
+bool   PyDbDimension::setDimtol(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimtol(v), L"AcDbDimension::setDimtol"); }
+double PyDbDimension::dimtp() const { if (!impObj()) return 0.0; return impObj()->dimtp(); }
+bool   PyDbDimension::setDimtp(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimtp(v), L"AcDbDimension::setDimtp"); }
+double PyDbDimension::dimtm() const { if (!impObj()) return 0.0; return impObj()->dimtm(); }
+bool   PyDbDimension::setDimtm(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimtm(v), L"AcDbDimension::setDimtm"); }
+double PyDbDimension::dimscale() const { if (!impObj()) return 0.0; return impObj()->dimscale(); }
+bool   PyDbDimension::setDimscale(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimscale(v), L"AcDbDimension::setDimscale"); }
 uint64_t PyDbDimension::dimtxsty() const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id = impObj()->dimtxsty();
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 }
 bool   PyDbDimension::setDimtxsty(uint64_t idv) {
+	if (!impObj()) return false;
 	AcDbObjectId id; id.setFromOldId(static_cast<Adesk::IntDbId>(idv));
 	return PyWarnIfError(impObj()->setDimtxsty(id), L"AcDbDimension::setDimtxsty");
 }
-bool   PyDbDimension::dimse1() const { return impObj()->dimse1(); }
-bool   PyDbDimension::setDimse1(bool v) { return PyWarnIfError(impObj()->setDimse1(v), L"AcDbDimension::setDimse1"); }
-bool   PyDbDimension::dimse2() const { return impObj()->dimse2(); }
-bool   PyDbDimension::setDimse2(bool v) { return PyWarnIfError(impObj()->setDimse2(v), L"AcDbDimension::setDimse2"); }
-double PyDbDimension::dimexe() const { return impObj()->dimexe(); }
-bool   PyDbDimension::setDimexe(double v) { return PyWarnIfError(impObj()->setDimexe(v), L"AcDbDimension::setDimexe"); }
-double PyDbDimension::dimexo() const { return impObj()->dimexo(); }
-bool   PyDbDimension::setDimexo(double v) { return PyWarnIfError(impObj()->setDimexo(v), L"AcDbDimension::setDimexo"); }
-int    PyDbDimension::dimtad() const { return impObj()->dimtad(); }
-bool   PyDbDimension::setDimtad(int v) { return PyWarnIfError(impObj()->setDimtad(v), L"AcDbDimension::setDimtad"); }
+bool   PyDbDimension::dimse1() const { if (!impObj()) return false; return impObj()->dimse1(); }
+bool   PyDbDimension::setDimse1(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimse1(v), L"AcDbDimension::setDimse1"); }
+bool   PyDbDimension::dimse2() const { if (!impObj()) return false; return impObj()->dimse2(); }
+bool   PyDbDimension::setDimse2(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimse2(v), L"AcDbDimension::setDimse2"); }
+double PyDbDimension::dimexe() const { if (!impObj()) return 0.0; return impObj()->dimexe(); }
+bool   PyDbDimension::setDimexe(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimexe(v), L"AcDbDimension::setDimexe"); }
+double PyDbDimension::dimexo() const { if (!impObj()) return 0.0; return impObj()->dimexo(); }
+bool   PyDbDimension::setDimexo(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimexo(v), L"AcDbDimension::setDimexo"); }
+int    PyDbDimension::dimtad() const { if (!impObj()) return 0; return impObj()->dimtad(); }
+bool   PyDbDimension::setDimtad(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDimtad(v), L"AcDbDimension::setDimtad"); }
 
 void bind_PyDbDimension(pym& m) {
 	py::class_<PyDbDimension, PyDbEntity>(m, "PyDbDimension")

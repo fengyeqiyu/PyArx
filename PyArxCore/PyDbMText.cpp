@@ -4,75 +4,79 @@
 
 PyWrapper_Cpp(DbMText)
 AcString PyDbMText::toString() const { return AcString(std::format("AcDbMText[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbMText::location() const { return impObj()->location(); }
+AcGePoint3d PyDbMText::location() const { if (!impObj()) return AcGePoint3d(); return impObj()->location(); }
 
-bool  PyDbMText::setLocation(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setLocation(p), L"AcDbMText::setLocation"); }
+bool  PyDbMText::setLocation(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLocation(p), L"AcDbMText::setLocation"); }
 
-double PyDbMText::textHeight() const { return impObj()->textHeight(); }
+double PyDbMText::textHeight() const { if (!impObj()) return 0.0; return impObj()->textHeight(); }
 
-bool  PyDbMText::setTextHeight(double h) { return PyWarnIfError(impObj()->setTextHeight(h), L"AcDbMText::setTextHeight"); }
+bool  PyDbMText::setTextHeight(double h) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTextHeight(h), L"AcDbMText::setTextHeight"); }
 
-double PyDbMText::rotation() const { return impObj()->rotation(); }
+double PyDbMText::rotation() const { if (!impObj()) return 0.0; return impObj()->rotation(); }
 
-bool  PyDbMText::setRotation(double r) { return PyWarnIfError(impObj()->setRotation(r), L"AcDbMText::setRotation"); }
+bool  PyDbMText::setRotation(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setRotation(r), L"AcDbMText::setRotation"); }
 
-AcString PyDbMText::contents() const { AcString s; if(!PyWarnIfError(impObj()->contents(s), L"AcDbMText::contents")) return AcString(); return s; }
+AcString PyDbMText::contents() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->contents(s), L"AcDbMText::contents")) return AcString(); return s; }
 
 bool PyDbMText::setContents(const AcString& s) {
+	if (!impObj()) return false;
 	int rc = impObj()->setContents(s.kwszPtr());
 	if (rc != 0) { acutPrintf(L"[PyArx] AcDbMText::setContents failed (e%d)\n", rc); return false; }
 	return true;
 }
 
-AcGeVector3d PyDbMText::normal() const { return impObj()->normal(); }
-bool  PyDbMText::setNormal(const AcGeVector3d& n) { return PyWarnIfError(impObj()->setNormal(n), L"AcDbMText::setNormal"); }
-AcGeVector3d PyDbMText::direction() const { return impObj()->direction(); }
-bool  PyDbMText::setDirection(const AcGeVector3d& v) { return PyWarnIfError(impObj()->setDirection(v), L"AcDbMText::setDirection"); }
-double PyDbMText::width() const { return impObj()->width(); }
-bool  PyDbMText::setWidth(double v) { return PyWarnIfError(impObj()->setWidth(v), L"AcDbMText::setWidth"); }
-double PyDbMText::ascent() const { return impObj()->ascent(); }
-double PyDbMText::descent() const { return impObj()->descent(); }
-int PyDbMText::attachment() const { return static_cast<int>(impObj()->attachment()); }
-bool  PyDbMText::setAttachment(int v) { return PyWarnIfError(impObj()->setAttachment(static_cast<AcDbMText::AttachmentPoint>(v)), L"AcDbMText::setAttachment"); }
-int PyDbMText::flowDirection() const { return static_cast<int>(impObj()->flowDirection()); }
-bool  PyDbMText::setFlowDirection(int v) { return PyWarnIfError(impObj()->setFlowDirection(static_cast<AcDbMText::FlowDirection>(v)), L"AcDbMText::setFlowDirection"); }
-AcString PyDbMText::contentsRTF() const { AcString s; if(!PyWarnIfError(impObj()->contentsRTF(s), L"AcDbMText::contentsRTF")) return AcString(); return s; }
+AcGeVector3d PyDbMText::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
+bool  PyDbMText::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbMText::setNormal"); }
+AcGeVector3d PyDbMText::direction() const { if (!impObj()) return AcGeVector3d(); return impObj()->direction(); }
+bool  PyDbMText::setDirection(const AcGeVector3d& v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDirection(v), L"AcDbMText::setDirection"); }
+double PyDbMText::width() const { if (!impObj()) return 0.0; return impObj()->width(); }
+bool  PyDbMText::setWidth(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setWidth(v), L"AcDbMText::setWidth"); }
+double PyDbMText::ascent() const { if (!impObj()) return 0.0; return impObj()->ascent(); }
+double PyDbMText::descent() const { if (!impObj()) return 0.0; return impObj()->descent(); }
+int PyDbMText::attachment() const { if (!impObj()) return 0; return static_cast<int>(impObj()->attachment()); }
+bool  PyDbMText::setAttachment(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setAttachment(static_cast<AcDbMText::AttachmentPoint>(v)), L"AcDbMText::setAttachment"); }
+int PyDbMText::flowDirection() const { if (!impObj()) return 0; return static_cast<int>(impObj()->flowDirection()); }
+bool  PyDbMText::setFlowDirection(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFlowDirection(static_cast<AcDbMText::FlowDirection>(v)), L"AcDbMText::setFlowDirection"); }
+AcString PyDbMText::contentsRTF() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->contentsRTF(s), L"AcDbMText::contentsRTF")) return AcString(); return s; }
 bool PyDbMText::setContentsRTF(const AcString& s) {
+	if (!impObj()) return false;
 	int rc = impObj()->setContentsRTF(s.kwszPtr());
 	if (rc != 0) { acutPrintf(L"[PyArx] AcDbMText::setContentsRTF failed (e%d)\n", rc); return false; }
 	return true;
 }
-AcString PyDbMText::text() const { AcString s; if(!PyWarnIfError(impObj()->text(s), L"AcDbMText::text")) return AcString(); return s; }
-double PyDbMText::actualHeight() const { return impObj()->actualHeight(); }
-double PyDbMText::actualWidth() const { return impObj()->actualWidth(); }
-int PyDbMText::lineSpacingStyle() const { return static_cast<int>(impObj()->lineSpacingStyle()); }
-bool  PyDbMText::setLineSpacingStyle(int v) { return PyWarnIfError(impObj()->setLineSpacingStyle(static_cast<AcDb::LineSpacingStyle>(v)), L"AcDbMText::setLineSpacingStyle"); }
-double PyDbMText::lineSpacingFactor() const { return impObj()->lineSpacingFactor(); }
-bool  PyDbMText::setLineSpacingFactor(double v) { return PyWarnIfError(impObj()->setLineSpacingFactor(v), L"AcDbMText::setLineSpacingFactor"); }
-bool PyDbMText::showBorders() const { return impObj()->showBorders(); }
-bool  PyDbMText::setShowBorders(bool v) { return PyWarnIfError(impObj()->setShowBorders(v), L"AcDbMText::setShowBorders"); }
-bool PyDbMText::backgroundFillOn() const { return impObj()->backgroundFillOn(); }
-bool  PyDbMText::setBackgroundFill(bool v) { return PyWarnIfError(impObj()->setBackgroundFill(v), L"AcDbMText::setBackgroundFill"); }
+AcString PyDbMText::text() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->text(s), L"AcDbMText::text")) return AcString(); return s; }
+double PyDbMText::actualHeight() const { if (!impObj()) return 0.0; return impObj()->actualHeight(); }
+double PyDbMText::actualWidth() const { if (!impObj()) return 0.0; return impObj()->actualWidth(); }
+int PyDbMText::lineSpacingStyle() const { if (!impObj()) return 0; return static_cast<int>(impObj()->lineSpacingStyle()); }
+bool  PyDbMText::setLineSpacingStyle(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLineSpacingStyle(static_cast<AcDb::LineSpacingStyle>(v)), L"AcDbMText::setLineSpacingStyle"); }
+double PyDbMText::lineSpacingFactor() const { if (!impObj()) return 0.0; return impObj()->lineSpacingFactor(); }
+bool  PyDbMText::setLineSpacingFactor(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLineSpacingFactor(v), L"AcDbMText::setLineSpacingFactor"); }
+bool PyDbMText::showBorders() const { if (!impObj()) return false; return impObj()->showBorders(); }
+bool  PyDbMText::setShowBorders(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setShowBorders(v), L"AcDbMText::setShowBorders"); }
+bool PyDbMText::backgroundFillOn() const { if (!impObj()) return false; return impObj()->backgroundFillOn(); }
+bool  PyDbMText::setBackgroundFill(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBackgroundFill(v), L"AcDbMText::setBackgroundFill"); }
 PyColor PyDbMText::backgroundFillColor() const {
 	AcCmColor c;
 	PyWarnIfError(impObj()->getBackgroundFillColor(c), L"AcDbMText::getBackgroundFillColor");
 	return PyColor(c);
 }
 bool  PyDbMText::setBackgroundFillColor(const PyColor& color) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setBackgroundFillColor(color.m_color), L"AcDbMText::setBackgroundFillColor");
 }
-bool PyDbMText::useBackgroundColorOn() const { return impObj()->useBackgroundColorOn(); }
-bool  PyDbMText::setUseBackgroundColor(bool v) { return PyWarnIfError(impObj()->setUseBackgroundColor(v), L"AcDbMText::setUseBackgroundColor"); }
-bool PyDbMText::useWordBreak() const { return impObj()->useWordBreak(); }
-bool  PyDbMText::setUseWordBreak(bool v) { return PyWarnIfError(impObj()->setUseWordBreak(v), L"AcDbMText::setUseWordBreak"); }
-bool PyDbMText::hitTest(const AcGePoint3d& pt) const { return impObj()->hitTest(pt); }
-int PyDbMText::correctSpelling() { return impObj()->correctSpelling(); }
+bool PyDbMText::useBackgroundColorOn() const { if (!impObj()) return false; return impObj()->useBackgroundColorOn(); }
+bool  PyDbMText::setUseBackgroundColor(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setUseBackgroundColor(v), L"AcDbMText::setUseBackgroundColor"); }
+bool PyDbMText::useWordBreak() const { if (!impObj()) return false; return impObj()->useWordBreak(); }
+bool  PyDbMText::setUseWordBreak(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setUseWordBreak(v), L"AcDbMText::setUseWordBreak"); }
+bool PyDbMText::hitTest(const AcGePoint3d& pt) const { if (!impObj()) return false; return impObj()->hitTest(pt); }
+int PyDbMText::correctSpelling() { if (!impObj()) return 0; return impObj()->correctSpelling(); }
 
-double PyDbMText::height() const { return impObj()->height(); }
-bool  PyDbMText::setHeight(double h) { return PyWarnIfError(impObj()->setHeight(h), L"AcDbMText::setHeight"); }
+double PyDbMText::height() const { if (!impObj()) return 0.0; return impObj()->height(); }
+bool  PyDbMText::setHeight(double h) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHeight(h), L"AcDbMText::setHeight"); }
 
-uint64_t PyDbMText::textStyle() const { return static_cast<uint64_t>(impObj()->textStyle().asOldId()); }
+uint64_t PyDbMText::textStyle() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->textStyle().asOldId()); }
 bool  PyDbMText::setTextStyle(uint64_t id) {
+	if (!impObj()) return false;
 	AcDbObjectId styleId; styleId.setFromOldId(static_cast<Adesk::IntDbId>(id));
 	return PyWarnIfError(impObj()->setTextStyle(styleId), L"AcDbMText::setTextStyle");
 }
@@ -101,16 +105,17 @@ std::vector<std::vector<AcGePoint3d>> PyDbMText::getBoundingPointsByLine() const
 	return out;
 }
 
-bool  PyDbMText::setAttachmentMovingLocation(int v) { return PyWarnIfError(impObj()->setAttachmentMovingLocation(static_cast<AcDbMText::AttachmentPoint>(v)), L"AcDbMText::setAttachmentMovingLocation"); }
+bool  PyDbMText::setAttachmentMovingLocation(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setAttachmentMovingLocation(static_cast<AcDbMText::AttachmentPoint>(v)), L"AcDbMText::setAttachmentMovingLocation"); }
 
 py::tuple PyDbMText::getPlane() const {
+	if (!impObj()) return py::tuple();
 	AcGePlane plane; AcDb::Planarity type;
 	if (!PyWarnIfError(impObj()->getPlane(plane, type), L"AcDbMText::getPlane"))
 		return py::make_tuple(AcGePlane(), 0);
 	return py::make_tuple(plane, static_cast<int>(type));
 }
 
-bool PyDbMText::isPlanar() const { return impObj()->isPlanar() != Adesk::kFalse; }
+bool PyDbMText::isPlanar() const { if (!impObj()) return false; return impObj()->isPlanar() != Adesk::kFalse; }
 
 // ---- explodeFragments: C enumerator callback bridged to a Python callable ----
 namespace {
@@ -168,6 +173,7 @@ namespace {
 }
 
 void PyDbMText::explodeFragments(const py::object& callback) {
+	if (!impObj()) return;
 	auto* ctx = new PyDbMTextEnumCtx{callback};
 	struct CtxGuard { PyDbMTextEnumCtx* c; ~CtxGuard() { delete c; } } guard{ctx};
 	impObj()->explodeFragments(&PyDbMTextFragmentTrampoline, ctx, nullptr);

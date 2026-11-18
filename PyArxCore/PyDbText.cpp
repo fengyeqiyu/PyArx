@@ -4,53 +4,54 @@
 
 PyWrapper_Cpp(DbText)
 AcString PyDbText::toString() const { return AcString(std::format("AcDbText[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbText::position() const { return impObj()->position(); }
+AcGePoint3d PyDbText::position() const { if (!impObj()) return AcGePoint3d(); return impObj()->position(); }
 
-bool  PyDbText::setPosition(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setPosition(p), L"AcDbText::setPosition"); }
+bool  PyDbText::setPosition(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPosition(p), L"AcDbText::setPosition"); }
 
-double PyDbText::height() const { return impObj()->height(); }
+double PyDbText::height() const { if (!impObj()) return 0.0; return impObj()->height(); }
 
-bool  PyDbText::setHeight(double h) { return PyWarnIfError(impObj()->setHeight(h), L"AcDbText::setHeight"); }
+bool  PyDbText::setHeight(double h) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHeight(h), L"AcDbText::setHeight"); }
 
-double PyDbText::rotation() const { return impObj()->rotation(); }
+double PyDbText::rotation() const { if (!impObj()) return 0.0; return impObj()->rotation(); }
 
-bool  PyDbText::setRotation(double r) { return PyWarnIfError(impObj()->setRotation(r), L"AcDbText::setRotation"); }
+bool  PyDbText::setRotation(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setRotation(r), L"AcDbText::setRotation"); }
 
-AcString PyDbText::textString() const { AcString s; if(!PyWarnIfError(impObj()->textString(s), L"AcDbText::textString")) return AcString(); return s; }
+AcString PyDbText::textString() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->textString(s), L"AcDbText::textString")) return AcString(); return s; }
 
-bool  PyDbText::setTextString(const AcString& s) { return PyWarnIfError(impObj()->setTextString(s.kwszPtr()), L"AcDbText::setTextString"); }
+bool  PyDbText::setTextString(const AcString& s) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTextString(s.kwszPtr()), L"AcDbText::setTextString"); }
 
-AcGePoint3d PyDbText::alignmentPoint() const { return impObj()->alignmentPoint(); }
-bool  PyDbText::setAlignmentPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setAlignmentPoint(p), L"AcDbText::setAlignmentPoint"); }
-bool PyDbText::isDefaultAlignment() const { return impObj()->isDefaultAlignment() != Adesk::kFalse; }
-AcGeVector3d PyDbText::normal() const { return impObj()->normal(); }
-bool  PyDbText::setNormal(const AcGeVector3d& n) { return PyWarnIfError(impObj()->setNormal(n), L"AcDbText::setNormal"); }
-double PyDbText::thickness() const { return impObj()->thickness(); }
-bool  PyDbText::setThickness(double v) { return PyWarnIfError(impObj()->setThickness(v), L"AcDbText::setThickness"); }
-double PyDbText::oblique() const { return impObj()->oblique(); }
-bool  PyDbText::setOblique(double v) { return PyWarnIfError(impObj()->setOblique(v), L"AcDbText::setOblique"); }
-double PyDbText::widthFactor() const { return impObj()->widthFactor(); }
-bool  PyDbText::setWidthFactor(double v) { return PyWarnIfError(impObj()->setWidthFactor(v), L"AcDbText::setWidthFactor"); }
-bool PyDbText::isMirroredInX() const { return impObj()->isMirroredInX() != Adesk::kFalse; }
-bool  PyDbText::mirrorInX(bool v) { return PyWarnIfError(impObj()->mirrorInX(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbText::mirrorInX"); }
-bool PyDbText::isMirroredInY() const { return impObj()->isMirroredInY() != Adesk::kFalse; }
-bool  PyDbText::mirrorInY(bool v) { return PyWarnIfError(impObj()->mirrorInY(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbText::mirrorInY"); }
-int PyDbText::horizontalMode() const { return static_cast<int>(impObj()->horizontalMode()); }
-bool  PyDbText::setHorizontalMode(int v) { return PyWarnIfError(impObj()->setHorizontalMode(static_cast<AcDb::TextHorzMode>(v)), L"AcDbText::setHorizontalMode"); }
-int PyDbText::verticalMode() const { return static_cast<int>(impObj()->verticalMode()); }
-bool  PyDbText::setVerticalMode(int v) { return PyWarnIfError(impObj()->setVerticalMode(static_cast<AcDb::TextVertMode>(v)), L"AcDbText::setVerticalMode"); }
-int PyDbText::justification() const { return static_cast<int>(impObj()->justification()); }
-bool  PyDbText::setJustification(int v) { return PyWarnIfError(impObj()->setJustification(static_cast<AcDbText::AcTextAlignment>(v)), L"AcDbText::setJustification"); }
-bool PyDbText::hitTest(const AcGePoint3d& pt) const { return impObj()->hitTest(pt); }
-int PyDbText::correctSpelling() { return impObj()->correctSpelling(); }
+AcGePoint3d PyDbText::alignmentPoint() const { if (!impObj()) return AcGePoint3d(); return impObj()->alignmentPoint(); }
+bool  PyDbText::setAlignmentPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setAlignmentPoint(p), L"AcDbText::setAlignmentPoint"); }
+bool PyDbText::isDefaultAlignment() const { if (!impObj()) return false; return impObj()->isDefaultAlignment() != Adesk::kFalse; }
+AcGeVector3d PyDbText::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
+bool  PyDbText::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbText::setNormal"); }
+double PyDbText::thickness() const { if (!impObj()) return 0.0; return impObj()->thickness(); }
+bool  PyDbText::setThickness(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setThickness(v), L"AcDbText::setThickness"); }
+double PyDbText::oblique() const { if (!impObj()) return 0.0; return impObj()->oblique(); }
+bool  PyDbText::setOblique(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setOblique(v), L"AcDbText::setOblique"); }
+double PyDbText::widthFactor() const { if (!impObj()) return 0.0; return impObj()->widthFactor(); }
+bool  PyDbText::setWidthFactor(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setWidthFactor(v), L"AcDbText::setWidthFactor"); }
+bool PyDbText::isMirroredInX() const { if (!impObj()) return false; return impObj()->isMirroredInX() != Adesk::kFalse; }
+bool  PyDbText::mirrorInX(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->mirrorInX(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbText::mirrorInX"); }
+bool PyDbText::isMirroredInY() const { if (!impObj()) return false; return impObj()->isMirroredInY() != Adesk::kFalse; }
+bool  PyDbText::mirrorInY(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->mirrorInY(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbText::mirrorInY"); }
+int PyDbText::horizontalMode() const { if (!impObj()) return 0; return static_cast<int>(impObj()->horizontalMode()); }
+bool  PyDbText::setHorizontalMode(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHorizontalMode(static_cast<AcDb::TextHorzMode>(v)), L"AcDbText::setHorizontalMode"); }
+int PyDbText::verticalMode() const { if (!impObj()) return 0; return static_cast<int>(impObj()->verticalMode()); }
+bool  PyDbText::setVerticalMode(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setVerticalMode(static_cast<AcDb::TextVertMode>(v)), L"AcDbText::setVerticalMode"); }
+int PyDbText::justification() const { if (!impObj()) return 0; return static_cast<int>(impObj()->justification()); }
+bool  PyDbText::setJustification(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setJustification(static_cast<AcDbText::AcTextAlignment>(v)), L"AcDbText::setJustification"); }
+bool PyDbText::hitTest(const AcGePoint3d& pt) const { if (!impObj()) return false; return impObj()->hitTest(pt); }
+int PyDbText::correctSpelling() { if (!impObj()) return 0; return impObj()->correctSpelling(); }
 
-uint64_t PyDbText::textStyle() const { return static_cast<uint64_t>(impObj()->textStyle().asOldId()); }
+uint64_t PyDbText::textStyle() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->textStyle().asOldId()); }
 bool  PyDbText::setTextStyle(uint64_t id) {
+	if (!impObj()) return false;
 	AcDbObjectId styleId; styleId.setFromOldId(static_cast<Adesk::IntDbId>(id));
 	return PyWarnIfError(impObj()->setTextStyle(styleId), L"AcDbText::setTextStyle");
 }
 
-bool PyDbText::adjustAlignment() { return PyWarnIfError(impObj()->adjustAlignment(nullptr), L"AcDbText::adjustAlignment"); }
+bool PyDbText::adjustAlignment() { if (!impObj()) return false; return PyWarnIfError(impObj()->adjustAlignment(nullptr), L"AcDbText::adjustAlignment"); }
 
 std::vector<AcGePoint3d> PyDbText::getBoundingPoints() const {
 	AcGePoint3dArray arr;
@@ -61,19 +62,21 @@ std::vector<AcGePoint3d> PyDbText::getBoundingPoints() const {
 	return out;
 }
 
-bool PyDbText::convertFieldToText() { return PyWarnIfError(impObj()->convertFieldToText(), L"AcDbText::convertFieldToText"); }
+bool PyDbText::convertFieldToText() { if (!impObj()) return false; return PyWarnIfError(impObj()->convertFieldToText(), L"AcDbText::convertFieldToText"); }
 
 py::tuple PyDbText::getPlane() const {
+	if (!impObj()) return py::tuple();
 	AcGePlane plane; AcDb::Planarity type;
 	if (!PyWarnIfError(impObj()->getPlane(plane, type), L"AcDbText::getPlane"))
 		return py::make_tuple(AcGePlane(), 0);
 	return py::make_tuple(plane, static_cast<int>(type));
 }
 
-bool PyDbText::isPlanar() const { return impObj()->isPlanar() != Adesk::kFalse; }
+bool PyDbText::isPlanar() const { if (!impObj()) return false; return impObj()->isPlanar() != Adesk::kFalse; }
 
-bool PyDbText::removeField(const AcString& propName) { return PyWarnIfError(impObj()->removeField(propName.kwszPtr()), L"AcDbText::removeField"); }
+bool PyDbText::removeField(const AcString& propName) { if (!impObj()) return false; return PyWarnIfError(impObj()->removeField(propName.kwszPtr()), L"AcDbText::removeField"); }
 bool PyDbText::removeField(uint64_t fieldId) {
+	if (!impObj()) return false;
 	AcDbObjectId id; id.setFromOldId(static_cast<Adesk::IntDbId>(fieldId));
 	return PyWarnIfError(impObj()->removeField(id), L"AcDbText::removeField");
 }

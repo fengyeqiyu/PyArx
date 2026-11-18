@@ -4,30 +4,30 @@
 
 PyWrapper_Cpp(DbSpline)
 AcString PyDbSpline::toString() const { return AcString(std::format("AcDbSpline[wrapper]").c_str(), AcString::Utf8); }
-int PyDbSpline::numControlPoints() const { return impObj()->numControlPoints(); }
+int PyDbSpline::numControlPoints() const { if (!impObj()) return 0; return impObj()->numControlPoints(); }
 
-int PyDbSpline::degree() const { return impObj()->degree(); }
+int PyDbSpline::degree() const { if (!impObj()) return 0; return impObj()->degree(); }
 
-bool PyDbSpline::isNull() const { return impObj()->isNull() != Adesk::kFalse; }
-bool PyDbSpline::isRational() const { return impObj()->isRational() != Adesk::kFalse; }
-bool  PyDbSpline::elevateDegree(int newDegree) { return PyWarnIfError(impObj()->elevateDegree(newDegree), L"AcDbSpline::elevateDegree"); }
-AcGePoint3d PyDbSpline::getControlPointAt(int index) const { AcGePoint3d p; if(!PyWarnIfError(impObj()->getControlPointAt(index, p), L"AcDbSpline::getControlPointAt")) return AcGePoint3d(); return p; }
-bool  PyDbSpline::setControlPointAt(int index, const AcGePoint3d& p) { return PyWarnIfError(impObj()->setControlPointAt(index, p), L"AcDbSpline::setControlPointAt"); }
-int PyDbSpline::numFitPoints() const { return impObj()->numFitPoints(); }
-AcGePoint3d PyDbSpline::getFitPointAt(int index) const { AcGePoint3d p; if(!PyWarnIfError(impObj()->getFitPointAt(index, p), L"AcDbSpline::getFitPointAt")) return AcGePoint3d(); return p; }
-bool  PyDbSpline::setFitPointAt(int index, const AcGePoint3d& p) { return PyWarnIfError(impObj()->setFitPointAt(index, p), L"AcDbSpline::setFitPointAt"); }
-bool  PyDbSpline::insertFitPointAt(int index, const AcGePoint3d& p) { return PyWarnIfError(impObj()->insertFitPointAt(index, p), L"AcDbSpline::insertFitPointAt"); }
-bool  PyDbSpline::removeFitPointAt(int index) { return PyWarnIfError(impObj()->removeFitPointAt(index), L"AcDbSpline::removeFitPointAt"); }
-double PyDbSpline::fitTolerance() const { return impObj()->fitTolerance(); }
-bool  PyDbSpline::setFitTol(double tol) { return PyWarnIfError(impObj()->setFitTol(tol), L"AcDbSpline::setFitTol"); }
-double PyDbSpline::weightAt(int index) const { return impObj()->weightAt(index); }
-bool  PyDbSpline::setWeightAt(int index, double weight) { return PyWarnIfError(impObj()->setWeightAt(index, weight), L"AcDbSpline::setWeightAt"); }
-bool  PyDbSpline::insertKnot(double param) { return PyWarnIfError(impObj()->insertKnot(param), L"AcDbSpline::insertKnot"); }
-py::tuple PyDbSpline::getFitTangents() const { AcGeVector3d s, e; if(!PyWarnIfError(impObj()->getFitTangents(s, e), L"AcDbSpline::getFitTangents")) return py::tuple(); return py::make_tuple(s, e); }
-bool  PyDbSpline::setFitTangents(const AcGeVector3d& s, const AcGeVector3d& e) { return PyWarnIfError(impObj()->setFitTangents(s, e), L"AcDbSpline::setFitTangents"); }
-bool PyDbSpline::hasFitData() const { return impObj()->hasFitData() != Adesk::kFalse; }
-bool  PyDbSpline::purgeFitData() { return PyWarnIfError(impObj()->purgeFitData(), L"AcDbSpline::purgeFitData"); }
-bool  PyDbSpline::updateFitData() { return PyWarnIfError(impObj()->updateFitData(), L"AcDbSpline::updateFitData"); }
+bool PyDbSpline::isNull() const { if (!impObj()) return false; return impObj()->isNull() != Adesk::kFalse; }
+bool PyDbSpline::isRational() const { if (!impObj()) return false; return impObj()->isRational() != Adesk::kFalse; }
+bool  PyDbSpline::elevateDegree(int newDegree) { if (!impObj()) return false; return PyWarnIfError(impObj()->elevateDegree(newDegree), L"AcDbSpline::elevateDegree"); }
+AcGePoint3d PyDbSpline::getControlPointAt(int index) const { if (!impObj()) return AcGePoint3d(); AcGePoint3d p; if(!PyWarnIfError(impObj()->getControlPointAt(index, p), L"AcDbSpline::getControlPointAt")) return AcGePoint3d(); return p; }
+bool  PyDbSpline::setControlPointAt(int index, const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setControlPointAt(index, p), L"AcDbSpline::setControlPointAt"); }
+int PyDbSpline::numFitPoints() const { if (!impObj()) return 0; return impObj()->numFitPoints(); }
+AcGePoint3d PyDbSpline::getFitPointAt(int index) const { if (!impObj()) return AcGePoint3d(); AcGePoint3d p; if(!PyWarnIfError(impObj()->getFitPointAt(index, p), L"AcDbSpline::getFitPointAt")) return AcGePoint3d(); return p; }
+bool  PyDbSpline::setFitPointAt(int index, const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFitPointAt(index, p), L"AcDbSpline::setFitPointAt"); }
+bool  PyDbSpline::insertFitPointAt(int index, const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->insertFitPointAt(index, p), L"AcDbSpline::insertFitPointAt"); }
+bool  PyDbSpline::removeFitPointAt(int index) { if (!impObj()) return false; return PyWarnIfError(impObj()->removeFitPointAt(index), L"AcDbSpline::removeFitPointAt"); }
+double PyDbSpline::fitTolerance() const { if (!impObj()) return 0.0; return impObj()->fitTolerance(); }
+bool  PyDbSpline::setFitTol(double tol) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFitTol(tol), L"AcDbSpline::setFitTol"); }
+double PyDbSpline::weightAt(int index) const { if (!impObj()) return 0.0; return impObj()->weightAt(index); }
+bool  PyDbSpline::setWeightAt(int index, double weight) { if (!impObj()) return false; return PyWarnIfError(impObj()->setWeightAt(index, weight), L"AcDbSpline::setWeightAt"); }
+bool  PyDbSpline::insertKnot(double param) { if (!impObj()) return false; return PyWarnIfError(impObj()->insertKnot(param), L"AcDbSpline::insertKnot"); }
+py::tuple PyDbSpline::getFitTangents() const { if (!impObj()) return py::tuple(); AcGeVector3d s, e; if(!PyWarnIfError(impObj()->getFitTangents(s, e), L"AcDbSpline::getFitTangents")) return py::tuple(); return py::make_tuple(s, e); }
+bool  PyDbSpline::setFitTangents(const AcGeVector3d& s, const AcGeVector3d& e) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFitTangents(s, e), L"AcDbSpline::setFitTangents"); }
+bool PyDbSpline::hasFitData() const { if (!impObj()) return false; return impObj()->hasFitData() != Adesk::kFalse; }
+bool  PyDbSpline::purgeFitData() { if (!impObj()) return false; return PyWarnIfError(impObj()->purgeFitData(), L"AcDbSpline::purgeFitData"); }
+bool  PyDbSpline::updateFitData() { if (!impObj()) return false; return PyWarnIfError(impObj()->updateFitData(), L"AcDbSpline::updateFitData"); }
 
 std::tuple<AcGePoint3dArray, bool, AcGeVector3d, AcGeVector3d, int, int, double> PyDbSpline::getFitData() const {
 	AcGePoint3dArray fitPoints;
@@ -55,6 +55,7 @@ std::tuple<int, bool, bool, bool, AcGePoint3dArray, AcGeDoubleArray, AcGeDoubleA
 }
 
 bool PyDbSpline::setFitData(const AcGePoint3dArray& fitPoints, const AcGeVector3d& startTangent, const AcGeVector3d& endTangent, int knotParam, int degree, double fitTolerance) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setFitData(fitPoints, startTangent, endTangent, static_cast<AcGe::KnotParameterization>(knotParam), degree, fitTolerance), L"AcDbSpline::setFitData");
 }
 
@@ -71,6 +72,7 @@ PyDbSpline::PyDbSpline(int degree, bool rational, bool closed, bool periodic, co
 		controlPoints, knots, weights, controlPtTol, knotTol)) {}
 
 bool PyDbSpline::setNurbsData(int degree, bool rational, bool closed, bool periodic, const AcGePoint3dArray& controlPoints, const AcGeDoubleArray& knots, const AcGeDoubleArray& weights, double controlPtTol, double knotTol) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setNurbsData(degree,
 		rational ? Adesk::kTrue : Adesk::kFalse,
 		closed ? Adesk::kTrue : Adesk::kFalse,
@@ -95,10 +97,12 @@ PyDbCurve PyDbSpline::toPolylineAs(bool bConvertAsArcs, bool bToLWPolyline, int 
 }
 
 bool PyDbSpline::insertControlPointAt(double knotParam, const AcGePoint3d& ctrlPt, double weight) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->insertControlPointAt(knotParam, ctrlPt, weight), L"AcDbSpline::insertControlPointAt");
 }
 
 bool PyDbSpline::removeControlPointAt(int index) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->removeControlPointAt(index), L"AcDbSpline::removeControlPointAt");
 }
 

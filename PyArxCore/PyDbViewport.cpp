@@ -4,75 +4,75 @@
 
 PyWrapper_Cpp(DbViewport)
 AcString PyDbViewport::toString() const { return AcString(std::format("AcDbViewport[wrapper]").c_str(), AcString::Utf8); }
-double PyDbViewport::height() const { return impObj() ? impObj()->height() : 0.0; }
+double PyDbViewport::height() const { if (!impObj()) return 0.0; return impObj() ? impObj()->height() : 0.0; }
 
 bool  PyDbViewport::setHeight(double h) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHeight(h), L"AcDbViewport::setHeight"); }
 
-double PyDbViewport::width() const { return impObj() ? impObj()->width() : 0.0; }
+double PyDbViewport::width() const { if (!impObj()) return 0.0; return impObj() ? impObj()->width() : 0.0; }
 
 bool  PyDbViewport::setWidth(double w) { if (!impObj()) return false; return PyWarnIfError(impObj()->setWidth(w), L"AcDbViewport::setWidth"); }
 
-AcGePoint3d PyDbViewport::centerPoint() const { return impObj() ? impObj()->centerPoint() : AcGePoint3d(); }
+AcGePoint3d PyDbViewport::centerPoint() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->centerPoint() : AcGePoint3d(); }
 
 bool  PyDbViewport::setCenterPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setCenterPoint(p), L"AcDbViewport::setCenterPoint"); }
 
-AcGePoint3d PyDbViewport::viewTarget() const { return impObj() ? impObj()->viewTarget() : AcGePoint3d(); }
+AcGePoint3d PyDbViewport::viewTarget() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->viewTarget() : AcGePoint3d(); }
 
 bool  PyDbViewport::setViewTarget(const AcGePoint3d& t) { if (!impObj()) return false; return PyWarnIfError(impObj()->setViewTarget(t), L"AcDbViewport::setViewTarget"); }
 
-int PyDbViewport::number() const { return impObj() ? impObj()->number() : 0; }
-bool PyDbViewport::isOn() const { return impObj() ? impObj()->isOn() : false; }
+int PyDbViewport::number() const { if (!impObj()) return 0; return impObj() ? impObj()->number() : 0; }
+bool PyDbViewport::isOn() const { if (!impObj()) return false; return impObj() ? impObj()->isOn() : false; }
 bool  PyDbViewport::setIsOn(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIsOn(v), L"AcDbViewport::setIsOn"); }
-AcGeVector3d PyDbViewport::viewDirection() const { return impObj() ? impObj()->viewDirection() : AcGeVector3d(); }
+AcGeVector3d PyDbViewport::viewDirection() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->viewDirection() : AcGeVector3d(); }
 bool  PyDbViewport::setViewDirection(const AcGeVector3d& v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setViewDirection(v), L"AcDbViewport::setViewDirection"); }
-double PyDbViewport::viewHeight() const { return impObj() ? impObj()->viewHeight() : 0.0; }
+double PyDbViewport::viewHeight() const { if (!impObj()) return 0.0; return impObj() ? impObj()->viewHeight() : 0.0; }
 bool  PyDbViewport::setViewHeight(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setViewHeight(v), L"AcDbViewport::setViewHeight"); }
-AcGePoint2d PyDbViewport::viewCenter() const { return impObj() ? impObj()->viewCenter() : AcGePoint2d(); }
+AcGePoint2d PyDbViewport::viewCenter() const { if (!impObj()) return AcGePoint2d(); return impObj() ? impObj()->viewCenter() : AcGePoint2d(); }
 bool  PyDbViewport::setViewCenter(const AcGePoint2d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setViewCenter(p), L"AcDbViewport::setViewCenter"); }
-double PyDbViewport::twistAngle() const { return impObj() ? impObj()->twistAngle() : 0.0; }
+double PyDbViewport::twistAngle() const { if (!impObj()) return 0.0; return impObj() ? impObj()->twistAngle() : 0.0; }
 bool  PyDbViewport::setTwistAngle(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTwistAngle(v), L"AcDbViewport::setTwistAngle"); }
-double PyDbViewport::lensLength() const { return impObj() ? impObj()->lensLength() : 0.0; }
+double PyDbViewport::lensLength() const { if (!impObj()) return 0.0; return impObj() ? impObj()->lensLength() : 0.0; }
 bool  PyDbViewport::setLensLength(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLensLength(v), L"AcDbViewport::setLensLength"); }
-bool PyDbViewport::isFrontClipOn() const { return impObj() ? impObj()->isFrontClipOn() : false; }
+bool PyDbViewport::isFrontClipOn() const { if (!impObj()) return false; return impObj() ? impObj()->isFrontClipOn() : false; }
 bool  PyDbViewport::setFrontClipOn(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFrontClipOn(v), L"AcDbViewport::setFrontClipOn"); }
-bool PyDbViewport::isBackClipOn() const { return impObj() ? impObj()->isBackClipOn() : false; }
+bool PyDbViewport::isBackClipOn() const { if (!impObj()) return false; return impObj() ? impObj()->isBackClipOn() : false; }
 bool  PyDbViewport::setBackClipOn(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBackClipOn(v), L"AcDbViewport::setBackClipOn"); }
-double PyDbViewport::frontClipDistance() const { return impObj() ? impObj()->frontClipDistance() : 0.0; }
+double PyDbViewport::frontClipDistance() const { if (!impObj()) return 0.0; return impObj() ? impObj()->frontClipDistance() : 0.0; }
 bool  PyDbViewport::setFrontClipDistance(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFrontClipDistance(v), L"AcDbViewport::setFrontClipDistance"); }
-double PyDbViewport::backClipDistance() const { return impObj() ? impObj()->backClipDistance() : 0.0; }
+double PyDbViewport::backClipDistance() const { if (!impObj()) return 0.0; return impObj() ? impObj()->backClipDistance() : 0.0; }
 bool  PyDbViewport::setBackClipDistance(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBackClipDistance(v), L"AcDbViewport::setBackClipDistance"); }
-bool PyDbViewport::isPerspectiveOn() const { return impObj() ? impObj()->isPerspectiveOn() : false; }
+bool PyDbViewport::isPerspectiveOn() const { if (!impObj()) return false; return impObj() ? impObj()->isPerspectiveOn() : false; }
 bool  PyDbViewport::setPerspectiveOn(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPerspectiveOn(v), L"AcDbViewport::setPerspectiveOn"); }
-int PyDbViewport::circleSides() const { return impObj() ? impObj()->circleSides() : 0; }
+int PyDbViewport::circleSides() const { if (!impObj()) return 0; return impObj() ? impObj()->circleSides() : 0; }
 bool  PyDbViewport::setCircleSides(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setCircleSides(static_cast<Adesk::UInt16>(v)), L"AcDbViewport::setCircleSides"); }
-bool PyDbViewport::isSnapOn() const { return impObj() ? impObj()->isSnapOn() : false; }
+bool PyDbViewport::isSnapOn() const { if (!impObj()) return false; return impObj() ? impObj()->isSnapOn() : false; }
 bool  PyDbViewport::setSnapOn(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setSnapOn(v), L"AcDbViewport::setSnapOn"); }
-double PyDbViewport::snapAngle() const { return impObj() ? impObj()->snapAngle() : 0.0; }
+double PyDbViewport::snapAngle() const { if (!impObj()) return 0.0; return impObj() ? impObj()->snapAngle() : 0.0; }
 bool  PyDbViewport::setSnapAngle(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setSnapAngle(v), L"AcDbViewport::setSnapAngle"); }
-AcGePoint2d PyDbViewport::snapBasePoint() const { return impObj() ? impObj()->snapBasePoint() : AcGePoint2d(); }
+AcGePoint2d PyDbViewport::snapBasePoint() const { if (!impObj()) return AcGePoint2d(); return impObj() ? impObj()->snapBasePoint() : AcGePoint2d(); }
 bool  PyDbViewport::setSnapBasePoint(const AcGePoint2d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setSnapBasePoint(p), L"AcDbViewport::setSnapBasePoint"); }
-AcGeVector2d PyDbViewport::snapIncrement() const { return impObj() ? impObj()->snapIncrement() : AcGeVector2d(); }
+AcGeVector2d PyDbViewport::snapIncrement() const { if (!impObj()) return AcGeVector2d(); return impObj() ? impObj()->snapIncrement() : AcGeVector2d(); }
 bool  PyDbViewport::setSnapIncrement(const AcGeVector2d& v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setSnapIncrement(v), L"AcDbViewport::setSnapIncrement"); }
-bool PyDbViewport::isGridOn() const { return impObj() ? impObj()->isGridOn() : false; }
+bool PyDbViewport::isGridOn() const { if (!impObj()) return false; return impObj() ? impObj()->isGridOn() : false; }
 bool  PyDbViewport::setGridOn(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setGridOn(v), L"AcDbViewport::setGridOn"); }
-int PyDbViewport::gridMajor() const { return impObj() ? impObj()->gridMajor() : 0; }
+int PyDbViewport::gridMajor() const { if (!impObj()) return 0; return impObj() ? impObj()->gridMajor() : 0; }
 bool  PyDbViewport::setGridMajor(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setGridMajor(static_cast<Adesk::UInt16>(v)), L"AcDbViewport::setGridMajor"); }
-AcGeVector2d PyDbViewport::gridIncrement() const { return impObj() ? impObj()->gridIncrement() : AcGeVector2d(); }
+AcGeVector2d PyDbViewport::gridIncrement() const { if (!impObj()) return AcGeVector2d(); return impObj() ? impObj()->gridIncrement() : AcGeVector2d(); }
 bool  PyDbViewport::setGridIncrement(const AcGeVector2d& v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setGridIncrement(v), L"AcDbViewport::setGridIncrement"); }
-bool PyDbViewport::hiddenLinesRemoved() const { return impObj() ? impObj()->hiddenLinesRemoved() : false; }
+bool PyDbViewport::hiddenLinesRemoved() const { if (!impObj()) return false; return impObj() ? impObj()->hiddenLinesRemoved() : false; }
 bool  PyDbViewport::removeHiddenLines(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->removeHiddenLines(v), L"AcDbViewport::removeHiddenLines"); }
 bool  PyDbViewport::updateDisplay() { if (!impObj()) return false; return PyWarnIfError(impObj()->updateDisplay(), L"AcDbViewport::updateDisplay"); }
-bool PyDbViewport::isLocked() const { return impObj() ? impObj()->isLocked() : false; }
+bool PyDbViewport::isLocked() const { if (!impObj()) return false; return impObj() ? impObj()->isLocked() : false; }
 bool  PyDbViewport::setLocked() { if (!impObj()) return false; return PyWarnIfError(impObj()->setLocked(), L"AcDbViewport::setLocked"); }
 bool  PyDbViewport::setUnlocked() { if (!impObj()) return false; return PyWarnIfError(impObj()->setUnlocked(), L"AcDbViewport::setUnlocked"); }
 
 // ---- 显示/裁剪/UCS 开关与视图关联（AcDbViewport 自己）----
-bool PyDbViewport::isFastZoomOn() const { return impObj() ? impObj()->isFastZoomOn() : false; }
-bool PyDbViewport::isFrontClipAtEyeOn() const { return impObj() ? impObj()->isFrontClipAtEyeOn() : false; }
-bool PyDbViewport::isSnapIsometric() const { return impObj() ? impObj()->isSnapIsometric() : false; }
-bool PyDbViewport::isUcsFollowModeOn() const { return impObj() ? impObj()->isUcsFollowModeOn() : false; }
-bool PyDbViewport::isUcsIconAtOrigin() const { return impObj() ? impObj()->isUcsIconAtOrigin() : false; }
-bool PyDbViewport::isUcsIconVisible() const { return impObj() ? impObj()->isUcsIconVisible() : false; }
+bool PyDbViewport::isFastZoomOn() const { if (!impObj()) return false; return impObj() ? impObj()->isFastZoomOn() : false; }
+bool PyDbViewport::isFrontClipAtEyeOn() const { if (!impObj()) return false; return impObj() ? impObj()->isFrontClipAtEyeOn() : false; }
+bool PyDbViewport::isSnapIsometric() const { if (!impObj()) return false; return impObj() ? impObj()->isSnapIsometric() : false; }
+bool PyDbViewport::isUcsFollowModeOn() const { if (!impObj()) return false; return impObj() ? impObj()->isUcsFollowModeOn() : false; }
+bool PyDbViewport::isUcsIconAtOrigin() const { if (!impObj()) return false; return impObj() ? impObj()->isUcsIconAtOrigin() : false; }
+bool PyDbViewport::isUcsIconVisible() const { if (!impObj()) return false; return impObj() ? impObj()->isUcsIconVisible() : false; }
 
 uint64_t PyDbViewport::getLabelBlock() const {
 	if (!impObj()) return 0ULL;

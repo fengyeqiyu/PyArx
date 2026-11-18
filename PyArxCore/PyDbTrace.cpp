@@ -8,11 +8,11 @@ AcGePoint3d PyDbTrace::getPointAt(Adesk::UInt16 i) const { if (!impObj()) return
 
 bool  PyDbTrace::setPointAt(Adesk::UInt16 i, const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPointAt(i, p), L"AcDbTrace::setPointAt"); }
 
-double PyDbTrace::thickness() const { return impObj() ? impObj()->thickness() : 0.0; }
+double PyDbTrace::thickness() const { if (!impObj()) return 0.0; return impObj() ? impObj()->thickness() : 0.0; }
 
 bool  PyDbTrace::setThickness(double t) { if (!impObj()) return false; return PyWarnIfError(impObj()->setThickness(t), L"AcDbTrace::setThickness"); }
 
-AcGeVector3d PyDbTrace::normal() const { return impObj() ? impObj()->normal() : AcGeVector3d(); }
+AcGeVector3d PyDbTrace::normal() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->normal() : AcGeVector3d(); }
 bool  PyDbTrace::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbTrace::setNormal"); }
 // 注：AcDbTrace::elevation/setElevation 未被导入库导出（LNK2001），不绑定
 

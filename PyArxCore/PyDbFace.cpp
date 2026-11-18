@@ -4,13 +4,13 @@
 
 PyWrapper_Cpp(DbFace)
 AcString PyDbFace::toString() const { return AcString(std::format("AcDbFace[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbFace::getVertexAt(Adesk::UInt16 i) const { AcGePoint3d p; if(!PyWarnIfError(impObj()->getVertexAt(i, p), L"AcDbFace::getVertexAt")) return AcGePoint3d(); return p; }
+AcGePoint3d PyDbFace::getVertexAt(Adesk::UInt16 i) const { if (!impObj()) return AcGePoint3d(); AcGePoint3d p; if(!PyWarnIfError(impObj()->getVertexAt(i, p), L"AcDbFace::getVertexAt")) return AcGePoint3d(); return p; }
 
-bool  PyDbFace::setVertexAt(Adesk::UInt16 i, const AcGePoint3d& p) { return PyWarnIfError(impObj()->setVertexAt(i, p), L"AcDbFace::setVertexAt"); }
+bool  PyDbFace::setVertexAt(Adesk::UInt16 i, const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setVertexAt(i, p), L"AcDbFace::setVertexAt"); }
 
-bool PyDbFace::isEdgeVisibleAt(Adesk::UInt16 i) const { Adesk::Boolean v = Adesk::kFalse; if(!PyWarnIfError(impObj()->isEdgeVisibleAt(i, v), L"AcDbFace::isEdgeVisibleAt")) return false; return v != Adesk::kFalse; }
-bool  PyDbFace::makeEdgeVisibleAt(Adesk::UInt16 i) { return PyWarnIfError(impObj()->makeEdgeVisibleAt(i), L"AcDbFace::makeEdgeVisibleAt"); }
-bool  PyDbFace::makeEdgeInvisibleAt(Adesk::UInt16 i) { return PyWarnIfError(impObj()->makeEdgeInvisibleAt(i), L"AcDbFace::makeEdgeInvisibleAt"); }
+bool PyDbFace::isEdgeVisibleAt(Adesk::UInt16 i) const { if (!impObj()) return false; Adesk::Boolean v = Adesk::kFalse; if(!PyWarnIfError(impObj()->isEdgeVisibleAt(i, v), L"AcDbFace::isEdgeVisibleAt")) return false; return v != Adesk::kFalse; }
+bool  PyDbFace::makeEdgeVisibleAt(Adesk::UInt16 i) { if (!impObj()) return false; return PyWarnIfError(impObj()->makeEdgeVisibleAt(i), L"AcDbFace::makeEdgeVisibleAt"); }
+bool  PyDbFace::makeEdgeInvisibleAt(Adesk::UInt16 i) { if (!impObj()) return false; return PyWarnIfError(impObj()->makeEdgeInvisibleAt(i), L"AcDbFace::makeEdgeInvisibleAt"); }
 
 void bind_PyDbFace(pym& m) {
 	py::class_<PyDbFace, PyDbEntity>(m, "PyDbFace")

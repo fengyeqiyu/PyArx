@@ -4,21 +4,21 @@
 
 PyWrapper_Cpp(Db2dVertex);
 AcString PyDb2dVertex::toString() const { return AcString(std::format("AcDb2dVertex[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDb2dVertex::position() const { return impObj() ? impObj()->position() : AcGePoint3d(); }
+AcGePoint3d PyDb2dVertex::position() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->position() : AcGePoint3d(); }
 bool PyDb2dVertex::setPosition(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPosition(p), L"AcDb2dVertex::setPosition"); }
-double PyDb2dVertex::startWidth() const { return impObj() ? impObj()->startWidth() : 0.0; }
+double PyDb2dVertex::startWidth() const { if (!impObj()) return 0.0; return impObj() ? impObj()->startWidth() : 0.0; }
 bool PyDb2dVertex::setStartWidth(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setStartWidth(v), L"AcDb2dVertex::setStartWidth"); }
-double PyDb2dVertex::endWidth() const { return impObj() ? impObj()->endWidth() : 0.0; }
+double PyDb2dVertex::endWidth() const { if (!impObj()) return 0.0; return impObj() ? impObj()->endWidth() : 0.0; }
 bool PyDb2dVertex::setEndWidth(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEndWidth(v), L"AcDb2dVertex::setEndWidth"); }
-double PyDb2dVertex::bulge() const { return impObj() ? impObj()->bulge() : 0.0; }
+double PyDb2dVertex::bulge() const { if (!impObj()) return 0.0; return impObj() ? impObj()->bulge() : 0.0; }
 bool PyDb2dVertex::setBulge(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBulge(v), L"AcDb2dVertex::setBulge"); }
-bool PyDb2dVertex::isTangentUsed() const { return impObj() ? (impObj()->isTangentUsed() != Adesk::kFalse) : false; }
+bool PyDb2dVertex::isTangentUsed() const { if (!impObj()) return false; return impObj() ? (impObj()->isTangentUsed() != Adesk::kFalse) : false; }
 bool PyDb2dVertex::useTangent() { if (!impObj()) return false; return PyWarnIfError(impObj()->useTangent(), L"AcDb2dVertex::useTangent"); }
 bool PyDb2dVertex::ignoreTangent() { if (!impObj()) return false; return PyWarnIfError(impObj()->ignoreTangent(), L"AcDb2dVertex::ignoreTangent"); }
 bool PyDb2dVertex::setTangentUsed(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTangentUsed(v ? Adesk::kTrue : Adesk::kFalse), L"AcDb2dVertex::setTangentUsed"); }
-double PyDb2dVertex::tangent() const { return impObj() ? impObj()->tangent() : 0.0; }
+double PyDb2dVertex::tangent() const { if (!impObj()) return 0.0; return impObj() ? impObj()->tangent() : 0.0; }
 bool PyDb2dVertex::setTangent(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTangent(v), L"AcDb2dVertex::setTangent"); }
-int PyDb2dVertex::vertexType() const { return impObj() ? static_cast<int>(impObj()->vertexType()) : 0; }
+int PyDb2dVertex::vertexType() const { if (!impObj()) return 0; return impObj() ? static_cast<int>(impObj()->vertexType()) : 0; }
 
 void bind_PyDb2dVertex(pym& m) {
 	py::class_<PyDb2dVertex, PyDbVertex>(m, "PyDb2dVertex")

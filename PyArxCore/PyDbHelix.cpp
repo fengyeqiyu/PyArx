@@ -4,39 +4,39 @@
 
 PyWrapper_Cpp(DbHelix)
 AcString PyDbHelix::toString() const { return AcString(std::format("AcDbHelix[wrapper]").c_str(), AcString::Utf8); }
-double PyDbHelix::height() const { return impObj() ? impObj()->height() : 0.0; }
+double PyDbHelix::height() const { if (!impObj()) return 0.0; return impObj() ? impObj()->height() : 0.0; }
 
 bool  PyDbHelix::setHeight(double h) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHeight(h), L"AcDbHelix::setHeight"); }
 
-double PyDbHelix::baseRadius() const { return impObj() ? impObj()->baseRadius() : 0.0; }
+double PyDbHelix::baseRadius() const { if (!impObj()) return 0.0; return impObj() ? impObj()->baseRadius() : 0.0; }
 
 bool  PyDbHelix::setBaseRadius(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBaseRadius(r), L"AcDbHelix::setBaseRadius"); }
 
-double PyDbHelix::topRadius() const { return impObj() ? impObj()->topRadius() : 0.0; }
+double PyDbHelix::topRadius() const { if (!impObj()) return 0.0; return impObj() ? impObj()->topRadius() : 0.0; }
 
 bool  PyDbHelix::setTopRadius(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTopRadius(r), L"AcDbHelix::setTopRadius"); }
 
-double PyDbHelix::turns() const { return impObj() ? impObj()->turns() : 0.0; }
+double PyDbHelix::turns() const { if (!impObj()) return 0.0; return impObj() ? impObj()->turns() : 0.0; }
 
 bool  PyDbHelix::setTurns(double t) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTurns(t), L"AcDbHelix::setTurns"); }
 
-AcGePoint3d PyDbHelix::startPoint() const { return impObj() ? impObj()->startPoint() : AcGePoint3d(); }
+AcGePoint3d PyDbHelix::startPoint() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->startPoint() : AcGePoint3d(); }
 
 bool  PyDbHelix::setStartPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setStartPoint(p), L"AcDbHelix::setStartPoint"); }
 
 bool  PyDbHelix::createHelix() { if (!impObj()) return false; return PyWarnIfError(impObj()->createHelix(), L"AcDbHelix::createHelix"); }
-AcGePoint3d PyDbHelix::axisPoint() const { return impObj() ? impObj()->axisPoint() : AcGePoint3d(); }
+AcGePoint3d PyDbHelix::axisPoint() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->axisPoint() : AcGePoint3d(); }
 bool  PyDbHelix::setAxisPoint(const AcGePoint3d& p, bool bMoveStartPoint) { if (!impObj()) return false; return PyWarnIfError(impObj()->setAxisPoint(p, bMoveStartPoint), L"AcDbHelix::setAxisPoint"); }
-AcGeVector3d PyDbHelix::axisVector() const { return impObj() ? impObj()->axisVector() : AcGeVector3d(); }
+AcGeVector3d PyDbHelix::axisVector() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->axisVector() : AcGeVector3d(); }
 bool  PyDbHelix::setAxisVector(const AcGeVector3d& v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setAxisVector(v), L"AcDbHelix::setAxisVector"); }
-double PyDbHelix::turnHeight() const { return impObj() ? impObj()->turnHeight() : 0.0; }
+double PyDbHelix::turnHeight() const { if (!impObj()) return 0.0; return impObj() ? impObj()->turnHeight() : 0.0; }
 bool  PyDbHelix::setTurnHeight(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTurnHeight(v), L"AcDbHelix::setTurnHeight"); }
-bool PyDbHelix::twist() const { return impObj() ? (impObj()->twist() != Adesk::kFalse) : false; }
+bool PyDbHelix::twist() const { if (!impObj()) return false; return impObj() ? (impObj()->twist() != Adesk::kFalse) : false; }
 bool  PyDbHelix::setTwist(bool b) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTwist(b ? Adesk::kTrue : Adesk::kFalse), L"AcDbHelix::setTwist"); }
-int PyDbHelix::constrain() const { return impObj() ? static_cast<int>(impObj()->constrain()) : 0; }
+int PyDbHelix::constrain() const { if (!impObj()) return 0; return impObj() ? static_cast<int>(impObj()->constrain()) : 0; }
 bool  PyDbHelix::setConstrain(int c) { if (!impObj()) return false; return PyWarnIfError(impObj()->setConstrain(static_cast<AcDbHelix::ConstrainType>(c)), L"AcDbHelix::setConstrain"); }
-double PyDbHelix::turnSlope() const { return impObj() ? impObj()->turnSlope() : 0.0; }
-double PyDbHelix::totalLength() const { return impObj() ? impObj()->totalLength() : 0.0; }
+double PyDbHelix::turnSlope() const { if (!impObj()) return 0.0; return impObj() ? impObj()->turnSlope() : 0.0; }
+double PyDbHelix::totalLength() const { if (!impObj()) return 0.0; return impObj() ? impObj()->totalLength() : 0.0; }
 
 void bind_PyDbHelix(pym& m) {
 	py::class_<PyDbHelix, PyDbSpline>(m, "PyDbHelix")

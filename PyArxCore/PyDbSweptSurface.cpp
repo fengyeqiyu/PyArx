@@ -5,6 +5,7 @@
 PyWrapper_Cpp(DbSweptSurface);
 
 double PyDbSweptSurface::getPathLength() const {
+	if (!impObj()) return 0.0;
 	double len = 0.0;
 	if (!PyWarnIfError(impObj()->getPathLength(len), L"AcDbSweptSurface::getPathLength"))
 		return 0.0;
@@ -12,6 +13,7 @@ double PyDbSweptSurface::getPathLength() const {
 }
 
 bool PyDbSweptSurface::isDependent() const {
+	if (!impObj()) return false;
 	return impObj()->isDependent();
 }
 

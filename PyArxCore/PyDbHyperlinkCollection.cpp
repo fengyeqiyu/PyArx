@@ -3,6 +3,7 @@
 #include "PyDbHyperlinkCollection.h"
 
 int PyDbHyperlinkCollection::count() const {
+	if (!impObj()) return 0;
 	return impObj() ? impObj()->count() : 0;
 }
 

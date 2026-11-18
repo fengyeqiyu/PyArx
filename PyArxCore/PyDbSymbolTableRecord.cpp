@@ -4,12 +4,12 @@
 
 PyWrapper_Cpp(DbSymbolTableRecord);
 
-bool  PyDbSymbolTableRecord::setName(const AcString& name) { return PyWarnIfError(impObj()->setName(name.kwszPtr()), L"AcDbSymbolTableRecord::setName"); }
-AcString PyDbSymbolTableRecord::getName() const { AcString s; if(!PyWarnIfError(impObj()->getName(s), L"AcDbSymbolTableRecord::getName")) return AcString(); return s; }
-bool PyDbSymbolTableRecord::isDependent() const { return impObj() ? impObj()->isDependent() : false; }
-bool PyDbSymbolTableRecord::isResolved() const { return impObj() ? impObj()->isResolved() : false; }
-bool PyDbSymbolTableRecord::isRenamable() const { return impObj() ? impObj()->isRenamable() : false; }
-bool PyDbSymbolTableRecord::upgradeOpen() { return PyWarnIfError(impObj()->upgradeOpen(), L"SymbolTableRecord.upgradeOpen"); }
+bool  PyDbSymbolTableRecord::setName(const AcString& name) { if (!impObj()) return false; return PyWarnIfError(impObj()->setName(name.kwszPtr()), L"AcDbSymbolTableRecord::setName"); }
+AcString PyDbSymbolTableRecord::getName() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->getName(s), L"AcDbSymbolTableRecord::getName")) return AcString(); return s; }
+bool PyDbSymbolTableRecord::isDependent() const { if (!impObj()) return false; return impObj() ? impObj()->isDependent() : false; }
+bool PyDbSymbolTableRecord::isResolved() const { if (!impObj()) return false; return impObj() ? impObj()->isResolved() : false; }
+bool PyDbSymbolTableRecord::isRenamable() const { if (!impObj()) return false; return impObj() ? impObj()->isRenamable() : false; }
+bool PyDbSymbolTableRecord::upgradeOpen() { if (!impObj()) return false; return PyWarnIfError(impObj()->upgradeOpen(), L"SymbolTableRecord.upgradeOpen"); }
 
 void bind_PyDbSymbolTableRecord(pym& m) {
 	py::class_<PyDbSymbolTableRecord, PyDbObject>(m, "PyDbSymbolTableRecord")

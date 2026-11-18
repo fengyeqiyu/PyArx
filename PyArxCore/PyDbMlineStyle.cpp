@@ -6,35 +6,36 @@ PyWrapper_Cpp(DbMlineStyle);
 
 AcString PyDbMlineStyle::toString() const { return AcString(std::format("AcDbMlineStyle[wrapper]").c_str(), AcString::Utf8); }
 
-AcString PyDbMlineStyle::description() const { const ACHAR* p = impObj()->description(); return p ? AcString(p) : AcString(); }
-bool PyDbMlineStyle::setDescription(const AcString& desc) { return PyWarnIfError(impObj()->setDescription(desc.kwszPtr()), L"AcDbMlineStyle::setDescription"); }
-AcString PyDbMlineStyle::styleName() const { const ACHAR* p = impObj()->name(); return p ? AcString(p) : AcString(); }
-bool PyDbMlineStyle::setStyleName(const AcString& name) { return PyWarnIfError(impObj()->setName(name.kwszPtr()), L"AcDbMlineStyle::setName"); }
+AcString PyDbMlineStyle::description() const { if (!impObj()) return AcString(); const ACHAR* p = impObj()->description(); return p ? AcString(p) : AcString(); }
+bool PyDbMlineStyle::setDescription(const AcString& desc) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDescription(desc.kwszPtr()), L"AcDbMlineStyle::setDescription"); }
+AcString PyDbMlineStyle::styleName() const { if (!impObj()) return AcString(); const ACHAR* p = impObj()->name(); return p ? AcString(p) : AcString(); }
+bool PyDbMlineStyle::setStyleName(const AcString& name) { if (!impObj()) return false; return PyWarnIfError(impObj()->setName(name.kwszPtr()), L"AcDbMlineStyle::setName"); }
 
-bool PyDbMlineStyle::showMiters() const { return impObj()->showMiters(); }
-bool PyDbMlineStyle::setShowMiters(bool show) { impObj()->setShowMiters(show); return true; }
-bool PyDbMlineStyle::startSquareCap() const { return impObj()->startSquareCap(); }
-bool PyDbMlineStyle::setStartSquareCap(bool show) { impObj()->setStartSquareCap(show); return true; }
-bool PyDbMlineStyle::startRoundCap() const { return impObj()->startRoundCap(); }
-bool PyDbMlineStyle::setStartRoundCap(bool show) { impObj()->setStartRoundCap(show); return true; }
-bool PyDbMlineStyle::startInnerArcs() const { return impObj()->startInnerArcs(); }
-bool PyDbMlineStyle::setStartInnerArcs(bool show) { impObj()->setStartInnerArcs(show); return true; }
-bool PyDbMlineStyle::endSquareCap() const { return impObj()->endSquareCap(); }
-bool PyDbMlineStyle::setEndSquareCap(bool show) { impObj()->setEndSquareCap(show); return true; }
-bool PyDbMlineStyle::endRoundCap() const { return impObj()->endRoundCap(); }
-bool PyDbMlineStyle::setEndRoundCap(bool show) { impObj()->setEndRoundCap(show); return true; }
-bool PyDbMlineStyle::endInnerArcs() const { return impObj()->endInnerArcs(); }
-bool PyDbMlineStyle::setEndInnerArcs(bool show) { impObj()->setEndInnerArcs(show); return true; }
-bool PyDbMlineStyle::filled() const { return impObj()->filled(); }
-bool PyDbMlineStyle::setFilled(bool onOff) { impObj()->setFilled(onOff); return true; }
+bool PyDbMlineStyle::showMiters() const { if (!impObj()) return false; return impObj()->showMiters(); }
+bool PyDbMlineStyle::setShowMiters(bool show) { if (!impObj()) return false; impObj()->setShowMiters(show); return true; }
+bool PyDbMlineStyle::startSquareCap() const { if (!impObj()) return false; return impObj()->startSquareCap(); }
+bool PyDbMlineStyle::setStartSquareCap(bool show) { if (!impObj()) return false; impObj()->setStartSquareCap(show); return true; }
+bool PyDbMlineStyle::startRoundCap() const { if (!impObj()) return false; return impObj()->startRoundCap(); }
+bool PyDbMlineStyle::setStartRoundCap(bool show) { if (!impObj()) return false; impObj()->setStartRoundCap(show); return true; }
+bool PyDbMlineStyle::startInnerArcs() const { if (!impObj()) return false; return impObj()->startInnerArcs(); }
+bool PyDbMlineStyle::setStartInnerArcs(bool show) { if (!impObj()) return false; impObj()->setStartInnerArcs(show); return true; }
+bool PyDbMlineStyle::endSquareCap() const { if (!impObj()) return false; return impObj()->endSquareCap(); }
+bool PyDbMlineStyle::setEndSquareCap(bool show) { if (!impObj()) return false; impObj()->setEndSquareCap(show); return true; }
+bool PyDbMlineStyle::endRoundCap() const { if (!impObj()) return false; return impObj()->endRoundCap(); }
+bool PyDbMlineStyle::setEndRoundCap(bool show) { if (!impObj()) return false; impObj()->setEndRoundCap(show); return true; }
+bool PyDbMlineStyle::endInnerArcs() const { if (!impObj()) return false; return impObj()->endInnerArcs(); }
+bool PyDbMlineStyle::setEndInnerArcs(bool show) { if (!impObj()) return false; impObj()->setEndInnerArcs(show); return true; }
+bool PyDbMlineStyle::filled() const { if (!impObj()) return false; return impObj()->filled(); }
+bool PyDbMlineStyle::setFilled(bool onOff) { if (!impObj()) return false; impObj()->setFilled(onOff); return true; }
 
-double PyDbMlineStyle::startAngle() const { return impObj()->startAngle(); }
-bool PyDbMlineStyle::setStartAngle(double ang) { return PyWarnIfError(impObj()->setStartAngle(ang), L"AcDbMlineStyle::setStartAngle"); }
-double PyDbMlineStyle::endAngle() const { return impObj()->endAngle(); }
-bool PyDbMlineStyle::setEndAngle(double ang) { return PyWarnIfError(impObj()->setEndAngle(ang), L"AcDbMlineStyle::setEndAngle"); }
-int PyDbMlineStyle::numElements() const { return impObj()->numElements(); }
+double PyDbMlineStyle::startAngle() const { if (!impObj()) return 0.0; return impObj()->startAngle(); }
+bool PyDbMlineStyle::setStartAngle(double ang) { if (!impObj()) return false; return PyWarnIfError(impObj()->setStartAngle(ang), L"AcDbMlineStyle::setStartAngle"); }
+double PyDbMlineStyle::endAngle() const { if (!impObj()) return 0.0; return impObj()->endAngle(); }
+bool PyDbMlineStyle::setEndAngle(double ang) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEndAngle(ang), L"AcDbMlineStyle::setEndAngle"); }
+int PyDbMlineStyle::numElements() const { if (!impObj()) return 0; return impObj()->numElements(); }
 
 int PyDbMlineStyle::addElement(double offset, int r, int g, int b, uint64_t linetypeId, bool checkIfReferenced) {
+	if (!impObj()) return 0;
 	int idx = 0;
 	AcCmColor c; c.setRGB((Adesk::UInt8)r, (Adesk::UInt8)g, (Adesk::UInt8)b);
 	AcDbObjectId ltId; ltId.setFromOldId(static_cast<Adesk::IntDbId>(linetypeId));
@@ -50,13 +51,15 @@ std::tuple<double, int, int, int, uint64_t> PyDbMlineStyle::getElementAt(int ele
 		ltId.isNull() ? 0ULL : static_cast<uint64_t>(ltId.asOldId()));
 }
 bool PyDbMlineStyle::setElement(int elem, double offset, int r, int g, int b, uint64_t linetypeId) {
+	if (!impObj()) return false;
 	AcCmColor c; c.setRGB((Adesk::UInt8)r, (Adesk::UInt8)g, (Adesk::UInt8)b);
 	AcDbObjectId ltId; ltId.setFromOldId(static_cast<Adesk::IntDbId>(linetypeId));
 	int e = elem;
 	return PyWarnIfError(impObj()->setElement(e, offset, c, ltId), L"AcDbMlineStyle::setElement");
 }
-bool PyDbMlineStyle::removeElementAt(int elem) { return PyWarnIfError(impObj()->removeElementAt(elem), L"AcDbMlineStyle::removeElementAt"); }
+bool PyDbMlineStyle::removeElementAt(int elem) { if (!impObj()) return false; return PyWarnIfError(impObj()->removeElementAt(elem), L"AcDbMlineStyle::removeElementAt"); }
 bool PyDbMlineStyle::setFillColor(int r, int g, int b) {
+	if (!impObj()) return false;
 	AcCmColor c; c.setRGB((Adesk::UInt8)r, (Adesk::UInt8)g, (Adesk::UInt8)b);
 	return PyWarnIfError(impObj()->setFillColor(c), L"AcDbMlineStyle::setFillColor");
 }
@@ -64,8 +67,9 @@ std::tuple<int, int, int> PyDbMlineStyle::fillColor() const {
 	const AcCmColor& c = impObj()->fillColor();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
-void PyDbMlineStyle::initMlineStyle() { impObj()->initMlineStyle(); }
+void PyDbMlineStyle::initMlineStyle() { if (!impObj()) return; impObj()->initMlineStyle(); }
 bool PyDbMlineStyle::setFrom(const PyDbMlineStyle& src, bool checkIfReferenced) {
+	if (!impObj()) return false;
 	impObj()->set(*src.impObj(), checkIfReferenced);
 	return true;
 }

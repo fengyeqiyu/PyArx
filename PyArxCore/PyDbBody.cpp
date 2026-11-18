@@ -4,10 +4,10 @@
 
 PyWrapper_Cpp(DbBody)
 AcString PyDbBody::toString() const { return AcString(std::format("AcDbBody[wrapper]").c_str(), AcString::Utf8); }
-bool PyDbBody::isNull() const { return impObj() ? impObj()->isNull() == Adesk::kTrue : true; }
-unsigned int PyDbBody::numChanges() const { return impObj() ? impObj()->numChanges() : 0u; }
-void PyDbBody::invalidateCachedBodySubentIds() { if (impObj()) impObj()->invalidateCachedBodySubentIds(); }
-bool PyDbBody::usesGraphicsCache() const { return impObj() ? impObj()->usesGraphicsCache() : false; }
+bool PyDbBody::isNull() const { if (!impObj()) return false; return impObj() ? impObj()->isNull() == Adesk::kTrue : true; }
+unsigned int PyDbBody::numChanges() const { if (!impObj()) return 0; return impObj() ? impObj()->numChanges() : 0u; }
+void PyDbBody::invalidateCachedBodySubentIds() { if (!impObj()) return; if (impObj()) impObj()->invalidateCachedBodySubentIds(); }
+bool PyDbBody::usesGraphicsCache() const { if (!impObj()) return false; return impObj() ? impObj()->usesGraphicsCache() : false; }
 
 std::vector<PyDbBody> PyDbBody::acisIn(const AcString& fileName) {
 	AcDbVoidPtrArray out;

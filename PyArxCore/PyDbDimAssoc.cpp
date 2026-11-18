@@ -5,14 +5,17 @@
 PyWrapper_Cpp(DbDimAssoc);
 
 bool PyDbDimAssoc::addToDimensionReactor(bool isAdd) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->addToDimensionReactor(isAdd), L"AcDbDimAssoc::addToDimensionReactor");
 }
 bool PyDbDimAssoc::addToPointRefReactor() {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->addToPointRefReactor(), L"AcDbDimAssoc::addToPointRefReactor");
 }
-int PyDbDimAssoc::assocFlag() { return impObj()->assocFlag(); }
-bool PyDbDimAssoc::assocFlag(int ptType) const { return impObj()->assocFlag(ptType); }
+int PyDbDimAssoc::assocFlag() { if (!impObj()) return 0; return impObj()->assocFlag(); }
+bool PyDbDimAssoc::assocFlag(int ptType) const { if (!impObj()) return false; return impObj()->assocFlag(ptType); }
 uint64_t PyDbDimAssoc::dimObjId() const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id = impObj()->dimObjId();
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 }
@@ -21,9 +24,9 @@ AcDbObjectIdArray PyDbDimAssoc::getDimAssocGeomIds() const {
 	PyWarnIfError(impObj()->getDimAssocGeomIds(ids), L"AcDbDimAssoc::getDimAssocGeomIds");
 	return ids;
 }
-bool PyDbDimAssoc::hasOopsWatcher() const { return impObj()->hasOopsWatcher(); }
-bool PyDbDimAssoc::isAllGeomErased() const { return impObj()->isAllGeomErased(); }
-bool PyDbDimAssoc::isTransSpatial() const { return impObj()->isTransSpatial(); }
+bool PyDbDimAssoc::hasOopsWatcher() const { if (!impObj()) return false; return impObj()->hasOopsWatcher(); }
+bool PyDbDimAssoc::isAllGeomErased() const { if (!impObj()) return false; return impObj()->isAllGeomErased(); }
+bool PyDbDimAssoc::isTransSpatial() const { if (!impObj()) return false; return impObj()->isTransSpatial(); }
 
 std::tuple<bool, uint64_t> PyDbDimAssoc::post(uint64_t dimId, bool isActive) {
 	AcDbObjectId dim; dim.setFromOldId(static_cast<Adesk::UIntPtr>(dimId));
@@ -34,44 +37,56 @@ std::tuple<bool, uint64_t> PyDbDimAssoc::post(uint64_t dimId, bool isActive) {
 }
 
 bool PyDbDimAssoc::removeAssociativity(bool force) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->removeAssociativity(force), L"AcDbDimAssoc::removeAssociativity");
 }
-void PyDbDimAssoc::removeOopsWatcher() { impObj()->removeOopsWatcher(); }
+void PyDbDimAssoc::removeOopsWatcher() { if (!impObj()) return; impObj()->removeOopsWatcher(); }
 bool PyDbDimAssoc::removePointRef(int ptType) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->removePointRef(ptType), L"AcDbDimAssoc::removePointRef");
 }
 bool PyDbDimAssoc::restoreAssocFromOopsWatcher() {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->restoreAssocFromOopsWatcher(), L"AcDbDimAssoc::restoreAssocFromOopsWatcher");
 }
-int PyDbDimAssoc::rotatedDimType() const { return (int)impObj()->rotatedDimType(); }
-void PyDbDimAssoc::setAssocFlag(int assocFlg) { impObj()->setAssocFlag(assocFlg); }
+int PyDbDimAssoc::rotatedDimType() const { if (!impObj()) return 0; return (int)impObj()->rotatedDimType(); }
+void PyDbDimAssoc::setAssocFlag(int assocFlg) { if (!impObj()) return; impObj()->setAssocFlag(assocFlg); }
 bool PyDbDimAssoc::setAssocFlag(int ptType, bool value) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setAssocFlag(ptType, value), L"AcDbDimAssoc::setAssocFlag");
 }
 bool PyDbDimAssoc::setDimObjId(uint64_t dimId) {
+	if (!impObj()) return false;
 	AcDbObjectId id; id.setFromOldId(static_cast<Adesk::UIntPtr>(dimId));
 	return PyWarnIfError(impObj()->setDimObjId(id), L"AcDbDimAssoc::setDimObjId");
 }
 bool PyDbDimAssoc::setRotatedDimType(int dimType) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setRotatedDimType(static_cast<AcDbDimAssoc::RotatedDimType>(dimType)), L"AcDbDimAssoc::setRotatedDimType");
 }
 bool PyDbDimAssoc::setTransSpatial(bool value) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTransSpatial(value), L"AcDbDimAssoc::setTransSpatial");
 }
 bool PyDbDimAssoc::startCmdWatcher() {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->startCmdWatcher(), L"AcDbDimAssoc::startCmdWatcher");
 }
 bool PyDbDimAssoc::startOopsWatcher(bool bAddAll) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->startOopsWatcher(bAddAll), L"AcDbDimAssoc::startOopsWatcher");
 }
 bool PyDbDimAssoc::updateAssociativity(const AcDbObjectIdArray& ids) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->updateAssociativity(ids), L"AcDbDimAssoc::updateAssociativity");
 }
-void PyDbDimAssoc::updateDueToMirror(bool wasInMirror) { impObj()->updateDueToMirror(wasInMirror); }
+void PyDbDimAssoc::updateDueToMirror(bool wasInMirror) { if (!impObj()) return; impObj()->updateDueToMirror(wasInMirror); }
 bool PyDbDimAssoc::updateFillet(const AcDbObjectIdArray& ids) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->updateFillet(ids), L"AcDbDimAssoc::updateFillet");
 }
 bool PyDbDimAssoc::updateXrefSubentPath() {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->updateXrefSubentPath(), L"AcDbDimAssoc::updateXrefSubentPath");
 }
 

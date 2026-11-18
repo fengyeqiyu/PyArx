@@ -8,61 +8,68 @@
 
 PyWrapper_Cpp(DbBlockTableRecord);
 
-AcString PyDbBlockTableRecord::comments() const { AcString s; if(!PyWarnIfError(impObj()->comments(s), L"AcDbBlockTableRecord::comments")) return AcString(); return s; }
-bool  PyDbBlockTableRecord::setComments(const AcString& comments) { return PyWarnIfError(impObj()->setComments(comments.kwszPtr()), L"AcDbBlockTableRecord::setComments"); }
-AcString PyDbBlockTableRecord::pathName() const { AcString s; if(!PyWarnIfError(impObj()->pathName(s), L"AcDbBlockTableRecord::pathName")) return AcString(); return s; }
-bool  PyDbBlockTableRecord::setPathName(const AcString& path) { return PyWarnIfError(impObj()->setPathName(path.kwszPtr()), L"AcDbBlockTableRecord::setPathName"); }
-AcGePoint3d PyDbBlockTableRecord::origin() const { return impObj()->origin(); }
-bool  PyDbBlockTableRecord::setOrigin(const AcGePoint3d& pt) { return PyWarnIfError(impObj()->setOrigin(pt), L"AcDbBlockTableRecord::setOrigin"); }
-bool PyDbBlockTableRecord::hasAttributeDefinitions() const { return impObj()->hasAttributeDefinitions(); }
-bool PyDbBlockTableRecord::hasPreviewIcon() const { return impObj()->hasPreviewIcon(); }
-bool PyDbBlockTableRecord::isAnonymous() const { return impObj()->isAnonymous(); }
-bool PyDbBlockTableRecord::isFromExternalReference() const { return impObj()->isFromExternalReference(); }
-bool PyDbBlockTableRecord::isFromOverlayReference() const { return impObj()->isFromOverlayReference(); }
-bool  PyDbBlockTableRecord::setIsFromOverlayReference(bool bIsOverlay) { return PyWarnIfError(impObj()->setIsFromOverlayReference(bIsOverlay), L"AcDbBlockTableRecord::setIsFromOverlayReference"); }
-bool PyDbBlockTableRecord::isLayout() const { return impObj()->isLayout(); }
-uint64_t PyDbBlockTableRecord::getLayoutId() const { return static_cast<uint64_t>(impObj()->getLayoutId().asOldId()); }
+AcString PyDbBlockTableRecord::comments() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->comments(s), L"AcDbBlockTableRecord::comments")) return AcString(); return s; }
+bool  PyDbBlockTableRecord::setComments(const AcString& comments) { if (!impObj()) return false; return PyWarnIfError(impObj()->setComments(comments.kwszPtr()), L"AcDbBlockTableRecord::setComments"); }
+AcString PyDbBlockTableRecord::pathName() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->pathName(s), L"AcDbBlockTableRecord::pathName")) return AcString(); return s; }
+bool  PyDbBlockTableRecord::setPathName(const AcString& path) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPathName(path.kwszPtr()), L"AcDbBlockTableRecord::setPathName"); }
+AcGePoint3d PyDbBlockTableRecord::origin() const { if (!impObj()) return AcGePoint3d(); return impObj()->origin(); }
+bool  PyDbBlockTableRecord::setOrigin(const AcGePoint3d& pt) { if (!impObj()) return false; return PyWarnIfError(impObj()->setOrigin(pt), L"AcDbBlockTableRecord::setOrigin"); }
+bool PyDbBlockTableRecord::hasAttributeDefinitions() const { if (!impObj()) return false; return impObj()->hasAttributeDefinitions(); }
+bool PyDbBlockTableRecord::hasPreviewIcon() const { if (!impObj()) return false; return impObj()->hasPreviewIcon(); }
+bool PyDbBlockTableRecord::isAnonymous() const { if (!impObj()) return false; return impObj()->isAnonymous(); }
+bool PyDbBlockTableRecord::isFromExternalReference() const { if (!impObj()) return false; return impObj()->isFromExternalReference(); }
+bool PyDbBlockTableRecord::isFromOverlayReference() const { if (!impObj()) return false; return impObj()->isFromOverlayReference(); }
+bool  PyDbBlockTableRecord::setIsFromOverlayReference(bool bIsOverlay) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIsFromOverlayReference(bIsOverlay), L"AcDbBlockTableRecord::setIsFromOverlayReference"); }
+bool PyDbBlockTableRecord::isLayout() const { if (!impObj()) return false; return impObj()->isLayout(); }
+uint64_t PyDbBlockTableRecord::getLayoutId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->getLayoutId().asOldId()); }
 bool  PyDbBlockTableRecord::setLayoutId(uint64_t layoutId) {
+	if (!impObj()) return false;
 	AcDbObjectId id;
 	id.setFromOldId(static_cast<Adesk::IntDbId>(layoutId));
 	return PyWarnIfError(impObj()->setLayoutId(id), L"AcDbBlockTableRecord::setLayoutId");
 }
-bool PyDbBlockTableRecord::isUnloaded() const { return impObj()->isUnloaded(); }
-bool  PyDbBlockTableRecord::setIsUnloaded(bool isUnloaded) { return PyWarnIfError(impObj()->setIsUnloaded(isUnloaded), L"AcDbBlockTableRecord::setIsUnloaded"); }
-int PyDbBlockTableRecord::xrefStatus() const { return static_cast<int>(impObj()->xrefStatus()); }
+bool PyDbBlockTableRecord::isUnloaded() const { if (!impObj()) return false; return impObj()->isUnloaded(); }
+bool  PyDbBlockTableRecord::setIsUnloaded(bool isUnloaded) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIsUnloaded(isUnloaded), L"AcDbBlockTableRecord::setIsUnloaded"); }
+int PyDbBlockTableRecord::xrefStatus() const { if (!impObj()) return 0; return static_cast<int>(impObj()->xrefStatus()); }
 
 py::list PyDbBlockTableRecord::getBlockReferenceIds(bool directOnly, bool forceValidity) const {
+	if (!impObj()) return py::list();
 	AcDbObjectIdArray ids;
 	if(!PyWarnIfError(impObj()->getBlockReferenceIds(ids, directOnly, forceValidity), L"AcDbBlockTableRecord::getBlockReferenceIds")) return py::list();
 	return py::cast(ids);
 }
 
 py::list PyDbBlockTableRecord::getErasedBlockReferenceIds() const {
+	if (!impObj()) return py::list();
 	AcDbObjectIdArray ids;
 	if(!PyWarnIfError(impObj()->getErasedBlockReferenceIds(ids), L"AcDbBlockTableRecord::getErasedBlockReferenceIds")) return py::list();
 	return py::cast(ids);
 }
 
 bool  PyDbBlockTableRecord::assumeOwnershipOf(const AcDbObjectIdArray& entitiesToMove) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->assumeOwnershipOf(entitiesToMove), L"AcDbBlockTableRecord::assumeOwnershipOf");
 }
 
-int PyDbBlockTableRecord::blockScaling() const { return static_cast<int>(impObj()->blockScaling()); }
+int PyDbBlockTableRecord::blockScaling() const { if (!impObj()) return 0; return static_cast<int>(impObj()->blockScaling()); }
 bool  PyDbBlockTableRecord::setBlockScaling(int blockScaling) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setBlockScaling(static_cast<AcDbBlockTableRecord::BlockScaling>(blockScaling)), L"AcDbBlockTableRecord::setBlockScaling");
 }
-bool PyDbBlockTableRecord::explodable() const { return impObj()->explodable(); }
-bool  PyDbBlockTableRecord::setExplodable(bool bExplodable) { return PyWarnIfError(impObj()->setExplodable(bExplodable), L"AcDbBlockTableRecord::setExplodable"); }
-int PyDbBlockTableRecord::blockInsertUnits() const { return static_cast<int>(impObj()->blockInsertUnits()); }
-bool  PyDbBlockTableRecord::setBlockInsertUnits(int insunits) { return PyWarnIfError(impObj()->setBlockInsertUnits(static_cast<AcDb::UnitsValue>(insunits)), L"AcDbBlockTableRecord::setBlockInsertUnits"); }
+bool PyDbBlockTableRecord::explodable() const { if (!impObj()) return false; return impObj()->explodable(); }
+bool  PyDbBlockTableRecord::setExplodable(bool bExplodable) { if (!impObj()) return false; return PyWarnIfError(impObj()->setExplodable(bExplodable), L"AcDbBlockTableRecord::setExplodable"); }
+int PyDbBlockTableRecord::blockInsertUnits() const { if (!impObj()) return 0; return static_cast<int>(impObj()->blockInsertUnits()); }
+bool  PyDbBlockTableRecord::setBlockInsertUnits(int insunits) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBlockInsertUnits(static_cast<AcDb::UnitsValue>(insunits)), L"AcDbBlockTableRecord::setBlockInsertUnits"); }
 int PyDbBlockTableRecord::postProcessAnnotativeBTR(bool bqueryOnly, bool bScale) {
+	if (!impObj()) return 0;
 	int stripCnt = 0;
 	if(!PyWarnIfError(impObj()->postProcessAnnotativeBTR(stripCnt, bqueryOnly, bScale), L"AcDbBlockTableRecord::postProcessAnnotativeBTR")) return 0;
 	return stripCnt;
 }
-bool  PyDbBlockTableRecord::addAnnoScalestoBlkRefs(bool bScale) { return PyWarnIfError(impObj()->addAnnoScalestoBlkRefs(bScale), L"AcDbBlockTableRecord::addAnnoScalestoBlkRefs"); }
+bool  PyDbBlockTableRecord::addAnnoScalestoBlkRefs(bool bScale) { if (!impObj()) return false; return PyWarnIfError(impObj()->addAnnoScalestoBlkRefs(bScale), L"AcDbBlockTableRecord::addAnnoScalestoBlkRefs"); }
 
 bool  PyDbBlockTableRecord::appendEntity(PyDbEntity& pEntity) {
+	if (!impObj()) return false;
 	// 经典 ARX 写法：块记录以 kForWrite 打开时直接 appendAcDbEntity，随后关闭实体。
 	// 旧实现用 startTransaction + addNewlyCreatedDBRObject + detach + endTransaction 五步，
 	// 每一步都返回成功，但函数返回后 pybind 仍报 "Caught an unknown exception"，实体也没进库
@@ -77,6 +84,7 @@ bool  PyDbBlockTableRecord::appendEntity(PyDbEntity& pEntity) {
 }
 
 uint64_t PyDbBlockTableRecord::appendAcDbEntityId(PyDbEntity& pEntity) {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId outId;
 	Acad::ErrorStatus es = impObj()->appendAcDbEntity(outId, pEntity.impObj());
 	if (es != Acad::eOk) { PyWarnIfError(es, L"AcDbBlockTableRecord::appendAcDbEntityId"); return 0ULL; }
@@ -175,6 +183,7 @@ std::vector<uint8_t> PyDbBlockTableRecord::getPreviewIcon() const {
 }
 
 bool  PyDbBlockTableRecord::setPreviewIcon(const std::vector<uint8_t>& bytes) {
+	if (!impObj()) return false;
 	AcArray<Adesk::UInt8> icon;
 	icon.setLogicalLength(static_cast<int>(bytes.size()));
 	if (!bytes.empty())

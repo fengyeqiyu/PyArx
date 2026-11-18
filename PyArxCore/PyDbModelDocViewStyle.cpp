@@ -43,6 +43,7 @@ std::tuple<bool, uint64_t> PyDbModelDocViewStyle::postViewStyleToDb(PyDbDatabase
 }
 
 bool PyDbModelDocViewStyle::setDatabaseDefaults(PyDbDatabase& db) {
+	if (!impObj()) return false;
 	if (!impObj() || !db.impObj()) return false;
 	impObj()->setDatabaseDefaults(db.impObj());
 	return true;

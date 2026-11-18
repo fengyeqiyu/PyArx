@@ -5,58 +5,69 @@
 PyWrapper_Cpp(DbViewTableRecord);
 
 // ---- AcDbViewTableRecord own ----
-bool PyDbViewTableRecord::isPaperspaceView() const { return impObj()->isPaperspaceView(); }
-bool PyDbViewTableRecord::setIsPaperspaceView(bool pspace) { impObj()->setIsPaperspaceView(pspace); return true; }
-bool PyDbViewTableRecord::isUcsAssociatedToView() const { return impObj()->isUcsAssociatedToView(); }
-bool PyDbViewTableRecord::disassociateUcsFromView() { return PyWarnIfError(impObj()->disassociateUcsFromView(), L"AcDbViewTableRecord::disassociateUcsFromView"); }
+bool PyDbViewTableRecord::isPaperspaceView() const { if (!impObj()) return false; return impObj()->isPaperspaceView(); }
+bool PyDbViewTableRecord::setIsPaperspaceView(bool pspace) { if (!impObj()) return false; impObj()->setIsPaperspaceView(pspace); return true; }
+bool PyDbViewTableRecord::isUcsAssociatedToView() const { if (!impObj()) return false; return impObj()->isUcsAssociatedToView(); }
+bool PyDbViewTableRecord::disassociateUcsFromView() { if (!impObj()) return false; return PyWarnIfError(impObj()->disassociateUcsFromView(), L"AcDbViewTableRecord::disassociateUcsFromView"); }
 
 AcString PyDbViewTableRecord::getCategoryName() const {
+	if (!impObj()) return AcString();
 	AcString s; if(!PyWarnIfError(impObj()->getCategoryName(s), L"AcDbViewTableRecord::getCategoryName")) return AcString(); return s;
 }
-bool PyDbViewTableRecord::setCategoryName(const AcString& name) { return PyWarnIfError(impObj()->setCategoryName(name.kwszPtr()), L"AcDbViewTableRecord::setCategoryName"); }
+bool PyDbViewTableRecord::setCategoryName(const AcString& name) { if (!impObj()) return false; return PyWarnIfError(impObj()->setCategoryName(name.kwszPtr()), L"AcDbViewTableRecord::setCategoryName"); }
 AcString PyDbViewTableRecord::getLayerState() const {
+	if (!impObj()) return AcString();
 	AcString s; if(!PyWarnIfError(impObj()->getLayerState(s), L"AcDbViewTableRecord::getLayerState")) return AcString(); return s;
 }
-bool PyDbViewTableRecord::setLayerState(const AcString& name) { return PyWarnIfError(impObj()->setLayerState(name.kwszPtr()), L"AcDbViewTableRecord::setLayerState"); }
+bool PyDbViewTableRecord::setLayerState(const AcString& name) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLayerState(name.kwszPtr()), L"AcDbViewTableRecord::setLayerState"); }
 
 uint64_t PyDbViewTableRecord::getLayout() const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id; if(!PyWarnIfError(impObj()->getLayout(id), L"AcDbViewTableRecord::getLayout")) return 0ULL; return static_cast<uint64_t>(id.asOldId());
 }
 bool PyDbViewTableRecord::setLayout(uint64_t layoutId) {
+	if (!impObj()) return false;
 	AcDbObjectId id; id.setFromOldId(static_cast<Adesk::IntDbId>(layoutId));
 	return PyWarnIfError(impObj()->setLayout(id), L"AcDbViewTableRecord::setLayout");
 }
-bool PyDbViewTableRecord::isViewAssociatedToViewport() const { return impObj()->isViewAssociatedToViewport(); }
-bool PyDbViewTableRecord::setViewAssociatedToViewport(bool flag) { return PyWarnIfError(impObj()->setViewAssociatedToViewport(flag), L"AcDbViewTableRecord::setViewAssociatedToViewport"); }
-bool PyDbViewTableRecord::isCameraPlottable() const { return impObj()->isCameraPlottable(); }
-bool PyDbViewTableRecord::setIsCameraPlottable(bool plottable) { return PyWarnIfError(impObj()->setIsCameraPlottable(plottable), L"AcDbViewTableRecord::setIsCameraPlottable"); }
+bool PyDbViewTableRecord::isViewAssociatedToViewport() const { if (!impObj()) return false; return impObj()->isViewAssociatedToViewport(); }
+bool PyDbViewTableRecord::setViewAssociatedToViewport(bool flag) { if (!impObj()) return false; return PyWarnIfError(impObj()->setViewAssociatedToViewport(flag), L"AcDbViewTableRecord::setViewAssociatedToViewport"); }
+bool PyDbViewTableRecord::isCameraPlottable() const { if (!impObj()) return false; return impObj()->isCameraPlottable(); }
+bool PyDbViewTableRecord::setIsCameraPlottable(bool plottable) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIsCameraPlottable(plottable), L"AcDbViewTableRecord::setIsCameraPlottable"); }
 
 // ---- 相机 / 活截面 / 太阳 / 注释比例（本类自有）----
 uint64_t PyDbViewTableRecord::camera() const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id = impObj()->camera();
 	return static_cast<uint64_t>(id.asOldId());
 }
 uint64_t PyDbViewTableRecord::liveSection() const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id = impObj()->liveSection();
 	return static_cast<uint64_t>(id.asOldId());
 }
 uint64_t PyDbViewTableRecord::sunId() const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id = impObj()->sunId();
 	return static_cast<uint64_t>(id.asOldId());
 }
 bool PyDbViewTableRecord::setCamera(uint64_t cameraId) {
+	if (!impObj()) return false;
 	AcDbObjectId id; id.setFromOldId(static_cast<Adesk::IntDbId>(cameraId));
 	return PyWarnIfError(impObj()->setCamera(id), L"AcDbViewTableRecord::setCamera");
 }
 bool PyDbViewTableRecord::setLiveSection(uint64_t liveSectionId) {
+	if (!impObj()) return false;
 	AcDbObjectId id; id.setFromOldId(static_cast<Adesk::IntDbId>(liveSectionId));
 	return PyWarnIfError(impObj()->setLiveSection(id), L"AcDbViewTableRecord::setLiveSection");
 }
 bool PyDbViewTableRecord::setParametersFromViewport(uint64_t viewportId) {
+	if (!impObj()) return false;
 	AcDbObjectId id; id.setFromOldId(static_cast<Adesk::IntDbId>(viewportId));
 	return PyWarnIfError(impObj()->setParametersFromViewport(id), L"AcDbViewTableRecord::setParametersFromViewport");
 }
 bool PyDbViewTableRecord::setAnnotationScale(PyDbAnnotationScale& scale) {
+	if (!impObj()) return false;
 	if (scale.isNull()) return false;
 	return PyWarnIfError(impObj()->setAnnotationScale(scale.impObj()), L"AcDbViewTableRecord::setAnnotationScale");
 }
@@ -72,34 +83,34 @@ std::tuple<bool, uint64_t> PyDbViewTableRecord::setSun(PyDbObject& sunObj, bool 
 }
 
 // ---- Inherited from AcDbAbstractViewTableRecord ----
-AcGePoint2d PyDbViewTableRecord::centerPoint() const { return impObj()->centerPoint(); }
-bool PyDbViewTableRecord::setCenterPoint(const AcGePoint2d& pt) { impObj()->setCenterPoint(pt); return true; }
-double PyDbViewTableRecord::height() const { return impObj()->height(); }
-bool PyDbViewTableRecord::setHeight(double h) { impObj()->setHeight(h); return true; }
-double PyDbViewTableRecord::width() const { return impObj()->width(); }
-bool PyDbViewTableRecord::setWidth(double w) { impObj()->setWidth(w); return true; }
-AcGePoint3d PyDbViewTableRecord::target() const { return impObj()->target(); }
-bool PyDbViewTableRecord::setTarget(const AcGePoint3d& t) { impObj()->setTarget(t); return true; }
-AcGeVector3d PyDbViewTableRecord::viewDirection() const { return impObj()->viewDirection(); }
-bool PyDbViewTableRecord::setViewDirection(const AcGeVector3d& v) { impObj()->setViewDirection(v); return true; }
-double PyDbViewTableRecord::viewTwist() const { return impObj()->viewTwist(); }
-bool PyDbViewTableRecord::setViewTwist(double angle) { impObj()->setViewTwist(angle); return true; }
-double PyDbViewTableRecord::lensLength() const { return impObj()->lensLength(); }
-bool PyDbViewTableRecord::setLensLength(double length) { impObj()->setLensLength(length); return true; }
-bool PyDbViewTableRecord::perspectiveEnabled() const { return impObj()->perspectiveEnabled(); }
-bool PyDbViewTableRecord::setPerspectiveEnabled(bool enabled) { impObj()->setPerspectiveEnabled(enabled); return true; }
+AcGePoint2d PyDbViewTableRecord::centerPoint() const { if (!impObj()) return AcGePoint2d(); return impObj()->centerPoint(); }
+bool PyDbViewTableRecord::setCenterPoint(const AcGePoint2d& pt) { if (!impObj()) return false; impObj()->setCenterPoint(pt); return true; }
+double PyDbViewTableRecord::height() const { if (!impObj()) return 0.0; return impObj()->height(); }
+bool PyDbViewTableRecord::setHeight(double h) { if (!impObj()) return false; impObj()->setHeight(h); return true; }
+double PyDbViewTableRecord::width() const { if (!impObj()) return 0.0; return impObj()->width(); }
+bool PyDbViewTableRecord::setWidth(double w) { if (!impObj()) return false; impObj()->setWidth(w); return true; }
+AcGePoint3d PyDbViewTableRecord::target() const { if (!impObj()) return AcGePoint3d(); return impObj()->target(); }
+bool PyDbViewTableRecord::setTarget(const AcGePoint3d& t) { if (!impObj()) return false; impObj()->setTarget(t); return true; }
+AcGeVector3d PyDbViewTableRecord::viewDirection() const { if (!impObj()) return AcGeVector3d(); return impObj()->viewDirection(); }
+bool PyDbViewTableRecord::setViewDirection(const AcGeVector3d& v) { if (!impObj()) return false; impObj()->setViewDirection(v); return true; }
+double PyDbViewTableRecord::viewTwist() const { if (!impObj()) return 0.0; return impObj()->viewTwist(); }
+bool PyDbViewTableRecord::setViewTwist(double angle) { if (!impObj()) return false; impObj()->setViewTwist(angle); return true; }
+double PyDbViewTableRecord::lensLength() const { if (!impObj()) return 0.0; return impObj()->lensLength(); }
+bool PyDbViewTableRecord::setLensLength(double length) { if (!impObj()) return false; impObj()->setLensLength(length); return true; }
+bool PyDbViewTableRecord::perspectiveEnabled() const { if (!impObj()) return false; return impObj()->perspectiveEnabled(); }
+bool PyDbViewTableRecord::setPerspectiveEnabled(bool enabled) { if (!impObj()) return false; impObj()->setPerspectiveEnabled(enabled); return true; }
 
 // ---- 裁剪平面与高程（继承自 AcDbAbstractViewTableRecord）----
-double PyDbViewTableRecord::frontClipDistance() const { return impObj()->frontClipDistance(); }
-bool PyDbViewTableRecord::setFrontClipDistance(double d) { impObj()->setFrontClipDistance(d); return true; }
-double PyDbViewTableRecord::backClipDistance() const { return impObj()->backClipDistance(); }
-bool PyDbViewTableRecord::setBackClipDistance(double d) { impObj()->setBackClipDistance(d); return true; }
-bool PyDbViewTableRecord::frontClipEnabled() const { return impObj()->frontClipEnabled(); }
-bool PyDbViewTableRecord::setFrontClipEnabled(bool enabled) { impObj()->setFrontClipEnabled(enabled); return true; }
-bool PyDbViewTableRecord::backClipEnabled() const { return impObj()->backClipEnabled(); }
-bool PyDbViewTableRecord::setBackClipEnabled(bool enabled) { impObj()->setBackClipEnabled(enabled); return true; }
-double PyDbViewTableRecord::elevation() const { return impObj()->elevation(); }
-bool PyDbViewTableRecord::setElevation(double e) { impObj()->setElevation(e); return true; }
+double PyDbViewTableRecord::frontClipDistance() const { if (!impObj()) return 0.0; return impObj()->frontClipDistance(); }
+bool PyDbViewTableRecord::setFrontClipDistance(double d) { if (!impObj()) return false; impObj()->setFrontClipDistance(d); return true; }
+double PyDbViewTableRecord::backClipDistance() const { if (!impObj()) return 0.0; return impObj()->backClipDistance(); }
+bool PyDbViewTableRecord::setBackClipDistance(double d) { if (!impObj()) return false; impObj()->setBackClipDistance(d); return true; }
+bool PyDbViewTableRecord::frontClipEnabled() const { if (!impObj()) return false; return impObj()->frontClipEnabled(); }
+bool PyDbViewTableRecord::setFrontClipEnabled(bool enabled) { if (!impObj()) return false; impObj()->setFrontClipEnabled(enabled); return true; }
+bool PyDbViewTableRecord::backClipEnabled() const { if (!impObj()) return false; return impObj()->backClipEnabled(); }
+bool PyDbViewTableRecord::setBackClipEnabled(bool enabled) { if (!impObj()) return false; impObj()->setBackClipEnabled(enabled); return true; }
+double PyDbViewTableRecord::elevation() const { if (!impObj()) return 0.0; return impObj()->elevation(); }
+bool PyDbViewTableRecord::setElevation(double e) { if (!impObj()) return false; impObj()->setElevation(e); return true; }
 
 void bind_PyDbViewTableRecord(pym& m) {
 	py::class_<PyDbViewTableRecord, PyDbSymbolTableRecord>(m, "PyDbViewTableRecord")

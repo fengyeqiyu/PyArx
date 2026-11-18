@@ -8,87 +8,97 @@ PyDbLayerTableRecord* PyDbLayerTableRecord::newRecord() {
 	return new PyDbLayerTableRecord(new AcDbLayerTableRecord());
 }
 
-bool PyDbLayerTableRecord::isFrozen() const { return impObj()->isFrozen(); }
-bool  PyDbLayerTableRecord::setIsFrozen(bool frozen) { return PyWarnIfError(impObj()->setIsFrozen(frozen), L"AcDbLayerTableRecord::setIsFrozen"); }
-bool PyDbLayerTableRecord::isOff() const { return impObj()->isOff(); }
-void PyDbLayerTableRecord::setIsOff(bool off) { impObj()->setIsOff(off); }
-bool PyDbLayerTableRecord::VPDFLT() const { return impObj()->VPDFLT(); }
-void PyDbLayerTableRecord::setVPDFLT(bool frozen) { impObj()->setVPDFLT(frozen); }
-bool PyDbLayerTableRecord::isLocked() const { return impObj()->isLocked(); }
-void PyDbLayerTableRecord::setIsLocked(bool locked) { impObj()->setIsLocked(locked); }
-uint64_t PyDbLayerTableRecord::linetypeObjectId() const { return static_cast<uint64_t>(impObj()->linetypeObjectId().asOldId()); }
+bool PyDbLayerTableRecord::isFrozen() const { if (!impObj()) return false; return impObj()->isFrozen(); }
+bool  PyDbLayerTableRecord::setIsFrozen(bool frozen) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIsFrozen(frozen), L"AcDbLayerTableRecord::setIsFrozen"); }
+bool PyDbLayerTableRecord::isOff() const { if (!impObj()) return false; return impObj()->isOff(); }
+void PyDbLayerTableRecord::setIsOff(bool off) { if (!impObj()) return; impObj()->setIsOff(off); }
+bool PyDbLayerTableRecord::VPDFLT() const { if (!impObj()) return false; return impObj()->VPDFLT(); }
+void PyDbLayerTableRecord::setVPDFLT(bool frozen) { if (!impObj()) return; impObj()->setVPDFLT(frozen); }
+bool PyDbLayerTableRecord::isLocked() const { if (!impObj()) return false; return impObj()->isLocked(); }
+void PyDbLayerTableRecord::setIsLocked(bool locked) { if (!impObj()) return; impObj()->setIsLocked(locked); }
+uint64_t PyDbLayerTableRecord::linetypeObjectId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->linetypeObjectId().asOldId()); }
 bool  PyDbLayerTableRecord::setLinetypeObjectId(uint64_t id) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(id));
 	return PyWarnIfError(impObj()->setLinetypeObjectId(oid), L"AcDbLayerTableRecord::setLinetypeObjectId");
 }
-uint64_t PyDbLayerTableRecord::materialId() const { return static_cast<uint64_t>(impObj()->materialId().asOldId()); }
+uint64_t PyDbLayerTableRecord::materialId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->materialId().asOldId()); }
 bool  PyDbLayerTableRecord::setMaterialId(uint64_t id) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(id));
 	return PyWarnIfError(impObj()->setMaterialId(oid), L"AcDbLayerTableRecord::setMaterialId");
 }
-int PyDbLayerTableRecord::lineWeight() const { return static_cast<int>(impObj()->lineWeight()); }
-bool  PyDbLayerTableRecord::setLineWeight(int lw) { return PyWarnIfError(impObj()->setLineWeight(static_cast<AcDb::LineWeight>(lw)), L"AcDbLayerTableRecord::setLineWeight"); }
-bool PyDbLayerTableRecord::isPlottable() const { return impObj()->isPlottable(); }
-bool  PyDbLayerTableRecord::setIsPlottable(bool plot) { return PyWarnIfError(impObj()->setIsPlottable(plot), L"AcDbLayerTableRecord::setIsPlottable"); }
-AcString PyDbLayerTableRecord::plotStyleName() const { AcString s; if(!PyWarnIfError(impObj()->plotStyleName(s), L"AcDbLayerTableRecord::plotStyleName")) return AcString(); return s; }
-uint64_t PyDbLayerTableRecord::plotStyleNameId() const { return static_cast<uint64_t>(impObj()->plotStyleNameId().asOldId()); }
-bool  PyDbLayerTableRecord::setPlotStyleName(const AcString& newName) { return PyWarnIfError(impObj()->setPlotStyleName(newName.kwszPtr()), L"AcDbLayerTableRecord::setPlotStyleName"); }
+int PyDbLayerTableRecord::lineWeight() const { if (!impObj()) return 0; return static_cast<int>(impObj()->lineWeight()); }
+bool  PyDbLayerTableRecord::setLineWeight(int lw) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLineWeight(static_cast<AcDb::LineWeight>(lw)), L"AcDbLayerTableRecord::setLineWeight"); }
+bool PyDbLayerTableRecord::isPlottable() const { if (!impObj()) return false; return impObj()->isPlottable(); }
+bool  PyDbLayerTableRecord::setIsPlottable(bool plot) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIsPlottable(plot), L"AcDbLayerTableRecord::setIsPlottable"); }
+AcString PyDbLayerTableRecord::plotStyleName() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->plotStyleName(s), L"AcDbLayerTableRecord::plotStyleName")) return AcString(); return s; }
+uint64_t PyDbLayerTableRecord::plotStyleNameId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->plotStyleNameId().asOldId()); }
+bool  PyDbLayerTableRecord::setPlotStyleName(const AcString& newName) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPlotStyleName(newName.kwszPtr()), L"AcDbLayerTableRecord::setPlotStyleName"); }
 bool  PyDbLayerTableRecord::setPlotStyleNameById(uint64_t newId) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(newId));
 	return PyWarnIfError(impObj()->setPlotStyleName(oid), L"AcDbLayerTableRecord::setPlotStyleNameById");
 }
-bool PyDbLayerTableRecord::isInUse() const { return impObj()->isInUse(); }
-AcString PyDbLayerTableRecord::description() const { AcString s; if(!PyWarnIfError(impObj()->description(s), L"AcDbLayerTableRecord::description")) return AcString(); return s; }
-bool  PyDbLayerTableRecord::setDescription(const AcString& description) { return PyWarnIfError(impObj()->setDescription(description.kwszPtr()), L"AcDbLayerTableRecord::setDescription"); }
-bool PyDbLayerTableRecord::isHidden() const { return impObj()->isHidden(); }
-bool  PyDbLayerTableRecord::setIsHidden(bool on) { return PyWarnIfError(impObj()->setIsHidden(on), L"AcDbLayerTableRecord::setIsHidden"); }
+bool PyDbLayerTableRecord::isInUse() const { if (!impObj()) return false; return impObj()->isInUse(); }
+AcString PyDbLayerTableRecord::description() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->description(s), L"AcDbLayerTableRecord::description")) return AcString(); return s; }
+bool  PyDbLayerTableRecord::setDescription(const AcString& description) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDescription(description.kwszPtr()), L"AcDbLayerTableRecord::setDescription"); }
+bool PyDbLayerTableRecord::isHidden() const { if (!impObj()) return false; return impObj()->isHidden(); }
+bool  PyDbLayerTableRecord::setIsHidden(bool on) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIsHidden(on), L"AcDbLayerTableRecord::setIsHidden"); }
 bool PyDbLayerTableRecord::isHidden(uint64_t objectId) {
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(objectId));
 	return AcDbLayerTableRecord::isHidden(oid);
 }
 bool  PyDbLayerTableRecord::removeColorOverride(uint64_t viewportId) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(viewportId));
 	return PyWarnIfError(impObj()->removeColorOverride(oid), L"AcDbLayerTableRecord::removeColorOverride");
 }
 bool  PyDbLayerTableRecord::removeLinetypeOverride(uint64_t viewportId) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(viewportId));
 	return PyWarnIfError(impObj()->removeLinetypeOverride(oid), L"AcDbLayerTableRecord::removeLinetypeOverride");
 }
 bool  PyDbLayerTableRecord::removeLineWeightOverride(uint64_t viewportId) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(viewportId));
 	return PyWarnIfError(impObj()->removeLineWeightOverride(oid), L"AcDbLayerTableRecord::removeLineWeightOverride");
 }
 bool  PyDbLayerTableRecord::removePlotStyleOverride(uint64_t viewportId) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(viewportId));
 	return PyWarnIfError(impObj()->removePlotStyleOverride(oid), L"AcDbLayerTableRecord::removePlotStyleOverride");
 }
 bool  PyDbLayerTableRecord::removeTransparencyOverride(uint64_t viewportId) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(viewportId));
 	return PyWarnIfError(impObj()->removeTransparencyOverride(oid), L"AcDbLayerTableRecord::removeTransparencyOverride");
 }
 bool  PyDbLayerTableRecord::removeViewportOverrides(uint64_t viewportId) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(viewportId));
 	return PyWarnIfError(impObj()->removeViewportOverrides(oid), L"AcDbLayerTableRecord::removeViewportOverrides");
 }
-bool  PyDbLayerTableRecord::removeAllOverrides() { return PyWarnIfError(impObj()->removeAllOverrides(), L"AcDbLayerTableRecord::removeAllOverrides"); }
+bool  PyDbLayerTableRecord::removeAllOverrides() { if (!impObj()) return false; return PyWarnIfError(impObj()->removeAllOverrides(), L"AcDbLayerTableRecord::removeAllOverrides"); }
 bool PyDbLayerTableRecord::hasOverrides(uint64_t viewportId) const {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(viewportId));
 	return impObj()->hasOverrides(oid);
 }
-bool PyDbLayerTableRecord::hasAnyOverrides() const { return impObj()->hasAnyOverrides(); }
-bool PyDbLayerTableRecord::isReconciled() const { return impObj()->isReconciled(); }
-bool  PyDbLayerTableRecord::setIsReconciled(bool bReconcile) { return PyWarnIfError(impObj()->setIsReconciled(bReconcile), L"AcDbLayerTableRecord::setIsReconciled"); }
+bool PyDbLayerTableRecord::hasAnyOverrides() const { if (!impObj()) return false; return impObj()->hasAnyOverrides(); }
+bool PyDbLayerTableRecord::isReconciled() const { if (!impObj()) return false; return impObj()->isReconciled(); }
+bool  PyDbLayerTableRecord::setIsReconciled(bool bReconcile) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIsReconciled(bReconcile), L"AcDbLayerTableRecord::setIsReconciled"); }
 bool PyDbLayerTableRecord::isReconciled(uint64_t objectId) {
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(objectId));
@@ -105,6 +115,7 @@ std::tuple<int, int, int, int> PyDbLayerTableRecord::color() const {
 }
 
 void PyDbLayerTableRecord::setColor(int r, int g, int b) {
+	if (!impObj()) return;
 	AcCmColor c;
 	c.setRGB(static_cast<Adesk::UInt8>(r), static_cast<Adesk::UInt8>(g), static_cast<Adesk::UInt8>(b));
 	impObj()->setColor(c);
@@ -120,6 +131,7 @@ std::tuple<int, int, int, int> PyDbLayerTableRecord::entityColor() const {
 }
 
 int PyDbLayerTableRecord::transparency() const {
+	if (!impObj()) return 0;
 	AcCmTransparency t = impObj()->transparency();
 	if (t.isByLayer()) return 0;
 	if (t.isByBlock()) return 1;
@@ -127,6 +139,7 @@ int PyDbLayerTableRecord::transparency() const {
 }
 
 bool PyDbLayerTableRecord::setTransparency(int trans) {
+	if (!impObj()) return false;
 	AcCmTransparency t;
 	if (trans == 0) { t.setMethod(AcCmTransparency::kByLayer); }
 	else if (trans == 1) { t.setMethod(AcCmTransparency::kByBlock); }

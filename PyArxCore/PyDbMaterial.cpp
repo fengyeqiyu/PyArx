@@ -4,91 +4,112 @@
 
 PyWrapper_Cpp(DbMaterial);
 
-int PyDbMaterial::channelFlags() const { return (int)impObj()->channelFlags(); }
-void PyDbMaterial::clearAdskMaterialCache() { impObj()->clearAdskMaterialCache(); }
-double PyDbMaterial::colorBleedScale() const { return impObj()->colorBleedScale(); }
-int PyDbMaterial::finalGather() const { return (int)impObj()->finalGather(); }
+int PyDbMaterial::channelFlags() const { if (!impObj()) return 0; return (int)impObj()->channelFlags(); }
+void PyDbMaterial::clearAdskMaterialCache() { if (!impObj()) return; impObj()->clearAdskMaterialCache(); }
+double PyDbMaterial::colorBleedScale() const { if (!impObj()) return 0.0; return impObj()->colorBleedScale(); }
+int PyDbMaterial::finalGather() const { if (!impObj()) return 0; return (int)impObj()->finalGather(); }
 int PyDbMaterial::getAdskMaterialFlags() const {
+	if (!impObj()) return 0;
 	AcDbMaterial::MaterialFlags f = AcDbMaterial::kNone;
 	PyWarnIfError(impObj()->getAdskMaterialFlags(f), L"AcDbMaterial::getAdskMaterialFlags");
 	return (int)f;
 }
-int PyDbMaterial::globalIllumination() const { return (int)impObj()->globalIllumination(); }
-int PyDbMaterial::illuminationModel() const { return (int)impObj()->illuminationModel(); }
-double PyDbMaterial::indirectBumpScale() const { return impObj()->indirectBumpScale(); }
-bool PyDbMaterial::isAnonymous() const { return impObj()->isAnonymous() != Adesk::kFalse; }
+int PyDbMaterial::globalIllumination() const { if (!impObj()) return 0; return (int)impObj()->globalIllumination(); }
+int PyDbMaterial::illuminationModel() const { if (!impObj()) return 0; return (int)impObj()->illuminationModel(); }
+double PyDbMaterial::indirectBumpScale() const { if (!impObj()) return 0.0; return impObj()->indirectBumpScale(); }
+bool PyDbMaterial::isAnonymous() const { if (!impObj()) return false; return impObj()->isAnonymous() != Adesk::kFalse; }
 // isRenamable: SDK2024 未导出该符号，暂不封装
-double PyDbMaterial::luminance() const { return impObj()->luminance(); }
-int PyDbMaterial::luminanceMode() const { return (int)impObj()->luminanceMode(); }
-int PyDbMaterial::mode() const { return (int)impObj()->mode(); }
-double PyDbMaterial::reflectanceScale() const { return impObj()->reflectanceScale(); }
-double PyDbMaterial::reflectivity() const { return impObj()->reflectivity(); }
-double PyDbMaterial::selfIllumination() const { return impObj()->selfIllumination(); }
-double PyDbMaterial::shininess() const { return impObj()->shininess(); }
-double PyDbMaterial::translucence() const { return impObj()->translucence(); }
-double PyDbMaterial::transmittanceScale() const { return impObj()->transmittanceScale(); }
-bool PyDbMaterial::twoSided() const { return impObj()->twoSided() != Adesk::kFalse; }
+double PyDbMaterial::luminance() const { if (!impObj()) return 0.0; return impObj()->luminance(); }
+int PyDbMaterial::luminanceMode() const { if (!impObj()) return 0; return (int)impObj()->luminanceMode(); }
+int PyDbMaterial::mode() const { if (!impObj()) return 0; return (int)impObj()->mode(); }
+double PyDbMaterial::reflectanceScale() const { if (!impObj()) return 0.0; return impObj()->reflectanceScale(); }
+double PyDbMaterial::reflectivity() const { if (!impObj()) return 0.0; return impObj()->reflectivity(); }
+double PyDbMaterial::selfIllumination() const { if (!impObj()) return 0.0; return impObj()->selfIllumination(); }
+double PyDbMaterial::shininess() const { if (!impObj()) return 0.0; return impObj()->shininess(); }
+double PyDbMaterial::translucence() const { if (!impObj()) return 0.0; return impObj()->translucence(); }
+double PyDbMaterial::transmittanceScale() const { if (!impObj()) return 0.0; return impObj()->transmittanceScale(); }
+bool PyDbMaterial::twoSided() const { if (!impObj()) return false; return impObj()->twoSided() != Adesk::kFalse; }
 
 bool PyDbMaterial::setChannelFlags(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setChannelFlags(static_cast<AcGiMaterialTraits::ChannelFlags>(v)), L"AcDbMaterial::setChannelFlags");
 }
 bool PyDbMaterial::setColorBleedScale(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setColorBleedScale(v), L"AcDbMaterial::setColorBleedScale");
 }
 bool PyDbMaterial::setFinalGather(int v) {
+	if (!impObj()) return false;
 	impObj()->setFinalGather(static_cast<AcGiMaterialTraits::FinalGatherMode>(v));
 	return true;
 }
 bool PyDbMaterial::setAdskMaterialFlags(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setAdskMaterialFlags(static_cast<AcDbMaterial::MaterialFlags>(v)), L"AcDbMaterial::setAdskMaterialFlags");
 }
 bool PyDbMaterial::setGlobalIllumination(int v) {
+	if (!impObj()) return false;
 	impObj()->setGlobalIllumination(static_cast<AcGiMaterialTraits::GlobalIlluminationMode>(v));
 	return true;
 }
 bool PyDbMaterial::setIlluminationModel(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setIlluminationModel(static_cast<AcGiMaterialTraits::IlluminationModel>(v)), L"AcDbMaterial::setIlluminationModel");
 }
 bool PyDbMaterial::setIndirectBumpScale(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setIndirectBumpScale(v), L"AcDbMaterial::setIndirectBumpScale");
 }
 bool PyDbMaterial::setAnonymous(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setAnonymous(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbMaterial::setAnonymous");
 }
 bool PyDbMaterial::setLuminance(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setLuminance(v), L"AcDbMaterial::setLuminance");
 }
 bool PyDbMaterial::setLuminanceMode(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setLuminanceMode(static_cast<AcGiMaterialTraits::LuminanceMode>(v)), L"AcDbMaterial::setLuminanceMode");
 }
 bool PyDbMaterial::setMode(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setMode(static_cast<AcGiMaterialTraits::Mode>(v)), L"AcDbMaterial::setMode");
 }
 bool PyDbMaterial::setName(const AcString& v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setName(v.kwszPtr()), L"AcDbMaterial::setName");
 }
 bool PyDbMaterial::setDescription(const AcString& v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setDescription(v.kwszPtr()), L"AcDbMaterial::setDescription");
 }
 bool PyDbMaterial::setReflectanceScale(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setReflectanceScale(v), L"AcDbMaterial::setReflectanceScale");
 }
 bool PyDbMaterial::setReflectivity(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setReflectivity(v), L"AcDbMaterial::setReflectivity");
 }
 bool PyDbMaterial::setSelfIllumination(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setSelfIllumination(v), L"AcDbMaterial::setSelfIllumination");
 }
 bool PyDbMaterial::setShininess(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setShininess(v), L"AcDbMaterial::setShininess");
 }
 bool PyDbMaterial::setTranslucence(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTranslucence(v), L"AcDbMaterial::setTranslucence");
 }
 bool PyDbMaterial::setTransmittanceScale(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTransmittanceScale(v), L"AcDbMaterial::setTransmittanceScale");
 }
 bool PyDbMaterial::setTwoSided(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTwoSided(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbMaterial::setTwoSided");
 }
 

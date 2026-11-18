@@ -6,39 +6,44 @@
 PyWrapper_Cpp(DbTableStyle);
 
 AcString PyDbTableStyle::getName() const {
+	if (!impObj()) return AcString();
 	AcString s; if(!PyWarnIfError(impObj()->getName(s), L"AcDbTableStyle::getName")) return AcString(); return s;
 }
-bool PyDbTableStyle::setName(const AcString& name) { return PyWarnIfError(impObj()->setName(name.kwszPtr()), L"AcDbTableStyle::setName"); }
+bool PyDbTableStyle::setName(const AcString& name) { if (!impObj()) return false; return PyWarnIfError(impObj()->setName(name.kwszPtr()), L"AcDbTableStyle::setName"); }
 // isRenamable() const is not exported by the import library; left as skeleton.
-AcString PyDbTableStyle::description() const { const ACHAR* p = impObj()->description(); return p ? AcString(p) : AcString(); }
-bool PyDbTableStyle::setDescription(const AcString& desc) { return PyWarnIfError(impObj()->setDescription(desc.kwszPtr()), L"AcDbTableStyle::setDescription"); }
-int PyDbTableStyle::bitFlags() const { return static_cast<int>(impObj()->bitFlags()); }
-bool PyDbTableStyle::setBitFlags(int flags) { return PyWarnIfError(impObj()->setBitFlags(static_cast<Adesk::UInt32>(flags)), L"AcDbTableStyle::setBitFlags"); }
-int PyDbTableStyle::flowDirection() const { return static_cast<int>(impObj()->flowDirection()); }
-bool PyDbTableStyle::setFlowDirection(int flow) { return PyWarnIfError(impObj()->setFlowDirection(static_cast<AcDb::FlowDirection>(flow)), L"AcDbTableStyle::setFlowDirection"); }
-double PyDbTableStyle::textHeight() const { return impObj()->textHeight(); }
-bool PyDbTableStyle::setTextHeight(double h) { return PyWarnIfError(impObj()->setTextHeight(h), L"AcDbTableStyle::setTextHeight"); }
+AcString PyDbTableStyle::description() const { if (!impObj()) return AcString(); const ACHAR* p = impObj()->description(); return p ? AcString(p) : AcString(); }
+bool PyDbTableStyle::setDescription(const AcString& desc) { if (!impObj()) return false; return PyWarnIfError(impObj()->setDescription(desc.kwszPtr()), L"AcDbTableStyle::setDescription"); }
+int PyDbTableStyle::bitFlags() const { if (!impObj()) return 0; return static_cast<int>(impObj()->bitFlags()); }
+bool PyDbTableStyle::setBitFlags(int flags) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBitFlags(static_cast<Adesk::UInt32>(flags)), L"AcDbTableStyle::setBitFlags"); }
+int PyDbTableStyle::flowDirection() const { if (!impObj()) return 0; return static_cast<int>(impObj()->flowDirection()); }
+bool PyDbTableStyle::setFlowDirection(int flow) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFlowDirection(static_cast<AcDb::FlowDirection>(flow)), L"AcDbTableStyle::setFlowDirection"); }
+double PyDbTableStyle::textHeight() const { if (!impObj()) return 0.0; return impObj()->textHeight(); }
+bool PyDbTableStyle::setTextHeight(double h) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTextHeight(h), L"AcDbTableStyle::setTextHeight"); }
 
 uint64_t PyDbTableStyle::textStyle(int rowType) const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id = impObj()->textStyle(static_cast<AcDb::RowType>(rowType));
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 }
 
 bool PyDbTableStyle::setTextStyle(uint64_t id, int rowTypes) {
+	if (!impObj()) return false;
 	AcDbObjectId oid;
 	oid.setFromOldId(static_cast<Adesk::IntDbId>(id));
 	return PyWarnIfError(impObj()->setTextStyle(oid, rowTypes), L"AcDbTableStyle::setTextStyle");
 }
 
 int PyDbTableStyle::alignment(int rowType) const {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->alignment(static_cast<AcDb::RowType>(rowType)));
 }
 
 bool PyDbTableStyle::setAlignment(int align, int rowTypes) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setAlignment(static_cast<AcDb::CellAlignment>(align), rowTypes), L"AcDbTableStyle::setAlignment");
 }
-int PyDbTableStyle::numCellStyles() const { return impObj()->numCellStyles(); }
-bool PyDbTableStyle::isCellStyleInUse(const AcString& cellStyle) const { return impObj()->isCellStyleInUse(cellStyle.kwszPtr()); }
+int PyDbTableStyle::numCellStyles() const { if (!impObj()) return 0; return impObj()->numCellStyles(); }
+bool PyDbTableStyle::isCellStyleInUse(const AcString& cellStyle) const { if (!impObj()) return false; return impObj()->isCellStyleInUse(cellStyle.kwszPtr()); }
 
 // ---- 颜色 RGB（AcCmColor 未单独封装，按 (r,g,b) 出入参包装）----
 std::tuple<int,int,int> PyDbTableStyle::color(int rowType) const {
@@ -46,6 +51,7 @@ std::tuple<int,int,int> PyDbTableStyle::color(int rowType) const {
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
 bool PyDbTableStyle::setColor(int r, int g, int b, int rowTypes) {
+	if (!impObj()) return false;
 	AcCmColor c; c.setRGB((Adesk::UInt8)r, (Adesk::UInt8)g, (Adesk::UInt8)b);
 	return PyWarnIfError(impObj()->setColor(c, rowTypes), L"AcDbTableStyle::setColor");
 }
@@ -54,11 +60,12 @@ std::tuple<int,int,int> PyDbTableStyle::backgroundColor(int rowType) const {
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
 bool PyDbTableStyle::setBackgroundColor(int r, int g, int b, int rowTypes) {
+	if (!impObj()) return false;
 	AcCmColor c; c.setRGB((Adesk::UInt8)r, (Adesk::UInt8)g, (Adesk::UInt8)b);
 	return PyWarnIfError(impObj()->setBackgroundColor(c, rowTypes), L"AcDbTableStyle::setBackgroundColor");
 }
-bool PyDbTableStyle::isBackgroundColorNone(int rowType) const { return impObj()->isBackgroundColorNone(static_cast<AcDb::RowType>(rowType)); }
-bool PyDbTableStyle::setBackgroundColorNone(bool b, int rowTypes) { return PyWarnIfError(impObj()->setBackgroundColorNone(b, rowTypes), L"AcDbTableStyle::setBackgroundColorNone"); }
+bool PyDbTableStyle::isBackgroundColorNone(int rowType) const { if (!impObj()) return false; return impObj()->isBackgroundColorNone(static_cast<AcDb::RowType>(rowType)); }
+bool PyDbTableStyle::setBackgroundColorNone(bool b, int rowTypes) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBackgroundColorNone(b, rowTypes), L"AcDbTableStyle::setBackgroundColorNone"); }
 
 // ---- 数据类型 / 格式 ----
 std::tuple<int,int> PyDbTableStyle::getDataType() const {
@@ -67,36 +74,38 @@ std::tuple<int,int> PyDbTableStyle::getDataType() const {
 	return std::make_tuple((int)dt, (int)ut);
 }
 bool PyDbTableStyle::setDataType(int dt, int ut) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setDataType(static_cast<AcValue::DataType>(dt), static_cast<AcValue::UnitType>(ut)), L"AcDbTableStyle::setDataType");
 }
-AcString PyDbTableStyle::format() const { const ACHAR* p = impObj()->format(); return p ? AcString(p) : AcString(); }
-bool PyDbTableStyle::setFormat(const AcString& fmt) { return PyWarnIfError(impObj()->setFormat(fmt.kwszPtr()), L"AcDbTableStyle::setFormat"); }
+AcString PyDbTableStyle::format() const { if (!impObj()) return AcString(); const ACHAR* p = impObj()->format(); return p ? AcString(p) : AcString(); }
+bool PyDbTableStyle::setFormat(const AcString& fmt) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFormat(fmt.kwszPtr()), L"AcDbTableStyle::setFormat"); }
 
 // ---- 网格线属性 ----
-int PyDbTableStyle::gridLineWeight(int glt, int rowType) const { return (int)impObj()->gridLineWeight(static_cast<AcDb::GridLineType>(glt), static_cast<AcDb::RowType>(rowType)); }
-bool PyDbTableStyle::setGridLineWeight(int lw, int glts, int rowTypes) { return PyWarnIfError(impObj()->setGridLineWeight(static_cast<AcDb::LineWeight>(lw), glts, rowTypes), L"AcDbTableStyle::setGridLineWeight"); }
+int PyDbTableStyle::gridLineWeight(int glt, int rowType) const { if (!impObj()) return 0; return (int)impObj()->gridLineWeight(static_cast<AcDb::GridLineType>(glt), static_cast<AcDb::RowType>(rowType)); }
+bool PyDbTableStyle::setGridLineWeight(int lw, int glts, int rowTypes) { if (!impObj()) return false; return PyWarnIfError(impObj()->setGridLineWeight(static_cast<AcDb::LineWeight>(lw), glts, rowTypes), L"AcDbTableStyle::setGridLineWeight"); }
 std::tuple<int,int,int> PyDbTableStyle::gridColor(int glt, int rowType) const {
 	AcCmColor c = impObj()->gridColor(static_cast<AcDb::GridLineType>(glt), static_cast<AcDb::RowType>(rowType));
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
 bool PyDbTableStyle::setGridColor(int r, int g, int b, int glts, int rowTypes) {
+	if (!impObj()) return false;
 	AcCmColor c; c.setRGB((Adesk::UInt8)r, (Adesk::UInt8)g, (Adesk::UInt8)b);
 	return PyWarnIfError(impObj()->setGridColor(c, glts, rowTypes), L"AcDbTableStyle::setGridColor");
 }
-int PyDbTableStyle::gridVisibility(int glt, int rowType) const { return (int)impObj()->gridVisibility(static_cast<AcDb::GridLineType>(glt), static_cast<AcDb::RowType>(rowType)); }
-bool PyDbTableStyle::setGridVisibility(int vis, int glts, int rowTypes) { return PyWarnIfError(impObj()->setGridVisibility(static_cast<AcDb::Visibility>(vis), glts, rowTypes), L"AcDbTableStyle::setGridVisibility"); }
+int PyDbTableStyle::gridVisibility(int glt, int rowType) const { if (!impObj()) return 0; return (int)impObj()->gridVisibility(static_cast<AcDb::GridLineType>(glt), static_cast<AcDb::RowType>(rowType)); }
+bool PyDbTableStyle::setGridVisibility(int vis, int glts, int rowTypes) { if (!impObj()) return false; return PyWarnIfError(impObj()->setGridVisibility(static_cast<AcDb::Visibility>(vis), glts, rowTypes), L"AcDbTableStyle::setGridVisibility"); }
 
 // ---- 边距 / 标题与表头抑制 ----
-double PyDbTableStyle::horzCellMargin() const { return impObj()->horzCellMargin(); }
-bool PyDbTableStyle::setHorzCellMargin(double m) { return PyWarnIfError(impObj()->setHorzCellMargin(m), L"AcDbTableStyle::setHorzCellMargin"); }
-double PyDbTableStyle::vertCellMargin() const { return impObj()->vertCellMargin(); }
-bool PyDbTableStyle::setVertCellMargin(double m) { return PyWarnIfError(impObj()->setVertCellMargin(m), L"AcDbTableStyle::setVertCellMargin"); }
-bool PyDbTableStyle::isTitleSuppressed() const { return impObj()->isTitleSuppressed(); }
-bool PyDbTableStyle::isHeaderSuppressed() const { return impObj()->isHeaderSuppressed(); }
-bool PyDbTableStyle::suppressTitleRow(bool b) { return PyWarnIfError(impObj()->suppressTitleRow(b), L"AcDbTableStyle::suppressTitleRow"); }
-bool PyDbTableStyle::suppressHeaderRow(bool b) { return PyWarnIfError(impObj()->suppressHeaderRow(b), L"AcDbTableStyle::suppressHeaderRow"); }
-double PyDbTableStyle::margin(int cm, const AcString& cellStyle) const { return impObj()->margin(static_cast<AcDb::CellMargin>(cm), cellStyle.kwszPtr()); }
-bool PyDbTableStyle::setMargin(int cm, double fMargin, const AcString& cellStyle) { return PyWarnIfError(impObj()->setMargin(static_cast<AcDb::CellMargin>(cm), fMargin, cellStyle.kwszPtr()), L"AcDbTableStyle::setMargin"); }
+double PyDbTableStyle::horzCellMargin() const { if (!impObj()) return 0.0; return impObj()->horzCellMargin(); }
+bool PyDbTableStyle::setHorzCellMargin(double m) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHorzCellMargin(m), L"AcDbTableStyle::setHorzCellMargin"); }
+double PyDbTableStyle::vertCellMargin() const { if (!impObj()) return 0.0; return impObj()->vertCellMargin(); }
+bool PyDbTableStyle::setVertCellMargin(double m) { if (!impObj()) return false; return PyWarnIfError(impObj()->setVertCellMargin(m), L"AcDbTableStyle::setVertCellMargin"); }
+bool PyDbTableStyle::isTitleSuppressed() const { if (!impObj()) return false; return impObj()->isTitleSuppressed(); }
+bool PyDbTableStyle::isHeaderSuppressed() const { if (!impObj()) return false; return impObj()->isHeaderSuppressed(); }
+bool PyDbTableStyle::suppressTitleRow(bool b) { if (!impObj()) return false; return PyWarnIfError(impObj()->suppressTitleRow(b), L"AcDbTableStyle::suppressTitleRow"); }
+bool PyDbTableStyle::suppressHeaderRow(bool b) { if (!impObj()) return false; return PyWarnIfError(impObj()->suppressHeaderRow(b), L"AcDbTableStyle::suppressHeaderRow"); }
+double PyDbTableStyle::margin(int cm, const AcString& cellStyle) const { if (!impObj()) return 0.0; return impObj()->margin(static_cast<AcDb::CellMargin>(cm), cellStyle.kwszPtr()); }
+bool PyDbTableStyle::setMargin(int cm, double fMargin, const AcString& cellStyle) { if (!impObj()) return false; return PyWarnIfError(impObj()->setMargin(static_cast<AcDb::CellMargin>(cm), fMargin, cellStyle.kwszPtr()), L"AcDbTableStyle::setMargin"); }
 
 void bind_PyDbTableStyle(pym& m) {
 	py::class_<PyDbTableStyle, PyDbObject>(m, "PyDbTableStyle")

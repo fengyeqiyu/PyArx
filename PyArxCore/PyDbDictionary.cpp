@@ -6,6 +6,7 @@
 PyWrapper_Cpp(DbDictionary);
 
 bool  PyDbDictionary::add(const AcString& name, PyDbObject& obj) {
+	if (!impObj()) return false;
 	AcDbObjectId retId;
 	return PyWarnIfError(impObj()->setAt(name.kwszPtr(), obj.impObj(), retId), L"Dictionary.add");
 }
@@ -18,10 +19,12 @@ PyDbObject PyDbDictionary::getAt(const AcString& name) {
 }
 
 bool  PyDbDictionary::remove(const AcString& name) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->remove(name.kwszPtr()), L"Dictionary.remove");
 }
 
 int PyDbDictionary::numEntries() const {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->numEntries());
 }
 
@@ -38,6 +41,7 @@ uint64_t PyDbDictionary::getIdAt(const AcString& name) const {
 }
 
 AcString PyDbDictionary::nameAt(uint64_t objId) const {
+	if (!impObj()) return AcString();
 	AcDbObjectId id;
 	id.setFromOldId(static_cast<Adesk::IntDbId>(objId));
 	AcString s;
@@ -46,18 +50,21 @@ AcString PyDbDictionary::nameAt(uint64_t objId) const {
 }
 
 bool PyDbDictionary::removeById(uint64_t objId) {
+	if (!impObj()) return false;
 	AcDbObjectId id;
 	id.setFromOldId(static_cast<Adesk::IntDbId>(objId));
 	return PyWarnIfError(impObj()->remove(id), L"Dictionary.removeById");
 }
 
 bool PyDbDictionary::hasId(uint64_t objId) const {
+	if (!impObj()) return false;
 	AcDbObjectId id;
 	id.setFromOldId(static_cast<Adesk::IntDbId>(objId));
 	return impObj()->has(id);
 }
 
 bool PyDbDictionary::rename(const AcString& oldName, const AcString& newName) {
+	if (!impObj()) return false;
 	return impObj()->setName(oldName.kwszPtr(), newName.kwszPtr());
 }
 
@@ -73,18 +80,22 @@ AcDb::DuplicateRecordCloning PyDbDictionary::mergeStyle() const {
 }
 
 void PyDbDictionary::setMergeStyle(int style) {
+	if (!impObj()) return;
 	impObj()->setMergeStyle(static_cast<AcDb::DuplicateRecordCloning>(style));
 }
 
 bool PyDbDictionary::isTreatElementsAsHard() const {
+	if (!impObj()) return false;
 	return impObj()->isTreatElementsAsHard();
 }
 
 void PyDbDictionary::setTreatElementsAsHard(bool doIt) {
+	if (!impObj()) return;
 	impObj()->setTreatElementsAsHard(doIt);
 }
 
 py::dict PyDbDictionary::toDict() {
+	if (!impObj()) return py::dict();
 	py::dict out;
 	AcDbDictionaryIterator* pIter = impObj()->newIterator();
 	if (pIter == nullptr) return out;

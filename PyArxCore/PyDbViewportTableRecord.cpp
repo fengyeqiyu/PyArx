@@ -5,92 +5,95 @@
 PyWrapper_Cpp(DbViewportTableRecord);
 
 // ---- AcDbViewportTableRecord own ----
-int PyDbViewportTableRecord::number() const { return static_cast<int>(impObj()->number()); }
-AcGePoint2d PyDbViewportTableRecord::lowerLeftCorner() const { return impObj()->lowerLeftCorner(); }
-bool PyDbViewportTableRecord::setLowerLeftCorner(const AcGePoint2d& pt) { impObj()->setLowerLeftCorner(pt); return true; }
-AcGePoint2d PyDbViewportTableRecord::upperRightCorner() const { return impObj()->upperRightCorner(); }
-bool PyDbViewportTableRecord::setUpperRightCorner(const AcGePoint2d& pt) { impObj()->setUpperRightCorner(pt); return true; }
-bool PyDbViewportTableRecord::ucsFollowMode() const { return impObj()->ucsFollowMode(); }
-bool PyDbViewportTableRecord::setUcsFollowMode(bool enabled) { impObj()->setUcsFollowMode(enabled); return true; }
-int PyDbViewportTableRecord::circleSides() const { return static_cast<int>(impObj()->circleSides()); }
-bool PyDbViewportTableRecord::setCircleSides(int sides) { impObj()->setCircleSides(static_cast<Adesk::UInt16>(sides)); return true; }
-bool PyDbViewportTableRecord::iconEnabled() const { return impObj()->iconEnabled(); }
-bool PyDbViewportTableRecord::setIconEnabled(bool enabled) { impObj()->setIconEnabled(enabled); return true; }
-bool PyDbViewportTableRecord::iconAtOrigin() const { return impObj()->iconAtOrigin(); }
-bool PyDbViewportTableRecord::setIconAtOrigin(bool atOrigin) { impObj()->setIconAtOrigin(atOrigin); return true; }
-bool PyDbViewportTableRecord::gridEnabled() const { return impObj()->gridEnabled(); }
-bool PyDbViewportTableRecord::setGridEnabled(bool enabled) { impObj()->setGridEnabled(enabled); return true; }
-AcGePoint2d PyDbViewportTableRecord::gridIncrements() const { return impObj()->gridIncrements(); }
-bool PyDbViewportTableRecord::setGridIncrements(const AcGePoint2d& pt) { impObj()->setGridIncrements(pt); return true; }
-bool PyDbViewportTableRecord::snapEnabled() const { return impObj()->snapEnabled(); }
-bool PyDbViewportTableRecord::setSnapEnabled(bool enabled) { impObj()->setSnapEnabled(enabled); return true; }
-bool PyDbViewportTableRecord::isometricSnapEnabled() const { return impObj()->isometricSnapEnabled(); }
-bool PyDbViewportTableRecord::setIsometricSnapEnabled(bool enabled) { impObj()->setIsometricSnapEnabled(enabled); return true; }
-int PyDbViewportTableRecord::snapPair() const { return static_cast<int>(impObj()->snapPair()); }
-bool PyDbViewportTableRecord::setSnapPair(int pairType) { impObj()->setSnapPair(static_cast<Adesk::Int16>(pairType)); return true; }
-double PyDbViewportTableRecord::snapAngle() const { return impObj()->snapAngle(); }
-bool PyDbViewportTableRecord::setSnapAngle(double angle) { impObj()->setSnapAngle(angle); return true; }
-AcGePoint2d PyDbViewportTableRecord::snapBase() const { return impObj()->snapBase(); }
-bool PyDbViewportTableRecord::setSnapBase(const AcGePoint2d& pt) { impObj()->setSnapBase(pt); return true; }
-AcGePoint2d PyDbViewportTableRecord::snapIncrements() const { return impObj()->snapIncrements(); }
-bool PyDbViewportTableRecord::setSnapIncrements(const AcGePoint2d& pt) { impObj()->setSnapIncrements(pt); return true; }
-bool PyDbViewportTableRecord::isUcsSavedWithViewport() const { return impObj()->isUcsSavedWithViewport(); }
-bool PyDbViewportTableRecord::setUcsPerViewport(bool ucsvp) { impObj()->setUcsPerViewport(ucsvp); return true; }
-bool PyDbViewportTableRecord::isGridBoundToLimits() const { return impObj()->isGridBoundToLimits(); }
-bool PyDbViewportTableRecord::setGridBoundToLimits(bool enabled) { impObj()->setGridBoundToLimits(enabled); return true; }
-bool PyDbViewportTableRecord::isGridAdaptive() const { return impObj()->isGridAdaptive(); }
-bool PyDbViewportTableRecord::setGridAdaptive(bool enabled) { impObj()->setGridAdaptive(enabled); return true; }
-bool PyDbViewportTableRecord::isGridSubdivisionRestricted() const { return impObj()->isGridSubdivisionRestricted(); }
-bool PyDbViewportTableRecord::setGridSubdivisionRestricted(bool enabled) { impObj()->setGridSubdivisionRestricted(enabled); return true; }
-bool PyDbViewportTableRecord::isGridFollow() const { return impObj()->isGridFollow(); }
-bool PyDbViewportTableRecord::setGridFollow(bool enabled) { impObj()->setGridFollow(enabled); return true; }
-int PyDbViewportTableRecord::gridMajor() const { return static_cast<int>(impObj()->gridMajor()); }
-bool PyDbViewportTableRecord::setGridMajor(int value) { impObj()->setGridMajor(static_cast<Adesk::Int16>(value)); return true; }
+int PyDbViewportTableRecord::number() const { if (!impObj()) return 0; return static_cast<int>(impObj()->number()); }
+AcGePoint2d PyDbViewportTableRecord::lowerLeftCorner() const { if (!impObj()) return AcGePoint2d(); return impObj()->lowerLeftCorner(); }
+bool PyDbViewportTableRecord::setLowerLeftCorner(const AcGePoint2d& pt) { if (!impObj()) return false; impObj()->setLowerLeftCorner(pt); return true; }
+AcGePoint2d PyDbViewportTableRecord::upperRightCorner() const { if (!impObj()) return AcGePoint2d(); return impObj()->upperRightCorner(); }
+bool PyDbViewportTableRecord::setUpperRightCorner(const AcGePoint2d& pt) { if (!impObj()) return false; impObj()->setUpperRightCorner(pt); return true; }
+bool PyDbViewportTableRecord::ucsFollowMode() const { if (!impObj()) return false; return impObj()->ucsFollowMode(); }
+bool PyDbViewportTableRecord::setUcsFollowMode(bool enabled) { if (!impObj()) return false; impObj()->setUcsFollowMode(enabled); return true; }
+int PyDbViewportTableRecord::circleSides() const { if (!impObj()) return 0; return static_cast<int>(impObj()->circleSides()); }
+bool PyDbViewportTableRecord::setCircleSides(int sides) { if (!impObj()) return false; impObj()->setCircleSides(static_cast<Adesk::UInt16>(sides)); return true; }
+bool PyDbViewportTableRecord::iconEnabled() const { if (!impObj()) return false; return impObj()->iconEnabled(); }
+bool PyDbViewportTableRecord::setIconEnabled(bool enabled) { if (!impObj()) return false; impObj()->setIconEnabled(enabled); return true; }
+bool PyDbViewportTableRecord::iconAtOrigin() const { if (!impObj()) return false; return impObj()->iconAtOrigin(); }
+bool PyDbViewportTableRecord::setIconAtOrigin(bool atOrigin) { if (!impObj()) return false; impObj()->setIconAtOrigin(atOrigin); return true; }
+bool PyDbViewportTableRecord::gridEnabled() const { if (!impObj()) return false; return impObj()->gridEnabled(); }
+bool PyDbViewportTableRecord::setGridEnabled(bool enabled) { if (!impObj()) return false; impObj()->setGridEnabled(enabled); return true; }
+AcGePoint2d PyDbViewportTableRecord::gridIncrements() const { if (!impObj()) return AcGePoint2d(); return impObj()->gridIncrements(); }
+bool PyDbViewportTableRecord::setGridIncrements(const AcGePoint2d& pt) { if (!impObj()) return false; impObj()->setGridIncrements(pt); return true; }
+bool PyDbViewportTableRecord::snapEnabled() const { if (!impObj()) return false; return impObj()->snapEnabled(); }
+bool PyDbViewportTableRecord::setSnapEnabled(bool enabled) { if (!impObj()) return false; impObj()->setSnapEnabled(enabled); return true; }
+bool PyDbViewportTableRecord::isometricSnapEnabled() const { if (!impObj()) return false; return impObj()->isometricSnapEnabled(); }
+bool PyDbViewportTableRecord::setIsometricSnapEnabled(bool enabled) { if (!impObj()) return false; impObj()->setIsometricSnapEnabled(enabled); return true; }
+int PyDbViewportTableRecord::snapPair() const { if (!impObj()) return 0; return static_cast<int>(impObj()->snapPair()); }
+bool PyDbViewportTableRecord::setSnapPair(int pairType) { if (!impObj()) return false; impObj()->setSnapPair(static_cast<Adesk::Int16>(pairType)); return true; }
+double PyDbViewportTableRecord::snapAngle() const { if (!impObj()) return 0.0; return impObj()->snapAngle(); }
+bool PyDbViewportTableRecord::setSnapAngle(double angle) { if (!impObj()) return false; impObj()->setSnapAngle(angle); return true; }
+AcGePoint2d PyDbViewportTableRecord::snapBase() const { if (!impObj()) return AcGePoint2d(); return impObj()->snapBase(); }
+bool PyDbViewportTableRecord::setSnapBase(const AcGePoint2d& pt) { if (!impObj()) return false; impObj()->setSnapBase(pt); return true; }
+AcGePoint2d PyDbViewportTableRecord::snapIncrements() const { if (!impObj()) return AcGePoint2d(); return impObj()->snapIncrements(); }
+bool PyDbViewportTableRecord::setSnapIncrements(const AcGePoint2d& pt) { if (!impObj()) return false; impObj()->setSnapIncrements(pt); return true; }
+bool PyDbViewportTableRecord::isUcsSavedWithViewport() const { if (!impObj()) return false; return impObj()->isUcsSavedWithViewport(); }
+bool PyDbViewportTableRecord::setUcsPerViewport(bool ucsvp) { if (!impObj()) return false; impObj()->setUcsPerViewport(ucsvp); return true; }
+bool PyDbViewportTableRecord::isGridBoundToLimits() const { if (!impObj()) return false; return impObj()->isGridBoundToLimits(); }
+bool PyDbViewportTableRecord::setGridBoundToLimits(bool enabled) { if (!impObj()) return false; impObj()->setGridBoundToLimits(enabled); return true; }
+bool PyDbViewportTableRecord::isGridAdaptive() const { if (!impObj()) return false; return impObj()->isGridAdaptive(); }
+bool PyDbViewportTableRecord::setGridAdaptive(bool enabled) { if (!impObj()) return false; impObj()->setGridAdaptive(enabled); return true; }
+bool PyDbViewportTableRecord::isGridSubdivisionRestricted() const { if (!impObj()) return false; return impObj()->isGridSubdivisionRestricted(); }
+bool PyDbViewportTableRecord::setGridSubdivisionRestricted(bool enabled) { if (!impObj()) return false; impObj()->setGridSubdivisionRestricted(enabled); return true; }
+bool PyDbViewportTableRecord::isGridFollow() const { if (!impObj()) return false; return impObj()->isGridFollow(); }
+bool PyDbViewportTableRecord::setGridFollow(bool enabled) { if (!impObj()) return false; impObj()->setGridFollow(enabled); return true; }
+int PyDbViewportTableRecord::gridMajor() const { if (!impObj()) return 0; return static_cast<int>(impObj()->gridMajor()); }
+bool PyDbViewportTableRecord::setGridMajor(int value) { if (!impObj()) return false; impObj()->setGridMajor(static_cast<Adesk::Int16>(value)); return true; }
 
 // ---- Inherited from AcDbAbstractViewTableRecord ----
-AcGePoint2d PyDbViewportTableRecord::centerPoint() const { return impObj()->centerPoint(); }
-bool PyDbViewportTableRecord::setCenterPoint(const AcGePoint2d& pt) { impObj()->setCenterPoint(pt); return true; }
-double PyDbViewportTableRecord::height() const { return impObj()->height(); }
-bool PyDbViewportTableRecord::setHeight(double h) { impObj()->setHeight(h); return true; }
-double PyDbViewportTableRecord::width() const { return impObj()->width(); }
-bool PyDbViewportTableRecord::setWidth(double w) { impObj()->setWidth(w); return true; }
-AcGePoint3d PyDbViewportTableRecord::target() const { return impObj()->target(); }
-bool PyDbViewportTableRecord::setTarget(const AcGePoint3d& t) { impObj()->setTarget(t); return true; }
-AcGeVector3d PyDbViewportTableRecord::viewDirection() const { return impObj()->viewDirection(); }
-bool PyDbViewportTableRecord::setViewDirection(const AcGeVector3d& v) { impObj()->setViewDirection(v); return true; }
-double PyDbViewportTableRecord::viewTwist() const { return impObj()->viewTwist(); }
-bool PyDbViewportTableRecord::setViewTwist(double angle) { impObj()->setViewTwist(angle); return true; }
-double PyDbViewportTableRecord::lensLength() const { return impObj()->lensLength(); }
-bool PyDbViewportTableRecord::setLensLength(double length) { impObj()->setLensLength(length); return true; }
-bool PyDbViewportTableRecord::perspectiveEnabled() const { return impObj()->perspectiveEnabled(); }
-bool PyDbViewportTableRecord::setPerspectiveEnabled(bool enabled) { impObj()->setPerspectiveEnabled(enabled); return true; }
+AcGePoint2d PyDbViewportTableRecord::centerPoint() const { if (!impObj()) return AcGePoint2d(); return impObj()->centerPoint(); }
+bool PyDbViewportTableRecord::setCenterPoint(const AcGePoint2d& pt) { if (!impObj()) return false; impObj()->setCenterPoint(pt); return true; }
+double PyDbViewportTableRecord::height() const { if (!impObj()) return 0.0; return impObj()->height(); }
+bool PyDbViewportTableRecord::setHeight(double h) { if (!impObj()) return false; impObj()->setHeight(h); return true; }
+double PyDbViewportTableRecord::width() const { if (!impObj()) return 0.0; return impObj()->width(); }
+bool PyDbViewportTableRecord::setWidth(double w) { if (!impObj()) return false; impObj()->setWidth(w); return true; }
+AcGePoint3d PyDbViewportTableRecord::target() const { if (!impObj()) return AcGePoint3d(); return impObj()->target(); }
+bool PyDbViewportTableRecord::setTarget(const AcGePoint3d& t) { if (!impObj()) return false; impObj()->setTarget(t); return true; }
+AcGeVector3d PyDbViewportTableRecord::viewDirection() const { if (!impObj()) return AcGeVector3d(); return impObj()->viewDirection(); }
+bool PyDbViewportTableRecord::setViewDirection(const AcGeVector3d& v) { if (!impObj()) return false; impObj()->setViewDirection(v); return true; }
+double PyDbViewportTableRecord::viewTwist() const { if (!impObj()) return 0.0; return impObj()->viewTwist(); }
+bool PyDbViewportTableRecord::setViewTwist(double angle) { if (!impObj()) return false; impObj()->setViewTwist(angle); return true; }
+double PyDbViewportTableRecord::lensLength() const { if (!impObj()) return 0.0; return impObj()->lensLength(); }
+bool PyDbViewportTableRecord::setLensLength(double length) { if (!impObj()) return false; impObj()->setLensLength(length); return true; }
+bool PyDbViewportTableRecord::perspectiveEnabled() const { if (!impObj()) return false; return impObj()->perspectiveEnabled(); }
+bool PyDbViewportTableRecord::setPerspectiveEnabled(bool enabled) { if (!impObj()) return false; impObj()->setPerspectiveEnabled(enabled); return true; }
 
 // ---- 裁剪平面与高程（继承自 AcDbAbstractViewTableRecord）----
-double PyDbViewportTableRecord::frontClipDistance() const { return impObj()->frontClipDistance(); }
-bool PyDbViewportTableRecord::setFrontClipDistance(double d) { impObj()->setFrontClipDistance(d); return true; }
-double PyDbViewportTableRecord::backClipDistance() const { return impObj()->backClipDistance(); }
-bool PyDbViewportTableRecord::setBackClipDistance(double d) { impObj()->setBackClipDistance(d); return true; }
-bool PyDbViewportTableRecord::frontClipEnabled() const { return impObj()->frontClipEnabled(); }
-bool PyDbViewportTableRecord::setFrontClipEnabled(bool enabled) { impObj()->setFrontClipEnabled(enabled); return true; }
-bool PyDbViewportTableRecord::backClipEnabled() const { return impObj()->backClipEnabled(); }
-bool PyDbViewportTableRecord::setBackClipEnabled(bool enabled) { impObj()->setBackClipEnabled(enabled); return true; }
-double PyDbViewportTableRecord::elevation() const { return impObj()->elevation(); }
-bool PyDbViewportTableRecord::setElevation(double e) { impObj()->setElevation(e); return true; }
+double PyDbViewportTableRecord::frontClipDistance() const { if (!impObj()) return 0.0; return impObj()->frontClipDistance(); }
+bool PyDbViewportTableRecord::setFrontClipDistance(double d) { if (!impObj()) return false; impObj()->setFrontClipDistance(d); return true; }
+double PyDbViewportTableRecord::backClipDistance() const { if (!impObj()) return 0.0; return impObj()->backClipDistance(); }
+bool PyDbViewportTableRecord::setBackClipDistance(double d) { if (!impObj()) return false; impObj()->setBackClipDistance(d); return true; }
+bool PyDbViewportTableRecord::frontClipEnabled() const { if (!impObj()) return false; return impObj()->frontClipEnabled(); }
+bool PyDbViewportTableRecord::setFrontClipEnabled(bool enabled) { if (!impObj()) return false; impObj()->setFrontClipEnabled(enabled); return true; }
+bool PyDbViewportTableRecord::backClipEnabled() const { if (!impObj()) return false; return impObj()->backClipEnabled(); }
+bool PyDbViewportTableRecord::setBackClipEnabled(bool enabled) { if (!impObj()) return false; impObj()->setBackClipEnabled(enabled); return true; }
+double PyDbViewportTableRecord::elevation() const { if (!impObj()) return 0.0; return impObj()->elevation(); }
+bool PyDbViewportTableRecord::setElevation(double e) { if (!impObj()) return false; impObj()->setElevation(e); return true; }
 
 // ---- 背景与快速缩放（AcDbViewportTableRecord 自己）----
-bool PyDbViewportTableRecord::fastZoomsEnabled() const { return impObj()->fastZoomsEnabled(); }
+bool PyDbViewportTableRecord::fastZoomsEnabled() const { if (!impObj()) return false; return impObj()->fastZoomsEnabled(); }
 uint64_t PyDbViewportTableRecord::previousBackground(int type) const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id = impObj()->previousBackground(static_cast<AcGiDrawable::DrawableType>(type));
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 }
-bool PyDbViewportTableRecord::previousBackgroundForcedSwitch() const { return impObj()->previousBackgroundForcedSwitch(); }
+bool PyDbViewportTableRecord::previousBackgroundForcedSwitch() const { if (!impObj()) return false; return impObj()->previousBackgroundForcedSwitch(); }
 bool PyDbViewportTableRecord::setBackground(uint64_t backgroundId) {
+	if (!impObj()) return false;
 	AcDbObjectId id;
 	id.setFromOldId(static_cast<Adesk::IntDbId>(backgroundId));
 	return PyWarnIfError(impObj()->setBackground(id), L"AcDbViewportTableRecord::setBackground");
 }
-bool PyDbViewportTableRecord::setFastZoomsEnabled(bool enabled) { impObj()->setFastZoomsEnabled(enabled); return true; }
+bool PyDbViewportTableRecord::setFastZoomsEnabled(bool enabled) { if (!impObj()) return false; impObj()->setFastZoomsEnabled(enabled); return true; }
 bool PyDbViewportTableRecord::setPreviousBackground(uint64_t backgroundId, int type, bool bForcedSwitch) {
+	if (!impObj()) return false;
 	AcDbObjectId id;
 	id.setFromOldId(static_cast<Adesk::IntDbId>(backgroundId));
 	return PyWarnIfError(impObj()->setPreviousBackground(id, static_cast<AcGiDrawable::DrawableType>(type), bForcedSwitch), L"AcDbViewportTableRecord::setPreviousBackground");

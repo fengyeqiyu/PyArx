@@ -4,9 +4,9 @@
 
 PyWrapper_Cpp(DbOle2Frame)
 AcString PyDbOle2Frame::toString() const { return AcString(std::format("AcDbOle2Frame[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbOle2Frame::location() const { AcGePoint3d pt; impObj()->getLocation(pt); return pt; }
+AcGePoint3d PyDbOle2Frame::location() const { if (!impObj()) return AcGePoint3d(); AcGePoint3d pt; impObj()->getLocation(pt); return pt; }
 
-void PyDbOle2Frame::setLocation(const AcGePoint3d& p) { impObj()->setLocation(p); }
+void PyDbOle2Frame::setLocation(const AcGePoint3d& p) { if (!impObj()) return; impObj()->setLocation(p); }
 
 std::tuple<AcGePoint3d, AcGePoint3d, AcGePoint3d, AcGePoint3d> PyDbOle2Frame::position3d() const {
 	CRectangle3d r{};
@@ -22,30 +22,30 @@ void PyDbOle2Frame::setPosition3d(const AcGePoint3d& upLeft, const AcGePoint3d& 
 	impObj()->setPosition(r);
 }
 
-double PyDbOle2Frame::rotation() const { return impObj()->rotation(); }
+double PyDbOle2Frame::rotation() const { if (!impObj()) return 0.0; return impObj()->rotation(); }
 
-bool  PyDbOle2Frame::setRotation(double r) { return PyWarnIfError(impObj()->setRotation(r), L"AcDbOle2Frame::setRotation"); }
+bool  PyDbOle2Frame::setRotation(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setRotation(r), L"AcDbOle2Frame::setRotation"); }
 
-int PyDbOle2Frame::getType() const { return impObj()->getType(); }
+int PyDbOle2Frame::getType() const { if (!impObj()) return 0; return impObj()->getType(); }
 
-AcString PyDbOle2Frame::getUserType() const { AcString s; if(!PyWarnIfError(impObj()->getUserType(s), L"AcDbOle2Frame::getUserType")) return AcString(); return s; }
-AcString PyDbOle2Frame::getLinkName() const { AcString s; if(!PyWarnIfError(impObj()->getLinkName(s), L"AcDbOle2Frame::getLinkName")) return AcString(); return s; }
-AcString PyDbOle2Frame::getLinkPath() const { AcString s; if(!PyWarnIfError(impObj()->getLinkPath(s), L"AcDbOle2Frame::getLinkPath")) return AcString(); return s; }
-bool PyDbOle2Frame::isLinked() const { return impObj()->isLinked(); }
-int PyDbOle2Frame::outputQuality() const { return impObj()->outputQuality(); }
-void PyDbOle2Frame::setOutputQuality(int v) { impObj()->setOutputQuality(static_cast<Adesk::UInt8>(v)); }
-bool PyDbOle2Frame::autoOutputQuality() const { return impObj()->autoOutputQuality() != Adesk::kFalse; }
-void PyDbOle2Frame::setAutoOutputQuality(int v) { impObj()->setAutoOutputQuality(static_cast<Adesk::UInt8>(v)); }
-double PyDbOle2Frame::wcsWidth() const { return impObj()->wcsWidth(); }
-bool  PyDbOle2Frame::setWcsWidth(double v) { return PyWarnIfError(impObj()->setWcsWidth(v), L"AcDbOle2Frame::setWcsWidth"); }
-double PyDbOle2Frame::wcsHeight() const { return impObj()->wcsHeight(); }
-bool  PyDbOle2Frame::setWcsHeight(double v) { return PyWarnIfError(impObj()->setWcsHeight(v), L"AcDbOle2Frame::setWcsHeight"); }
-double PyDbOle2Frame::scaleWidth() const { return impObj()->scaleWidth(); }
-bool  PyDbOle2Frame::setScaleWidth(double v) { return PyWarnIfError(impObj()->setScaleWidth(v), L"AcDbOle2Frame::setScaleWidth"); }
-double PyDbOle2Frame::scaleHeight() const { return impObj()->scaleHeight(); }
-bool  PyDbOle2Frame::setScaleHeight(double v) { return PyWarnIfError(impObj()->setScaleHeight(v), L"AcDbOle2Frame::setScaleHeight"); }
-bool PyDbOle2Frame::lockAspect() const { return impObj()->lockAspect() != Adesk::kFalse; }
-bool  PyDbOle2Frame::setLockAspect(bool v) { return PyWarnIfError(impObj()->setLockAspect(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbOle2Frame::setLockAspect"); }
+AcString PyDbOle2Frame::getUserType() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->getUserType(s), L"AcDbOle2Frame::getUserType")) return AcString(); return s; }
+AcString PyDbOle2Frame::getLinkName() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->getLinkName(s), L"AcDbOle2Frame::getLinkName")) return AcString(); return s; }
+AcString PyDbOle2Frame::getLinkPath() const { if (!impObj()) return AcString(); AcString s; if(!PyWarnIfError(impObj()->getLinkPath(s), L"AcDbOle2Frame::getLinkPath")) return AcString(); return s; }
+bool PyDbOle2Frame::isLinked() const { if (!impObj()) return false; return impObj()->isLinked(); }
+int PyDbOle2Frame::outputQuality() const { if (!impObj()) return 0; return impObj()->outputQuality(); }
+void PyDbOle2Frame::setOutputQuality(int v) { if (!impObj()) return; impObj()->setOutputQuality(static_cast<Adesk::UInt8>(v)); }
+bool PyDbOle2Frame::autoOutputQuality() const { if (!impObj()) return false; return impObj()->autoOutputQuality() != Adesk::kFalse; }
+void PyDbOle2Frame::setAutoOutputQuality(int v) { if (!impObj()) return; impObj()->setAutoOutputQuality(static_cast<Adesk::UInt8>(v)); }
+double PyDbOle2Frame::wcsWidth() const { if (!impObj()) return 0.0; return impObj()->wcsWidth(); }
+bool  PyDbOle2Frame::setWcsWidth(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setWcsWidth(v), L"AcDbOle2Frame::setWcsWidth"); }
+double PyDbOle2Frame::wcsHeight() const { if (!impObj()) return 0.0; return impObj()->wcsHeight(); }
+bool  PyDbOle2Frame::setWcsHeight(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setWcsHeight(v), L"AcDbOle2Frame::setWcsHeight"); }
+double PyDbOle2Frame::scaleWidth() const { if (!impObj()) return 0.0; return impObj()->scaleWidth(); }
+bool  PyDbOle2Frame::setScaleWidth(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setScaleWidth(v), L"AcDbOle2Frame::setScaleWidth"); }
+double PyDbOle2Frame::scaleHeight() const { if (!impObj()) return 0.0; return impObj()->scaleHeight(); }
+bool  PyDbOle2Frame::setScaleHeight(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setScaleHeight(v), L"AcDbOle2Frame::setScaleHeight"); }
+bool PyDbOle2Frame::lockAspect() const { if (!impObj()) return false; return impObj()->lockAspect() != Adesk::kFalse; }
+bool  PyDbOle2Frame::setLockAspect(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLockAspect(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbOle2Frame::setLockAspect"); }
 
 void bind_PyDbOle2Frame(pym& m) {
 	py::class_<PyDbOle2Frame, PyDbEntity>(m, "PyDbOle2Frame")

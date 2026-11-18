@@ -41,18 +41,23 @@ AcGiRegenType PyGiCommonDraw::regenType() const {
 	return impObj()->regenType();
 }
 bool PyGiCommonDraw::regenAbort() const {
+	if (!impObj()) return false;
 	return impObj()->regenAbort() == Adesk::kTrue;
 }
 bool PyGiCommonDraw::isDragging() const {
+	if (!impObj()) return false;
 	return impObj()->isDragging() == Adesk::kTrue;
 }
 double PyGiCommonDraw::deviation(int deviationType, const AcGePoint3d& pt) const {
+	if (!impObj()) return 0.0;
 	return impObj()->deviation(static_cast<AcGiDeviationType>(deviationType), pt);
 }
 unsigned int PyGiCommonDraw::numberOfIsolines() const {
+	if (!impObj()) return 0;
 	return static_cast<unsigned int>(impObj()->numberOfIsolines());
 }
 bool PyGiCommonDraw::secondaryCall() const {
+	if (!impObj()) return false;
 	return impObj()->secondaryCall();
 }
 GiContextRef* PyGiCommonDraw::context() {
@@ -69,9 +74,11 @@ PyGiViewport PyGiViewportDraw::viewport() const {
 	return PyGiViewport(&impObj()->viewport());
 }
 unsigned int PyGiViewportDraw::sequenceNumber() const {
+	if (!impObj()) return 0;
 	return static_cast<unsigned int>(impObj()->sequenceNumber());
 }
 bool PyGiViewportDraw::isValidId(unsigned long long acgiId) const {
+	if (!impObj()) return false;
 	return impObj()->isValidId(static_cast<Adesk::ULongPtr>(acgiId)) == Adesk::kTrue;
 }
 AcDbObjectId PyGiViewportDraw::viewportObjectId() const {

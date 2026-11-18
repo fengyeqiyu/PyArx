@@ -9,8 +9,8 @@ uint64_t PyDbGeoData::blockTableRecordId() const {
 	AcDbObjectId id = impObj()->blockTableRecordId();
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 }
-int PyDbGeoData::coordinateType() const { return impObj() ? (int)impObj()->coordinateType() : 0; }
-AcGePoint3d PyDbGeoData::designPoint() const { return impObj() ? impObj()->designPoint() : AcGePoint3d(); }
+int PyDbGeoData::coordinateType() const { if (!impObj()) return 0; return impObj() ? (int)impObj()->coordinateType() : 0; }
+AcGePoint3d PyDbGeoData::designPoint() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->designPoint() : AcGePoint3d(); }
 bool PyDbGeoData::eraseFromDb() {
 	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->eraseFromDb(), L"AcDbGeoData::eraseFromDb");

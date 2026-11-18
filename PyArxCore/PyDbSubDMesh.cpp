@@ -5,32 +5,34 @@
 
 PyWrapper_Cpp(DbSubDMesh)
 AcString PyDbSubDMesh::toString() const { return AcString(std::format("AcDbSubDMesh[wrapper]").c_str(), AcString::Utf8); }
-int PyDbSubDMesh::subdLevel() const { Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->subdLevel(r), L"AcDbSubDMesh::subdLevel")) return 0; return static_cast<int>(r); }
-bool PyDbSubDMesh::isWatertight() const { bool r = false; if(!PyWarnIfError(impObj()->isWatertight(r), L"AcDbSubDMesh::isWatertight")) return false; return r; }
-int PyDbSubDMesh::numOfFaces() const { Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfFaces(r), L"AcDbSubDMesh::numOfFaces")) return 0; return static_cast<int>(r); }
-int PyDbSubDMesh::numOfVertices() const { Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfVertices(r), L"AcDbSubDMesh::numOfVertices")) return 0; return static_cast<int>(r); }
-int PyDbSubDMesh::numOfEdges() const { Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfEdges(r), L"AcDbSubDMesh::numOfEdges")) return 0; return static_cast<int>(r); }
-int PyDbSubDMesh::numOfSubDividedFaces() const { Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfSubDividedFaces(r), L"AcDbSubDMesh::numOfSubDividedFaces")) return 0; return static_cast<int>(r); }
-int PyDbSubDMesh::numOfSubDividedVertices() const { Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfSubDividedVertices(r), L"AcDbSubDMesh::numOfSubDividedVertices")) return 0; return static_cast<int>(r); }
-AcGePoint3d PyDbSubDMesh::getVertexAt(int i) const { AcGePoint3d v; if(!PyWarnIfError(impObj()->getVertexAt(static_cast<Adesk::Int32>(i), v), L"AcDbSubDMesh::getVertexAt")) return AcGePoint3d(); return v; }
-bool  PyDbSubDMesh::setVertexAt(int i, const AcGePoint3d& v) { return PyWarnIfError(impObj()->setVertexAt(static_cast<Adesk::Int32>(i), v), L"AcDbSubDMesh::setVertexAt"); }
-double PyDbSubDMesh::computeVolume() const { double v = 0.0; if(!PyWarnIfError(impObj()->computeVolume(v), L"AcDbSubDMesh::computeVolume")) return 0.0; return v; }
-double PyDbSubDMesh::computeSurfaceArea() const { double v = 0.0; if(!PyWarnIfError(impObj()->computeSurfaceArea(v), L"AcDbSubDMesh::computeSurfaceArea")) return 0.0; return v; }
-bool  PyDbSubDMesh::subdDivideUp() { return PyWarnIfError(impObj()->subdDivideUp(), L"AcDbSubDMesh::subdDivideUp"); }
-bool  PyDbSubDMesh::subdDivideDown() { return PyWarnIfError(impObj()->subdDivideDown(), L"AcDbSubDMesh::subdDivideDown"); }
-bool  PyDbSubDMesh::subdRefine() { return PyWarnIfError(impObj()->subdRefine(), L"AcDbSubDMesh::subdRefine"); }
-bool  PyDbSubDMesh::setSphere(double r, int da, int dh, int lvl) { return PyWarnIfError(impObj()->setSphere(r, da, dh, lvl), L"AcDbSubDMesh::setSphere"); }
-bool  PyDbSubDMesh::setBox(double x, double y, double z, int dx, int dy, int dz, int lvl) { return PyWarnIfError(impObj()->setBox(x, y, z, dx, dy, dz, lvl), L"AcDbSubDMesh::setBox"); }
-bool  PyDbSubDMesh::setTorus(double major, int ds, int dp, double ratio, double rot, int lvl) { return PyWarnIfError(impObj()->setTorus(major, ds, dp, ratio, rot, lvl), L"AcDbSubDMesh::setTorus"); }
-bool  PyDbSubDMesh::setCylinder(double major, double minor, double h, int da, int dh, int dc, int lvl) { return PyWarnIfError(impObj()->setCylinder(major, minor, h, da, dh, dc, lvl), L"AcDbSubDMesh::setCylinder"); }
-bool  PyDbSubDMesh::setCone(double major, double minor, double h, int da, int dh, int dc, double ratio, int lvl) { return PyWarnIfError(impObj()->setCone(major, minor, h, da, dh, dc, ratio, lvl), L"AcDbSubDMesh::setCone"); }
-bool  PyDbSubDMesh::setWedge(double x, double y, double z, int dl, int dw, int dh, int ds, int dc, int lvl) { return PyWarnIfError(impObj()->setWedge(x, y, z, dl, dw, dh, ds, dc, lvl), L"AcDbSubDMesh::setWedge"); }
-bool  PyDbSubDMesh::setPyramid(double radius, double h, int dl, int dh, int dc, int nSides, double ratio, int lvl) { return PyWarnIfError(impObj()->setPyramid(radius, h, dl, dh, dc, nSides, ratio, lvl), L"AcDbSubDMesh::setPyramid"); }
+int PyDbSubDMesh::subdLevel() const { if (!impObj()) return 0; Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->subdLevel(r), L"AcDbSubDMesh::subdLevel")) return 0; return static_cast<int>(r); }
+bool PyDbSubDMesh::isWatertight() const { if (!impObj()) return false; bool r = false; if(!PyWarnIfError(impObj()->isWatertight(r), L"AcDbSubDMesh::isWatertight")) return false; return r; }
+int PyDbSubDMesh::numOfFaces() const { if (!impObj()) return 0; Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfFaces(r), L"AcDbSubDMesh::numOfFaces")) return 0; return static_cast<int>(r); }
+int PyDbSubDMesh::numOfVertices() const { if (!impObj()) return 0; Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfVertices(r), L"AcDbSubDMesh::numOfVertices")) return 0; return static_cast<int>(r); }
+int PyDbSubDMesh::numOfEdges() const { if (!impObj()) return 0; Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfEdges(r), L"AcDbSubDMesh::numOfEdges")) return 0; return static_cast<int>(r); }
+int PyDbSubDMesh::numOfSubDividedFaces() const { if (!impObj()) return 0; Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfSubDividedFaces(r), L"AcDbSubDMesh::numOfSubDividedFaces")) return 0; return static_cast<int>(r); }
+int PyDbSubDMesh::numOfSubDividedVertices() const { if (!impObj()) return 0; Adesk::Int32 r = 0; if(!PyWarnIfError(impObj()->numOfSubDividedVertices(r), L"AcDbSubDMesh::numOfSubDividedVertices")) return 0; return static_cast<int>(r); }
+AcGePoint3d PyDbSubDMesh::getVertexAt(int i) const { if (!impObj()) return AcGePoint3d(); AcGePoint3d v; if(!PyWarnIfError(impObj()->getVertexAt(static_cast<Adesk::Int32>(i), v), L"AcDbSubDMesh::getVertexAt")) return AcGePoint3d(); return v; }
+bool  PyDbSubDMesh::setVertexAt(int i, const AcGePoint3d& v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setVertexAt(static_cast<Adesk::Int32>(i), v), L"AcDbSubDMesh::setVertexAt"); }
+double PyDbSubDMesh::computeVolume() const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->computeVolume(v), L"AcDbSubDMesh::computeVolume")) return 0.0; return v; }
+double PyDbSubDMesh::computeSurfaceArea() const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->computeSurfaceArea(v), L"AcDbSubDMesh::computeSurfaceArea")) return 0.0; return v; }
+bool  PyDbSubDMesh::subdDivideUp() { if (!impObj()) return false; return PyWarnIfError(impObj()->subdDivideUp(), L"AcDbSubDMesh::subdDivideUp"); }
+bool  PyDbSubDMesh::subdDivideDown() { if (!impObj()) return false; return PyWarnIfError(impObj()->subdDivideDown(), L"AcDbSubDMesh::subdDivideDown"); }
+bool  PyDbSubDMesh::subdRefine() { if (!impObj()) return false; return PyWarnIfError(impObj()->subdRefine(), L"AcDbSubDMesh::subdRefine"); }
+bool  PyDbSubDMesh::setSphere(double r, int da, int dh, int lvl) { if (!impObj()) return false; return PyWarnIfError(impObj()->setSphere(r, da, dh, lvl), L"AcDbSubDMesh::setSphere"); }
+bool  PyDbSubDMesh::setBox(double x, double y, double z, int dx, int dy, int dz, int lvl) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBox(x, y, z, dx, dy, dz, lvl), L"AcDbSubDMesh::setBox"); }
+bool  PyDbSubDMesh::setTorus(double major, int ds, int dp, double ratio, double rot, int lvl) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTorus(major, ds, dp, ratio, rot, lvl), L"AcDbSubDMesh::setTorus"); }
+bool  PyDbSubDMesh::setCylinder(double major, double minor, double h, int da, int dh, int dc, int lvl) { if (!impObj()) return false; return PyWarnIfError(impObj()->setCylinder(major, minor, h, da, dh, dc, lvl), L"AcDbSubDMesh::setCylinder"); }
+bool  PyDbSubDMesh::setCone(double major, double minor, double h, int da, int dh, int dc, double ratio, int lvl) { if (!impObj()) return false; return PyWarnIfError(impObj()->setCone(major, minor, h, da, dh, dc, ratio, lvl), L"AcDbSubDMesh::setCone"); }
+bool  PyDbSubDMesh::setWedge(double x, double y, double z, int dl, int dw, int dh, int ds, int dc, int lvl) { if (!impObj()) return false; return PyWarnIfError(impObj()->setWedge(x, y, z, dl, dw, dh, ds, dc, lvl), L"AcDbSubDMesh::setWedge"); }
+bool  PyDbSubDMesh::setPyramid(double radius, double h, int dl, int dh, int dc, int nSides, double ratio, int lvl) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPyramid(radius, h, dl, dh, dc, nSides, ratio, lvl), L"AcDbSubDMesh::setPyramid"); }
 
 bool PyDbSubDMesh::setSubDMesh(const AcGePoint3dArray& vertexArray, const AcArray<Adesk::Int32>& faceArray, int subDLevel) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setSubDMesh(vertexArray, faceArray, subDLevel), L"AcDbSubDMesh::setSubDMesh");
 }
 bool PyDbSubDMesh::splitFace(const PyDbSubentId& faceId, const PyDbSubentId& sub0, const AcGePoint3d& p0, const PyDbSubentId& sub1, const AcGePoint3d& p1) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->splitFace(static_cast<AcDbSubentId>(faceId), static_cast<AcDbSubentId>(sub0), p0, static_cast<AcDbSubentId>(sub1), p1), L"AcDbSubDMesh::splitFace");
 }
 static AcDbFullSubentPathArray ToFspArray(const std::vector<PyDbFullSubentPath>& paths) {
@@ -39,9 +41,11 @@ static AcDbFullSubentPathArray ToFspArray(const std::vector<PyDbFullSubentPath>&
 	return arr;
 }
 bool PyDbSubDMesh::extrudeFaces(const std::vector<PyDbFullSubentPath>& paths, const AcGePoint3dArray& alongPath, double taper) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->extrudeFaces(ToFspArray(paths), alongPath, taper), L"AcDbSubDMesh::extrudeFaces");
 }
 bool PyDbSubDMesh::extrudeConnectedFaces(const std::vector<PyDbFullSubentPath>& paths, const AcGePoint3dArray& alongPath, double taper) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->extrudeConnectedFaces(ToFspArray(paths), alongPath, taper), L"AcDbSubDMesh::extrudeConnectedFaces");
 }
 

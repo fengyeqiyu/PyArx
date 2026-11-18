@@ -5,10 +5,12 @@
 PyWrapper_Cpp(DbLoftedSurface);
 
 int PyDbLoftedSurface::numCrossSections() const {
+	if (!impObj()) return 0;
 	return impObj()->numCrossSections();
 }
 
 int PyDbLoftedSurface::numGuideCurves() const {
+	if (!impObj()) return 0;
 	return impObj()->numGuideCurves();
 }
 

@@ -15,10 +15,12 @@ PyDbLayerTableRecord PyDbLayerTable::getAt(const AcString& name) const {
 }
 
 bool PyDbLayerTable::hasUnreconciledLayers() const {
+	if (!impObj()) return false;
 	return impObj()->hasUnreconciledLayers();
 }
 
 void PyDbLayerTable::generateUsageData() {
+	if (!impObj()) return;
 	impObj()->generateUsageData();
 }
 

@@ -6,44 +6,47 @@
 
 PyWrapper_Cpp(DbCurve)
 
-bool PyDbCurve::isClosed() const { return impObj()->isClosed() != Adesk::kFalse; }
-bool PyDbCurve::isPeriodic() const { return impObj()->isPeriodic() != Adesk::kFalse; }
+bool PyDbCurve::isClosed() const { if (!impObj()) return false; return impObj()->isClosed() != Adesk::kFalse; }
+bool PyDbCurve::isPeriodic() const { if (!impObj()) return false; return impObj()->isPeriodic() != Adesk::kFalse; }
 
-double PyDbCurve::getStartParam() const { double v = 0.0; if(!PyWarnIfError(impObj()->getStartParam(v), L"AcDbCurve::getStartParam")) return 0.0; return v; }
-double PyDbCurve::getEndParam() const { double v = 0.0; if(!PyWarnIfError(impObj()->getEndParam(v), L"AcDbCurve::getEndParam")) return 0.0; return v; }
-AcGePoint3d PyDbCurve::getStartPoint() const { AcGePoint3d v; if(!PyWarnIfError(impObj()->getStartPoint(v), L"AcDbCurve::getStartPoint")) return AcGePoint3d(); return v; }
-AcGePoint3d PyDbCurve::getEndPoint() const { AcGePoint3d v; if(!PyWarnIfError(impObj()->getEndPoint(v), L"AcDbCurve::getEndPoint")) return AcGePoint3d(); return v; }
+double PyDbCurve::getStartParam() const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->getStartParam(v), L"AcDbCurve::getStartParam")) return 0.0; return v; }
+double PyDbCurve::getEndParam() const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->getEndParam(v), L"AcDbCurve::getEndParam")) return 0.0; return v; }
+AcGePoint3d PyDbCurve::getStartPoint() const { if (!impObj()) return AcGePoint3d(); AcGePoint3d v; if(!PyWarnIfError(impObj()->getStartPoint(v), L"AcDbCurve::getStartPoint")) return AcGePoint3d(); return v; }
+AcGePoint3d PyDbCurve::getEndPoint() const { if (!impObj()) return AcGePoint3d(); AcGePoint3d v; if(!PyWarnIfError(impObj()->getEndPoint(v), L"AcDbCurve::getEndPoint")) return AcGePoint3d(); return v; }
 
-AcGePoint3d PyDbCurve::getPointAtParam(double param) const { AcGePoint3d v; if(!PyWarnIfError(impObj()->getPointAtParam(param, v), L"AcDbCurve::getPointAtParam")) return AcGePoint3d(); return v; }
-double PyDbCurve::getParamAtPoint(const AcGePoint3d& pt) const { double v = 0.0; if(!PyWarnIfError(impObj()->getParamAtPoint(pt, v), L"AcDbCurve::getParamAtPoint")) return 0.0; return v; }
-double PyDbCurve::getDistAtParam(double param) const { double v = 0.0; if(!PyWarnIfError(impObj()->getDistAtParam(param, v), L"AcDbCurve::getDistAtParam")) return 0.0; return v; }
-double PyDbCurve::getParamAtDist(double dist) const { double v = 0.0; if(!PyWarnIfError(impObj()->getParamAtDist(dist, v), L"AcDbCurve::getParamAtDist")) return 0.0; return v; }
-double PyDbCurve::getDistAtPoint(const AcGePoint3d& pt) const { double v = 0.0; if(!PyWarnIfError(impObj()->getDistAtPoint(pt, v), L"AcDbCurve::getDistAtPoint")) return 0.0; return v; }
-AcGePoint3d PyDbCurve::getPointAtDist(double dist) const { AcGePoint3d v; if(!PyWarnIfError(impObj()->getPointAtDist(dist, v), L"AcDbCurve::getPointAtDist")) return AcGePoint3d(); return v; }
+AcGePoint3d PyDbCurve::getPointAtParam(double param) const { if (!impObj()) return AcGePoint3d(); AcGePoint3d v; if(!PyWarnIfError(impObj()->getPointAtParam(param, v), L"AcDbCurve::getPointAtParam")) return AcGePoint3d(); return v; }
+double PyDbCurve::getParamAtPoint(const AcGePoint3d& pt) const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->getParamAtPoint(pt, v), L"AcDbCurve::getParamAtPoint")) return 0.0; return v; }
+double PyDbCurve::getDistAtParam(double param) const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->getDistAtParam(param, v), L"AcDbCurve::getDistAtParam")) return 0.0; return v; }
+double PyDbCurve::getParamAtDist(double dist) const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->getParamAtDist(dist, v), L"AcDbCurve::getParamAtDist")) return 0.0; return v; }
+double PyDbCurve::getDistAtPoint(const AcGePoint3d& pt) const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->getDistAtPoint(pt, v), L"AcDbCurve::getDistAtPoint")) return 0.0; return v; }
+AcGePoint3d PyDbCurve::getPointAtDist(double dist) const { if (!impObj()) return AcGePoint3d(); AcGePoint3d v; if(!PyWarnIfError(impObj()->getPointAtDist(dist, v), L"AcDbCurve::getPointAtDist")) return AcGePoint3d(); return v; }
 
-AcGeVector3d PyDbCurve::getFirstDeriv(double param) const { AcGeVector3d v; if(!PyWarnIfError(impObj()->getFirstDeriv(param, v), L"AcDbCurve::getFirstDeriv")) return AcGeVector3d(); return v; }
-AcGeVector3d PyDbCurve::getFirstDeriv(const AcGePoint3d& pt) const { AcGeVector3d v; if(!PyWarnIfError(impObj()->getFirstDeriv(pt, v), L"AcDbCurve::getFirstDeriv")) return AcGeVector3d(); return v; }
-AcGeVector3d PyDbCurve::getSecondDeriv(double param) const { AcGeVector3d v; if(!PyWarnIfError(impObj()->getSecondDeriv(param, v), L"AcDbCurve::getSecondDeriv")) return AcGeVector3d(); return v; }
-AcGeVector3d PyDbCurve::getSecondDeriv(const AcGePoint3d& pt) const { AcGeVector3d v; if(!PyWarnIfError(impObj()->getSecondDeriv(pt, v), L"AcDbCurve::getSecondDeriv")) return AcGeVector3d(); return v; }
+AcGeVector3d PyDbCurve::getFirstDeriv(double param) const { if (!impObj()) return AcGeVector3d(); AcGeVector3d v; if(!PyWarnIfError(impObj()->getFirstDeriv(param, v), L"AcDbCurve::getFirstDeriv")) return AcGeVector3d(); return v; }
+AcGeVector3d PyDbCurve::getFirstDeriv(const AcGePoint3d& pt) const { if (!impObj()) return AcGeVector3d(); AcGeVector3d v; if(!PyWarnIfError(impObj()->getFirstDeriv(pt, v), L"AcDbCurve::getFirstDeriv")) return AcGeVector3d(); return v; }
+AcGeVector3d PyDbCurve::getSecondDeriv(double param) const { if (!impObj()) return AcGeVector3d(); AcGeVector3d v; if(!PyWarnIfError(impObj()->getSecondDeriv(param, v), L"AcDbCurve::getSecondDeriv")) return AcGeVector3d(); return v; }
+AcGeVector3d PyDbCurve::getSecondDeriv(const AcGePoint3d& pt) const { if (!impObj()) return AcGeVector3d(); AcGeVector3d v; if(!PyWarnIfError(impObj()->getSecondDeriv(pt, v), L"AcDbCurve::getSecondDeriv")) return AcGeVector3d(); return v; }
 
 AcGePoint3d PyDbCurve::getClosestPointTo(const AcGePoint3d& pt, bool extend) const {
+	if (!impObj()) return AcGePoint3d();
 	AcGePoint3d v;
 	if(!PyWarnIfError(impObj()->getClosestPointTo(pt, v, extend ? Adesk::kTrue : Adesk::kFalse), L"AcDbCurve::getClosestPointTo")) return AcGePoint3d();
 	return v;
 }
 
-double PyDbCurve::getArea() const { double v = 0.0; if(!PyWarnIfError(impObj()->getArea(v), L"AcDbCurve::getArea")) return 0.0; return v; }
-bool  PyDbCurve::reverseCurve() { return PyWarnIfError(impObj()->reverseCurve(), L"AcDbCurve::reverseCurve"); }
-bool  PyDbCurve::extend(double newParam) { return PyWarnIfError(impObj()->extend(newParam), L"AcDbCurve::extend"); }
+double PyDbCurve::getArea() const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->getArea(v), L"AcDbCurve::getArea")) return 0.0; return v; }
+bool  PyDbCurve::reverseCurve() { if (!impObj()) return false; return PyWarnIfError(impObj()->reverseCurve(), L"AcDbCurve::reverseCurve"); }
+bool  PyDbCurve::extend(double newParam) { if (!impObj()) return false; return PyWarnIfError(impObj()->extend(newParam), L"AcDbCurve::extend"); }
 
 // 方向投影版最近点：direction 为投影方向(入参)，仅输出曲线上点
 AcGePoint3d PyDbCurve::getClosestPointTo(const AcGePoint3d& givenPnt, const AcGeVector3d& direction, bool extend) const {
+	if (!impObj()) return AcGePoint3d();
 	AcGePoint3d v;
 	if(!PyWarnIfError(impObj()->getClosestPointTo(givenPnt, direction, v, extend ? Adesk::kTrue : Adesk::kFalse), L"AcDbCurve::getClosestPointTo")) return AcGePoint3d();
 	return v;
 }
 
 bool PyDbCurve::extendToPoint(bool extendStart, const AcGePoint3d& toPoint) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->extend(extendStart ? Adesk::kTrue : Adesk::kFalse, toPoint), L"AcDbCurve::extend");
 }
 

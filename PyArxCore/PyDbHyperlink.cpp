@@ -9,6 +9,7 @@ namespace {
 }
 
 AcString PyDbHyperlink::name() const {
+	if (!impObj()) return AcString();
 	return impObj() ? achToW(impObj()->name()) : AcString();
 }
 bool PyDbHyperlink::setName(const AcString& v) {
@@ -18,6 +19,7 @@ bool PyDbHyperlink::setName(const AcString& v) {
 }
 
 AcString PyDbHyperlink::description() const {
+	if (!impObj()) return AcString();
 	return impObj() ? achToW(impObj()->description()) : AcString();
 }
 bool PyDbHyperlink::setDescription(const AcString& v) {
@@ -27,6 +29,7 @@ bool PyDbHyperlink::setDescription(const AcString& v) {
 }
 
 AcString PyDbHyperlink::subLocation() const {
+	if (!impObj()) return AcString();
 	return impObj() ? achToW(impObj()->subLocation()) : AcString();
 }
 bool PyDbHyperlink::setSubLocation(const AcString& v) {
@@ -36,18 +39,22 @@ bool PyDbHyperlink::setSubLocation(const AcString& v) {
 }
 
 AcString PyDbHyperlink::displayString() const {
+	if (!impObj()) return AcString();
 	return impObj() ? achToW(impObj()->getDisplayString()) : AcString();
 }
 
 bool PyDbHyperlink::isOutermostContainer() const {
+	if (!impObj()) return false;
 	return impObj() && impObj()->isOutermostContainer();
 }
 
 int PyDbHyperlink::nestedLevel() const {
+	if (!impObj()) return 0;
 	return impObj() ? impObj()->getNestedLevel() : 0;
 }
 
 int PyDbHyperlink::flags() const {
+	if (!impObj()) return 0;
 	return impObj() ? static_cast<int>(impObj()->flags()) : 0;
 }
 bool PyDbHyperlink::setFlags(int f) {

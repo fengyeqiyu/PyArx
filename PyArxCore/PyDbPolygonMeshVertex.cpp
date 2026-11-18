@@ -4,9 +4,9 @@
 
 PyWrapper_Cpp(DbPolygonMeshVertex);
 AcString PyDbPolygonMeshVertex::toString() const { return AcString(std::format("AcDbPolygonMeshVertex[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbPolygonMeshVertex::position() const { return impObj()->position(); }
-bool PyDbPolygonMeshVertex::setPosition(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setPosition(p), L"AcDbPolygonMeshVertex::setPosition"); }
-int PyDbPolygonMeshVertex::vertexType() const { return static_cast<int>(impObj()->vertexType()); }
+AcGePoint3d PyDbPolygonMeshVertex::position() const { if (!impObj()) return AcGePoint3d(); return impObj()->position(); }
+bool PyDbPolygonMeshVertex::setPosition(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPosition(p), L"AcDbPolygonMeshVertex::setPosition"); }
+int PyDbPolygonMeshVertex::vertexType() const { if (!impObj()) return 0; return static_cast<int>(impObj()->vertexType()); }
 
 void bind_PyDbPolygonMeshVertex(pym& m) {
 	py::class_<PyDbPolygonMeshVertex, PyDbVertex>(m, "PyDbPolygonMeshVertex")

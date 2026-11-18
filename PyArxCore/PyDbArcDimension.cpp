@@ -4,38 +4,38 @@
 
 PyWrapper_Cpp(DbArcDimension)
 AcString PyDbArcDimension::toString() const { return AcString(std::format("AcDbArcDimension[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbArcDimension::arcPoint() const { return impObj()->arcPoint(); }
+AcGePoint3d PyDbArcDimension::arcPoint() const { if (!impObj()) return AcGePoint3d(); return impObj()->arcPoint(); }
 
-bool  PyDbArcDimension::setArcPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setArcPoint(p), L"AcDbArcDimension::setArcPoint"); }
+bool  PyDbArcDimension::setArcPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setArcPoint(p), L"AcDbArcDimension::setArcPoint"); }
 
-AcGePoint3d PyDbArcDimension::centerPoint() const { return impObj()->centerPoint(); }
+AcGePoint3d PyDbArcDimension::centerPoint() const { if (!impObj()) return AcGePoint3d(); return impObj()->centerPoint(); }
 
-bool  PyDbArcDimension::setCenterPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setCenterPoint(p), L"AcDbArcDimension::setCenterPoint"); }
+bool  PyDbArcDimension::setCenterPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setCenterPoint(p), L"AcDbArcDimension::setCenterPoint"); }
 
-AcGePoint3d PyDbArcDimension::xLine1Point() const { return impObj()->xLine1Point(); }
+AcGePoint3d PyDbArcDimension::xLine1Point() const { if (!impObj()) return AcGePoint3d(); return impObj()->xLine1Point(); }
 
-bool  PyDbArcDimension::setXLine1Point(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setXLine1Point(p), L"AcDbArcDimension::setXLine1Point"); }
+bool  PyDbArcDimension::setXLine1Point(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setXLine1Point(p), L"AcDbArcDimension::setXLine1Point"); }
 
-AcGePoint3d PyDbArcDimension::xLine2Point() const { return impObj()->xLine2Point(); }
+AcGePoint3d PyDbArcDimension::xLine2Point() const { if (!impObj()) return AcGePoint3d(); return impObj()->xLine2Point(); }
 
-bool  PyDbArcDimension::setXLine2Point(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setXLine2Point(p), L"AcDbArcDimension::setXLine2Point"); }
+bool  PyDbArcDimension::setXLine2Point(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setXLine2Point(p), L"AcDbArcDimension::setXLine2Point"); }
 
-bool PyDbArcDimension::isPartial() const { return impObj()->isPartial(); }
+bool PyDbArcDimension::isPartial() const { if (!impObj()) return false; return impObj()->isPartial(); }
 
-bool  PyDbArcDimension::setIsPartial(bool v) { return PyWarnIfError(impObj()->setIsPartial(v), L"AcDbArcDimension::setIsPartial"); }
+bool  PyDbArcDimension::setIsPartial(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIsPartial(v), L"AcDbArcDimension::setIsPartial"); }
 
-double PyDbArcDimension::arcStartParam() const { return impObj()->arcStartParam(); }
-bool  PyDbArcDimension::setArcStartParam(double v) { return PyWarnIfError(impObj()->setArcStartParam(v), L"AcDbArcDimension::setArcStartParam"); }
-double PyDbArcDimension::arcEndParam() const { return impObj()->arcEndParam(); }
-bool  PyDbArcDimension::setArcEndParam(double v) { return PyWarnIfError(impObj()->setArcEndParam(v), L"AcDbArcDimension::setArcEndParam"); }
-bool PyDbArcDimension::hasLeader() const { return impObj()->hasLeader(); }
-bool  PyDbArcDimension::setHasLeader(bool v) { return PyWarnIfError(impObj()->setHasLeader(v), L"AcDbArcDimension::setHasLeader"); }
-AcGePoint3d PyDbArcDimension::leader1Point() const { return impObj()->leader1Point(); }
-bool  PyDbArcDimension::setLeader1Point(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setLeader1Point(p), L"AcDbArcDimension::setLeader1Point"); }
-AcGePoint3d PyDbArcDimension::leader2Point() const { return impObj()->leader2Point(); }
-bool  PyDbArcDimension::setLeader2Point(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setLeader2Point(p), L"AcDbArcDimension::setLeader2Point"); }
-int PyDbArcDimension::arcSymbolType() const { return impObj()->arcSymbolType(); }
-bool  PyDbArcDimension::setArcSymbolType(int v) { return PyWarnIfError(impObj()->setArcSymbolType(v), L"AcDbArcDimension::setArcSymbolType"); }
+double PyDbArcDimension::arcStartParam() const { if (!impObj()) return 0.0; return impObj()->arcStartParam(); }
+bool  PyDbArcDimension::setArcStartParam(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setArcStartParam(v), L"AcDbArcDimension::setArcStartParam"); }
+double PyDbArcDimension::arcEndParam() const { if (!impObj()) return 0.0; return impObj()->arcEndParam(); }
+bool  PyDbArcDimension::setArcEndParam(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setArcEndParam(v), L"AcDbArcDimension::setArcEndParam"); }
+bool PyDbArcDimension::hasLeader() const { if (!impObj()) return false; return impObj()->hasLeader(); }
+bool  PyDbArcDimension::setHasLeader(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHasLeader(v), L"AcDbArcDimension::setHasLeader"); }
+AcGePoint3d PyDbArcDimension::leader1Point() const { if (!impObj()) return AcGePoint3d(); return impObj()->leader1Point(); }
+bool  PyDbArcDimension::setLeader1Point(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLeader1Point(p), L"AcDbArcDimension::setLeader1Point"); }
+AcGePoint3d PyDbArcDimension::leader2Point() const { if (!impObj()) return AcGePoint3d(); return impObj()->leader2Point(); }
+bool  PyDbArcDimension::setLeader2Point(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLeader2Point(p), L"AcDbArcDimension::setLeader2Point"); }
+int PyDbArcDimension::arcSymbolType() const { if (!impObj()) return 0; return impObj()->arcSymbolType(); }
+bool  PyDbArcDimension::setArcSymbolType(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setArcSymbolType(v), L"AcDbArcDimension::setArcSymbolType"); }
 
 void bind_PyDbArcDimension(pym& m) {
 	py::class_<PyDbArcDimension, PyDbDimension>(m, "PyDbArcDimension")

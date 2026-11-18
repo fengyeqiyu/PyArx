@@ -7,8 +7,8 @@ AcString PyDbRegion::toString() const { return AcString(std::format("AcDbRegion[
 double PyDbRegion::area() const { double v = 0.0; if(!impObj()) return 0.0; if(!PyWarnIfError(impObj()->getArea(v), L"AcDbRegion::getArea")) return 0.0; return v; }
 double PyDbRegion::perimeter() const { double v = 0.0; if(!impObj()) return 0.0; if(!PyWarnIfError(impObj()->getPerimeter(v), L"AcDbRegion::getPerimeter")) return 0.0; return v; }
 AcGeVector3d PyDbRegion::normal() const { AcGeVector3d n; if(!impObj()) return AcGeVector3d(); if(!PyWarnIfError(impObj()->getNormal(n), L"AcDbRegion::getNormal")) return AcGeVector3d(); return n; }
-bool PyDbRegion::isNull() const { return impObj() ? (impObj()->isNull() != Adesk::kFalse) : true; }
-unsigned int PyDbRegion::numChanges() const { return impObj() ? impObj()->numChanges() : 0u; }
+bool PyDbRegion::isNull() const { if (!impObj()) return false; return impObj() ? (impObj()->isNull() != Adesk::kFalse) : true; }
+unsigned int PyDbRegion::numChanges() const { if (!impObj()) return 0; return impObj() ? impObj()->numChanges() : 0u; }
 std::tuple<AcGePlane, int> PyDbRegion::getPlane() const {
 	AcGePlane plane; AcDb::Planarity type;
 	if(!impObj()) return { AcGePlane(), 0 };
@@ -16,10 +16,11 @@ std::tuple<AcGePlane, int> PyDbRegion::getPlane() const {
 	return { plane, static_cast<int>(type) };
 }
 bool PyDbRegion::booleanOper(int operation, PyDbRegion& other) {
+	if (!impObj()) return false;
 	if(!impObj() || !other.impObj()) return false;
 	return PyWarnIfError(impObj()->booleanOper(static_cast<AcDb::BoolOperType>(operation), other.impObj()), L"AcDbRegion::booleanOper");
 }
-bool PyDbRegion::usesGraphicsCache() const { return impObj() ? impObj()->usesGraphicsCache() : false; }
+bool PyDbRegion::usesGraphicsCache() const { if (!impObj()) return false; return impObj() ? impObj()->usesGraphicsCache() : false; }
 std::tuple<AcGePoint2d, double, double,
 	double, double, double,
 	double, double,

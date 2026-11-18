@@ -10,49 +10,64 @@ PyWrapper_Cpp(GiSubEntityTraits)
 PyWrapper_Cpp(GiDrawableTraits)
 
 void PyGiSubEntityTraits::setColor(const Adesk::UInt16 color) {
+	if (!impObj()) return;
 	impObj()->setColor(color);
 }
 void PyGiSubEntityTraits::setTrueColor(const AcCmEntityColor& color) {
+	if (!impObj()) return;
 	impObj()->setTrueColor(color);
 }
 void PyGiSubEntityTraits::setLayer(const AcDbObjectId layerId) {
+	if (!impObj()) return;
 	impObj()->setLayer(layerId);
 }
 void PyGiSubEntityTraits::setLineType(const AcDbObjectId linetypeId) {
+	if (!impObj()) return;
 	impObj()->setLineType(linetypeId);
 }
 void PyGiSubEntityTraits::setSelectionMarker(const Adesk::LongPtr markerId) {
+	if (!impObj()) return;
 	impObj()->setSelectionMarker(markerId);
 }
 void PyGiSubEntityTraits::setFillType(const AcGiFillType filltype) {
+	if (!impObj()) return;
 	impObj()->setFillType(filltype);
 }
 void PyGiSubEntityTraits::setLineWeight(const AcDb::LineWeight lw) {
+	if (!impObj()) return;
 	impObj()->setLineWeight(lw);
 }
 void PyGiSubEntityTraits::setLineWeight(const AcDb::LineWeight lw, const char lweight_index) {
+	if (!impObj()) return;
 	impObj()->setLineWeight(lw, lweight_index);
 }
 
 void PyGiSubEntityTraits::setLineTypeScale(double dScale) {
+	if (!impObj()) return;
 	impObj()->setLineTypeScale(dScale);
 }
 void PyGiSubEntityTraits::setThickness(double dThickness) {
+	if (!impObj()) return;
 	impObj()->setThickness(dThickness);
 }
 void PyGiSubEntityTraits::setVisualStyle(const AcDbObjectId visualStyleId) {
+	if (!impObj()) return;
 	impObj()->setVisualStyle(visualStyleId);
 }
 void PyGiSubEntityTraits::setPlotStyleName(AcDb::PlotStyleNameType pltType, const AcDbObjectId& objid) {
+	if (!impObj()) return;
 	impObj()->setPlotStyleName(pltType, objid);
 }
 void PyGiSubEntityTraits::setMaterial(const AcDbObjectId materialId) {
+	if (!impObj()) return;
 	impObj()->setMaterial(materialId);
 }
 void PyGiSubEntityTraits::setMapper(const AcGiMapper& mapper) {
+	if (!impObj()) return;
 	impObj()->setMapper(&mapper);
 }
 void PyGiSubEntityTraits::setSectionable(bool bSectionable) {
+	if (!impObj()) return;
 	impObj()->setSectionable(bSectionable);
 }
 Acad::ErrorStatus PyGiSubEntityTraits::setDrawFlags(Adesk::UInt32 flags) {
@@ -62,18 +77,22 @@ Acad::ErrorStatus PyGiSubEntityTraits::setShadowFlags(AcGiSubEntityTraits::Shado
 	return impObj()->setShadowFlags(flags);
 }
 void PyGiSubEntityTraits::setSelectionGeom(bool bSelectionflag) {
+	if (!impObj()) return;
 	impObj()->setSelectionGeom(bSelectionflag);
 }
 void PyGiSubEntityTraits::setTransparency(const AcCmTransparency& transparency) {
+	if (!impObj()) return;
 	impObj()->setTransparency(transparency);
 }
 void PyGiSubEntityTraits::setFill(const PyGiFill& pFill) {
+	if (!impObj()) return;
 	impObj()->setFill(pFill.impObj());
 }
 
 // Return current settings.
 //
 Adesk::UInt16 PyGiSubEntityTraits::color(void) const {
+	if (!impObj()) return 0;
 	return impObj()->color();
 }
 AcCmEntityColor PyGiSubEntityTraits::trueColor(void) const {
@@ -92,9 +111,11 @@ AcDb::LineWeight PyGiSubEntityTraits::lineWeight(void) const {
 	return impObj()->lineWeight();
 }
 double PyGiSubEntityTraits::lineTypeScale(void) const {
+	if (!impObj()) return 0.0;
 	return impObj()->lineTypeScale();
 }
 double PyGiSubEntityTraits::thickness(void) const {
+	if (!impObj()) return 0.0;
 	return impObj()->thickness();
 }
 AcDbObjectId PyGiSubEntityTraits::visualStyle(void) const {
@@ -112,15 +133,18 @@ std::optional<AcGiMapper> PyGiSubEntityTraits::mapper(void) const {
 	return *p;
 }
 bool PyGiSubEntityTraits::sectionable(void) const {
+	if (!impObj()) return false;
 	return impObj()->sectionable();
 }
 Adesk::UInt32 PyGiSubEntityTraits::drawFlags(void) const {
+	if (!impObj()) return 0;
 	return impObj()->drawFlags();
 }
 AcGiSubEntityTraits::ShadowFlags PyGiSubEntityTraits::shadowFlags(void) const {
 	return impObj()->shadowFlags();
 }
 bool PyGiSubEntityTraits::selectionGeom(void) const {
+	if (!impObj()) return false;
 	return impObj()->selectionGeom();
 }
 AcCmTransparency PyGiSubEntityTraits::transparency(void) const {
@@ -128,12 +152,15 @@ AcCmTransparency PyGiSubEntityTraits::transparency(void) const {
 }
 
 void PyGiSubEntityTraits::pushMarkerOverride(bool flag, const Adesk::LongPtr markerId) {
+	if (!impObj()) return;
 	impObj()->pushMarkerOverride(flag, markerId);
 }
 void PyGiSubEntityTraits::popMarkerOverride(void) {
+	if (!impObj()) return;
 	impObj()->popMarkerOverride();
 }
 void PyGiSubEntityTraits::clearMarkerOverride(void) {
+	if (!impObj()) return;
 	impObj()->clearMarkerOverride();
 }
 

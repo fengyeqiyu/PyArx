@@ -6,92 +6,108 @@
 
 PyWrapper_Cpp(DbMLeader)
 AcString PyDbMLeader::toString() const { return AcString(std::format("AcDbMLeader[wrapper]").c_str(), AcString::Utf8); }
-int PyDbMLeader::numLeaderLines() const { return impObj()->numLeaderLines(); }
+int PyDbMLeader::numLeaderLines() const { if (!impObj()) return 0; return impObj()->numLeaderLines(); }
 
-double PyDbMLeader::scale() const { return impObj()->scale(); }
-bool  PyDbMLeader::setScale(double v) { return PyWarnIfError(impObj()->setScale(v), L"AcDbMLeader::setScale"); }
-int PyDbMLeader::contentType() const { return static_cast<int>(impObj()->contentType()); }
-bool  PyDbMLeader::setContentType(int v) { return PyWarnIfError(impObj()->setContentType(static_cast<AcDbMLeaderStyle::ContentType>(v)), L"AcDbMLeader::setContentType"); }
-bool PyDbMLeader::enableAnnotationScale() const { return impObj()->enableAnnotationScale(); }
-bool  PyDbMLeader::setEnableAnnotationScale(bool v) { return PyWarnIfError(impObj()->setEnableAnnotationScale(v), L"AcDbMLeader::setEnableAnnotationScale"); }
-bool PyDbMLeader::extendLeaderToText() const { return impObj()->extendLeaderToText(); }
-bool  PyDbMLeader::setExtendLeaderToText(bool v) { return PyWarnIfError(impObj()->setExtendLeaderToText(v), L"AcDbMLeader::setExtendLeaderToText"); }
-int PyDbMLeader::textAttachmentDirection() const { return static_cast<int>(impObj()->textAttachmentDirection()); }
-bool  PyDbMLeader::setTextAttachmentDirection(int v) { return PyWarnIfError(impObj()->setTextAttachmentDirection(static_cast<AcDbMLeaderStyle::TextAttachmentDirection>(v)), L"AcDbMLeader::setTextAttachmentDirection"); }
-bool  PyDbMLeader::updateLeaderLinePosition() { return PyWarnIfError(impObj()->updateLeaderLinePosition(), L"AcDbMLeader::updateLeaderLinePosition"); }
-int PyDbMLeader::numLeaders() const { return impObj()->numLeaders(); }
+double PyDbMLeader::scale() const { if (!impObj()) return 0.0; return impObj()->scale(); }
+bool  PyDbMLeader::setScale(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setScale(v), L"AcDbMLeader::setScale"); }
+int PyDbMLeader::contentType() const { if (!impObj()) return 0; return static_cast<int>(impObj()->contentType()); }
+bool  PyDbMLeader::setContentType(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setContentType(static_cast<AcDbMLeaderStyle::ContentType>(v)), L"AcDbMLeader::setContentType"); }
+bool PyDbMLeader::enableAnnotationScale() const { if (!impObj()) return false; return impObj()->enableAnnotationScale(); }
+bool  PyDbMLeader::setEnableAnnotationScale(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEnableAnnotationScale(v), L"AcDbMLeader::setEnableAnnotationScale"); }
+bool PyDbMLeader::extendLeaderToText() const { if (!impObj()) return false; return impObj()->extendLeaderToText(); }
+bool  PyDbMLeader::setExtendLeaderToText(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setExtendLeaderToText(v), L"AcDbMLeader::setExtendLeaderToText"); }
+int PyDbMLeader::textAttachmentDirection() const { if (!impObj()) return 0; return static_cast<int>(impObj()->textAttachmentDirection()); }
+bool  PyDbMLeader::setTextAttachmentDirection(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTextAttachmentDirection(static_cast<AcDbMLeaderStyle::TextAttachmentDirection>(v)), L"AcDbMLeader::setTextAttachmentDirection"); }
+bool  PyDbMLeader::updateLeaderLinePosition() { if (!impObj()) return false; return PyWarnIfError(impObj()->updateLeaderLinePosition(), L"AcDbMLeader::updateLeaderLinePosition"); }
+int PyDbMLeader::numLeaders() const { if (!impObj()) return 0; return impObj()->numLeaders(); }
 
 // ---- 构建族（T0 补齐 2026-10-21）：引线 / 引线直线 / 顶点 / 内容 / 样式 ----
 bool PyDbMLeader::addLeader(int& leaderIndex) {
+	if (!impObj()) return false;
 	Acad::ErrorStatus es = impObj()->addLeader(leaderIndex);
 	return PyWarnIfError(es, L"AcDbMLeader::addLeader");
 }
 bool PyDbMLeader::removeLeader(int leaderIndex) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->removeLeader(leaderIndex), L"AcDbMLeader::removeLeader");
 }
 bool PyDbMLeader::addLeaderLine(int leaderIndex, int& leaderLineIndex) {
+	if (!impObj()) return false;
 	Acad::ErrorStatus es = impObj()->addLeaderLine(leaderIndex, leaderLineIndex);
 	return PyWarnIfError(es, L"AcDbMLeader::addLeaderLine");
 }
 bool PyDbMLeader::addLeaderLineAtPoint(const AcGePoint3d& point, int& leaderLineIndex) {
+	if (!impObj()) return false;
 	Acad::ErrorStatus es = impObj()->addLeaderLine(point, leaderLineIndex);
 	return PyWarnIfError(es, L"AcDbMLeader::addLeaderLine(point)");
 }
 bool PyDbMLeader::removeLeaderLine(int leaderLineIndex) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->removeLeaderLine(leaderLineIndex), L"AcDbMLeader::removeLeaderLine");
 }
 bool PyDbMLeader::addFirstVertex(int leaderLineIndex, const AcGePoint3d& point) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->addFirstVertex(leaderLineIndex, point), L"AcDbMLeader::addFirstVertex");
 }
 bool PyDbMLeader::addLastVertex(int leaderLineIndex, const AcGePoint3d& point) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->addLastVertex(leaderLineIndex, point), L"AcDbMLeader::addLastVertex");
 }
 bool PyDbMLeader::numVertices(int leaderLineIndex, int& num) const {
+	if (!impObj()) return false;
 	Acad::ErrorStatus es = impObj()->numVertices(leaderLineIndex, num);
 	return PyWarnIfError(es, L"AcDbMLeader::numVertices");
 }
 bool PyDbMLeader::setVertex(int leaderLineIndex, int index, const AcGePoint3d& point) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setVertex(leaderLineIndex, index, point), L"AcDbMLeader::setVertex");
 }
 bool PyDbMLeader::getVertex(int leaderLineIndex, int index, AcGePoint3d& point) const {
+	if (!impObj()) return false;
 	Acad::ErrorStatus es = impObj()->getVertex(leaderLineIndex, index, point);
 	return PyWarnIfError(es, L"AcDbMLeader::getVertex");
 }
 bool PyDbMLeader::setMText(const AcDbMText* pMText) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setMText(pMText), L"AcDbMLeader::setMText");
 }
 bool PyDbMLeader::setBlockContentId(AcDbObjectId blockId) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setBlockContentId(blockId), L"AcDbMLeader::setBlockContentId");
 }
 AcDbObjectId PyDbMLeader::blockContentId() const { return impObj()->blockContentId(); }
 bool PyDbMLeader::setMLeaderStyle(AcDbObjectId newStyleId) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setMLeaderStyle(newStyleId), L"AcDbMLeader::setMLeaderStyle");
 }
 AcDbObjectId PyDbMLeader::MLeaderStyle() const { return impObj()->MLeaderStyle(); }
 bool PyDbMLeader::setTextLocation(const AcGePoint3d& location) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTextLocation(location), L"AcDbMLeader::setTextLocation");
 }
 bool PyDbMLeader::getTextLocation(AcGePoint3d& location) const {
+	if (!impObj()) return false;
 	Acad::ErrorStatus es = impObj()->getTextLocation(location);
 	return PyWarnIfError(es, L"AcDbMLeader::getTextLocation");
 }
 bool PyDbMLeader::postMLeaderToDb(AcDbDatabase* pDb) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->postMLeaderToDb(pDb), L"AcDbMLeader::postMLeaderToDb");
 }
-AcGeVector3d PyDbMLeader::normal() const { return impObj()->normal(); }
-bool PyDbMLeader::hasContent() const { return impObj()->hasContent(); }
-double PyDbMLeader::landingGap() const { return impObj()->landingGap(); }
-bool  PyDbMLeader::setLandingGap(double v) { return PyWarnIfError(impObj()->setLandingGap(v), L"AcDbMLeader::setLandingGap"); }
-bool PyDbMLeader::enableLanding() const { return impObj()->enableLanding(); }
-bool  PyDbMLeader::setEnableLanding(bool v) { return PyWarnIfError(impObj()->setEnableLanding(v), L"AcDbMLeader::setEnableLanding"); }
-bool PyDbMLeader::enableDogleg() const { return impObj()->enableDogleg(); }
-bool  PyDbMLeader::setEnableDogleg(bool v) { return PyWarnIfError(impObj()->setEnableDogleg(v), L"AcDbMLeader::setEnableDogleg"); }
-double PyDbMLeader::arrowSize() const { return impObj()->arrowSize(); }
-bool  PyDbMLeader::setArrowSize(double v) { return PyWarnIfError(impObj()->setArrowSize(v), L"AcDbMLeader::setArrowSize"); }
-double PyDbMLeader::textHeight() const { return impObj()->textHeight(); }
-bool  PyDbMLeader::setTextHeight(double v) { return PyWarnIfError(impObj()->setTextHeight(v), L"AcDbMLeader::setTextHeight"); }
-double PyDbMLeader::blockRotation() const { return impObj()->blockRotation(); }
-bool  PyDbMLeader::setBlockRotation(double v) { return PyWarnIfError(impObj()->setBlockRotation(v), L"AcDbMLeader::setBlockRotation"); }
+AcGeVector3d PyDbMLeader::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
+bool PyDbMLeader::hasContent() const { if (!impObj()) return false; return impObj()->hasContent(); }
+double PyDbMLeader::landingGap() const { if (!impObj()) return 0.0; return impObj()->landingGap(); }
+bool  PyDbMLeader::setLandingGap(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLandingGap(v), L"AcDbMLeader::setLandingGap"); }
+bool PyDbMLeader::enableLanding() const { if (!impObj()) return false; return impObj()->enableLanding(); }
+bool  PyDbMLeader::setEnableLanding(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEnableLanding(v), L"AcDbMLeader::setEnableLanding"); }
+bool PyDbMLeader::enableDogleg() const { if (!impObj()) return false; return impObj()->enableDogleg(); }
+bool  PyDbMLeader::setEnableDogleg(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEnableDogleg(v), L"AcDbMLeader::setEnableDogleg"); }
+double PyDbMLeader::arrowSize() const { if (!impObj()) return 0.0; return impObj()->arrowSize(); }
+bool  PyDbMLeader::setArrowSize(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setArrowSize(v), L"AcDbMLeader::setArrowSize"); }
+double PyDbMLeader::textHeight() const { if (!impObj()) return 0.0; return impObj()->textHeight(); }
+bool  PyDbMLeader::setTextHeight(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setTextHeight(v), L"AcDbMLeader::setTextHeight"); }
+double PyDbMLeader::blockRotation() const { if (!impObj()) return 0.0; return impObj()->blockRotation(); }
+bool  PyDbMLeader::setBlockRotation(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setBlockRotation(v), L"AcDbMLeader::setBlockRotation"); }
 
 void bind_PyDbMLeader(pym& m) {
 	py::class_<PyDbMLeader, PyDbEntity>(m, "PyDbMLeader")

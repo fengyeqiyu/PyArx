@@ -77,6 +77,7 @@ uint64_t PyDbDatabase::addToModelspace(PyDbObject& entity) {
 }
 
 uint64_t PyDbDatabase::addToCurrentspace(PyDbObject& entity) {
+	if (!impObj()) return 0ULL;
 	return addToBlock(static_cast<uint64_t>(impObj()->currentSpaceId().asOldId()), entity);
 }
 
@@ -161,10 +162,12 @@ bool PyDbDatabase::setSysVar(const std::string& name, const py::object& value) {
 
 // --- 文件读写 ---
 bool PyDbDatabase::dxfIn(const std::string& filename) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->dxfIn(AcString(filename.c_str())), L"AcDbDatabase::dxfIn");
 }
 
 bool PyDbDatabase::dxfOut(const std::string& filename, int precision) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->dxfOut(AcString(filename.c_str()), precision), L"AcDbDatabase::dxfOut");
 }
 
@@ -521,10 +524,12 @@ Acad::ErrorStatus PyDbDatabase::readDwgFile(AcDwgFileHandle* pDwgFile, bool bAll
 
 
 bool PyDbDatabase::needsRecovery() const {
+	if (!impObj()) return false;
 	return impObj()->needsRecovery();
 }
 
 void PyDbDatabase::setFullSaveRequired() {
+	if (!impObj()) return;
 	impObj()->setFullSaveRequired();
 }
 
@@ -574,12 +579,15 @@ Acad::ErrorStatus PyDbDatabase::closeInput(bool bCloseFile) {
 }
 
 int PyDbDatabase::approxNumObjects() const {
+	if (!impObj()) return 0;
 	return impObj()->approxNumObjects();
 }
 Adesk::Int32 PyDbDatabase::numberOfSaves() const {
+	if (!impObj()) return 0;
 	return impObj()->numberOfSaves();
 }
 AcString PyDbDatabase::originalFileName() const {
+	if (!impObj()) return AcString();
 	return AcString(impObj()->originalFileName());
 }
 AcDb::AcDbDwgVersion PyDbDatabase::lastSavedAsVersion() const {
@@ -640,6 +648,7 @@ PyDbDatabase PyDbDatabase::wblock()
 }
 
 void PyDbDatabase::forceWblockDatabaseCopy() {
+	if (!impObj()) return;
 	impObj()->forceWblockDatabaseCopy();
 }
 
@@ -667,6 +676,7 @@ AcDbObjectId PyDbDatabase::insert(AcString pSourceBlockName, AcString pDestinati
 
 // ��ȿ�¡���� 
 void PyDbDatabase::deepCloneObjects(const PyDbObjectIdArray& objectIds, const AcDbObjectId& owner, AcDbIdMapping& idMap, bool deferXlation) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->deepCloneObjects(VecToAcArray<AcDbObjectId>(objectIds), owner, idMap, deferXlation));
 }
 
@@ -696,10 +706,12 @@ void PyDbDatabase::abortDeepClone(AcDbIdMapping& idMap)
 
 // Ӧ�ó���ע����� 
 bool PyDbDatabase::registerApp(const AcString& pszAppName) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->registerApp(pszAppName.kwszPtr()));
 }
 
 bool PyDbDatabase::isAppRegistered(const AcString& pszAppName) const {
+	if (!impObj()) return false;
 	return impObj()->isAppRegistered(pszAppName.kwszPtr());
 }
 
@@ -714,11 +726,13 @@ AcDbUndoController* PyDbDatabase::undoController() const {
 }
 
 bool PyDbDatabase::disableUndoRecording(bool disable) {
+	if (!impObj()) return false;
 	impObj()->disableUndoRecording(disable);
 	return true;
 }
 
 bool PyDbDatabase::undoRecording() const {
+	if (!impObj()) return false;
 	return impObj()->undoRecording();
 }
 
@@ -749,254 +763,311 @@ AcDbObjectId PyDbDatabase::xrefBlockId() const {
 
 // �ߴ��ע�����Կ��ƣ�DIMASO��
 bool PyDbDatabase::dimaso() const {
+	if (!impObj()) return false;
 	return impObj()->dimaso();
 }
 bool PyDbDatabase::setDimaso(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setDimaso(val));
 }
 
 // �ߴ��עʵʱ���£�DIMSHO��
 bool PyDbDatabase::dimsho() const {
+	if (!impObj()) return false;
 	return impObj()->dimsho();
 }
 bool PyDbDatabase::setDimsho(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setDimsho(val));
 }
 
 // ����߶������ɣ�PLINEGEN��
 bool PyDbDatabase::plinegen() const {
+	if (!impObj()) return false;
 	return impObj()->plinegen();
 }
 bool PyDbDatabase::setPlinegen(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setPlinegen(val));
 }
 
 // ����ģʽ���ƣ�ORTHOMODE��
 bool PyDbDatabase::orthomode() const {
+	if (!impObj()) return false;
 	return impObj()->orthomode();
 }
 bool PyDbDatabase::setOrthomode(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setOrthomode(val));
 }
 
 // ������ģʽ���ƣ�REGENMODE��
 bool PyDbDatabase::regenmode() const {
+	if (!impObj()) return false;
 	return impObj()->regenmode();
 }
 bool PyDbDatabase::setRegenmode(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setRegenmode(val));
 }
 
 // �����ʾ���ƣ�FILLMODE��
 bool PyDbDatabase::fillmode() const {
+	if (!impObj()) return false;
 	return impObj()->fillmode();
 }
 bool PyDbDatabase::setFillmode(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setFillmode(val));
 }
 
 // ��������ģʽ��QTEXTMODE��
 bool PyDbDatabase::qtextmode() const {
+	if (!impObj()) return false;
 	return impObj()->qtextmode();
 }
 bool PyDbDatabase::setQtextmode(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setQtextmode(val));
 }
 
 // ���ͱ������ƣ�PSLTSCALE��
 bool PyDbDatabase::psltscale() const {
+	if (!impObj()) return false;
 	return impObj()->psltscale();
 }
 bool PyDbDatabase::setPsltscale(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setPsltscale(val));
 }
 
 // ��ͼ���Ƽ�飨LIMCHECK��
 bool PyDbDatabase::limcheck() const {
+	if (!impObj()) return false;
 	return impObj()->limcheck();
 }
 bool PyDbDatabase::setLimcheck(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setLimcheck(val));
 }
 
 // ��ʱ�����ʾ��BLIPMODE��
 bool PyDbDatabase::blipmode() const {
+	if (!impObj()) return false;
 	return impObj()->blipmode();
 }
 bool PyDbDatabase::setBlipmode(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setBlipmode(val));
 }
 
 //=== 新增常用系统变量 ===//
-bool PyDbDatabase::mirrtext() const { return impObj()->mirrtext() != Adesk::kFalse; }
-bool PyDbDatabase::setMirrtext(bool val) { return CheckErrorStatus(impObj()->setMirrtext(val ? Adesk::kTrue : Adesk::kFalse)); }
+bool PyDbDatabase::mirrtext() const { if (!impObj()) return false; return impObj()->mirrtext() != Adesk::kFalse; }
+bool PyDbDatabase::setMirrtext(bool val) { if (!impObj()) return false; return CheckErrorStatus(impObj()->setMirrtext(val ? Adesk::kTrue : Adesk::kFalse)); }
 
-int PyDbDatabase::attmode() const { return (int)impObj()->attmode(); }
-bool PyDbDatabase::setAttmode(int val) { return CheckErrorStatus(impObj()->setAttmode((Adesk::Int16)val)); }
+int PyDbDatabase::attmode() const { if (!impObj()) return 0; return (int)impObj()->attmode(); }
+bool PyDbDatabase::setAttmode(int val) { if (!impObj()) return false; return CheckErrorStatus(impObj()->setAttmode((Adesk::Int16)val)); }
 
 
-double PyDbDatabase::filletrad() const { return impObj()->filletrad(); }
-bool PyDbDatabase::setFilletrad(double val) { return CheckErrorStatus(impObj()->setFilletrad(val)); }
+double PyDbDatabase::filletrad() const { if (!impObj()) return 0.0; return impObj()->filletrad(); }
+bool PyDbDatabase::setFilletrad(double val) { if (!impObj()) return false; return CheckErrorStatus(impObj()->setFilletrad(val)); }
 
-double PyDbDatabase::chamfera() const { return impObj()->chamfera(); }
-bool PyDbDatabase::setChamfera(double val) { return CheckErrorStatus(impObj()->setChamfera(val)); }
+double PyDbDatabase::chamfera() const { if (!impObj()) return 0.0; return impObj()->chamfera(); }
+bool PyDbDatabase::setChamfera(double val) { if (!impObj()) return false; return CheckErrorStatus(impObj()->setChamfera(val)); }
 
-double PyDbDatabase::chamferb() const { return impObj()->chamferb(); }
-bool PyDbDatabase::setChamferb(double val) { return CheckErrorStatus(impObj()->setChamferb(val)); }
+double PyDbDatabase::chamferb() const { if (!impObj()) return 0.0; return impObj()->chamferb(); }
+bool PyDbDatabase::setChamferb(double val) { if (!impObj()) return false; return CheckErrorStatus(impObj()->setChamferb(val)); }
 
-double PyDbDatabase::celtscale() const { return impObj()->celtscale(); }
-bool PyDbDatabase::setCeltscale(double val) { return CheckErrorStatus(impObj()->setCeltscale(val)); }
+double PyDbDatabase::celtscale() const { if (!impObj()) return 0.0; return impObj()->celtscale(); }
+bool PyDbDatabase::setCeltscale(double val) { if (!impObj()) return false; return CheckErrorStatus(impObj()->setCeltscale(val)); }
 
-int PyDbDatabase::pdmode() const { return (int)impObj()->pdmode(); }
-bool PyDbDatabase::setPdmode(int val) { return CheckErrorStatus(impObj()->setPdmode((Adesk::Int16)val)); }
+int PyDbDatabase::pdmode() const { if (!impObj()) return 0; return (int)impObj()->pdmode(); }
+bool PyDbDatabase::setPdmode(int val) { if (!impObj()) return false; return CheckErrorStatus(impObj()->setPdmode((Adesk::Int16)val)); }
 
 // ����ͼ�α��棨SAVEPROXYGRAPHICS��
 Adesk::Int16 PyDbDatabase::saveproxygraphics() const {
+	if (!impObj()) return 0;
 	return impObj()->saveproxygraphics();
 }
 void PyDbDatabase::setSaveproxygraphics(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSaveproxygraphics(val));
 }
 
 // ��ɾ����������DELUSEDOBJ��
 Adesk::Int16 PyDbDatabase::delUsedObj() const {
+	if (!impObj()) return 0;
 	return impObj()->delUsedObj();
 }
 void PyDbDatabase::setDelUsedObj(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDelUsedObj(val));
 }
 
 // ��������ʾ��DISPSILH��
 bool PyDbDatabase::dispSilh() const {
+	if (!impObj()) return false;
 	return impObj()->dispSilh();
 }
 void PyDbDatabase::setDispSilh(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDispSilh(val));
 }
 
 // �������Բת����PLINEELLIPSE��
 bool PyDbDatabase::plineEllipse() const {
+	if (!impObj()) return false;
 	return impObj()->plineEllipse();
 }
 void PyDbDatabase::setPlineEllipse(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPlineEllipse(val));
 }
 
 // �û���ʱ��״̬��USRTIMER��
 bool PyDbDatabase::usrtimer() const {
+	if (!impObj()) return false;
 	return impObj()->usrtimer();
 }
 void PyDbDatabase::setUsrtimer(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUsrtimer(val));
 }
 
 // ��ͼ�����ģʽ��SKPOLY��
 bool PyDbDatabase::skpoly() const {
+	if (!impObj()) return false;
 	return impObj()->skpoly();
 }
 void PyDbDatabase::setSkpoly(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSkpoly(val));
 }
 
 // �Ƕȷ�����ƣ�ANGDIR��
 bool PyDbDatabase::angdir() const {
+	if (!impObj()) return false;
 	return impObj()->angdir();
 }
 void PyDbDatabase::setAngdir(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setAngdir(val));
 }
 
 // ���������ʾ���ƣ�SPLFRAME��
 bool PyDbDatabase::splframe() const {
+	if (!impObj()) return false;
 	return impObj()->splframe();
 }
 void PyDbDatabase::setSplframe(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSplframe(val));
 }
 
 // ���ÿ����ʾ���ƣ�XCLIPFRAME��
 Adesk::UInt8 PyDbDatabase::xclipFrame() const {
+	if (!impObj()) return 0;
 	return impObj()->xclipFrame();
 }
 void PyDbDatabase::setXclipFrame(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	if (val > 2) throw std::out_of_range("XCLIPFRAME value must be 0-2");
 	CheckErrorStatus(impObj()->setXclipFrame(val));
 }
 
 // ������ؿ���
 bool PyDbDatabase::attreq() const {
+	if (!impObj()) return false;
 	return impObj()->attreq();
 }
 void PyDbDatabase::setAttreq(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setAttreq(val));
 }
 
 bool PyDbDatabase::attdia() const {
+	if (!impObj()) return false;
 	return impObj()->attdia();
 }
 void PyDbDatabase::setAttdia(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setAttdia(val));
 }
 
 
 // ��ͼ��ռ����
 bool PyDbDatabase::worldview() const {
+	if (!impObj()) return false;
 	return impObj()->worldview();
 }
 void PyDbDatabase::setWorldview(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setWorldview(val));
 }
 
 bool PyDbDatabase::tilemode() const {
+	if (!impObj()) return false;
 	return impObj()->tilemode();
 }
 bool PyDbDatabase::setTilemode(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setTilemode(val));
 }
 
 // ����ϵͳ����
 Adesk::Int16 PyDbDatabase::dragmode() const {
+	if (!impObj()) return 0;
 	return impObj()->dragmode();
 }
 void PyDbDatabase::setDragmode(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDragmode(val), L"DRAGMODEֵ����Ϊ0-3");
 }
 
 
 // �ռ�������ȿ��ƣ�TREEDEPTH��
 Adesk::Int16 PyDbDatabase::treedepth() const {
+	if (!impObj()) return 0;
 	return impObj()->treedepth();
 }
 void PyDbDatabase::setTreedepth(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setTreedepth(val), L"ֵ����Ϊ0-3020");
 }
 
 // ���Ե�λ���ƣ�LUNITS/LUPREC��
 Adesk::Int16 PyDbDatabase::lunits() const {
+	if (!impObj()) return 0;
 	return impObj()->lunits();
 }
 bool PyDbDatabase::setLunits(Adesk::Int16 val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setLunits(val), L"ֵ����Ϊ1-5");
 }
 
 Adesk::Int16 PyDbDatabase::luprec() const {
+	if (!impObj()) return 0;
 	return impObj()->luprec();
 }
 bool PyDbDatabase::setLuprec(Adesk::Int16 val) {
+	if (!impObj()) return false;
 	if (val < 0 || val > 8) throw std::out_of_range("luprec value must be 0-8");
 	return CheckErrorStatus(impObj()->setLuprec(val));
 }
 
 // �Ƕȵ�λ���ƣ�AUNITS/AUPREC��
 bool PyDbDatabase::setAunits(Adesk::Int16 val) {
+	if (!impObj()) return false;
 	if (val < 0 || val > 4) throw std::out_of_range("aunits value must be 0-4");
 	return CheckErrorStatus(impObj()->setAunits(val));
 }
 
 Adesk::Int16 PyDbDatabase::auprec() const {
+	if (!impObj()) return 0;
 	return impObj()->auprec();
 }
 bool PyDbDatabase::setAuprec(Adesk::Int16 val) {
+	if (!impObj()) return false;
 	if (val < 0 || val > 8) throw std::out_of_range("auprec value must be 0-8");
 	return CheckErrorStatus(impObj()->setAuprec(val));
 }
@@ -1007,115 +1078,146 @@ Adesk::Int16 PyDbDatabase::pdmode()
 }
 
 void PyDbDatabase::setPdmode(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPdmode(val), L"ֵ����Ϊ0 - 4");
 }
 // ѡ����ʽ���� 
 Adesk::Int16 PyDbDatabase::pickstyle() const {
+	if (!impObj()) return 0;
 	return impObj()->pickstyle();
 }
 void PyDbDatabase::setPickstyle(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPickstyle(val), L"PICKSTYLEֵ����Ϊ0-3");
 }
 
 // �û��Զ������ͱ��� 
 Adesk::Int16 PyDbDatabase::useri1() const {
+	if (!impObj()) return 0;
 	return impObj()->useri1();
 }
 void PyDbDatabase::setUseri1(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUseri1(val));
 }
 
 Adesk::Int16 PyDbDatabase::useri2() const {
+	if (!impObj()) return 0;
 	return impObj()->useri2();
 }
 void PyDbDatabase::setUseri2(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUseri2(val));
 }
 
 Adesk::Int16 PyDbDatabase::useri3() const {
+	if (!impObj()) return 0;
 	return impObj()->useri3();
 }
 void PyDbDatabase::setUseri3(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUseri3(val));
 }
 
 Adesk::Int16 PyDbDatabase::useri4() const {
+	if (!impObj()) return 0;
 	return impObj()->useri4();
 }
 void PyDbDatabase::setUseri4(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUseri4(val));
 }
 
 Adesk::Int16 PyDbDatabase::useri5() const {
+	if (!impObj()) return 0;
 	return impObj()->useri5();
 }
 void PyDbDatabase::setUseri5(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUseri5(val));
 }
 
 // �������߿��� 
 Adesk::Int16 PyDbDatabase::splinesegs() const {
+	if (!impObj()) return 0;
 	return impObj()->splinesegs();
 }
 void PyDbDatabase::setSplinesegs(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSplinesegs(val), L"SPLINESEGS�������0");
 }
 
 // �������
 Adesk::Int16 PyDbDatabase::surfu() const {
+	if (!impObj()) return 0;
 	return impObj()->surfu();
 }
 
 void PyDbDatabase::setSurfu(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSurfu(val), L"SURFUֵ����Ϊ2-200");
 }
 
 Adesk::Int16 PyDbDatabase::surfv() const {
+	if (!impObj()) return 0;
 	return impObj()->surfv();
 }
 void PyDbDatabase::setSurfv(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSurfv(val), L"SURFVֵ����Ϊ2-200");
 }
 
 Adesk::Int16 PyDbDatabase::surftype() const {
+	if (!impObj()) return 0;
 	return impObj()->surftype();
 }
 void PyDbDatabase::setSurftype(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSurftype(val), L"SURFTYPEֵ����Ϊ5-8");
 }
 
 Adesk::Int16 PyDbDatabase::surftab1() const {
+	if (!impObj()) return 0;
 	return impObj()->surftab1();
 }
 void PyDbDatabase::setSurftab1(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSurftab1(val), L"SURFTAB1ֵ����Ϊ2-32766");
 }
 
 Adesk::Int16 PyDbDatabase::surftab2() const {
+	if (!impObj()) return 0;
 	return impObj()->surftab2();
 }
 void PyDbDatabase::setSurftab2(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSurftab2(val), L"SURFTAB2ֵ����Ϊ2-32766");
 }
 
 Adesk::Int16 PyDbDatabase::splinetype() const {
+	if (!impObj()) return 0;
 	return impObj()->splinetype();
 }
 void PyDbDatabase::setSplinetype(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSplinetype(val), L"SPLINETYPEֵ����Ϊ5��6");
 }
 
 Adesk::Int16 PyDbDatabase::shadedge() const {
+	if (!impObj()) return 0;
 	return impObj()->shadedge();
 }
 void PyDbDatabase::setShadedge(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setShadedge(val), L"SHADEDGEֵ����Ϊ0-3");
 }
 
 Adesk::Int16 PyDbDatabase::shadedif() const {
+	if (!impObj()) return 0;
 	return impObj()->shadedif();
 }
 void PyDbDatabase::setShadedif(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setShadedif(val), L"SHADEDIFֵ����Ϊ0-100");
 }
 
@@ -1125,85 +1227,108 @@ AcDb::MeasurementValue PyDbDatabase::measurement() {
 }
 
 void PyDbDatabase::setMeasurement(AcDb::MeasurementValue val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setMeasurement(val));
 }
 
 Adesk::Int16 PyDbDatabase::unitmode() const {
+	if (!impObj()) return 0;
 	return impObj()->unitmode();
 }
 void PyDbDatabase::setUnitmode(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUnitmode(val), L"UNITMODEֵ����Ϊ0��1");
 }
 // �ӿڿ���
 Adesk::Int16 PyDbDatabase::maxactvp() const {
+	if (!impObj()) return 0;
 	return impObj()->maxactvp();
 }
 void PyDbDatabase::setMaxactvp(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setMaxactvp(val), L"MAXACTVPֵ����Ϊ1-64");
 }
 
 Adesk::Int16 PyDbDatabase::isolines() const {
+	if (!impObj()) return 0;
 	return impObj()->isolines();
 }
 
 void PyDbDatabase::setIsolines(Adesk::Int16 isolines) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setIsolines(isolines));
 }
 
 Adesk::UInt8 PyDbDatabase::dwfframe() const {
+	if (!impObj()) return 0;
 	return impObj()->dwfframe();
 }
 void PyDbDatabase::setDwfframe(Adesk::UInt8 dwfframe) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDwfframe(dwfframe));
 }
 
 Adesk::UInt8 PyDbDatabase::dgnframe() const {
+	if (!impObj()) return 0;
 	return impObj()->dgnframe();
 }
 void PyDbDatabase::setDgnframe(Adesk::UInt8 dgnframe) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDgnframe(dgnframe));
 }
 
 Adesk::Int8 PyDbDatabase::pdfframe() const {
+	if (!impObj()) return 0;
 	return impObj()->pdfframe();
 }
 void PyDbDatabase::setPdfframe(Adesk::Int8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPdfframe(val));
 }
 
 double PyDbDatabase::ltscale() const {
+	if (!impObj()) return 0.0;
 	return impObj()->ltscale();
 }
 bool PyDbDatabase::setLtscale(double scale) {
+	if (!impObj()) return false;
 	return CheckErrorStatus((impObj()->setLtscale(scale)));
 }
 
 double PyDbDatabase::textsize() const {
+	if (!impObj()) return 0.0;
 	return impObj()->textsize();
 }
 bool PyDbDatabase::setTextsize(double size) {
+	if (!impObj()) return false;
 	return CheckErrorStatus((impObj()->setTextsize(size)));
 }
 
 double PyDbDatabase::tracewid() const {
+	if (!impObj()) return 0.0;
 	return impObj()->tracewid();
 }
 void PyDbDatabase::setTracewid(double width) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setTracewid(width));
 }
 
 double PyDbDatabase::sketchinc() const {
+	if (!impObj()) return 0.0;
 	return impObj()->sketchinc();
 }
 void PyDbDatabase::setSketchinc(double inc) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSketchinc(inc));
 }
 
 
 double PyDbDatabase::thickness() const {
+	if (!impObj()) return 0.0;
 	return impObj()->thickness();
 }
 bool PyDbDatabase::setThickness(double thickness) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setThickness(thickness));
 }
 
@@ -1211,6 +1336,7 @@ AcDb::LineWeight PyDbDatabase::celweight() const {
 	return impObj()->celweight();
 }
 void PyDbDatabase::setCelweight(AcDb::LineWeight weight) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCelweight(weight));
 }
 
@@ -1226,6 +1352,7 @@ AcDb::EndCaps PyDbDatabase::endCaps() const {
 	return impObj()->endCaps();
 }
 void PyDbDatabase::setEndCaps(AcDb::EndCaps endCapstype) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setEndCaps(endCapstype));
 }
 
@@ -1233,133 +1360,169 @@ AcDb::JoinStyle PyDbDatabase::joinStyle() const {
 	return impObj()->joinStyle();
 }
 void PyDbDatabase::setJoinStyle(AcDb::JoinStyle style) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setJoinStyle(style));
 }
 
 bool PyDbDatabase::lineWeightDisplay() const {
+	if (!impObj()) return false;
 	return impObj()->lineWeightDisplay();
 }
 void PyDbDatabase::setLineWeightDisplay(bool display) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLineWeightDisplay(display));
 }
 
 bool PyDbDatabase::xrefEditEnabled() const {
+	if (!impObj()) return false;
 	return impObj()->xrefEditEnabled();
 }
 void PyDbDatabase::setXrefEditEnabled(bool enable) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setXrefEditEnabled(enable));
 }
 
 bool PyDbDatabase::oleStartUp() const {
+	if (!impObj()) return false;
 	return impObj()->oleStartUp();
 }
 void PyDbDatabase::setOleStartUp(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setOleStartUp(val));
 }
 
 double PyDbDatabase::angbase() const {
+	if (!impObj()) return 0.0;
 	return impObj()->angbase();
 }
 bool PyDbDatabase::setAngbase(double angle) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setAngbase(angle));
 }
 
 double PyDbDatabase::pdsize() const {
+	if (!impObj()) return 0.0;
 	return	impObj()->pdsize();
 }
 bool PyDbDatabase::setPdsize(double size) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setPdsize(size));
 }
 
 double PyDbDatabase::plinewid() const {
+	if (!impObj()) return 0.0;
 	return impObj()->plinewid();
 }
 bool PyDbDatabase::setPlinewid(double width) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setPlinewid(width));
 }
 
 double PyDbDatabase::userr1() const {
+	if (!impObj()) return 0.0;
 	return impObj()->userr1();
 }
 bool PyDbDatabase::setUserr1(double val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setUserr1(val));
 }
 
 double PyDbDatabase::userr2() const {
+	if (!impObj()) return 0.0;
 	return impObj()->userr2();
 }
 bool PyDbDatabase::setUserr2(double val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setUserr2(val));
 }
 
 double PyDbDatabase::userr3() const {
+	if (!impObj()) return 0.0;
 	return impObj()->userr3();
 }
 void PyDbDatabase::setUserr3(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUserr3(val));
 }
 double PyDbDatabase::userr4() const {
+	if (!impObj()) return 0.0;
 	return impObj()->userr4();
 }
 void PyDbDatabase::setUserr4(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUserr4(val));
 }
 
 double PyDbDatabase::userr5() const {
+	if (!impObj()) return 0.0;
 	return impObj()->userr5();
 }
 void PyDbDatabase::setUserr5(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUserr5(val));
 }
 
 
 double PyDbDatabase::chamferc() const {
+	if (!impObj()) return 0.0;
 	return impObj()->chamferc();
 }
 void PyDbDatabase::setChamferc(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setChamferc(val));
 }
 
 double PyDbDatabase::chamferd() const {
+	if (!impObj()) return 0.0;
 	return impObj()->chamferd();
 }
 void PyDbDatabase::setChamferd(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setChamferd(val));
 }
 
 double PyDbDatabase::facetres() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->facetres();
 }
 
 void PyDbDatabase::setFacetres(double facetres) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setFacetres(facetres));
 }
 
 // 3DDWF
 double PyDbDatabase::get3dDwfPrec() const {
+	if (!impObj()) return 0.0;
 	return impObj()->get3dDwfPrec();
 }
 void PyDbDatabase::set3dDwfPrec(double DwfPrec) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->set3dDwfPrec(DwfPrec));
 }
 
 AcString  PyDbDatabase::getMenu() const {
+	if (!impObj()) return AcString();
 	AcString sMenuName;
 	CheckErrorStatus(impObj()->getMenu(sMenuName));
 	return sMenuName;
 }
 
 bool PyDbDatabase::hpInherit() const {
+	if (!impObj()) return false;
 	return impObj()->hpInherit();
 }
 void PyDbDatabase::setHpInherit(const bool inherit) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setHpInherit(inherit));
 }
 
 AcGePoint2d PyDbDatabase::hpOrigin() const {
+	if (!impObj()) return AcGePoint2d();
 	return impObj()->hpOrigin();
 }
 void PyDbDatabase::setHpOrigin(const AcGePoint2d& origin) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setHpOrigin(origin));
 }
 // returns a local time
@@ -1386,6 +1549,7 @@ const AcDbDate PyDbDatabase::tdusrtimer() const {
 }
 
 void PyDbDatabase::resetTimes() {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->resetTimes());
 }
 
@@ -1393,6 +1557,7 @@ AcCmColor PyDbDatabase::cecolor() const {
 	return impObj()->cecolor();
 }
 void PyDbDatabase::setCecolor(const AcCmColor& color) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCecolor(color));
 }
 
@@ -1400,6 +1565,7 @@ AcCmTransparency PyDbDatabase::cetransparency() const {
 	return impObj()->cetransparency();
 }
 void PyDbDatabase::setCetransparency(const AcCmTransparency& transparency) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCetransparency(transparency));
 }
 
@@ -1407,6 +1573,7 @@ AcDbHandle PyDbDatabase::handseed() const {
 	return impObj()->handseed();
 }
 void PyDbDatabase::setHandseed(const AcDbHandle& handle) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setHandseed(handle));
 }
 
@@ -1415,6 +1582,7 @@ AcDbObjectId PyDbDatabase::clayer() const {
 }
 
 bool PyDbDatabase::setClayer(AcDbObjectId val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setClayer(val));
 }
 
@@ -1424,6 +1592,7 @@ std::tuple<AcDb::PlotStyleNameType, AcDbObjectId> PyDbDatabase::getCePlotStyleNa
 }
 
 void PyDbDatabase::setCePlotStyleName(AcDb::PlotStyleNameType plotsStyleNameType, AcDbObjectId newId) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCePlotStyleName(plotsStyleNameType, newId));
 }
 
@@ -1431,6 +1600,7 @@ AcDbObjectId PyDbDatabase::textstyle() const {
 	return impObj()->textstyle();
 }
 bool PyDbDatabase::setTextstyle(AcDbObjectId val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setTextstyle(val));
 }
 
@@ -1438,6 +1608,7 @@ AcDbObjectId PyDbDatabase::celtype() const {
 	return impObj()->celtype();
 }
 bool PyDbDatabase::setCeltype(AcDbObjectId val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setCeltype(val));
 }
 
@@ -1445,6 +1616,7 @@ AcDbObjectId PyDbDatabase::cmaterial() const {
 	return impObj()->cmaterial();
 }
 bool PyDbDatabase::setCmaterial(AcDbObjectId val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setCmaterial(val));
 }
 
@@ -1452,6 +1624,7 @@ AcDbObjectId PyDbDatabase::dimstyle() const {
 	return impObj()->dimstyle();
 }
 bool PyDbDatabase::setDimstyle(AcDbObjectId styleId) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setDimstyle(styleId));
 }
 
@@ -1478,9 +1651,11 @@ AcDbObjectId PyDbDatabase::getDimstyleParentId(AcDbObjectId& childStyle) const {
 }
 
 void PyDbDatabase::setDimstyleData(AcDbDimStyleTableRecord* pRec) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDimstyleData(pRec));
 }
 void PyDbDatabase::setDimstyleData(AcDbObjectId id) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDimstyleData(id));
 }
 
@@ -1488,20 +1663,25 @@ AcDbObjectId PyDbDatabase::cmlstyleID() const {
 	return impObj()->cmlstyleID();
 }
 void PyDbDatabase::setCmlstyleID(AcDbObjectId val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCmlstyleID(val));
 }
 
 Adesk::Int16 PyDbDatabase::cmljust() const {
+	if (!impObj()) return 0;
 	return impObj()->cmljust();
 }
 void PyDbDatabase::setCmljust(Adesk::Int16 just) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCmljust(just));
 }
 
 double PyDbDatabase::cmlscale() const {
+	if (!impObj()) return 0.0;
 	return impObj()->cmlscale();
 }
 void PyDbDatabase::setCmlscale(double scale) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCmlscale(scale));
 }
 
@@ -1510,63 +1690,79 @@ void PyDbDatabase::setCmlscale(double scale) {
 // Paper space variable access
 // ͼֽ�ռ������� 
 AcGePoint3d PyDbDatabase::pinsbase() const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->pinsbase();
 }
 void PyDbDatabase::setPinsbase(const AcGePoint3d& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPinsbase(val), L"Invalid paper space base point");
 }
 
 // Paper space geometry range (pextmin/pextmax)
 AcGePoint3d PyDbDatabase::pextmin() const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->pextmin();
 }
 AcGePoint3d PyDbDatabase::pextmax() const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->pextmax();
 }
 void PyDbDatabase::setPextmin(const AcGePoint3d& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPextmin(val), L"Invalid paper space min extents");
 }
 void PyDbDatabase::setPextmax(const AcGePoint3d& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPextmax(val), L"Invalid paper space max extents");
 }
 
 // Paper space limits (plimmin/plimmax)
 AcGePoint2d PyDbDatabase::plimmin() const {
+	if (!impObj()) return AcGePoint2d();
 	return impObj()->plimmin();
 }
 AcGePoint2d PyDbDatabase::plimmax() const {
+	if (!impObj()) return AcGePoint2d();
 	return impObj()->plimmax();
 }
 void PyDbDatabase::setPlimmin(const AcGePoint2d& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPlimmin(val), L"Invalid paper space min limits");
 }
 void PyDbDatabase::setPlimmax(const AcGePoint2d& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPlimmax(val), L"Invalid paper space max limits");
 }
 
 // Paper space elevation
 double PyDbDatabase::pelevation() const {
+	if (!impObj()) return 0.0;
 	return impObj()->pelevation();
 }
 void PyDbDatabase::setPelevation(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPelevation(val), L"Invalid elevation value");
 }
 
 // Paper space UCS origin
 AcGePoint3d PyDbDatabase::pucsorg() const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->pucsorg();
 }
 
 AcGeVector3d PyDbDatabase::pucsxdir() const {
+	if (!impObj()) return AcGeVector3d();
 	return impObj()->pucsxdir();
 }
 
 
 AcGeVector3d PyDbDatabase::pucsydir() const {
+	if (!impObj()) return AcGeVector3d();
 	return impObj()->pucsydir();
 }
 
 void PyDbDatabase::setPucs(const AcGePoint3d& ucsOrigin, const AcGeVector3d& ucsXDir, const AcGeVector3d& ucsYDir) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPucs(ucsOrigin, ucsXDir, ucsYDir));
 }
 
@@ -1576,6 +1772,7 @@ AcDbObjectId PyDbDatabase::pucsname() const {
 
 // ͼֽ�ռ�UCS����
 void PyDbDatabase::setPucsname(const AcDbObjectId& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPucsname(val),
 		L"��Ч��UCS��¼ID");
 }
@@ -1585,6 +1782,7 @@ AcDbObjectId PyDbDatabase::pucsBase() const {
 }
 
 void PyDbDatabase::setPucsBase(const AcDbObjectId& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPucsBase(val),
 		L"��Ч�Ļ���UCS ID");
 }
@@ -1609,117 +1807,146 @@ bool PyDbDatabase::isPucsOrthographic(
 
 // ����������� 
 double PyDbDatabase::cameraHeight() const {
+	if (!impObj()) return 0.0;
 	return impObj()->cameraHeight();
 }
 
 void PyDbDatabase::setCameraHeight(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCameraHeight(val),
 		L"����߶ȱ������0");
 }
 
 double PyDbDatabase::lensLength() const {
+	if (!impObj()) return 0.0;
 	return impObj()->lensLength();
 }
 
 void PyDbDatabase::setLensLength(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLensLength(val),
 		L"��ͷ���ȱ������0");
 }
 
 bool PyDbDatabase::cameraDisplay() const {
+	if (!impObj()) return false;
 	return impObj()->cameraDisplay();
 }
 
 void PyDbDatabase::setCameraDisplay(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCameraDisplay(val));
 }
 
 // ������������
 double PyDbDatabase::stepsPerSec() const {
+	if (!impObj()) return 0.0;
 	return impObj()->stepsPerSec();
 }
 void PyDbDatabase::setStepsPerSec(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setStepsPerSec(val), L"������Ƶ�������0");
 }
 
 double PyDbDatabase::stepSize() const {
+	if (!impObj()) return 0.0;
 	return impObj()->stepSize();
 }
 void PyDbDatabase::setStepSize(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setStepSize(val), L"����ֵ�������0");
 }
 
 // �������� 
 bool PyDbDatabase::realWorldScale() const {
+	if (!impObj()) return false;
 	return impObj()->realWorldScale();
 }
 void PyDbDatabase::setRealWorldScale(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setRealWorldScale(val));
 }
 
 // ͼ�η�Χ���� 
 AcGePoint3d PyDbDatabase::insbase() const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->insbase();
 }
 void PyDbDatabase::setInsbase(const AcGePoint3d& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setInsbase(val));
 }
 
 AcGePoint3d PyDbDatabase::extmin() const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->extmin();
 }
 AcGePoint3d PyDbDatabase::extmax() const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->extmax();
 }
 
 bool PyDbDatabase::updateExt(bool val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->updateExt(val));
 }
 
 void PyDbDatabase::setExtmin(const AcGePoint3d& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setExtmin(val));
 }
 void PyDbDatabase::setExtmax(const AcGePoint3d& val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setExtmax(val));
 }
 
 
 AcGePoint2d PyDbDatabase::limmin() const {
+	if (!impObj()) return AcGePoint2d();
 	return	impObj()->limmin();
 }
 void PyDbDatabase::setLimmin(const AcGePoint2d& min) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLimmin(min));
 }
 
 AcGePoint2d PyDbDatabase::limmax() const {
+	if (!impObj()) return AcGePoint2d();
 	return	 impObj()->limmax();
 }
 void PyDbDatabase::setLimmax(const AcGePoint2d& max) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLimmax(max));
 }
 
 double PyDbDatabase::elevation() const {
+	if (!impObj()) return 0.0;
 	return impObj()->elevation();
 }
 bool PyDbDatabase::setElevation(double elev) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setElevation(elev));
 }
 
 AcGePoint3d PyDbDatabase::ucsorg() const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->ucsorg();
 }
 
 
 AcGeVector3d PyDbDatabase::ucsxdir() const {
+	if (!impObj()) return AcGeVector3d();
 	return impObj()->ucsxdir();
 }
 
 
 AcGeVector3d PyDbDatabase::ucsydir() const {
+	if (!impObj()) return AcGeVector3d();
 	return impObj()->ucsydir();
 }
 
 void PyDbDatabase::setUcs(const AcGePoint3d& ucsOrigin, const AcGeVector3d& ucsXDir, const AcGeVector3d& ucsYDir) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUcs(ucsOrigin, ucsXDir, ucsYDir));
 }
 
@@ -1728,6 +1955,7 @@ AcDbObjectId PyDbDatabase::ucsname() const {
 }
 
 void PyDbDatabase::setUcsname(const AcDbObjectId& ucsRecId) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUcsname(ucsRecId));
 }
 
@@ -1735,24 +1963,30 @@ AcDbObjectId PyDbDatabase::ucsBase() const {
 	return impObj()->ucsBase();
 }
 void PyDbDatabase::setUcsBase(AcDbObjectId ucsid) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUcsBase(ucsid));
 }
 
 AcGePoint3d PyDbDatabase::worldUcsBaseOrigin(AcDb::OrthographicView orthoView) const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->worldUcsBaseOrigin(orthoView);
 }
 void PyDbDatabase::setWorldUcsBaseOrigin(const AcGePoint3d& origin, AcDb::OrthographicView orthoView) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setWorldUcsBaseOrigin(origin, orthoView));
 }
 
 bool PyDbDatabase::isUcsOrthographic(AcDb::OrthographicView& orthoView) const {
+	if (!impObj()) return false;
 	return impObj()->isUcsOrthographic(orthoView);
 }
 
 bool PyDbDatabase::isEMR() const {
+	if (!impObj()) return false;
 	return impObj()->isEMR();
 }
 AcString PyDbDatabase::getDimpost() const {
+	if (!impObj()) return AcString();
 	return AcString(impObj()->dimpost());
 }
 AcString PyDbDatabase::getDimapost() const
@@ -1784,16 +2018,20 @@ AcString PyDbDatabase::getDimblk2() const
 }
 
 int PyDbDatabase::dimfit() const {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->dimfit());
 }
 int PyDbDatabase::dimunit() const {
+	if (!impObj()) return 0;
 	return impObj()->dimunit();
 }
 
 void PyDbDatabase::setDimfit(int fit) {
+	if (!impObj()) return;
 	impObj()->setDimfit(fit);
 }
 void PyDbDatabase::setDimunit(int unit) {
+	if (!impObj()) return;
 	impObj()->setDimunit(unit);
 }
 
@@ -1802,14 +2040,17 @@ void PyDbDatabase::getDimRecentStyleList(PyDbObjectIdArray& vals) const {}
 void PyDbDatabase::loadLineTypeFile(AcString ltn, AcString filename) {}
 
 AcString PyDbDatabase::getProjectName() const {
+	if (!impObj()) return AcString();
 	AcString acs;
 	CheckErrorStatus(impObj()->getProjectName(acs));
 	return acs;
 }
 bool PyDbDatabase::setProjectName(AcString val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setProjectName(val.kwszPtr()));
 }
 AcString PyDbDatabase::getHyperlinkBase() const {
+	if (!impObj()) return AcString();
 	AcString acs;
 	CheckErrorStatus(impObj()->getHyperlinkBase(acs));
 	return acs;
@@ -1817,21 +2058,25 @@ AcString PyDbDatabase::getHyperlinkBase() const {
 }
 
 bool PyDbDatabase::setHyperlinkBase(AcString val) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setHyperlinkBase(val.kwszPtr()));
 }
 
 AcString PyDbDatabase::getStyleSheet() const {
+	if (!impObj()) return AcString();
 	AcString acs;
 	CheckErrorStatus(impObj()->getStyleSheet(acs));
 	return acs;
 }
 
 void PyDbDatabase::setStyleSheet(AcString val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setStyleSheet(val.kwszPtr()));
 }
 
 
 AcString PyDbDatabase::getFilename() const {
+	if (!impObj()) return AcString();
 	const ACHAR* pName = nullptr;
 	Acad::ErrorStatus es = impObj()->getFilename(pName);
 	if (es != Acad::eOk || !pName) {
@@ -1842,18 +2087,22 @@ AcString PyDbDatabase::getFilename() const {
 }
 
 bool PyDbDatabase::isPartiallyOpened() const {
+	if (!impObj()) return false;
 	return	 impObj()->isPartiallyOpened();
 }
 
 void PyDbDatabase::applyPartialOpenFilters(const AcDbSpatialFilter* pSpatialFilter, const AcDbLayerFilter* pLayerFilter) {
+	if (!impObj()) return;
 	impObj()->applyPartialOpenFilters(pSpatialFilter, pLayerFilter);
 }
 
 void PyDbDatabase::disablePartialOpen() {
+	if (!impObj()) return;
 	impObj()->disablePartialOpen();
 }
 
 AcString PyDbDatabase::getFingerprintGuid() const {
+	if (!impObj()) return AcString();
 	AcString acs;
 	CheckErrorStatus(impObj()->getFingerprintGuid(acs));
 	return acs;
@@ -1861,32 +2110,39 @@ AcString PyDbDatabase::getFingerprintGuid() const {
 
 
 void PyDbDatabase::setFingerprintGuid(AcString val) {
+	if (!impObj()) return;
 	impObj()->setFingerprintGuid(val.kwszPtr());
 }
 
 AcString  PyDbDatabase::getVersionGuid() const {
+	if (!impObj()) return AcString();
 	AcString acs;
 	CheckErrorStatus(impObj()->getVersionGuid(acs));
 	return acs;
 }
 
 void PyDbDatabase::setVersionGuid(AcString val) {
+	if (!impObj()) return;
 	impObj()->setVersionGuid(val.kwszPtr());
 
 }
 
 int PyDbDatabase::tstackalign() const {
+	if (!impObj()) return 0;
 	return impObj()->tstackalign();
 }
 
 void PyDbDatabase::setTStackAlign(int val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setTStackAlign(val));
 }
 
 int PyDbDatabase::tstacksize() const {
+	if (!impObj()) return 0;
 	return impObj()->tstacksize();
 }
 void PyDbDatabase::setTStackSize(int val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setTStackSize(val));
 }
 
@@ -1894,23 +2150,28 @@ AcDb::UnitsValue PyDbDatabase::insunits() const {
 	return impObj()->insunits();
 }
 bool PyDbDatabase::setInsunits(const AcDb::UnitsValue units) {
+	if (!impObj()) return false;
 	return CheckErrorStatus(impObj()->setInsunits(units));
 }
 
 bool PyDbDatabase::plotStyleMode() const {
+	if (!impObj()) return false;
 	return impObj()->plotStyleMode();
 }
 
 // Default paperspace viewport scale
 double PyDbDatabase::viewportScaleDefault() const {
+	if (!impObj()) return 0.0;
 	return impObj()->viewportScaleDefault();
 }
 void PyDbDatabase::setViewportScaleDefault(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setViewportScaleDefault(val));
 }
 
 // dwg watermark
 bool PyDbDatabase::dwgFileWasSavedByAutodeskSoftware() const {
+	if (!impObj()) return false;
 	return impObj()->dwgFileWasSavedByAutodeskSoftware();
 }
 
@@ -1926,75 +2187,94 @@ AcDbObjectContextManager* PyDbDatabase::objectContextManager() const {
 
 // When entity traversals are sorted (AcDb::kSortEnts*).
 Adesk::UInt8 PyDbDatabase::sortEnts() const {
+	if (!impObj()) return 0;
 	return	 impObj()->sortEnts();
 
 }
 void PyDbDatabase::setSortEnts(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSortEnts(val));
 }
 
 Adesk::UInt8 PyDbDatabase::drawOrderCtl() const {
+	if (!impObj()) return 0;
 	return	 impObj()->drawOrderCtl();
 }
 void PyDbDatabase::setDrawOrderCtl(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDrawOrderCtl(val));
 }
 
 Adesk::UInt8 PyDbDatabase::dimAssoc() const {
+	if (!impObj()) return 0;
 	return	 impObj()->dimAssoc();
 }
 
 void PyDbDatabase::setDimAssoc(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDimAssoc(val));
 }
 
 Adesk::UInt8 PyDbDatabase::hideText() const {
+	if (!impObj()) return 0;
 	return	 impObj()->hideText();
 }
 void PyDbDatabase::setHideText(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setHideText(val));
 }
 
 Adesk::UInt8 PyDbDatabase::haloGap() const {
+	if (!impObj()) return 0;
 	return	 impObj()->haloGap();
 }
 
 void PyDbDatabase::setHaloGap(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setHaloGap(val));
 
 }
 
 Adesk::UInt16 PyDbDatabase::obscuredColor() const {
+	if (!impObj()) return 0;
 	return	 impObj()->obscuredColor();
 }
 void PyDbDatabase::setObscuredColor(Adesk::UInt16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setObscuredColor(val));
 }
 
 Adesk::UInt8 PyDbDatabase::obscuredLineType() const {
+	if (!impObj()) return 0;
 	return	 impObj()->obscuredLineType();
 }
 void PyDbDatabase::setObscuredLineType(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setObscuredLineType(val));
 }
 
 Adesk::UInt8 PyDbDatabase::intersectDisplay() const {
+	if (!impObj()) return 0;
 	return	 impObj()->intersectDisplay();
 }
 
 void PyDbDatabase::setIntersectDisplay(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setIntersectDisplay(val));
 }
 
 Adesk::UInt16 PyDbDatabase::intersectColor() const {
+	if (!impObj()) return 0;
 	return	 impObj()->intersectColor();
 }
 void PyDbDatabase::setIntersectColor(Adesk::UInt16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setIntersectColor(val));
 }
 
 // For the ACAD_TABLESTYLE dictionary
 void PyDbDatabase::getTableStyleDictionary(AcDbDictionary*& pDict, AcDb::OpenMode mode) {
+	if (!impObj()) return;
 	impObj()->getTableStyleDictionary(pDict, mode);
 }
 
@@ -2009,6 +2289,7 @@ AcDbObjectId PyDbDatabase::tablestyle() const {
 	return	 impObj()->tablestyle();
 }
 void PyDbDatabase::setTablestyle(AcDbObjectId val) {
+	if (!impObj()) return;
 	impObj()->setTablestyle(val);
 }
 
@@ -2030,6 +2311,7 @@ AcDbObjectId PyDbDatabase::mleaderstyle() const {
 	return impObj()->mleaderstyle();
 }
 void PyDbDatabase::setMLeaderstyle(AcDbObjectId val) {
+	if (!impObj()) return;
 	impObj()->setMLeaderstyle(val);
 }
 
@@ -2069,6 +2351,7 @@ AcDbObjectId PyDbDatabase::sectionViewStyle() const {
 //Do not change format of setSectionViewStyle function! 
 //We need to preserve format which SymbolTableInfo struct defines for AcDiObservableCollection datatype (AcDiImpManager object)
 void PyDbDatabase::setSectionViewStyle(AcDbObjectId val) {
+	if (!impObj()) return;
 	impObj()->setSectionViewStyle(val);
 }
 
@@ -2093,125 +2376,161 @@ std::vector<AcString> PyDbDatabase::getVisualStyleList() {
 }
 
 Adesk::UInt8 PyDbDatabase::solidHist() const {
+	if (!impObj()) return 0;
 	return	 impObj()->solidHist();
 } // 0 (default) or 1
 void PyDbDatabase::setSolidHist(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setSolidHist(val));
 }
 // 0, 1(default) or 2
 Adesk::UInt8 PyDbDatabase::showHist() const {
+	if (!impObj()) return 0;
 	return	 impObj()->showHist();
 }
 void PyDbDatabase::setShowHist(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setShowHist(val));
 }
 
 double PyDbDatabase::psolWidth() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->psolWidth();
 }
 void PyDbDatabase::setPsolWidth(double width) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPsolWidth(width));
 }
 double PyDbDatabase::psolHeight() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->psolHeight();
 }
 void PyDbDatabase::setPsolHeight(double height) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPsolHeight(height));
 }
 
 Adesk::UInt16 PyDbDatabase::loftParam() const {
+	if (!impObj()) return 0;
 	return	 impObj()->loftParam();
 }
 
 void PyDbDatabase::setLoftParam(Adesk::UInt16 flags) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLoftParam(flags));
 }
 
 Adesk::UInt8 PyDbDatabase::loftNormals() const {
+	if (!impObj()) return 0;
 	return	 impObj()->loftNormals();
 }
 void PyDbDatabase::setLoftNormals(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLoftNormals(val));
 }
 double PyDbDatabase::loftAng1() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->loftAng1();
 }
 void PyDbDatabase::setLoftAng1(double ang1) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLoftAng1(ang1));
 }
 double PyDbDatabase::loftAng2() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->loftAng2();
 }
 void PyDbDatabase::setLoftAng2(double ang2) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLoftAng2(ang2));
 }
 double PyDbDatabase::loftMag1() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->loftMag1();
 }
 void PyDbDatabase::setLoftMag1(double mag1) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLoftMag1(mag1));
 }
 double PyDbDatabase::loftMag2() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->loftMag2();
 }
 void PyDbDatabase::setLoftMag2(double mag2) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLoftMag2(mag2));
 }
 
 // Lat and long are in decimal degrees, not radians!
 double PyDbDatabase::latitude() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->latitude();
 }
 
 void PyDbDatabase::setLatitude(double lat) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLatitude(lat));
 }
 double PyDbDatabase::longitude() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->longitude();
 }
 void PyDbDatabase::setLongitude(double lng) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLongitude(lng));
 }
 double PyDbDatabase::northDirection() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->northDirection();
 }
 
 void PyDbDatabase::setNorthDirection(double northdir) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setNorthDirection(northdir));
 }
 AcDb::TimeZone PyDbDatabase::timeZone() const {
 	return	 impObj()->timeZone();
 }
 void PyDbDatabase::setTimeZone(AcDb::TimeZone tz) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setTimeZone(tz));
 }
 // Offsets measured in hours difference from UTC
 void PyDbDatabase::getTimeZoneInfo(AcDb::TimeZone tz, double& offset, AcString& desc) const {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->getTimeZoneInfo(tz, offset, desc));
 }
 void PyDbDatabase::setTimeZoneAsUtcOffset(double offset) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setTimeZoneAsUtcOffset(offset));
 }
 bool PyDbDatabase::geoMarkerVisibility() const {
+	if (!impObj()) return false;
 	return	 impObj()->geoMarkerVisibility();
 }
 void PyDbDatabase::setGeoMarkerVisibility(bool value) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setGeoMarkerVisibility(value));
 }
 AcString PyDbDatabase::geoCoordinateSystemId() const {
+	if (!impObj()) return AcString();
 	return	 impObj()->geoCoordinateSystemId();
 }
 
 Adesk::UInt8 PyDbDatabase::lightGlyphDisplay() const { // 0 or 1(default)
+	if (!impObj()) return 0;
 	return	 impObj()->lightGlyphDisplay();
 }
 void PyDbDatabase::setLightGlyphDisplay(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLightGlyphDisplay(val));
 }
 Adesk::UInt8 PyDbDatabase::tileModeLightSynch() const { // 0 or 1(default)
+	if (!impObj()) return 0;
 	return	 impObj()->tileModeLightSynch();
 }
 void PyDbDatabase::setTileModeLightSynch(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setTileModeLightSynch(val));
 }
 
@@ -2219,6 +2538,7 @@ AcCmColor PyDbDatabase::interfereColor() const {
 	return	 impObj()->interfereColor();
 }
 void  PyDbDatabase::setInterfereColor(const AcCmColor& color) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setInterfereColor(color));
 }
 
@@ -2226,6 +2546,7 @@ AcDbObjectId PyDbDatabase::interfereObjVisStyle() const {
 	return	 impObj()->interfereObjVisStyle();
 }
 void  PyDbDatabase::setInterfereObjVisStyle(AcDbObjectId id) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setInterfereObjVisStyle(id));
 }
 
@@ -2234,6 +2555,7 @@ AcDbObjectId  PyDbDatabase::interfereVpVisStyle() const {
 }
 
 void  PyDbDatabase::setInterfereVpVisStyle(AcDbObjectId id) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setInterfereVpVisStyle(id));
 }
 
@@ -2241,21 +2563,26 @@ AcDbObjectId PyDbDatabase::dragVisStyle() const {
 	return	 impObj()->dragVisStyle();
 }
 void PyDbDatabase::setDragVisStyle(AcDbObjectId id) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDragVisStyle(id));
 }
 
 Adesk::UInt8 PyDbDatabase::cshadow() const {
+	if (!impObj()) return 0;
 	return	 impObj()->cshadow();
 }
 void PyDbDatabase::setCshadow(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCshadow(val));
 }
 
 
 double PyDbDatabase::shadowPlaneLocation() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->shadowPlaneLocation();
 }
 void  PyDbDatabase::setShadowPlaneLocation(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setShadowPlaneLocation(val));
 }
 
@@ -2263,111 +2590,142 @@ AcDbAnnotationScale* PyDbDatabase::cannoscale() const {
 	return	 impObj()->cannoscale();
 }
 void  PyDbDatabase::setCannoscale(AcDbAnnotationScale* pScale) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCannoscale(pScale));
 }
 
 bool  PyDbDatabase::annoAllVisible() const {
+	if (!impObj()) return false;
 	return	 impObj()->annoAllVisible();
 }
 void PyDbDatabase::setAnnoAllVisible(bool allvis) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setAnnoAllVisible(allvis));
 }
 
 bool  PyDbDatabase::annotativeDwg() const {
+	if (!impObj()) return false;
 	return	 impObj()->annotativeDwg();
 }
 void  PyDbDatabase::setAnnotativeDwg(bool anno) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setAnnotativeDwg(anno));
 }
 
 bool  PyDbDatabase::msltscale() const {
+	if (!impObj()) return false;
 	return	 impObj()->msltscale();
 }
 void  PyDbDatabase::setMsltscale(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setMsltscale(val));
 }
 
 Adesk::UInt8  PyDbDatabase::lightingUnits() const {
+	if (!impObj()) return 0;
 	return	 impObj()->lightingUnits();
 }
 void  PyDbDatabase::setLightingUnits(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLightingUnits(val));
 }
 
 bool  PyDbDatabase::lightsInBlocks() const {
+	if (!impObj()) return false;
 	return	 impObj()->lightsInBlocks();
 }
 void  PyDbDatabase::setLightsInBlocks(bool val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLightsInBlocks(val));
 }
 
 Adesk::Int16  PyDbDatabase::dxeVal() const {
+	if (!impObj()) return 0;
 	return	 impObj()->dxeVal();
 }
 void  PyDbDatabase::setDxeVal(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setDxeVal(val));
 }
 
 double  PyDbDatabase::mleaderscale() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->mleaderscale();
 }
 void  PyDbDatabase::setMLeaderscale(double scale) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setMLeaderscale(scale));
 }
 
 Adesk::Int16  PyDbDatabase::cDynDisplayMode() const {
+	if (!impObj()) return 0;
 	return	 impObj()->cDynDisplayMode();
 }
 void  PyDbDatabase::setCDynDisplayMode(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setCDynDisplayMode(val));
 }
 
 Adesk::Int16  PyDbDatabase::previewType() const {
+	if (!impObj()) return 0;
 	return	 impObj()->previewType();
 }
 void  PyDbDatabase::setPreviewType(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setPreviewType(val));
 }
 
 Adesk::UInt8  PyDbDatabase::indexctl() const {
+	if (!impObj()) return 0;
 	return	 impObj()->indexctl();
 }
 void  PyDbDatabase::setIndexctl(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setIndexctl(val));
 }
 
 Adesk::UInt8  PyDbDatabase::layerEval() const {
+	if (!impObj()) return 0;
 	return	 impObj()->layerEval();
 }
 void  PyDbDatabase::setLayerEval(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLayerEval(val));
 }
 
 Adesk::Int16  PyDbDatabase::layerNotify() const {
+	if (!impObj()) return 0;
 	return	 impObj()->layerNotify();
 }
 void  PyDbDatabase::setLayerNotify(Adesk::Int16 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setLayerNotify(val));
 }
 
 double  PyDbDatabase::msOleScale() const {
+	if (!impObj()) return 0.0;
 	return	 impObj()->msOleScale();
 }
 void  PyDbDatabase::setMsOleScale(double val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setMsOleScale(val));
 }
 
 Adesk::UInt8 PyDbDatabase::updateThumbnail() const {
+	if (!impObj()) return 0;
 	return	 impObj()->updateThumbnail();
 }
 void  PyDbDatabase::setUpdateThumbnail(Adesk::UInt8 val) {
+	if (!impObj()) return;
 	CheckErrorStatus(impObj()->setUpdateThumbnail(val));
 }
 
 Adesk::UInt32  PyDbDatabase::eraseEmptyObjects(const Adesk::UInt32 flags) {
+	if (!impObj()) return 0;
 	return	 impObj()->eraseEmptyObjects(flags);
 }
 Adesk::UInt32  PyDbDatabase::countEmptyObjects(const Adesk::UInt32 flags) {
+	if (!impObj()) return 0;
 	return	 impObj()->countEmptyObjects(flags);
 }
 

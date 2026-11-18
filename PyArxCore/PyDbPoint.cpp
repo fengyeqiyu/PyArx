@@ -4,18 +4,18 @@
 
 PyWrapper_Cpp(DbPoint)
 AcString PyDbPoint::toString() const { return AcString(std::format("AcDbPoint[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbPoint::position() const { return impObj() ? impObj()->position() : AcGePoint3d(); }
+AcGePoint3d PyDbPoint::position() const { if (!impObj()) return AcGePoint3d(); return impObj() ? impObj()->position() : AcGePoint3d(); }
 
-bool  PyDbPoint::setPosition(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setPosition(p), L"AcDbPoint::setPosition"); }
+bool  PyDbPoint::setPosition(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPosition(p), L"AcDbPoint::setPosition"); }
 
-double PyDbPoint::thickness() const { return impObj() ? impObj()->thickness() : 0.0; }
+double PyDbPoint::thickness() const { if (!impObj()) return 0.0; return impObj() ? impObj()->thickness() : 0.0; }
 
-bool  PyDbPoint::setThickness(double t) { return PyWarnIfError(impObj()->setThickness(t), L"AcDbPoint::setThickness"); }
+bool  PyDbPoint::setThickness(double t) { if (!impObj()) return false; return PyWarnIfError(impObj()->setThickness(t), L"AcDbPoint::setThickness"); }
 
-AcGeVector3d PyDbPoint::normal() const { return impObj() ? impObj()->normal() : AcGeVector3d(); }
-bool  PyDbPoint::setNormal(const AcGeVector3d& n) { return PyWarnIfError(impObj()->setNormal(n), L"AcDbPoint::setNormal"); }
-double PyDbPoint::ecsRotation() const { return impObj() ? impObj()->ecsRotation() : 0.0; }
-bool  PyDbPoint::setEcsRotation(double r) { return PyWarnIfError(impObj()->setEcsRotation(r), L"AcDbPoint::setEcsRotation"); }
+AcGeVector3d PyDbPoint::normal() const { if (!impObj()) return AcGeVector3d(); return impObj() ? impObj()->normal() : AcGeVector3d(); }
+bool  PyDbPoint::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbPoint::setNormal"); }
+double PyDbPoint::ecsRotation() const { if (!impObj()) return 0.0; return impObj() ? impObj()->ecsRotation() : 0.0; }
+bool  PyDbPoint::setEcsRotation(double r) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEcsRotation(r), L"AcDbPoint::setEcsRotation"); }
 
 void bind_PyDbPoint(pym& m) {
 	py::class_<PyDbPoint, PyDbEntity>(m, "PyDbPoint")

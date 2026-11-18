@@ -94,3 +94,4 @@
 2026-11-18 19:45 | PyDbLayout.cpp:8-69 | ② | 13 个成员函数体首行补判空，返回 0/false/AcString()/py::list()/py::tuple()/return;
 2026-11-18 19:46 | PyDbOrdinateDimension.cpp:7-24 | ② | 12 个单行方法内联补判空，返回 AcGePoint3d()/false
 2026-11-18 19:46 | PyDbAlignedDimension.cpp:7-24 | ② | 12 个单行方法内联补判空，返回 AcGePoint3d()/0.0/false
+2026-11-18 20:00 | 74 文件 | ② | 全库批量补 if(!impObj()) 判空净新增 1672 处，逐文件 check_one 编译 PASS
