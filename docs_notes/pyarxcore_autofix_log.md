@@ -1,0 +1,49 @@
+# PyArxCore 防呆审计自动修复日志
+
+2026-11-18 00:20 | PyArxCore.vcxproj:542 | ⑥登记缺失头文件 | 追加 ClInclude PyDbOpenCache.h（此前新增未登记）
+2026-11-18 01:02 | PyDbDatabase.cpp:2513 | ⑤重复注册 | 删除 7 个与下方 impObj 直连同签名重复的 sysvar 绑定（angdir/chamferc/chamferd/cmljust/cmlscale/dimfit/dimunit），保留 celweight/dimassoc
+2026-11-18 01:03 | PyDbLayerTableRecord.cpp:14 ③④ void setIsOff 补 PyWarnIfError 判 es
+2026-11-18 01:03 | PyDbLayerTableRecord.cpp:16 ③④ void setVPDFLT 补 PyWarnIfError
+2026-11-18 01:03 | PyDbLayerTableRecord.cpp:18 ③④ void setIsLocked 补 PyWarnIfError
+2026-11-18 01:03 | PyDbLayerTableRecord.cpp:110 ③④ setColor 补 PyWarnIfError
+2026-11-18 01:03 | 回退 setIsOff/setVPDFLT/setIsLocked：ARX 返回 void 无 es，原写法正确；仅保留 setColor 补判 es
+2026-11-18 01:04 | 回退 setColor：ARX 亦返回 void 无 es；PyDbLayerTableRecord 全部 setter 为 void，无 es 丢弃问题，文件恢复原状
+2026-11-18 01:05 | PyArxCore.vcxproj:543 | ⑥ | 补登记 HotModName.h/HotModuleName.h 到 ClInclude（stdafx 与 PyArxBinder 实际引用）
+2026-11-18 01:07 | PyDbBlockReference.cpp:163 | ④⑤ | hasAttributes 不再恒返 false 占位，改按 attributeCount()>0 实现，接收实例
+2026-11-18 01:19 | PyDbSymbolTableRecord.cpp:9-11 | ② | isDependent/isResolved/isRenamable 补 impObj 判空（三元兜底 false）
+2026-11-18 01:19 | PyDbBody.cpp:7-10 | ② | isNull/numChanges/invalidateCachedBodySubentIds/usesGraphicsCache 补判空
+2026-11-18 01:19 | PyDbDgnReference.cpp:12 | ② | setXrefDepth 补 impObj 判空，空返回 false
+2026-11-18 01:19 | PyDbDgnDefinition.cpp:15,24,33 | ② | setUseMasterUnits/setXrefDepth/setShowRasterRef 补判空
+2026-11-18 01:19 | PyDbAttribute.cpp:全文件 | ② | 21 处 impObj()-> 无判空，超 20 行上限，只报不改
+2026-11-18 01:19 | PyDbTable.cpp:全文件 | ② | 47 处无判空，只报不改
+2026-11-18 01:19 | PyDbHyperlink.cpp:16,25,34,55 | ③ | setter 后直接 return true，ARX 头缺失无法确认返回类型，只报不改
+2026-11-18 02:18 | PyDbColor.cpp:16,27,35 | ② | entityColor/getColorRGB/setRGB 三个 lambda 补 impObj 判空
+2026-11-18 02:18 | PyDb3dPolylineVertex.cpp:7,9 | ② | position/vertexType 补判空（返回默认值）
+2026-11-18 02:18 | PyDbPolyFaceMeshVertex.cpp:7 | ② | position 补判空
+2026-11-18 02:18 | PyDbPoint.cpp:7,11,15,17 | ② | position/thickness/normal/ecsRotation 四个 getter 补判空
+2026-11-18 03:18 | PyDbRay.cpp:7-16 | ② | 3 getter 三元兜底、3 setter 补 impObj 判空
+2026-11-18 03:18 | PyDbXline.cpp:7-16 | ② | 3 getter 三元兜底、3 setter 补 impObj 判空
+2026-11-18 04:17 | PyDbTrace.cpp:7-16 | ② | 3 getter 三元兜底、3 setter 补 impObj 判空
+2026-11-18 04:17 | PyDbSolid.cpp:7-16 | ② | 3 getter 三元兜底、3 setter 补 impObj 判空
+2026-11-18 05:17 | PyDbBlendOptions.cpp:16-29 | ② | 3 getter 判空兜底、3 setter 前置判空
+2026-11-18 06:18 | PyDbRegion.cpp:7-33 | ② | 9 处补 impObj 判空（isNull 空指针视为 true）
+2026-11-18 06:18 | PyDb3dProfile.cpp:10-36 | ② | 构造/set/copyFrom/convertProfile 共 4 处补判空
+2026-11-18 06:18 | PyDbSpatialFilter.cpp:13-46 | ② | 4 处 lambda 补 impObj/ext 判空
+2026-11-18 07:20 | PyDbXrecord.cpp:8-45 | ② | 7 处 impObj 判空，rbChain/setFromRbChain/appendRbChain/mergeStyle 等空对象安全返回
+2026-11-18 07:20 | PyDbVisualStyle.cpp:7-29 | ② | type 兜底 0，6 个 setter 前置判空
+2026-11-18 07:20 | PyDbUcsTableRecord.cpp:7-19 | ② | 6 getter/setter 判空，ucsBaseOrigin 与 setUcsBaseOrigin 前置 return
+2026-11-18 07:20 | PyDbGeoData.cpp:7-31 | ② | 8 处 impObj 判空，postToDb 空对象返回 (false,0)
+2026-11-18 08:18 | PyDbMInsertBlock.cpp:7-21 | ② | 8 处判空，getter 兜底 0/0.0，setter 前置 return false
+2026-11-18 08:18 | PyDbModelDocViewStyle.cpp:8-50 | ② | 9 处判空含 db 入参，getDescription 空返回默认 AcString
+2026-11-18 08:18 | PyDbRevolvedSurface.cpp:7-33 | ② | 7 处判空，点/向量 getter 兜底默认几何
+2026-11-18 08:18 | PyDbRevolveOptions.cpp:17-34 | ② | 7 处判空，checkRevolveCurve 空实体报错返回全 false
+2026-11-18 08:18 | PyRxClass.cpp:11-55 | ② | 9 处判空，空对象返回默认 PyRxObject/PyRxClass
+2026-11-18 09:18 | PyDbShape.cpp:7-35 | ② | 22 处判空，几何/数值 getter 兜底默认
+2026-11-18 09:18 | PyDbFcf.cpp:8-34 | ② | 22 处判空，含 getDimstyleData 空返 nullptr
+2026-11-18 09:18 | PyDb2dVertex.cpp:7-21 | ② | 15 处判空，getter 兜底 0/0.0
+2026-11-18 09:18 | PyDbArc.cpp:7-28 | ② | 14 处判空，几何/数值 getter 兜底默认
+2026-11-18 10:18 | PyDbSection.cpp:8-23 | ② | 16 处判空，几何/数值 getter 兜底默认
+2026-11-18 10:18 | PyDbHelix.cpp:7-39 | ② | 23 处判空，getter 兜底 0/0.0，setter/as 板前置
+2026-11-18 10:18 | PyDbEllipse.cpp:7-52 | ② | 22 处判空，isNull 空视为 true，get 空返默认元组
+2026-11-18 11:19 | PyDbViewport.cpp:7-122 | ② | 84 处 getter/setter 补 impObj() 判空（getter 返回默认值，setter 直接 return false），行为不变
+2026-11-18 11:19 | PyDbViewport.cpp:216-237 | ② | 21 处 PyRx 对齐 lambda 直接解 o.impObj()，需改写表达式，本轮只报不改
