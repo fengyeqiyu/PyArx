@@ -102,3 +102,4 @@
 2026-11-19 02:20 | PyDbFullSubentPath.cpp:65-115 | ② | PyDbSubentId 6 处裸解引用 m_ptr 补判空并给默认返回
 2026-11-19 03:18 | PyDbLongTransaction.cpp:12-60 | ② | 8 个绑定 lambda 内裸调用 s.impObj() 补判空并给默认返回
 2026-11-19 05:19 | PyDbPlotSettingsValidator.cpp:30-167 | ② | 23 个绑定 lambda 补 self/ps 判空并给默认返回
+2026-11-19 07:18 | PyDbDimStyleTableRecord.cpp:12-137 | ② | 73 个绑定 lambda 首行补 s.impObj() 判空并返回同型默认值

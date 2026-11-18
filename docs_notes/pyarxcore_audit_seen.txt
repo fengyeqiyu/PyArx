@@ -444,3 +444,9 @@ PyGeCompositeCurve2d.cpp:40:②-待报
 PyGeCompositeCurve3d.cpp:40:②-待报
 PyGeKnotVector.cpp:52:②-待报
 PyGeKnotVector.cpp:131:②-待报
+PyDbDimStyleTableRecord.cpp:12-137:②已改
+PyGeLine2d.cpp:1:clean
+PyGeLine3d.cpp:1:clean
+PyGeLinearEnt2d.cpp:1:clean
+PyGeLinearEnt3d.cpp:1:clean
+PyGeLineSeg2d.cpp:1:clean
