@@ -90,3 +90,4 @@
 2026-11-18 19:41 | PyDbDiametricDimension.cpp:7-22 | ② | 10 个单行 getter/setter 内联补判空，返回 AcGePoint3d()/0.0/false
 2026-11-18 19:41 | PyDbRadialDimension.cpp:7-22 | ② | 10 个单行 getter/setter 内联补判空，返回 AcGePoint3d()/0.0/false
 2026-11-18 19:42 | PyDbLine.cpp:7-33 | ② | 11 个单行成员方法内联补判空（void setColorIndex 用 return;），getOffsetCurvesGivenPlaneNormal 条件前置判空
+2026-11-18 19:44 | PyDbWipeout.cpp:7-21 | ② | 10 个单行成员方法内联补判空 + append 前置判空返回 false

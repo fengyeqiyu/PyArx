@@ -223,3 +223,14 @@ PyDbLine.cpp:23:②
 PyDbLine.cpp:29:②
 PyDbWipeout.cpp:1:clean-1/7/8
 PyDbLayout.cpp:1:clean-1/7/8
+PyDbWipeout.cpp:7:②
+PyDbWipeout.cpp:9:②
+PyDbWipeout.cpp:10:②
+PyDbWipeout.cpp:11:②
+PyDbWipeout.cpp:12:②
+PyDbWipeout.cpp:13:②
+PyDbWipeout.cpp:14:②
+PyDbWipeout.cpp:15:②
+PyDbWipeout.cpp:16:②
+PyDbWipeout.cpp:17:②
+PyDbWipeout.cpp:21:②
