@@ -1,25 +1,25 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbRadialDimension.h"
 
 PyWrapper_Cpp(DbRadialDimension)
 AcString PyDbRadialDimension::toString() const { return AcString(std::format("AcDbRadialDimension[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbRadialDimension::center() const { return impObj()->center(); }
+AcGePoint3d PyDbRadialDimension::center() const { if (!impObj()) return AcGePoint3d(); return impObj()->center(); }
 
-bool  PyDbRadialDimension::setCenter(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setCenter(p), L"AcDbRadialDimension::setCenter"); }
+bool  PyDbRadialDimension::setCenter(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setCenter(p), L"AcDbRadialDimension::setCenter"); }
 
-AcGePoint3d PyDbRadialDimension::chordPoint() const { return impObj()->chordPoint(); }
+AcGePoint3d PyDbRadialDimension::chordPoint() const { if (!impObj()) return AcGePoint3d(); return impObj()->chordPoint(); }
 
-bool  PyDbRadialDimension::setChordPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setChordPoint(p), L"AcDbRadialDimension::setChordPoint"); }
+bool  PyDbRadialDimension::setChordPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setChordPoint(p), L"AcDbRadialDimension::setChordPoint"); }
 
-double PyDbRadialDimension::leaderLength() const { return impObj()->leaderLength(); }
+double PyDbRadialDimension::leaderLength() const { if (!impObj()) return 0.0; return impObj()->leaderLength(); }
 
-bool  PyDbRadialDimension::setLeaderLength(double l) { return PyWarnIfError(impObj()->setLeaderLength(l), L"AcDbRadialDimension::setLeaderLength"); }
+bool  PyDbRadialDimension::setLeaderLength(double l) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLeaderLength(l), L"AcDbRadialDimension::setLeaderLength"); }
 
-double PyDbRadialDimension::extArcStartAngle() const { return impObj()->extArcStartAngle(); }
-bool  PyDbRadialDimension::setExtArcStartAngle(double a) { return PyWarnIfError(impObj()->setExtArcStartAngle(a), L"AcDbRadialDimension::setExtArcStartAngle"); }
-double PyDbRadialDimension::extArcEndAngle() const { return impObj()->extArcEndAngle(); }
-bool  PyDbRadialDimension::setExtArcEndAngle(double a) { return PyWarnIfError(impObj()->setExtArcEndAngle(a), L"AcDbRadialDimension::setExtArcEndAngle"); }
+double PyDbRadialDimension::extArcStartAngle() const { if (!impObj()) return 0.0; return impObj()->extArcStartAngle(); }
+bool  PyDbRadialDimension::setExtArcStartAngle(double a) { if (!impObj()) return false; return PyWarnIfError(impObj()->setExtArcStartAngle(a), L"AcDbRadialDimension::setExtArcStartAngle"); }
+double PyDbRadialDimension::extArcEndAngle() const { if (!impObj()) return 0.0; return impObj()->extArcEndAngle(); }
+bool  PyDbRadialDimension::setExtArcEndAngle(double a) { if (!impObj()) return false; return PyWarnIfError(impObj()->setExtArcEndAngle(a), L"AcDbRadialDimension::setExtArcEndAngle"); }
 
 void bind_PyDbRadialDimension(pym& m) {
 	py::class_<PyDbRadialDimension, PyDbDimension>(m, "PyDbRadialDimension")

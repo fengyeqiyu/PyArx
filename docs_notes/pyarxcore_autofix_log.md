@@ -87,3 +87,5 @@
 2026-11-18 18:19 | PyDbFaceRecord.cpp:9-28 | ② | 5 个成员方法补 if(!impObj()) 返回 0/false
 2026-11-18 19:18 | PyDbLoftProfile.cpp:21-45 | ② | copyFrom/continuity/setContinuity/magnitude/setMagnitude 五个 lambda 补判空（src 同时判空）返回 false/0/0.0
 2026-11-18 19:18 | PyDbCircle.cpp:7-24 | ② | 12 个单行 getter/setter 内联补 if(!impObj()) 返回原类型默认值
+2026-11-18 19:41 | PyDbDiametricDimension.cpp:7-22 | ② | 10 个单行 getter/setter 内联补判空，返回 AcGePoint3d()/0.0/false
+2026-11-18 19:41 | PyDbRadialDimension.cpp:7-22 | ② | 10 个单行 getter/setter 内联补判空，返回 AcGePoint3d()/0.0/false

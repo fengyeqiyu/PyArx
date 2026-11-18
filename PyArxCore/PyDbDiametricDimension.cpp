@@ -1,25 +1,25 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbDiametricDimension.h"
 
 PyWrapper_Cpp(DbDiametricDimension)
 AcString PyDbDiametricDimension::toString() const { return AcString(std::format("AcDbDiametricDimension[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDbDiametricDimension::chordPoint() const { return impObj()->chordPoint(); }
+AcGePoint3d PyDbDiametricDimension::chordPoint() const { if (!impObj()) return AcGePoint3d(); return impObj()->chordPoint(); }
 
-bool  PyDbDiametricDimension::setChordPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setChordPoint(p), L"AcDbDiametricDimension::setChordPoint"); }
+bool  PyDbDiametricDimension::setChordPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setChordPoint(p), L"AcDbDiametricDimension::setChordPoint"); }
 
-AcGePoint3d PyDbDiametricDimension::farChordPoint() const { return impObj()->farChordPoint(); }
+AcGePoint3d PyDbDiametricDimension::farChordPoint() const { if (!impObj()) return AcGePoint3d(); return impObj()->farChordPoint(); }
 
-bool  PyDbDiametricDimension::setFarChordPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setFarChordPoint(p), L"AcDbDiametricDimension::setFarChordPoint"); }
+bool  PyDbDiametricDimension::setFarChordPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setFarChordPoint(p), L"AcDbDiametricDimension::setFarChordPoint"); }
 
-double PyDbDiametricDimension::leaderLength() const { return impObj()->leaderLength(); }
+double PyDbDiametricDimension::leaderLength() const { if (!impObj()) return 0.0; return impObj()->leaderLength(); }
 
-bool  PyDbDiametricDimension::setLeaderLength(double l) { return PyWarnIfError(impObj()->setLeaderLength(l), L"AcDbDiametricDimension::setLeaderLength"); }
+bool  PyDbDiametricDimension::setLeaderLength(double l) { if (!impObj()) return false; return PyWarnIfError(impObj()->setLeaderLength(l), L"AcDbDiametricDimension::setLeaderLength"); }
 
-double PyDbDiametricDimension::extArcStartAngle() const { return impObj()->extArcStartAngle(); }
-bool  PyDbDiametricDimension::setExtArcStartAngle(double a) { return PyWarnIfError(impObj()->setExtArcStartAngle(a), L"AcDbDiametricDimension::setExtArcStartAngle"); }
-double PyDbDiametricDimension::extArcEndAngle() const { return impObj()->extArcEndAngle(); }
-bool  PyDbDiametricDimension::setExtArcEndAngle(double a) { return PyWarnIfError(impObj()->setExtArcEndAngle(a), L"AcDbDiametricDimension::setExtArcEndAngle"); }
+double PyDbDiametricDimension::extArcStartAngle() const { if (!impObj()) return 0.0; return impObj()->extArcStartAngle(); }
+bool  PyDbDiametricDimension::setExtArcStartAngle(double a) { if (!impObj()) return false; return PyWarnIfError(impObj()->setExtArcStartAngle(a), L"AcDbDiametricDimension::setExtArcStartAngle"); }
+double PyDbDiametricDimension::extArcEndAngle() const { if (!impObj()) return 0.0; return impObj()->extArcEndAngle(); }
+bool  PyDbDiametricDimension::setExtArcEndAngle(double a) { if (!impObj()) return false; return PyWarnIfError(impObj()->setExtArcEndAngle(a), L"AcDbDiametricDimension::setExtArcEndAngle"); }
 
 void bind_PyDbDiametricDimension(pym& m) {
 	py::class_<PyDbDiametricDimension, PyDbDimension>(m, "PyDbDiametricDimension")

@@ -189,3 +189,23 @@ PyDbCircle.cpp:22:②
 PyDbCircle.cpp:23:②
 PyDbCircle.cpp:24:②
 PyDbEvalVariant.cpp:19:clean-2（impObj 返回值引用）
+PyDbDiametricDimension.cpp:7:②
+PyDbDiametricDimension.cpp:9:②
+PyDbDiametricDimension.cpp:11:②
+PyDbDiametricDimension.cpp:13:②
+PyDbDiametricDimension.cpp:15:②
+PyDbDiametricDimension.cpp:17:②
+PyDbDiametricDimension.cpp:19:②
+PyDbDiametricDimension.cpp:20:②
+PyDbDiametricDimension.cpp:21:②
+PyDbDiametricDimension.cpp:22:②
+PyDbRadialDimension.cpp:7:②
+PyDbRadialDimension.cpp:9:②
+PyDbRadialDimension.cpp:11:②
+PyDbRadialDimension.cpp:13:②
+PyDbRadialDimension.cpp:15:②
+PyDbRadialDimension.cpp:17:②
+PyDbRadialDimension.cpp:19:②
+PyDbRadialDimension.cpp:20:②
+PyDbRadialDimension.cpp:21:②
+PyDbRadialDimension.cpp:22:②
