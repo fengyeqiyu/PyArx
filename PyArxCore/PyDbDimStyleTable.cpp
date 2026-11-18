@@ -1,12 +1,14 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbDimStyleTable.h"
 
 PyWrapper_Cpp(DbDimStyleTable);
 bool PyDbDimStyleTable::has(const AcString& name) const {
+	if (!impObj()) return false;
 	return impObj()->has(name.kwszPtr());
 }
 PyDbSymbolTableRecord PyDbDimStyleTable::getAt(const AcString& name) const {
+	if (!impObj()) return PyDbSymbolTableRecord(nullptr);
 	AcDbDimStyleTable::RecordType* rec = nullptr;
 	if(!PyWarnIfError(impObj()->getAt(name.kwszPtr(), rec, AcDb::kForRead), L"getAt")) return PyDbSymbolTableRecord(nullptr);
 	return PyDbSymbolTableRecord(rec);

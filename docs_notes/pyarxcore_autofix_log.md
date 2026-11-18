@@ -66,3 +66,15 @@
 2026-11-18 15:19 | PyDbRegAppTableIterator.cpp:1-17 | ② | 构造函数补 owner.impObj() 判空，空则提前返回
 2026-11-18 15:19 | PyDbTextStyleTableIterator.cpp:1-17 | ② | 构造函数补 owner.impObj() 判空，空则提前返回
 2026-11-18 15:19 | PyDbBlockTableIterator.cpp:1-17 | ② | 构造函数补 owner.impObj() 判空，空则提前返回
+2026-11-18 16:19 | PyDbBlockTable.cpp:1-15 | ② | has/getAt 补 impObj 判空，空返 false / PyDbBlockTableRecord(nullptr)
+2026-11-18 16:19 | PyDbDictionary.cpp:1-40 | ② | has/getAt/getIdAt 补 impObj 判空，空返 false / PyDbObject(nullptr) / 0ULL
+2026-11-18 16:19 | PyDbDimStyleTable.cpp:1-15 | ② | has/getAt 补 impObj 判空
+2026-11-18 16:19 | PyDbLayerTable.cpp:1-15 | ② | has/getAt 补 impObj 判空，getAt 空返 PyDbLayerTableRecord(nullptr)
+2026-11-18 16:19 | PyDbLinetypeTable.cpp:1-15 | ② | has/getAt 补 impObj 判空
+2026-11-18 16:19 | PyDbRegAppTable.cpp:1-15 | ② | has/getAt 补 impObj 判空
+2026-11-18 16:19 | PyDbSymbolTable.cpp:1-40 | ② | has/getAt 补 impObj 判空
+2026-11-18 16:19 | PyDbTextStyleTable.cpp:1-15 | ② | has/getAt 补 impObj 判空
+2026-11-18 16:19 | PyDbUCSTable.cpp:1-15 | ② | has/getAt 补 impObj 判空
+2026-11-18 16:19 | PyDbViewportTable.cpp:1-15 | ② | has/getAt 补 impObj 判空
+2026-11-18 16:19 | PyDbViewTable.cpp:1-15 | ② | has/getAt 补 impObj 判空
+2026-11-18 16:19 | PyDbSurface.cpp:8-14 | ② | createFrom 补 srcEntity.impObj() 判空，空返 std::nullopt

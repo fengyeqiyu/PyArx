@@ -117,3 +117,16 @@ PyDbLinetypeTableIterator.cpp:1-17:②
 PyDbRegAppTableIterator.cpp:1-17:②
 PyDbTextStyleTableIterator.cpp:1-17:②
 PyDbBlockTableIterator.cpp:1-17:②
+PyDbBlockTable.cpp:1-15:②
+PyDbDictionary.cpp:1-40:②
+PyDbDimStyleTable.cpp:1-15:②
+PyDbLayerTable.cpp:1-15:②
+PyDbLinetypeTable.cpp:1-15:②
+PyDbRegAppTable.cpp:1-15:②
+PyDbSymbolTable.cpp:1-40:②
+PyDbTextStyleTable.cpp:1-15:②
+PyDbUCSTable.cpp:1-15:②
+PyDbViewportTable.cpp:1-15:②
+PyDbViewTable.cpp:1-15:②
+PyDbSurface.cpp:8-14:②
+PyDbObjectIterator.cpp:1-10:clean

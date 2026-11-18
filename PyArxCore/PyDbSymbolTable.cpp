@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyUtils.h"
 #include "PyDbSymbolTable.h"
@@ -7,10 +7,12 @@
 PyWrapper_Cpp(DbSymbolTable);
 
 bool PyDbSymbolTable::has(const AcString& name) const {
+	if (!impObj()) return false;
 	return impObj()->has(name.kwszPtr());
 }
 
 PyDbSymbolTableRecord PyDbSymbolTable::getAt(const AcString& name, int mode) const {
+	if (!impObj()) return PyDbSymbolTableRecord(nullptr);
 	AcDbObjectId id;
 	if (impObj()->getIdAt(name.kwszPtr(), id) == Acad::eOk) {
 		Acad::ErrorStatus cacheEs = Acad::eOk;

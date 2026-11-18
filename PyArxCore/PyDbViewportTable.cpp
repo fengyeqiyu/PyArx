@@ -1,12 +1,14 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbViewportTable.h"
 
 PyWrapper_Cpp(DbViewportTable);
 bool PyDbViewportTable::has(const AcString& name) const {
+	if (!impObj()) return false;
 	return impObj()->has(name.kwszPtr());
 }
 PyDbSymbolTableRecord PyDbViewportTable::getAt(const AcString& name) const {
+	if (!impObj()) return PyDbSymbolTableRecord(nullptr);
 	AcDbViewportTable::RecordType* rec = nullptr;
 	if(!PyWarnIfError(impObj()->getAt(name.kwszPtr(), rec, AcDb::kForRead), L"getAt")) return PyDbSymbolTableRecord(nullptr);
 	return PyDbSymbolTableRecord(rec);

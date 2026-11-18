@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyUtils.h"
 #include "PyDbDictionary.h"
@@ -11,6 +11,7 @@ bool  PyDbDictionary::add(const AcString& name, PyDbObject& obj) {
 }
 
 PyDbObject PyDbDictionary::getAt(const AcString& name) {
+	if (!impObj()) return PyDbObject(nullptr);
 	AcDbObject* p = nullptr;
 	if(!PyWarnIfError(impObj()->getAt(name.kwszPtr(), p, AcDb::kForRead), L"Dictionary.getAt")) return PyDbObject(nullptr);
 	return PyDbObject(p);
@@ -25,10 +26,12 @@ int PyDbDictionary::numEntries() const {
 }
 
 bool PyDbDictionary::has(const AcString& name) const {
+	if (!impObj()) return false;
 	return impObj()->has(name.kwszPtr());
 }
 
 uint64_t PyDbDictionary::getIdAt(const AcString& name) const {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId id;
 	if (!PyWarnIfError(impObj()->getAt(name.kwszPtr(), id), L"Dictionary.getIdAt")) return 0ULL;
 	return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());

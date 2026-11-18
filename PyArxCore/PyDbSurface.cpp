@@ -1,10 +1,11 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbSurface.h"
 
 PyWrapper_Cpp(DbSurface);
 
 std::optional<PyDbSurface> PyDbSurface::createFrom(PyDbEntity& srcEntity) {
+	if (!srcEntity.impObj()) return std::nullopt;
 	AcDbSurface* pNewSurface = nullptr;
 	if (!PyWarnIfError(AcDbSurface::createFrom(srcEntity.impObj(), pNewSurface),
 		L"AcDbSurface::createFrom") || !pNewSurface)

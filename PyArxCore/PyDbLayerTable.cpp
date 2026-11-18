@@ -1,12 +1,14 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbLayerTable.h"
 
 PyWrapper_Cpp(DbLayerTable);
 bool PyDbLayerTable::has(const AcString& name) const {
+	if (!impObj()) return false;
 	return impObj()->has(name.kwszPtr());
 }
 PyDbLayerTableRecord PyDbLayerTable::getAt(const AcString& name) const {
+	if (!impObj()) return PyDbLayerTableRecord(nullptr);
 	AcDbLayerTable::RecordType* rec = nullptr;
 	if(!PyWarnIfError(impObj()->getAt(name.kwszPtr(), rec, AcDb::kForRead), L"getAt")) return PyDbLayerTableRecord(nullptr);
 	return PyDbLayerTableRecord(rec);

@@ -1,12 +1,14 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbRegAppTable.h"
 
 PyWrapper_Cpp(DbRegAppTable);
 bool PyDbRegAppTable::has(const AcString& name) const {
+	if (!impObj()) return false;
 	return impObj()->has(name.kwszPtr());
 }
 PyDbSymbolTableRecord PyDbRegAppTable::getAt(const AcString& name) const {
+	if (!impObj()) return PyDbSymbolTableRecord(nullptr);
 	AcDbRegAppTable::RecordType* rec = nullptr;
 	if(!PyWarnIfError(impObj()->getAt(name.kwszPtr(), rec, AcDb::kForRead), L"getAt")) return PyDbSymbolTableRecord(nullptr);
 	return PyDbSymbolTableRecord(rec);
