@@ -209,3 +209,17 @@ PyDbRadialDimension.cpp:19:②
 PyDbRadialDimension.cpp:20:②
 PyDbRadialDimension.cpp:21:②
 PyDbRadialDimension.cpp:22:②
+PyDbLine.cpp:7:②
+PyDbLine.cpp:8:②
+PyDbLine.cpp:9:②
+PyDbLine.cpp:10:②
+PyDbLine.cpp:11:②
+PyDbLine.cpp:17:②
+PyDbLine.cpp:18:②
+PyDbLine.cpp:20:②
+PyDbLine.cpp:21:②
+PyDbLine.cpp:22:②
+PyDbLine.cpp:23:②
+PyDbLine.cpp:29:②
+PyDbWipeout.cpp:1:clean-1/7/8
+PyDbLayout.cpp:1:clean-1/7/8

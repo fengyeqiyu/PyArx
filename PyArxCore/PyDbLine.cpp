@@ -1,32 +1,32 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyDbLine.h"
 #include "PyErrorStatusException.h"
 
 PyWrapper_Cpp(DbLine)
 
-bool PyDbLine::isClosed() const { return impObj()->isClosed() == Adesk::kTrue; }
-AcGePoint3d PyDbLine::startPoint() const { return impObj()->startPoint(); }
-bool PyDbLine::setStartPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setStartPoint(p), L"AcDbLine::setStartPoint"); }
-AcGePoint3d PyDbLine::endPoint() const { return impObj()->endPoint(); }
-bool PyDbLine::setEndPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setEndPoint(p), L"AcDbLine::setEndPoint"); }
+bool PyDbLine::isClosed() const { if (!impObj()) return false; return impObj()->isClosed() == Adesk::kTrue; }
+AcGePoint3d PyDbLine::startPoint() const { if (!impObj()) return AcGePoint3d(); return impObj()->startPoint(); }
+bool PyDbLine::setStartPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setStartPoint(p), L"AcDbLine::setStartPoint"); }
+AcGePoint3d PyDbLine::endPoint() const { if (!impObj()) return AcGePoint3d(); return impObj()->endPoint(); }
+bool PyDbLine::setEndPoint(const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setEndPoint(p), L"AcDbLine::setEndPoint"); }
 AcString PyDbLine::toString() const {
 	AcGePoint3d start = startPoint(); AcGePoint3d end = endPoint();
 	return AcString(std::format("AcDbLine[start=({:.2f},{:.2f},{:.2f}), end=({:.2f},{:.2f},{:.2f})]",
 		start.x, start.y, start.z, end.x, end.y, end.z).c_str(), AcString::Utf8);
 }
-Adesk::UInt16 PyDbLine::colorIndex() const { return impObj()->colorIndex(); }
-void PyDbLine::setColorIndex(Adesk::UInt16 c) { impObj()->setColorIndex(c); }
+Adesk::UInt16 PyDbLine::colorIndex() const { if (!impObj()) return 0; return impObj()->colorIndex(); }
+void PyDbLine::setColorIndex(Adesk::UInt16 c) { if (!impObj()) return; impObj()->setColorIndex(c); }
 
-AcGeVector3d PyDbLine::normal() const { return impObj()->normal(); }
-bool PyDbLine::setNormal(const AcGeVector3d& n) { return PyWarnIfError(impObj()->setNormal(n), L"AcDbLine::setNormal"); }
-double PyDbLine::thickness() const { return impObj()->thickness(); }
-bool PyDbLine::setThickness(double t) { return PyWarnIfError(impObj()->setThickness(t), L"AcDbLine::setThickness"); }
+AcGeVector3d PyDbLine::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
+bool PyDbLine::setNormal(const AcGeVector3d& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDbLine::setNormal"); }
+double PyDbLine::thickness() const { if (!impObj()) return 0.0; return impObj()->thickness(); }
+bool PyDbLine::setThickness(double t) { if (!impObj()) return false; return PyWarnIfError(impObj()->setThickness(t), L"AcDbLine::setThickness"); }
 
 // 按指定平面法向偏移直线，返回新建曲线列表（未入库，需 appendEntity 入库，否则内存泄漏）
 std::vector<PyDbEntity> PyDbLine::getOffsetCurvesGivenPlaneNormal(const AcGeVector3d& nrm, double offsetDist) const {
 	std::vector<PyDbEntity> out;
 	AcDbVoidPtrArray arr;
-	if (impObj()->getOffsetCurvesGivenPlaneNormal(nrm, offsetDist, arr) != Acad::eOk) return out;
+	if (!impObj() || impObj()->getOffsetCurvesGivenPlaneNormal(nrm, offsetDist, arr) != Acad::eOk) return out;
 	for (int i = 0; i < arr.length(); ++i)
 		out.emplace_back(static_cast<AcDbEntity*>(arr[i]));
 	return out;
