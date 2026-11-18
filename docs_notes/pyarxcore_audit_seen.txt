@@ -415,3 +415,13 @@ PyDbIdTypes.cpp:1:clean
 PyDbIndexUpdateDataIterator.cpp:1:clean
 PyDbLayerIndexIterator.cpp:1:clean
 PyDbLongTransWorkSetIterator.cpp:1:clean
+PyDbBlockTableRecordIterator.cpp:1:clean
+PyDbFilteredBlockIterator.cpp:1:clean
+PyDbNurbSurface.cpp:1:clean
+PyApDocument.cpp:1:clean
+PyDbBinder.cpp:1:clean
+PyAdsPromptStatus.cpp:1:clean-6
+PyAdsJigEnums.cpp:1:clean
+PyAdsTableUpdateEnums.cpp:1:clean
+PyArxExtraEnums.cpp:1:clean
+PyAdsDbCoreEnums.cpp:1:clean
