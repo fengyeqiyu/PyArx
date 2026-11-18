@@ -52,3 +52,5 @@
 
 2026-11-18 12:29 | PyDbHatch.cpp:1-209 | ② | 45 处 getter/setter 补 impObj() 判空（43 处批量 + float shadeTintValue/gradientShift 手改），行为不变；115-194 的 16 处 PyRx self.impObj() lambda 只报不改
 2026-11-18 12:29 | PyDbMLeaderStyle.cpp:1-329 | ② | 63 处补 impObj() 判空（18 处单行 + 43 处多行函数体 + PyColor textColor/blockColor 与 postMLeaderStyleToDb 手改），行为不变
+
+2026-11-18 13:18 | PyDb2dPolyline.cpp:1-118 | ② | 34 处 getter/setter 补 impObj() 判空（28 单行 + 5 多行体 + numVerts 手改），uint64_t 返回改为 0ULL

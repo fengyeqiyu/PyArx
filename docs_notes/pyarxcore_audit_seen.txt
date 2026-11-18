@@ -99,3 +99,9 @@ PyAdsFindTextOptions.cpp:1-30:clean
 PyAdsLineEnums.cpp:1-40:clean
 PyDbHatch.cpp:1-209:②
 PyDbMLeaderStyle.cpp:1-329:②
+PyDbDataColumn.cpp:1-8:clean
+PyDbDataLink.cpp:1-8:clean
+PyDbAuditInfo.cpp:1-8:clean
+PyDbBackground.cpp:1-8:clean
+PyDbDwgFiler.cpp:1-8:clean
+PyDb2dPolyline.cpp:1-118:②

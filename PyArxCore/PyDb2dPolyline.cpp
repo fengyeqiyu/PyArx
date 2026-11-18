@@ -1,61 +1,66 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDb2dPolyline.h"
 #include "PyDb2dVertex.h"
 
 PyWrapper_Cpp(Db2dPolyline)
 AcString PyDb2dPolyline::toString() const { return AcString(std::format("AcDb2dPolyline[wrapper]").c_str(), AcString::Utf8); }
-bool PyDb2dPolyline::isClosed() const { return impObj()->isClosed() == Adesk::kTrue; }
+bool PyDb2dPolyline::isClosed() const { if (!impObj()) return false; return impObj()->isClosed() == Adesk::kTrue; }
 
-bool  PyDb2dPolyline::setClosed(bool c) { return PyWarnIfError(impObj()->setClosed(c ? Adesk::kTrue : Adesk::kFalse), L"AcDb2dPolyline::setClosed"); }
+bool PyDb2dPolyline::setClosed(bool c)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setClosed(c ? Adesk::kTrue : Adesk::kFalse), L"AcDb2dPolyline::setClosed"); }
 
-double PyDb2dPolyline::elevation() const { return impObj()->elevation(); }
+double PyDb2dPolyline::elevation() const { if (!impObj()) return 0.0; return impObj()->elevation(); }
 
-bool  PyDb2dPolyline::setElevation(double e) { return PyWarnIfError(impObj()->setElevation(e), L"AcDb2dPolyline::setElevation"); }
+bool PyDb2dPolyline::setElevation(double e)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setElevation(e), L"AcDb2dPolyline::setElevation"); }
 
-unsigned int PyDb2dPolyline::numVerts() const { AcDbObjectIterator* it = impObj()->vertexIterator(); unsigned int n = 0; if (it) { for (; !it->done(); it->step()) ++n; delete it; } return n; }
+unsigned int PyDb2dPolyline::numVerts() const { if (!impObj()) return 0; AcDbObjectIterator* it = impObj()->vertexIterator(); unsigned int n = 0; if (it) { for (; !it->done(); it->step()) ++n; delete it; } return n; }
 
-int PyDb2dPolyline::polyType() const { return static_cast<int>(impObj()->polyType()); }
-bool  PyDb2dPolyline::setPolyType(int type) { return PyWarnIfError(impObj()->setPolyType(static_cast<AcDb::Poly2dType>(type)), L"AcDb2dPolyline::setPolyType"); }
-bool  PyDb2dPolyline::convertToPolyType(int newVal) { return PyWarnIfError(impObj()->convertToPolyType(static_cast<AcDb::Poly2dType>(newVal)), L"AcDb2dPolyline::convertToPolyType"); }
-bool  PyDb2dPolyline::makeClosed() { return PyWarnIfError(impObj()->makeClosed(), L"AcDb2dPolyline::makeClosed"); }
-bool  PyDb2dPolyline::makeOpen() { return PyWarnIfError(impObj()->makeOpen(), L"AcDb2dPolyline::makeOpen"); }
-double PyDb2dPolyline::constantWidth() const { double v = 0.0; if(!PyWarnIfError(impObj()->constantWidth(v), L"AcDb2dPolyline::constantWidth")) return 0.0; return v; }
-bool  PyDb2dPolyline::setConstantWidth(double w) { return PyWarnIfError(impObj()->setConstantWidth(w), L"AcDb2dPolyline::setConstantWidth"); }
-double PyDb2dPolyline::length() const { double v = 0.0; if(!PyWarnIfError(impObj()->length(v), L"AcDb2dPolyline::length")) return 0.0; return v; }
-double PyDb2dPolyline::defaultStartWidth() const { return impObj()->defaultStartWidth(); }
-bool  PyDb2dPolyline::setDefaultStartWidth(double w) { return PyWarnIfError(impObj()->setDefaultStartWidth(w), L"AcDb2dPolyline::setDefaultStartWidth"); }
-double PyDb2dPolyline::defaultEndWidth() const { return impObj()->defaultEndWidth(); }
-bool  PyDb2dPolyline::setDefaultEndWidth(double w) { return PyWarnIfError(impObj()->setDefaultEndWidth(w), L"AcDb2dPolyline::setDefaultEndWidth"); }
-double PyDb2dPolyline::thickness() const { return impObj()->thickness(); }
-bool  PyDb2dPolyline::setThickness(double t) { return PyWarnIfError(impObj()->setThickness(t), L"AcDb2dPolyline::setThickness"); }
-AcGeVector3d PyDb2dPolyline::normal() const { return impObj()->normal(); }
-bool  PyDb2dPolyline::setNormal(const AcGeVector3d& n) { return PyWarnIfError(impObj()->setNormal(n), L"AcDb2dPolyline::setNormal"); }
-bool PyDb2dPolyline::isLinetypeGenerationOn() const { return impObj()->isLinetypeGenerationOn() != Adesk::kFalse; }
-bool  PyDb2dPolyline::setLinetypeGenerationOn() { return PyWarnIfError(impObj()->setLinetypeGenerationOn(), L"AcDb2dPolyline::setLinetypeGenerationOn"); }
-bool  PyDb2dPolyline::setLinetypeGenerationOff() { return PyWarnIfError(impObj()->setLinetypeGenerationOff(), L"AcDb2dPolyline::setLinetypeGenerationOff"); }
-bool  PyDb2dPolyline::setLinetypeGenerationOn(bool on) { return PyWarnIfError(impObj()->setLinetypeGenerationOn(on ? Adesk::kTrue : Adesk::kFalse), L"AcDb2dPolyline::setLinetypeGenerationOn"); }
-bool  PyDb2dPolyline::straighten() { return PyWarnIfError(impObj()->straighten(), L"AcDb2dPolyline::straighten"); }
-bool  PyDb2dPolyline::splineFit() { return PyWarnIfError(impObj()->splineFit(), L"AcDb2dPolyline::splineFit"); }
-bool  PyDb2dPolyline::splineFit(int splineType, int splineSegs) { return PyWarnIfError(impObj()->splineFit(static_cast<AcDb::Poly2dType>(splineType), static_cast<Adesk::Int16>(splineSegs)), L"AcDb2dPolyline::splineFit"); }
-bool  PyDb2dPolyline::curveFit() { return PyWarnIfError(impObj()->curveFit(), L"AcDb2dPolyline::curveFit"); }
+int PyDb2dPolyline::polyType() const { if (!impObj()) return 0; return static_cast<int>(impObj()->polyType()); }
+bool PyDb2dPolyline::setPolyType(int type)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setPolyType(static_cast<AcDb::Poly2dType>(type)), L"AcDb2dPolyline::setPolyType"); }
+bool PyDb2dPolyline::convertToPolyType(int newVal)  { if (!impObj()) return false; return PyWarnIfError(impObj()->convertToPolyType(static_cast<AcDb::Poly2dType>(newVal)), L"AcDb2dPolyline::convertToPolyType"); }
+bool PyDb2dPolyline::makeClosed()  { if (!impObj()) return false; return PyWarnIfError(impObj()->makeClosed(), L"AcDb2dPolyline::makeClosed"); }
+bool PyDb2dPolyline::makeOpen()  { if (!impObj()) return false; return PyWarnIfError(impObj()->makeOpen(), L"AcDb2dPolyline::makeOpen"); }
+double PyDb2dPolyline::constantWidth() const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->constantWidth(v), L"AcDb2dPolyline::constantWidth")) return 0.0; return v; }
+bool PyDb2dPolyline::setConstantWidth(double w)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setConstantWidth(w), L"AcDb2dPolyline::setConstantWidth"); }
+double PyDb2dPolyline::length() const { if (!impObj()) return 0.0; double v = 0.0; if(!PyWarnIfError(impObj()->length(v), L"AcDb2dPolyline::length")) return 0.0; return v; }
+double PyDb2dPolyline::defaultStartWidth() const { if (!impObj()) return 0.0; return impObj()->defaultStartWidth(); }
+bool PyDb2dPolyline::setDefaultStartWidth(double w)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setDefaultStartWidth(w), L"AcDb2dPolyline::setDefaultStartWidth"); }
+double PyDb2dPolyline::defaultEndWidth() const { if (!impObj()) return 0.0; return impObj()->defaultEndWidth(); }
+bool PyDb2dPolyline::setDefaultEndWidth(double w)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setDefaultEndWidth(w), L"AcDb2dPolyline::setDefaultEndWidth"); }
+double PyDb2dPolyline::thickness() const { if (!impObj()) return 0.0; return impObj()->thickness(); }
+bool PyDb2dPolyline::setThickness(double t)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setThickness(t), L"AcDb2dPolyline::setThickness"); }
+AcGeVector3d PyDb2dPolyline::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
+bool PyDb2dPolyline::setNormal(const AcGeVector3d& n)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(n), L"AcDb2dPolyline::setNormal"); }
+bool PyDb2dPolyline::isLinetypeGenerationOn() const { if (!impObj()) return false; return impObj()->isLinetypeGenerationOn() != Adesk::kFalse; }
+bool PyDb2dPolyline::setLinetypeGenerationOn()  { if (!impObj()) return false; return PyWarnIfError(impObj()->setLinetypeGenerationOn(), L"AcDb2dPolyline::setLinetypeGenerationOn"); }
+bool PyDb2dPolyline::setLinetypeGenerationOff()  { if (!impObj()) return false; return PyWarnIfError(impObj()->setLinetypeGenerationOff(), L"AcDb2dPolyline::setLinetypeGenerationOff"); }
+bool PyDb2dPolyline::setLinetypeGenerationOn(bool on)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setLinetypeGenerationOn(on ? Adesk::kTrue : Adesk::kFalse), L"AcDb2dPolyline::setLinetypeGenerationOn"); }
+bool PyDb2dPolyline::straighten()  { if (!impObj()) return false; return PyWarnIfError(impObj()->straighten(), L"AcDb2dPolyline::straighten"); }
+bool PyDb2dPolyline::splineFit()  { if (!impObj()) return false; return PyWarnIfError(impObj()->splineFit(), L"AcDb2dPolyline::splineFit"); }
+bool PyDb2dPolyline::splineFit(int splineType, int splineSegs)  { if (!impObj()) return false; return PyWarnIfError(impObj()->splineFit(static_cast<AcDb::Poly2dType>(splineType), static_cast<Adesk::Int16>(splineSegs)), L"AcDb2dPolyline::splineFit"); }
+bool PyDb2dPolyline::curveFit()  { if (!impObj()) return false; return PyWarnIfError(impObj()->curveFit(), L"AcDb2dPolyline::curveFit"); }
 bool  PyDb2dPolyline::makeClosedIfStartAndEndVertexCoincide(double distTol) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->makeClosedIfStartAndEndVertexCoincide(distTol), L"AcDb2dPolyline::makeClosedIfStartAndEndVertexCoincide");
 }
 
 // 追加顶点：SDK 接管顶点对象指针，调用方包装不可再析构删除该顶点
 bool PyDb2dPolyline::appendVertex(PyDb2dVertex& vertex) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->appendVertex(vertex.impObj()), L"AcDb2dPolyline::appendVertex");
 }
 uint64_t PyDb2dPolyline::appendVertexId(PyDb2dVertex& vertex) {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId outId;
 	if (!PyWarnIfError(impObj()->appendVertex(outId, vertex.impObj()), L"AcDb2dPolyline::appendVertexId")) return 0ULL;
 	return outId.isNull() ? 0ULL : static_cast<uint64_t>(outId.asOldId());
 }
 bool PyDb2dPolyline::insertVertexAt(const PyDb2dVertex& indexVertex, PyDb2dVertex& newVertex) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->insertVertexAt(indexVertex.impObj(), newVertex.impObj()), L"AcDb2dPolyline::insertVertexAt");
 }
 uint64_t PyDb2dPolyline::insertVertexAtById(uint64_t indexVertexId, PyDb2dVertex& newVertex) {
+	if (!impObj()) return 0ULL;
 	AcDbObjectId indexId;
 	indexId.setFromOldId(static_cast<Adesk::IntDbId>(indexVertexId));
 	AcDbObjectId newId;
