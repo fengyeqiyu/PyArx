@@ -130,3 +130,14 @@ PyDbViewportTable.cpp:1-15:②
 PyDbViewTable.cpp:1-15:②
 PyDbSurface.cpp:8-14:②
 PyDbObjectIterator.cpp:1-10:clean
+PyDbDynBlockTableRecord.cpp:21:②
+PyDbDynBlockTableRecord.cpp:25:②
+PyDbDynBlockTableRecord.cpp:31:②
+PyDbDynBlockTableRecord.cpp:44:②
+PyDbDynBlockTableRecord.cpp:8:②
+PyDbDimStyleTableRecord.cpp:12:②
+PyDbVertex.cpp:8:clean
+PyDbRegAppTableRecord.cpp:8:clean
+PyDbPdfDefinition.cpp:8:clean
+PyDbDwfReference.cpp:8:clean
+PyDbPlaceHolder.cpp:11:clean

@@ -78,3 +78,7 @@
 2026-11-18 16:19 | PyDbViewportTable.cpp:1-15 | ② | has/getAt 补 impObj 判空
 2026-11-18 16:19 | PyDbViewTable.cpp:1-15 | ② | has/getAt 补 impObj 判空
 2026-11-18 16:19 | PyDbSurface.cpp:8-14 | ② | createFrom 补 srcEntity.impObj() 判空，空返 std::nullopt
+2026-11-18 17:21 | PyDbDynBlockTableRecord.cpp:21 | ② | isDynamicBlock lambda 补 if(!impObj()) return false
+2026-11-18 17:21 | PyDbDynBlockTableRecord.cpp:25 | ② | blockTableRecordId lambda 补判空返回 0ULL
+2026-11-18 17:21 | PyDbDynBlockTableRecord.cpp:31 | ② | getAnonymousBlockIds lambda 补判空返回空列表
+2026-11-18 17:21 | PyDbDynBlockTableRecord.cpp:44 | ② | updateAnonymousBlocks lambda 补判空返回 false

@@ -18,15 +18,18 @@ void bind_PyDbDynBlockTableRecord(pym& m) {
 		.def(py::init<uint64_t>(), py::arg("btr_old_id"))
 		// isDynamicBlock
 		.def("isDynamicBlock", [](const PyDbDynBlockTableRecord& d) -> bool {
+			if (!d.impObj()) return false;
 			return d.impObj()->isDynamicBlock();
 		})
 		// blockTableRecordId -> uint64_t
 		.def("blockTableRecordId", [](const PyDbDynBlockTableRecord& d) -> uint64_t {
+			if (!d.impObj()) return 0ULL;
 			auto id = d.impObj()->blockTableRecordId();
 			return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 		})
 		// getAnonymousBlockIds -> list[uint64]（失败返回空列表）
 		.def("getAnonymousBlockIds", [](const PyDbDynBlockTableRecord& d) -> std::vector<uint64_t> {
+			if (!d.impObj()) return {};
 			AcDbObjectIdArray arr;
 			if (!PyWarnIfError(d.impObj()->getAnonymousBlockIds(arr), L"AcDbDynBlockTableRecord::getAnonymousBlockIds")) {
 				return {};
@@ -41,6 +44,7 @@ void bind_PyDbDynBlockTableRecord(pym& m) {
 		})
 		// updateAnonymousBlocks -> bool
 		.def("updateAnonymousBlocks", [](const PyDbDynBlockTableRecord& d) -> bool {
+			if (!d.impObj()) return false;
 			return PyWarnIfError(d.impObj()->updateAnonymousBlocks(), L"AcDbDynBlockTableRecord::updateAnonymousBlocks");
 		})
 		;
