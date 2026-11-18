@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbDwfDefinition.h"
 
@@ -10,6 +10,7 @@ void bind_PyDbDwfDefinition(pym& m) {
 		PyWrapper_BIND(DbDwfDefinition)
 		// ---- isDWFx ----
 		.def("isDWFx", [](PyDbDwfDefinition& s) -> bool {
+			if (!s.impObj()) return false;
 			return s.impObj()->isDWFx() != Adesk::kFalse;
 		})
 		;

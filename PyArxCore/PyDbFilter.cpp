@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbFilter.h"
 #include "PyRxClass.h"
@@ -13,6 +13,7 @@ void bind_PyDbFilter(pym& m) {
 		PyWrapper_BIND(DbFilter)
 		// ---- indexClass() -> PyRxClass（描述符，非所有权） ----
 		.def("indexClass", [](const PyDbFilter& s) {
+			if (!s.impObj()) return PyRxClass(nullptr, false);
 			AcRxClass* c = s.impObj()->indexClass();
 			return PyRxClass(c, false);
 		}, "返回本 Filter 对应的 Index 的 AcRxClass 描述符")

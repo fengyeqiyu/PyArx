@@ -109,3 +109,11 @@ PyDb2LineAngularDimension.cpp:1-50:②
 PyDb3PointAngularDimension.cpp:1-40:②
 PyDb3dPolyline.cpp:1-69:②
 PyDb3dSolid.cpp:1-70:②
+PyDbDwfDefinition.cpp:1-16:②
+PyDbFilter.cpp:1-20:②
+PyDbDimStyleTableIterator.cpp:1-17:②
+PyDbLayerTableIterator.cpp:1-17:②
+PyDbLinetypeTableIterator.cpp:1-17:②
+PyDbRegAppTableIterator.cpp:1-17:②
+PyDbTextStyleTableIterator.cpp:1-17:②
+PyDbBlockTableIterator.cpp:1-17:②

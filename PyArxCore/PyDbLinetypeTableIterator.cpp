@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbLinetypeTableIterator.h"
 #include "PyDbLinetypeTable.h"
@@ -6,6 +6,7 @@
 
 PyDbLinetypeTableIterator::PyDbLinetypeTableIterator(PyDbLinetypeTable& owner, bool atBeginning, bool skipDeleted)
 	: PyDbSymbolTableIterator(nullptr) {
+	if (!owner.impObj()) return;   // 基类构造已置 m_pObj=nullptr
 	AcDbLinetypeTableIterator* p = nullptr;
 	if (!PyWarnIfError(owner.impObj()->newIterator(p, atBeginning, skipDeleted), L"AcDbLinetypeTable::newIterator"))
 		p = nullptr;

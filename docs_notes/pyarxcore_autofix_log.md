@@ -58,3 +58,11 @@
 2026-11-18 14:20 | PyDb3PointAngularDimension.cpp:1-40 | ② | 10 处 getter/setter 补 impObj() 判空
 2026-11-18 14:20 | PyDb3dPolyline.cpp:1-69 | ② | 15 处补判空（10 单行 + 4 多行体 + numVerts 手改），uint64_t 返回 0ULL
 2026-11-18 14:20 | PyDb3dSolid.cpp:1-70 | ② | 21 处补判空（16 单行 + 3 多行体 + numChanges 手改 + extrude lambda 内 self.impObj()
+2026-11-18 15:19 | PyDbDwfDefinition.cpp:1-16 | ② | isDWFx lambda 补 s.impObj() 判空，空返 false
+2026-11-18 15:19 | PyDbFilter.cpp:1-20 | ② | indexClass lambda 补 s.impObj() 判空，空返 PyRxClass(nullptr,false)
+2026-11-18 15:19 | PyDbDimStyleTableIterator.cpp:1-17 | ② | 构造函数补 owner.impObj() 判空，空则提前返回
+2026-11-18 15:19 | PyDbLayerTableIterator.cpp:1-17 | ② | 构造函数补 owner.impObj() 判空，空则提前返回
+2026-11-18 15:19 | PyDbLinetypeTableIterator.cpp:1-17 | ② | 构造函数补 owner.impObj() 判空，空则提前返回
+2026-11-18 15:19 | PyDbRegAppTableIterator.cpp:1-17 | ② | 构造函数补 owner.impObj() 判空，空则提前返回
+2026-11-18 15:19 | PyDbTextStyleTableIterator.cpp:1-17 | ② | 构造函数补 owner.impObj() 判空，空则提前返回
+2026-11-18 15:19 | PyDbBlockTableIterator.cpp:1-17 | ② | 构造函数补 owner.impObj() 判空，空则提前返回

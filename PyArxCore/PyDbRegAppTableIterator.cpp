@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbRegAppTableIterator.h"
 #include "PyDbRegAppTable.h"
@@ -6,6 +6,7 @@
 
 PyDbRegAppTableIterator::PyDbRegAppTableIterator(PyDbRegAppTable& owner, bool atBeginning, bool skipDeleted)
 	: PyDbSymbolTableIterator(nullptr) {
+	if (!owner.impObj()) return;   // 基类构造已置 m_pObj=nullptr
 	AcDbRegAppTableIterator* p = nullptr;
 	if (!PyWarnIfError(owner.impObj()->newIterator(p, atBeginning, skipDeleted), L"AcDbRegAppTable::newIterator"))
 		p = nullptr;

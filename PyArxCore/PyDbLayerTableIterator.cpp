@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbLayerTableIterator.h"
 #include "PyDbLayerTable.h"
@@ -6,6 +6,7 @@
 
 PyDbLayerTableIterator::PyDbLayerTableIterator(PyDbLayerTable& owner, bool atBeginning, bool skipDeleted)
 	: PyDbSymbolTableIterator(nullptr) {
+	if (!owner.impObj()) return;   // 基类构造已置 m_pObj=nullptr
 	AcDbLayerTableIterator* p = nullptr;
 	if (!PyWarnIfError(owner.impObj()->newIterator(p, atBeginning, skipDeleted), L"AcDbLayerTable::newIterator"))
 		p = nullptr;

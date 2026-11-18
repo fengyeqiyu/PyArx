@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbTextStyleTableIterator.h"
 #include "PyDbTextStyleTable.h"
@@ -6,6 +6,7 @@
 
 PyDbTextStyleTableIterator::PyDbTextStyleTableIterator(PyDbTextStyleTable& owner, bool atBeginning, bool skipDeleted)
 	: PyDbSymbolTableIterator(nullptr) {
+	if (!owner.impObj()) return;   // 基类构造已置 m_pObj=nullptr
 	AcDbTextStyleTableIterator* p = nullptr;
 	if (!PyWarnIfError(owner.impObj()->newIterator(p, atBeginning, skipDeleted), L"AcDbTextStyleTable::newIterator"))
 		p = nullptr;
