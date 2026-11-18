@@ -15,7 +15,6 @@
 #include "PyDbVisibilityOverrule.h"
 #include "PyDbDimensionStyleOverrule.h"
 #include "PyDbAuditInfo.h"
-#include "PyDbDictionaryIterator.h"
 #include "PyDbBackground.h"
 #include "PyDbDataTable.h"
 #include "PyDbDataCell.h"
@@ -138,27 +137,13 @@ void bind_PyDbBlendOptions(pym& m);
 void bind_PyDbRevolveOptions(pym& m);
 void bind_PyDbLayerStateManager(pym& m);
 void bind_PyDbPlotSettingsValidator(pym& m);
-void bind_PyDbObjectIterator(pym& m);
-void bind_PyDbSymbolTableIterator(pym& m);
-void bind_PyDbAbstractViewTableIterator(pym& m);
-void bind_PyDbViewTableIterator(pym& m);
-void bind_PyDbViewportTableIterator(pym& m);
-void bind_PyDbUCSTableIterator(pym& m);
-void bind_PyDbBlockTableIterator(pym& m);
-void bind_PyDbLayerTableIterator(pym& m);
-void bind_PyDbTextStyleTableIterator(pym& m);
-void bind_PyDbLinetypeTableIterator(pym& m);
-void bind_PyDbRegAppTableIterator(pym& m);
-void bind_PyDbDimStyleTableIterator(pym& m);
 void bind_PyDbBlockTableRecordIterator(pym& m);
-void bind_PyDbBlockReferenceIdIterator(pym& m);
 void bind_PyDbFilteredBlockIterator(pym& m);
 void bind_PyDbCompositeFilteredBlockIterator(pym& m);
 void bind_PyDbLongTransWorkSetIterator(pym& m);
 void bind_PyDbTextEditorParagraphIterator(pym& m);
 void bind_PyDbIndexUpdateDataIterator(pym& m);
 void bind_PyDbBlockChangeIterator(pym& m);
-void bind_PyDbXrecordIterator(pym& m);
 void bind_PyDbLayerIndexIterator(pym& m);
 void bind_PyDbSpatialIndexIterator(pym& m);
 void bind_PyDbIdMappingIter(pym& m);
@@ -287,7 +272,6 @@ void pybind11_init_PyDb(::pybind11::module_& m) {
 	bind_PyDbVisibilityOverrule(m);
 	bind_PyDbDimensionStyleOverrule(m);
 	bind_PyDbAuditInfo(m);
-	bind_PyDbDictionaryIterator(m);
 	bind_PyDbBackground(m);
 	bind_PyDbDataTable(m);
 	bind_PyDbDataCell(m);
@@ -458,27 +442,13 @@ void pybind11_init_PyDb(::pybind11::module_& m) {
 	bind_PyDbRevolveOptions(m);
 	bind_PyDbLayerStateManager(m);
 	bind_PyDbPlotSettingsValidator(m);
-	bind_PyDbObjectIterator(m);
-	bind_PyDbSymbolTableIterator(m);
-	bind_PyDbAbstractViewTableIterator(m);
-	bind_PyDbViewTableIterator(m);
-	bind_PyDbViewportTableIterator(m);
-	bind_PyDbUCSTableIterator(m);
-	bind_PyDbBlockTableIterator(m);
-	bind_PyDbLayerTableIterator(m);
-	bind_PyDbTextStyleTableIterator(m);
-	bind_PyDbLinetypeTableIterator(m);
-	bind_PyDbRegAppTableIterator(m);
-	bind_PyDbDimStyleTableIterator(m);
 	bind_PyDbBlockTableRecordIterator(m);
-	bind_PyDbBlockReferenceIdIterator(m);
 	bind_PyDbFilteredBlockIterator(m);
 	bind_PyDbCompositeFilteredBlockIterator(m);
 	bind_PyDbLongTransWorkSetIterator(m);
 	bind_PyDbTextEditorParagraphIterator(m);
 	bind_PyDbIndexUpdateDataIterator(m);
 	bind_PyDbBlockChangeIterator(m);
-	bind_PyDbXrecordIterator(m);
 	bind_PyDbLayerIndexIterator(m);
 	bind_PyDbSpatialIndexIterator(m);
 	bind_PyDbIdMappingIter(m);
