@@ -170,3 +170,22 @@ PyDbSummaryInfo.cpp:1:clean-1/7/8
 PyDbLeader.cpp:1:clean-1/7/8
 PyDbDeepCloneFiler.cpp:1:clean-1/7/8
 PyDbMPolygon.cpp:1:clean-1/7/8
+PyDbLoftProfile.cpp:22:②
+PyDbLoftProfile.cpp:30:②
+PyDbLoftProfile.cpp:34:②
+PyDbLoftProfile.cpp:40:②
+PyDbLoftProfile.cpp:44:②
+PyDbLoftProfile.cpp:11:②-待报
+PyDbCircle.cpp:7:②
+PyDbCircle.cpp:9:②
+PyDbCircle.cpp:11:②
+PyDbCircle.cpp:13:②
+PyDbCircle.cpp:15:②
+PyDbCircle.cpp:17:②
+PyDbCircle.cpp:19:②
+PyDbCircle.cpp:20:②
+PyDbCircle.cpp:21:②
+PyDbCircle.cpp:22:②
+PyDbCircle.cpp:23:②
+PyDbCircle.cpp:24:②
+PyDbEvalVariant.cpp:19:clean-2（impObj 返回值引用）

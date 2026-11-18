@@ -19,6 +19,7 @@ void bind_PyDbLoftProfile(pym& m) {
 
 		// ---- copyFrom(const AcRxObject*) -> bool ----
 		.def("copyFrom", [](PyDbLoftProfile& s, const PyRxObject& src){
+			if (!s.impObj() || !src.impObj()) return false;
 			return PyWarnIfError(s.impObj()->copyFrom(src.impObj()), L"AcDbLoftProfile::copyFrom");
 		}, py::arg("src"))
 
@@ -26,20 +27,24 @@ void bind_PyDbLoftProfile(pym& m) {
 		// impObj() 返回基类 AcDb3dProfile*；continuity/setContinuity 是 AcDbLoftProfile
 		// 派生类新增的非虚方法（db3dProfile.h:387/396），必须向下转型访问。
 		.def("continuity", [](PyDbLoftProfile& s){
+			if (!s.impObj()) return 0;
 			auto p = static_cast<AcDbLoftProfile*>(s.impObj());
 			return static_cast<int>(p->continuity());
 		})
 		.def("setContinuity", [](PyDbLoftProfile& s, int v){
+			if (!s.impObj()) return false;
 			auto p = static_cast<AcDbLoftProfile*>(s.impObj());
 			p->setContinuity(static_cast<Adesk::Int16>(v)); return true;
 		}, py::arg("v"))
 
 		// ---- magnitude ----
 		.def("magnitude", [](PyDbLoftProfile& s){
+			if (!s.impObj()) return 0.0;
 			auto p = static_cast<AcDbLoftProfile*>(s.impObj());
 			return p->magnitude();
 		})
 		.def("setMagnitude", [](PyDbLoftProfile& s, double v){
+			if (!s.impObj()) return false;
 			auto p = static_cast<AcDbLoftProfile*>(s.impObj());
 			p->setMagnitude(v); return true;
 		}, py::arg("v"))
