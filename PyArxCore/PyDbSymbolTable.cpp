@@ -166,6 +166,60 @@ bool PyDbSymbolTable::add(PyDbSymbolTableRecord& rec) {
 	return true;
 }
 
+PyDbSymbolTableRecord PyDbSymbolTable::recordAt(int index, int mode) const {
+	if (!impObj()) return PyDbSymbolTableRecord(nullptr);
+	const int total = numRecords();
+	if (index < 0) index += total;
+	if (index < 0 || index >= total) throw py::index_error("SymbolTable 索引越界");
+	int i = 0;
+	AcString found;
+	AcDbSymbolTableIterator* pIter = nullptr;
+	if (!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return PyDbSymbolTableRecord(nullptr);
+	for (pIter->start(true, true); !pIter->done(); pIter->step(true, true), ++i) {
+		if (i != index) continue;
+		AcDbSymbolTableRecord* pRec = nullptr;
+		if (!PyWarnIfError(pIter->getRecord(pRec, AcDb::kForRead), L"SymbolTable.getRecord")) break;
+		if (pRec->getName(found) != Acad::eOk) { pRec->close(); break; }
+		pRec->close();
+		break;
+	}
+	delete pIter;
+	if (found.isEmpty()) throw py::index_error("SymbolTable 索引越界");
+	return getAt(found, mode);
+}
+
+AcString PyDbSymbolTable::keyAt(int index) const {
+	if (!impObj()) return AcString();
+	const int total = numRecords();
+	if (index < 0) index += total;
+	if (index < 0 || index >= total) throw py::index_error("SymbolTable 索引越界");
+	int i = 0;
+	AcString found;
+	AcDbSymbolTableIterator* pIter = nullptr;
+	if (!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return AcString();
+	for (pIter->start(true, true); !pIter->done(); pIter->step(true, true), ++i) {
+		if (i != index) continue;
+		AcDbSymbolTableRecord* pRec = nullptr;
+		if (!PyWarnIfError(pIter->getRecord(pRec, AcDb::kForRead), L"SymbolTable.getRecord")) break;
+		if (pRec->getName(found) != Acad::eOk) found = AcString();
+		pRec->close();
+		break;
+	}
+	delete pIter;
+	return found;
+}
+
+PyDbSymbolTableRecord PyDbSymbolTable::getOrCreate(const AcString& name, PyDbSymbolTableRecord& rec, int mode) {
+	if (!impObj()) return PyDbSymbolTableRecord(nullptr);
+	if (has(name)) return getAt(name, mode);
+	AcDbSymbolTableRecord* pRec = rec.impObj();
+	if (!pRec) throw std::runtime_error("SymbolTable.getOrCreate: 传入的新建记录为空（先用 XxxRecord.newRecord() 或构造新建）");
+	if (pRec->setName(name.kwszPtr()) != Acad::eOk) throw std::runtime_error("SymbolTable.getOrCreate: 新记录 setName 失败");
+	if (!PyWarnIfError(impObj()->add(pRec), L"SymbolTable.getOrCreate.add")) throw std::runtime_error("SymbolTable.getOrCreate: 追加记录失败");
+	// add 之后记录入库并被表接管：关闭写状态，避免后续按名读不到或写锁残留
+	if (!pRec->objectId().isNull() && pRec->isWriteEnabled()) pRec->close();
+	return getAt(name, mode);
+}
 void bind_PyDbSymbolTable(pym& m) {
 	py::class_<PyDbSymbolTable, PyDbObject>(m, "PyDbSymbolTable")
 		.def(py::init<AcDbSymbolTable*>(), py::arg("p"))
@@ -187,7 +241,11 @@ void bind_PyDbSymbolTable(pym& m) {
 			return self.records().attr("__iter__")();
 		}, "支持 for rec in table: 遍历")
 		.def("__len__", &PyDbSymbolTable::numRecords, "len(table)")
-		.def("__getitem__", [](PyDbSymbolTable& self, const AcString& name) {
-			return self.getAt(name);
-		}, py::arg("name"), "table['Layer0'] 按名称取记录");
+		.def("__getitem__", [](PyDbSymbolTable& self, py::object key) {
+			if (py::isinstance<py::int_>(key)) return self.recordAt(key.cast<int>(), 1);
+			return self.getAt(key.cast<AcString>(), 1);
+		}, py::arg("key"), "table[num] 按位置取（支持负索引）；table[name] 按名称取记录")
+		.def("recordAt", &PyDbSymbolTable::recordAt, py::arg("index"), py::arg("mode") = 1, "按位置取记录（负索引从末尾算，越界抛 IndexError）")
+		.def("keyAt", &PyDbSymbolTable::keyAt, py::arg("index"), "按位置取记录名")
+		.def("getOrCreate", &PyDbSymbolTable::getOrCreate, py::arg("name"), py::arg("rec"), py::arg("mode") = 1, "取或建：名字不存在时把传入的新记录追加进表");
 }

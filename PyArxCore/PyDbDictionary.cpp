@@ -98,6 +98,57 @@ py::dict PyDbDictionary::toDict() {
 	return out;
 }
 
+py::list PyDbDictionary::names() const {
+	py::list out;
+	if (!impObj()) return out;
+	AcDbDictionaryIterator* pIter = impObj()->newIterator();
+	if (!pIter) return out;
+	for (; !pIter->done(); pIter->next()) {
+		AcString s;
+		if (pIter->name(s)) out.append(py::cast(s));
+	}
+	delete pIter;
+	return out;
+}
+
+py::list PyDbDictionary::values(int mode) {
+	py::list out;
+	const int total = numEntries();
+	for (int i = 0; i < total; ++i) out.append(std::get<1>(entryAt(i, mode)));
+	return out;
+}
+
+py::list PyDbDictionary::items(int mode) {
+	py::list out;
+	const int total = numEntries();
+	for (int i = 0; i < total; ++i) {
+		auto e = entryAt(i, mode);
+		out.append(py::make_tuple(py::cast(std::get<0>(e)), std::get<1>(e)));
+	}
+	return out;
+}
+
+std::tuple<AcString, PyDbObject> PyDbDictionary::entryAt(int index, int mode) const {
+	if (!impObj()) return std::make_tuple(AcString(), PyDbObject(nullptr));
+	const int total = numEntries();
+	if (index < 0) index += total;
+	if (index < 0 || index >= total) throw py::index_error("Dictionary 索引越界");
+	int i = 0;
+	AcString found;
+	AcDbDictionaryIterator* pIter = impObj()->newIterator();
+	if (!pIter) throw py::index_error("Dictionary 无迭代器");
+	for (; !pIter->done(); pIter->next(), ++i) {
+		if (i != index) continue;
+		pIter->name(found);
+		break;
+	}
+	delete pIter;
+	if (found.isEmpty()) throw py::index_error("Dictionary 索引越界");
+	AcDbObject* p = nullptr;
+	if (!PyWarnIfError(impObj()->getAt(found.kwszPtr(), p, static_cast<AcDb::OpenMode>(mode)), L"Dictionary.entryAt"))
+		return std::make_tuple(found, PyDbObject(nullptr));
+	return std::make_tuple(found, PyDbObject(p));
+}
 void bind_PyDbDictionary(pym& m) {
 	py::class_<PyDbDictionary, PyDbObject>(m, "PyDbDictionary")
 		.def(py::init<AcDbDictionary*>(), py::arg("object"))
@@ -119,6 +170,21 @@ void bind_PyDbDictionary(pym& m) {
 		.def("isTreatElementsAsHard", &PyDbDictionary::isTreatElementsAsHard)
 		.def("setTreatElementsAsHard", &PyDbDictionary::setTreatElementsAsHard, py::arg("doIt"))
 		.def("toDict", &PyDbDictionary::toDict)
+		// ---- 容器协议：keys/values/items、for 遍历、len、in、索引 ----
+		.def("keys", &PyDbDictionary::names, "条目名列表")
+		.def("names", &PyDbDictionary::names, "条目名列表")
+		.def("values", &PyDbDictionary::values, py::arg("mode") = 1, "条目对象列表")
+		.def("items", &PyDbDictionary::items, py::arg("mode") = 1, "(条目名, 对象) 列表")
+		.def("entryAt", &PyDbDictionary::entryAt, py::arg("index"), py::arg("mode") = 1, "按位置取 (条目名, 对象)")
+		.def("__len__", &PyDbDictionary::numEntries, "len(dict)")
+		.def("__contains__", &PyDbDictionary::has, py::arg("name"), "'name' in dict")
+		.def("__iter__", [](PyDbDictionary& self) {
+			return self.names().attr("__iter__")();
+		}, "for name in dict：遍历条目名（取值用 dict[name]）")
+		.def("__getitem__", [](PyDbDictionary& self, py::object key) {
+			if (py::isinstance<py::int_>(key)) return std::get<1>(self.entryAt(key.cast<int>(), 1));
+			return self.getAt(key.cast<AcString>());
+		}, py::arg("key"), "dict[name] 取条目对象；dict[i] 按位置取第 i 个条目对象（支持负索引）")
 		// ---- DictionaryWithDefault 扩展（对象确为默认字典时生效）----
 		.def("defaultEntryId", [](PyDbDictionary& self) -> uint64_t {
 			auto* p = AcDbDictionaryWithDefault::cast(self.impObj());

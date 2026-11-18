@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "stdafx.h"
 #include "PyDbObject.h"
 #include "PyDbEntity.h"
@@ -25,6 +25,12 @@ public:
 	std::tuple<bool, uint64_t> setAt(const AcString& key, PyDbObject& obj);
 	AcDb::DuplicateRecordCloning mergeStyle() const;
 	void setMergeStyle(int style);
+	// ---- 容器协议：遍历 + 索引（迭代器折叠进字典本体）----
+	py::list names() const;
+	py::list values(int mode = 1);
+	py::list items(int mode = 1);
+	// 按位置取条目：(条目名, 对象)；负索引从末尾算，越界抛 IndexError
+	std::tuple<AcString, PyDbObject> entryAt(int index, int mode = 1) const;
 	bool isTreatElementsAsHard() const;
 	void setTreatElementsAsHard(bool doIt);
 	py::dict toDict();

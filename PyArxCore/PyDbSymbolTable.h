@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "stdafx.h"
 #include "PyDbObject.h"
 #include "PyDbSymbolTableRecord.h"
@@ -23,6 +23,12 @@ public:
 
 	// 按名称取记录 ObjectId（不打开记录）；失败返回 0
 	uint64_t getIdAt(const AcString& name) const;
+
+	// 索引访问（负索引从末尾算；越界抛 IndexError）
+	PyDbSymbolTableRecord recordAt(int index, int mode = 1) const;
+	AcString keyAt(int index) const;
+	// 取或建：名字已存在直接返回；不存在则把 rec 追加进表，再按 name 打开返回
+	PyDbSymbolTableRecord getOrCreate(const AcString& name, PyDbSymbolTableRecord& rec, int mode = 1);
 
 	// 向符号表追加一条记录（SDK add(AcDbSymbolTableRecord*)）
 	bool add(PyDbSymbolTableRecord& rec);

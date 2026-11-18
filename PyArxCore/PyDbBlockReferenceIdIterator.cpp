@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbBlockReferenceIdIterator.h"
 #include "PyDbBlockTableRecord.h"
@@ -42,17 +42,7 @@ uint64_t PyDbBlockReferenceIdIterator::__next__() {
     return id;
 }
 
-void bind_PyDbBlockReferenceIdIterator(pym& m) {
-    py::class_<PyDbBlockReferenceIdIterator>(m, "PyDbBlockReferenceIdIterator")
-        .def(py::init<PyDbBlockTableRecord&>(),
-             py::arg("owner"), "从 PyDbBlockTableRecord 创建 BlockReferenceId 迭代器")
-        .def(py::init<AcDbBlockReferenceIdIterator*>(), py::arg("p"), "指针接管构造（析构 delete）")
-        .def("done", &PyDbBlockReferenceIdIterator::done)
-        .def("step", &PyDbBlockReferenceIdIterator::step)
-        .def("currentId", &PyDbBlockReferenceIdIterator::currentId, "当前 BlockReference ObjectId（uint64）；失败返回 0")
-        .def("__iter__", [](PyDbBlockReferenceIdIterator& it) -> PyDbBlockReferenceIdIterator& {
-            if (it.impObj()) it.impObj()->start();
-            return it;
-        })
-        .def("__next__", &PyDbBlockReferenceIdIterator::__next__);
+void bind_PyDbBlockReferenceIdIterator(pym&) {
+    // 公开迭代器已退役：块参照 id 遍历折叠进 PyDbBlockTableRecord.refIds()。
+    // PyDbBlockReferenceIdIterator 保留为内部实现。
 }

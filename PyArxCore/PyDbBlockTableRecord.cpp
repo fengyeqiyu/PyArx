@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "dbapserv.h"   // acdbOpenObject（裸打开）+ AcDbTransactionManager
 #include "PyErrorStatusException.h"
 #include "PyUtils.h"
@@ -257,7 +257,48 @@ void bind_PyDbBlockTableRecord(pym& m) {
 			delete it;
 			return out;
 		}, "遍历块记录内所有实体的 ObjectId 列表")
-		.def("numEntities", &PyDbBlockTableRecord::numEntities, "块内实体数量（不含已删除）")
+		// ---- 索引访问（Iterator 折叠进 BTR 本体，不再单独暴露迭代器类）----
+		.def("entityAt", [](PyDbBlockTableRecord& self, int index, int mode) -> PyDbEntity {
+			if (!self.impObj()) return PyDbEntity(nullptr);
+			AcDbBlockTableRecordIterator* it = nullptr;
+			if (self.impObj()->newIterator(it, true, true) != Acad::eOk || !it) return PyDbEntity(nullptr);
+			int total = 0;
+			for (it->start(true, true); !it->done(); it->step(true, true)) ++total;
+			if (index < 0) index += total;
+			if (index < 0 || index >= total) { delete it; throw py::index_error("BlockTableRecord 索引越界"); }
+			int i = 0;
+			for (it->start(true, true); !it->done(); it->step(true, true), ++i) {
+				if (i != index) continue;
+				AcDbEntity* pEnt = nullptr;
+				Acad::ErrorStatus es = it->getEntity(pEnt, static_cast<AcDb::OpenMode>(mode), false);
+				if (es != Acad::eOk || !pEnt) {
+					pEnt = nullptr;
+					es = it->getEntity(pEnt, AcDb::kForRead, false);
+					delete it;
+					if (es != Acad::eOk || !pEnt) return PyDbEntity(nullptr);
+					PyDbOpenCache::Track(pEnt, AcDb::kForRead);
+					return PyDbEntity(pEnt);
+				}
+				delete it;
+				PyDbOpenCache::Track(pEnt, static_cast<AcDb::OpenMode>(mode));
+				return PyDbEntity(pEnt);
+			}
+			delete it;
+			return PyDbEntity(nullptr);
+		}, py::arg("index"), py::arg("mode") = 1, "btr.entityAt(i)：按位置取实体（支持负索引，越界抛 IndexError）")
+		.def("refIds", [](PyDbBlockTableRecord& self) -> py::list {
+			py::list out;
+			if (!self.impObj()) return out;
+			AcDbBlockReferenceIdIterator* it = nullptr;
+			if (self.impObj()->newBlockReferenceIdIterator(it) != Acad::eOk || !it) return out;
+			for (it->start(); !it->done(); it->step()) {
+				AcDbObjectId id;
+				if (it->getBlockReferenceId(id) == Acad::eOk && !id.isNull())
+					out.append(static_cast<uint64_t>(id.asOldId()));
+			}
+			delete it;
+			return out;
+		}, "块内所有块参照的 ObjectId 列表（原 BlockReferenceIdIterator 折叠进本体）")		.def("numEntities", &PyDbBlockTableRecord::numEntities, "块内实体数量（不含已删除）")
 		.def("__len__", &PyDbBlockTableRecord::numEntities, "len(btr)：块内实体数量")
 		.def("attdefData", &PyDbBlockTableRecord::attdefData,
 			"块内 ATTDEF 列表：[{tag, txt, x, y, z, h, rot, ha, va, inv, ly, ci}]")

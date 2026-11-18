@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyRxObject.h"
 #include "PyRxClass.h"
 #include "PyDbObject.h"
@@ -743,15 +743,18 @@ void bind_PyResbuf(pym& m) {
 		.def("isNull", &PyResbuf::isNull, "是否为空链表")
 		.def("__bool__", [](const PyResbuf& rb) { return !rb.isNull(); })
 		.def("__len__", [](const PyResbuf& rb) { return (size_t)rb.toList().size(); })
-		.def("__getitem__", [](const PyResbuf& rb, size_t i) -> const TypedValue& {
-			auto t = rb.toList();
-			if (i >= t.size()) throw py::index_error();
+		.def("__getitem__", [](const PyResbuf& rb, int i) {
+			auto t = rb.toList();   // 按值返回，避免把局部 list 的元素引用交给 Python（悬垂引用）
+			const int n = (int)t.size();
+			if (i < 0) i += n;
+			if (i < 0 || i >= n) throw py::index_error("Resbuf 索引越界");
 			return t[i];
-		}, py::arg("i"), py::return_value_policy::reference_internal)
+		}, py::arg("i"), "rb[i] 取第 i 个组码对（支持负索引）")
 		.def("__iter__", [](const PyResbuf& rb) {
-			auto t = rb.toList();
-			return py::make_iterator(t.begin(), t.end());
-		}, py::return_value_policy::reference_internal)
+			py::list out;
+			for (const auto& tv : rb.toList()) out.append(py::cast(tv));
+			return out.attr("__iter__")();
+		}, "for tv in rb：遍历组码对")
 		.def("__str__", [](const PyResbuf& rb) {
 			return py::cast(rb.toString());
 		})
