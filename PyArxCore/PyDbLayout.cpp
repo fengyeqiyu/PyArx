@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyUtils.h"
 #include "PyDbLayout.h"
@@ -6,20 +6,24 @@
 PyWrapper_Cpp(DbLayout);
 
 uint64_t PyDbLayout::getBlockTableRecordId() const {
+	if (!impObj()) return 0;
 	return static_cast<uint64_t>(impObj()->getBlockTableRecordId().asOldId());
 }
 
 bool PyDbLayout::setBlockTableRecordId(uint64_t btrId) {
+	if (!impObj()) return false;
 	AcDbObjectId id;
 	id.setFromOldId(static_cast<Adesk::IntDbId>(btrId));
 	return PyWarnIfError(impObj()->setBlockTableRecordId(id), L"Layout.setBlockTableRecordId");
 }
 
 py::list PyDbLayout::getViewportArray() const {
+	if (!impObj()) return py::list();
 	return py::cast(impObj()->getViewportArray());
 }
 
 py::tuple PyDbLayout::getLimits() const {
+	if (!impObj()) return py::tuple();
 	AcGePoint2d limMin, limMax;
 	impObj()->getLimits(limMin, limMax);
 	return py::make_tuple(
@@ -28,6 +32,7 @@ py::tuple PyDbLayout::getLimits() const {
 }
 
 py::tuple PyDbLayout::getExtents() const {
+	if (!impObj()) return py::tuple();
 	AcGePoint3d extMin, extMax;
 	impObj()->getExtents(extMin, extMax);
 	return py::make_tuple(
@@ -36,40 +41,49 @@ py::tuple PyDbLayout::getExtents() const {
 }
 
 bool PyDbLayout::annoAllVisible() const {
+	if (!impObj()) return false;
 	return impObj()->annoAllVisible();
 }
 
 bool PyDbLayout::setAnnoAllVisible(bool visible) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setAnnoAllVisible(visible), L"Layout.setAnnoAllVisible");
 }
 
 AcString PyDbLayout::getLayoutName() const {
+	if (!impObj()) return AcString();
 	AcString s;
 	if(!PyWarnIfError(impObj()->getName(s), L"Layout.getName")) return AcString();
 	return s;
 }
 
 bool  PyDbLayout::setLayoutName(const AcString& name) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setLayoutName(name.kwszPtr()), L"Layout.setLayoutName");
 }
 
 int PyDbLayout::getTabOrder() const {
+	if (!impObj()) return 0;
 	return impObj()->getTabOrder();
 }
 
 void PyDbLayout::setTabOrder(int order) {
+	if (!impObj()) return;
 	impObj()->setTabOrder(order);
 }
 
 bool PyDbLayout::getTabSelected() const {
+	if (!impObj()) return false;
 	return impObj()->getTabSelected();
 }
 
 void PyDbLayout::setTabSelected(bool selected) {
+	if (!impObj()) return;
 	impObj()->setTabSelected(selected ? Adesk::kTrue : Adesk::kFalse);
 }
 
 AcString PyDbLayout::toString() const {
+	if (!impObj()) return AcString();
 	return AcString(std::format("PyDbLayout[tabOrder={}]", getTabOrder()).c_str(), AcString::Utf8);
 }
 
