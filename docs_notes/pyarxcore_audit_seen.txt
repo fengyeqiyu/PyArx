@@ -435,3 +435,12 @@ PyDbTransactionManager.cpp:1:clean
 PyDbValueTypes.cpp:1:clean
 PyDbWblockCloneFiler.cpp:1:clean
 PyDxfTypeValue.cpp:1:clean
+PyGeCircArc2d.cpp:1:clean
+PyGeCircArc3d.cpp:1:clean
+PyGeCompositeCurve2d.cpp:1:clean
+PyGeCompositeCurve3d.cpp:1:clean
+PyGeCone.cpp:1:clean
+PyGeCompositeCurve2d.cpp:40:②-待报
+PyGeCompositeCurve3d.cpp:40:②-待报
+PyGeKnotVector.cpp:52:②-待报
+PyGeKnotVector.cpp:131:②-待报
