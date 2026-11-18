@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbMLeaderStyle.h"
 #include "PyDbMText.h"
@@ -10,118 +10,148 @@ AcString PyDbMLeaderStyle::toString() const { return AcString(std::format("AcDbM
 
 // ---- 名称 / 描述 ----
 AcString PyDbMLeaderStyle::getName() const {
+	if (!impObj()) return AcString();
 	AcString s;
 	if (!PyWarnIfError(impObj()->getName(s), L"AcDbMLeaderStyle::getName")) return AcString();
 	return s;
 }
 bool PyDbMLeaderStyle::setName(const AcString& n) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setName(n.kwszPtr()), L"AcDbMLeaderStyle::setName");
 }
 AcString PyDbMLeaderStyle::description() const {
+	if (!impObj()) return AcString();
 	const ACHAR* p = impObj()->description();
 	return p ? AcString(p) : AcString();
 }
 bool PyDbMLeaderStyle::setDescription(const AcString& d) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setDescription(d.kwszPtr()), L"AcDbMLeaderStyle::setDescription");
 }
 
 // ---- 内容类型 ----
 int PyDbMLeaderStyle::contentType() const {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->contentType());
 }
 bool PyDbMLeaderStyle::setContentType(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setContentType(static_cast<AcDbMLeaderStyle::ContentType>(v)), L"AcDbMLeaderStyle::setContentType");
 }
 
 // ---- 引线 ----
-int PyDbMLeaderStyle::maxLeaderSegmentsPoints() const { return impObj()->maxLeaderSegmentsPoints(); }
+int PyDbMLeaderStyle::maxLeaderSegmentsPoints() const { if (!impObj()) return 0; return impObj()->maxLeaderSegmentsPoints(); }
 bool PyDbMLeaderStyle::setMaxLeaderSegmentsPoints(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setMaxLeaderSegmentsPoints(v), L"AcDbMLeaderStyle::setMaxLeaderSegmentsPoints");
 }
 int PyDbMLeaderStyle::firstSegmentAngleConstraint() const {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->firstSegmentAngleConstraint());
 }
 bool PyDbMLeaderStyle::setFirstSegmentAngleConstraint(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setFirstSegmentAngleConstraint(static_cast<AcDbMLeaderStyle::SegmentAngleType>(v)), L"AcDbMLeaderStyle::setFirstSegmentAngleConstraint");
 }
 int PyDbMLeaderStyle::secondSegmentAngleConstraint() const {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->secondSegmentAngleConstraint());
 }
 bool PyDbMLeaderStyle::setSecondSegmentAngleConstraint(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setSecondSegmentAngleConstraint(static_cast<AcDbMLeaderStyle::SegmentAngleType>(v)), L"AcDbMLeaderStyle::setSecondSegmentAngleConstraint");
 }
 uint64_t PyDbMLeaderStyle::leaderLineTypeId() const {
+	if (!impObj()) return 0ULL;
 	return static_cast<uint64_t>(impObj()->leaderLineTypeId().asOldId());
 }
 bool PyDbMLeaderStyle::setLeaderLineTypeId(uint64_t id) {
+	if (!impObj()) return false;
 	AcDbObjectId oid; oid.setFromOldId(static_cast<Adesk::UIntPtr>(id));
 	return PyWarnIfError(impObj()->setLeaderLineTypeId(oid), L"AcDbMLeaderStyle::setLeaderLineTypeId");
 }
-bool PyDbMLeaderStyle::enableLanding() const { return impObj()->enableLanding(); }
+bool PyDbMLeaderStyle::enableLanding() const { if (!impObj()) return false; return impObj()->enableLanding(); }
 bool PyDbMLeaderStyle::setEnableLanding(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setEnableLanding(v), L"AcDbMLeaderStyle::setEnableLanding");
 }
-double PyDbMLeaderStyle::landingGap() const { return impObj()->landingGap(); }
+double PyDbMLeaderStyle::landingGap() const { if (!impObj()) return 0.0; return impObj()->landingGap(); }
 bool PyDbMLeaderStyle::setLandingGap(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setLandingGap(v), L"AcDbMLeaderStyle::setLandingGap");
 }
-bool PyDbMLeaderStyle::enableDogleg() const { return impObj()->enableDogleg(); }
+bool PyDbMLeaderStyle::enableDogleg() const { if (!impObj()) return false; return impObj()->enableDogleg(); }
 bool PyDbMLeaderStyle::setEnableDogleg(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setEnableDogleg(v), L"AcDbMLeaderStyle::setEnableDogleg");
 }
-double PyDbMLeaderStyle::doglegLength() const { return impObj()->doglegLength(); }
+double PyDbMLeaderStyle::doglegLength() const { if (!impObj()) return 0.0; return impObj()->doglegLength(); }
 bool PyDbMLeaderStyle::setDoglegLength(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setDoglegLength(v), L"AcDbMLeaderStyle::setDoglegLength");
 }
 
 // ---- 箭头 ----
 uint64_t PyDbMLeaderStyle::arrowSymbolId() const {
+	if (!impObj()) return 0ULL;
 	return static_cast<uint64_t>(impObj()->arrowSymbolId().asOldId());
 }
 bool PyDbMLeaderStyle::setArrowSymbolId(uint64_t id) {
+	if (!impObj()) return false;
 	AcDbObjectId oid; oid.setFromOldId(static_cast<Adesk::UIntPtr>(id));
 	return PyWarnIfError(impObj()->setArrowSymbolId(oid), L"AcDbMLeaderStyle::setArrowSymbolId");
 }
-double PyDbMLeaderStyle::arrowSize() const { return impObj()->arrowSize(); }
+double PyDbMLeaderStyle::arrowSize() const { if (!impObj()) return 0.0; return impObj()->arrowSize(); }
 bool PyDbMLeaderStyle::setArrowSize(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setArrowSize(v), L"AcDbMLeaderStyle::setArrowSize");
 }
 
 // ---- 文字 ----
 uint64_t PyDbMLeaderStyle::textStyleId() const {
+	if (!impObj()) return 0ULL;
 	return static_cast<uint64_t>(impObj()->textStyleId().asOldId());
 }
 bool PyDbMLeaderStyle::setTextStyleId(uint64_t id) {
+	if (!impObj()) return false;
 	AcDbObjectId oid; oid.setFromOldId(static_cast<Adesk::UIntPtr>(id));
 	return PyWarnIfError(impObj()->setTextStyleId(oid), L"AcDbMLeaderStyle::setTextStyleId");
 }
 int PyDbMLeaderStyle::textAlignmentType() const {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->textAlignmentType());
 }
 bool PyDbMLeaderStyle::setTextAlignmentType(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTextAlignmentType(static_cast<AcDbMLeaderStyle::TextAlignmentType>(v)), L"AcDbMLeaderStyle::setTextAlignmentType");
 }
-bool PyDbMLeaderStyle::textAlignAlwaysLeft() const { return impObj()->textAlignAlwaysLeft(); }
+bool PyDbMLeaderStyle::textAlignAlwaysLeft() const { if (!impObj()) return false; return impObj()->textAlignAlwaysLeft(); }
 bool PyDbMLeaderStyle::setTextAlignAlwaysLeft(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTextAlignAlwaysLeft(v), L"AcDbMLeaderStyle::setTextAlignAlwaysLeft");
 }
-double PyDbMLeaderStyle::textHeight() const { return impObj()->textHeight(); }
+double PyDbMLeaderStyle::textHeight() const { if (!impObj()) return 0.0; return impObj()->textHeight(); }
 bool PyDbMLeaderStyle::setTextHeight(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTextHeight(v), L"AcDbMLeaderStyle::setTextHeight");
 }
-PyColor PyDbMLeaderStyle::textColor() const { return PyColor(impObj()->textColor()); }
+PyColor PyDbMLeaderStyle::textColor() const { if (!impObj()) return PyColor(); return PyColor(impObj()->textColor()); }
 bool PyDbMLeaderStyle::setTextColor(const PyColor& c) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTextColor(c.m_color), L"AcDbMLeaderStyle::setTextColor");
 }
-bool PyDbMLeaderStyle::enableFrameText() const { return impObj()->enableFrameText(); }
+bool PyDbMLeaderStyle::enableFrameText() const { if (!impObj()) return false; return impObj()->enableFrameText(); }
 bool PyDbMLeaderStyle::setEnableFrameText(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setEnableFrameText(v), L"AcDbMLeaderStyle::setEnableFrameText");
 }
-double PyDbMLeaderStyle::alignSpace() const { return impObj()->alignSpace(); }
+double PyDbMLeaderStyle::alignSpace() const { if (!impObj()) return 0.0; return impObj()->alignSpace(); }
 bool PyDbMLeaderStyle::setAlignSpace(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setAlignSpace(v), L"AcDbMLeaderStyle::setAlignSpace");
 }
 bool PyDbMLeaderStyle::setDefaultMText(uint64_t mtextId) {
+	if (!impObj()) return false;
 	AcDbObjectId oid; oid.setFromOldId(static_cast<Adesk::UIntPtr>(mtextId));
 	AcDbMText* mt = nullptr;
 	if (!oid.isNull()) {
@@ -135,6 +165,7 @@ bool PyDbMLeaderStyle::setDefaultMText(uint64_t mtextId) {
 	return ok;
 }
 uint64_t PyDbMLeaderStyle::defaultMText() const {
+	if (!impObj()) return 0ULL;
 	AcDbMText* mt = impObj()->defaultMText(); // cloned; caller must delete
 	if (!mt) return 0ULL;
 	uint64_t id = static_cast<uint64_t>(mt->objectId().asOldId());
@@ -144,56 +175,69 @@ uint64_t PyDbMLeaderStyle::defaultMText() const {
 
 // ---- 块 ----
 uint64_t PyDbMLeaderStyle::blockId() const {
+	if (!impObj()) return 0ULL;
 	return static_cast<uint64_t>(impObj()->blockId().asOldId());
 }
 bool PyDbMLeaderStyle::setBlockId(uint64_t id) {
+	if (!impObj()) return false;
 	AcDbObjectId oid; oid.setFromOldId(static_cast<Adesk::UIntPtr>(id));
 	return PyWarnIfError(impObj()->setBlockId(oid), L"AcDbMLeaderStyle::setBlockId");
 }
-PyColor PyDbMLeaderStyle::blockColor() const { return PyColor(impObj()->blockColor()); }
+PyColor PyDbMLeaderStyle::blockColor() const { if (!impObj()) return PyColor(); return PyColor(impObj()->blockColor()); }
 bool PyDbMLeaderStyle::setBlockColor(const PyColor& c) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setBlockColor(c.m_color), L"AcDbMLeaderStyle::setBlockColor");
 }
-bool PyDbMLeaderStyle::enableBlockScale() const { return impObj()->enableBlockScale(); }
+bool PyDbMLeaderStyle::enableBlockScale() const { if (!impObj()) return false; return impObj()->enableBlockScale(); }
 bool PyDbMLeaderStyle::setEnableBlockScale(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setEnableBlockScale(v), L"AcDbMLeaderStyle::setEnableBlockScale");
 }
-double PyDbMLeaderStyle::blockRotation() const { return impObj()->blockRotation(); }
+double PyDbMLeaderStyle::blockRotation() const { if (!impObj()) return 0.0; return impObj()->blockRotation(); }
 bool PyDbMLeaderStyle::setBlockRotation(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setBlockRotation(v), L"AcDbMLeaderStyle::setBlockRotation");
 }
-bool PyDbMLeaderStyle::enableBlockRotation() const { return impObj()->enableBlockRotation(); }
+bool PyDbMLeaderStyle::enableBlockRotation() const { if (!impObj()) return false; return impObj()->enableBlockRotation(); }
 bool PyDbMLeaderStyle::setEnableBlockRotation(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setEnableBlockRotation(v), L"AcDbMLeaderStyle::setEnableBlockRotation");
 }
 
 // ---- 比例 / 标注性 / 其他 ----
-double PyDbMLeaderStyle::scale() const { return impObj()->scale(); }
+double PyDbMLeaderStyle::scale() const { if (!impObj()) return 0.0; return impObj()->scale(); }
 bool PyDbMLeaderStyle::setScale(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setScale(v), L"AcDbMLeaderStyle::setScale");
 }
-bool PyDbMLeaderStyle::overwritePropChanged() const { return impObj()->overwritePropChanged(); }
-bool PyDbMLeaderStyle::annotative() const { return impObj()->annotative(); }
+bool PyDbMLeaderStyle::overwritePropChanged() const { if (!impObj()) return false; return impObj()->overwritePropChanged(); }
+bool PyDbMLeaderStyle::annotative() const { if (!impObj()) return false; return impObj()->annotative(); }
 bool PyDbMLeaderStyle::setAnnotative(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setAnnotative(v), L"AcDbMLeaderStyle::setAnnotative");
 }
-double PyDbMLeaderStyle::breakSize() const { return impObj()->breakSize(); }
+double PyDbMLeaderStyle::breakSize() const { if (!impObj()) return 0.0; return impObj()->breakSize(); }
 bool PyDbMLeaderStyle::setBreakSize(double v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setBreakSize(v), L"AcDbMLeaderStyle::setBreakSize");
 }
 int PyDbMLeaderStyle::textAttachmentDirection() const {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->textAttachmentDirection());
 }
 bool PyDbMLeaderStyle::setTextAttachmentDirection(int v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setTextAttachmentDirection(static_cast<AcDbMLeaderStyle::TextAttachmentDirection>(v)), L"AcDbMLeaderStyle::setTextAttachmentDirection");
 }
-bool PyDbMLeaderStyle::extendLeaderToText() const { return impObj()->extendLeaderToText(); }
+bool PyDbMLeaderStyle::extendLeaderToText() const { if (!impObj()) return false; return impObj()->extendLeaderToText(); }
 bool PyDbMLeaderStyle::setExtendLeaderToText(bool v) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setExtendLeaderToText(v), L"AcDbMLeaderStyle::setExtendLeaderToText");
 }
 
 // ---- 入库 ----
 std::tuple<bool, uint64_t> PyDbMLeaderStyle::postMLeaderStyleToDb(PyDbDatabase& db, const AcString& styleName) {
+	if (!impObj()) return std::make_tuple(false, 0ULL);
 	AcDbObjectId styleId;
 	Acad::ErrorStatus es = impObj()->postMLeaderStyleToDb(db.impObj(), styleName.kwszPtr(), styleId);
 	if (!PyWarnIfError(es, L"AcDbMLeaderStyle::postMLeaderStyleToDb"))

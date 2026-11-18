@@ -1,39 +1,39 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbHatch.h"
 
 PyWrapper_Cpp(DbHatch)
 AcString PyDbHatch::toString() const { return AcString(std::format("AcDbHatch[wrapper]").c_str(), AcString::Utf8); }
-bool PyDbHatch::associative() const { return impObj()->associative(); }
+bool PyDbHatch::associative() const { if (!impObj()) return false; return impObj()->associative(); }
 
-bool  PyDbHatch::setAssociative(bool a) { return PyWarnIfError(impObj()->setAssociative(a), L"AcDbHatch::setAssociative"); }
+bool PyDbHatch::setAssociative(bool a) { if (!impObj()) return false; return PyWarnIfError(impObj()->setAssociative(a), L"AcDbHatch::setAssociative"); }
 
-int PyDbHatch::numLoops() const { return impObj()->numLoops(); }
-int PyDbHatch::loopTypeAt(int i) const { return static_cast<int>(impObj()->loopTypeAt(i)); }
-double PyDbHatch::elevation() const { return impObj()->elevation(); }
-bool  PyDbHatch::setElevation(double v) { return PyWarnIfError(impObj()->setElevation(v), L"AcDbHatch::setElevation"); }
+int PyDbHatch::numLoops() const { if (!impObj()) return 0; return impObj()->numLoops(); }
+int PyDbHatch::loopTypeAt(int i) const { if (!impObj()) return 0; return static_cast<int>(impObj()->loopTypeAt(i)); }
+double PyDbHatch::elevation() const { if (!impObj()) return 0.0; return impObj()->elevation(); }
+bool PyDbHatch::setElevation(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setElevation(v), L"AcDbHatch::setElevation"); }
 
-AcGeVector3d PyDbHatch::normal() const { return impObj()->normal(); }
-bool  PyDbHatch::setNormal(const AcGeVector3d& v) { return PyWarnIfError(impObj()->setNormal(v), L"AcDbHatch::setNormal"); }
-int PyDbHatch::hatchObjectType() const { return static_cast<int>(impObj()->hatchObjectType()); }
-bool  PyDbHatch::setHatchObjectType(int v) { return PyWarnIfError(impObj()->setHatchObjectType(static_cast<AcDbHatch::HatchObjectType>(v)), L"AcDbHatch::setHatchObjectType"); }
-bool PyDbHatch::isGradient() const { return impObj()->isGradient() != Adesk::kFalse; }
-bool PyDbHatch::isHatch() const { return impObj()->isHatch() != Adesk::kFalse; }
-bool PyDbHatch::isSolidFill() const { return impObj()->isSolidFill(); }
-AcGePoint2d PyDbHatch::originPoint() const { return impObj()->originPoint(); }
-bool  PyDbHatch::setOriginPoint(const AcGePoint2d& p) { return PyWarnIfError(impObj()->setOriginPoint(p), L"AcDbHatch::setOriginPoint"); }
-int PyDbHatch::patternType() const { return static_cast<int>(impObj()->patternType()); }
-AcString PyDbHatch::patternName() const { return impObj()->patternName(); }
-bool  PyDbHatch::setPattern(int t, const AcString& n) { return PyWarnIfError(impObj()->setPattern(static_cast<AcDbHatch::HatchPatternType>(t), n.kwszPtr()), L"AcDbHatch::setPattern"); }
-double PyDbHatch::patternAngle() const { return impObj()->patternAngle(); }
-bool  PyDbHatch::setPatternAngle(double v) { return PyWarnIfError(impObj()->setPatternAngle(v), L"AcDbHatch::setPatternAngle"); }
-double PyDbHatch::patternSpace() const { return impObj()->patternSpace(); }
-bool  PyDbHatch::setPatternSpace(double v) { return PyWarnIfError(impObj()->setPatternSpace(v), L"AcDbHatch::setPatternSpace"); }
-double PyDbHatch::patternScale() const { return impObj()->patternScale(); }
-bool  PyDbHatch::setPatternScale(double v) { return PyWarnIfError(impObj()->setPatternScale(v), L"AcDbHatch::setPatternScale"); }
-bool PyDbHatch::patternDouble() const { return impObj()->patternDouble(); }
-bool  PyDbHatch::setPatternDouble(bool v) { return PyWarnIfError(impObj()->setPatternDouble(v), L"AcDbHatch::setPatternDouble"); }
-int PyDbHatch::numPatternDefinitions() const { return impObj()->numPatternDefinitions(); }
+AcGeVector3d PyDbHatch::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
+bool PyDbHatch::setNormal(const AcGeVector3d& v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setNormal(v), L"AcDbHatch::setNormal"); }
+int PyDbHatch::hatchObjectType() const { if (!impObj()) return 0; return static_cast<int>(impObj()->hatchObjectType()); }
+bool PyDbHatch::setHatchObjectType(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHatchObjectType(static_cast<AcDbHatch::HatchObjectType>(v)), L"AcDbHatch::setHatchObjectType"); }
+bool PyDbHatch::isGradient() const { if (!impObj()) return false; return impObj()->isGradient() != Adesk::kFalse; }
+bool PyDbHatch::isHatch() const { if (!impObj()) return false; return impObj()->isHatch() != Adesk::kFalse; }
+bool PyDbHatch::isSolidFill() const { if (!impObj()) return false; return impObj()->isSolidFill(); }
+AcGePoint2d PyDbHatch::originPoint() const { if (!impObj()) return AcGePoint2d(); return impObj()->originPoint(); }
+bool PyDbHatch::setOriginPoint(const AcGePoint2d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setOriginPoint(p), L"AcDbHatch::setOriginPoint"); }
+int PyDbHatch::patternType() const { if (!impObj()) return 0; return static_cast<int>(impObj()->patternType()); }
+AcString PyDbHatch::patternName() const { if (!impObj()) return AcString(); return impObj()->patternName(); }
+bool PyDbHatch::setPattern(int t, const AcString& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPattern(static_cast<AcDbHatch::HatchPatternType>(t), n.kwszPtr()), L"AcDbHatch::setPattern"); }
+double PyDbHatch::patternAngle() const { if (!impObj()) return 0.0; return impObj()->patternAngle(); }
+bool PyDbHatch::setPatternAngle(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPatternAngle(v), L"AcDbHatch::setPatternAngle"); }
+double PyDbHatch::patternSpace() const { if (!impObj()) return 0.0; return impObj()->patternSpace(); }
+bool PyDbHatch::setPatternSpace(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPatternSpace(v), L"AcDbHatch::setPatternSpace"); }
+double PyDbHatch::patternScale() const { if (!impObj()) return 0.0; return impObj()->patternScale(); }
+bool PyDbHatch::setPatternScale(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPatternScale(v), L"AcDbHatch::setPatternScale"); }
+bool PyDbHatch::patternDouble() const { if (!impObj()) return false; return impObj()->patternDouble(); }
+bool PyDbHatch::setPatternDouble(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setPatternDouble(v), L"AcDbHatch::setPatternDouble"); }
+int PyDbHatch::numPatternDefinitions() const { if (!impObj()) return 0; return impObj()->numPatternDefinitions(); }
 std::tuple<double, double, double, double, double, AcGeDoubleArray> PyDbHatch::getPatternDefinitionAt(int index) const {
 	double angle = 0.0, baseX = 0.0, baseY = 0.0, offX = 0.0, offY = 0.0;
 	AcGeDoubleArray dashes;
@@ -41,24 +41,24 @@ std::tuple<double, double, double, double, double, AcGeDoubleArray> PyDbHatch::g
 		return { 0.0, 0.0, 0.0, 0.0, 0.0, AcGeDoubleArray() };
 	return { angle, baseX, baseY, offX, offY, dashes };
 }
-int PyDbHatch::hatchStyle() const { return static_cast<int>(impObj()->hatchStyle()); }
-bool  PyDbHatch::setHatchStyle(int v) { return PyWarnIfError(impObj()->setHatchStyle(static_cast<AcDbHatch::HatchStyle>(v)), L"AcDbHatch::setHatchStyle"); }
-int PyDbHatch::numHatchLines() const { return impObj()->numHatchLines(); }
-double PyDbHatch::area() const { double a = 0.0; return (impObj()->getArea(a) == Acad::eOk) ? a : 0.0; }
-bool  PyDbHatch::evaluateHatch(bool u) { return PyWarnIfError(impObj()->evaluateHatch(u), L"AcDbHatch::evaluateHatch"); }
-bool  PyDbHatch::evaluateHatchAllScales(bool u) { return PyWarnIfError(impObj()->evaluateHatchAllScales(u), L"AcDbHatch::evaluateHatchAllScales"); }
-bool PyDbHatch::lineGenerationEnabled() const { return impObj()->lineGenerationEnabled(); }
-bool PyDbHatch::setLineGenerationEnabled(bool v) { return impObj()->setLineGenerationEnabled(v); }
-int PyDbHatch::gradientType() const { return static_cast<int>(impObj()->gradientType()); }
-AcString PyDbHatch::gradientName() const { return impObj()->gradientName(); }
-double PyDbHatch::gradientAngle() const { return impObj()->gradientAngle(); }
-bool  PyDbHatch::setGradientAngle(double v) { return PyWarnIfError(impObj()->setGradientAngle(v), L"AcDbHatch::setGradientAngle"); }
-bool PyDbHatch::gradientOneColorMode() const { return impObj()->getGradientOneColorMode() != Adesk::kFalse; }
-bool  PyDbHatch::setGradientOneColorMode(bool v) { return PyWarnIfError(impObj()->setGradientOneColorMode(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbHatch::setGradientOneColorMode"); }
-float PyDbHatch::shadeTintValue() const { return impObj()->getShadeTintValue(); }
-bool  PyDbHatch::setShadeTintValue(float v) { return PyWarnIfError(impObj()->setShadeTintValue(v), L"AcDbHatch::setShadeTintValue"); }
-float PyDbHatch::gradientShift() const { return impObj()->gradientShift(); }
-bool  PyDbHatch::setGradientShift(float v) { return PyWarnIfError(impObj()->setGradientShift(v), L"AcDbHatch::setGradientShift"); }
+int PyDbHatch::hatchStyle() const { if (!impObj()) return 0; return static_cast<int>(impObj()->hatchStyle()); }
+bool PyDbHatch::setHatchStyle(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHatchStyle(static_cast<AcDbHatch::HatchStyle>(v)), L"AcDbHatch::setHatchStyle"); }
+int PyDbHatch::numHatchLines() const { if (!impObj()) return 0; return impObj()->numHatchLines(); }
+double PyDbHatch::area() const { if (!impObj()) return 0.0; double a = 0.0; return (impObj()->getArea(a) == Acad::eOk) ? a : 0.0; }
+bool PyDbHatch::evaluateHatch(bool u) { if (!impObj()) return false; return PyWarnIfError(impObj()->evaluateHatch(u), L"AcDbHatch::evaluateHatch"); }
+bool PyDbHatch::evaluateHatchAllScales(bool u) { if (!impObj()) return false; return PyWarnIfError(impObj()->evaluateHatchAllScales(u), L"AcDbHatch::evaluateHatchAllScales"); }
+bool PyDbHatch::lineGenerationEnabled() const { if (!impObj()) return false; return impObj()->lineGenerationEnabled(); }
+bool PyDbHatch::setLineGenerationEnabled(bool v) { if (!impObj()) return false; return impObj()->setLineGenerationEnabled(v); }
+int PyDbHatch::gradientType() const { if (!impObj()) return 0; return static_cast<int>(impObj()->gradientType()); }
+AcString PyDbHatch::gradientName() const { if (!impObj()) return AcString(); return impObj()->gradientName(); }
+double PyDbHatch::gradientAngle() const { if (!impObj()) return 0.0; return impObj()->gradientAngle(); }
+bool PyDbHatch::setGradientAngle(double v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setGradientAngle(v), L"AcDbHatch::setGradientAngle"); }
+bool PyDbHatch::gradientOneColorMode() const { if (!impObj()) return false; return impObj()->getGradientOneColorMode() != Adesk::kFalse; }
+bool PyDbHatch::setGradientOneColorMode(bool v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setGradientOneColorMode(v ? Adesk::kTrue : Adesk::kFalse), L"AcDbHatch::setGradientOneColorMode"); }
+float PyDbHatch::shadeTintValue() const { if (!impObj()) return 0.0f; return impObj()->getShadeTintValue(); }
+bool PyDbHatch::setShadeTintValue(float v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setShadeTintValue(v), L"AcDbHatch::setShadeTintValue"); }
+float PyDbHatch::gradientShift() const { if (!impObj()) return 0.0f; return impObj()->gradientShift(); }
+bool PyDbHatch::setGradientShift(float v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setGradientShift(v), L"AcDbHatch::setGradientShift"); }
 
 void bind_PyDbHatch(pym& m) {
 	py::class_<PyDbHatch, PyDbEntity>(m, "PyDbHatch")

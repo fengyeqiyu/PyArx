@@ -97,3 +97,5 @@ PyAdsDxfCode.cpp:1-60:clean
 PyAdsErrorStatus.cpp:1-30:clean
 PyAdsFindTextOptions.cpp:1-30:clean
 PyAdsLineEnums.cpp:1-40:clean
+PyDbHatch.cpp:1-209:②
+PyDbMLeaderStyle.cpp:1-329:②
