@@ -71,29 +71,30 @@ $clArgs += (($def -split ';') | Where-Object { $_ } | ForEach-Object { $_.Trim()
 if ($proj -match '<UseOfMfc>Dynamic<') { $clArgs += '/D_AFXDLL' }   # MFC 共享 dll 必配 /MD
 $clArgs += (($inc -split ';') | Where-Object { $_ } | ForEach-Object { '/I' + ($_.Trim() -replace '\\$', '') })
 $clArgs += @('/MD', '/bigobj', '/FS')
-$clArgs += $full
 
-# ---- 编译（obj 落在 ObjDir，不影响正式构建目录）----
-$sw = [Diagnostics.Stopwatch]::StartNew()
-Push-Location $ObjDir
-try { $out = & $cl @clArgs 2>&1 } finally { Pop-Location }
-$code = $LASTEXITCODE
-$sw.Stop()
-
-# ---- 汇总：滤掉 ARX 头 gemat3d.h 既有的 C4828 噪声 ----
-$keep = $out | Where-Object {
-  ($_ -match 'error' -or ($ShowWarnings -and $_ -match 'warning')) -and $_ -notmatch 'C4828'
-}
+# ---- 逐文件编译（obj 落在 ObjDir，不影响正式构建目录；单文件失败不掩盖其它文件结果）----
+$fail = 0
 foreach ($f in $full) {
   $obj = Join-Path $ObjDir ([IO.Path]::GetFileNameWithoutExtension($f) + '.obj')
-  $ok = Test-Path -LiteralPath $obj
+  if (Test-Path -LiteralPath $obj) { Remove-Item -LiteralPath $obj -Force -ErrorAction SilentlyContinue }  # 清掉旧 obj，避免误判 PASS
+  $sw = [Diagnostics.Stopwatch]::StartNew()
+  Push-Location $ObjDir
+  try { $out = & $cl @clArgs $f 2>&1 } finally { Pop-Location }
+  $code = $LASTEXITCODE
+  $sw.Stop()
+  $ok = (Test-Path -LiteralPath $obj)
   $size = if ($ok) { (Get-Item -LiteralPath $obj).Length } else { 0 }
   Write-Output ("{0}  {1}  {2}s  obj={3}KB" -f `
     $(if ($code -eq 0 -and $ok) { 'PASS' } else { 'FAIL' }), (Split-Path -Leaf $f), `
     [int]$sw.Elapsed.TotalSeconds, [int]($size / 1024))
+  if ($code -ne 0) {
+    $fail = 1
+    # 滤掉 ARX 头 gemat3d.h 既有的 C4828 噪声
+    $keep = $out | Where-Object {
+      ($_ -match 'error' -or ($ShowWarnings -and $_ -match 'warning')) -and $_ -notmatch 'C4828'
+    }
+    if ($keep) { ($keep | Select-Object -First 10) | ForEach-Object { Write-Output $_.Trim() } }
+    else { ($out | Where-Object { $_.Trim() } | Select-Object -Last 6) | ForEach-Object { Write-Output $_.Trim() } }
+  }
 }
-if ($code -ne 0) {
-  if ($keep) { $keep | Select-Object -First 10 | ForEach-Object { Write-Output $_.Trim() } }
-  else { $out | Where-Object { $_.Trim() } | Select-Object -Last 6 | ForEach-Object { Write-Output $_.Trim() } }
-}
-exit $code
+exit $fail
