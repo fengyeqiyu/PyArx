@@ -35,22 +35,6 @@ bool PyDbGeoData::setDesignPoint(const AcGePoint3d& p) {
 	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setDesignPoint(p), L"AcDbGeoData::setDesignPoint");
 }
-std::tuple<bool, uint64_t> PyDbGeoData::postToDb() {
-	AcDbObjectId id;
-	Acad::ErrorStatus es = impObj()->postToDb(id);
-	if (!PyWarnIfError(es, L"AcDbGeoData::postToDb")) return std::make_tuple(false, 0ULL);
-	return std::make_tuple(true, id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()));
-}
-bool PyDbGeoData::setBlockTableRecordId(uint64_t blockId) {
-	AcDbObjectId id; id.setFromOldId(static_cast<Adesk::UIntPtr>(blockId));
-	return PyWarnIfError(impObj()->setBlockTableRecordId(id), L"AcDbGeoData::setBlockTableRecordId");
-}
-bool PyDbGeoData::setCoordinateType(int t) {
-	return PyWarnIfError(impObj()->setCoordinateType(static_cast<AcDbGeoData::TypeOfCoordinates>(t)), L"AcDbGeoData::setCoordinateType");
-}
-bool PyDbGeoData::setDesignPoint(const AcGePoint3d& p) {
-	return PyWarnIfError(impObj()->setDesignPoint(p), L"AcDbGeoData::setDesignPoint");
-}
 
 void bind_PyDbGeoData(pym& m) {
 	py::class_<PyDbGeoData, PyDbObject>(m, "PyDbGeoData")

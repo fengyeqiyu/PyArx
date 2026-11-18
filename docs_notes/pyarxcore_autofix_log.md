@@ -47,3 +47,5 @@
 2026-11-18 10:18 | PyDbEllipse.cpp:7-52 | ② | 22 处判空，isNull 空视为 true，get 空返默认元组
 2026-11-18 11:19 | PyDbViewport.cpp:7-122 | ② | 84 处 getter/setter 补 impObj() 判空（getter 返回默认值，setter 直接 return false），行为不变
 2026-11-18 11:19 | PyDbViewport.cpp:216-237 | ② | 21 处 PyRx 对齐 lambda 直接解 o.impObj()，需改写表达式，本轮只报不改
+2026-11-18 11:33 | PyDbSpatialFilter.cpp:14 | ② | 去掉对按值返回 impObj() 的 PyDbExtents3d 误判空（!ext.impObj() 无法编译），仅保留 s.impObj() 判空
+2026-11-18 11:33 | PyDbGeoData.cpp:38-53 | ⑤ | 删除历史判空脚本遗留的 5 个重复函数体（C2084 重复定义），保留已判空版本

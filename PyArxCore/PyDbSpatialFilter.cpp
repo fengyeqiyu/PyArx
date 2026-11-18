@@ -11,7 +11,7 @@ void bind_PyDbSpatialFilter(pym& m) {
 		PyWrapper_BIND(DbSpatialFilter)
 		// ---- clipVolumeIntersectsExtents(ext) -> bool ----
 		.def("clipVolumeIntersectsExtents", [](const PyDbSpatialFilter& s, const PyDbExtents3d& ext) -> bool {
-			if (!s.impObj() || !ext.impObj()) return false;
+			if (!s.impObj()) return false;
 			return s.impObj()->clipVolumeIntersectsExtents(ext.impObj()) != Adesk::kFalse;
 		}, py::arg("ext"), "裁剪体是否与给定包围盒相交")
 		// ---- getDefinition() -> (pts2d, normal, elevation, frontClip, backClip, enabled) ----
