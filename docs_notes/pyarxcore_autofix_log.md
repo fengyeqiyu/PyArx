@@ -82,3 +82,6 @@
 2026-11-18 17:21 | PyDbDynBlockTableRecord.cpp:25 | ② | blockTableRecordId lambda 补判空返回 0ULL
 2026-11-18 17:21 | PyDbDynBlockTableRecord.cpp:31 | ② | getAnonymousBlockIds lambda 补判空返回空列表
 2026-11-18 17:21 | PyDbDynBlockTableRecord.cpp:44 | ② | updateAnonymousBlocks lambda 补判空返回 false
+2026-11-18 18:19 | PyDbExtrudedSurface.cpp:8-24 | ② | 5 个成员方法补 if(!impObj()) 返回 0.0/AcGeVector3d()/false
+2026-11-18 18:19 | PyDbLayerFilter.cpp:14-33 | ② | add/remove/getAt/isValid/layerCount 五个 lambda 补判空
+2026-11-18 18:19 | PyDbFaceRecord.cpp:9-28 | ② | 5 个成员方法补 if(!impObj()) 返回 0/false
