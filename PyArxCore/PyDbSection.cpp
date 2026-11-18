@@ -5,22 +5,22 @@
 PyWrapper_Cpp(DbSection)
 AcString PyDbSection::toString() const { return AcString(std::format("AcDbSection[wrapper]").c_str(), AcString::Utf8); }
 
-int PyDbSection::state() const { return static_cast<int>(impObj()->state()); }
-bool  PyDbSection::setState(int v) { return PyWarnIfError(impObj()->setState(static_cast<AcDbSection::State>(v)), L"AcDbSection::setState"); }
-AcString PyDbSection::getName() const { AcString s; if(!PyWarnIfError(impObj()->getName(s), L"AcDbSection::getName")) return AcString(); return s; }
-bool  PyDbSection::setName(const AcString& n) { return PyWarnIfError(impObj()->setName(n.kwszPtr()), L"AcDbSection::setName"); }
-AcGeVector3d PyDbSection::viewingDirection() const { return impObj()->viewingDirection(); }
-bool  PyDbSection::setViewingDirection(const AcGeVector3d& v) { return PyWarnIfError(impObj()->setViewingDirection(v), L"AcDbSection::setViewingDirection"); }
-AcGeVector3d PyDbSection::verticalDirection() const { return impObj()->verticalDirection(); }
-bool  PyDbSection::setVerticalDirection(const AcGeVector3d& v) { return PyWarnIfError(impObj()->setVerticalDirection(v), L"AcDbSection::setVerticalDirection"); }
-AcGeVector3d PyDbSection::normal() const { return impObj()->normal(); }
-int PyDbSection::indicatorTransparency() const { return impObj()->indicatorTransparency(); }
-bool  PyDbSection::setIndicatorTransparency(int v) { return PyWarnIfError(impObj()->setIndicatorTransparency(v), L"AcDbSection::setIndicatorTransparency"); }
-int PyDbSection::numVertices() const { return impObj()->numVertices(); }
-AcGePoint3d PyDbSection::getVertex(int i) const { AcGePoint3d pt; if(!PyWarnIfError(impObj()->getVertex(i, pt), L"AcDbSection::getVertex")) return AcGePoint3d(); return pt; }
-bool  PyDbSection::setVertex(int i, const AcGePoint3d& p) { return PyWarnIfError(impObj()->setVertex(i, p), L"AcDbSection::setVertex"); }
-bool  PyDbSection::addVertex(int i, const AcGePoint3d& p) { return PyWarnIfError(impObj()->addVertex(i, p), L"AcDbSection::addVertex"); }
-bool  PyDbSection::removeVertex(int i) { return PyWarnIfError(impObj()->removeVertex(i), L"AcDbSection::removeVertex"); }
+int PyDbSection::state() const { return impObj() ? static_cast<int>(impObj()->state()) : 0; }
+bool  PyDbSection::setState(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setState(static_cast<AcDbSection::State>(v)), L"AcDbSection::setState"); }
+AcString PyDbSection::getName() const { AcString s; if (!impObj()) return s; if(!PyWarnIfError(impObj()->getName(s), L"AcDbSection::getName")) return AcString(); return s; }
+bool  PyDbSection::setName(const AcString& n) { if (!impObj()) return false; return PyWarnIfError(impObj()->setName(n.kwszPtr()), L"AcDbSection::setName"); }
+AcGeVector3d PyDbSection::viewingDirection() const { return impObj() ? impObj()->viewingDirection() : AcGeVector3d(); }
+bool  PyDbSection::setViewingDirection(const AcGeVector3d& v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setViewingDirection(v), L"AcDbSection::setViewingDirection"); }
+AcGeVector3d PyDbSection::verticalDirection() const { return impObj() ? impObj()->verticalDirection() : AcGeVector3d(); }
+bool  PyDbSection::setVerticalDirection(const AcGeVector3d& v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setVerticalDirection(v), L"AcDbSection::setVerticalDirection"); }
+AcGeVector3d PyDbSection::normal() const { return impObj() ? impObj()->normal() : AcGeVector3d(); }
+int PyDbSection::indicatorTransparency() const { return impObj() ? impObj()->indicatorTransparency() : 0; }
+bool  PyDbSection::setIndicatorTransparency(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setIndicatorTransparency(v), L"AcDbSection::setIndicatorTransparency"); }
+int PyDbSection::numVertices() const { return impObj() ? impObj()->numVertices() : 0; }
+AcGePoint3d PyDbSection::getVertex(int i) const { AcGePoint3d pt; if (!impObj()) return pt; if(!PyWarnIfError(impObj()->getVertex(i, pt), L"AcDbSection::getVertex")) return AcGePoint3d(); return pt; }
+bool  PyDbSection::setVertex(int i, const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->setVertex(i, p), L"AcDbSection::setVertex"); }
+bool  PyDbSection::addVertex(int i, const AcGePoint3d& p) { if (!impObj()) return false; return PyWarnIfError(impObj()->addVertex(i, p), L"AcDbSection::addVertex"); }
+bool  PyDbSection::removeVertex(int i) { if (!impObj()) return false; return PyWarnIfError(impObj()->removeVertex(i), L"AcDbSection::removeVertex"); }
 
 void bind_PyDbSection(pym& m) {
 	py::class_<PyDbSection, PyDbEntity>(m, "PyDbSection")
