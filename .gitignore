@@ -7,6 +7,9 @@ Debug/
 Release/
 build/
 obj/
+# tools\build 是脚本目录（旁路编译校验），不是构建产物目录，需要入库
+!tools/build/
+!tools/build/*
 *.obj
 *.pch
 *.pdb
