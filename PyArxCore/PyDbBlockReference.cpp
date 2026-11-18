@@ -2,6 +2,9 @@
 #include "PyErrorStatusException.h"
 #include "PyDbBlockReference.h"
 #include "PyDbAttribute.h"
+#include "PyDbDynBlockReference.h"
+#include "PyDbDynBlockReferenceProperty.h"
+#include "PyDbOpenCache.h"
 
 PyWrapper_Cpp(DbBlockReference)
 AcString PyDbBlockReference::toString() const { return AcString(std::format("AcDbBlockReference[wrapper]").c_str(), AcString::Utf8); }
@@ -123,6 +126,155 @@ py::list PyDbBlockReference::attribData() const {
 	return PyAttribDataFromObject(impObj());
 }
 
+namespace {
+// 收集块参照上全部 ATTRIB 的 ObjectId（每次用完即删迭代器，不自持）
+std::vector<AcDbObjectId> brAttribIds(AcDbBlockReference* br) {
+	std::vector<AcDbObjectId> ids;
+	if (!br) return ids;
+	AcDbObjectIterator* it = br->attributeIterator();
+	if (!it) return ids;
+	for (; !it->done(); it->step()) {
+		AcDbObjectId aid = it->objectId();
+		if (!aid.isNull()) ids.push_back(aid);
+	}
+	delete it;
+	return ids;
+}
+
+// 按 id 打开属性，走打开缓存（同对象只允许一个包装，读→写自动 upgrade）
+AcDbAttribute* brOpenAttrib(AcDbObjectId id, int mode) {
+	AcDb::OpenMode m = static_cast<AcDb::OpenMode>(mode);
+	Acad::ErrorStatus es = Acad::eOk;
+	AcDbObject* pObj = PyDbOpenCache::Open(id, m, es);
+	if ((es != Acad::eOk || !pObj) && (es == Acad::eWasOpenForRead || es == Acad::eWasOpenForWrite)) {
+		es = Acad::eOk;
+		pObj = PyDbOpenCache::Get(id, m, es);
+	}
+	if (es != Acad::eOk || !pObj) return nullptr;
+	AcDbAttribute* pAtt = AcDbAttribute::cast(pObj);
+	if (!pAtt) return nullptr;
+	PyDbOpenCache::Track(pAtt, m);
+	return pAtt;
+}
+
+// 只读取一次 tag 后立即关闭，不留打开痕
+bool brPeekTag(AcDbObjectId id, AcString& tag) {
+	AcDbAttribute* pAtt = nullptr;
+	if (acdbOpenObject(pAtt, id, AcDb::kForRead) != Acad::eOk || !pAtt) return false;
+	pAtt->tag(tag);
+	pAtt->close();
+	return true;
+}
+
+// 一次取齐块参照的动态属性（非动态块/失败返回 false，属性arr 为空）
+bool brDynProps(AcDbBlockReference* br, AcDbDynBlockReferencePropertyArray& arr) {
+	if (!br) return false;
+	AcDbObjectId id = br->objectId();
+	if (id.isNull()) return false;
+	try {
+		AcDbDynBlockReference dbr(id);
+		if (!dbr.isDynamicBlock()) return false;
+		dbr.getBlockProperties(arr);
+		return true;
+	}
+	catch (const std::exception& e) {
+		acutPrintf(L"\n[BlockReference] dynamic property: %hs\n", e.what());
+		return false;
+	}
+	catch (...) {
+		acutPrintf(L"\n[BlockReference] dynamic property: unknown SDK exception\n");
+		return false;
+	}
+}
+} // namespace
+
+py::list PyDbBlockReference::attributes(int mode) const {
+	py::list out;
+	for (const auto& aid : brAttribIds(impObj())) {
+		AcDbAttribute* pAtt = brOpenAttrib(aid, mode);
+		if (!pAtt) continue;
+		out.append(py::cast(PyDbAttribute(pAtt)));
+	}
+	return out;
+}
+
+PyDbAttribute PyDbBlockReference::attributeAt(int index, int mode) const {
+	auto ids = brAttribIds(impObj());
+	int total = static_cast<int>(ids.size());
+	if (index < 0) index += total;
+	if (index < 0 || index >= total) throw py::index_error("BlockReference 属性索引越界");
+	AcDbAttribute* pAtt = brOpenAttrib(ids[index], mode);
+	return pAtt ? PyDbAttribute(pAtt) : PyDbAttribute(nullptr);
+}
+
+PyDbAttribute PyDbBlockReference::attributeByTag(const AcString& tag, int mode) const {
+	for (const auto& aid : brAttribIds(impObj())) {
+		AcString t;
+		if (!brPeekTag(aid, t)) continue;
+		// 属性 tag 在 CAD 中不区分大小写
+		if (_wcsicmp(t.kwszPtr(), tag.kwszPtr()) != 0) continue;
+		AcDbAttribute* pAtt = brOpenAttrib(aid, mode);
+		return pAtt ? PyDbAttribute(pAtt) : PyDbAttribute(nullptr);
+	}
+	return PyDbAttribute(nullptr);
+}
+
+bool PyDbBlockReference::hasAttributeTag(const AcString& tag) const {
+	for (const auto& aid : brAttribIds(impObj())) {
+		AcString t;
+		if (!brPeekTag(aid, t)) continue;
+		if (_wcsicmp(t.kwszPtr(), tag.kwszPtr()) == 0) return true;
+	}
+	return false;
+}
+
+bool PyDbBlockReference::isDynamicBlock() const {
+	AcDbBlockReference* br = impObj();
+	if (!br) return false;
+	AcDbObjectId id = br->objectId();
+	if (id.isNull()) return false;
+	try {
+		AcDbDynBlockReference dbr(id);
+		return dbr.isDynamicBlock();
+	}
+	catch (const std::exception& e) {
+		acutPrintf(L"\n[BlockReference] isDynamicBlock: %hs\n", e.what());
+		return false;
+	}
+	catch (...) {
+		acutPrintf(L"\n[BlockReference] isDynamicBlock: unknown SDK exception\n");
+		return false;
+	}
+}
+
+py::list PyDbBlockReference::dynamicProperties() const {
+	py::list out;
+	AcDbDynBlockReferencePropertyArray arr;
+	if (!brDynProps(impObj(), arr)) return out;
+	for (int i = 0; i < arr.length(); ++i)
+		out.append(py::cast(PyDbDynBlockReferenceProperty(arr[i])));
+	return out;
+}
+
+py::list PyDbBlockReference::dynamicPropertyNames() const {
+	py::list out;
+	AcDbDynBlockReferencePropertyArray arr;
+	if (!brDynProps(impObj(), arr)) return out;
+	for (int i = 0; i < arr.length(); ++i)
+		out.append(py::cast(arr[i].propertyName()));
+	return out;
+}
+
+PyDbDynBlockReferenceProperty PyDbBlockReference::dynamicProperty(const AcString& name) const {
+	AcDbDynBlockReferencePropertyArray arr;
+	if (!brDynProps(impObj(), arr)) return PyDbDynBlockReferenceProperty();
+	for (int i = 0; i < arr.length(); ++i) {
+		if (_wcsicmp(arr[i].propertyName().kwszPtr(), name.kwszPtr()) == 0)
+			return PyDbDynBlockReferenceProperty(arr[i]);
+	}
+	return PyDbDynBlockReferenceProperty();
+}
+
 void bind_PyDbBlockReference(pym& m) {
 	py::class_<PyDbBlockReference, PyDbEntity>(m, "PyDbBlockReference")
 		.def(py::init<>())
@@ -167,6 +319,35 @@ void bind_PyDbBlockReference(pym& m) {
 		.def("appendAttribute", [](PyDbBlockReference& self, PyDbAttribute& attr) {
 			return PyWarnIfError(self.impObj()->appendAttribute(attr.impObj()), L"appendAttribute");
 		}, py::arg("attribute"), "向块参照追加一个属性")
+		// ---- 属性块：ATTRIB 遍历（原 attributeIterator 折叠进本体）----
+		.def("attributes", &PyDbBlockReference::attributes, py::arg("mode") = 1,
+			"blkref.attributes(mode)：属性对象列表（mode 0=只读 1=写，返回的是已打开的包装）")
+		.def("attributeAt", &PyDbBlockReference::attributeAt,
+			py::arg("index"), py::arg("mode") = 1,
+			"blkref.attributeAt(i)：按位置取属性（支持负索引，越界抛 IndexError）")
+		.def("attributeByTag", &PyDbBlockReference::attributeByTag,
+			py::arg("tag"), py::arg("mode") = 1,
+			"blkref.attributeByTag(tag)：按 tag 取属性（不区分大小写，不存在返回空对象）")
+		.def("hasAttributeTag", &PyDbBlockReference::hasAttributeTag, py::arg("tag"),
+			"是否存在指定 tag 的属性（不区分大小写）")
+		.def("__len__", [](const PyDbBlockReference& self) {
+			int n = self.attributeCount();
+			return n < 0 ? 0 : n;
+		}, "len(blkref)：属性数量")
+		.def("__getitem__", [](const PyDbBlockReference& self, int index) {
+			return self.attributeAt(index, 1);
+		}, py::arg("index"), "blkref[i]：按位置取属性（写模式）")
+		.def("__iter__", [](const PyDbBlockReference& self) {
+			return self.attributes(0).attr("__iter__")();
+		}, "for att in blkref：遍历全部属性（只读）")
+		// ---- 动态块：动态属性遍历（原 DynBlockReference.getBlockProperties 折叠进本体）----
+		.def("isDynamicBlock", &PyDbBlockReference::isDynamicBlock, "是否为动态块参照")
+		.def("dynamicProperties", &PyDbBlockReference::dynamicProperties,
+			"blkref.dynamicProperties()：动态属性对象列表（非动态块返回空 list）")
+		.def("dynamicPropertyNames", &PyDbBlockReference::dynamicPropertyNames,
+			"blkref.dynamicPropertyNames()：动态属性名列表")
+		.def("dynamicProperty", &PyDbBlockReference::dynamicProperty, py::arg("name"),
+			"blkref.dynamicProperty(name)：按名取动态属性（不存在返回空对象）")
 		PyWrapper_BIND(DbBlockReference)
 		.def("__repr__", &PyDbBlockReference::toString)
 		;

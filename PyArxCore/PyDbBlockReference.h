@@ -3,6 +3,8 @@
 #include "PyDbEntity.h"
 #include "PyDbAttribute.h"
 
+class PyDbDynBlockReferenceProperty;
+
 class PyDbBlockReference : public PyDbEntity {
 	PyWrapper_H(DbBlockReference)
 public:
@@ -34,6 +36,19 @@ public:
 
 	// 实例属性（ATTRIB）数据：tag/txt/pos/alignPoint/h/rot/ha/va/inv/ly/ci
 	py::list attribData() const;
+
+	// ---- 属性块：ATTRIB 子实体遍历（原 attributeIterator 折叠进本体）----
+	// 返回的是已按 mode 打开的 PyDbAttribute 包装（所有权随包装，close/GC 释放）
+	py::list attributes(int mode = 1) const;
+	PyDbAttribute attributeAt(int index, int mode = 1) const;
+	PyDbAttribute attributeByTag(const AcString& tag, int mode = 1) const;
+	bool hasAttributeTag(const AcString& tag) const;
+
+	// ---- 动态块：动态属性（DynBlockReferenceProperty）遍历 ----
+	bool isDynamicBlock() const;
+	py::list dynamicProperties() const;
+	py::list dynamicPropertyNames() const;
+	PyDbDynBlockReferenceProperty dynamicProperty(const AcString& name) const;
 };
 
 void bind_PyDbBlockReference(pym& m);
