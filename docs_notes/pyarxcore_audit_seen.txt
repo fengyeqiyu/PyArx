@@ -382,3 +382,11 @@ PyDbShape.cpp:1:clean
 PyDbTrace.cpp:1:clean
 PyDbHelix.cpp:1:clean
 PyArxCore.vcxproj:1:clean-6
+PyDbDatabaseReactor.cpp:20-148:⑧已改
+PyDbAnnotationScale.cpp:1:clean
+PyDbDate.cpp:1:clean
+PyColor.cpp:1:clean
+PyDbDictionaryWithDefault.cpp:1:clean
+PyDbEvalExpr.cpp:1:clean
+PyArxBinder.cpp:134:clean-8
+PyUt.cpp:334:clean-8

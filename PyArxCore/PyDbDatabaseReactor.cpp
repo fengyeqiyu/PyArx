@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbDatabaseReactor.h"
 #include "PyDbDatabase.h"
@@ -16,8 +16,8 @@ void PyDbDatabaseReactor::objectAppended(const AcDbDatabase* pDb, const AcDbObje
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "objectAppended")) {
         try { py_self.attr("objectAppended")(PyDbDatabase(const_cast<AcDbDatabase*>(pDb)), PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (const pybind11::error_already_set& e) { acutPrintf(L"\n[PyDbDatabaseReactor] Python 回调异常: %hs\n", e.what()); PyErr_Clear(); }
+        catch (...) { acutPrintf(L"\n[PyDbDatabaseReactor] 回调抛出未知异常（已忽略）\n"); }
     } else {
         AcDbDatabaseReactor::objectAppended(pDb, pObj);
     }
@@ -32,8 +32,8 @@ void PyDbDatabaseReactor::objectUnAppended(const AcDbDatabase* pDb, const AcDbOb
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "objectUnAppended")) {
         try { py_self.attr("objectUnAppended")(PyDbDatabase(const_cast<AcDbDatabase*>(pDb)), PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (const pybind11::error_already_set& e) { acutPrintf(L"\n[PyDbDatabaseReactor] Python 回调异常: %hs\n", e.what()); PyErr_Clear(); }
+        catch (...) { acutPrintf(L"\n[PyDbDatabaseReactor] 回调抛出未知异常（已忽略）\n"); }
     } else {
         AcDbDatabaseReactor::objectUnAppended(pDb, pObj);
     }
@@ -48,8 +48,8 @@ void PyDbDatabaseReactor::objectReAppended(const AcDbDatabase* pDb, const AcDbOb
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "objectReAppended")) {
         try { py_self.attr("objectReAppended")(PyDbDatabase(const_cast<AcDbDatabase*>(pDb)), PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (const pybind11::error_already_set& e) { acutPrintf(L"\n[PyDbDatabaseReactor] Python 回调异常: %hs\n", e.what()); PyErr_Clear(); }
+        catch (...) { acutPrintf(L"\n[PyDbDatabaseReactor] 回调抛出未知异常（已忽略）\n"); }
     } else {
         AcDbDatabaseReactor::objectReAppended(pDb, pObj);
     }
@@ -64,8 +64,8 @@ void PyDbDatabaseReactor::objectOpenedForModify(const AcDbDatabase* pDb, const A
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "objectOpenedForModify")) {
         try { py_self.attr("objectOpenedForModify")(PyDbDatabase(const_cast<AcDbDatabase*>(pDb)), PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (const pybind11::error_already_set& e) { acutPrintf(L"\n[PyDbDatabaseReactor] Python 回调异常: %hs\n", e.what()); PyErr_Clear(); }
+        catch (...) { acutPrintf(L"\n[PyDbDatabaseReactor] 回调抛出未知异常（已忽略）\n"); }
     } else {
         AcDbDatabaseReactor::objectOpenedForModify(pDb, pObj);
     }
@@ -80,8 +80,8 @@ void PyDbDatabaseReactor::objectModified(const AcDbDatabase* pDb, const AcDbObje
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "objectModified")) {
         try { py_self.attr("objectModified")(PyDbDatabase(const_cast<AcDbDatabase*>(pDb)), PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (const pybind11::error_already_set& e) { acutPrintf(L"\n[PyDbDatabaseReactor] Python 回调异常: %hs\n", e.what()); PyErr_Clear(); }
+        catch (...) { acutPrintf(L"\n[PyDbDatabaseReactor] 回调抛出未知异常（已忽略）\n"); }
     } else {
         AcDbDatabaseReactor::objectModified(pDb, pObj);
     }
@@ -96,8 +96,8 @@ void PyDbDatabaseReactor::objectErased(const AcDbDatabase* pDb, const AcDbObject
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "objectErased")) {
         try { py_self.attr("objectErased")(PyDbDatabase(const_cast<AcDbDatabase*>(pDb)), PyDbObject(const_cast<AcDbObject*>(pObj)), erased); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (const pybind11::error_already_set& e) { acutPrintf(L"\n[PyDbDatabaseReactor] Python 回调异常: %hs\n", e.what()); PyErr_Clear(); }
+        catch (...) { acutPrintf(L"\n[PyDbDatabaseReactor] 回调抛出未知异常（已忽略）\n"); }
     } else {
         AcDbDatabaseReactor::objectErased(pDb, pObj, erased);
     }
@@ -112,8 +112,8 @@ void PyDbDatabaseReactor::headerSysVarWillChange(const AcDbDatabase* pDb, const 
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "headerSysVarWillChange")) {
         try { py_self.attr("headerSysVarWillChange")(PyDbDatabase(const_cast<AcDbDatabase*>(pDb)), pybind11::str(AcString(name).utf8Ptr())); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (const pybind11::error_already_set& e) { acutPrintf(L"\n[PyDbDatabaseReactor] Python 回调异常: %hs\n", e.what()); PyErr_Clear(); }
+        catch (...) { acutPrintf(L"\n[PyDbDatabaseReactor] 回调抛出未知异常（已忽略）\n"); }
     } else {
         AcDbDatabaseReactor::headerSysVarWillChange(pDb, name);
     }
@@ -128,8 +128,8 @@ void PyDbDatabaseReactor::headerSysVarChanged(const AcDbDatabase* pDb, const wch
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "headerSysVarChanged")) {
         try { py_self.attr("headerSysVarChanged")(PyDbDatabase(const_cast<AcDbDatabase*>(pDb)), pybind11::str(AcString(name).utf8Ptr()), success); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (const pybind11::error_already_set& e) { acutPrintf(L"\n[PyDbDatabaseReactor] Python 回调异常: %hs\n", e.what()); PyErr_Clear(); }
+        catch (...) { acutPrintf(L"\n[PyDbDatabaseReactor] 回调抛出未知异常（已忽略）\n"); }
     } else {
         AcDbDatabaseReactor::headerSysVarChanged(pDb, name, success);
     }
@@ -144,8 +144,8 @@ void PyDbDatabaseReactor::goodbye(const AcDbDatabase* pDb) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "goodbye")) {
         try { py_self.attr("goodbye")(PyDbDatabase(const_cast<AcDbDatabase*>(pDb))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (const pybind11::error_already_set& e) { acutPrintf(L"\n[PyDbDatabaseReactor] Python 回调异常: %hs\n", e.what()); PyErr_Clear(); }
+        catch (...) { acutPrintf(L"\n[PyDbDatabaseReactor] 回调抛出未知异常（已忽略）\n"); }
     } else {
         AcDbDatabaseReactor::goodbye(pDb);
     }
@@ -177,3 +177,4 @@ void bind_PyDbDatabaseReactor(pym& m) {
 		.def("attach", &PyDbDatabaseReactor::attach, py::arg("db"))
 		.def("detach", &PyDbDatabaseReactor::detach, py::arg("db"));
 }
+
