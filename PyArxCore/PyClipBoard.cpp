@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyClipBoard.h"
 
 // 构造函数：打开剪贴板
@@ -48,14 +48,14 @@ bool PyClipBoard::getText(AcString& data)
 {
     data.setEmpty();
 
-    if (!m_bOpen) return false;
-    if (!IsClipboardFormatAvailable(CF_UNICODETEXT)) return false;
+    if (!m_bOpen) { acutPrintf(L"\n[PyClipBoard] getText: 剪贴板未打开"); return false; }
+    if (!IsClipboardFormatAvailable(CF_UNICODETEXT)) { acutPrintf(L"\n[PyClipBoard] getText: 剪贴板无 CF_UNICODETEXT 数据"); return false; }
 
     HANDLE hData = GetClipboardData(CF_UNICODETEXT);
     if (hData == NULL) return false;
 
     wchar_t* pData = (wchar_t*)GlobalLock(hData);
-    if (pData == NULL) return false;
+    if (pData == NULL) { acutPrintf(L"\n[PyClipBoard] getText: GlobalLock 失败"); return false; }
 
     data.assign(pData);
 
@@ -69,17 +69,18 @@ bool PyClipBoard::setText(const AcString& data)
     if (!m_bOpen) return false;
 
     // 清空剪贴板
-    if (!EmptyClipboard()) return false;
+    if (!EmptyClipboard()) { acutPrintf(L"\n[PyClipBoard] setText: EmptyClipboard 失败"); return false; }
 
     // 计算内存大小（含结束符）
     size_t size = (data.length() + 1) * sizeof(wchar_t);
 
     HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, size);
-    if (hMem == NULL) return false;
+    if (hMem == NULL) { acutPrintf(L"\n[PyClipBoard] setText: GlobalAlloc 失败"); return false; }
 
     wchar_t* pMem = (wchar_t*)GlobalLock(hMem);
     if (pMem == NULL) {
         GlobalFree(hMem);
+        acutPrintf(L"\n[PyClipBoard] setText: GlobalLock 失败");
         return false;
     }
 
@@ -89,6 +90,7 @@ bool PyClipBoard::setText(const AcString& data)
 
     if (!SetClipboardData(CF_UNICODETEXT, hMem)) {
         GlobalFree(hMem);
+        acutPrintf(L"\n[PyClipBoard] setText: SetClipboardData 失败");
         return false;
     }
 

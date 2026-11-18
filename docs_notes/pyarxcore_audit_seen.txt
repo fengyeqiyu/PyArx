@@ -396,3 +396,8 @@ PyDbCompositeFilteredBlockIterator.cpp:1:clean
 PyDbDynBlockReferenceProperty.cpp:1:clean-3/4/8
 PyApp.cpp:1:clean
 PyDbEvalContextIterator.cpp:11:②-待报(interface)
+PyClipBoard.cpp:51-93:④已改
+PyArxCompat.cpp:1:clean
+PyApp.cpp:1:clean
+PyAcadDatabase.cpp:1:clean
+PyAdsName.cpp:1:clean
