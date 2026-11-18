@@ -100,3 +100,4 @@
 2026-11-19 00:18 | PyClipBoard.cpp:51-93 | ④ | getText/setText 6 处失败分支补 acutPrintf 原因提示
 2026-11-19 01:18 | PyDbField.cpp:16-139 | ② | 21 个成员函数补 if (!impObj()) 守卫并给默认返回
 2026-11-19 02:20 | PyDbFullSubentPath.cpp:65-115 | ② | PyDbSubentId 6 处裸解引用 m_ptr 补判空并给默认返回
+2026-11-19 03:18 | PyDbLongTransaction.cpp:12-60 | ② | 8 个绑定 lambda 内裸调用 s.impObj() 补判空并给默认返回

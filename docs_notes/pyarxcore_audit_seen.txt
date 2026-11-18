@@ -410,3 +410,8 @@ PyDbIdMapping.cpp:1:clean
 PyDbIdMappingIter.cpp:1:clean
 PyDbObjectContext.cpp:1:clean
 PyDbObjectContextManager.cpp:1:clean
+PyDbLongTransaction.cpp:12-60:②已改
+PyDbIdTypes.cpp:1:clean
+PyDbIndexUpdateDataIterator.cpp:1:clean
+PyDbLayerIndexIterator.cpp:1:clean
+PyDbLongTransWorkSetIterator.cpp:1:clean
