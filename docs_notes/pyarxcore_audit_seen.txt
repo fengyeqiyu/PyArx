@@ -376,3 +376,9 @@ PyDbViewportTable.cpp:multi:②补默认值
 PyGiDrawable.cpp:multi:②补默认值
 PyGiSubEntityTraits.cpp:multi:②补默认值
 PyGiWorldGeometry.cpp:multi:②补默认值
+PyDbGeoData.cpp:1:clean-3/4
+PyDbFcf.cpp:1:clean-3/4
+PyDbShape.cpp:1:clean
+PyDbTrace.cpp:1:clean
+PyDbHelix.cpp:1:clean
+PyArxCore.vcxproj:1:clean-6
