@@ -105,3 +105,7 @@ PyDbAuditInfo.cpp:1-8:clean
 PyDbBackground.cpp:1-8:clean
 PyDbDwgFiler.cpp:1-8:clean
 PyDb2dPolyline.cpp:1-118:②
+PyDb2LineAngularDimension.cpp:1-50:②
+PyDb3PointAngularDimension.cpp:1-40:②
+PyDb3dPolyline.cpp:1-69:②
+PyDb3dSolid.cpp:1-70:②

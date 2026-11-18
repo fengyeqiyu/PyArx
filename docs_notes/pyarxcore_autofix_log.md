@@ -54,3 +54,7 @@
 2026-11-18 12:29 | PyDbMLeaderStyle.cpp:1-329 | ② | 63 处补 impObj() 判空（18 处单行 + 43 处多行函数体 + PyColor textColor/blockColor 与 postMLeaderStyleToDb 手改），行为不变
 
 2026-11-18 13:18 | PyDb2dPolyline.cpp:1-118 | ② | 34 处 getter/setter 补 impObj() 判空（28 单行 + 5 多行体 + numVerts 手改），uint64_t 返回改为 0ULL
+2026-11-18 14:20 | PyDb2LineAngularDimension.cpp:1-50 | ② | 12 处 getter/setter 补 impObj() 判空
+2026-11-18 14:20 | PyDb3PointAngularDimension.cpp:1-40 | ② | 10 处 getter/setter 补 impObj() 判空
+2026-11-18 14:20 | PyDb3dPolyline.cpp:1-69 | ② | 15 处补判空（10 单行 + 4 多行体 + numVerts 手改），uint64_t 返回 0ULL
+2026-11-18 14:20 | PyDb3dSolid.cpp:1-70 | ② | 21 处补判空（16 单行 + 3 多行体 + numChanges 手改 + extrude lambda 内 self.impObj()

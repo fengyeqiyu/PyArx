@@ -4,28 +4,28 @@
 
 PyWrapper_Cpp(Db2LineAngularDimension)
 AcString PyDb2LineAngularDimension::toString() const { return AcString(std::format("AcDb2LineAngularDimension[wrapper]").c_str(), AcString::Utf8); }
-AcGePoint3d PyDb2LineAngularDimension::arcPoint() const { return impObj()->arcPoint(); }
+AcGePoint3d PyDb2LineAngularDimension::arcPoint() const { if (!impObj()) return AcGePoint3d(); return impObj()->arcPoint(); }
 
-bool  PyDb2LineAngularDimension::setArcPoint(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setArcPoint(p), L"AcDb2LineAngularDimension::setArcPoint"); }
+bool PyDb2LineAngularDimension::setArcPoint(const AcGePoint3d& p)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setArcPoint(p), L"AcDb2LineAngularDimension::setArcPoint"); }
 
-AcGePoint3d PyDb2LineAngularDimension::xLine1Start() const { return impObj()->xLine1Start(); }
+AcGePoint3d PyDb2LineAngularDimension::xLine1Start() const { if (!impObj()) return AcGePoint3d(); return impObj()->xLine1Start(); }
 
-bool  PyDb2LineAngularDimension::setXLine1Start(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setXLine1Start(p), L"AcDb2LineAngularDimension::setXLine1Start"); }
+bool PyDb2LineAngularDimension::setXLine1Start(const AcGePoint3d& p)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setXLine1Start(p), L"AcDb2LineAngularDimension::setXLine1Start"); }
 
-AcGePoint3d PyDb2LineAngularDimension::xLine1End() const { return impObj()->xLine1End(); }
+AcGePoint3d PyDb2LineAngularDimension::xLine1End() const { if (!impObj()) return AcGePoint3d(); return impObj()->xLine1End(); }
 
-bool  PyDb2LineAngularDimension::setXLine1End(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setXLine1End(p), L"AcDb2LineAngularDimension::setXLine1End"); }
+bool PyDb2LineAngularDimension::setXLine1End(const AcGePoint3d& p)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setXLine1End(p), L"AcDb2LineAngularDimension::setXLine1End"); }
 
-AcGePoint3d PyDb2LineAngularDimension::xLine2Start() const { return impObj()->xLine2Start(); }
+AcGePoint3d PyDb2LineAngularDimension::xLine2Start() const { if (!impObj()) return AcGePoint3d(); return impObj()->xLine2Start(); }
 
-bool  PyDb2LineAngularDimension::setXLine2Start(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setXLine2Start(p), L"AcDb2LineAngularDimension::setXLine2Start"); }
+bool PyDb2LineAngularDimension::setXLine2Start(const AcGePoint3d& p)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setXLine2Start(p), L"AcDb2LineAngularDimension::setXLine2Start"); }
 
-AcGePoint3d PyDb2LineAngularDimension::xLine2End() const { return impObj()->xLine2End(); }
+AcGePoint3d PyDb2LineAngularDimension::xLine2End() const { if (!impObj()) return AcGePoint3d(); return impObj()->xLine2End(); }
 
-bool  PyDb2LineAngularDimension::setXLine2End(const AcGePoint3d& p) { return PyWarnIfError(impObj()->setXLine2End(p), L"AcDb2LineAngularDimension::setXLine2End"); }
+bool PyDb2LineAngularDimension::setXLine2End(const AcGePoint3d& p)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setXLine2End(p), L"AcDb2LineAngularDimension::setXLine2End"); }
 
-bool PyDb2LineAngularDimension::extArcOn() const { return impObj()->extArcOn(); }
-bool  PyDb2LineAngularDimension::setExtArcOn(bool v) { return PyWarnIfError(impObj()->setExtArcOn(v), L"AcDb2LineAngularDimension::setExtArcOn"); }
+bool PyDb2LineAngularDimension::extArcOn() const { if (!impObj()) return false; return impObj()->extArcOn(); }
+bool PyDb2LineAngularDimension::setExtArcOn(bool v)  { if (!impObj()) return false; return PyWarnIfError(impObj()->setExtArcOn(v), L"AcDb2LineAngularDimension::setExtArcOn"); }
 
 void bind_PyDb2LineAngularDimension(pym& m) {
 	py::class_<PyDb2LineAngularDimension, PyDbDimension>(m, "PyDb2LineAngularDimension")
