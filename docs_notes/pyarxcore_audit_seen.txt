@@ -425,3 +425,13 @@ PyAdsJigEnums.cpp:1:clean
 PyAdsTableUpdateEnums.cpp:1:clean
 PyArxExtraEnums.cpp:1:clean
 PyAdsDbCoreEnums.cpp:1:clean
+PyDbPlotSettingsValidator.cpp:30-167:②已改
+PyDbOleFrame.cpp:1:clean
+PyDbPdfReference.cpp:1:clean
+PyDbSpatialIndexIterator.cpp:1:clean
+PyDbTextEditorParagraphIterator.cpp:1:clean
+PyDbTextStyleTableRecord.cpp:1:clean
+PyDbTransactionManager.cpp:1:clean
+PyDbValueTypes.cpp:1:clean
+PyDbWblockCloneFiler.cpp:1:clean
+PyDxfTypeValue.cpp:1:clean
