@@ -13,67 +13,80 @@ PyDbField* PyDbField::create(const AcString& fieldCode, bool bTextField)
 
 int PyDbField::state() const
 {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->state());
 }
 
 int PyDbField::evaluationStatus() const
 {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->evaluationStatus());
 }
 
 int PyDbField::evaluationOption() const
 {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->evaluationOption());
 }
 
 bool PyDbField::setEvaluationOption(int option)
 {
+	if (!impObj()) return false;
 	return impObj()->setEvaluationOption(static_cast<AcDbField::EvalOption>(option)) == Acad::eOk;
 }
 
 int PyDbField::filingOption() const
 {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->filingOption());
 }
 
 bool PyDbField::setFilingOption(int option)
 {
+	if (!impObj()) return false;
 	return impObj()->setFilingOption(static_cast<AcDbField::FilingOption>(option)) == Acad::eOk;
 }
 
 AcString PyDbField::evaluatorId() const
 {
+	if (!impObj()) return AcString(L"");
 	const ACHAR* psz = impObj()->evaluatorId();
 	return AcString(psz != nullptr ? psz : L"");
 }
 
 bool PyDbField::setEvaluatorId(const AcString& evaluatorId)
 {
+	if (!impObj()) return false;
 	return impObj()->setEvaluatorId(evaluatorId) == Acad::eOk;
 }
 
 bool PyDbField::isTextField() const
 {
+	if (!impObj()) return false;
 	return impObj()->isTextField();
 }
 
 bool PyDbField::convertToTextField()
 {
+	if (!impObj()) return false;
 	return impObj()->convertToTextField() == Acad::eOk;
 }
 
 int PyDbField::dataType() const
 {
+	if (!impObj()) return 0;
 	return static_cast<int>(impObj()->dataType());
 }
 
 int PyDbField::childCount() const
 {
+	if (!impObj()) return 0;
 	return impObj()->childCount();
 }
 
 AcString PyDbField::getFieldCode(int flag) const
 {
+	if (!impObj()) return AcString(L"");
 	AcString sCode;
 	Acad::ErrorStatus es = impObj()->getFieldCode(sCode, static_cast<AcDbField::FieldCodeFlag>(flag));
 	if (es != Acad::eOk)
@@ -83,11 +96,13 @@ AcString PyDbField::getFieldCode(int flag) const
 
 bool PyDbField::setFieldCode(const AcString& fieldCode, int flag)
 {
+	if (!impObj()) return false;
 	return impObj()->setFieldCode(fieldCode, static_cast<AcDbField::FieldCodeFlag>(flag)) == Acad::eOk;
 }
 
 AcString PyDbField::getFormat() const
 {
+	if (!impObj()) return AcString(L"");
 	AcString sFormat;
 	if (impObj()->getFormat(sFormat) != Acad::eOk)
 		return AcString(L"");
@@ -96,11 +111,13 @@ AcString PyDbField::getFormat() const
 
 bool PyDbField::setFormat(const AcString& format)
 {
+	if (!impObj()) return false;
 	return impObj()->setFormat(format) == Acad::eOk;
 }
 
 AcString PyDbField::getValue() const
 {
+	if (!impObj()) return AcString(L"");
 	AcString sValue;
 	if (impObj()->getValue(sValue) != Acad::eOk)
 		return AcString(L"");
@@ -109,6 +126,7 @@ AcString PyDbField::getValue() const
 
 py::tuple PyDbField::evaluate(int context, PyDbDatabase* db)
 {
+	if (!impObj()) return py::make_tuple(0, 0);
 	int nFound = 0;
 	int nEvaluated = 0;
 	AcDbDatabase* pDb = (db != nullptr) ? db->impObj() : nullptr;
@@ -121,6 +139,7 @@ py::tuple PyDbField::evaluate(int context, PyDbDatabase* db)
 
 PyDbField* PyDbField::getChild(int index, AcDb::OpenMode mode)
 {
+	if (!impObj()) return nullptr;
 	AcDbField* pChild = nullptr;
 	Acad::ErrorStatus es = impObj()->getChild(index, pChild, mode);
 	if (es != Acad::eOk || pChild == nullptr)
@@ -130,11 +149,13 @@ PyDbField* PyDbField::getChild(int index, AcDb::OpenMode mode)
 
 bool PyDbField::setInObject(PyDbObject& obj, const AcString& propName)
 {
+	if (!impObj()) return false;
 	return impObj()->setInObject(obj.impObj(), propName) == Acad::eOk;
 }
 
 bool PyDbField::postInDatabase(PyDbDatabase& db)
 {
+	if (!impObj()) return false;
 	return impObj()->postInDatabase(db.impObj()) == Acad::eOk;
 }
 

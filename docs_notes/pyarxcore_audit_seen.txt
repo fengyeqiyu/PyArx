@@ -401,3 +401,7 @@ PyArxCompat.cpp:1:clean
 PyApp.cpp:1:clean
 PyAcadDatabase.cpp:1:clean
 PyAdsName.cpp:1:clean
+PyDbField.cpp:16-139:②已改
+PyDbImage.cpp:1:clean
+PyDbLinetypeTableRecord.cpp:1:clean
+PyDbLayerStateManager.cpp:1:clean
