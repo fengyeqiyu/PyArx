@@ -6,30 +6,36 @@
 PyWrapper_Cpp(DbModelDocViewStyle);
 
 AcString PyDbModelDocViewStyle::defaultViewName(int index) const {
+	if (!impObj()) return AcString();
 	return impObj()->defaultViewName(index);
 }
 
 AcString PyDbModelDocViewStyle::getDescription() const {
 	AcString s;
+	if (!impObj()) return s;
 	impObj()->getDescription(s);
 	return s;
 }
 
 AcString PyDbModelDocViewStyle::getName() const {
 	AcString s;
+	if (!impObj()) return s;
 	if (!PyWarnIfError(impObj()->getName(s), L"AcDbModelDocViewStyle::getName")) return AcString();
 	return s;
 }
 
 bool PyDbModelDocViewStyle::isModifiedForRecompute() const {
+	if (!impObj()) return false;
 	return impObj()->isModifiedForRecompute();
 }
 
 bool PyDbModelDocViewStyle::isViewNameValid(const AcString& name) const {
+	if (!impObj()) return false;
 	return impObj()->isViewNameValid(name.kwszPtr());
 }
 
 std::tuple<bool, uint64_t> PyDbModelDocViewStyle::postViewStyleToDb(PyDbDatabase& db, const AcString& styleName) {
+	if (!impObj() || !db.impObj()) return std::make_tuple(false, 0ULL);
 	AcDbObjectId id;
 	Acad::ErrorStatus es = impObj()->postViewStyleToDb(db.impObj(), styleName.kwszPtr(), id);
 	if (!PyWarnIfError(es, L"AcDbModelDocViewStyle::postViewStyleToDb")) return std::make_tuple(false, 0ULL);
@@ -37,15 +43,18 @@ std::tuple<bool, uint64_t> PyDbModelDocViewStyle::postViewStyleToDb(PyDbDatabase
 }
 
 bool PyDbModelDocViewStyle::setDatabaseDefaults(PyDbDatabase& db) {
+	if (!impObj() || !db.impObj()) return false;
 	impObj()->setDatabaseDefaults(db.impObj());
 	return true;
 }
 
 bool PyDbModelDocViewStyle::setDescription(const AcString& desc) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setDescription(desc.kwszPtr()), L"AcDbModelDocViewStyle::setDescription");
 }
 
 bool PyDbModelDocViewStyle::setName(const AcString& name) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setName(name.kwszPtr()), L"AcDbModelDocViewStyle::setName");
 }
 

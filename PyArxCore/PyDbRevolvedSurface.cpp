@@ -5,30 +5,35 @@
 PyWrapper_Cpp(DbRevolvedSurface);
 
 AcGePoint3d PyDbRevolvedSurface::getAxisPnt() const {
+	if (!impObj()) return AcGePoint3d();
 	return impObj()->getAxisPnt();
 }
 
 AcGeVector3d PyDbRevolvedSurface::getAxisVec() const {
+	if (!impObj()) return AcGeVector3d();
 	return impObj()->getAxisVec();
 }
 
 double PyDbRevolvedSurface::getRevolveAngle() const {
-	return impObj()->getRevolveAngle();
+	return impObj() ? impObj()->getRevolveAngle() : 0.0;
 }
 
 double PyDbRevolvedSurface::getStartAngle() const {
-	return impObj()->getStartAngle();
+	return impObj() ? impObj()->getStartAngle() : 0.0;
 }
 
 bool PyDbRevolvedSurface::setAxisPnt(const AcGePoint3d& pnt) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setAxisPnt(pnt), L"AcDbRevolvedSurface::setAxisPnt");
 }
 
 bool PyDbRevolvedSurface::setAxisVec(const AcGeVector3d& vec) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setAxisVec(vec), L"AcDbRevolvedSurface::setAxisVec");
 }
 
 bool PyDbRevolvedSurface::setRevolveAngle(double ang) {
+	if (!impObj()) return false;
 	return PyWarnIfError(impObj()->setRevolveAngle(ang), L"AcDbRevolvedSurface::setRevolveAngle");
 }
 

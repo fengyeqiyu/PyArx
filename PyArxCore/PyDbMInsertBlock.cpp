@@ -4,21 +4,21 @@
 
 PyWrapper_Cpp(DbMInsertBlock)
 AcString PyDbMInsertBlock::toString() const { return AcString(std::format("AcDbMInsertBlock[wrapper]").c_str(), AcString::Utf8); }
-Adesk::UInt16 PyDbMInsertBlock::columns() const { return impObj()->columns(); }
+Adesk::UInt16 PyDbMInsertBlock::columns() const { return impObj() ? impObj()->columns() : 0; }
 
-bool  PyDbMInsertBlock::setColumns(Adesk::UInt16 columns) { return PyWarnIfError(impObj()->setColumns(columns), L"AcDbMInsertBlock::setColumns"); }
+bool  PyDbMInsertBlock::setColumns(Adesk::UInt16 columns) { if (!impObj()) return false; return PyWarnIfError(impObj()->setColumns(columns), L"AcDbMInsertBlock::setColumns"); }
 
-Adesk::UInt16 PyDbMInsertBlock::rows() const { return impObj()->rows(); }
+Adesk::UInt16 PyDbMInsertBlock::rows() const { return impObj() ? impObj()->rows() : 0; }
 
-bool  PyDbMInsertBlock::setRows(Adesk::UInt16 rows) { return PyWarnIfError(impObj()->setRows(rows), L"AcDbMInsertBlock::setRows"); }
+bool  PyDbMInsertBlock::setRows(Adesk::UInt16 rows) { if (!impObj()) return false; return PyWarnIfError(impObj()->setRows(rows), L"AcDbMInsertBlock::setRows"); }
 
-double PyDbMInsertBlock::columnSpacing() const { return impObj()->columnSpacing(); }
+double PyDbMInsertBlock::columnSpacing() const { return impObj() ? impObj()->columnSpacing() : 0.0; }
 
-bool  PyDbMInsertBlock::setColumnSpacing(double spacing) { return PyWarnIfError(impObj()->setColumnSpacing(spacing), L"AcDbMInsertBlock::setColumnSpacing"); }
+bool  PyDbMInsertBlock::setColumnSpacing(double spacing) { if (!impObj()) return false; return PyWarnIfError(impObj()->setColumnSpacing(spacing), L"AcDbMInsertBlock::setColumnSpacing"); }
 
-double PyDbMInsertBlock::rowSpacing() const { return impObj()->rowSpacing(); }
+double PyDbMInsertBlock::rowSpacing() const { return impObj() ? impObj()->rowSpacing() : 0.0; }
 
-bool  PyDbMInsertBlock::setRowSpacing(double spacing) { return PyWarnIfError(impObj()->setRowSpacing(spacing), L"AcDbMInsertBlock::setRowSpacing"); }
+bool  PyDbMInsertBlock::setRowSpacing(double spacing) { if (!impObj()) return false; return PyWarnIfError(impObj()->setRowSpacing(spacing), L"AcDbMInsertBlock::setRowSpacing"); }
 
 void bind_PyDbMInsertBlock(pym& m) {
 	py::class_<PyDbMInsertBlock, PyDbBlockReference>(m, "PyDbMInsertBlock")
