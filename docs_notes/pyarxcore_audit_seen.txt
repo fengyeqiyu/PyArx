@@ -459,3 +459,7 @@ PyErrorStatusResult.h:1:⑤-待报
 singleinstance.h:1:⑤-待报
 PyEdEnt.cpp:1:⑤已改
 TextFinder.h:1:⑤已删（自研QTextFind，SDK acdbTextFind 已迁入 PyDb）
+PyEdBinder.cpp:1:通过-1/2/3/4/5/7/8
+PyEdFunc.cpp:1:通过-2/5/7/8
+PyEdEditor.cpp:1:③已改
+PyEdSel.cpp:1:通过-1/2/3/4/5/7/8

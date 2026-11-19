@@ -114,7 +114,8 @@ void bind_PyEdEditor(pym& ed)
 			}
 			else
 			{
-				acedCoordFromPixelToWorld(cpnt, out);
+				if (!acedCoordFromPixelToWorld(cpnt, out))
+					return py::none();
 			}
 			return py::cast(AcGePoint3d(out[0], out[1], out[2]));
 		});
