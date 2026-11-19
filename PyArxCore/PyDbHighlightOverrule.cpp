@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyDbHighlightOverrule.h"
 
 bool PyDbHighlightOverrule::isApplicable(const AcRxObject* pOverruledSubject) const {
@@ -10,8 +10,8 @@ bool PyDbHighlightOverrule::isApplicable(const AcRxObject* pOverruledSubject) co
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "isApplicable")) {
         try { return py_self.attr("isApplicable")(pybind11::cast(pOverruledSubject)).cast<bool>(); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     }
     return true;
 }

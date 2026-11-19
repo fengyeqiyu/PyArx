@@ -121,3 +121,6 @@
 2026-11-19 10:20 | PyDbEntity.cpp:85 | 命名 | setColor(PyColor) 改为 setColorByRgb(r,g,b)，颜色设置入口收敛为 setColorIndex + setColorByRgb
 2026-11-19 10:20 | PyDbLayerTableRecord.cpp:120 | 命名/③ | setColor(r,g,b) 改为 setColorByRgb，补 clamp 并补回 bool
 2026-11-19 10:20 | PyDbColor.cpp:33 | 命名 | setRGB 改为 setColorByRgb，补 clamp 与 bool 返回
+2026-11-19 10:24 | PyDbHighlightOverrule.cpp:14 | ⑧/④ | catch(...) 与 error_already_set 分支改为 restore+PyErr_Print，异常不再静默
+2026-11-19 10:24 | PyDbGripOverrule.cpp:52 | ⑧/④ | 6 处回调 catch 补 PyErr_Print，reg_* 降级仍保留
+2026-11-19 10:24 | PyDbObjectReactor.cpp:19 | ⑧/④ | 12 处回调 catch 补 PyErr_Print，异常不再静默

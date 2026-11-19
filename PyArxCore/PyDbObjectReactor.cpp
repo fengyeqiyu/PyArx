@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyDbObjectReactor.h"
 #include "PyDbObject.h"
 
@@ -15,8 +15,8 @@ void PyDbObjectReactor::cancelled(const AcDbObject* pObj) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "cancelled")) {
         try { py_self.attr("cancelled")(PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::cancelled(pObj);
     }
@@ -31,8 +31,8 @@ void PyDbObjectReactor::copied(const AcDbObject* pOld, const AcDbObject* pNew) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "copied")) {
         try { py_self.attr("copied")(PyDbObject(const_cast<AcDbObject*>(pOld)), PyDbObject(const_cast<AcDbObject*>(pNew))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::copied(pOld, pNew);
     }
@@ -47,8 +47,8 @@ void PyDbObjectReactor::erased(const AcDbObject* pObj, bool bErasing) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "erased")) {
         try { py_self.attr("erased")(PyDbObject(const_cast<AcDbObject*>(pObj)), bErasing); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::erased(pObj, bErasing);
     }
@@ -63,8 +63,8 @@ void PyDbObjectReactor::goodbye(const AcDbObject* pObj) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "goodbye")) {
         try { py_self.attr("goodbye")(PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::goodbye(pObj);
     }
@@ -79,8 +79,8 @@ void PyDbObjectReactor::openedForModify(const AcDbObject* pObj) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "openedForModify")) {
         try { py_self.attr("openedForModify")(PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::openedForModify(pObj);
     }
@@ -95,8 +95,8 @@ void PyDbObjectReactor::modified(const AcDbObject* pObj) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "modified")) {
         try { py_self.attr("modified")(PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::modified(pObj);
     }
@@ -111,8 +111,8 @@ void PyDbObjectReactor::subObjModified(const AcDbObject* pObj, const AcDbObject*
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "subObjModified")) {
         try { py_self.attr("subObjModified")(PyDbObject(const_cast<AcDbObject*>(pObj)), PyDbObject(const_cast<AcDbObject*>(pSub))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::subObjModified(pObj, pSub);
     }
@@ -127,8 +127,8 @@ void PyDbObjectReactor::modifyUndone(const AcDbObject* pObj) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "modifyUndone")) {
         try { py_self.attr("modifyUndone")(PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::modifyUndone(pObj);
     }
@@ -143,8 +143,8 @@ void PyDbObjectReactor::modifiedXData(const AcDbObject* pObj) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "modifiedXData")) {
         try { py_self.attr("modifiedXData")(PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::modifiedXData(pObj);
     }
@@ -159,8 +159,8 @@ void PyDbObjectReactor::unappended(const AcDbObject* pObj) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "unappended")) {
         try { py_self.attr("unappended")(PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::unappended(pObj);
     }
@@ -175,8 +175,8 @@ void PyDbObjectReactor::reappended(const AcDbObject* pObj) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "reappended")) {
         try { py_self.attr("reappended")(PyDbObject(const_cast<AcDbObject*>(pObj))); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::reappended(pObj);
     }
@@ -191,8 +191,8 @@ void PyDbObjectReactor::objectClosed(const AcDbObjectId objId) {
     } catch (const pybind11::cast_error&) { h3_bound = false; }
     if (h3_bound && pybind11::hasattr(py_self, "objectClosed")) {
         try { py_self.attr("objectClosed")(static_cast<uint64_t>(objId.asOldId())); }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     } else {
         AcDbObjectReactor::objectClosed(objId);
     }

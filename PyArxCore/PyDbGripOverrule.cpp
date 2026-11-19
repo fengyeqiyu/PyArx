@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyDbGripOverrule.h"
 #include "PyDbEntity.h"
 
@@ -48,8 +48,8 @@ bool PyDbGripOverrule::isApplicable(const AcRxObject* pOverruledSubject) const {
         try {
             return py_self.attr("isApplicable")(pybind11::cast(pOverruledSubject)).cast<bool>();
         }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) { reg_isApplicable = false; }
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); reg_isApplicable = false; }
     }
     return true;
 }
@@ -75,8 +75,8 @@ Acad::ErrorStatus PyDbGripOverrule::getGripPoints(const AcDbEntity* pSubject, Ac
             }
             return es;
         }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) { reg_getGripPoints = false; }
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); reg_getGripPoints = false; }
     }
     return AcDbGripOverrule::getGripPoints(pSubject, gripPoints, osnapModes, geomIds);
 }
@@ -94,8 +94,8 @@ Acad::ErrorStatus PyDbGripOverrule::moveGripPointsAt(AcDbEntity* pSubject, const
             pybind11::list pyIndices = intArrayToList(indices);
             return py_self.attr("moveGripPointsAt")(pybind11::cast(pSubject), pyIndices, offset).cast<Acad::ErrorStatus>();
         }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) { reg_moveGripPointsAt = false; }
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); reg_moveGripPointsAt = false; }
     }
     return AcDbGripOverrule::moveGripPointsAt(pSubject, indices, offset);
 }
@@ -117,8 +117,8 @@ Acad::ErrorStatus PyDbGripOverrule::getStretchPoints(const AcDbEntity* pSubject,
             }
             return es;
         }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) { reg_getStretchPoints = false; }
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); reg_getStretchPoints = false; }
     }
     return AcDbGripOverrule::getStretchPoints(pSubject, stretchPoints);
 }
@@ -136,8 +136,8 @@ Acad::ErrorStatus PyDbGripOverrule::moveStretchPointsAt(AcDbEntity* pSubject, co
             pybind11::list pyIndices = intArrayToList(indices);
             return py_self.attr("moveStretchPointsAt")(pybind11::cast(pSubject), pyIndices, offset).cast<Acad::ErrorStatus>();
         }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) { reg_moveStretchPointsAt = false; }
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); reg_moveStretchPointsAt = false; }
     }
     return AcDbGripOverrule::moveStretchPointsAt(pSubject, indices, offset);
 }
@@ -155,8 +155,8 @@ void PyDbGripOverrule::gripStatus(AcDbEntity* pSubject, const AcDb::GripStat sta
             py_self.attr("gripStatus")(pybind11::cast(pSubject), (int)status);
             return;
         }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) { reg_gripStatus = false; }
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); reg_gripStatus = false; }
     }
     AcDbGripOverrule::gripStatus(pSubject, status);
 }
