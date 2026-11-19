@@ -533,3 +533,4 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-19 22:20 全项目602文件 9类矩阵复检 通过（①⑥⑦⑨=0命中；②③④⑤ 抽查 PyGe/PyGi/PyDb 24 文件 0 命中；新增 getAt/遍历/字典类型还原 均通过无头实测）
 2026-11-19 23:10 全项目602文件 9类复检 通过（②1558处均为绑定lambda标准写法已登记；③ErrorStatus仅声明/转发无丢弃；⑧catch(...)69处25文件已在册；⑨源码无python315t残留）
 2026-11-19 00:10 全项目602文件 9类复检 通过（dumpbin 实证 pyd/pyd/arx 仅依赖 python315t.dll；⑤纯同名转发=0；④ acdbOpenObject 6 处均已判 es+判空）
+2026-11-19 01:00 全项目602文件 9类复检 通过（⑨ dumpbin 三产物仅依赖 python315t.dll；本轮补训练样本 20 条至 sft_audit_api.jsonl，已按问句去重）
