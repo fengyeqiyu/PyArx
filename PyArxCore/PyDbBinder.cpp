@@ -32,6 +32,19 @@
 #include <dbapserv.h>   // acdbHostApplicationServices()->workingDatabase()
 #include <dbmain.h>     // acdbTextFind + AC_SRCH_* 位标志
 
+// 文字查找位标志：dbmain.h 的 AC_SRCH_* 宏在 C++ 里无法作为枚举引用，
+// 这里收成强类型枚举，Python 侧注册为 Db.TextFindFlags（可按位或组合）。
+enum class PyDbTextFindFlags : Adesk::UInt8 {
+    BLOCK      = AC_SRCH_BLOCK,
+    DIM_TEXT   = AC_SRCH_DIM_TEXT,
+    TEXT       = AC_SRCH_TEXT,
+    LINK_DESC  = AC_SRCH_LINK_DESC,
+    LINK_URL   = AC_SRCH_LINK_URL,
+    MATCH_CASE = AC_SRCH_MATCH_CASE,
+    WHOLE_WORD = AC_SRCH_WHOLE_WORD,
+    DEFAULT    = AC_SRCH_DEFAULT,
+};
+
 // Forward declarations of per-class bind functions (one TU per class).
 void bind_PyDbEntity(pym& m);
 void bind_PyDbCurve(pym& m);
@@ -259,8 +272,20 @@ void pybind11_init_PyDb(::pybind11::module_& m) {
 	bind_PyTvList(m);
 	bind_PyResbuf(m);
 
+	// 文字查找位标志（对应 AC_SRCH_*）：Db.TextFindFlags.TEXT | Db.TextFindFlags.MATCH_CASE 这样用。
+	py::enum_<PyDbTextFindFlags>(m, "TextFindFlags", py::arithmetic(),
+		"文字查找位标志（dbmain.h AC_SRCH_*），可用 | 组合")
+		.value("BLOCK", PyDbTextFindFlags::BLOCK, "块属性（AC_SRCH_BLOCK）")
+		.value("DIM_TEXT", PyDbTextFindFlags::DIM_TEXT, "标注文字（AC_SRCH_DIM_TEXT）")
+		.value("TEXT", PyDbTextFindFlags::TEXT, "单行/多行文字（AC_SRCH_TEXT）")
+		.value("LINK_DESC", PyDbTextFindFlags::LINK_DESC, "超链接描述（AC_SRCH_LINK_DESC）")
+		.value("LINK_URL", PyDbTextFindFlags::LINK_URL, "超链接地址（AC_SRCH_LINK_URL）")
+		.value("MATCH_CASE", PyDbTextFindFlags::MATCH_CASE, "区分大小写（AC_SRCH_MATCH_CASE）")
+		.value("WHOLE_WORD", PyDbTextFindFlags::WHOLE_WORD, "全词匹配（AC_SRCH_WHOLE_WORD）")
+		.value("DEFAULT", PyDbTextFindFlags::DEFAULT, "默认组合（AC_SRCH_DEFAULT = 0x1F）");
+
 	// 文字查找 / 替换：直接走 ObjectARX 自带 acdbTextFind（dbmain.h Text Finder API）。
-	// find 为空返回空表；replace 为空 = 只查找；options 取 AC_SRCH_* 位标志，默认 AC_SRCH_DEFAULT；
+	// find 为空返回空表；replace 为空 = 只查找；options 取 TextFindFlags 位标志，默认 DEFAULT；
 	// sel 非空 = 只在给定 id 集合内搜索。返回命中 ObjectId 列表（无命中/失败同样给空表）。
 	m.def("textFind", [](const AcString& find, const AcString& replace, int options,
 	                    const AcDbObjectIdArray& sel) {
@@ -272,17 +297,9 @@ void pybind11_init_PyDb(::pybind11::module_& m) {
 		               replace.isEmpty() ? nullptr : replace.kwszPtr(),
 		               static_cast<Adesk::UInt8>(options), sel);
 		return result;
-	}, py::arg("find"), py::arg("replace") = AcString(), py::arg("options") = int(AC_SRCH_DEFAULT),
-	   py::arg("sel") = AcDbObjectIdArray(),
-	   "按 acdbTextFind 查找（可替换）文字；返回 list[oldId]");
-	m.attr("AC_SRCH_BLOCK")      = int(AC_SRCH_BLOCK);
-	m.attr("AC_SRCH_DIM_TEXT")   = int(AC_SRCH_DIM_TEXT);
-	m.attr("AC_SRCH_TEXT")       = int(AC_SRCH_TEXT);
-	m.attr("AC_SRCH_LINK_DESC")  = int(AC_SRCH_LINK_DESC);
-	m.attr("AC_SRCH_LINK_URL")   = int(AC_SRCH_LINK_URL);
-	m.attr("AC_SRCH_MATCH_CASE") = int(AC_SRCH_MATCH_CASE);
-	m.attr("AC_SRCH_WHOLE_WORD") = int(AC_SRCH_WHOLE_WORD);
-	m.attr("AC_SRCH_DEFAULT")    = int(AC_SRCH_DEFAULT);
+	}, py::arg("find"), py::arg("replace") = AcString(),
+	   py::arg("options") = int(AC_SRCH_DEFAULT), py::arg("sel") = AcDbObjectIdArray(),
+	   "按 acdbTextFind 查找（可替换）文字；options 用 TextFindFlags（可用 | 组合）；返回 list[oldId]");
 
 	// PyRxObject/PyRxClass 已由 PyArx.Rx 子模块先行注册（PyArx 聚合顺序 Rx 先于 Db）。
 	bind_PyDbObject(m);
