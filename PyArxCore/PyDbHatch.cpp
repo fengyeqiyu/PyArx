@@ -123,6 +123,7 @@ void bind_PyDbHatch(pym& m) {
 		}, py::arg("index"), "删除指定索引的边界环")
 		// ---- 背景色（AcCmColor 未单独封装，按 RGB 安全出入参包装）----
 		.def("backgroundColor", [](const PyDbHatch& self) -> std::tuple<int, int, int> {
+			if (!self.impObj()) return { 0, 0, 0 };
 			AcCmColor c = self.impObj()->backgroundColor();
 			return { (int)c.red(), (int)c.green(), (int)c.blue() };
 		}, "返回背景色 (r,g,b) 0-255")
@@ -134,6 +135,7 @@ void bind_PyDbHatch(pym& m) {
 		// ---- 关联边界对象 ID（按工程 oldId(uint64) 约定透出）----
 		.def("getAssocObjIds", [](const PyDbHatch& self) -> std::vector<uint64_t> {
 			AcDbObjectIdArray ids;
+			if (!self.impObj()) return {};
 			if (self.impObj()->getAssocObjIds(ids) != Acad::eOk) return {};
 			std::vector<uint64_t> out;
 			out.reserve(ids.length());
@@ -142,6 +144,7 @@ void bind_PyDbHatch(pym& m) {
 		}, "所有关联边界对象 ID 列表")
 		.def("getAssocObjIdsAt", [](const PyDbHatch& self, int loopIndex) -> std::vector<uint64_t> {
 			AcDbObjectIdArray ids;
+			if (!self.impObj()) return {};
 			if (self.impObj()->getAssocObjIdsAt(loopIndex, ids) != Acad::eOk) return {};
 			std::vector<uint64_t> out;
 			out.reserve(ids.length());
@@ -156,6 +159,7 @@ void bind_PyDbHatch(pym& m) {
 			Adesk::Int32 loopType = 0;
 			AcGePoint2dArray verts;
 			AcGeDoubleArray bulges;
+			if (!self.impObj()) return { 0, AcGePoint2dArray(), AcGeDoubleArray() };
 			if (self.impObj()->getLoopAt(loopIndex, loopType, verts, bulges) != Acad::eOk)
 				return { 0, AcGePoint2dArray(), AcGeDoubleArray() };
 			return { (int)loopType, verts, bulges };
@@ -182,6 +186,7 @@ void bind_PyDbHatch(pym& m) {
 		}, py::arg("colors"), py::arg("values"), "设置渐变色 [(r,g,b),...] 与归一化位置 [0..1]")
 		.def("evaluateGradientColorAt", [](PyDbHatch& self, float value) -> std::tuple<int, int, int> {
 			AcCmColor c;
+			if (!self.impObj()) return { 0, 0, 0 };
 			if (self.impObj()->evaluateGradientColorAt(value, c) != Acad::eOk) return { 0, 0, 0 };
 			return { (int)c.red(), (int)c.green(), (int)c.blue() };
 		}, py::arg("value"), "评估渐变在 value[0..1] 处的颜色 (r,g,b)")
@@ -192,6 +197,7 @@ void bind_PyDbHatch(pym& m) {
 			unsigned int count = 0;
 			AcCmColor* colors = nullptr;
 			float* values = nullptr;
+			if (!self.impObj()) return { {}, {} };
 			if (self.impObj()->getGradientColors(count, colors, values) != Acad::eOk) return { {}, {} };
 			std::vector<std::tuple<int, int, int>> cc;
 			std::vector<float> vals;

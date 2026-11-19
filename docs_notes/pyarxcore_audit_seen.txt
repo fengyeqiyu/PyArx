@@ -571,3 +571,6 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 05:18 PyDbCurve.cpp:102/113/121/133/138/144 ② 已改 6 处 object-returning lambda 补 impObj 判空
 2026-11-20 05:18 PyDbBlockReference.cpp:314 ② 已改 attributeIds 补 impObj 判空
 2026-11-20 05:18 PyDbEntity/PyDbHatch/PyDbObject/PyDbDynBlockReference/PyDbSweepOptions/PyDbLoftOptions/PyDbDeepCloneFiler/PyDbWblockCloneFiler 等 57 处 .impObj()-> 直接解引用 ② 未改 同一模式（多为内部持有对象必然非空的 options/filer 类，或方法链需逐个改），全量补判空超 20 行 只报不改
+2026-11-20 06:19 PyDbEntity.cpp:307/328/374/384/393 ② 已改 5 处补 impObj 判空（含 other）
+2026-11-20 06:19 PyDbHatch.cpp:126/137/145/159/185/195 ② 已改 6 处补 impObj 判空，空包装回落默认值
+2026-11-20 06:19 剩余 .impObj()-> 直接解引用 ② 未改 集中在 PyDbObject.cpp:241-310、PyDbDynBlockReference.cpp:51-103 及 options/filer 类（内部对象必然非空），逐个改超 20 行 只报不改

@@ -162,3 +162,5 @@
 2026-11-20 03:19 | PyDbBlockTableRecord.cpp:225 | ④ | old_id 构造失败时补 PyWarnIfError（仍返回空包装，签名不变）
 2026-11-20 05:18 | PyDbCurve.cpp:102/113/121/133/138/144 | ② | 6 个返回对象/列表的 lambda 先判 self.impObj()，空包装直接返回空 list / PyDbSpline(nullptr) / PyDbCurve(nullptr) / nullptr
 2026-11-20 05:18 | PyDbBlockReference.cpp:314 | ② | attributeIds 先判 self.impObj()，空包装返回空列表
+2026-11-20 06:19 | PyDbEntity.cpp:307/328/374/384/393 | ② | getTransformedCopy/explode/intersectWith×3 先判 self（含 other）impObj，空包装返回空对象/空列表
+2026-11-20 06:19 | PyDbHatch.cpp:126/137/145/159/185/195 | ② | backgroundColor/getAssocObjIds/getAssocObjIdsAt/getLoopAt/evaluateGradientColorAt/getGradientColors 先判 impObj，空包装返回默认零值/空容器

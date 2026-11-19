@@ -304,6 +304,7 @@ void bind_PyDbEntity(pym& m) {
 		// 变换副本（游离对象，需 appendEntity 入库）
 		.def("getTransformedCopy", [](PyDbEntity& self, const AcGeMatrix3d& xform) -> PyDbEntity {
 			AcDbEntity* p = nullptr;
+			if (!self.impObj()) return PyDbEntity(nullptr);
 			if (self.impObj()->getTransformedCopy(xform, p) != Acad::eOk) p = nullptr;
 			return PyDbEntity(p);
 		}, py::arg("xform"), "返回变换后的实体副本（未入库）")
@@ -325,6 +326,7 @@ void bind_PyDbEntity(pym& m) {
 		.def("explode", [](const PyDbEntity& self) -> std::vector<PyDbEntity> {
 			std::vector<PyDbEntity> out;
 			AcDbVoidPtrArray arr;
+			if (!self.impObj()) return out;
 			if (self.impObj()->explode(arr) != Acad::eOk) return out;
 			for (int i = 0; i < arr.length(); ++i) out.emplace_back(static_cast<AcDbEntity*>(arr[i]));
 			return out;
@@ -371,6 +373,7 @@ void bind_PyDbEntity(pym& m) {
 				const AcGePlane& projPlane, int thisGsMarker, int otherGsMarker) -> std::vector<AcGePoint3d> {
 			std::vector<AcGePoint3d> out;
 			AcGePoint3dArray pts;
+			if (!self.impObj() || !other.impObj()) return out;
 			if (self.impObj()->intersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), projPlane, pts,
 					static_cast<Adesk::GsMarker>(thisGsMarker), static_cast<Adesk::GsMarker>(otherGsMarker)) != Acad::eOk) return out;
 			for (int i = 0; i < pts.length(); ++i) out.push_back(pts[i]);
@@ -381,6 +384,7 @@ void bind_PyDbEntity(pym& m) {
 				const AcGePlane& projPlane, int thisGsMarker, int otherGsMarker) -> std::vector<AcGePoint3d> {
 			std::vector<AcGePoint3d> out;
 			AcGePoint3dArray pts;
+			if (!self.impObj() || !other.impObj()) return out;
 			if (self.impObj()->boundingBoxIntersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), projPlane, pts,
 					static_cast<Adesk::GsMarker>(thisGsMarker), static_cast<Adesk::GsMarker>(otherGsMarker)) != Acad::eOk) return out;
 			for (int i = 0; i < pts.length(); ++i) out.push_back(pts[i]);
@@ -390,6 +394,7 @@ void bind_PyDbEntity(pym& m) {
 				int thisGsMarker, int otherGsMarker) -> std::vector<AcGePoint3d> {
 			std::vector<AcGePoint3d> out;
 			AcGePoint3dArray pts;
+			if (!self.impObj() || !other.impObj()) return out;
 			if (self.impObj()->boundingBoxIntersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), pts,
 					static_cast<Adesk::GsMarker>(thisGsMarker), static_cast<Adesk::GsMarker>(otherGsMarker)) != Acad::eOk) return out;
 			for (int i = 0; i < pts.length(); ++i) out.push_back(pts[i]);
