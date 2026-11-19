@@ -102,6 +102,10 @@ void bind_PyDbMPolygon(pym& m) {
 		.def("appendLoopFromBoundary", [](PyDbMPolygon& s, const PyDbEntity& boundary, bool excludeCrossing, double tol) -> bool {
 			auto* p = static_cast<AcDbMPolygon*>(s.impObj());
 			AcDbEntity* bo = boundary.impObj();
+			if (!bo) {
+				PyWarnIfError(Acad::eNullObjectPointer, L"MPolygon.appendLoopFromBoundary");
+				return false;
+			}
 			AcRxClass* circleCls = AcDbCircle::desc();
 			AcRxClass* plineCls = AcDbPolyline::desc();
 			AcRxClass* p2dCls = AcDb2dPolyline::desc();

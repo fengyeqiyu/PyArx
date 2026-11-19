@@ -126,6 +126,7 @@ bool PyDbPolyline::makeClosedIfStartAndEndVertexCoincide(double distTol) {
 bool PyDbPolyline::convertFrom(const PyDbEntity& src, bool transferId) {
 	if (!impObj()) return false;
 	AcDbEntity* pSrc = src.impObj();
+	if (!pSrc) return PyWarnIfError(Acad::eNullObjectPointer, L"AcDbPolyline::convertFrom");
 	return PyWarnIfError(impObj()->convertFrom(pSrc, transferId ? Adesk::kTrue : Adesk::kFalse), L"AcDbPolyline::convertFrom");
 }
 

@@ -147,3 +147,5 @@
 2026-11-19 19:43 | PyArxCore 59 类 ⑤ | 头文件补无参构造 + 绑定 py::init<>()（new AcDbXxx()，属性后设）
 2026-11-19 19:43 | PyDbDeepCloneFiler.h/PyDbWblockCloneFiler.h/PyDbLayerStateManager.h/PyDbDatabase.h | ⑤ | 去掉默认实参二义，修正无参构造位置
 2026-11-19 19:43 | PyGiBinder.cpp/PyDbObjectContext.cpp | ⑤ | 移除不可默认构造类的 init<>（TextStyle 需字体、ObjectContext 抽象）
+2026-11-19 22:18 | PyDbPolyline.cpp:128 | ② | 先判 src.impObj() 空，空则 PyWarnIfError(eNullObjectPointer) 返回 false
+2026-11-19 22:18 | PyDbMPolygon.cpp:104 | ② | 先判 boundary.impObj() 空，空则警告并 return false

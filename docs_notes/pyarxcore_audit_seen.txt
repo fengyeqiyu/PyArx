@@ -537,3 +537,6 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-19 02:00 全项目602文件 9类复检 通过（①0；⑥未登记0；⑦TEMP-DIAG/0，ofstream 仅 PyDbTrans 已登记；⑧69处已册；⑨python315t=0/PyGILState=0/mod_gil_not_used=1；py::init<> 共209）
 2026-11-19 03:00 PyArxEngine/PyEngine.cpp:73,82 ⑨ 只报不改 无锁分支仍探测 python315.zip（free-threaded 构建的 stdlib zip 名为 python315t.zip，潜在失配）
 2026-11-19 03:00 PyArxCore 602 文件 ①②③④⑤⑥⑦⑧ 复检 通过（③ return true 疑点仅 PyDbDeepCloneFiler.cpp:32，setFilerStatus 返回 void 非丢弃 es；② 102 处均为标准取值绑定，指针型 14 处全部原样返回 ErrorStatus）
+2026-11-19 22:18 PyDbPolyline.cpp:128 ② 已改 补 src 判空
+2026-11-19 22:18 PyDbMPolygon.cpp:104 ② 已改 补 boundary 判空
+2026-11-19 22:18 ④ 复检 6 处 ErrName/PyWarnIfError 已处理 通过（PyApDocument 3 处返回 ErrName，PyDbMPolygon 3 处返回 PyWarnIfError）
