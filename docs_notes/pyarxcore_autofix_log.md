@@ -110,3 +110,4 @@
 2026-11-19 09:05 | PyDbBinder.cpp:262 | ⑤ | AC_SRCH_* 8 个裸常量收为 Db.TextFindFlags 强类型枚举（支持 | 组合）
 2026-11-19 09:06 | PyDbBinder.cpp:38 | ⑤ | 枚举成员统一 k 前缀（kBLOCK/kDIM/kTEXT/…）
 2026-11-19 09:18 | PyEdEditor.cpp:117 | ③ | acedCoordFromPixelToWorld 无窗号分支补返回值判断，失败返回 None
+2026-11-19 09:19 | PyColor.cpp:34 | ④ | setColorIndex 对 256 取模归一（负值亦归一），fromACI 改走 setColorIndex，文案改为 0=ByBlock

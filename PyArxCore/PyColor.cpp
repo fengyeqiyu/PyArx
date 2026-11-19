@@ -12,7 +12,7 @@ PyColor PyColor::fromRGB(int r, int g, int b) {
 
 PyColor PyColor::fromACI(int index) {
 	PyColor c;
-	c.m_color.setColorIndex(static_cast<Adesk::UInt16>(index));
+	c.setColorIndex(index);
 	return c;
 }
 
@@ -31,7 +31,11 @@ void PyColor::setRGB(int r, int g, int b) {
 
 // ---- ACI ----
 int  PyColor::colorIndex() const      { return m_color.colorIndex(); }
-void PyColor::setColorIndex(int idx)  { m_color.setColorIndex(static_cast<Adesk::UInt16>(idx)); }
+void PyColor::setColorIndex(int idx) {
+	// ACI 仅 0-255 有效（0=ByBlock）；越界按 Python 语义对 256 取模归一，不做静默截断
+	int aci = ((idx % 256) + 256) % 256;
+	m_color.setColorIndex(static_cast<Adesk::UInt16>(aci));
+}
 
 // ---- 判定 ----
 bool PyColor::isByLayer() const { return m_color.isByLayer(); }
@@ -81,8 +85,8 @@ void bind_PyColor(pym& m) {
 			py::arg("r"), py::arg("g"), py::arg("b"), "按 0-255 设置 RGB")
 
 		// ACI
-		.def_property_readonly("colorIndex", &PyColor::colorIndex, "ACI 颜色号 (-1=ByLayer/ByBlock 等)")
-		.def("setColorIndex", &PyColor::setColorIndex, py::arg("index"), "设置 ACI 颜色号")
+		.def_property_readonly("colorIndex", &PyColor::colorIndex, "ACI 颜色号 (0=ByBlock, 1-255)")
+		.def("setColorIndex", &PyColor::setColorIndex, py::arg("index"), "设置 ACI 颜色号（对 256 取模，0=ByBlock）")
 
 		// 判定
 		.def("isByLayer", &PyColor::isByLayer)
