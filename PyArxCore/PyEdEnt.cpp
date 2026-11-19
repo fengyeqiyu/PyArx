@@ -4,9 +4,9 @@
 #include "acedCmdNF.h"
 #include "PyEdEnt.h"
 #include "PyEdCommon.h"
-#include "TextFinder.h"
 #include <array>
 #include <string>
+#include <dbapserv.h>   // acdbHostApplicationServices()->workingDatabase()
 
 // Legacy ADS entity accessors (acdbEnt*), resbuf normalized through PyResbuf.
 // These are thin editor-level wrappers; modern database editing belongs to PyDb.
@@ -181,21 +181,22 @@ PyAdsName PyEdDictAdd(const PyAdsName& dict, const AcString& sym, const PyAdsNam
 }
 
 //-----------------------------------------------------------------------------
-// 批量文字搜索（AcDbText / AcDbMText，大小写无关）：建一次索引，按模式查询。
-// mode: prefix(默认) 前缀 / contains 任意位置包含 / full 整串全等。
-// 空 ids 或空关键字直接返回空列表，不做无谓的图元打开。
+// 文字查找 / 替换：直接走 ObjectARX 自带的 acdbTextFind（dbmain.h Text Finder API）。
+// findString 为空直接返回空表；replaceString 为空表示只查找不替换。
+// options 取 AC_SRCH_* 位标志（TEXT/DIM_TEXT/BLOCK/LINK_*/MATCH_CASE/WHOLE_WORD），
+// 默认 AC_SRCH_DEFAULT；selSet 非空时只在给定 id 集合内搜索。
+// 返回命中的 ObjectId 列表（acdbTextFind 返回 false 时即无命中/失败，同样给空表）。
 //-----------------------------------------------------------------------------
-AcDbObjectIdArray PyEdTextFind(const AcDbObjectIdArray& ids, const AcString& keyword, const std::string& mode) {
+AcDbObjectIdArray PyEdTextFind(const AcString& findString, const AcString& replaceString,
+                               int options, const AcDbObjectIdArray& selSet) {
     AcDbObjectIdArray result;
-    if (ids.isEmpty() || keyword.isEmpty()) return result;
-    QTextFind finder(ids);
-    std::vector<AcDbObjectId> hits;
-    if (mode == "contains" || mode == "any")
-        hits = finder.matchAnyPos(keyword);
-    else if (mode == "full" || mode == "equals")
-        hits = finder.matchFull(keyword);
-    else
-        hits = finder.matchStart(keyword);
-    for (const AcDbObjectId& id : hits) result.append(id);
+    if (findString.isEmpty()) return result;
+    AcDbDatabase* db = acdbHostApplicationServices() ? acdbHostApplicationServices()->workingDatabase() : nullptr;
+    if (!db) return result;
+    const bool doReplace = !replaceString.isEmpty();
+    ::acdbTextFind(db, result, findString.kwszPtr(),
+                   doReplace ? replaceString.kwszPtr() : nullptr,
+                   static_cast<Adesk::UInt8>(options),
+                   selSet);
     return result;
 }

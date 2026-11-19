@@ -38,6 +38,7 @@ bool        PyEdDictRename(const PyAdsName& dict, const AcString& oldsym, const 
 bool        PyEdDictRemove(const PyAdsName& dict, const AcString& sym);
 PyAdsName   PyEdDictAdd(const PyAdsName& dict, const AcString& sym, const PyAdsName& obj);
 
-// ---- 批量文字搜索（Text/MText，大小写无关）----
-// mode: "prefix"（默认）| "contains" | "full"，返回命中 ObjectId 数组。
-AcDbObjectIdArray PyEdTextFind(const AcDbObjectIdArray& ids, const AcString& keyword, const std::string& mode);
+// ---- 文字查找 / 替换（ObjectARX acdbTextFind）----
+// replaceString 为空 = 只查找；options 取 AC_SRCH_* 位标志；selSet 非空则限定搜索范围。
+AcDbObjectIdArray PyEdTextFind(const AcString& findString, const AcString& replaceString,
+                               int options, const AcDbObjectIdArray& selSet);

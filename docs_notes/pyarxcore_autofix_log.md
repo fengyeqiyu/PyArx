@@ -104,3 +104,4 @@
 2026-11-19 05:19 | PyDbPlotSettingsValidator.cpp:30-167 | ② | 23 个绑定 lambda 补 self/ps 判空并给默认返回
 2026-11-19 07:18 | PyDbDimStyleTableRecord.cpp:12-137 | ② | 73 个绑定 lambda 首行补 s.impObj() 判空并返回同型默认值
 2026-11-19 08:54 | PyEdEnt.cpp:tail | ⑤ | 接入 TextFinder：新增 Ed.textFind(ids,keyword,mode)，顺手给 QTextFind 构造补 openStatus/空指针判断
+2026-11-19 08:56 | PyEdEnt.cpp:tail | ⑤ | Ed.textFind 改用 SDK acdbTextFind（支持 replace/AC_SRCH_* 位标志/sel 限定），并导出 8 个 AC_SRCH_* 常量

@@ -460,3 +460,4 @@ singleinstance.h:1:⑤-待报
 TextFinder.h:1:⑤-待报
 TextFinder.h:1:⑤已接入PyEd
 PyEdEnt.cpp:1:⑤已改
+TextFinder.h:1:⑤自研QTextFind已被SDK替代未删
