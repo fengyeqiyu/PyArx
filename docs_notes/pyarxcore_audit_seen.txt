@@ -490,3 +490,8 @@ PyEdSelectionSets.cpp:1:通过
 PyEdUcsVp.cpp:1:通过
 PyEdUtil.cpp:1:通过
 PyEnum.cpp:1:通过
+PyExtraEnums.cpp:1:通过
+PyGeBinder.cpp:1:通过
+PyGeCurve2d.cpp:1:通过
+PyGeCurve3d.cpp:1:通过
+PyGeCurveCurveInt2d.cpp:1:通过
