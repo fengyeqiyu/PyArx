@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -37,7 +37,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;Py_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;Py_ENABLE_SHARED;Py_GIL_DISABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir);G:\ObjectArx\2024\inc;G:\ObjectArx\2024\inc-x64;G:\ObjectArx\2024\utils\brep\inc;G:\PyArx\third_party\python315t\Include;G:\PyArx\third_party\python315t\PC;G:\PyArx\third_party\pybind11\include;G:\PyArx\common\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)stdafx.pch</PrecompiledHeaderOutputFile>
@@ -54,18 +54,18 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>G:\ObjectArx\2024\lib-x64;G:\ObjectArx\2024\utils\brep\lib-x64;G:\PyArx\third_party\python315t\PCbuild\amd64;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>G:\ObjectArx\2024\lib-x64;G:\ObjectArx\2024\utils\brep\lib-x64;G:\PyArx\third_party\python315t\PCbuild\amd64t;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>PyArxEngine.def</ModuleDefinitionFile>
       <AdditionalOptions>/MANIFEST:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(OutDir)PyArxEngine.dll" "$(OutDir)PyArxEngine.arx"
 copy /Y "$(OutDir)PyArxEngine.dll" "$(OutDir)PyArxEngine.crx"
-copy /Y "G:\vcpkg\installed\x64-windows\tools\python3\python315t.dll" "$(OutDir)"
-copy /Y "G:\vcpkg\installed\x64-windows\bin\python3.dll" "$(OutDir)"
+copy /Y "G:\PyArx\third_party\python315t\PCbuild\amd64t\python315t.dll" "$(OutDir)"
+copy /Y "G:\PyArx\third_party\python315t\PCbuild\amd64t\python3.dll" "$(OutDir)"
 if not exist "$(OutDir)DLLs" mkdir "$(OutDir)DLLs"
-xcopy /Y /D "G:\vcpkg\installed\x64-windows\tools\python3\DLLs\*.pyd" "$(OutDir)DLLs\"
-xcopy /Y /D "G:\vcpkg\installed\x64-windows\tools\python3\DLLs\*.dll" "$(OutDir)DLLs\"</Command>
+xcopy /Y /D "G:\PyArx\third_party\python315t\PCbuild\amd64t\*.pyd" "$(OutDir)DLLs\"
+xcopy /Y /D "G:\PyArx\third_party\python315t\PCbuild\amd64t\*.dll" "$(OutDir)DLLs\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

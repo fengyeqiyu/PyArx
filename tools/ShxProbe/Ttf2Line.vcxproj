@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -37,7 +37,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;Py_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;Py_ENABLE_SHARED;Py_GIL_DISABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>G:\ObjectArx\2024\inc;G:\ObjectArx\2024\inc-x64;G:\PyArx\third_party\python315t\Include;G:\PyArx\third_party\python315t\PC;G:\PyArx\third_party\pybind11\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
@@ -52,9 +52,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>G:\ObjectArx\2024\lib-x64;G:\PyArx\third_party\python315t\PCbuild\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>G:\ObjectArx\2024\lib-x64;G:\PyArx\third_party\python315t\PCbuild\amd64t;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/MANIFEST:NO /FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>G:\PyArx\X64\Release\python315t.lib;G:\PyArx\third_party\python315t\PCbuild\amd64\python3.lib;acdb24.lib;acge24.lib;ac1st24.lib;AcPal.lib;acad.lib;rxapi.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>G:\PyArx\third_party\python315t\PCbuild\amd64t\python315t.lib;G:\PyArx\third_party\python315t\PCbuild\amd64t\python3.lib;acdb24.lib;acge24.lib;ac1st24.lib;AcPal.lib;acad.lib;rxapi.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
