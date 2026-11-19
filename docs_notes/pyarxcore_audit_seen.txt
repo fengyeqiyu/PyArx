@@ -450,3 +450,8 @@ PyGeLine3d.cpp:1:clean
 PyGeLinearEnt2d.cpp:1:clean
 PyGeLinearEnt3d.cpp:1:clean
 PyGeLineSeg2d.cpp:1:clean
+PyGeEllipArc3d.cpp:1:clean
+PyGeEntity2d.cpp:1:clean
+PyGeEntity3d.cpp:1:clean
+PyGeInterval.cpp:1:clean
+PyGeLineSeg3d.cpp:1:clean
