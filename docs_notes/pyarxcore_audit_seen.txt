@@ -499,3 +499,15 @@ PyGeCurveCurveInt2d.cpp:22:⑦过时注释-已删 comment
 PyExtraEnums.cpp:52:命名规范-CommandFlags/OptionFlags 无k前缀-只报不改
 PyGeCurve2d.cpp:76:explode入参无类型校验-只报不改
 PyGeCurve3d.cpp:124:explode入参无类型校验-只报不改
+PyArxCore全项目:1:①AcArray类注册0处/②impObj均判空(isNull或!impObj)/③仅2处疑似经SDK核对为void/⑥未登记0处/⑨无314及GIL名硬编码-通过
+PyArxBinder.cpp:62:⑨mod_gil_not_used已声明-通过
+PyArxBinder.cpp:133:⑦绑定异常ofstream落盘(ap_bind_err.txt)-只报不改
+PyUt.cpp:155:④genStub写pyi未判ofstream是否打开成功-只报不改
+PyUt.cpp:331:⑦debug_attach错误日志ofstream-功能实现非残留-通过
+PyDbOsnapOverrule.cpp:14:⑧裸catch空体+Py错误被清后回落return true-只报不改
+PyDbPropertiesOverrule.cpp:14:⑧同上-只报不改
+PyDbSubentityOverrule.cpp:14:⑧同上-只报不改
+PyDbTransformOverrule.cpp:14:⑧同上-只报不改
+PyDbVisibilityOverrule.cpp:14:⑧同上-只报不改
+PyDbObject.cpp:110:③disableUndoRecording经SDK确认返回void-通过
+PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
