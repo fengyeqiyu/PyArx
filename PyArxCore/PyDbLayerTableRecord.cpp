@@ -163,6 +163,7 @@ bool PyDbLayerTableRecord::setTransparency(int trans) {
 
 void bind_PyDbLayerTableRecord(pym& m) {
 	py::class_<PyDbLayerTableRecord, PyDbSymbolTableRecord>(m, "PyDbLayerTableRecord")
+		.def(py::init<>())
 		.def(py::init<AcDbLayerTableRecord*>(), py::arg("p"))
 		.def_static("newRecord", &PyDbLayerTableRecord::newRecord,
 			py::return_value_policy::take_ownership, "新建图层表记录（未入库，需 lt.add(rec)）")

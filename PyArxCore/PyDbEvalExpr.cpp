@@ -7,6 +7,7 @@ PyWrapper_Cpp(DbEvalExpr);
 
 void bind_PyDbEvalExpr(pym& m) {
 	py::class_<PyDbEvalExpr, PyDbObject>(m, "PyDbEvalExpr")
+		.def(py::init<>())
 		.def(py::init<AcDbEvalExpr*>(), py::arg("p"))
 		.def(py::init([]() { return std::make_unique<PyDbEvalExpr>(new AcDbEvalExpr()).release(); }), "无参构造（new 默认 AcDbEvalExpr）")
 		PyWrapper_BIND(DbEvalExpr)

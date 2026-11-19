@@ -8,6 +8,7 @@ PyWrapper_Cpp(DbDictionaryWithDefault);
 // getObjectBirthVersion 为 AcDbObject 虚函数 override，PyDbObject 已绑，跳过。
 void bind_PyDbDictionaryWithDefault(pym& m) {
 	py::class_<PyDbDictionaryWithDefault, PyDbDictionary>(m, "PyDbDictionaryWithDefault")
+		.def(py::init<>())
 		.def(py::init<AcDbDictionaryWithDefault*>(), py::arg("p"))
 		.def(py::init([]() { return std::make_unique<PyDbDictionaryWithDefault>(new AcDbDictionaryWithDefault()).release(); }), "无参构造（new 默认 AcDbDictionaryWithDefault）")
 		PyWrapper_BIND(DbDictionaryWithDefault)

@@ -10,6 +10,7 @@ class PyDbPlaneSurface : public PyDbSurface {
 	PyWrapper_H(DbPlaneSurface)
 public:
 	PyDbPlaneSurface(AcDbPlaneSurface* p) : PyDbSurface(p) {}
+	PyDbPlaneSurface() : PyDbPlaneSurface(new AcDbPlaneSurface()) {}
 
 	bool createFromRegion(PyDbRegion& region);
 	bool isDependent() const;

@@ -2809,6 +2809,7 @@ bool IsGsWorkerThread()
 void bind_PyDbDatabase(pym& m)
 {
 	py::class_<PyDbDatabase, PyRxObject>(m, "PyDbDatabase")
+		.def(py::init<>())
 		.def(py::init([]() { return new PyDbDatabase(new AcDbDatabase(false, true), true); }), "Creates an empty in-memory database")
 		.def(py::init<bool, bool>(), py::arg("buildDefaultDrawing"), py::arg("noDocument"),
 			"Creates a database with/without a default drawing and document")

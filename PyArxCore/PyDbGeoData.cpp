@@ -38,6 +38,7 @@ bool PyDbGeoData::setDesignPoint(const AcGePoint3d& p) {
 
 void bind_PyDbGeoData(pym& m) {
 	py::class_<PyDbGeoData, PyDbObject>(m, "PyDbGeoData")
+		.def(py::init<>())
 		.def(py::init<AcDbGeoData*>(), py::arg("p"))
 		.def(py::init([]() { return std::make_unique<PyDbGeoData>(new AcDbGeoData()).release(); }), "无参构造（new 默认 AcDbGeoData）")
 		PyWrapper_BIND(DbGeoData)

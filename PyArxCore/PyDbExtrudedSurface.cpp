@@ -31,6 +31,7 @@ bool PyDbExtrudedSurface::isDependent() const {
 
 void bind_PyDbExtrudedSurface(pym& m) {
 	py::class_<PyDbExtrudedSurface, PyDbSurface>(m, "PyDbExtrudedSurface")
+		.def(py::init<>())
 		.def(py::init<AcDbExtrudedSurface*>(), py::arg("p"))
 		PyWrapper_BIND(DbExtrudedSurface)
 		.def("getHeight", &PyDbExtrudedSurface::getHeight)

@@ -143,3 +143,7 @@
 2026-11-19 21:40 | PyDbBlockTableRecordIterator.cpp:68 | 防呆 | 遍历实体改走全局类注册表还原真实类型，AcDbTable/AcDbMText 等不再退化成 PyDbEntity
 2026-11-19 21:40 | PyDbTrans.h/.cpp:42 | 防呆 | 新增 pyarxWrapDbObjectByClass：AcRxClass 继承链向上找已注册包装类，供遍历/字典复用
 2026-11-19 21:40 | PyDbDictionary.h/.cpp:17 | 防呆 | getAt 返回 py::object 并按类注册表还原类型，字典里的子字典/块表记录拿回派生 API；__getitem__ 同步
+2026-11-19 19:43 | PyArxCore 16 类 ⑤ | 补齐 py::init<>()（wrapper 已有无参构造，仅缺绑定）
+2026-11-19 19:43 | PyArxCore 59 类 ⑤ | 头文件补无参构造 + 绑定 py::init<>()（new AcDbXxx()，属性后设）
+2026-11-19 19:43 | PyDbDeepCloneFiler.h/PyDbWblockCloneFiler.h/PyDbLayerStateManager.h/PyDbDatabase.h | ⑤ | 去掉默认实参二义，修正无参构造位置
+2026-11-19 19:43 | PyGiBinder.cpp/PyDbObjectContext.cpp | ⑤ | 移除不可默认构造类的 init<>（TextStyle 需字体、ObjectContext 抽象）

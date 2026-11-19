@@ -40,6 +40,7 @@ AcDbObjectIdArray PyDbLayerTable::getUnreconciledLayers() const {
 
 void bind_PyDbLayerTable(pym& m) {
 	py::class_<PyDbLayerTable, PyDbSymbolTable>(m, "PyDbLayerTable")
+		.def(py::init<>())
 		.def(py::init<AcDbLayerTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbLayerTable)
 		.def("has", &PyDbLayerTable::has, py::arg("name"))

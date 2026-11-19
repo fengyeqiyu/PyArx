@@ -10,6 +10,7 @@ class PyDbColor : public PyDbObject {
 public:
 	PyWrapper_H(DbColor)
 	PyDbColor(AcDbColor* p) : PyDbObject(p) {}
+	PyDbColor() : PyDbColor(new AcDbColor()) {}
 };
 
 void bind_PyDbColor(pym& m);

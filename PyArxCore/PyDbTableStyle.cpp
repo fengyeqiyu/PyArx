@@ -113,6 +113,7 @@ bool PyDbTableStyle::setMargin(int cm, double fMargin, const AcString& cellStyle
 
 void bind_PyDbTableStyle(pym& m) {
 	py::class_<PyDbTableStyle, PyDbObject>(m, "PyDbTableStyle")
+		.def(py::init<>())
 		.def(py::init<AcDbTableStyle*>(), py::arg("p"))
 		.def(py::init([]() { return std::make_unique<PyDbTableStyle>(new AcDbTableStyle()).release(); }), "无参构造（new 默认 AcDbTableStyle）")
 		PyWrapper_BIND(DbTableStyle)

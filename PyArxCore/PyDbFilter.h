@@ -7,6 +7,7 @@ class PyDbFilter : public PyDbObject {
 public:
 	PyWrapper_H(DbFilter)
 	PyDbFilter(AcDbFilter* p) : PyDbObject(p) {}
+	PyDbFilter() : PyDbFilter(new AcDbFilter()) {}
 };
 
 void bind_PyDbFilter(pym& m);

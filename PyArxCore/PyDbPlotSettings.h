@@ -6,6 +6,7 @@ class PyDbPlotSettings : public PyDbObject {
 public:
 	PyWrapper_H(DbPlotSettings)
 	PyDbPlotSettings(AcDbPlotSettings* ptr) : PyDbObject(ptr) {}
+	PyDbPlotSettings() : PyDbPlotSettings(new AcDbPlotSettings()) {}
 
 	AcString getPlotSettingsName() const;
 	bool setPlotSettingsName(const AcString& name);

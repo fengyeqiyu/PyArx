@@ -16,6 +16,7 @@ PyDbSequenceEnd PyDbPolyFaceMesh::openSequenceEnd(int mode) const {
 
 void bind_PyDbPolyFaceMesh(pym& m) {
 	py::class_<PyDbPolyFaceMesh, PyDbEntity>(m, "PyDbPolyFaceMesh")
+		.def(py::init<>())
 		.def(py::init<AcDbPolyFaceMesh*>(), py::arg("p"))
 		PyWrapper_BIND(DbPolyFaceMesh)
 		// ---- numVertices / numFaces ----

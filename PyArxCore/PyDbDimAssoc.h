@@ -7,6 +7,7 @@ class PyDbDimAssoc : public PyDbObject {
 public:
 	PyWrapper_H(DbDimAssoc)
 	PyDbDimAssoc(AcDbDimAssoc* ptr) : PyDbObject(ptr) {}
+	PyDbDimAssoc() : PyDbDimAssoc(new AcDbDimAssoc()) {}
 
 	bool addToDimensionReactor(bool isAdd);
 	bool addToPointRefReactor();

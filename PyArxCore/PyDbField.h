@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "stdafx.h"
 #include <dbField.h>
 #include "PyDbObject.h"
@@ -12,6 +12,7 @@ class PyDbField : public PyDbObject {
 	PyWrapper_H(DbField)
 public:
 	PyDbField(AcDbField* ptr) : PyDbObject(ptr) {}
+	PyDbField() : PyDbField(new AcDbField()) {}
 	virtual ~PyDbField(void) override = default;
 
 	// 构造：字段码 / (字段码, 是否文本字段)

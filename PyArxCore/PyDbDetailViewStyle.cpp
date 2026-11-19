@@ -70,6 +70,7 @@ bool PyDbDetailViewStyle::setIdentifierStyleId(uint64_t idv) {
 
 void bind_PyDbDetailViewStyle(pym& m) {
 	py::class_<PyDbDetailViewStyle, PyDbModelDocViewStyle>(m, "PyDbDetailViewStyle")
+		.def(py::init<>())
 		.def(py::init<AcDbDetailViewStyle*>(), py::arg("p"))
 		PyWrapper_BIND(DbDetailViewStyle)
 		.def("arrowSymbolColor", &PyDbDetailViewStyle::arrowSymbolColor, "返回箭头符号色 (r,g,b)")

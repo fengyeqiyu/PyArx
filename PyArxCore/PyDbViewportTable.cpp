@@ -30,6 +30,7 @@ std::vector<uint64_t> PyDbViewportTable::newIterator(bool atBeginning, bool skip
 
 void bind_PyDbViewportTable(pym& m) {
 	py::class_<PyDbViewportTable, PyDbSymbolTable>(m, "PyDbViewportTable")
+		.def(py::init<>())
 		.def(py::init<AcDbViewportTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbViewportTable)
 		.def("has", &PyDbViewportTable::has, py::arg("name"))

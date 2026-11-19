@@ -11,6 +11,7 @@ PyWrapper_Cpp(DbOleFrame);
 //       这里以整数地址透传（高级用法，调用方需自行保证指针有效性）。
 void bind_PyDbOleFrame(pym& m) {
 	py::class_<PyDbOleFrame, PyDbEntity>(m, "PyDbOleFrame")
+		.def(py::init<>())
 		.def(py::init<AcDbOleFrame*>(), py::arg("p"))
 		PyWrapper_BIND(DbOleFrame)
 		// ---- getOleObject() -> intptr（内部 OLE 指针地址，只读） ----

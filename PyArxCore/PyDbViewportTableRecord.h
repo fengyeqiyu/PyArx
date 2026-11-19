@@ -6,6 +6,7 @@ class PyDbViewportTableRecord : public PyDbSymbolTableRecord {
 public:
 	PyWrapper_H(DbViewportTableRecord)
 	PyDbViewportTableRecord(AcDbViewportTableRecord* ptr) : PyDbSymbolTableRecord(ptr) {}
+	PyDbViewportTableRecord() : PyDbViewportTableRecord(new AcDbViewportTableRecord()) {}
 
 	// ---- AcDbViewportTableRecord own ----
 	int number() const;

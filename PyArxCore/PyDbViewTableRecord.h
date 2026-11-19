@@ -8,6 +8,7 @@ class PyDbViewTableRecord : public PyDbSymbolTableRecord {
 public:
 	PyWrapper_H(DbViewTableRecord)
 	PyDbViewTableRecord(AcDbViewTableRecord* ptr) : PyDbSymbolTableRecord(ptr) {}
+	PyDbViewTableRecord() : PyDbViewTableRecord(new AcDbViewTableRecord()) {}
 
 	// ---- AcDbViewTableRecord own ----
 	bool isPaperspaceView() const;

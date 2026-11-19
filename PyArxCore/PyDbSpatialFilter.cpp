@@ -7,6 +7,7 @@ PyWrapper_Cpp(DbSpatialFilter);
 
 void bind_PyDbSpatialFilter(pym& m) {
 	py::class_<PyDbSpatialFilter, PyDbFilter>(m, "PyDbSpatialFilter")
+		.def(py::init<>())
 		.def(py::init<AcDbSpatialFilter*>(), py::arg("p"))
 		PyWrapper_BIND(DbSpatialFilter)
 		// ---- clipVolumeIntersectsExtents(ext) -> bool ----

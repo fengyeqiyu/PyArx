@@ -7,6 +7,7 @@ PyWrapper_Cpp(DbColor);
 
 void bind_PyDbColor(pym& m) {
 	py::class_<PyDbColor, PyDbObject>(m, "PyDbColor")
+		.def(py::init<>())
 		.def(py::init<AcDbColor*>(), py::arg("p"))
 		PyWrapper_BIND(DbColor)
 		// ---- entityColor() -> (colorMethod, r, g, b) ----

@@ -7,6 +7,7 @@ class PyDbSectionViewStyle : public PyDbModelDocViewStyle {
 public:
 	PyWrapper_H(DbSectionViewStyle)
 	PyDbSectionViewStyle(AcDbSectionViewStyle* ptr) : PyDbModelDocViewStyle(ptr) {}
+	PyDbSectionViewStyle() : PyDbSectionViewStyle(new AcDbSectionViewStyle()) {}
 
 	uint64_t arrowEndSymbolId() const;
 	uint64_t arrowStartSymbolId() const;

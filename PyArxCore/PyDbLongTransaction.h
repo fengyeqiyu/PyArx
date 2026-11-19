@@ -8,6 +8,7 @@ class PyDbLongTransaction : public PyDbObject {
 	PyWrapper_H(DbLongTransaction)
 public:
 	PyDbLongTransaction(AcDbLongTransaction* p) : PyDbObject(p) {}
+	PyDbLongTransaction() : PyDbLongTransaction(new AcDbLongTransaction()) {}
 };
 
 void bind_PyDbLongTransaction(pym& m);

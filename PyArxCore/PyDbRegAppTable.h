@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "stdafx.h"
 #include "PyDbSymbolTable.h"
 #include "PyDbSymbolTableRecord.h"
@@ -7,6 +7,7 @@ class PyDbRegAppTable : public PyDbSymbolTable {
 public:
 	PyWrapper_H(DbRegAppTable)
 	PyDbRegAppTable(AcDbRegAppTable* ptr) : PyDbSymbolTable(ptr) {}
+	PyDbRegAppTable() : PyDbRegAppTable(new AcDbRegAppTable()) {}
 	bool has(const AcString& name) const;
 	PyDbSymbolTableRecord* getAt(const AcString& name, int mode = 1) const;
 

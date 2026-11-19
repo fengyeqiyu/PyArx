@@ -8,6 +8,7 @@ class PyDbSweptSurface : public PyDbSurface {
 	PyWrapper_H(DbSweptSurface)
 public:
 	PyDbSweptSurface(AcDbSweptSurface* p) : PyDbSurface(p) {}
+	PyDbSweptSurface() : PyDbSweptSurface(new AcDbSweptSurface()) {}
 
 	double getPathLength() const;
 	bool isDependent() const;

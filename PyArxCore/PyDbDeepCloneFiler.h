@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "stdafx.h"
 #include "PyRxObject.h"
 #include "dbcfilrs.h"
@@ -9,8 +9,9 @@
 // 不使用 PyWrapper_H/Cpp/BIND 宏（独立绑定）。
 class PyDbDeepCloneFiler : public PyRxObject {
 public:
-	PyDbDeepCloneFiler(AcDbDeepCloneFiler* p = nullptr, bool autoDelete = true)
+	PyDbDeepCloneFiler(AcDbDeepCloneFiler* p, bool autoDelete = true)
 		: PyRxObject(p, autoDelete, false) {}
+	PyDbDeepCloneFiler() : PyDbDeepCloneFiler(new AcDbDeepCloneFiler()) {}
 	AcDbDeepCloneFiler* impObj() { return static_cast<AcDbDeepCloneFiler*>(m_ptr); }
 	AcDbDeepCloneFiler* impObj() const { return static_cast<AcDbDeepCloneFiler*>(m_ptr); }
 };

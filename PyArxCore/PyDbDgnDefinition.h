@@ -7,6 +7,7 @@ class PyDbDgnDefinition : public PyDbObject {
 public:
 	PyWrapper_H(DbDgnDefinition)
 	PyDbDgnDefinition(AcDbDgnDefinition* p) : PyDbObject(p) {}
+	PyDbDgnDefinition() : PyDbDgnDefinition(new AcDbDgnDefinition()) {}
 };
 
 void bind_PyDbDgnDefinition(pym& m);

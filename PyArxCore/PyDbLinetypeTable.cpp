@@ -16,6 +16,7 @@ PyDbSymbolTableRecord* PyDbLinetypeTable::getAt(const AcString& name, int mode) 
 
 void bind_PyDbLinetypeTable(pym& m) {
 	py::class_<PyDbLinetypeTable, PyDbSymbolTable>(m, "PyDbLinetypeTable")
+		.def(py::init<>())
 		.def(py::init<AcDbLinetypeTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbLinetypeTable)
 		.def("has", &PyDbLinetypeTable::has, py::arg("name"))

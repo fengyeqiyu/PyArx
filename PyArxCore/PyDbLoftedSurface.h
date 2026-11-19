@@ -8,6 +8,7 @@ class PyDbLoftedSurface : public PyDbSurface {
 	PyWrapper_H(DbLoftedSurface)
 public:
 	PyDbLoftedSurface(AcDbLoftedSurface* p) : PyDbSurface(p) {}
+	PyDbLoftedSurface() : PyDbLoftedSurface(new AcDbLoftedSurface()) {}
 
 	int numCrossSections() const;
 	int numGuideCurves() const;

@@ -168,6 +168,7 @@ std::tuple<AcString, PyDbObject> PyDbDictionary::entryAt(int index, int mode) co
 }
 void bind_PyDbDictionary(pym& m) {
 	py::class_<PyDbDictionary, PyDbObject>(m, "PyDbDictionary")
+		.def(py::init<>())
 		.def(py::init<AcDbDictionary*>(), py::arg("object"))
 		.def(py::init([]() { return std::make_unique<PyDbDictionary>(new AcDbDictionary()).release(); }), "无参构造（new 默认 AcDbDictionary）")
 		.def("add", &PyDbDictionary::add, py::arg("name"), py::arg("obj"))

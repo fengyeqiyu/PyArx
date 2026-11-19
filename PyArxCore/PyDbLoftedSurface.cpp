@@ -16,6 +16,7 @@ int PyDbLoftedSurface::numGuideCurves() const {
 
 void bind_PyDbLoftedSurface(pym& m) {
 	py::class_<PyDbLoftedSurface, PyDbSurface>(m, "PyDbLoftedSurface")
+		.def(py::init<>())
 		.def(py::init<AcDbLoftedSurface*>(), py::arg("p"))
 		PyWrapper_BIND(DbLoftedSurface)
 		.def("numCrossSections", &PyDbLoftedSurface::numCrossSections)

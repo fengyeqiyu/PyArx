@@ -10,6 +10,7 @@ class PyDbPolyFaceMesh : public PyDbEntity {
 public:
 	PyWrapper_H(DbPolyFaceMesh)
 	PyDbPolyFaceMesh(AcDbPolyFaceMesh* p) : PyDbEntity(p) {}
+	PyDbPolyFaceMesh() : PyDbPolyFaceMesh(new AcDbPolyFaceMesh()) {}
 
 	// 打开网格末尾的 SequenceEnd；失败返回空包装（不抛异常）。
 	PyDbSequenceEnd openSequenceEnd(int mode) const;

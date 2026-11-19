@@ -7,6 +7,7 @@ class PyDbDetailViewStyle : public PyDbModelDocViewStyle {
 public:
 	PyWrapper_H(DbDetailViewStyle)
 	PyDbDetailViewStyle(AcDbDetailViewStyle* ptr) : PyDbModelDocViewStyle(ptr) {}
+	PyDbDetailViewStyle() : PyDbDetailViewStyle(new AcDbDetailViewStyle()) {}
 
 	std::tuple<int,int,int> arrowSymbolColor() const;
 	uint64_t arrowSymbolId() const;

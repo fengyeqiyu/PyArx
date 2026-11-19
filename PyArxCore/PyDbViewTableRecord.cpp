@@ -115,6 +115,7 @@ bool PyDbViewTableRecord::setElevation(double e) { if (!impObj()) return false; 
 
 void bind_PyDbViewTableRecord(pym& m) {
 	py::class_<PyDbViewTableRecord, PyDbSymbolTableRecord>(m, "PyDbViewTableRecord")
+		.def(py::init<>())
 		.def(py::init<AcDbViewTableRecord*>(), py::arg("p"))
 		PyWrapper_BIND(DbViewTableRecord)
 		.def("isPaperspaceView", &PyDbViewTableRecord::isPaperspaceView)

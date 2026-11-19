@@ -8,6 +8,7 @@ class PyDbBlockBegin : public PyDbEntity {
 public:
 	PyWrapper_H(DbBlockBegin)
 	PyDbBlockBegin(AcDbBlockBegin* p) : PyDbEntity(p) {}
+	PyDbBlockBegin() : PyDbBlockBegin(new AcDbBlockBegin()) {}
 };
 
 void bind_PyDbBlockBegin(pym& m);

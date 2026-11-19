@@ -18,6 +18,7 @@ bool PyDbPlaneSurface::isDependent() const {
 
 void bind_PyDbPlaneSurface(pym& m) {
 	py::class_<PyDbPlaneSurface, PyDbSurface>(m, "PyDbPlaneSurface")
+		.def(py::init<>())
 		.def(py::init<AcDbPlaneSurface*>(), py::arg("p"))
 		PyWrapper_BIND(DbPlaneSurface)
 		.def("createFromRegion", &PyDbPlaneSurface::createFromRegion, py::arg("region"))

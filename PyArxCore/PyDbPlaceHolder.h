@@ -7,6 +7,7 @@ class PyDbPlaceHolder : public PyDbObject {
 public:
 	PyWrapper_H(DbPlaceHolder)
 	PyDbPlaceHolder(AcDbPlaceHolder* p) : PyDbObject(p) {}
+	PyDbPlaceHolder() : PyDbPlaceHolder(new AcDbPlaceHolder()) {}
 };
 
 void bind_PyDbPlaceHolder(pym& m);

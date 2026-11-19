@@ -36,6 +36,7 @@ bool PyDbVisualStyle::setTraitColorF(int prop, double r, double g, double b, int
 
 void bind_PyDbVisualStyle(pym& m) {
 	py::class_<PyDbVisualStyle, PyDbObject>(m, "PyDbVisualStyle")
+		.def(py::init<>())
 		.def(py::init<AcDbVisualStyle*>(), py::arg("p"))
 		.def(py::init([]() { return std::make_unique<PyDbVisualStyle>(new AcDbVisualStyle()).release(); }), "无参构造（new 默认 AcDbVisualStyle）")
 		PyWrapper_BIND(DbVisualStyle)

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "stdafx.h"
 #include "dbmain.h"
 #include "PyRxObject.h"
@@ -16,7 +16,8 @@ class PyDbObject;
 class PyDbDatabase : public PyRxObject {
 	PyWrapper_H(DbDatabase)
 public:
-	PyDbDatabase(AcDbDatabase* ptr = nullptr) : PyRxObject(ptr, false, false) {}
+	PyDbDatabase(AcDbDatabase* ptr) : PyRxObject(ptr, false, false) {}
+	PyDbDatabase() : PyDbDatabase(new AcDbDatabase()) {}
 	PyDbDatabase(AcDbDatabase* ptr, bool autodelete) : PyRxObject(ptr, autodelete, false) {}
 	PyDbDatabase(bool buildDefaultDrawing, bool noDocument) :
 		PyDbDatabase(new AcDbDatabase(buildDefaultDrawing, noDocument), true) {

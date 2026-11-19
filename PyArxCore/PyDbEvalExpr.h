@@ -9,6 +9,7 @@ class PyDbEvalExpr : public PyDbObject {
 	PyWrapper_H(DbEvalExpr)
 public:
 	PyDbEvalExpr(AcDbEvalExpr* p) : PyDbObject(p) {}
+	PyDbEvalExpr() : PyDbEvalExpr(new AcDbEvalExpr()) {}
 };
 
 void bind_PyDbEvalExpr(pym& m);

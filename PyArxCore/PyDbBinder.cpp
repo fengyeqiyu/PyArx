@@ -221,6 +221,7 @@ void bind_PyRx(pym& m)
 	auto RxClass = py::class_<PyRxClass, PyRxObject>(m,"PyRxClass");
 	RxObject.def(py::init<>())
 		// copyFrom-backed copy constructor
+		.def(py::init<>())
 		.def(py::init<const PyRxObject&>(), py::arg("rxobj"))
 		PyWrapper_BIND(RxObject)
 

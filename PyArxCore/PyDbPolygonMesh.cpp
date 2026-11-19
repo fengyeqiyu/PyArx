@@ -16,6 +16,7 @@ PyDbSequenceEnd PyDbPolygonMesh::openSequenceEnd(int mode) const {
 
 void bind_PyDbPolygonMesh(pym& m) {
 	py::class_<PyDbPolygonMesh, PyDbEntity>(m, "PyDbPolygonMesh")
+		.def(py::init<>())
 		.def(py::init<AcDbPolygonMesh*>(), py::arg("p"))
 		PyWrapper_BIND(DbPolygonMesh)
 		// ---- polyMeshType（AcDb::PolyMeshType：0=kSimpleMesh 5=kQuad 6=kCubic 8=kBezier）----

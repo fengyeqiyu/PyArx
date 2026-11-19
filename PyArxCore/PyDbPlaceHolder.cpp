@@ -9,6 +9,7 @@ PyWrapper_Cpp(DbPlaceHolder);
 // 此处不再重复绑定。
 void bind_PyDbPlaceHolder(pym& m) {
 	py::class_<PyDbPlaceHolder, PyDbObject>(m, "PyDbPlaceHolder")
+		.def(py::init<>())
 		.def(py::init<AcDbPlaceHolder*>(), py::arg("p"))
 		PyWrapper_BIND(DbPlaceHolder)
 		;

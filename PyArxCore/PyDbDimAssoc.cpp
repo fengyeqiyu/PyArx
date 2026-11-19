@@ -94,6 +94,7 @@ bool PyDbDimAssoc::updateXrefSubentPath() {
 
 void bind_PyDbDimAssoc(pym& m) {
 	py::class_<PyDbDimAssoc, PyDbObject>(m, "PyDbDimAssoc")
+		.def(py::init<>())
 		.def(py::init<AcDbDimAssoc*>(), py::arg("p"))
 		PyWrapper_BIND(DbDimAssoc)
 		.def("addToDimensionReactor", &PyDbDimAssoc::addToDimensionReactor, py::arg("isAdd") = true)

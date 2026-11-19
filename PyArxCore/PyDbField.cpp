@@ -229,6 +229,7 @@ void bind_PyDbField(pym& m)
 		return;
 
 	py::class_<PyDbField, PyDbObject>(m, "Field", "AcDbField 包装（对齐 PyRx Db.Field）")
+		.def(py::init<>())
 		.def(py::init([]() { return new PyDbField(new AcDbField()); }))
 		.def(py::init([](const AcString& fieldCode) { return PyDbField::create(fieldCode, false); }),
 			py::arg("fieldCode"))

@@ -41,6 +41,7 @@ bool PyDbRevolvedSurface::setRevolveAngle(double ang) {
 
 void bind_PyDbRevolvedSurface(pym& m) {
 	py::class_<PyDbRevolvedSurface, PyDbSurface>(m, "PyDbRevolvedSurface")
+		.def(py::init<>())
 		.def(py::init<AcDbRevolvedSurface*>(), py::arg("p"))
 		PyWrapper_BIND(DbRevolvedSurface)
 		.def("getAxisPnt", &PyDbRevolvedSurface::getAxisPnt)

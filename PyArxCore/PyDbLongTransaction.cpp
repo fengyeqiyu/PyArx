@@ -6,6 +6,7 @@ PyWrapper_Cpp(DbLongTransaction);
 
 void bind_PyDbLongTransaction(pym& m) {
 	py::class_<PyDbLongTransaction, PyDbObject>(m, "PyDbLongTransaction")
+		.def(py::init<>())
 		.def(py::init<AcDbLongTransaction*>(), py::arg("p"))
 		PyWrapper_BIND(DbLongTransaction)
 		// ---- type() -> int (kSameDb=0/kXrefDb=1/kUnrelatedDb=2) ----

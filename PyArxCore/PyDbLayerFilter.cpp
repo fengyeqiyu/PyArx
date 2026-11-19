@@ -7,6 +7,7 @@ PyWrapper_Cpp(DbLayerFilter);
 // 自身方法：add / remove / getAt / isValid / layerCount
 void bind_PyDbLayerFilter(pym& m) {
 	py::class_<PyDbLayerFilter, PyDbFilter>(m, "PyDbLayerFilter")
+		.def(py::init<>())
 		.def(py::init<AcDbLayerFilter*>(), py::arg("p"))
 		PyWrapper_BIND(DbLayerFilter)
 		// ---- add(layerName) -> bool ----

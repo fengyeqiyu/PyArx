@@ -348,6 +348,7 @@ void PyDbTrans::exit(py::object excType, py::object, py::object) {
 
 void bind_PyDbTrans(py::module& m) {
 	py::class_<PyDbTrans>(m, "PyDbTrans")
+		.def(py::init<>())
 		.def(py::init([]() { return new PyDbTrans(); }))
 		.def(py::init([](PyDbDatabase& db) {
 			return new PyDbTrans(static_cast<AcDbDatabase*>(db.impObj()));

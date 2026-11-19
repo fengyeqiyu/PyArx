@@ -7,6 +7,7 @@ class PyDbLayerFilter : public PyDbFilter {
 public:
 	PyWrapper_H(DbLayerFilter)
 	PyDbLayerFilter(AcDbLayerFilter* p) : PyDbFilter(p) {}
+	PyDbLayerFilter() : PyDbLayerFilter(new AcDbLayerFilter()) {}
 };
 
 void bind_PyDbLayerFilter(pym& m);

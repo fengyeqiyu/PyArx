@@ -8,6 +8,7 @@ class PyDbUCSTableRecord : public PyDbSymbolTableRecord {
 public:
 	PyWrapper_H(DbUCSTableRecord)
 	PyDbUCSTableRecord(AcDbUCSTableRecord* ptr) : PyDbSymbolTableRecord(ptr) {}
+	PyDbUCSTableRecord() : PyDbUCSTableRecord(new AcDbUCSTableRecord()) {}
 
 	AcGePoint3d origin() const;
 	bool setOrigin(const AcGePoint3d& pt);

@@ -22,6 +22,7 @@ bool PyDbUCSTableRecord::setUcsBaseOrigin(const AcGePoint3d& pt, int view) {
 
 void bind_PyDbUcsTableRecord(pym& m) {
 	py::class_<PyDbUCSTableRecord, PyDbSymbolTableRecord>(m, "PyDbUcsTableRecord")
+		.def(py::init<>())
 		.def(py::init<AcDbUCSTableRecord*>(), py::arg("p"))
 		PyWrapper_BIND(DbUCSTableRecord)
 		.def("origin", &PyDbUCSTableRecord::origin)

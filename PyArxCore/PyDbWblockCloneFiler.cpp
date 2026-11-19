@@ -11,6 +11,7 @@ static inline uint64_t idToU64(const AcDbObjectId& id) {
 
 void bind_PyDbWblockCloneFiler(pym& m) {
 	py::class_<PyDbWblockCloneFiler, PyDbDeepCloneFiler>(m, "PyDbWblockCloneFiler")
+		.def(py::init<>())
 		.def(py::init<AcDbWblockCloneFiler*, bool>(), py::arg("p"), py::arg("autoDelete") = true)
 
 		// filerType override

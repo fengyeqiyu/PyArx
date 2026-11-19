@@ -115,6 +115,7 @@ bool PyDbMaterial::setTwoSided(bool v) {
 
 void bind_PyDbMaterial(pym& m) {
 	py::class_<PyDbMaterial, PyDbObject>(m, "PyDbMaterial")
+		.def(py::init<>())
 		.def(py::init<AcDbMaterial*>(), py::arg("p"))
 		.def(py::init([]() { return std::make_unique<PyDbMaterial>(new AcDbMaterial()).release(); }), "无参构造（new 默认 AcDbMaterial）")
 		PyWrapper_BIND(DbMaterial)

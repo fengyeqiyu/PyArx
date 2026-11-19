@@ -6,6 +6,7 @@ PyWrapper_Cpp(DbPdfReference);
 
 void bind_PyDbPdfReference(pym& m) {
 	py::class_<PyDbPdfReference, PyDbEntity>(m, "PyDbPdfReference")
+		.def(py::init<>())
 		.def(py::init<AcDbPdfReference*>(), py::arg("p"))
 		PyWrapper_BIND(DbPdfReference)
 		// ---- contrastDefault / fadeDefault（静态，继承自 AcDbUnderlayReference）----

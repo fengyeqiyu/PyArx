@@ -9,6 +9,7 @@ class PyDbOleFrame : public PyDbEntity {
 public:
 	PyWrapper_H(DbOleFrame)
 	PyDbOleFrame(AcDbOleFrame* p) : PyDbEntity(p) {}
+	PyDbOleFrame() : PyDbOleFrame(new AcDbOleFrame()) {}
 };
 
 void bind_PyDbOleFrame(pym& m);

@@ -6,6 +6,7 @@ PyWrapper_Cpp(DbDgnReference);
 
 void bind_PyDbDgnReference(pym& m) {
 	py::class_<PyDbDgnReference, PyDbEntity>(m, "PyDbDgnReference")
+		.def(py::init<>())
 		.def(py::init<AcDbDgnReference*>(), py::arg("p"))
 		PyWrapper_BIND(DbDgnReference)
 		// ---- setXrefDepth ----

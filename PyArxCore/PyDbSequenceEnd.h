@@ -8,6 +8,7 @@ class PyDbSequenceEnd : public PyDbEntity {
 public:
 	PyWrapper_H(DbSequenceEnd)
 	PyDbSequenceEnd(AcDbSequenceEnd* p) : PyDbEntity(p) {}
+	PyDbSequenceEnd() : PyDbSequenceEnd(new AcDbSequenceEnd()) {}
 };
 
 void bind_PyDbSequenceEnd(pym& m);

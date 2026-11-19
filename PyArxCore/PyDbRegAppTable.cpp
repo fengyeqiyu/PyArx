@@ -23,6 +23,7 @@ uint64_t PyDbRegAppTable::addReturnId(PyDbSymbolTableRecord& rec) {
 
 void bind_PyDbRegAppTable(pym& m) {
 	py::class_<PyDbRegAppTable, PyDbSymbolTable>(m, "PyDbRegAppTable")
+		.def(py::init<>())
 		.def(py::init<AcDbRegAppTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbRegAppTable)
 		.def("has", &PyDbRegAppTable::has, py::arg("name"))

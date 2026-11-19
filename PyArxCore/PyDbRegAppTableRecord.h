@@ -6,6 +6,7 @@ class PyDbRegAppTableRecord : public PyDbSymbolTableRecord {
 public:
 	PyWrapper_H(DbRegAppTableRecord)
 	PyDbRegAppTableRecord(AcDbRegAppTableRecord* ptr) : PyDbSymbolTableRecord(ptr) {}
+	PyDbRegAppTableRecord() : PyDbRegAppTableRecord(new AcDbRegAppTableRecord()) {}
 
 	// ---- Skeleton (no own public accessors beyond inherited name) ----
 	// AcDbRegAppTableRecord adds no public methods; name/setName/isDependent/

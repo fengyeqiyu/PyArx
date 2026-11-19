@@ -8,6 +8,7 @@ class PyDbBlockEnd : public PyDbEntity {
 public:
 	PyWrapper_H(DbBlockEnd)
 	PyDbBlockEnd(AcDbBlockEnd* p) : PyDbEntity(p) {}
+	PyDbBlockEnd() : PyDbBlockEnd(new AcDbBlockEnd()) {}
 };
 
 void bind_PyDbBlockEnd(pym& m);

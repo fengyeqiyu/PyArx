@@ -6,6 +6,7 @@ PyWrapper_Cpp(DbDimStyleTableRecord);
 
 void bind_PyDbDimStyleTableRecord(pym& m) {
 	py::class_<PyDbDimStyleTableRecord, PyDbSymbolTableRecord>(m, "PyDbDimStyleTableRecord")
+		.def(py::init<>())
 		.def(py::init<AcDbDimStyleTableRecord*>(), py::arg("p"))
 		PyWrapper_BIND(DbDimStyleTableRecord)
 		// ---- 尺寸变量 double ----

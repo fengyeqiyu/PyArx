@@ -6,6 +6,7 @@ PyWrapper_Cpp(DbBlockEnd);
 
 void bind_PyDbBlockEnd(pym& m) {
 	py::class_<PyDbBlockEnd, PyDbEntity>(m, "PyDbBlockEnd")
+		.def(py::init<>())
 		.def(py::init<AcDbBlockEnd*>(), py::arg("p"))
 		PyWrapper_BIND(DbBlockEnd)
 		;

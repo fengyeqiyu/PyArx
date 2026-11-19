@@ -18,6 +18,7 @@ static inline AcDbObjectId u64ToId(uint64_t v) {
 
 void bind_PyDbDeepCloneFiler(pym& m) {
 	py::class_<PyDbDeepCloneFiler, PyRxObject>(m, "PyDbDeepCloneFiler")
+		.def(py::init<>())
 		.def(py::init<AcDbDeepCloneFiler*, bool>(), py::arg("p"), py::arg("autoDelete") = true)
 
 		// ---- status / type ----

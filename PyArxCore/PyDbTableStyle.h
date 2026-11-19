@@ -6,6 +6,7 @@ class PyDbTableStyle : public PyDbObject {
 public:
 	PyWrapper_H(DbTableStyle)
 	PyDbTableStyle(AcDbTableStyle* ptr) : PyDbObject(ptr) {}
+	PyDbTableStyle() : PyDbTableStyle(new AcDbTableStyle()) {}
 
 	AcString getName() const;
 	bool setName(const AcString& name);

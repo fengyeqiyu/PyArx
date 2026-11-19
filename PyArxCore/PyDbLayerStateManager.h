@@ -9,8 +9,9 @@
 // 跳过（P2 依赖）。
 class PyDbLayerStateManager : public PyRxObject {
 public:
-	PyDbLayerStateManager(AcDbLayerStateManager* p = nullptr, bool autoDelete = true)
+	PyDbLayerStateManager(AcDbLayerStateManager* p, bool autoDelete = true)
 		: PyRxObject(p, autoDelete, false) {}
+	PyDbLayerStateManager() : PyDbLayerStateManager(new AcDbLayerStateManager()) {}
 	AcDbLayerStateManager* impObj() { return static_cast<AcDbLayerStateManager*>(m_ptr); }
 	AcDbLayerStateManager* impObj() const { return static_cast<AcDbLayerStateManager*>(m_ptr); }
 };

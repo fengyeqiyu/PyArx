@@ -7,6 +7,7 @@ class PyDbDictionaryWithDefault : public PyDbDictionary {
 public:
 	PyWrapper_H(DbDictionaryWithDefault)
 	PyDbDictionaryWithDefault(AcDbDictionaryWithDefault* p) : PyDbDictionary(p) {}
+	PyDbDictionaryWithDefault() : PyDbDictionaryWithDefault(new AcDbDictionaryWithDefault()) {}
 };
 
 void bind_PyDbDictionaryWithDefault(pym& m);

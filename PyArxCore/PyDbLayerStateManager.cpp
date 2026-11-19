@@ -17,6 +17,7 @@ static inline AcDbObjectId u64ToId(uint64_t v) {
 
 void bind_PyDbLayerStateManager(pym& m) {
 	py::class_<PyDbLayerStateManager, PyRxObject>(m, "PyDbLayerStateManager")
+		.def(py::init<>())
 		.def(py::init<AcDbLayerStateManager*>(), py::arg("p") = nullptr)
 		.def(py::init([](PyDbDatabase& db) {
 			return std::make_unique<PyDbLayerStateManager>(new AcDbLayerStateManager(db.impObj()), true).release();

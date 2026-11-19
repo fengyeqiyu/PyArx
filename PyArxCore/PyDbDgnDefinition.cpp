@@ -6,6 +6,7 @@ PyWrapper_Cpp(DbDgnDefinition);
 
 void bind_PyDbDgnDefinition(pym& m) {
 	py::class_<PyDbDgnDefinition, PyDbObject>(m, "PyDbDgnDefinition")
+		.def(py::init<>())
 		.def(py::init<AcDbDgnDefinition*>(), py::arg("p"))
 		PyWrapper_BIND(DbDgnDefinition)
 		// ---- useMasterUnits ----

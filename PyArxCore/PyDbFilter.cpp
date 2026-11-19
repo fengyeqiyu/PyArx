@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbFilter.h"
 #include "PyRxClass.h"
@@ -9,6 +9,7 @@ PyWrapper_Cpp(DbFilter);
 // CHM 清单里 "pack" 为疑误提取，已跳过。
 void bind_PyDbFilter(pym& m) {
 	py::class_<PyDbFilter, PyDbObject>(m, "PyDbFilter")
+		.def(py::init<>())
 		.def(py::init<AcDbFilter*>(), py::arg("p"))
 		PyWrapper_BIND(DbFilter)
 		// ---- indexClass() -> PyRxClass（描述符，非所有权） ----

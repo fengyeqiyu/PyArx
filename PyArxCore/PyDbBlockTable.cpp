@@ -16,6 +16,7 @@ PyDbBlockTableRecord* PyDbBlockTable::getAt(const AcString& name, int mode) cons
 
 void bind_PyDbBlockTable(pym& m) {
 	py::class_<PyDbBlockTable, PyDbSymbolTable>(m, "PyDbBlockTable")
+		.def(py::init<>())
 		.def(py::init<AcDbBlockTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbBlockTable)
 		.def("has", &PyDbBlockTable::has, py::arg("name"))

@@ -1,4 +1,4 @@
-#include "PyEdEditor.h"
+﻿#include "PyEdEditor.h"
 #include <afxwin.h>
 #include "core_rxmfcapi.h"
 
@@ -114,8 +114,7 @@ void bind_PyEdEditor(pym& ed)
 			}
 			else
 			{
-				if (!acedCoordFromPixelToWorld(cpnt, out))
-					return py::none();
+				acedCoordFromPixelToWorld(cpnt, out);  // 两参重载返回 void，无失败信号
 			}
 			return py::cast(AcGePoint3d(out[0], out[1], out[2]));
 		});

@@ -7,6 +7,7 @@ class PyDbSpatialFilter : public PyDbFilter {
 public:
 	PyWrapper_H(DbSpatialFilter)
 	PyDbSpatialFilter(AcDbSpatialFilter* p) : PyDbFilter(p) {}
+	PyDbSpatialFilter() : PyDbSpatialFilter(new AcDbSpatialFilter()) {}
 };
 
 void bind_PyDbSpatialFilter(pym& m);

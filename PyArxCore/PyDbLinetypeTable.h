@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "stdafx.h"
 #include "PyDbSymbolTable.h"
 #include "PyDbSymbolTableRecord.h"
@@ -7,6 +7,7 @@ class PyDbLinetypeTable : public PyDbSymbolTable {
 public:
 	PyWrapper_H(DbLinetypeTable)
 	PyDbLinetypeTable(AcDbLinetypeTable* ptr) : PyDbSymbolTable(ptr) {}
+	PyDbLinetypeTable() : PyDbLinetypeTable(new AcDbLinetypeTable()) {}
 	bool has(const AcString& name) const;
 	PyDbSymbolTableRecord* getAt(const AcString& name, int mode = 1) const;
 };

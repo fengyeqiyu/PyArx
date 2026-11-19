@@ -9,6 +9,7 @@ class PyDbPolygonMesh : public PyDbEntity {
 public:
 	PyWrapper_H(DbPolygonMesh)
 	PyDbPolygonMesh(AcDbPolygonMesh* p) : PyDbEntity(p) {}
+	PyDbPolygonMesh() : PyDbPolygonMesh(new AcDbPolygonMesh()) {}
 
 	// 打开网格末尾的 SequenceEnd；失败返回空包装（不抛异常）。
 	PyDbSequenceEnd openSequenceEnd(int mode) const;

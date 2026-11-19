@@ -73,6 +73,7 @@ bool PyDbSectionViewStyle::setIdentifierStyleId(uint64_t idv) {
 
 void bind_PyDbSectionViewStyle(pym& m) {
 	py::class_<PyDbSectionViewStyle, PyDbModelDocViewStyle>(m, "PyDbSectionViewStyle")
+		.def(py::init<>())
 		.def(py::init<AcDbSectionViewStyle*>(), py::arg("p"))
 		PyWrapper_BIND(DbSectionViewStyle)
 		.def("arrowEndSymbolId", &PyDbSectionViewStyle::arrowEndSymbolId)

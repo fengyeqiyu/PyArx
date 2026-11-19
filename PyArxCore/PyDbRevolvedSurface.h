@@ -8,6 +8,7 @@ class PyDbRevolvedSurface : public PyDbSurface {
 	PyWrapper_H(DbRevolvedSurface)
 public:
 	PyDbRevolvedSurface(AcDbRevolvedSurface* p) : PyDbSurface(p) {}
+	PyDbRevolvedSurface() : PyDbRevolvedSurface(new AcDbRevolvedSurface()) {}
 
 	AcGePoint3d getAxisPnt() const;
 	AcGeVector3d getAxisVec() const;

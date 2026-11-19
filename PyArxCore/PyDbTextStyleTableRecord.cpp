@@ -6,6 +6,7 @@ PyWrapper_Cpp(DbTextStyleTableRecord);
 
 void bind_PyDbTextStyleTableRecord(pym& m) {
 	py::class_<PyDbTextStyleTableRecord, PyDbSymbolTableRecord>(m, "PyDbTextStyleTableRecord")
+		.def(py::init<>())
 		.def(py::init<AcDbTextStyleTableRecord*>(), py::arg("p"))
 		PyWrapper_BIND(DbTextStyleTableRecord)
 		// ---- isShapeFile ----

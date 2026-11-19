@@ -16,6 +16,7 @@ PyDbSymbolTableRecord* PyDbViewTable::getAt(const AcString& name, int mode) cons
 
 void bind_PyDbViewTable(pym& m) {
 	py::class_<PyDbViewTable, PyDbSymbolTable>(m, "PyDbViewTable")
+		.def(py::init<>())
 		.def(py::init<AcDbViewTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbViewTable)
 		.def("has", &PyDbViewTable::has, py::arg("name"))

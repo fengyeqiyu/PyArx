@@ -7,6 +7,7 @@ class PyDbMaterial : public PyDbObject {
 public:
 	PyWrapper_H(DbMaterial)
 	PyDbMaterial(AcDbMaterial* ptr) : PyDbObject(ptr) {}
+	PyDbMaterial() : PyDbMaterial(new AcDbMaterial()) {}
 
 	int channelFlags() const;
 	void clearAdskMaterialCache();

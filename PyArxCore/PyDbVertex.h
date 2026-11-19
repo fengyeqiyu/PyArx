@@ -8,6 +8,7 @@ class PyDbVertex : public PyDbEntity {
 	PyWrapper_H(DbVertex)
 public:
 	PyDbVertex(AcDbVertex* p) : PyDbEntity(p) {}
+	PyDbVertex() : PyDbVertex(new AcDbVertex()) {}
 };
 
 void bind_PyDbVertex(pym& m);

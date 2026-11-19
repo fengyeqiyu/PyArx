@@ -7,6 +7,7 @@ class PyDbVisualStyle : public PyDbObject {
 public:
 	PyWrapper_H(DbVisualStyle)
 	PyDbVisualStyle(AcDbVisualStyle* ptr) : PyDbObject(ptr) {}
+	PyDbVisualStyle() : PyDbVisualStyle(new AcDbVisualStyle()) {}
 
 	int type() const;
 	bool setType(int type);

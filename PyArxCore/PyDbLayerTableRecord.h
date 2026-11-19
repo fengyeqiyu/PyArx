@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "stdafx.h"
 #include "PyDbObject.h"
 #include "PyDbEntity.h"
@@ -9,6 +9,7 @@ class PyDbLayerTableRecord : public PyDbSymbolTableRecord {
 public:
 	PyWrapper_H(DbLayerTableRecord)
 	PyDbLayerTableRecord(AcDbLayerTableRecord* ptr) : PyDbSymbolTableRecord(ptr) {}
+	PyDbLayerTableRecord() : PyDbLayerTableRecord(new AcDbLayerTableRecord()) {}
 	// 新建一条图层表记录（AcDbLayerTableRecord 默认构造在 ObjectARX 里是公开的；
 	// 之前只绑了拷贝/指针构造，导致 Python 无法新建图层，只能退回 -LAYER 命令通道）
 	static PyDbLayerTableRecord* newRecord();

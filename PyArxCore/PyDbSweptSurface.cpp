@@ -19,6 +19,7 @@ bool PyDbSweptSurface::isDependent() const {
 
 void bind_PyDbSweptSurface(pym& m) {
 	py::class_<PyDbSweptSurface, PyDbSurface>(m, "PyDbSweptSurface")
+		.def(py::init<>())
 		.def(py::init<AcDbSweptSurface*>(), py::arg("p"))
 		PyWrapper_BIND(DbSweptSurface)
 		.def("getPathLength", &PyDbSweptSurface::getPathLength)

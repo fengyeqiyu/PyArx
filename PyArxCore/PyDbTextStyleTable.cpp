@@ -16,6 +16,7 @@ PyDbSymbolTableRecord* PyDbTextStyleTable::getAt(const AcString& name, int mode)
 
 void bind_PyDbTextStyleTable(pym& m) {
 	py::class_<PyDbTextStyleTable, PyDbSymbolTable>(m, "PyDbTextStyleTable")
+		.def(py::init<>())
 		.def(py::init<AcDbTextStyleTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbTextStyleTable)
 		.def("has", &PyDbTextStyleTable::has, py::arg("name"))

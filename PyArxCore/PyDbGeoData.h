@@ -7,6 +7,7 @@ class PyDbGeoData : public PyDbObject {
 public:
 	PyWrapper_H(DbGeoData)
 	PyDbGeoData(AcDbGeoData* ptr) : PyDbObject(ptr) {}
+	PyDbGeoData() : PyDbGeoData(new AcDbGeoData()) {}
 
 	uint64_t blockTableRecordId() const;
 	int coordinateType() const;

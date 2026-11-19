@@ -8,6 +8,7 @@ class PyDbExtrudedSurface : public PyDbSurface {
 	PyWrapper_H(DbExtrudedSurface)
 public:
 	PyDbExtrudedSurface(AcDbExtrudedSurface* p) : PyDbSurface(p) {}
+	PyDbExtrudedSurface() : PyDbExtrudedSurface(new AcDbExtrudedSurface()) {}
 
 	double getHeight() const;
 	AcGeVector3d getSweepVec() const;

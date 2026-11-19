@@ -6,6 +6,7 @@ PyWrapper_Cpp(DbLinetypeTableRecord);
 
 void bind_PyDbLinetypeTableRecord(pym& m) {
 	py::class_<PyDbLinetypeTableRecord, PyDbSymbolTableRecord>(m, "PyDbLinetypeTableRecord")
+		.def(py::init<>())
 		.def(py::init<AcDbLinetypeTableRecord*>(), py::arg("p"))
 		PyWrapper_BIND(DbLinetypeTableRecord)
 		// ---- comments / asciiDescription（asciiDescription 为 comments 的内联别名） ----

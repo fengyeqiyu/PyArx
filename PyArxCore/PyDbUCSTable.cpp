@@ -16,6 +16,7 @@ PyDbSymbolTableRecord* PyDbUCSTable::getAt(const AcString& name, int mode) const
 
 void bind_PyDbUCSTable(pym& m) {
 	py::class_<PyDbUCSTable, PyDbSymbolTable>(m, "PyDbUCSTable")
+		.def(py::init<>())
 		.def(py::init<AcDbUCSTable*>(), py::arg("p"))
 		PyWrapper_BIND(DbUCSTable)
 		.def("has", &PyDbUCSTable::has, py::arg("name"))

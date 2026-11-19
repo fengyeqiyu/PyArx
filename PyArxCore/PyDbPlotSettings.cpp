@@ -100,6 +100,7 @@ AcString PyDbPlotSettings::getPlotCfgName() const {
 
 void bind_PyDbPlotSettings(pym& m) {
 	py::class_<PyDbPlotSettings, PyDbObject>(m, "PyDbPlotSettings")
+		.def(py::init<>())
 		.def(py::init<AcDbPlotSettings*>(), py::arg("p"))
 		.def(py::init([]() { return std::make_unique<PyDbPlotSettings>(new AcDbPlotSettings()).release(); }), "无参构造（new 默认 AcDbPlotSettings）")
 		PyWrapper_BIND(DbPlotSettings)

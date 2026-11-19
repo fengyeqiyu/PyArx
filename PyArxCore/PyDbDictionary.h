@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "stdafx.h"
 #include "PyDbObject.h"
 #include "PyDbEntity.h"
@@ -7,6 +7,7 @@ class PyDbDictionary : public PyDbObject {
 public:
 	PyWrapper_H(DbDictionary)
 	PyDbDictionary(AcDbDictionary* ptr) : PyDbObject(ptr) {}
+	PyDbDictionary() : PyDbDictionary(new AcDbDictionary()) {}
 	bool add(const AcString& name, PyDbObject& obj);
 	py::object getAt(const AcString& name);   // 按类注册表还原真实类型（块表记录/XRecord 等）
 	bool remove(const AcString& name);

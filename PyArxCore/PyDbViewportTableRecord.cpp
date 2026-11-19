@@ -101,6 +101,7 @@ bool PyDbViewportTableRecord::setPreviousBackground(uint64_t backgroundId, int t
 
 void bind_PyDbViewportTableRecord(pym& m) {
 	py::class_<PyDbViewportTableRecord, PyDbSymbolTableRecord>(m, "PyDbViewportTableRecord")
+		.def(py::init<>())
 		.def(py::init<AcDbViewportTableRecord*>(), py::arg("p"))
 		PyWrapper_BIND(DbViewportTableRecord)
 		.def("number", &PyDbViewportTableRecord::number)
