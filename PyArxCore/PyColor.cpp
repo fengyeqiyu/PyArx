@@ -1,5 +1,16 @@
 ﻿#include "stdafx.h"
 #include "PyColor.h"
+#include <aced.h>
+
+// ACI(1-255) -> RGB：acedGetRGB 返回 COLORREF(0x00bbggrr)；0/256/257 无实体色，返回 false
+static bool aciToRGB(int aci, int& r, int& g, int& b) {
+	if (aci < 1 || aci > 255) return false;
+	Adesk::ColorRef cr = ::acedGetRGB(aci);
+	r = static_cast<int>(cr & 0xFF);
+	g = static_cast<int>((cr >> 8) & 0xFF);
+	b = static_cast<int>((cr >> 16) & 0xFF);
+	return true;
+}
 
 // ---- 工厂 ----
 PyColor PyColor::fromRGB(int r, int g, int b) {
@@ -20,9 +31,23 @@ PyColor PyColor::byLayer() { PyColor c; c.m_color.setByLayer(); return c; }
 PyColor PyColor::byBlock() { PyColor c; c.m_color.setByBlock(); return c; }
 
 // ---- RGB ----
-int  PyColor::red() const   { return m_color.red(); }
-int  PyColor::green() const { return m_color.green(); }
-int  PyColor::blue() const  { return m_color.blue(); }
+// ACI 色（非真彩色）时 AcCmColor 的 RGB 分量恒为 0，这里按 ACI 索引查真实 RGB，
+// 保证 fromACI(...).red/green/blue 与 fromRGB(...) 语义一致。
+int  PyColor::red() const {
+	int r = 0, g = 0, b = 0;
+	if (!m_color.isByColor() && aciToRGB(static_cast<int>(m_color.colorIndex()), r, g, b)) return r;
+	return m_color.red();
+}
+int  PyColor::green() const {
+	int r = 0, g = 0, b = 0;
+	if (!m_color.isByColor() && aciToRGB(static_cast<int>(m_color.colorIndex()), r, g, b)) return g;
+	return m_color.green();
+}
+int  PyColor::blue() const {
+	int r = 0, g = 0, b = 0;
+	if (!m_color.isByColor() && aciToRGB(static_cast<int>(m_color.colorIndex()), r, g, b)) return b;
+	return m_color.blue();
+}
 void PyColor::setRGB(int r, int g, int b) {
 	m_color.setRGB(static_cast<Adesk::UInt8>(r),
 		static_cast<Adesk::UInt8>(g),
@@ -81,9 +106,9 @@ void bind_PyColor(pym& m) {
 		.def_static("byBlock", &PyColor::byBlock, "构造 ByBlock 颜色")
 
 		// RGB 读写
-		.def_property_readonly("red", &PyColor::red, "红分量 (0-255)")
-		.def_property_readonly("green", &PyColor::green, "绿分量 (0-255)")
-		.def_property_readonly("blue", &PyColor::blue, "蓝分量 (0-255)")
+		.def_property_readonly("red", &PyColor::red, "红分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
+		.def_property_readonly("green", &PyColor::green, "绿分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
+		.def_property_readonly("blue", &PyColor::blue, "蓝分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
 		.def("setRGB", &PyColor::setRGB,
 			py::arg("r"), py::arg("g"), py::arg("b"), "按 0-255 设置 RGB")
 
