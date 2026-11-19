@@ -530,3 +530,4 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-19 15:34 tools/cadmcp/headless_entity_test.py:block_make:用法已修-SymbolTable.add()后记录自动关闭,改按id重新openObject(...,1)再append,不再补addNewlyCreatedDBObject
 2026-11-19 15:34 无头回归 accoreconsole(headless_entity.scr):通过-8/8项全过 exit=0 entity_count 0->6
 2026-11-19 15:34 无头误用回归 tools/cadmcp/dbg_guard.py:通过-旧写法 add后直接append 返回False,进程不崩
+2026-11-19 22:20 全项目602文件 9类矩阵复检 通过（①⑥⑦⑨=0命中；②③④⑤ 抽查 PyGe/PyGi/PyDb 24 文件 0 命中；新增 getAt/遍历/字典类型还原 均通过无头实测）
