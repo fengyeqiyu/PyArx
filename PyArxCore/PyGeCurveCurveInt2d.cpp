@@ -19,7 +19,6 @@ void bind_AcGeCurveCurveInt2d(pybind11::module& m) {
 		.def("changeCurveOrder", &AcGeCurveCurveInt2d::changeCurveOrder)
 		.def("orderWrt1", &AcGeCurveCurveInt2d::orderWrt1)
 		.def("orderWrt2", &AcGeCurveCurveInt2d::orderWrt2)
-		// NOTE: getIntParams/getPointOnCurve1/2/getIntRanges/getIntConfigs deferred.
 		.def("getIntParams", [](const AcGeCurveCurveInt2d& self, int intNum) {
 				double p1 = 0.0, p2 = 0.0;
 				self.getIntParams(intNum, p1, p2);

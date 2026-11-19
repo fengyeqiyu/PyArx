@@ -495,3 +495,7 @@ PyGeBinder.cpp:1:通过
 PyGeCurve2d.cpp:1:通过
 PyGeCurve3d.cpp:1:通过
 PyGeCurveCurveInt2d.cpp:1:通过
+PyGeCurveCurveInt2d.cpp:22:⑦过时注释-已删 comment
+PyExtraEnums.cpp:52:命名规范-CommandFlags/OptionFlags 无k前缀-只报不改
+PyGeCurve2d.cpp:76:explode入参无类型校验-只报不改
+PyGeCurve3d.cpp:124:explode入参无类型校验-只报不改

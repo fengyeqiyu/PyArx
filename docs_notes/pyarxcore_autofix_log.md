@@ -127,3 +127,4 @@
 2026-11-19 11:19 | PyDbGeometryOverrule.cpp:16,53,90,109 | ⑧ | 静默 catch 改为 restore+PyErr_Print，回退 SDK 默认实现不变
 2026-11-19 11:19 | PyDbHighlightStateOverrule.cpp:14 | ⑧ | 同上，compat 回调异常可见化
 2026-11-19 11:19 | PyDbObjectOverrule.cpp:22,40,58,76,93 | ⑧ | 同上，5 处 open/close/cancel/erase/isApplicable 异常改为可见
+2026-11-19 14:28 | PyGeCurveCurveInt2d.cpp:22 | ⑦临时残留 | 删除已失效的 deferred NOTE 注释（相关绑定实际已实现）
