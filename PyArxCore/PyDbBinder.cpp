@@ -36,7 +36,7 @@
 // 这里收成强类型枚举，Python 侧注册为 Db.TextFindFlags（可按位或组合）。
 enum class PyDbTextFindFlags : Adesk::UInt8 {
     BLOCK      = AC_SRCH_BLOCK,
-    DIM_TEXT   = AC_SRCH_DIM_TEXT,
+    DIM        = AC_SRCH_DIM_TEXT,
     TEXT       = AC_SRCH_TEXT,
     LINK_DESC  = AC_SRCH_LINK_DESC,
     LINK_URL   = AC_SRCH_LINK_URL,
@@ -276,7 +276,7 @@ void pybind11_init_PyDb(::pybind11::module_& m) {
 	py::enum_<PyDbTextFindFlags>(m, "TextFindFlags", py::arithmetic(),
 		"文字查找位标志（dbmain.h AC_SRCH_*），可用 | 组合")
 		.value("BLOCK", PyDbTextFindFlags::BLOCK, "块属性（AC_SRCH_BLOCK）")
-		.value("DIM_TEXT", PyDbTextFindFlags::DIM_TEXT, "标注文字（AC_SRCH_DIM_TEXT）")
+		.value("DIM", PyDbTextFindFlags::DIM, "标注文字（AC_SRCH_DIM_TEXT）")
 		.value("TEXT", PyDbTextFindFlags::TEXT, "单行/多行文字（AC_SRCH_TEXT）")
 		.value("LINK_DESC", PyDbTextFindFlags::LINK_DESC, "超链接描述（AC_SRCH_LINK_DESC）")
 		.value("LINK_URL", PyDbTextFindFlags::LINK_URL, "超链接地址（AC_SRCH_LINK_URL）")
