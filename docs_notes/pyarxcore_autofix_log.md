@@ -153,3 +153,6 @@
 2026-11-20 00:18 | PyAdsName.cpp:69 | ③ | acdbGetObjectId 返回值改接 es 并 PyWarnIfError，失败不再静默（仍返回 id 保持签名）
 2026-11-20 00:18 | PyEdSelectionSets.cpp:48 | ③ | acedSSName 失败先提示并返回空 id，acdbGetObjectId 的 es 交给 PyWarnIfError
 2026-11-20 01:18 | PyDbField.cpp:35,47,60,72,100,115,153,159 | ④ | 8 个 setter 由 '== eOk' 静默布尔改为接 es 走 PyWarnIfError（返回值语义不变，失败有提示）
+2026-11-20 02:27 | PyDbBlockTableRecord.h:41 | ② | inline appendAcDbEntity 补 impObj() 与 pEntity.impObj() 判空，空返 eNullObjectPointer
+2026-11-20 02:27 | PyDbDatabase.h:50 | ② | getSymbolTable 模板补 impObj() 判空（空返 nullptr，走既有 es 护栏提示）
+2026-11-20 02:27 | PyDbDatabase.h:326 | ② | aunits() inline 补 impObj() 判空，空返 0

@@ -39,6 +39,7 @@ public:
 	int postProcessAnnotativeBTR(bool bqueryOnly = false, bool bScale = true);
 	bool addAnnoScalestoBlkRefs(bool bScale = false);
 	inline Acad::ErrorStatus appendAcDbEntity(PyDbEntity& pEntity) {
+		if (!impObj() || !pEntity.impObj()) return Acad::eNullObjectPointer;
 		return impObj()->appendAcDbEntity(pEntity.impObj());
 	}
 

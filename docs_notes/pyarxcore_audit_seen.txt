@@ -556,3 +556,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 01:44 ⑨ stdafx.h:47-52 按 Py_GIL_DISABLED 条件选 python315t.lib/python315.lib；core+mfc python315t=0、PyGILState=0、mod_gil_not_used=1；三产物只链 python315t.dll
 2026-11-20 01:44 ⑤ 745 处 impObj()-> 取值调用均为 SDK getter 转发、非同名包装类，按基线通过；⑧ catch 含既有 Reactor 静默与 ApLog 日志兜底，模块注册逐项隔离
 2026-11-20 01:44 audit_core.py 重跑：acarray_violation=0、enum_bad=10、dup_def=46（后两类非 9 类口径，仅记录）
+2026-11-20 02:27 PyDbBlockTableRecord.h:41 ② 已改 补两处 impObj 判空
+2026-11-20 02:27 PyDbDatabase.h:50 ② 已改 补 impObj 判空
+2026-11-20 02:27 PyDbDatabase.h:326 ② 已改 aunits 补 impObj 判空
+2026-11-20 02:27 ⑦ 非 dunder 下划线 .def 绑定 0；头部 ② 复扫 0；③ es 后直接 return bool 0

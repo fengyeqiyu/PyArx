@@ -47,6 +47,7 @@ public:
 	template <typename SymbolTableType>
 	SymbolTableType* getSymbolTable(OpenMode mode = OpenMode::kForWrite) {
 		SymbolTableType* pTable = nullptr;
+		if (!impObj()) return pTable;
 		Acad::ErrorStatus es = impObj()->getSymbolTable(pTable, mode);
 		if (es != Acad::eOk) {
 			// 护栏：写打开失败（库只读 / 记录只读 / xref）抛清晰 Python 异常，
@@ -324,6 +325,7 @@ public:
 
 	// 角度单位控制（AUNITS/AUPREC）
 	Adesk::Int16 aunits() const {
+		if (!impObj()) return 0;
 		return impObj()->aunits();
 	}
 	bool setAunits(Adesk::Int16 val);
