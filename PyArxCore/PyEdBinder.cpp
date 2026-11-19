@@ -633,6 +633,12 @@ void bind_PyEd(pym& m) {
         return py::cast(n);
     }, "仿 (entlast)：数据库最后实体 AdsName，失败返回 None");
 
+    // 批量文字搜索：对一批 ObjectId 建一次文字索引（Text/MText，大小写无关），
+    // 按 mode 返回命中 id 列表；mode: prefix(默认) 前缀 / contains 任意位置 / full 整串全等。
+    m.def("textFind", &PyEdTextFind, py::arg("ids"), py::arg("keyword"),
+        py::arg("mode") = "prefix",
+        "在 ids 中按文字搜索（AcDbText/AcDbMText，大小写无关）；返回 list[oldId]");
+
     // AcEdJig trampoline + AcEdDragStyle (registered in this same module).
     // 交互拖动环（drag/acquire* 阻塞等待用户点取与拖动），无头无显示通道，仅 GUI。
 #ifdef PyEdModule

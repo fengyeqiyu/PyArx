@@ -4,7 +4,9 @@
 #include "acedCmdNF.h"
 #include "PyEdEnt.h"
 #include "PyEdCommon.h"
+#include "TextFinder.h"
 #include <array>
+#include <string>
 
 // Legacy ADS entity accessors (acdbEnt*), resbuf normalized through PyResbuf.
 // These are thin editor-level wrappers; modern database editing belongs to PyDb.
@@ -176,4 +178,24 @@ PyAdsName PyEdDictAdd(const PyAdsName& dict, const AcString& sym, const PyAdsNam
     if (!edWarn(::acdbDictAdd(dict.data(), sym.kwszPtr(), obj.data()), L"acdbDictAdd"))
         return PyAdsName{};
     return obj;  // acdbDictAdd 无返回名，入参 obj 即新项名
+}
+
+//-----------------------------------------------------------------------------
+// 批量文字搜索（AcDbText / AcDbMText，大小写无关）：建一次索引，按模式查询。
+// mode: prefix(默认) 前缀 / contains 任意位置包含 / full 整串全等。
+// 空 ids 或空关键字直接返回空列表，不做无谓的图元打开。
+//-----------------------------------------------------------------------------
+AcDbObjectIdArray PyEdTextFind(const AcDbObjectIdArray& ids, const AcString& keyword, const std::string& mode) {
+    AcDbObjectIdArray result;
+    if (ids.isEmpty() || keyword.isEmpty()) return result;
+    QTextFind finder(ids);
+    std::vector<AcDbObjectId> hits;
+    if (mode == "contains" || mode == "any")
+        hits = finder.matchAnyPos(keyword);
+    else if (mode == "full" || mode == "equals")
+        hits = finder.matchFull(keyword);
+    else
+        hits = finder.matchStart(keyword);
+    for (const AcDbObjectId& id : hits) result.append(id);
+    return result;
 }

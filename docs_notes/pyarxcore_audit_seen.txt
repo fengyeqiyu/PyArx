@@ -458,3 +458,5 @@ PyGeLineSeg3d.cpp:1:通过
 PyErrorStatusResult.h:1:⑤-待报
 singleinstance.h:1:⑤-待报
 TextFinder.h:1:⑤-待报
+TextFinder.h:1:⑤已接入PyEd
+PyEdEnt.cpp:1:⑤已改

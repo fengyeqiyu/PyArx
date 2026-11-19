@@ -7,6 +7,7 @@
 #include "PyResbuf.h"
 #include "PyAdsName.h"
 #include <tuple>
+#include <string>
 
 // ---- moved verbatim from PyEdBinder.h ----
 PyResbuf  PyEdEntGet(const PyAdsName& ename);
@@ -36,3 +37,7 @@ py::object  PyEdDictNext(const PyAdsName& dict, bool rewind);
 bool        PyEdDictRename(const PyAdsName& dict, const AcString& oldsym, const AcString& newsym);
 bool        PyEdDictRemove(const PyAdsName& dict, const AcString& sym);
 PyAdsName   PyEdDictAdd(const PyAdsName& dict, const AcString& sym, const PyAdsName& obj);
+
+// ---- 批量文字搜索（Text/MText，大小写无关）----
+// mode: "prefix"（默认）| "contains" | "full"，返回命中 ObjectId 数组。
+AcDbObjectIdArray PyEdTextFind(const AcDbObjectIdArray& ids, const AcString& keyword, const std::string& mode);
