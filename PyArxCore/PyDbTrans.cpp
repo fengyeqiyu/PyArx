@@ -1,4 +1,4 @@
-﻿// PyDbTrans.cpp — 参考 MapleArxLib DbTrans 简化版
+// PyDbTrans.cpp — 参考 MapleArxLib DbTrans 简化版
 #include "stdafx.h"
 #include "logPath.h"
 #include "PyDbTrans.h"
@@ -35,6 +35,23 @@ static void pdtDiag(const char* step) {
 
 void registerPyClass(AcRxClass* acRxClass, py::object pyClass) {
 	g_classMap[acRxClass] = pyClass;
+}
+
+// 按 AcRxClass 继承链把 AcDbObject 还原成最贴近的 Python 包装类。
+// 只按精确类查会落到基类（如 AcDbTable→PyDbObject），Python 侧拿不到派生 API。
+py::object pyarxWrapDbObjectByClass(AcDbObject* p) {
+	if (!p) return py::none();
+	for (AcRxClass* pc = p->isA(); pc; pc = pc->myParent()) {
+		auto hit = g_classMap.find(pc);
+		if (hit == g_classMap.end()) continue;
+		try {
+			py::object obj = hit->second.attr("cast")(PyDbObject(p));
+			if (!obj.is_none()) return obj;
+		} catch (...) {
+			// 该层未注册该指针类型，继续向上
+		}
+	}
+	return py::cast(PyDbObject(p));
 }
 
 // 当前文档构造（GUI 专属）：锁文档 + 启动事务

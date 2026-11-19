@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "stdafx.h"
 #include <acdb.h>
 #include <acdocman.h>
@@ -15,6 +15,8 @@ class PyDbDatabase;
 class AcDbLine;
 
 void registerPyClass(AcRxClass* acRxClass, py::object pyClass);
+// 按 AcRxClass 继承链把 AcDbObject 还原成最贴近的 Python 包装（保证派生 API 可用）
+py::object pyarxWrapDbObjectByClass(AcDbObject* p);
 
 // 事务 RAII 助手（参考 MapleArxLib DbTrans）：
 // 构造即锁文档 + 启动事务，析构自动 commit。

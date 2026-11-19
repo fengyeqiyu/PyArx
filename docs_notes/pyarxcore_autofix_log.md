@@ -140,3 +140,6 @@
 2026-11-19 21:10 | PyDbSymbolTable.cpp:198/224/233 | 接口对齐 | recordAt/getOrCreate 同步改指针返回，get() 用 take_ownership 转 Python 对象
 2026-11-19 21:10 | PyRxObject.cpp:76-87 | 防呆 | detachDbObject 改为关闭写锁后保留指针、放弃关闭职责；原先置空 m_ptr 会让 add 后访问 objectId/属性空指针崩溃
 2026-11-19 21:10 | PyDbLayerTableRecord.h/.cpp | 接口补齐 | 新增 setColorIndex(colorIndex)，对 256 取模，与实体侧颜色 API 口径一致
+2026-11-19 21:40 | PyDbBlockTableRecordIterator.cpp:68 | 防呆 | 遍历实体改走全局类注册表还原真实类型，AcDbTable/AcDbMText 等不再退化成 PyDbEntity
+2026-11-19 21:40 | PyDbTrans.h/.cpp:42 | 防呆 | 新增 pyarxWrapDbObjectByClass：AcRxClass 继承链向上找已注册包装类，供遍历/字典复用
+2026-11-19 21:40 | PyDbDictionary.h/.cpp:17 | 防呆 | getAt 返回 py::object 并按类注册表还原类型，字典里的子字典/块表记录拿回派生 API；__getitem__ 同步

@@ -2,20 +2,24 @@
 #include "PyErrorStatusException.h"
 #include "PyUtils.h"
 #include "PyDbDictionary.h"
+#include "PyDbTrans.h"
 
 PyWrapper_Cpp(DbDictionary);
 
 bool  PyDbDictionary::add(const AcString& name, PyDbObject& obj) {
 	if (!impObj()) return false;
 	AcDbObjectId retId;
-	return PyWarnIfError(impObj()->setAt(name.kwszPtr(), obj.impObj(), retId), L"Dictionary.add");
+	if (!PyWarnIfError(impObj()->setAt(name.kwszPtr(), obj.impObj(), retId), L"Dictionary.add")) return false;
+	// 归属权已转移给字典/数据库：包装释放所有权，否则 Python 侧析构 delete 已入库对象 → 崩溃。
+	obj.detachDbObject();
+	return true;
 }
 
-PyDbObject PyDbDictionary::getAt(const AcString& name) {
-	if (!impObj()) return PyDbObject(nullptr);
+py::object PyDbDictionary::getAt(const AcString& name) {
+	if (!impObj()) return py::none();
 	AcDbObject* p = nullptr;
-	if(!PyWarnIfError(impObj()->getAt(name.kwszPtr(), p, AcDb::kForRead), L"Dictionary.getAt")) return PyDbObject(nullptr);
-	return PyDbObject(p);
+	if (!PyWarnIfError(impObj()->getAt(name.kwszPtr(), p, AcDb::kForRead), L"Dictionary.getAt")) return py::none();
+	return pyarxWrapDbObjectByClass(p);
 }
 
 bool  PyDbDictionary::remove(const AcString& name) {
@@ -194,8 +198,10 @@ void bind_PyDbDictionary(pym& m) {
 		.def("__iter__", [](PyDbDictionary& self) {
 			return self.names().attr("__iter__")();
 		}, "for name in dict：遍历条目名（取值用 dict[name]）")
-		.def("__getitem__", [](PyDbDictionary& self, py::object key) {
-			if (py::isinstance<py::int_>(key)) return std::get<1>(self.entryAt(key.cast<int>(), 1));
+		.def("__getitem__", [](PyDbDictionary& self, py::object key) -> py::object {
+			if (py::isinstance<py::int_>(key)) {
+				return py::cast(std::get<1>(self.entryAt(key.cast<int>(), 1)));
+			}
 			return self.getAt(key.cast<AcString>());
 		}, py::arg("key"), "dict[name] 取条目对象；dict[i] 按位置取第 i 个条目对象（支持负索引）")
 		// ---- DictionaryWithDefault 扩展（对象确为默认字典时生效）----

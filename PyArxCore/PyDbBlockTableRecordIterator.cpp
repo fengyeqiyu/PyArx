@@ -1,9 +1,10 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyErrorStatusException.h"
 #include "PyDbBlockTableRecordIterator.h"
 #include "PyDbBlockTableRecord.h"
 #include "PyDbEntity.h"
 #include "PyDbOpenCache.h"
+#include "PyDbTrans.h"
 
 PyDbBlockTableRecordIterator::PyDbBlockTableRecordIterator(PyDbBlockTableRecord& owner, bool atBeginning, bool skipDeleted) {
     if (!owner.impObj()) { m_pIter = nullptr; return; }
@@ -65,7 +66,12 @@ PyDbBlockTableRecordEntityIter::~PyDbBlockTableRecordEntityIter() {
 	delete m_pIter;
 }
 
-PyDbEntity PyDbBlockTableRecordEntityIter::__next__() {
+// 实体包装走全局类注册表还原真实类型（AcDbTable/AcDbMText 等不再退化成 PyDbEntity）。
+static py::object wrapEntityByClass(AcDbEntity* pEnt) {
+	return pyarxWrapDbObjectByClass(pEnt);
+}
+
+py::object PyDbBlockTableRecordEntityIter::__next__() {
 	if (!m_pIter) throw py::stop_iteration();
 	// 上一个遍历对象先关闭再取下一个，避免 AcDb 同一对象被连续打开两次。
 	if (m_pEnt) { PyDbOpenCache::Close(m_pEnt); m_pEnt->close(); m_pEnt = nullptr; }
@@ -81,14 +87,14 @@ PyDbEntity PyDbBlockTableRecordEntityIter::__next__() {
 				m_pIter->step(true, true);
 				PyDbOpenCache::Track(pEnt, AcDb::kForRead);
 				m_pEnt = pEnt;
-				return PyDbEntity(pEnt);
+				return wrapEntityByClass(pEnt);
 			}
 		}
 		m_pIter->step(true, true);
 		if (es != Acad::eOk || !pEnt) continue;
 		PyDbOpenCache::Track(pEnt, static_cast<AcDb::OpenMode>(m_mode));
 		m_pEnt = pEnt;
-		return PyDbEntity(pEnt);
+		return wrapEntityByClass(pEnt);
 	}
 	throw py::stop_iteration();
 }

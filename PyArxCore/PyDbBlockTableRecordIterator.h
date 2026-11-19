@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "stdafx.h"
 #include "PyDbEntity.h"
 
@@ -47,7 +47,7 @@ public:
 	PyDbBlockTableRecordEntityIter& operator=(const PyDbBlockTableRecordEntityIter&) = delete;
 
 	PyDbBlockTableRecordEntityIter& __iter__() { return *this; }
-	PyDbEntity __next__();
+	py::object __next__();   // 按 AcRxClass 继承链还原真实类型（表格/标注等不再退化成 PyDbEntity）
 
 private:
 	AcDbBlockTableRecordIterator* m_pIter = nullptr;

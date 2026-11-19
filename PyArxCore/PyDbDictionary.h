@@ -8,7 +8,7 @@ public:
 	PyWrapper_H(DbDictionary)
 	PyDbDictionary(AcDbDictionary* ptr) : PyDbObject(ptr) {}
 	bool add(const AcString& name, PyDbObject& obj);
-	PyDbObject getAt(const AcString& name);
+	py::object getAt(const AcString& name);   // 按类注册表还原真实类型（块表记录/XRecord 等）
 	bool remove(const AcString& name);
 	int numEntries() const;
 	bool has(const AcString& name) const;
