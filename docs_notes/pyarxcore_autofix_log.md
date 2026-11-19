@@ -156,3 +156,7 @@
 2026-11-20 02:27 | PyDbBlockTableRecord.h:41 | ② | inline appendAcDbEntity 补 impObj() 与 pEntity.impObj() 判空，空返 eNullObjectPointer
 2026-11-20 02:27 | PyDbDatabase.h:50 | ② | getSymbolTable 模板补 impObj() 判空（空返 nullptr，走既有 es 护栏提示）
 2026-11-20 02:27 | PyDbDatabase.h:326 | ② | aunits() inline 补 impObj() 判空，空返 0
+2026-11-20 03:19 | PyDbEntity.cpp:247/253 | ④ | pushHighlight/popHighlight 改为接 es 走 PyWarnIfError（返回布尔语义不变，失败有提示）
+2026-11-20 03:19 | PyDbDatabase.cpp:3136 | ④ | closeInput 改为补判空 + 接 es 走 PyWarnIfError
+2026-11-20 03:19 | PyDbHatch.cpp:48 | ④ | area() 的 getArea es 交给 PyWarnIfError（仍返回高度值，失败不再静默）
+2026-11-20 03:19 | PyDbBlockTableRecord.cpp:225 | ④ | old_id 构造失败时补 PyWarnIfError（仍返回空包装，签名不变）

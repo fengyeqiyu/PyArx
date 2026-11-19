@@ -45,7 +45,7 @@ std::tuple<double, double, double, double, double, AcGeDoubleArray> PyDbHatch::g
 int PyDbHatch::hatchStyle() const { if (!impObj()) return 0; return static_cast<int>(impObj()->hatchStyle()); }
 bool PyDbHatch::setHatchStyle(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setHatchStyle(static_cast<AcDbHatch::HatchStyle>(v)), L"AcDbHatch::setHatchStyle"); }
 int PyDbHatch::numHatchLines() const { if (!impObj()) return 0; return impObj()->numHatchLines(); }
-double PyDbHatch::area() const { if (!impObj()) return 0.0; double a = 0.0; return (impObj()->getArea(a) == Acad::eOk) ? a : 0.0; }
+double PyDbHatch::area() const { if (!impObj()) return 0.0; double a = 0.0; PyWarnIfError(impObj()->getArea(a), L"PyDbHatch::area"); return a; }
 bool PyDbHatch::evaluateHatch(bool u) { if (!impObj()) return false; return PyWarnIfError(impObj()->evaluateHatch(u), L"AcDbHatch::evaluateHatch"); }
 bool PyDbHatch::evaluateHatchAllScales(bool u) { if (!impObj()) return false; return PyWarnIfError(impObj()->evaluateHatchAllScales(u), L"AcDbHatch::evaluateHatchAllScales"); }
 bool PyDbHatch::lineGenerationEnabled() const { if (!impObj()) return false; return impObj()->lineGenerationEnabled(); }

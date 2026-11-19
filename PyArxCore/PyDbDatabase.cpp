@@ -3133,7 +3133,9 @@ void bind_PyDbDatabase(pym& m)
 		}, "获取对象上下文管理器 (PyDbObjectContextManager)")
 		// ---- 输入队列 ----
 		.def("closeInput", [](PyDbDatabase& d) {
-			return d.impObj()->closeInput(true) == Acad::eOk;
+			if (!d.impObj()) return false;
+			Acad::ErrorStatus es = d.impObj()->closeInput(true);
+			return PyWarnIfError(es, L"PyDbDatabase::closeInput");
 			}, "关闭挂起的输入队列")
 		// ---- PyRx getter 对齐补齐（自动生成，纯读无副作用） ----
 		.def("UCSTableId", [](const PyDbDatabase& d) -> uint64_t { auto id = d.impObj()->UCSTableId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })

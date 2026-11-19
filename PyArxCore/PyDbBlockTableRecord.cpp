@@ -222,6 +222,7 @@ void bind_PyDbBlockTableRecord(pym& m) {
 				es = Acad::eOk;
 				pObj = PyDbOpenCache::Get(objId, static_cast<AcDb::OpenMode>(mode), es);
 			}
+			if (es != Acad::eOk || !pObj) PyWarnIfError(es, L"PyDbBlockTableRecord(old_id)");
 			return new PyDbBlockTableRecord((es == Acad::eOk && pObj)
 				? static_cast<AcDbBlockTableRecord*>(pObj) : nullptr);
 		}), py::arg("old_id"), py::arg("mode") = 1, "从 ObjectId(oldId) 裸打开块表记录（无事务，命令上下文自动提交；失败返回空对象")

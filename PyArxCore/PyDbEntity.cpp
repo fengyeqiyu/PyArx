@@ -244,13 +244,15 @@ void PyDbEntity::moveGripPointsAt(const std::vector<int>& indices, const AcGeVec
 bool PyDbEntity::pushHighlight(int style) {
 	if (!impObj()) return false;
 	AcDbFullSubentPath path;
-	return impObj()->highlight(path, Adesk::kTrue) == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->highlight(path, Adesk::kTrue);
+	return PyWarnIfError(es, L"PyDbEntity::pushHighlight");
 }
 
 bool PyDbEntity::popHighlight() {
 	if (!impObj()) return false;
 	AcDbFullSubentPath path;
-	return impObj()->highlight(path, Adesk::kFalse) == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->highlight(path, Adesk::kFalse);
+	return PyWarnIfError(es, L"PyDbEntity::popHighlight");
 }
 
 // --- 拉伸点 ---

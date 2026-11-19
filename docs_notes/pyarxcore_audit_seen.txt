@@ -560,3 +560,8 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 02:27 PyDbDatabase.h:50 ② 已改 补 impObj 判空
 2026-11-20 02:27 PyDbDatabase.h:326 ② 已改 aunits 补 impObj 判空
 2026-11-20 02:27 ⑦ 非 dunder 下划线 .def 绑定 0；头部 ② 复扫 0；③ es 后直接 return bool 0
+2026-11-20 03:19 PyDbEntity.cpp:247/253 ④ 已改 highlight 两处接 es + PyWarnIfError
+2026-11-20 03:19 PyDbDatabase.cpp:3136 ④ 已改 closeInput 判空 + es + PyWarnIfError
+2026-11-20 03:19 PyDbHatch.cpp:48 ④ 已改 area() getArea 走 PyWarnIfError
+2026-11-20 03:19 PyDbBlockTableRecord.cpp:225 ④ 已改 old_id 构造失败补告警
+2026-11-20 03:19 DbTrans.h:33/139 PyDbTrans.h:42 PyDbOpenCache.h:28/50 PyErrorStatusResult.h:14 ④ 已核 均为内部状态取值/缓存辅助，保留 eOk 判等属设计语义 通过
