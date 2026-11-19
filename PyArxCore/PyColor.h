@@ -29,11 +29,11 @@ public:
 	int  red() const;
 	int  green() const;
 	int  blue() const;
-	void setRGB(int r, int g, int b);
+	bool setRGB(int r, int g, int b);   // 失败时 PyWarnIfError 并返回 false
 
 	// ACI
 	int  colorIndex() const;
-	void setColorIndex(int index);
+	bool setColorIndex(int index);      // 失败时 PyWarnIfError 并返回 false
 
 	// 判定
 	bool isByLayer() const;

@@ -116,3 +116,4 @@
 2026-11-19 10:07 | PyColor.cpp:54 | 防呆 | fromRGB/setRGB 分量夹紧 0-255，消除 UInt8 静默回绕
 2026-11-19 10:07 | PyColor.cpp:86 | ④ | describe() 空描述兜底为 ByLayer/ByBlock/None/RGB/ACI
 2026-11-19 10:07 | PyColor.cpp:142 | 易用 | 补 Push none() 工厂与 __eq__/__ne__
+2026-11-19 10:10 | PyColor.cpp:55 | ③/④ | setRGB/setColorIndex 改返回 bool，走 PyWarnIfError 判 es

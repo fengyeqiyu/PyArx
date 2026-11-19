@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "PyColor.h"
+#include "PyErrorStatusException.h"
 #include <aced.h>
 
 // ACI(1-255) -> RGB：acedGetRGB 返回 COLORREF(0x00bbggrr)；0/256/257 无实体色，返回 false
@@ -20,7 +21,7 @@ static Adesk::UInt8 clamp255(int v) {
 // ---- 工厂 ----
 PyColor PyColor::fromRGB(int r, int g, int b) {
 	PyColor c;
-	c.m_color.setRGB(clamp255(r), clamp255(g), clamp255(b));
+	c.setRGB(r, g, b);   // 已夹紧，setRGB 内部不会失败
 	return c;
 }
 
@@ -52,19 +53,21 @@ int  PyColor::blue() const {
 	if (!m_color.isByColor() && aciToRGB(static_cast<int>(m_color.colorIndex()), r, g, b)) return b;
 	return m_color.blue();
 }
-void PyColor::setRGB(int r, int g, int b) {
-	m_color.setRGB(clamp255(r), clamp255(g), clamp255(b));
+bool PyColor::setRGB(int r, int g, int b) {
+	return PyWarnIfError(m_color.setRGB(clamp255(r), clamp255(g), clamp255(b)),
+		L"AcCmColor::setRGB");
 }
 
 // ---- ACI ----
 int  PyColor::colorIndex() const      { return m_color.colorIndex(); }
-void PyColor::setColorIndex(int idx) {
+bool PyColor::setColorIndex(int idx) {
 	// 0-255 是 ACI 实体色（0=ByBlock）；256/257 是 SDK 的方法码，必须走专用 setter，
 	// 否则 setColorIndex(256) 会被当成 ByBlock。其余越界按 Python 语义对 256 取模归一。
-	if (idx == 256) { m_color.setByLayer(); return; }
-	if (idx == 257) { m_color.setNone();    return; }
+	if (idx == 256) { m_color.setByLayer(); return true; }
+	if (idx == 257) { m_color.setNone();    return true; }
 	int aci = ((idx % 256) + 256) % 256;
-	m_color.setColorIndex(static_cast<Adesk::UInt16>(aci));
+	return PyWarnIfError(m_color.setColorIndex(static_cast<Adesk::UInt16>(aci)),
+		L"AcCmColor::setColorIndex");
 }
 
 // ---- 判定 ----
@@ -120,11 +123,12 @@ void bind_PyColor(pym& m) {
 		.def_property_readonly("green", &PyColor::green, "绿分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
 		.def_property_readonly("blue", &PyColor::blue, "蓝分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
 		.def("setRGB", &PyColor::setRGB,
-			py::arg("r"), py::arg("g"), py::arg("b"), "按 RGB 设置真彩色（分量越界夹紧到 0-255）")
+			py::arg("r"), py::arg("g"), py::arg("b"),
+			"按 RGB 设置真彩色（分量越界夹紧到 0-255），返回 bool")
 
 		// ACI
 		.def_property_readonly("colorIndex", &PyColor::colorIndex, "ACI 颜色号 (0=ByBlock, 1-255, 256=ByLayer, 257=None)")
-		.def("setColorIndex", &PyColor::setColorIndex, py::arg("index"), "设置 ACI 颜色号（0=ByBlock, 1-255 实体色, 256=ByLayer, 257=None, 其余对 256 取模）")
+		.def("setColorIndex", &PyColor::setColorIndex, py::arg("index"), "设置 ACI 颜色号（0=ByBlock, 1-255 实体色, 256=ByLayer, 257=None, 其余对 256 取模），返回 bool")
 
 		// 判定
 		.def("isByLayer", &PyColor::isByLayer)
