@@ -551,3 +551,8 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 01:18 PyDbEntity.cpp:247/253 ④ 同型（highlight 静默 eOk）只报不改（本轮收敛影响面）
 2026-11-20 01:18 PyDbDatabase.cpp:3136 PyDbHatch.cpp:48 ④ 同型 只报不改（只读/取值型，无提示属既有语义）
 2026-11-20 01:18 PyMfcXml ⑨ 复检 python315t=0 PyGILState=0 mod_gil_not_used=1 通过
+2026-11-20 01:44 ⑥ 602/602 文件均登记 vcxproj，未登记 0
+2026-11-20 01:44 ③ es 赋值后 6 行内未使用 0；② impObj 赋值未判空 0；⑦ TEMP-DIAG/_diagAppend 0
+2026-11-20 01:44 ⑨ stdafx.h:47-52 按 Py_GIL_DISABLED 条件选 python315t.lib/python315.lib；core+mfc python315t=0、PyGILState=0、mod_gil_not_used=1；三产物只链 python315t.dll
+2026-11-20 01:44 ⑤ 745 处 impObj()-> 取值调用均为 SDK getter 转发、非同名包装类，按基线通过；⑧ catch 含既有 Reactor 静默与 ApLog 日志兜底，模块注册逐项隔离
+2026-11-20 01:44 audit_core.py 重跑：acarray_violation=0、enum_bad=10、dup_def=46（后两类非 9 类口径，仅记录）
