@@ -464,3 +464,4 @@ PyEdFunc.cpp:1:通过-2/5/7/8
 PyEdEditor.cpp:1:③已改
 PyEdSel.cpp:1:通过-1/2/3/4/5/7/8
 PyColor.cpp:34:④已改
+PyColor.cpp:86:④已改

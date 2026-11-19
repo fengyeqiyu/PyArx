@@ -113,3 +113,6 @@
 2026-11-19 09:19 | PyColor.cpp:34 | ④ | setColorIndex 对 256 取模归一（负值亦归一），fromACI 改走 setColorIndex，文案改为 0=ByBlock
 2026-11-19 09:24 | PyColor.cpp:34 | ④ | setColorIndex 分流：256 走 setByLayer、257 走 setNone、其余对 256 取模；文案更新
 2026-11-19 10:04 | PyColor.cpp:34 | ② | red/green/blue 对 ACI 色改用 acedGetRGB 解析真实 RGB（1-255），真彩色仍走分量；绑定文案更新
+2026-11-19 10:07 | PyColor.cpp:54 | 防呆 | fromRGB/setRGB 分量夹紧 0-255，消除 UInt8 静默回绕
+2026-11-19 10:07 | PyColor.cpp:86 | ④ | describe() 空描述兜底为 ByLayer/ByBlock/None/RGB/ACI
+2026-11-19 10:07 | PyColor.cpp:142 | 易用 | 补 Push none() 工厂与 __eq__/__ne__

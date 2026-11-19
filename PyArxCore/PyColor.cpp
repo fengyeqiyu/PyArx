@@ -12,12 +12,15 @@ static bool aciToRGB(int aci, int& r, int& g, int& b) {
 	return true;
 }
 
+// RGB 分量越界一律夹紧到 0-255，避免 static_cast<UInt8> 静默回绕（300 -> 44）
+static Adesk::UInt8 clamp255(int v) {
+	return static_cast<Adesk::UInt8>(v < 0 ? 0 : (v > 255 ? 255 : v));
+}
+
 // ---- 工厂 ----
 PyColor PyColor::fromRGB(int r, int g, int b) {
 	PyColor c;
-	c.m_color.setRGB(static_cast<Adesk::UInt8>(r),
-		static_cast<Adesk::UInt8>(g),
-		static_cast<Adesk::UInt8>(b));
+	c.m_color.setRGB(clamp255(r), clamp255(g), clamp255(b));
 	return c;
 }
 
@@ -29,6 +32,7 @@ PyColor PyColor::fromACI(int index) {
 
 PyColor PyColor::byLayer() { PyColor c; c.m_color.setByLayer(); return c; }
 PyColor PyColor::byBlock() { PyColor c; c.m_color.setByBlock(); return c; }
+PyColor PyColor::none()    { PyColor c; c.m_color.setNone();    return c; }
 
 // ---- RGB ----
 // ACI 色（非真彩色）时 AcCmColor 的 RGB 分量恒为 0，这里按 ACI 索引查真实 RGB，
@@ -49,9 +53,7 @@ int  PyColor::blue() const {
 	return m_color.blue();
 }
 void PyColor::setRGB(int r, int g, int b) {
-	m_color.setRGB(static_cast<Adesk::UInt8>(r),
-		static_cast<Adesk::UInt8>(g),
-		static_cast<Adesk::UInt8>(b));
+	m_color.setRGB(clamp255(r), clamp255(g), clamp255(b));
 }
 
 // ---- ACI ----
@@ -83,10 +85,17 @@ AcString PyColor::bookName() const {
 
 AcString PyColor::describe() const {
 	AcString desc;
-	if (m_color.getDescription(desc) == Acad::eOk) {
+	if (m_color.getDescription(desc) == Acad::eOk && !desc.isEmpty()) {
 		return desc;
 	}
-	return AcString();
+	// SDK 描述为空时兜底，避免 __repr__/__str__ 返回空串
+	AcString fb;
+	if (m_color.isByLayer())      fb = L"ByLayer";
+	else if (m_color.isByBlock()) fb = L"ByBlock";
+	else if (m_color.isNone())    fb = L"None";
+	else if (m_color.isByColor()) fb.format(L"RGB(%d,%d,%d)", red(), green(), blue());
+	else                          fb.format(L"ACI %d", static_cast<int>(m_color.colorIndex()));
+	return fb;
 }
 
 // ---- pybind 绑定 ----
@@ -99,27 +108,28 @@ void bind_PyColor(pym& m) {
 		// 工厂方法
 		.def_static("fromRGB", &PyColor::fromRGB,
 			py::arg("r"), py::arg("g"), py::arg("b"),
-			"按 RGB (0-255) 构造真彩色")
+			"按 RGB 构造真彩色（分量越界夹紧到 0-255）")
 		.def_static("fromACI", &PyColor::fromACI,
-			py::arg("index"), "按 ACI 颜色号 (0-255) 构造")
+			py::arg("index"), "按 ACI 颜色号构造（0=ByBlock, 1-255, 256=ByLayer, 257=None）")
 		.def_static("byLayer", &PyColor::byLayer, "构造 ByLayer 颜色")
 		.def_static("byBlock", &PyColor::byBlock, "构造 ByBlock 颜色")
+		.def_static("none", &PyColor::none, "构造 None（无颜色）")
 
 		// RGB 读写
 		.def_property_readonly("red", &PyColor::red, "红分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
 		.def_property_readonly("green", &PyColor::green, "绿分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
 		.def_property_readonly("blue", &PyColor::blue, "蓝分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
 		.def("setRGB", &PyColor::setRGB,
-			py::arg("r"), py::arg("g"), py::arg("b"), "按 0-255 设置 RGB")
+			py::arg("r"), py::arg("g"), py::arg("b"), "按 RGB 设置真彩色（分量越界夹紧到 0-255）")
 
 		// ACI
-		.def_property_readonly("colorIndex", &PyColor::colorIndex, "ACI 颜色号 (0=ByBlock, 1-255)")
+		.def_property_readonly("colorIndex", &PyColor::colorIndex, "ACI 颜色号 (0=ByBlock, 1-255, 256=ByLayer, 257=None)")
 		.def("setColorIndex", &PyColor::setColorIndex, py::arg("index"), "设置 ACI 颜色号（0=ByBlock, 1-255 实体色, 256=ByLayer, 257=None, 其余对 256 取模）")
 
 		// 判定
 		.def("isByLayer", &PyColor::isByLayer)
 		.def("isByBlock", &PyColor::isByBlock)
-		.def("isByColor", &PyColor::isByColor, "是否为真彩色/ACI 显式色")
+		.def("isByColor", &PyColor::isByColor, "是否真彩色（由 setRGB/fromRGB 设置）")
 		.def("isNone", &PyColor::isNone)
 
 		// 命名
@@ -129,5 +139,7 @@ void bind_PyColor(pym& m) {
 		// 字符串
 		.def("describe", &PyColor::describe, "可读颜色描述")
 		.def("__repr__", &PyColor::describe)
-		.def("__str__", &PyColor::describe);
+		.def("__str__", &PyColor::describe)
+		.def("__eq__", [](const PyColor& a, const PyColor& b) { return a == b; }, py::is_operator())
+		.def("__ne__", [](const PyColor& a, const PyColor& b) { return a != b; }, py::is_operator());
 }

@@ -23,6 +23,7 @@ public:
 	static PyColor fromACI(int index);
 	static PyColor byLayer();
 	static PyColor byBlock();
+	static PyColor none();
 
 	// RGB 读写
 	int  red() const;
@@ -46,6 +47,10 @@ public:
 
 	// 可读描述
 	AcString describe() const;
+
+	// 相等比较（直接比 AcCmColor，含颜色方法/索引/真彩色分量）
+	bool operator==(const PyColor& other) const { return m_color == other.m_color; }
+	bool operator!=(const PyColor& other) const { return !(*this == other); }
 };
 
 void bind_PyColor(pym& m);
