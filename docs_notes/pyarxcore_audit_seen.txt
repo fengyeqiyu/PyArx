@@ -455,3 +455,6 @@ PyGeEntity2d.cpp:1:通过
 PyGeEntity3d.cpp:1:通过
 PyGeInterval.cpp:1:通过
 PyGeLineSeg3d.cpp:1:通过
+PyErrorStatusResult.h:1:⑤-待报
+singleinstance.h:1:⑤-待报
+TextFinder.h:1:⑤-待报
