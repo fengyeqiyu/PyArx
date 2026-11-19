@@ -565,3 +565,6 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 03:19 PyDbHatch.cpp:48 ④ 已改 area() getArea 走 PyWarnIfError
 2026-11-20 03:19 PyDbBlockTableRecord.cpp:225 ④ 已改 old_id 构造失败补告警
 2026-11-20 03:19 DbTrans.h:33/139 PyDbTrans.h:42 PyDbOpenCache.h:28/50 PyErrorStatusResult.h:14 ④ 已核 均为内部状态取值/缓存辅助，保留 eOk 判等属设计语义 通过
+2026-11-20 04:18 PyArxBinder.cpp:93-122 ⑧ 未改 核心子模块 bind_PyGe/PyEnum/PyRx/PyDb*/PyGi/PyCore/PyUtility/PyDebug 调用未包 try/catch（Ap 子模块与 m 级绑定已隔离）；补包需 13 处 >20 行且改变失败语义 只报不改
+2026-11-20 04:18 PyArrayCaster.h:29/63 PyDbDynBlockReference.cpp:11 PyDbMText.cpp:165/170 PyDbTrans.cpp:50/248/266 PyGePolyline2d/3d PyGiTextEngine.cpp:106/127 PyUt.cpp:189/213/334 ⑧ 通过 catch(...) 均有返回兜底或注释说明，非静默
+2026-11-20 04:18 PyGeNurbCurve3d.cpp:28/36 PyGeMatrix3d.cpp:160 ⑧ 通过 异常兜底为已文档化的安全回退（非有理曲线权重、numpy 缺失回退嵌套 list）
