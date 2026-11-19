@@ -99,6 +99,59 @@ std::tuple<int,int,int> PyDbEntity::colorRGB() const {
 	AcCmColor c = impObj()->color();
 	return std::make_tuple((int)c.red(), (int)c.green(), (int)c.blue());
 }
+// SDK 只提供 ByLayer 解析(accmResolveEffectiveColorToRGB)，ByBlock 继承、块内 "0" 图层、
+// 257 不绘制、图层关闭/冻结均需在此自行补齐；前景色(ACI 7) 按黑底反色，与 accm 一致。
+static bool pyLayerOffOrFrozen(AcDbObjectId layerId, bool& off, bool& frozen) {
+	AcDbLayerTableRecord* pLay = nullptr;
+	if (acdbOpenObject(pLay, layerId, AcDb::kForRead) != Acad::eOk || !pLay) return false;
+	off = (pLay->isOff() == Adesk::kTrue);
+	frozen = (pLay->isFrozen() == Adesk::kTrue);
+	pLay->close();
+	return true;
+}
+std::tuple<int,int,int> PyDbEntity::displayColor() const {
+	if (!impObj()) return {};
+	AcCmEntityColor ec = impObj()->entityColor();
+	if (ec.isNone()) return std::make_tuple(0, 0, 0);
+	if (ec.isByColor()) return std::make_tuple((int)ec.red(), (int)ec.green(), (int)ec.blue());
+
+	AcCmEntityColor eff = ec;
+	AcDbObjectId layerId = impObj()->layerId();
+	bool insideBlock = false;
+	AcDbObjectId blockLayerId = AcDbObjectId::kNull;
+
+	if (ec.isByBlock()) {
+		AcDbObjectId ownerId = impObj()->ownerId();
+		for (int depth = 0; depth < 16; ++depth) {   // 嵌套块向上继承，限深防环
+			AcDbObject* pOwner = nullptr;
+			if (acdbOpenObject(pOwner, ownerId, AcDb::kForRead) != Acad::eOk || !pOwner) break;
+			AcDbBlockReference* pBr = AcDbBlockReference::cast(pOwner);
+			if (!pBr) { pOwner->close(); break; }
+			AcCmEntityColor brc = pBr->entityColor();
+			ownerId = pBr->ownerId();
+			insideBlock = true;
+			blockLayerId = pBr->layerId();
+			pOwner->close();
+			if (!brc.isByBlock()) { eff = brc; layerId = blockLayerId; break; }
+		}
+	}
+	if (eff.isByBlock()) eff = AcCmEntityColor::ByLayer();   // 顶层无块上下文 → 随图层
+
+	if (insideBlock && blockLayerId != AcDbObjectId::kNull) {
+		const wchar_t* name = impObj()->layer();
+		if (name != nullptr && 0 == wcscmp(name, L"0")) layerId = blockLayerId;  // 块内 "0" 层随父块图层
+	}
+	AcCmEntityColor out = accmResolveEffectiveColorToRGB(eff, layerId);
+	return std::make_tuple((int)out.red(), (int)out.green(), (int)out.blue());
+}
+bool PyDbEntity::isColorVisible() const {
+	if (!impObj()) return false;
+	if (impObj()->entityColor().isNone()) return false;
+	if (impObj()->visibility() == AcDb::kInvisible) return false;
+	bool off = false, frozen = false;
+	if (pyLayerOffOrFrozen(impObj()->layerId(), off, frozen) && (off || frozen)) return false;
+	return true;
+}
 int  PyDbEntity::transparency() const { if (!impObj()) return 0; return (int)impObj()->transparency().alpha(); }
 bool PyDbEntity::setTransparency(int alpha, bool doSubents) {
 	if (!impObj()) return false;
@@ -259,6 +312,10 @@ void bind_PyDbEntity(pym& m) {
 			"按真彩色 RGB 设置颜色（分量夹紧 0-255）")
 		.def("entityColor", &PyDbEntity::entityColor, "返回有效实体颜色 RGB (r,g,b)")
 		.def("colorRGB", &PyDbEntity::colorRGB, "返回存储的真彩色 RGB (r,g,b)")
+		.def("displayColor", &PyDbEntity::displayColor,
+			"返回真实显示色 RGB (r,g,b)：解析 ByLayer(随图层)、ByBlock(随块递归)、ACI、前景色")
+		.def("isColorVisible", &PyDbEntity::isColorVisible,
+			"颜色 257(None)/图层关闭或冻结/实体不可见时返回 False")
 		.def("transparency", &PyDbEntity::transparency, "返回透明度 alpha 0=全透明 255=不透明")
 		.def("setTransparency", &PyDbEntity::setTransparency, py::arg("alpha"), py::arg("doSubents") = true, "设置透明度 alpha 0-255")
 		// ---- 包围盒 / 炸开 ----

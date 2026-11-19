@@ -41,6 +41,8 @@ public:
 	bool setColorByRgb(int r, int g, int b, bool doSubents = true);   // 真彩色 RGB 设置（分量夹紧 0-255）
 	std::tuple<int,int,int> entityColor() const;          // 有效颜色 RGB
 	std::tuple<int,int,int> colorRGB() const;             // 存储真彩色 RGB
+	std::tuple<int,int,int> displayColor() const;         // 真实显示色 RGB（解析 ByLayer/ByBlock/ACI/前景）
+	bool isColorVisible() const;                          // 色 257 / 图层关闭冻结 / 不可见 → false
 	int  transparency() const;                            // alpha 0=全透明 255=不透明
 	bool setTransparency(int alpha, bool doSubents = true);
 
