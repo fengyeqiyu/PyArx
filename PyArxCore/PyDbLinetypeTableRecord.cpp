@@ -26,12 +26,18 @@ void bind_PyDbLinetypeTableRecord(pym& m) {
 			return PyWarnIfError(s.impObj()->setComments(v.kwszPtr()), L"AcDbLinetypeTableRecord::setAsciiDescription");
 		}, py::arg("v"))
 		// ---- patternLength ----
-		.def("patternLength", [](PyDbLinetypeTableRecord& s) { return s.impObj()->patternLength(); })
+		.def("patternLength", [](PyDbLinetypeTableRecord& s) {
+			if (s.isNull()) return 0.0;
+			return s.impObj()->patternLength();
+		})
 		.def("setPatternLength", [](PyDbLinetypeTableRecord& s, double v) {
 			return PyWarnIfError(s.impObj()->setPatternLength(v), L"AcDbLinetypeTableRecord::setPatternLength");
 		}, py::arg("v"))
 		// ---- numDashes ----
-		.def("numDashes", [](PyDbLinetypeTableRecord& s) { return s.impObj()->numDashes(); })
+		.def("numDashes", [](PyDbLinetypeTableRecord& s) {
+			if (s.isNull()) return 0;
+			return s.impObj()->numDashes();
+		})
 		.def("setNumDashes", [](PyDbLinetypeTableRecord& s, int v) {
 			return PyWarnIfError(s.impObj()->setNumDashes(v), L"AcDbLinetypeTableRecord::setNumDashes");
 		}, py::arg("v"))
@@ -65,7 +71,10 @@ void bind_PyDbLinetypeTableRecord(pym& m) {
 			return PyWarnIfError(s.impObj()->setShapeScaleAt(index, v), L"AcDbLinetypeTableRecord::setShapeScaleAt");
 		}, py::arg("index"), py::arg("v"))
 		// ---- isScaledToFit ----
-		.def("isScaledToFit", [](PyDbLinetypeTableRecord& s) { return s.impObj()->isScaledToFit(); })
+		.def("isScaledToFit", [](PyDbLinetypeTableRecord& s) {
+			if (s.isNull()) return false;
+			return s.impObj()->isScaledToFit();
+		})
 		.def("setIsScaledToFit", [](PyDbLinetypeTableRecord& s, bool v) {
 			s.impObj()->setIsScaledToFit(v); return true;
 		}, py::arg("v"))

@@ -42,14 +42,20 @@ void bind_PyDbPolygonMesh(pym& m) {
 				L"AcDbPolygonMesh::setNSize");
 		}, py::arg("v"))
 		// ---- M/N 闭合 ----
-		.def("isMClosed", [](PyDbPolygonMesh& s) { return s.impObj()->isMClosed() != Adesk::kFalse; })
+		.def("isMClosed", [](PyDbPolygonMesh& s) {
+			if (s.isNull()) return false;
+			return s.impObj()->isMClosed() != Adesk::kFalse;
+		})
 		.def("makeMClosed", [](PyDbPolygonMesh& s) {
 			return PyWarnIfError(s.impObj()->makeMClosed(), L"AcDbPolygonMesh::makeMClosed");
 		})
 		.def("makeMOpen", [](PyDbPolygonMesh& s) {
 			return PyWarnIfError(s.impObj()->makeMOpen(), L"AcDbPolygonMesh::makeMOpen");
 		})
-		.def("isNClosed", [](PyDbPolygonMesh& s) { return s.impObj()->isNClosed() != Adesk::kFalse; })
+		.def("isNClosed", [](PyDbPolygonMesh& s) {
+			if (s.isNull()) return false;
+			return s.impObj()->isNClosed() != Adesk::kFalse;
+		})
 		.def("makeNClosed", [](PyDbPolygonMesh& s) {
 			return PyWarnIfError(s.impObj()->makeNClosed(), L"AcDbPolygonMesh::makeNClosed");
 		})

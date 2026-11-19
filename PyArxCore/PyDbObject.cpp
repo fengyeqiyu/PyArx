@@ -253,7 +253,10 @@ void bind_PyDbObject(pym& m)
 		.def("isAcDbObjectIdsInFlux", [](PyDbObject& self) {
 			return static_cast<bool>(self.impObj()->isAcDbObjectIdsInFlux());
 		})
-		.def("hasFields", [](PyDbObject& self) { return self.impObj()->hasFields(); })
+		.def("hasFields", [](PyDbObject& self) {
+			if (self.isNull()) return false;
+			return self.impObj()->hasFields();
+		})
 		.def("getFieldDictionary", [](PyDbObject& self) {
 			return self.impObj()->getFieldDictionary();
 		})

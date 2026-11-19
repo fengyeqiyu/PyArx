@@ -132,3 +132,6 @@
 2026-11-19 15:18 | PyDbTrans.cpp:298 | ④/缺口 | 新增 addNewlyCreatedDBObject(obj, add) 绑定，内部走 AcDbTransactionManager::addNewlyCreatedDBRObject 并判 es
 2026-11-19 15:18 | PyMfcXml/PyMfcBind.cpp:90 | ⑨ | PYBIND11_MODULE 补第三参 py::mod_gil_not_used()，与 PyArxCore 一致
 2026-11-19 15:18 | tools/cadmcp/headless_entity_test.py:130/137/153 | 脚本 | addEntry→add、getRecord→getAt、图层改用 newRecord()
+2026-11-19 15:26 | PyDbObject.cpp:256 | ② | hasFields 补 isNull 守卫，空包装返回 false
+2026-11-19 15:26 | PyDbPolygonMesh.cpp:45/52 | ② | isMClosed/isNClosed 补 isNull 守卫
+2026-11-19 15:26 | PyDbLinetypeTableRecord.cpp:29/34/74 | ② | patternLength/numDashes/isScaledToFit 补 isNull 守卫(分别返 0.0/0/false)
