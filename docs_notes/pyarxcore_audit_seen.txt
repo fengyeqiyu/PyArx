@@ -485,3 +485,8 @@ PyDbPropertiesOverrule.cpp:1:通过
 PyDbSubentityOverrule.cpp:1:通过
 PyDbTransformOverrule.cpp:1:通过
 PyDbVisibilityOverrule.cpp:1:通过
+PyEdJig.cpp:1:通过
+PyEdSelectionSets.cpp:1:通过
+PyEdUcsVp.cpp:1:通过
+PyEdUtil.cpp:1:通过
+PyEnum.cpp:1:通过
