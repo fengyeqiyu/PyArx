@@ -521,3 +521,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-19 15:20 PyDbObject.cpp:单行lambda1处:②同上-只报不改
 2026-11-19 15:20 PyDbTrans.cpp:27:⑦pdtDiag 诊断写文件 35 处调用(每事务一次 fopen/fprintf)-只报不改(建议宏开关门控)
 2026-11-19 15:20 PyArxCore全项目:1:①②③④⑤⑥⑧⑨全项复核完成-①0/⑥0/⑨mod_gil_not_used已声明/⑧空catch9处已记录
+2026-11-19 15:26 PyDbObject.cpp:256:②已修-hasFields补isNull
+2026-11-19 15:26 PyDbPolygonMesh.cpp:45/52:②已修-isMClosed/isNClosed补isNull
+2026-11-19 15:26 PyDbLinetypeTableRecord.cpp:29/34/74:②已修-补isNull
+2026-11-19 15:26 PyArxEngine\PyEngine.cpp:75-78:⑨通过-usable()按Py_GIL_DISABLED选python315t/python315
