@@ -1,4 +1,5 @@
 #include "PyDbField.h"
+#include "PyErrorStatusException.h"
 #include "PyDbDatabase.h"
 
 PyWrapper_Cpp(DbField);
@@ -32,7 +33,8 @@ int PyDbField::evaluationOption() const
 bool PyDbField::setEvaluationOption(int option)
 {
 	if (!impObj()) return false;
-	return impObj()->setEvaluationOption(static_cast<AcDbField::EvalOption>(option)) == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->setEvaluationOption(static_cast<AcDbField::EvalOption>(option));
+	return PyWarnIfError(es, L"PyDbField::setEvaluationOption");
 }
 
 int PyDbField::filingOption() const
@@ -44,7 +46,8 @@ int PyDbField::filingOption() const
 bool PyDbField::setFilingOption(int option)
 {
 	if (!impObj()) return false;
-	return impObj()->setFilingOption(static_cast<AcDbField::FilingOption>(option)) == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->setFilingOption(static_cast<AcDbField::FilingOption>(option));
+	return PyWarnIfError(es, L"PyDbField::setFilingOption");
 }
 
 AcString PyDbField::evaluatorId() const
@@ -57,7 +60,8 @@ AcString PyDbField::evaluatorId() const
 bool PyDbField::setEvaluatorId(const AcString& evaluatorId)
 {
 	if (!impObj()) return false;
-	return impObj()->setEvaluatorId(evaluatorId) == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->setEvaluatorId(evaluatorId);
+	return PyWarnIfError(es, L"PyDbField::setEvaluatorId");
 }
 
 bool PyDbField::isTextField() const
@@ -69,7 +73,8 @@ bool PyDbField::isTextField() const
 bool PyDbField::convertToTextField()
 {
 	if (!impObj()) return false;
-	return impObj()->convertToTextField() == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->convertToTextField();
+	return PyWarnIfError(es, L"PyDbField::convertToTextField");
 }
 
 int PyDbField::dataType() const
@@ -97,7 +102,8 @@ AcString PyDbField::getFieldCode(int flag) const
 bool PyDbField::setFieldCode(const AcString& fieldCode, int flag)
 {
 	if (!impObj()) return false;
-	return impObj()->setFieldCode(fieldCode, static_cast<AcDbField::FieldCodeFlag>(flag)) == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->setFieldCode(fieldCode, static_cast<AcDbField::FieldCodeFlag>(flag));
+	return PyWarnIfError(es, L"PyDbField::setFieldCode");
 }
 
 AcString PyDbField::getFormat() const
@@ -112,7 +118,8 @@ AcString PyDbField::getFormat() const
 bool PyDbField::setFormat(const AcString& format)
 {
 	if (!impObj()) return false;
-	return impObj()->setFormat(format) == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->setFormat(format);
+	return PyWarnIfError(es, L"PyDbField::setFormat");
 }
 
 AcString PyDbField::getValue() const
@@ -150,13 +157,15 @@ PyDbField* PyDbField::getChild(int index, AcDb::OpenMode mode)
 bool PyDbField::setInObject(PyDbObject& obj, const AcString& propName)
 {
 	if (!impObj()) return false;
-	return impObj()->setInObject(obj.impObj(), propName) == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->setInObject(obj.impObj(), propName);
+	return PyWarnIfError(es, L"PyDbField::setInObject");
 }
 
 bool PyDbField::postInDatabase(PyDbDatabase& db)
 {
 	if (!impObj()) return false;
-	return impObj()->postInDatabase(db.impObj()) == Acad::eOk;
+	Acad::ErrorStatus es = impObj()->postInDatabase(db.impObj());
+	return PyWarnIfError(es, L"PyDbField::postInDatabase");
 }
 
 void bind_PyDbField(pym& m)

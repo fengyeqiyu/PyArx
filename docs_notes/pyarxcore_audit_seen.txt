@@ -547,3 +547,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 00:18 PyEdSelectionSets.cpp:48 ③ 已改 acedSSName 判 RTNORM + acdbGetObjectId es 交给 PyWarnIfError
 2026-11-20 00:18 PyEdSelectionSets.cpp:150 ③ 已核 该处 acdbGetObjectId 结果参与 ==eOk 判断 通过
 2026-11-20 00:18 ⑥ 全量比对 vcxproj 未登记 0；⑦ ofstream 仅 PyArxBinder 日志 + PyUt.genStub 写 .pyi（功能）通过
+2026-11-20 01:18 PyDbField.cpp:35-159 ④ 已改 8 处 setter 改接 es + PyWarnIfError
+2026-11-20 01:18 PyDbEntity.cpp:247/253 ④ 同型（highlight 静默 eOk）只报不改（本轮收敛影响面）
+2026-11-20 01:18 PyDbDatabase.cpp:3136 PyDbHatch.cpp:48 ④ 同型 只报不改（只读/取值型，无提示属既有语义）
+2026-11-20 01:18 PyMfcXml ⑨ 复检 python315t=0 PyGILState=0 mod_gil_not_used=1 通过
