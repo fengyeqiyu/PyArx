@@ -295,6 +295,14 @@ bool PyDbTrans::addEntity(PyDbEntity& ent) {
 	return btr ? addEntity(btr, ent) : false;
 }
 
+// 新建对象入事务：SDK 2024 里是 AcDbTransactionManager::addNewlyCreatedDBRObject(返回 ErrorStatus)，
+// add=true 时事务提交后由 DB 接管所有权
+bool PyDbTrans::addNewlyCreatedDBObject(PyDbObject& obj, bool add) {
+	if (!pTm || !obj.impObj()) return false;
+	if (!PyWarnIfError(pTm->addNewlyCreatedDBRObject(obj.impObj(), add), L"PyDbTrans::addNewlyCreatedDBObject")) return false;
+	return true;
+}
+
 // 排队图形刷新（GUI 下新实体立即可见）
 void PyDbTrans::flushScreen() {
 	pdtDiag("FLUSHSCREEN enter");
@@ -328,6 +336,9 @@ void bind_PyDbTrans(py::module& m) {
 			py::arg("entity"), "追加实体到当前空间")
 		.def("addEntity", py::overload_cast<AcDbBlockTableRecord*, PyDbEntity&>(&PyDbTrans::addEntity),
 			py::arg("block_table_record"), py::arg("entity"), "追加实体到指定块表记录")
+		.def("addNewlyCreatedDBObject", &PyDbTrans::addNewlyCreatedDBObject,
+			py::arg("obj"), py::arg("add") = true,
+			"把新建的表记录/对象登记进当前事务（建块定义、建图层后必须调用）")
 		.def("currentSpace", [](PyDbTrans& t) {
 			AcDbBlockTableRecord* btr = t.currentSpace();
 			return btr ? PyDbBlockTableRecord(btr) : PyDbBlockTableRecord(nullptr);

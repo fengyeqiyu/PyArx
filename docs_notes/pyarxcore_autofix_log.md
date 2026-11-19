@@ -128,3 +128,7 @@
 2026-11-19 11:19 | PyDbHighlightStateOverrule.cpp:14 | ⑧ | 同上，compat 回调异常可见化
 2026-11-19 11:19 | PyDbObjectOverrule.cpp:22,40,58,76,93 | ⑧ | 同上，5 处 open/close/cancel/erase/isApplicable 异常改为可见
 2026-11-19 14:28 | PyGeCurveCurveInt2d.cpp:22 | ⑦临时残留 | 删除已失效的 deferred NOTE 注释（相关绑定实际已实现）
+2026-11-19 15:18 | PyDbBinder.cpp:520 | ⑥/防呆 | 补登记 9 个符号表 (AcDb*Table) 到 g_classMap，openObject 不再回落 PyDbObject，Python 可拿 table.add()/getAt()
+2026-11-19 15:18 | PyDbTrans.cpp:298 | ④/缺口 | 新增 addNewlyCreatedDBObject(obj, add) 绑定，内部走 AcDbTransactionManager::addNewlyCreatedDBRObject 并判 es
+2026-11-19 15:18 | PyMfcXml/PyMfcBind.cpp:90 | ⑨ | PYBIND11_MODULE 补第三参 py::mod_gil_not_used()，与 PyArxCore 一致
+2026-11-19 15:18 | tools/cadmcp/headless_entity_test.py:130/137/153 | 脚本 | addEntry→add、getRecord→getAt、图层改用 newRecord()

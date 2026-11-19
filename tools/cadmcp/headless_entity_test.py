@@ -127,14 +127,14 @@ def block_make():
         bt = tr.openObject(db.blockTableId(), 1)
         btr = P.Db.PyDbBlockTableRecord()
         btr.setName("PYARX_BLK")
-        bt.addEntry(btr)
+        bt.add(btr)
         tr.addNewlyCreatedDBObject(btr, True)
         c = P.Db.PyDbCircle(_pt(0, 0), P.Ge.AcGeVector3d(0, 0, 1), 20.0)
         btr.appendAcDbEntity(c)
         tr.addNewlyCreatedDBObject(c, True)
     with P.Db.PyDbTrans() as tr:
         bt = tr.openObject(db.blockTableId(), 0)
-        rec2 = bt.getRecord("PYARX_BLK")
+        rec2 = bt.getAt("PYARX_BLK", 0)
         br = P.Db.PyDbBlockReference()
         br.setBlockTableRecord(rec2.objectId())
         br.setPosition(_pt(600, 0))
@@ -150,9 +150,9 @@ def layer_make():
     db = P.Db.curDb()
     with P.Db.PyDbTrans() as tr:
         lt = tr.openObject(db.layerTableId(), 1)
-        lr = P.Db.PyDbLayerTableRecord()
+        lr = P.Db.PyDbLayerTableRecord.newRecord()
         lr.setName("PYARX_LAYER")
-        lt.addEntry(lr)
+        lt.add(lr)
         tr.addNewlyCreatedDBObject(lr, True)
     return "PYARX_LAYER"
 

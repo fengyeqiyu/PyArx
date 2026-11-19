@@ -10,6 +10,7 @@
 namespace py = pybind11;
 
 class PyDbEntity;
+class PyDbObject;
 class PyDbDatabase;
 class AcDbLine;
 
@@ -51,6 +52,9 @@ public:
 	AcDbBlockTableRecord* currentSpace();
 	bool addEntity(AcDbBlockTableRecord* btr, PyDbEntity& ent);
 	bool addEntity(PyDbEntity& ent);
+	// 新建记录/对象入事务（SDK AcDbTransaction::addNewlyCreatedDBObject）：
+	// 缺这条 Python 侧建块定义、建图层会在 add 之后取不到对象
+	bool addNewlyCreatedDBObject(PyDbObject& obj, bool add);
 	void flushScreen();
 
 	// Python with 支持：enter 返回自身，exit 调 commit

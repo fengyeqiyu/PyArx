@@ -87,7 +87,8 @@ static std::wstring xmlPyPropValueFor(PyMfcHost* host, const std::wstring& name,
     return xmlPyPropValue(v);
 }
 
-PYBIND11_MODULE(PyMfcXml, m)
+// 第三参数声明本模块不使用 GIL：3.15t(free-threaded) 下 import 不再回开 GIL。
+PYBIND11_MODULE(PyMfcXml, m, py::mod_gil_not_used())
 {
     m.doc() = "PyMfcCore — MFC 原生控件最小 Python 接口";
 
@@ -115,6 +116,7 @@ PYBIND11_MODULE(PyMfcXml, m)
         .def("clientSize", &PyMfcWindow::ClientSize)
         .def("setBackground", &PyMfcWindow::setBackground, py::arg("r"), py::arg("g"), py::arg("b"))
         .def("getSize", &PyMfcWindow::getSize, py::arg("id"))
+        .def("getRect", &PyMfcWindow::getRect, py::arg("id"))
         .def("show", &PyMfcWindow::show)
         .def("close", &PyMfcWindow::close)
         .def("addButton", &PyMfcWindow::addButton)
@@ -342,8 +344,14 @@ PYBIND11_MODULE(PyMfcXml, m)
              "喂布局结果（powerplan.toJson 的 JSON 文本），自动重排并按窗口大小 fit")
         .def("loadPowerSvg", &PyMfcWindow::loadPowerSvg, py::arg("id"), py::arg("svg"),
              "喂 SVG 文本，走同一条绘制路径")
+        .def("loadPowerXml", &PyMfcWindow::loadPowerXml, py::arg("id"), py::arg("scene_xml"),
+             "喂 <XScene> 声明式场景（XLine/XCircle/XArc/XRect/XPolyline/XText/XGroup），"
+             "与 loadPowerSvg 同一条绘制路径，但不做 SVG 序列化 + 二次解析")
         .def("loadPlanOverlay", &PyMfcWindow::loadPlanOverlay, py::arg("id"), py::arg("svg"),
              "叠加层 SVG（选中框/橡皮筋/光标）：底图不重解析，只换这一层")
+        .def("loadPlanOverlayXml", &PyMfcWindow::loadPlanOverlayXml, py::arg("id"),
+             py::arg("scene_xml"),
+             "叠加层的 XML 场景版本（同上语义）")
         .def("setPlanView", &PyMfcWindow::setPlanView, py::arg("id"), py::arg("zoom"),
              py::arg("offset_x"), py::arg("offset_y"))
         .def("getPlanZoom", &PyMfcWindow::getPlanZoom)
@@ -643,7 +651,10 @@ PYBIND11_MODULE(PyMfcXml, m)
         .def("loadPowerPlan", &PyMfcPanel::loadPowerPlan, py::arg("id"), py::arg("json"))
         .def("loadPowerScene", &PyMfcPanel::loadPowerScene, py::arg("id"), py::arg("scene"))
         .def("loadPowerSvg", &PyMfcPanel::loadPowerSvg, py::arg("id"), py::arg("svg"))
+        .def("loadPowerXml", &PyMfcPanel::loadPowerXml, py::arg("id"), py::arg("scene_xml"))
         .def("loadPlanOverlay", &PyMfcPanel::loadPlanOverlay, py::arg("id"), py::arg("svg"))
+        .def("loadPlanOverlayXml", &PyMfcPanel::loadPlanOverlayXml, py::arg("id"),
+             py::arg("scene_xml"))
         .def("setPlanView", &PyMfcPanel::setPlanView, py::arg("id"), py::arg("zoom"),
              py::arg("offset_x"), py::arg("offset_y"))
         .def("getPlanZoom", &PyMfcPanel::getPlanZoom)

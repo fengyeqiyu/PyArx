@@ -517,6 +517,17 @@ void pybind11_init_PyDb(::pybind11::module_& m) {
 	registerPyClass(AcDbXline::desc(), pyDbModule.attr("PyDbXline"));
 	registerPyClass(AcDbLeader::desc(), pyDbModule.attr("PyDbLeader"));
 	registerPyClass(AcDbTable::desc(), pyDbModule.attr("PyDbTable"));
+	// 符号表本身也要登记：不登记时 tr.openObject(blockTableId/layerTableId) 只能回落成
+	// PyDbObject，Python 侧拿不到 table.add()/getAt()，块定义和图层都无法新建。
+	registerPyClass(AcDbBlockTable::desc(), pyDbModule.attr("PyDbBlockTable"));
+	registerPyClass(AcDbLayerTable::desc(), pyDbModule.attr("PyDbLayerTable"));
+	registerPyClass(AcDbLinetypeTable::desc(), pyDbModule.attr("PyDbLinetypeTable"));
+	registerPyClass(AcDbTextStyleTable::desc(), pyDbModule.attr("PyDbTextStyleTable"));
+	registerPyClass(AcDbDimStyleTable::desc(), pyDbModule.attr("PyDbDimStyleTable"));
+	registerPyClass(AcDbRegAppTable::desc(), pyDbModule.attr("PyDbRegAppTable"));
+	registerPyClass(AcDbUCSTable::desc(), pyDbModule.attr("PyDbUCSTable"));
+	registerPyClass(AcDbViewTable::desc(), pyDbModule.attr("PyDbViewTable"));
+	registerPyClass(AcDbViewportTable::desc(), pyDbModule.attr("PyDbViewportTable"));
 	registerPyClass(AcDbBlockTableRecord::desc(), pyDbModule.attr("PyDbBlockTableRecord"));
 	registerPyClass(AcDbLayerTableRecord::desc(), pyDbModule.attr("PyDbLayerTableRecord"));
 	registerPyClass(AcDbLinetypeTableRecord::desc(), pyDbModule.attr("PyDbLinetypeTableRecord"));
