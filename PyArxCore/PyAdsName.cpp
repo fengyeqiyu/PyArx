@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "PyAdsName.h"
+#include "PyErrorStatusException.h"
 #include "stdafx.h"
 #include "PyEdSelectionSets.h"
 // ---------- 构造 / 析构 ----------
@@ -67,7 +68,8 @@ AcString PyAdsName::toString() const
 AcDbObjectId PyAdsName::toObjectId() const
 {
     AcDbObjectId id;
-    acdbGetObjectId(id, m_data);
+    Acad::ErrorStatus es = acdbGetObjectId(id, m_data);
+    PyWarnIfError(es, L"PyAdsName::toObjectId");
     return id;
 }
 

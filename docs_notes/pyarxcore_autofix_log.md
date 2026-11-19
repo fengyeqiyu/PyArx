@@ -150,3 +150,5 @@
 2026-11-19 22:18 | PyDbPolyline.cpp:128 | ② | 先判 src.impObj() 空，空则 PyWarnIfError(eNullObjectPointer) 返回 false
 2026-11-19 22:18 | PyDbMPolygon.cpp:104 | ② | 先判 boundary.impObj() 空，空则警告并 return false
 2026-11-19 23:20 | PyArxBinder.cpp:126-127 | ⑦ | 删除 Ap 子模块临时调试残留：_ap_probe 探针绑定 + 子模块指针打印（全仓无引用）
+2026-11-20 00:18 | PyAdsName.cpp:69 | ③ | acdbGetObjectId 返回值改接 es 并 PyWarnIfError，失败不再静默（仍返回 id 保持签名）
+2026-11-20 00:18 | PyEdSelectionSets.cpp:48 | ③ | acedSSName 失败先提示并返回空 id，acdbGetObjectId 的 es 交给 PyWarnIfError

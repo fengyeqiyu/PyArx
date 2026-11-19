@@ -543,3 +543,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-19 23:20 PyArxBinder.cpp:126 ⑦ 已改 删 _ap_probe 探针与 %p 打印（全仓无引用）
 2026-11-19 23:20 dumpbin 实测 PyArxCore.pyd / PyMfcXml.pyd / PyArxEngine.arx 均只依赖 python315t.dll ⑨ 通过
 2026-11-19 23:20 PyArxBinder.cpp:130-136 ⑧ ApLog 内 catch(...) 为日志写入兜底 非静默 通过（模块注册各 bind_* 已逐项 try/catch 隔离）
+2026-11-20 00:18 PyAdsName.cpp:69 ③ 已改 接 es + PyWarnIfError
+2026-11-20 00:18 PyEdSelectionSets.cpp:48 ③ 已改 acedSSName 判 RTNORM + acdbGetObjectId es 交给 PyWarnIfError
+2026-11-20 00:18 PyEdSelectionSets.cpp:150 ③ 已核 该处 acdbGetObjectId 结果参与 ==eOk 判断 通过
+2026-11-20 00:18 ⑥ 全量比对 vcxproj 未登记 0；⑦ ofstream 仅 PyArxBinder 日志 + PyUt.genStub 写 .pyi（功能）通过

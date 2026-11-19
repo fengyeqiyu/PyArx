@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "pyedSelectionSets.h"
 #include <acedsubsel.h>
+#include "PyErrorStatusException.h"
 #include "PyResbuf.h"
 #include "PyAdsName.h"
 
@@ -45,8 +46,12 @@ AcDbObjectId PyEdSelectionSets::getObjectIdAt(size_t index) const
 {
 	AcDbObjectId result;
 	PyAdsName ename;
-	acedSSName(m_data, index, ename.data());
-	acdbGetObjectId(result, ename.data());
+	if (acedSSName(m_data, index, ename.data()) != RTNORM) {
+		acutPrintf(L"[PyArx] PyEdSelectionSets::getObjectIdAt: acedSSName 失败 (index=%llu)\n", (unsigned long long)index);
+		return result;
+	}
+	Acad::ErrorStatus es = acdbGetObjectId(result, ename.data());
+	PyWarnIfError(es, L"PyEdSelectionSets::getObjectIdAt");
 	return result;
 }
 
