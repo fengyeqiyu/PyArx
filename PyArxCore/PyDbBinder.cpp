@@ -29,6 +29,8 @@
 #include "PyAdsName.h"
 #include "PyColor.h"
 #include "PyDbMLeaderStyle.h"
+#include <dbapserv.h>   // acdbHostApplicationServices()->workingDatabase()
+#include <dbmain.h>     // acdbTextFind + AC_SRCH_* 位标志
 
 // Forward declarations of per-class bind functions (one TU per class).
 void bind_PyDbEntity(pym& m);
@@ -256,6 +258,31 @@ void pybind11_init_PyDb(::pybind11::module_& m) {
 	bind_PyTypedValue(m);
 	bind_PyTvList(m);
 	bind_PyResbuf(m);
+
+	// 文字查找 / 替换：直接走 ObjectARX 自带 acdbTextFind（dbmain.h Text Finder API）。
+	// find 为空返回空表；replace 为空 = 只查找；options 取 AC_SRCH_* 位标志，默认 AC_SRCH_DEFAULT；
+	// sel 非空 = 只在给定 id 集合内搜索。返回命中 ObjectId 列表（无命中/失败同样给空表）。
+	m.def("textFind", [](const AcString& find, const AcString& replace, int options,
+	                    const AcDbObjectIdArray& sel) {
+		AcDbObjectIdArray result;
+		if (find.isEmpty()) return result;
+		AcDbDatabase* db = acdbHostApplicationServices() ? acdbHostApplicationServices()->workingDatabase() : nullptr;
+		if (!db) return result;
+		::acdbTextFind(db, result, find.kwszPtr(),
+		               replace.isEmpty() ? nullptr : replace.kwszPtr(),
+		               static_cast<Adesk::UInt8>(options), sel);
+		return result;
+	}, py::arg("find"), py::arg("replace") = AcString(), py::arg("options") = int(AC_SRCH_DEFAULT),
+	   py::arg("sel") = AcDbObjectIdArray(),
+	   "按 acdbTextFind 查找（可替换）文字；返回 list[oldId]");
+	m.attr("AC_SRCH_BLOCK")      = int(AC_SRCH_BLOCK);
+	m.attr("AC_SRCH_DIM_TEXT")   = int(AC_SRCH_DIM_TEXT);
+	m.attr("AC_SRCH_TEXT")       = int(AC_SRCH_TEXT);
+	m.attr("AC_SRCH_LINK_DESC")  = int(AC_SRCH_LINK_DESC);
+	m.attr("AC_SRCH_LINK_URL")   = int(AC_SRCH_LINK_URL);
+	m.attr("AC_SRCH_MATCH_CASE") = int(AC_SRCH_MATCH_CASE);
+	m.attr("AC_SRCH_WHOLE_WORD") = int(AC_SRCH_WHOLE_WORD);
+	m.attr("AC_SRCH_DEFAULT")    = int(AC_SRCH_DEFAULT);
 
 	// PyRxObject/PyRxClass 已由 PyArx.Rx 子模块先行注册（PyArx 聚合顺序 Rx 先于 Db）。
 	bind_PyDbObject(m);

@@ -37,8 +37,3 @@ py::object  PyEdDictNext(const PyAdsName& dict, bool rewind);
 bool        PyEdDictRename(const PyAdsName& dict, const AcString& oldsym, const AcString& newsym);
 bool        PyEdDictRemove(const PyAdsName& dict, const AcString& sym);
 PyAdsName   PyEdDictAdd(const PyAdsName& dict, const AcString& sym, const PyAdsName& obj);
-
-// ---- 文字查找 / 替换（ObjectARX acdbTextFind）----
-// replaceString 为空 = 只查找；options 取 AC_SRCH_* 位标志；selSet 非空则限定搜索范围。
-AcDbObjectIdArray PyEdTextFind(const AcString& findString, const AcString& replaceString,
-                               int options, const AcDbObjectIdArray& selSet);

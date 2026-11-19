@@ -633,19 +633,7 @@ void bind_PyEd(pym& m) {
         return py::cast(n);
     }, "仿 (entlast)：数据库最后实体 AdsName，失败返回 None");
 
-    // 文字查找 / 替换：走 ObjectARX 自带 acdbTextFind（含全文/尺寸文字/块/超链接描述、
-    // 区分大小写、全词匹配等位标志）。replace 为空 = 只查找；sel 非空 = 限定搜索范围。
-    m.def("textFind", &PyEdTextFind, py::arg("find"), py::arg("replace") = AcString(),
-        py::arg("options") = int(AC_SRCH_DEFAULT), py::arg("sel") = AcDbObjectIdArray(),
-        "按 acdbTextFind 查找（可替换）文字；返回 list[oldId]");
-    m.attr("AC_SRCH_BLOCK")      = int(AC_SRCH_BLOCK);
-    m.attr("AC_SRCH_DIM_TEXT")   = int(AC_SRCH_DIM_TEXT);
-    m.attr("AC_SRCH_TEXT")       = int(AC_SRCH_TEXT);
-    m.attr("AC_SRCH_LINK_DESC")  = int(AC_SRCH_LINK_DESC);
-    m.attr("AC_SRCH_LINK_URL")   = int(AC_SRCH_LINK_URL);
-    m.attr("AC_SRCH_MATCH_CASE") = int(AC_SRCH_MATCH_CASE);
-    m.attr("AC_SRCH_WHOLE_WORD") = int(AC_SRCH_WHOLE_WORD);
-    m.attr("AC_SRCH_DEFAULT")    = int(AC_SRCH_DEFAULT);
+    // 文字查找 / 替换已迁到 PyDb（Db.textFind，走 SDK acdbTextFind）。
 
     // AcEdJig trampoline + AcEdDragStyle (registered in this same module).
     // 交互拖动环（drag/acquire* 阻塞等待用户点取与拖动），无头无显示通道，仅 GUI。

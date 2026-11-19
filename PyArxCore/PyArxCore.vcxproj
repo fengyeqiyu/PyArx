@@ -691,6 +691,5 @@
     <ClInclude Include="PyXdata.h" />
     <ClInclude Include="singleinstance.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="TextFinder.h" />
   </ItemGroup>
 </Project>

@@ -6,7 +6,6 @@
 #include "PyEdCommon.h"
 #include <array>
 #include <string>
-#include <dbapserv.h>   // acdbHostApplicationServices()->workingDatabase()
 
 // Legacy ADS entity accessors (acdbEnt*), resbuf normalized through PyResbuf.
 // These are thin editor-level wrappers; modern database editing belongs to PyDb.
@@ -178,25 +177,4 @@ PyAdsName PyEdDictAdd(const PyAdsName& dict, const AcString& sym, const PyAdsNam
     if (!edWarn(::acdbDictAdd(dict.data(), sym.kwszPtr(), obj.data()), L"acdbDictAdd"))
         return PyAdsName{};
     return obj;  // acdbDictAdd 无返回名，入参 obj 即新项名
-}
-
-//-----------------------------------------------------------------------------
-// 文字查找 / 替换：直接走 ObjectARX 自带的 acdbTextFind（dbmain.h Text Finder API）。
-// findString 为空直接返回空表；replaceString 为空表示只查找不替换。
-// options 取 AC_SRCH_* 位标志（TEXT/DIM_TEXT/BLOCK/LINK_*/MATCH_CASE/WHOLE_WORD），
-// 默认 AC_SRCH_DEFAULT；selSet 非空时只在给定 id 集合内搜索。
-// 返回命中的 ObjectId 列表（acdbTextFind 返回 false 时即无命中/失败，同样给空表）。
-//-----------------------------------------------------------------------------
-AcDbObjectIdArray PyEdTextFind(const AcString& findString, const AcString& replaceString,
-                               int options, const AcDbObjectIdArray& selSet) {
-    AcDbObjectIdArray result;
-    if (findString.isEmpty()) return result;
-    AcDbDatabase* db = acdbHostApplicationServices() ? acdbHostApplicationServices()->workingDatabase() : nullptr;
-    if (!db) return result;
-    const bool doReplace = !replaceString.isEmpty();
-    ::acdbTextFind(db, result, findString.kwszPtr(),
-                   doReplace ? replaceString.kwszPtr() : nullptr,
-                   static_cast<Adesk::UInt8>(options),
-                   selSet);
-    return result;
 }
