@@ -164,3 +164,4 @@
 2026-11-20 05:18 | PyDbBlockReference.cpp:314 | ② | attributeIds 先判 self.impObj()，空包装返回空列表
 2026-11-20 06:19 | PyDbEntity.cpp:307/328/374/384/393 | ② | getTransformedCopy/explode/intersectWith×3 先判 self（含 other）impObj，空包装返回空对象/空列表
 2026-11-20 06:19 | PyDbHatch.cpp:126/137/145/159/185/195 | ② | backgroundColor/getAssocObjIds/getAssocObjIdsAt/getLoopAt/evaluateGradientColorAt/getGradientColors 先判 impObj，空包装返回默认零值/空容器
+2026-11-20 07:17 | PyDbObject.cpp:241/248/251/265/271/277/310 | ② | getHandle/addPersistentReactor/removePersistentReactor/getField/setField/removeField/clone 先判 isNull（setField 同时判 field.impObj），空对象安全返回或抛 ValueError

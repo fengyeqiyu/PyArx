@@ -238,6 +238,7 @@ void bind_PyDbObject(pym& m)
 		// ---- PyRx DbObject 侧的缺口批量补齐（挂在基类，派生类自动继承）----
 		.def("getHandle", [](PyDbObject& self) {
 			AcDbHandle h;
+			if (self.isNull()) return AcDbHandle();
 			self.impObj()->getAcDbHandle(h);
 			return h;
 		}, "返回 Db.Handle")
@@ -245,9 +246,11 @@ void bind_PyDbObject(pym& m)
 			return static_cast<int>(self.impObj()->setOwnerId(owner));
 		}, py::arg("owner"))
 		.def("addPersistentReactor", [](PyDbObject& self, const AcDbObjectId& id) {
+			if (self.isNull()) return;
 			self.impObj()->addPersistentReactor(id);
 		}, py::arg("id"))
 		.def("removePersistentReactor", [](PyDbObject& self, const AcDbObjectId& id) {
+			if (self.isNull()) return;
 			self.impObj()->removePersistentReactor(id);
 		}, py::arg("id"))
 		.def("isAcDbObjectIdsInFlux", [](PyDbObject& self) {
@@ -262,18 +265,21 @@ void bind_PyDbObject(pym& m)
 		})
 		.def("getField", [](PyDbObject& self, const AcString& prop) {
 			AcDbObjectId fieldId;
+			if (self.isNull()) return AcDbObjectId::kNull;
 			if (self.impObj()->getField(prop, fieldId) != Acad::eOk)
 				return AcDbObjectId::kNull;
 			return fieldId;
 		}, py::arg("prop") = "TEXT")
 		.def("setField", [](PyDbObject& self, const AcString& prop, PyDbField& field) {
 			AcDbObjectId fieldId;
+			if (self.isNull() || !field.impObj()) throw py::value_error("setField: null object or field");
 			Acad::ErrorStatus es = self.impObj()->setField(prop, field.impObj(), fieldId);
 			if (es != Acad::eOk)
 				throw py::value_error("setField failed");
 			return fieldId;
 		}, py::arg("prop"), py::arg("field"))
 		.def("removeField", [](PyDbObject& self, const AcDbObjectId& fieldId) {
+			if (self.isNull()) return;
 			self.impObj()->removeField(fieldId);
 		}, py::arg("id"))
 
@@ -307,6 +313,7 @@ void bind_PyDbObject(pym& m)
 		// 必须返回「指针 + take_ownership」：若按值返回 PyRxObject，临时的按值包装析构时会把
 		// 刚克隆出的对象 delete 掉，Python 侧拿到悬空指针（无头实测 0xC0000374 堆损坏）。
 		.def("clone", [](PyDbObject& self) -> PyDbObject* {
+			if (self.isNull()) throw std::runtime_error("clone: 对象为空");
 			AcDbObject* pNew = static_cast<AcDbObject*>(self.impObj()->clone());
 			if (!pNew) throw std::runtime_error("clone: 该对象不支持克隆");
 			// 未入库克隆体处于打开态，先关闭，供后续 addToModelspace/addToBlock 入库
