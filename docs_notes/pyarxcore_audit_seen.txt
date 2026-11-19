@@ -511,3 +511,13 @@ PyDbTransformOverrule.cpp:14:⑧同上-只报不改
 PyDbVisibilityOverrule.cpp:14:⑧同上-只报不改
 PyDbObject.cpp:110:③disableUndoRecording经SDK确认返回void-通过
 PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
+2026-11-19 15:20 PyDbDimStyleTableRecord.cpp:单行lambda29处:②impObj未判空-只报不改(需批量改,超20行)
+2026-11-19 15:20 PyDbLoftOptions.cpp:单行lambda11处:②同上-只报不改
+2026-11-19 15:20 PyDbSweepOptions.cpp:单行lambda11处:②同上-只报不改
+2026-11-19 15:20 PyDb3dProfile.cpp:52-57:②6处isClosed/isPlanar/isSubent/isFace/isEdge/isValid-只报不改
+2026-11-19 15:20 PyDbTextStyleTableRecord.cpp:单行lambda6处:②同上-只报不改
+2026-11-19 15:20 PyDbLinetypeTableRecord.cpp:单行lambda3处:②同上-只报不改
+2026-11-19 15:20 PyDbPolygonMesh.cpp:单行lambda2处:②同上-只报不改
+2026-11-19 15:20 PyDbObject.cpp:单行lambda1处:②同上-只报不改
+2026-11-19 15:20 PyDbTrans.cpp:27:⑦pdtDiag 诊断写文件 35 处调用(每事务一次 fopen/fprintf)-只报不改(建议宏开关门控)
+2026-11-19 15:20 PyArxCore全项目:1:①②③④⑤⑥⑧⑨全项复核完成-①0/⑥0/⑨mod_gil_not_used已声明/⑧空catch9处已记录
