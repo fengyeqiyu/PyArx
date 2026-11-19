@@ -1,7 +1,7 @@
-﻿#pragma once
-// PyArxEngine stdafx.h — 宿主模块（arx/crx）预编译头。
-// 职责：Python 运行时嵌入（Python.h/PyConfig）+ ObjectARX 入口（acrxEntryPoint/aced/acut）。
-// 编码：UTF-8 带 BOM。
+#pragma once
+// PyArxEngine stdafx.h - ????(arx/crx)?????
+// ??:Python ?????(Python.h/PyConfig)+ ObjectARX ??(acrxEntryPoint/aced/acut)?
+// ??:UTF-8 ? BOM?
 
 #pragma warning(disable: 4786 4996 26812)
 
@@ -18,7 +18,7 @@
 #define _WIN32_WINNT 0x0A00
 #endif
 
-// MFC 必须最先包含（标准 MFC 顺序：afxwin.h 在 windows.h 之前）
+// MFC ??????(?? MFC ??:afxwin.h ? windows.h ??)
 #include <afxwin.h>
 #include <afxext.h>
 #include <afxcmn.h>
@@ -31,7 +31,7 @@
 #include <filesystem>
 #include <unordered_map>
 
-// ---- 系统库 ----
+// ---- ??? ----
 #pragma comment(lib, "kernel32.lib")
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
@@ -43,20 +43,24 @@
 #pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "version.lib")
 
-// ---- ObjectARX 动态导入库（宿主入口）----
+// ---- ObjectARX ?????(????)----
 #pragma comment(lib, "rxapi.lib")
 #pragma comment(lib, "acdb24.lib")
 #pragma comment(lib, "accore.lib")
 #pragma comment(lib, "acgeoment.lib")
-#pragma comment(lib, "acpal.lib")   // acHeapAlloc/acHeapFree（AcHeapOpers.h 全局 operator new/delete）
+#pragma comment(lib, "acpal.lib")   // acHeapAlloc/acHeapFree(AcHeapOpers.h ?? operator new/delete)
 
-// ---- Python 3.15t 动态链接导入库（python315t.dll）----
+// Python import lib: free-threaded build -> python315t.lib, GIL build -> python315.lib
+#ifdef Py_GIL_DISABLED
 #pragma comment(lib, "python315t.lib")
+#else
+#pragma comment(lib, "python315.lib")
+#endif
 
-// ---- ObjectARX 头链（arxHeaders.h 引入完整 AcDb/AcGe/AcEd 链）----
+// ---- ObjectARX ??(arxHeaders.h ???? AcDb/AcGe/AcEd ?)----
 #include "arxHeaders.h"
 
-// ---- Python 嵌入 ----
+// ---- Python ?? ----
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <frameobject.h>
@@ -64,7 +68,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
-#include <pybind11/functional.h>   // PyCmdBinder：py::function → std::function
+#include <pybind11/functional.h>   // PyCmdBinder:py::function ? std::function
 namespace py = pybind11;
 namespace fs = std::filesystem;
 using Path = std::filesystem::path;

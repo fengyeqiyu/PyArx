@@ -1,7 +1,7 @@
-﻿#pragma once
+#pragma once
 
-// PyMfcCore 公共头：MFC + pybind11 + Python。
-// 纯 GUI 层：不链任何 AutoCAD/ObjectARX 库（侧栏等 CAD 能力在 PyArxCore）。
+// PyMfcCore ???:MFC + pybind11 + Python?
+// ? GUI ?:???? AutoCAD/ObjectARX ?(??? CAD ??? PyArxCore)?
 #define WIN32_LEAN_AND_MEAN
 #include <afxwin.h>
 #include <afxext.h>
@@ -15,4 +15,9 @@
 
 namespace py = pybind11;
 
+// Python import lib: free-threaded build -> python315t.lib, GIL build -> python315.lib
+#ifdef Py_GIL_DISABLED
 #pragma comment(lib, "python315t.lib")
+#else
+#pragma comment(lib, "python315.lib")
+#endif

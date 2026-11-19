@@ -58,7 +58,8 @@ namespace
 // 在 CAD 内 import 新模块即可接管 sys.modules["PyArxCore"]。
 #include "HotModName.h"
 
-PYBIND11_MODULE(PYARX_HOT_MODULE, m) {
+// 第三参数声明本模块不使用 GIL：3.15t(free-threaded) 下 import 不再回开 GIL。
+PYBIND11_MODULE(PYARX_HOT_MODULE, m, py::mod_gil_not_used()) {
     const char* selfName = PyModule_GetName(m.ptr());
     const bool hotBuild = selfName && std::strcmp(selfName, "PyArxCore") != 0;
     if (hotBuild) {

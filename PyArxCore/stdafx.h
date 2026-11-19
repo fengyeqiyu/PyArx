@@ -1,6 +1,6 @@
-﻿#pragma once
+#pragma once
 
-// 热编译开关：必须早于任何 pybind11 头文件，统一各 TU 的模块名与 internals 命名空间。
+// ?????:?????? pybind11 ???,??? TU ????? internals ?????
 #include "HotModuleName.h"
 
 #pragma pack(push, 8)
@@ -33,20 +33,23 @@
 #if _MSC_VER >= 1920
 #pragma comment(lib, "AcPal.lib")
 #endif
-// AcUi / AdUi（PyApp / PyPaletteSet 侧栏 CAdUiPaletteSet 需要）
+// AcUi / AdUi(PyApp / PyPaletteSet ?? CAdUiPaletteSet ??)
 #pragma comment(lib, "adui24.lib")
 #pragma comment(lib, "acui24.lib")
 #pragma comment(lib, "AcMPolygonObj.lib")
 
-// ObjectARX 系列导入库（动态）
+// ObjectARX ?????(??)
 #pragma comment(lib, "acgeoment.lib")
 #pragma comment(lib, "acgex24.lib")
 #pragma comment(lib, "rxapi.lib")
 #pragma comment(lib, "acdb24.lib")
 #pragma comment(lib, "accore.lib")
-// Python 3.15t 动态链接导入库（python315t.dll 的导入库）
+// Python import lib: free-threaded build -> python315t.lib, GIL build -> python315.lib
+#ifdef Py_GIL_DISABLED
 #pragma comment(lib, "python315t.lib")
-// 系统库
+#else
+#pragma comment(lib, "python315.lib")
+#endif
 #pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "pathcch.lib")
@@ -67,7 +70,7 @@
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "kernel32.lib")
 
-// 标准库
+// ???
 #include <map>
 #include <vector>
 #include <array>
@@ -94,8 +97,8 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-// MFC 支持（PyApp / PyPaletteSet 侧栏需 CAdUiPaletteSet 等 AcUi/MFC 类型）。
-// 必须位于 windows.h 之前，且位于 winsock2.h 之后，保持 ObjectARX 兼容。
+// MFC ??(PyApp / PyPaletteSet ??? CAdUiPaletteSet ? AcUi/MFC ??)?
+// ???? windows.h ??,??? winsock2.h ??,?? ObjectARX ???
 #include <afxwin.h>
 #include <afxext.h>
 #include <afxcmn.h>
