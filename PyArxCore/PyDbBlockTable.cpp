@@ -7,11 +7,11 @@ bool PyDbBlockTable::has(const AcString& name) const {
 	if (!impObj()) return false;
 	return impObj()->has(name.kwszPtr());
 }
-PyDbBlockTableRecord PyDbBlockTable::getAt(const AcString& name, int mode) const {
-	if (!impObj()) return PyDbBlockTableRecord(nullptr);
+PyDbBlockTableRecord* PyDbBlockTable::getAt(const AcString& name, int mode) const {
+	if (!impObj()) return nullptr;
 	AcDbBlockTable::RecordType* rec = nullptr;
-	if(!PyWarnIfError(impObj()->getAt(name.kwszPtr(), rec, static_cast<AcDb::OpenMode>(mode)), L"getAt")) return PyDbBlockTableRecord(nullptr);
-	return PyDbBlockTableRecord(rec);
+	if(!PyWarnIfError(impObj()->getAt(name.kwszPtr(), rec, static_cast<AcDb::OpenMode>(mode)), L"getAt")) return nullptr;
+	return new PyDbBlockTableRecord(rec);
 }
 
 void bind_PyDbBlockTable(pym& m) {

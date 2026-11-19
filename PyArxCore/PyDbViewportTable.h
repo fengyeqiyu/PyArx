@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "stdafx.h"
 #include "PyDbSymbolTable.h"
 #include "PyDbSymbolTableRecord.h"
@@ -8,7 +8,7 @@ public:
 	PyWrapper_H(DbViewportTable)
 	PyDbViewportTable(AcDbViewportTable* ptr) : PyDbSymbolTable(ptr) {}
 	bool has(const AcString& name) const;
-	PyDbSymbolTableRecord getAt(const AcString& name) const;
+	PyDbSymbolTableRecord* getAt(const AcString& name, int mode = 1) const;
 	// 内部消费 SDK newIterator：遍历返回全部记录 ObjectId（uint64）列表，失败返回空列表
 	std::vector<uint64_t> newIterator(bool atBeginning, bool skipDeleted) const;
 };

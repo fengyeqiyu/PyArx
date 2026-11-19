@@ -8,7 +8,7 @@ public:
 	PyWrapper_H(DbSymbolTable)
 	PyDbSymbolTable(AcDbSymbolTable* ptr) : PyDbObject(ptr) {}
 	bool has(const AcString& name) const;
-	PyDbSymbolTableRecord getAt(const AcString& name, int mode = 1) const;
+	PyDbSymbolTableRecord* getAt(const AcString& name, int mode = 1) const;
 	py::dict toDict() const;
 	py::list names() const;
 	py::list records(int mode = 1) const;  // 返回所有记录列表（默认写模式打开）
@@ -25,10 +25,10 @@ public:
 	uint64_t getIdAt(const AcString& name) const;
 
 	// 索引访问（负索引从末尾算；越界抛 IndexError）
-	PyDbSymbolTableRecord recordAt(int index, int mode = 1) const;
+	PyDbSymbolTableRecord* recordAt(int index, int mode = 1) const;
 	AcString keyAt(int index) const;
 	// 取或建：名字已存在直接返回；不存在则把 rec 追加进表，再按 name 打开返回
-	PyDbSymbolTableRecord getOrCreate(const AcString& name, PyDbSymbolTableRecord& rec, int mode = 1);
+	PyDbSymbolTableRecord* getOrCreate(const AcString& name, PyDbSymbolTableRecord& rec, int mode = 1);
 
 	// 向符号表追加一条记录（SDK add(AcDbSymbolTableRecord*)）
 	bool add(PyDbSymbolTableRecord& rec);

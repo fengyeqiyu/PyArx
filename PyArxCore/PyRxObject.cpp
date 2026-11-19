@@ -80,10 +80,14 @@ void PyRxObject::detachDbObject()
 	// 脱钩前缓存所属数据库：addEntity 后包装被掏空，database() 需回退到该库
 	//（GUI 当前文档场景实测：不缓存则 l.database() 空指针解引用崩溃）
 	if (!m_pOwningDb) m_pOwningDb = pDbo->database();
-	if (!pDbo->objectId().isNull() && !pDbo->isReallyClosing()) {
+	PyDbOpenCache::Close(pDbo);   // 入库对象所有权已归数据库，先从打开缓存摘除
+	// 只关写锁（读锁关闭由事务/数据库统一处理）；此处不再二次 close 已关闭对象。
+	if (!pDbo->objectId().isNull() && pDbo->isWriteEnabled()) {
 		pDbo->close();
 	}
-	m_ptr = nullptr;
+	// 保留指针、放弃关闭/删除职责：包装降级为非拥有视图，Python 侧仍可安全读
+	// objectId()/isNull()/属性；置空会让后续任何属性访问变成空指针解引用崩溃。
+	m_autoDelete = false;
 }
 
 bool PyRxObject::isEqualTo(const PyRxObject& other) const

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "stdafx.h"
 #include "PyDbSymbolTable.h"
 #include "PyDbLayerTableRecord.h"
@@ -8,7 +8,7 @@ public:
 	PyWrapper_H(DbLayerTable)
 	PyDbLayerTable(AcDbLayerTable* ptr) : PyDbSymbolTable(ptr) {}
 	bool has(const AcString& name) const;
-	PyDbLayerTableRecord getAt(const AcString& name) const;
+	PyDbLayerTableRecord* getAt(const AcString& name, int mode = 1) const;
 	bool hasUnreconciledLayers() const;
 	void generateUsageData();
 

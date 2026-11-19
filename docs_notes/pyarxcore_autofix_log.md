@@ -135,3 +135,8 @@
 2026-11-19 15:26 | PyDbObject.cpp:256 | ② | hasFields 补 isNull 守卫，空包装返回 false
 2026-11-19 15:26 | PyDbPolygonMesh.cpp:45/52 | ② | isMClosed/isNClosed 补 isNull 守卫
 2026-11-19 15:26 | PyDbLinetypeTableRecord.cpp:29/34/74 | ② | patternLength/numDashes/isScaledToFit 补 isNull 守卫(分别返 0.0/0/false)
+2026-11-19 21:10 | PyDbSymbolTable.cpp:14-37 | 修复崩溃 | getAt 改为返回堆包装指针(take_ownership)，消除按值返回时临时包装析构 close 导致 Python 拿到已关闭对象、setter 断言崩溃
+2026-11-19 21:10 | PyDbLayerTable.cpp + 8 个表 getAt | 修复崩溃 | 10 个表 getAt 统一改指针返回 + 新增 mode 参数，支持新建记录后按名以 kForWrite 打开并直接 set
+2026-11-19 21:10 | PyDbSymbolTable.cpp:198/224/233 | 接口对齐 | recordAt/getOrCreate 同步改指针返回，get() 用 take_ownership 转 Python 对象
+2026-11-19 21:10 | PyRxObject.cpp:76-87 | 防呆 | detachDbObject 改为关闭写锁后保留指针、放弃关闭职责；原先置空 m_ptr 会让 add 后访问 objectId/属性空指针崩溃
+2026-11-19 21:10 | PyDbLayerTableRecord.h/.cpp | 接口补齐 | 新增 setColorIndex(colorIndex)，对 256 取模，与实体侧颜色 API 口径一致

@@ -11,14 +11,14 @@ bool PyDbSymbolTable::has(const AcString& name) const {
 	return impObj()->has(name.kwszPtr());
 }
 
-PyDbSymbolTableRecord PyDbSymbolTable::getAt(const AcString& name, int mode) const {
-	if (!impObj()) return PyDbSymbolTableRecord(nullptr);
+PyDbSymbolTableRecord* PyDbSymbolTable::getAt(const AcString& name, int mode) const {
+	if (!impObj()) return nullptr;
 	AcDbObjectId id;
 	if (impObj()->getIdAt(name.kwszPtr(), id) == Acad::eOk) {
 		Acad::ErrorStatus cacheEs = Acad::eOk;
 		AcDbObject* existing = PyDbOpenCache::Get(id, static_cast<AcDb::OpenMode>(mode), cacheEs);
 		if (cacheEs == Acad::eOk && existing) {
-			return PyDbSymbolTableRecord(static_cast<AcDbSymbolTableRecord*>(existing));
+			return new PyDbSymbolTableRecord(static_cast<AcDbSymbolTableRecord*>(existing));
 		}
 	}
 
@@ -33,7 +33,7 @@ PyDbSymbolTableRecord PyDbSymbolTable::getAt(const AcString& name, int mode) con
 			"；需以可写方式打开数据库或另存副本（纯查询请显式传 kForRead=0）");
 	}
 	PyDbOpenCache::Track(rec, static_cast<AcDb::OpenMode>(mode));
-	return PyDbSymbolTableRecord(rec);
+	return new PyDbSymbolTableRecord(rec);
 }
 
 py::dict PyDbSymbolTable::toDict() const {
@@ -86,7 +86,7 @@ py::list PyDbSymbolTable::records(int mode) const {
 		AcDbSymbolTableRecord* pRec = nullptr;
 		if(!PyWarnIfError(pIter->getRecord(pRec, AcDb::kForRead), L"SymbolTable.getRecord")) return py::list();
 		PyDbOpenCache::Track(pRec, AcDb::kForRead);
-		out.append(py::cast(PyDbSymbolTableRecord(pRec)));
+		out.append(py::cast(new PyDbSymbolTableRecord(pRec), py::return_value_policy::take_ownership));
 	}
 	delete pIter;
 	return out;
@@ -113,7 +113,7 @@ py::list PyDbSymbolTable::items(int mode) const {
 		AcString sName;
 		if (pRec->getName(sName) == Acad::eOk) {
 			PyDbOpenCache::Track(pRec, AcDb::kForRead);
-			out.append(py::make_tuple(py::cast(sName), py::cast(PyDbSymbolTableRecord(pRec))));
+			out.append(py::make_tuple(py::cast(sName), py::cast(new PyDbSymbolTableRecord(pRec), py::return_value_policy::take_ownership)));
 		} else {
 			pRec->close();
 		}
@@ -124,9 +124,9 @@ py::list PyDbSymbolTable::items(int mode) const {
 
 py::object PyDbSymbolTable::get(const AcString& name, py::object defaultValue) const {
 	if (!has(name)) return defaultValue;
-	PyDbSymbolTableRecord rec = getAt(name, 1);
-	if (!rec.impObj()) return defaultValue;
-	return py::cast(rec);
+	PyDbSymbolTableRecord* pRec = getAt(name, 1);
+	if (!pRec || !pRec->impObj()) { delete pRec; return defaultValue; }
+	return py::cast(pRec, py::return_value_policy::take_ownership);
 }
 
 std::vector<PyDbSymbolTableRecord> PyDbSymbolTable::toVector() const {
@@ -171,18 +171,20 @@ bool PyDbSymbolTable::add(PyDbSymbolTableRecord& rec) {
 	if (!PyWarnIfError(impObj()->add(rec.impObj()), L"SymbolTable.add")) return false;
 	// add 之后记录已入库并被表接管：关闭打开状态，避免写锁残留。
 	if (pRec && !pRec->objectId().isNull() && pRec->isWriteEnabled()) pRec->close();
+	// 归属权已转移给数据库：包装释放所有权，否则 Python 侧析构 delete 已入库记录 → 崩溃。
+	rec.detachDbObject();
 	return true;
 }
 
-PyDbSymbolTableRecord PyDbSymbolTable::recordAt(int index, int mode) const {
-	if (!impObj()) return PyDbSymbolTableRecord(nullptr);
+PyDbSymbolTableRecord* PyDbSymbolTable::recordAt(int index, int mode) const {
+	if (!impObj()) return nullptr;
 	const int total = numRecords();
 	if (index < 0) index += total;
 	if (index < 0 || index >= total) throw py::index_error("SymbolTable 索引越界");
 	int i = 0;
 	AcString found;
 	AcDbSymbolTableIterator* pIter = nullptr;
-	if (!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return PyDbSymbolTableRecord(nullptr);
+	if (!PyWarnIfError(impObj()->newIterator(pIter), L"SymbolTable.newIterator")) return nullptr;
 	for (pIter->start(true, true); !pIter->done(); pIter->step(true, true), ++i) {
 		if (i != index) continue;
 		AcDbSymbolTableRecord* pRec = nullptr;
@@ -217,8 +219,8 @@ AcString PyDbSymbolTable::keyAt(int index) const {
 	return found;
 }
 
-PyDbSymbolTableRecord PyDbSymbolTable::getOrCreate(const AcString& name, PyDbSymbolTableRecord& rec, int mode) {
-	if (!impObj()) return PyDbSymbolTableRecord(nullptr);
+PyDbSymbolTableRecord* PyDbSymbolTable::getOrCreate(const AcString& name, PyDbSymbolTableRecord& rec, int mode) {
+	if (!impObj()) return nullptr;
 	if (has(name)) return getAt(name, mode);
 	AcDbSymbolTableRecord* pRec = rec.impObj();
 	if (!pRec) throw std::runtime_error("SymbolTable.getOrCreate: 传入的新建记录为空（先用 XxxRecord.newRecord() 或构造新建）");
@@ -226,6 +228,8 @@ PyDbSymbolTableRecord PyDbSymbolTable::getOrCreate(const AcString& name, PyDbSym
 	if (!PyWarnIfError(impObj()->add(pRec), L"SymbolTable.getOrCreate.add")) throw std::runtime_error("SymbolTable.getOrCreate: 追加记录失败");
 	// add 之后记录入库并被表接管：关闭写状态，避免后续按名读不到或写锁残留
 	if (!pRec->objectId().isNull() && pRec->isWriteEnabled()) pRec->close();
+	// 归属权已转移给数据库：包装释放所有权，否则 Python 侧析构 delete 已入库记录 → 崩溃。
+	rec.detachDbObject();
 	return getAt(name, mode);
 }
 void bind_PyDbSymbolTable(pym& m) {

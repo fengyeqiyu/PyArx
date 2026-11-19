@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "stdafx.h"
 #include "PyDbSymbolTable.h"
 #include "PyDbSymbolTableRecord.h"
@@ -8,7 +8,7 @@ public:
 	PyWrapper_H(DbUCSTable)
 	PyDbUCSTable(AcDbUCSTable* ptr) : PyDbSymbolTable(ptr) {}
 	bool has(const AcString& name) const;
-	PyDbSymbolTableRecord getAt(const AcString& name) const;
+	PyDbSymbolTableRecord* getAt(const AcString& name, int mode = 1) const;
 };
 
 void bind_PyDbUCSTable(pym& m);

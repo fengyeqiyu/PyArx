@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "stdafx.h"
 #include "PyDbObject.h"
 #include "PyDbEntity.h"
@@ -57,6 +57,7 @@ public:
 	std::tuple<int, int, int, int> color() const;
 	// setColorByRgb(r,g,b) 直接以真彩色写入（分量夹紧 0-255）
 	bool setColorByRgb(int r, int g, int b);
+	bool setColorIndex(int colorIndex);
 	// entityColor() -> (colorIndex, r, g, b)
 	std::tuple<int, int, int, int> entityColor() const;
 	// transparency() -> int：0=ByLayer，1=ByBlock，否则为 alpha 0..255
