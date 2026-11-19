@@ -149,3 +149,4 @@
 2026-11-19 19:43 | PyGiBinder.cpp/PyDbObjectContext.cpp | ⑤ | 移除不可默认构造类的 init<>（TextStyle 需字体、ObjectContext 抽象）
 2026-11-19 22:18 | PyDbPolyline.cpp:128 | ② | 先判 src.impObj() 空，空则 PyWarnIfError(eNullObjectPointer) 返回 false
 2026-11-19 22:18 | PyDbMPolygon.cpp:104 | ② | 先判 boundary.impObj() 空，空则警告并 return false
+2026-11-19 23:20 | PyArxBinder.cpp:126-127 | ⑦ | 删除 Ap 子模块临时调试残留：_ap_probe 探针绑定 + 子模块指针打印（全仓无引用）

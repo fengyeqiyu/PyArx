@@ -540,3 +540,6 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-19 22:18 PyDbPolyline.cpp:128 ② 已改 补 src 判空
 2026-11-19 22:18 PyDbMPolygon.cpp:104 ② 已改 补 boundary 判空
 2026-11-19 22:18 ④ 复检 6 处 ErrName/PyWarnIfError 已处理 通过（PyApDocument 3 处返回 ErrName，PyDbMPolygon 3 处返回 PyWarnIfError）
+2026-11-19 23:20 PyArxBinder.cpp:126 ⑦ 已改 删 _ap_probe 探针与 %p 打印（全仓无引用）
+2026-11-19 23:20 dumpbin 实测 PyArxCore.pyd / PyMfcXml.pyd / PyArxEngine.arx 均只依赖 python315t.dll ⑨ 通过
+2026-11-19 23:20 PyArxBinder.cpp:130-136 ⑧ ApLog 内 catch(...) 为日志写入兜底 非静默 通过（模块注册各 bind_* 已逐项 try/catch 隔离）

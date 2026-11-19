@@ -123,8 +123,6 @@ PYBIND11_MODULE(PYARX_HOT_MODULE, m, py::mod_gil_not_used()) {
 
     // Ap：Application 门面 + 侧栏（CAD 应用级接口，收进 PyArxCore）
     auto ap = sub("Ap", "AutoCAD ARX Application 门面（PyApp/PaletteSet 侧栏）");
-    ap.def("_ap_probe", []() { return 42; }, "探针：验证 Ap 子模块绑定链路");
-    acutPrintf(L"\n[PyArx] Ap 子模块对象创建完成 (id=%p)\n", (void*)ap.ptr());
 
     // 逐项隔离绑定，异常消息写文件精确定位（UTF-8）
     auto ApLog = [](const char* which, const std::exception& e) {
