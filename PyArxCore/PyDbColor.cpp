@@ -28,13 +28,15 @@ void bind_PyDbColor(pym& m) {
 			s.impObj()->getColor(c);
 			return { static_cast<int>(c.red()), static_cast<int>(c.green()), static_cast<int>(c.blue()) };
 		}, "读取颜色 RGB (0-255)")
-		// ---- setColor(r, g, b) ----
+		// ---- setColorByRgb(r, g, b) ----
 		// SDK: void setColor(const AcCmColor& color); 无返回值
-		.def("setRGB", [](PyDbColor& s, int r, int g, int b) {
-			if (!s.impObj()) return;
+		.def("setColorByRgb", [](PyDbColor& s, int r, int g, int b) {
+			if (!s.impObj()) return false;
+			auto clamp = [](int v) { return static_cast<Adesk::UInt8>(v < 0 ? 0 : (v > 255 ? 255 : v)); };
 			AcCmColor c;
-			c.setRGB(static_cast<Adesk::UInt8>(r), static_cast<Adesk::UInt8>(g), static_cast<Adesk::UInt8>(b));
+			c.setRGB(clamp(r), clamp(g), clamp(b));
 			s.impObj()->setColor(c);
-		}, py::arg("r"), py::arg("g"), py::arg("b"), "按 RGB (0-255) 设置颜色")
+			return true;
+		}, py::arg("r"), py::arg("g"), py::arg("b"), "按 RGB 设置颜色（分量夹紧 0-255）")
 		;
 }

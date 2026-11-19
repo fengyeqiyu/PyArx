@@ -29,7 +29,7 @@ public:
 	int  red() const;
 	int  green() const;
 	int  blue() const;
-	bool setRGB(int r, int g, int b);   // 失败时 PyWarnIfError 并返回 false
+	bool setColorByRgb(int r, int g, int b);   // RGB 设置；失败时 PyWarnIfError 并返回 false
 
 	// ACI
 	int  colorIndex() const;

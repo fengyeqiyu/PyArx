@@ -38,7 +38,7 @@ public:
 
 	// --- 颜色 / 透明度（AcCm* 未单独绑定，提取为基本类型）---
 	PyColor color() const;
-	bool setColor(const PyColor& color, bool doSubents = true);
+	bool setColorByRgb(int r, int g, int b, bool doSubents = true);   // 真彩色 RGB 设置（分量夹紧 0-255）
 	std::tuple<int,int,int> entityColor() const;          // 有效颜色 RGB
 	std::tuple<int,int,int> colorRGB() const;             // 存储真彩色 RGB
 	int  transparency() const;                            // alpha 0=全透明 255=不透明

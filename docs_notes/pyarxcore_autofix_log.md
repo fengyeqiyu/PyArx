@@ -117,3 +117,7 @@
 2026-11-19 10:07 | PyColor.cpp:86 | ④ | describe() 空描述兜底为 ByLayer/ByBlock/None/RGB/ACI
 2026-11-19 10:07 | PyColor.cpp:142 | 易用 | 补 Push none() 工厂与 __eq__/__ne__
 2026-11-19 10:10 | PyColor.cpp:55 | ③/④ | setRGB/setColorIndex 改返回 bool，走 PyWarnIfError 判 es
+2026-11-19 10:20 | PyDbEntity.cpp:250 | ⑤ | 删除重复的 setRGB lambda，统一走 setColorByRgb(r,g,b,doSubents)
+2026-11-19 10:20 | PyDbEntity.cpp:85 | 命名 | setColor(PyColor) 改为 setColorByRgb(r,g,b)，颜色设置入口收敛为 setColorIndex + setColorByRgb
+2026-11-19 10:20 | PyDbLayerTableRecord.cpp:120 | 命名/③ | setColor(r,g,b) 改为 setColorByRgb，补 clamp 并补回 bool
+2026-11-19 10:20 | PyDbColor.cpp:33 | 命名 | setRGB 改为 setColorByRgb，补 clamp 与 bool 返回

@@ -82,9 +82,12 @@ PyColor PyDbEntity::color() const {
 	if (!impObj()) return {};
 	return PyColor(impObj()->color());
 }
-bool PyDbEntity::setColor(const PyColor& color, bool doSubents) {
+bool PyDbEntity::setColorByRgb(int r, int g, int b, bool doSubents) {
 	if (!impObj()) return false;
-	return PyWarnIfError(impObj()->setColor(color.m_color, doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setColor");
+	AcCmColor c;
+	auto clamp = [](int v) { return static_cast<Adesk::UInt8>(v < 0 ? 0 : (v > 255 ? 255 : v)); };
+	c.setRGB(clamp(r), clamp(g), clamp(b));
+	return PyWarnIfError(impObj()->setColor(c, doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setColor");
 }
 std::tuple<int,int,int> PyDbEntity::entityColor() const {
 	if (!impObj()) return {};
@@ -243,12 +246,6 @@ void bind_PyDbEntity(pym& m) {
 		.def("unhighlight", [](PyDbEntity& self) {
 			return PyWarnIfError(self.impObj()->unhighlight(AcDbFullSubentPath(), Adesk::kTrue), L"unhighlight");
 		}, "取消高亮")
-		// ---- 真彩色 RGB（直接构造 AcCmColor，无需单独绑 AcCmColor 类）----
-		.def("setRGB", [](PyDbEntity& self, int r, int g, int b) {
-			AcCmColor c;
-			c.setRGB(static_cast<Adesk::UInt8>(r), static_cast<Adesk::UInt8>(g), static_cast<Adesk::UInt8>(b));
-			return PyWarnIfError(self.impObj()->setColor(c), L"setColor");
-		}, py::arg("r"), py::arg("g"), py::arg("b"), "设置真彩色 0-255")
 		// 变换副本（游离对象，需 appendEntity 入库）
 		.def("getTransformedCopy", [](PyDbEntity& self, const AcGeMatrix3d& xform) -> PyDbEntity {
 			AcDbEntity* p = nullptr;
@@ -257,7 +254,9 @@ void bind_PyDbEntity(pym& m) {
 		}, py::arg("xform"), "返回变换后的实体副本（未入库）")
 		// ---- 颜色 / 透明度 ----
 		.def("color", &PyDbEntity::color, "返回真彩色对象 PyColor")
-		.def("setColor", &PyDbEntity::setColor, py::arg("color"), py::arg("doSubents") = true, "用 PyColor 对象设置颜色")
+		.def("setColorByRgb", &PyDbEntity::setColorByRgb,
+			py::arg("r"), py::arg("g"), py::arg("b"), py::arg("doSubents") = true,
+			"按真彩色 RGB 设置颜色（分量夹紧 0-255）")
 		.def("entityColor", &PyDbEntity::entityColor, "返回有效实体颜色 RGB (r,g,b)")
 		.def("colorRGB", &PyDbEntity::colorRGB, "返回存储的真彩色 RGB (r,g,b)")
 		.def("transparency", &PyDbEntity::transparency, "返回透明度 alpha 0=全透明 255=不透明")

@@ -115,11 +115,13 @@ std::tuple<int, int, int, int> PyDbLayerTableRecord::color() const {
 	return std::make_tuple(ci, r, g, b);
 }
 
-void PyDbLayerTableRecord::setColor(int r, int g, int b) {
-	if (!impObj()) return;
+bool PyDbLayerTableRecord::setColorByRgb(int r, int g, int b) {
+	if (!impObj()) return false;
+	auto clamp = [](int v) { return static_cast<Adesk::UInt8>(v < 0 ? 0 : (v > 255 ? 255 : v)); };
 	AcCmColor c;
-	c.setRGB(static_cast<Adesk::UInt8>(r), static_cast<Adesk::UInt8>(g), static_cast<Adesk::UInt8>(b));
-	impObj()->setColor(c);
+	c.setRGB(clamp(r), clamp(g), clamp(b));
+	impObj()->setColor(c);   // SDK 该接口返回 void，无 es 可判
+	return true;
 }
 
 std::tuple<int, int, int, int> PyDbLayerTableRecord::entityColor() const {
@@ -197,7 +199,7 @@ void bind_PyDbLayerTableRecord(pym& m) {
 		.def_static("isReconciledByObjectId", static_cast<bool(*)(uint64_t)>(&PyDbLayerTableRecord::isReconciled), py::arg("objectId"))
 		// ---- 颜色 / 透明度 ----
 		.def("color", &PyDbLayerTableRecord::color, "返回 (colorIndex, r, g, b)；256=ByLayer,0=ByBlock")
-		.def("setColor", &PyDbLayerTableRecord::setColor, py::arg("r"), py::arg("g"), py::arg("b"), "以真彩色 RGB 设置层颜色")
+		.def("setColorByRgb", &PyDbLayerTableRecord::setColorByRgb, py::arg("r"), py::arg("g"), py::arg("b"), "以真彩色 RGB 设置层颜色（分量夹紧 0-255）")
 		.def("entityColor", &PyDbLayerTableRecord::entityColor, "返回实体颜色 (colorIndex, r, g, b)")
 		.def("transparency", &PyDbLayerTableRecord::transparency, "返回 0=ByLayer,1=ByBlock,否则 alpha 0..255")
 		.def("setTransparency", &PyDbLayerTableRecord::setTransparency, py::arg("trans"), "0=ByLayer,1=ByBlock,否则 alpha 0..255")

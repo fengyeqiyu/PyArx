@@ -55,8 +55,8 @@ public:
 	// ---- 颜色 / 透明度（AcCmColor/AcCmEntityColor/AcCmTransparency 未单独封装，安全透出为整数）----
 	// color() -> (colorIndex, r, g, b)；colorIndex 为 ACI（256=ByLayer,0=ByBlock），RGB 仅在真彩色时有效
 	std::tuple<int, int, int, int> color() const;
-	// setColor(r,g,b) 直接以真彩色写入
-	void setColor(int r, int g, int b);
+	// setColorByRgb(r,g,b) 直接以真彩色写入（分量夹紧 0-255）
+	bool setColorByRgb(int r, int g, int b);
 	// entityColor() -> (colorIndex, r, g, b)
 	std::tuple<int, int, int, int> entityColor() const;
 	// transparency() -> int：0=ByLayer，1=ByBlock，否则为 alpha 0..255

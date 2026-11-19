@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyColor.h"
 #include "PyErrorStatusException.h"
 #include <aced.h>
@@ -21,7 +21,7 @@ static Adesk::UInt8 clamp255(int v) {
 // ---- 工厂 ----
 PyColor PyColor::fromRGB(int r, int g, int b) {
 	PyColor c;
-	c.setRGB(r, g, b);   // 已夹紧，setRGB 内部不会失败
+	c.setColorByRgb(r, g, b);   // 已夹紧，setColorByRgb 内部不会失败
 	return c;
 }
 
@@ -53,7 +53,7 @@ int  PyColor::blue() const {
 	if (!m_color.isByColor() && aciToRGB(static_cast<int>(m_color.colorIndex()), r, g, b)) return b;
 	return m_color.blue();
 }
-bool PyColor::setRGB(int r, int g, int b) {
+bool PyColor::setColorByRgb(int r, int g, int b) {
 	return PyWarnIfError(m_color.setRGB(clamp255(r), clamp255(g), clamp255(b)),
 		L"AcCmColor::setRGB");
 }
@@ -122,7 +122,7 @@ void bind_PyColor(pym& m) {
 		.def_property_readonly("red", &PyColor::red, "红分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
 		.def_property_readonly("green", &PyColor::green, "绿分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
 		.def_property_readonly("blue", &PyColor::blue, "蓝分量 (0-255)；ACI 色按 ACI 调色板解析真实 RGB")
-		.def("setRGB", &PyColor::setRGB,
+		.def("setColorByRgb", &PyColor::setColorByRgb,
 			py::arg("r"), py::arg("g"), py::arg("b"),
 			"按 RGB 设置真彩色（分量越界夹紧到 0-255），返回 bool")
 
@@ -133,7 +133,7 @@ void bind_PyColor(pym& m) {
 		// 判定
 		.def("isByLayer", &PyColor::isByLayer)
 		.def("isByBlock", &PyColor::isByBlock)
-		.def("isByColor", &PyColor::isByColor, "是否真彩色（由 setRGB/fromRGB 设置）")
+		.def("isByColor", &PyColor::isByColor, "是否真彩色（由 setColorByRgb/fromRGB 设置）")
 		.def("isNone", &PyColor::isNone)
 
 		// 命名
