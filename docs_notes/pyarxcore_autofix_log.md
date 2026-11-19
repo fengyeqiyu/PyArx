@@ -124,3 +124,6 @@
 2026-11-19 10:24 | PyDbHighlightOverrule.cpp:14 | ⑧/④ | catch(...) 与 error_already_set 分支改为 restore+PyErr_Print，异常不再静默
 2026-11-19 10:24 | PyDbGripOverrule.cpp:52 | ⑧/④ | 6 处回调 catch 补 PyErr_Print，reg_* 降级仍保留
 2026-11-19 10:24 | PyDbObjectReactor.cpp:19 | ⑧/④ | 12 处回调 catch 补 PyErr_Print，异常不再静默
+2026-11-19 11:19 | PyDbGeometryOverrule.cpp:16,53,90,109 | ⑧ | 静默 catch 改为 restore+PyErr_Print，回退 SDK 默认实现不变
+2026-11-19 11:19 | PyDbHighlightStateOverrule.cpp:14 | ⑧ | 同上，compat 回调异常可见化
+2026-11-19 11:19 | PyDbObjectOverrule.cpp:22,40,58,76,93 | ⑧ | 同上，5 处 open/close/cancel/erase/isApplicable 异常改为可见

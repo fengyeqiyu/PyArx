@@ -469,3 +469,14 @@ PyDbHighlightOverrule.cpp:14:⑧已改
 PyDbGripOverrule.cpp:52:⑧已改
 PyDbObjectReactor.cpp:19:⑧已改
 dllmain.cpp:1:通过
+PyDbGeometryOverrule.cpp:16:⑧已改
+PyDbGeometryOverrule.cpp:53:⑧已改
+PyDbGeometryOverrule.cpp:90:⑧已改
+PyDbGeometryOverrule.cpp:109:⑧已改
+PyDbHighlightStateOverrule.cpp:14:⑧已改
+PyDbObjectOverrule.cpp:22:⑧已改
+PyDbObjectOverrule.cpp:40:⑧已改
+PyDbObjectOverrule.cpp:58:⑧已改
+PyDbObjectOverrule.cpp:76:⑧已改
+PyDbObjectOverrule.cpp:93:⑧已改
+PyDbDbLayerStateManager.cpp:1:通过

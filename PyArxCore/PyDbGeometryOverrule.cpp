@@ -13,8 +13,8 @@ bool PyDbGeometryOverrule::isApplicable(const AcRxObject* pOverruledSubject) con
         try {
             return py_self.attr("isApplicable")(pybind11::cast(pOverruledSubject)).cast<bool>();
         }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     }
     return true;
 }
@@ -50,7 +50,7 @@ Acad::ErrorStatus PyDbGeometryOverrule::intersectWith(
             }
             return Acad::eOk;
         }
-        catch (...) {}
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     }
     return AcDbGeometryOverrule::intersectWith(pSubject, pEnt, intType, points, thisGsMarker, otherGsMarker);
 }
@@ -87,7 +87,7 @@ Acad::ErrorStatus PyDbGeometryOverrule::intersectWith(
             }
             return Acad::eOk;
         }
-        catch (...) {}
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     }
     return AcDbGeometryOverrule::intersectWith(pSubject, pEnt, intType, projPlane, points, thisGsMarker, otherGsMarker);
 }
@@ -106,8 +106,8 @@ Acad::ErrorStatus PyDbGeometryOverrule::getGeomExtents(const AcDbEntity* pSubjec
             extents.set(tuple[0].cast<AcGePoint3d>(), tuple[1].cast<AcGePoint3d>());
             return Acad::eOk;
         }
-        catch (const pybind11::error_already_set&) { PyErr_Clear(); }
-        catch (...) {}
+        catch (pybind11::error_already_set& e) { e.restore(); PyErr_Print(); }
+        catch (...) { if (PyErr_Occurred()) PyErr_Print(); }
     }
     return AcDbGeometryOverrule::getGeomExtents(pSubject, extents);
 }
