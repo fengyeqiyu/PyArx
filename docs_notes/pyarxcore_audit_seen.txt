@@ -480,3 +480,8 @@ PyDbObjectOverrule.cpp:58:⑧已改
 PyDbObjectOverrule.cpp:76:⑧已改
 PyDbObjectOverrule.cpp:93:⑧已改
 PyDbDbLayerStateManager.cpp:1:通过
+PyDbOsnapOverrule.cpp:1:通过
+PyDbPropertiesOverrule.cpp:1:通过
+PyDbSubentityOverrule.cpp:1:通过
+PyDbTransformOverrule.cpp:1:通过
+PyDbVisibilityOverrule.cpp:1:通过
