@@ -35,14 +35,14 @@
 // 文字查找位标志：dbmain.h 的 AC_SRCH_* 宏在 C++ 里无法作为枚举引用，
 // 这里收成强类型枚举，Python 侧注册为 Db.TextFindFlags（可按位或组合）。
 enum class PyDbTextFindFlags : Adesk::UInt8 {
-    BLOCK      = AC_SRCH_BLOCK,
-    DIM        = AC_SRCH_DIM_TEXT,
-    TEXT       = AC_SRCH_TEXT,
-    LINK_DESC  = AC_SRCH_LINK_DESC,
-    LINK_URL   = AC_SRCH_LINK_URL,
-    MATCH_CASE = AC_SRCH_MATCH_CASE,
-    WHOLE_WORD = AC_SRCH_WHOLE_WORD,
-    DEFAULT    = AC_SRCH_DEFAULT,
+    kBLOCK      = AC_SRCH_BLOCK,
+    kDIM        = AC_SRCH_DIM_TEXT,
+    kTEXT       = AC_SRCH_TEXT,
+    kLINK_DESC  = AC_SRCH_LINK_DESC,
+    kLINK_URL   = AC_SRCH_LINK_URL,
+    kMATCH_CASE = AC_SRCH_MATCH_CASE,
+    kWHOLE_WORD = AC_SRCH_WHOLE_WORD,
+    kDEFAULT    = AC_SRCH_DEFAULT,
 };
 
 // Forward declarations of per-class bind functions (one TU per class).
@@ -275,14 +275,14 @@ void pybind11_init_PyDb(::pybind11::module_& m) {
 	// 文字查找位标志（对应 AC_SRCH_*）：Db.TextFindFlags.TEXT | Db.TextFindFlags.MATCH_CASE 这样用。
 	py::enum_<PyDbTextFindFlags>(m, "TextFindFlags", py::arithmetic(),
 		"文字查找位标志（dbmain.h AC_SRCH_*），可用 | 组合")
-		.value("BLOCK", PyDbTextFindFlags::BLOCK, "块属性（AC_SRCH_BLOCK）")
-		.value("DIM", PyDbTextFindFlags::DIM, "标注文字（AC_SRCH_DIM_TEXT）")
-		.value("TEXT", PyDbTextFindFlags::TEXT, "单行/多行文字（AC_SRCH_TEXT）")
-		.value("LINK_DESC", PyDbTextFindFlags::LINK_DESC, "超链接描述（AC_SRCH_LINK_DESC）")
-		.value("LINK_URL", PyDbTextFindFlags::LINK_URL, "超链接地址（AC_SRCH_LINK_URL）")
-		.value("MATCH_CASE", PyDbTextFindFlags::MATCH_CASE, "区分大小写（AC_SRCH_MATCH_CASE）")
-		.value("WHOLE_WORD", PyDbTextFindFlags::WHOLE_WORD, "全词匹配（AC_SRCH_WHOLE_WORD）")
-		.value("DEFAULT", PyDbTextFindFlags::DEFAULT, "默认组合（AC_SRCH_DEFAULT = 0x1F）");
+		.value("kBLOCK", PyDbTextFindFlags::kBLOCK, "块属性（AC_SRCH_BLOCK）")
+		.value("kDIM", PyDbTextFindFlags::kDIM, "标注文字（AC_SRCH_DIM_TEXT）")
+		.value("kTEXT", PyDbTextFindFlags::kTEXT, "单行/多行文字（AC_SRCH_TEXT）")
+		.value("kLINK_DESC", PyDbTextFindFlags::kLINK_DESC, "超链接描述（AC_SRCH_LINK_DESC）")
+		.value("kLINK_URL", PyDbTextFindFlags::kLINK_URL, "超链接地址（AC_SRCH_LINK_URL）")
+		.value("kMATCH_CASE", PyDbTextFindFlags::kMATCH_CASE, "区分大小写（AC_SRCH_MATCH_CASE）")
+		.value("kWHOLE_WORD", PyDbTextFindFlags::kWHOLE_WORD, "全词匹配（AC_SRCH_WHOLE_WORD）")
+		.value("kDEFAULT", PyDbTextFindFlags::kDEFAULT, "默认组合（AC_SRCH_DEFAULT = 0x1F）");
 
 	// 文字查找 / 替换：直接走 ObjectARX 自带 acdbTextFind（dbmain.h Text Finder API）。
 	// find 为空返回空表；replace 为空 = 只查找；options 取 TextFindFlags 位标志，默认 DEFAULT；

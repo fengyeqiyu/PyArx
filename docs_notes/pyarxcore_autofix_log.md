@@ -108,3 +108,4 @@
 2026-11-19 09:00 | PyDbBinder.cpp:258 | ⑤ | acdbTextFind 迁入 Db.textFind（lambda 内联，含 AC_SRCH_* 常量），并在 PyEd/PyDb 两侧删除/清理
 2026-11-19 09:00 | TextFinder.h:1 | ⑤ | 删除自研 QTextFind 及 vcxproj ClInclude 登记
 2026-11-19 09:05 | PyDbBinder.cpp:262 | ⑤ | AC_SRCH_* 8 个裸常量收为 Db.TextFindFlags 强类型枚举（支持 | 组合）
+2026-11-19 09:06 | PyDbBinder.cpp:38 | ⑤ | 枚举成员统一 k 前缀（kBLOCK/kDIM/kTEXT/…）
