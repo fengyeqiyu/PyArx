@@ -525,3 +525,8 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-19 15:26 PyDbPolygonMesh.cpp:45/52:②已修-isMClosed/isNClosed补isNull
 2026-11-19 15:26 PyDbLinetypeTableRecord.cpp:29/34/74:②已修-补isNull
 2026-11-19 15:26 PyArxEngine\PyEngine.cpp:75-78:⑨通过-usable()按Py_GIL_DISABLED选python315t/python315
+
+2026-11-19 15:34 PyDbBlockTableRecord.cpp:71/86/244+PyDbTrans.cpp:262:②已修-append族加 EnsureBtrWritable 防呆,记录未写模式只报错不再触发ARX eNotOpenForWrite 致命崩溃
+2026-11-19 15:34 tools/cadmcp/headless_entity_test.py:block_make:用法已修-SymbolTable.add()后记录自动关闭,改按id重新openObject(...,1)再append,不再补addNewlyCreatedDBObject
+2026-11-19 15:34 无头回归 accoreconsole(headless_entity.scr):通过-8/8项全过 exit=0 entity_count 0->6
+2026-11-19 15:34 无头误用回归 tools/cadmcp/dbg_guard.py:通过-旧写法 add后直接append 返回False,进程不崩

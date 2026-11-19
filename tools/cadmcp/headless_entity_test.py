@@ -121,25 +121,26 @@ rec("poly3d_make", poly3d_make)
 
 
 # 6. 块定义 + 块参照
+# 正确用法：SymbolTable.add() 入库后会自动关闭记录，必须按 id 重新以写模式打开再 append；
+# appendAcDbEntity 入库后会自行关闭实体，不能再补 addNewlyCreatedDBObject（对象已 detach）。
 def block_make():
     db = P.Db.curDb()
     with P.Db.PyDbTrans() as tr:
         bt = tr.openObject(db.blockTableId(), 1)
         btr = P.Db.PyDbBlockTableRecord()
         btr.setName("PYARX_BLK")
-        bt.add(btr)
-        tr.addNewlyCreatedDBObject(btr, True)
+        ok_add = bt.add(btr)
+        btr_id = btr.objectId()
+        btr_w = tr.openObject(btr_id, 1)
         c = P.Db.PyDbCircle(_pt(0, 0), P.Ge.AcGeVector3d(0, 0, 1), 20.0)
-        btr.appendAcDbEntity(c)
-        tr.addNewlyCreatedDBObject(c, True)
+        ok_app = btr_w.appendAcDbEntity(c)
     with P.Db.PyDbTrans() as tr:
         bt = tr.openObject(db.blockTableId(), 0)
-        rec2 = bt.getAt("PYARX_BLK", 0)
         br = P.Db.PyDbBlockReference()
-        br.setBlockTableRecord(rec2.objectId())
+        br.setBlockTableRecord(bt.getIdAt("PYARX_BLK"))
         br.setPosition(_pt(600, 0))
         tr.addEntity(br)
-    return str(br.handle())
+    return "add=%s btr=%s append=%s ref=%s" % (ok_add, btr_id, ok_app, br.handle())
 
 
 rec("block_make", block_make)

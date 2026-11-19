@@ -80,6 +80,19 @@ CAD 渲染比 1em 宽约 1.33×。
 ## 6. 常用对象入口
 
 - 块表：`db.getBlockTable()` → `bt.getAt("*Model_Space", 1)`（1=kForWrite）、`bt.names()`
+- 建块定义（**踩坑点**）：`bt.add(btr)` 入库后会自动关闭记录（`isWriteEnabled()==False`），
+  此时直接 `btr.appendAcDbEntity(ent)` 会触发 ARX `eNotOpenForWrite` 致命断言（无头 accoreconsole 直接崩进程）。
+  正确写法是按 id 以写模式重开再 append，实体入库后自动关闭、**不要再补 `addNewlyCreatedDBObject`**：
+  ```python
+  with P.Db.PyDbTrans() as tr:
+      bt  = tr.openObject(db.blockTableId(), 1)
+      btr = P.Db.PyDbBlockTableRecord(); btr.setName("BLK")
+      bt.add(btr)
+      btr_w = tr.openObject(btr.objectId(), 1)      # 关键：重开
+      btr_w.appendAcDbEntity(P.Db.PyDbCircle(pt, vec, 20.0))
+  # 插块参照：bt.getIdAt("BLK") → PyDbBlockReference().setBlockTableRecord(id) → tr.addEntity(br)
+  ```
+  （绑定期已加防呆：未以写模式打开的块记录 append 只报错返回 False，不再进 ARX 断言。）
 - 多段线：`PyDbPolyline()` 无参构造；`addVertexAt(i, AcGePoint2d, bulge=0, sw=-1, ew=-1)`、`setClosed(True)`
 - 文字：`textString/height/rotation/widthFactor/oblique/position/textStyle/getGeomExtents`
 - 句柄：`PyDbObject.handle()`

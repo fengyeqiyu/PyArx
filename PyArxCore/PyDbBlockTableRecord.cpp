@@ -68,8 +68,22 @@ int PyDbBlockTableRecord::postProcessAnnotativeBTR(bool bqueryOnly, bool bScale)
 }
 bool  PyDbBlockTableRecord::addAnnoScalestoBlkRefs(bool bScale) { if (!impObj()) return false; return PyWarnIfError(impObj()->addAnnoScalestoBlkRefs(bScale), L"AcDbBlockTableRecord::addAnnoScalestoBlkRefs"); }
 
+// 防呆：记录未以写模式打开（典型：SymbolTable.add() 入库后已关闭，或新建未入库）时，
+// 直接 appendAcDbEntity 会触发 ARX assertWriteEnabled → eNotOpenForWrite 致命错误（无头下整进程崩）。
+// 必须先在事务里 tr.openObject(记录id, 1) 重开，此处只报错不进入 ARX。
+static bool EnsureBtrWritable(AcDbBlockTableRecord* p, const wchar_t* ctx) {
+	if (!p) return PyWarnIfError(Acad::eNullObjectPointer, ctx);
+	if (!p->isWriteEnabled()) {
+		PyWarnIfError(Acad::eNotOpenForWrite, ctx);
+		acutPrintf(L"[PyArx] 提示：SymbolTable.add() 入库后记录已自动关闭，请先 tr.openObject(btr.objectId(), 1) 重开再 append。\n");
+		return false;
+	}
+	return true;
+}
+
 bool  PyDbBlockTableRecord::appendEntity(PyDbEntity& pEntity) {
 	if (!impObj()) return false;
+	if (!EnsureBtrWritable(impObj(), L"AcDbBlockTableRecord::appendEntity(未以写模式打开)")) return false;
 	// 经典 ARX 写法：块记录以 kForWrite 打开时直接 appendAcDbEntity，随后关闭实体。
 	// 旧实现用 startTransaction + addNewlyCreatedDBRObject + detach + endTransaction 五步，
 	// 每一步都返回成功，但函数返回后 pybind 仍报 "Caught an unknown exception"，实体也没进库
@@ -85,6 +99,7 @@ bool  PyDbBlockTableRecord::appendEntity(PyDbEntity& pEntity) {
 
 uint64_t PyDbBlockTableRecord::appendAcDbEntityId(PyDbEntity& pEntity) {
 	if (!impObj()) return 0ULL;
+	if (!EnsureBtrWritable(impObj(), L"AcDbBlockTableRecord::appendAcDbEntityId(未以写模式打开)")) return 0ULL;
 	AcDbObjectId outId;
 	Acad::ErrorStatus es = impObj()->appendAcDbEntity(outId, pEntity.impObj());
 	if (es != Acad::eOk) { PyWarnIfError(es, L"AcDbBlockTableRecord::appendAcDbEntityId"); return 0ULL; }
@@ -244,6 +259,8 @@ void bind_PyDbBlockTableRecord(pym& m) {
 		.def("appendAcDbEntity", [](PyDbBlockTableRecord& self, PyDbEntity& entity) {
 			// 不能直接用 ARX 原名别名：两参重载入库后实体仍保持打开态，后续遍历/改属性会
 			// eWasOpenForWrite 打不开。这里与 appendEntity 一致——入库即关闭并释放包装。
+			if (!self.impObj()) return false;
+			if (!EnsureBtrWritable(self.impObj(), L"AcDbBlockTableRecord::appendAcDbEntity(未以写模式打开)")) return false;
 			AcDbObjectId outId;
 			Acad::ErrorStatus es = self.impObj()->appendAcDbEntity(outId, entity.impObj());
 			if (es != Acad::eOk) return PyWarnIfError(es, L"AcDbBlockTableRecord::appendAcDbEntity");

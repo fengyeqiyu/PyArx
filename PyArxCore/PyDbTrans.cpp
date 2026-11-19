@@ -259,6 +259,12 @@ bool PyDbTrans::addEntity(AcDbBlockTableRecord* btr, PyDbEntity& ent) {
 	if (!btr || ent.isNull()) { pdtDiag("ADDENTITY(btr,ent) btr/ent null"); return false; }
 
 	pdtDiag("ADDENTITY appendAcDbEntity BEFORE");
+	// 防呆：块表记录未以写模式打开时 appendAcDbEntity 会触发 ARX 致命断言（无头进程直接崩）
+	if (!btr->isWriteEnabled()) {
+		pdtDiag("ADDENTITY btr not write-enabled, refused");
+		PyWarnIfError(Acad::eNotOpenForWrite, L"PyDbTrans::addEntity(btr 未以写模式打开，请先 openObject(id,1))");
+		return false;
+	}
 	m_es = btr->appendAcDbEntity(ent.impObj());
 	{
 		char buf[128];
