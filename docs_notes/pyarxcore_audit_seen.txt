@@ -568,3 +568,6 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 04:18 PyArxBinder.cpp:93-122 ⑧ 未改 核心子模块 bind_PyGe/PyEnum/PyRx/PyDb*/PyGi/PyCore/PyUtility/PyDebug 调用未包 try/catch（Ap 子模块与 m 级绑定已隔离）；补包需 13 处 >20 行且改变失败语义 只报不改
 2026-11-20 04:18 PyArrayCaster.h:29/63 PyDbDynBlockReference.cpp:11 PyDbMText.cpp:165/170 PyDbTrans.cpp:50/248/266 PyGePolyline2d/3d PyGiTextEngine.cpp:106/127 PyUt.cpp:189/213/334 ⑧ 通过 catch(...) 均有返回兜底或注释说明，非静默
 2026-11-20 04:18 PyGeNurbCurve3d.cpp:28/36 PyGeMatrix3d.cpp:160 ⑧ 通过 异常兜底为已文档化的安全回退（非有理曲线权重、numpy 缺失回退嵌套 list）
+2026-11-20 05:18 PyDbCurve.cpp:102/113/121/133/138/144 ② 已改 6 处 object-returning lambda 补 impObj 判空
+2026-11-20 05:18 PyDbBlockReference.cpp:314 ② 已改 attributeIds 补 impObj 判空
+2026-11-20 05:18 PyDbEntity/PyDbHatch/PyDbObject/PyDbDynBlockReference/PyDbSweepOptions/PyDbLoftOptions/PyDbDeepCloneFiler/PyDbWblockCloneFiler 等 57 处 .impObj()-> 直接解引用 ② 未改 同一模式（多为内部持有对象必然非空的 options/filer 类，或方法链需逐个改），全量补判空超 20 行 只报不改

@@ -99,6 +99,7 @@ void bind_PyDbCurve(pym& m) {
 		.def("getOffsetCurves", [](const PyDbCurve& self, double dist) -> py::list {
 			py::list out;
 			AcDbVoidPtrArray arr;
+			if (!self.impObj()) return out;
 			if (self.impObj()->getOffsetCurves(dist, arr) != Acad::eOk) return out;
 			for (int i = 0; i < arr.length(); ++i)
 				out.append(PyDbEntity(static_cast<AcDbEntity*>(arr[i])));
@@ -110,6 +111,7 @@ void bind_PyDbCurve(pym& m) {
 			AcGeDoubleArray arr;
 			for (double d : params) arr.append(d);
 			AcDbVoidPtrArray segs;
+			if (!self.impObj()) return out;
 			if (self.impObj()->getSplitCurves(arr, segs) != Acad::eOk) return out;
 			for (int i = 0; i < segs.length(); ++i)
 				out.append(PyDbEntity(static_cast<AcDbEntity*>(segs[i])));
@@ -118,6 +120,7 @@ void bind_PyDbCurve(pym& m) {
 		// 拟合为样条，返回 AcDbSpline（未入库）
 		.def("getSpline", [](const PyDbCurve& self) -> PyDbSpline {
 			AcDbSpline* sp = nullptr;
+			if (!self.impObj()) return PyDbSpline(nullptr);
 			if (self.impObj()->getSpline(sp) != Acad::eOk) sp = nullptr;
 			return PyDbSpline(sp);
 		}, "拟合为样条曲线（未入库）")
@@ -130,17 +133,20 @@ void bind_PyDbCurve(pym& m) {
 		// 投影到平面，返回新曲线（未入库）
 		.def("getProjectedCurve", [](const PyDbCurve& self, const AcGePlane& pl, const AcGeVector3d& projDir) -> PyDbCurve {
 			AcDbCurve* c = nullptr;
+			if (!self.impObj()) return PyDbCurve(nullptr);
 			if (self.impObj()->getProjectedCurve(pl, projDir, c) != Acad::eOk) c = nullptr;
 			return PyDbCurve(c);
 		}, py::arg("plane"), py::arg("proj_dir"), "沿方向投影到平面，返回新曲线（未入库）")
 		.def("getOrthoProjectedCurve", [](const PyDbCurve& self, const AcGePlane& pl) -> PyDbCurve {
 			AcDbCurve* c = nullptr;
+			if (!self.impObj()) return PyDbCurve(nullptr);
 			if (self.impObj()->getOrthoProjectedCurve(pl, c) != Acad::eOk) c = nullptr;
 			return PyDbCurve(c);
 		}, py::arg("plane"), "正交投影到平面，返回新曲线（未入库）")
 		// 取出对应的 GE 曲线（堆对象，返回裸指针由 Python 接管 delete）
 		.def("getAcGeCurve", [](const PyDbCurve& self) -> AcGeCurve3d* {
 			AcGeCurve3d* g = nullptr;
+			if (!self.impObj()) return nullptr;
 			if (self.impObj()->getAcGeCurve(g) != Acad::eOk) return nullptr;
 			return g;
 		}, "返回对应的 AcGeCurve3d（堆对象，Python 接管内存）")

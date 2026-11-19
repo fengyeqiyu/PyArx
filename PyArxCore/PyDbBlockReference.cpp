@@ -311,6 +311,7 @@ void bind_PyDbBlockReference(pym& m) {
 		// ---- 属性 ----
 		.def("attributeIds", [](const PyDbBlockReference& self) -> py::list {
 			py::list out;
+			if (!self.impObj()) return out;
 			AcDbObjectIterator* it = self.impObj()->attributeIterator();
 			if (!it) return out;
 			for (; !it->done(); it->step())
