@@ -32,7 +32,10 @@ void PyColor::setRGB(int r, int g, int b) {
 // ---- ACI ----
 int  PyColor::colorIndex() const      { return m_color.colorIndex(); }
 void PyColor::setColorIndex(int idx) {
-	// ACI 仅 0-255 有效（0=ByBlock）；越界按 Python 语义对 256 取模归一，不做静默截断
+	// 0-255 是 ACI 实体色（0=ByBlock）；256/257 是 SDK 的方法码，必须走专用 setter，
+	// 否则 setColorIndex(256) 会被当成 ByBlock。其余越界按 Python 语义对 256 取模归一。
+	if (idx == 256) { m_color.setByLayer(); return; }
+	if (idx == 257) { m_color.setNone();    return; }
 	int aci = ((idx % 256) + 256) % 256;
 	m_color.setColorIndex(static_cast<Adesk::UInt16>(aci));
 }
@@ -86,7 +89,7 @@ void bind_PyColor(pym& m) {
 
 		// ACI
 		.def_property_readonly("colorIndex", &PyColor::colorIndex, "ACI 颜色号 (0=ByBlock, 1-255)")
-		.def("setColorIndex", &PyColor::setColorIndex, py::arg("index"), "设置 ACI 颜色号（对 256 取模，0=ByBlock）")
+		.def("setColorIndex", &PyColor::setColorIndex, py::arg("index"), "设置 ACI 颜色号（0=ByBlock, 1-255 实体色, 256=ByLayer, 257=None, 其余对 256 取模）")
 
 		// 判定
 		.def("isByLayer", &PyColor::isByLayer)

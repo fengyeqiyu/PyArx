@@ -111,3 +111,4 @@
 2026-11-19 09:06 | PyDbBinder.cpp:38 | ⑤ | 枚举成员统一 k 前缀（kBLOCK/kDIM/kTEXT/…）
 2026-11-19 09:18 | PyEdEditor.cpp:117 | ③ | acedCoordFromPixelToWorld 无窗号分支补返回值判断，失败返回 None
 2026-11-19 09:19 | PyColor.cpp:34 | ④ | setColorIndex 对 256 取模归一（负值亦归一），fromACI 改走 setColorIndex，文案改为 0=ByBlock
+2026-11-19 09:24 | PyColor.cpp:34 | ④ | setColorIndex 分流：256 走 setByLayer、257 走 setNone、其余对 256 取模；文案更新
