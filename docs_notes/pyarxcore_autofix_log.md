@@ -220,3 +220,4 @@
 2026-11-20 23:19 | PyDbRegion.cpp:19 | ⑤ | 删 1 行冗余前置判空
 2026-11-20 23:19 | PyDbRevolvedSurface.cpp:2 处 | ⑤ | 删 2 行冗余前置判空
 2026-11-20 23:19 | PyDbSummaryInfo.cpp:14 处 | ⑤ | 删 14 行冗余前置判空（setter 已用 impObj() ? ... : false）
+2026-11-21 00:21 | PyDb3dProfile.cpp:52-57 | ② | isClosed/isPlanar/isSubent/isFace/isEdge/isValid 六个 lambda 改为 impObj() 三元判空，空包装返回 False

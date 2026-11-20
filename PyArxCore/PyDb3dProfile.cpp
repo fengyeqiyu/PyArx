@@ -49,11 +49,11 @@ void bind_PyDb3dProfile(pym& m) {
 			py::arg("nonPlanarOnly"), py::arg("outerLoopOnly"))
 
 		// ---- 状态查询（SDK 头有、清单未列，补绑） ----
-		.def("isClosed", [](PyDb3dProfile& s){ return s.impObj()->isClosed(); })
-		.def("isPlanar", [](PyDb3dProfile& s){ return s.impObj()->isPlanar(); })
-		.def("isSubent", [](PyDb3dProfile& s){ return s.impObj()->isSubent(); })
-		.def("isFace", [](PyDb3dProfile& s){ return s.impObj()->isFace(); })
-		.def("isEdge", [](PyDb3dProfile& s){ return s.impObj()->isEdge(); })
-		.def("isValid", [](PyDb3dProfile& s){ return s.impObj()->isValid(); })
+		.def("isClosed", [](PyDb3dProfile& s){ return s.impObj() ? s.impObj()->isClosed() : false; })
+		.def("isPlanar", [](PyDb3dProfile& s){ return s.impObj() ? s.impObj()->isPlanar() : false; })
+		.def("isSubent", [](PyDb3dProfile& s){ return s.impObj() ? s.impObj()->isSubent() : false; })
+		.def("isFace", [](PyDb3dProfile& s){ return s.impObj() ? s.impObj()->isFace() : false; })
+		.def("isEdge", [](PyDb3dProfile& s){ return s.impObj() ? s.impObj()->isEdge() : false; })
+		.def("isValid", [](PyDb3dProfile& s){ return s.impObj() ? s.impObj()->isValid() : false; })
 		;
 }

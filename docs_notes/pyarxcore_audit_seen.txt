@@ -703,3 +703,14 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 23:19 PyDbXrecord.cpp:16 ③ 通过 setXlateReferences 为 void
 2026-11-20 23:19 PyDbDatabase.cpp:744、PyDbObject.cpp:110 ③ 通过 disableUndoRecording 为 void
 2026-11-20 23:19 PyArxCore 全量 ①⑥⑦⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / TEMP_RESIDUE=0 / python314=0 / PYBIND11_MODULE 唯一且带 mod_gil_not_used / 相邻重复行仅 4 处为注释分隔与格式串
+2026-11-21 00:21 PyDb3dProfile.cpp:52-57 ② 已改 6 个状态查询 lambda 补 impObj() 判空返回 False（该类可由空 PyDbEntity 构造出空包装）
+2026-11-21 00:21 PyDbLoftOptions.cpp:26-54、PyDbSweepOptions.cpp:29-71 ② 通过 仅暴露 py::init<>()（内部 new），无指针构造路径，impObj() 不可能为空
+2026-11-21 00:21 PyDbBlendOptions.cpp:16-31 ② 通过 已用 impObj() 三元判空
+2026-11-21 00:21 PyDb3dProfile.cpp:21-49 ② 通过 copyFrom/setByEntity/convertProfile 均已有 s/src/entity 判空
+2026-11-21 00:21 PyArxCore 全量 ⑥ 通过 602/602 全部登记（vcxproj Include 条目 602，missing=0）
+2026-11-21 00:21 PyArxCore 全量 ⑦ 通过 TEMP-DIAG/_diagAppend/OutputDebugString/#if 0/ofstream 仅剩既有功能用途（PyArxBinder ap 日志、PyUt 写 .pyi、PyDbTrans 受控开关）
+2026-11-21 00:21 PyArxCore 全量 ⑧ 通过 catch(...) 逐处核：Overrule/Reactor 回调均为异常隔离（PyErr_Print 或 acutPrintf），PyArrayCaster/PyUt 为 doc 解析兜底
+2026-11-21 00:21 PyArxCore 全量 ⑨ 通过 python314=0 / PyGILState=0 / PYBIND11_MODULE 唯一且带 mod_gil_not_used() / stdafx.h 按 Py_GIL_DISABLED 选 python315t.lib
+2026-11-21 00:21 PyMfcXml ⑨ 通过 PyMfcXml.cpp:91 带 mod_gil_not_used()，vcxproj 定义 Py_GIL_DISABLED，stdafx.h 条件链接
+2026-11-21 00:21 PyArxEngine ⑨ 未改 PyEngine.cpp:73/82/206/227 仍拼 python315.zip（free-threaded 标准库应为 python315t.zip）；acrxEntryPoint.cpp:244、PyAppDispatcher.cpp:93 仍用 PyGILState_Ensure（只读核对，未改）
+2026-11-21 00:21 PyArxCore 全量 ③④⑤ 通过 函数级扫描：含 es 判断但无 PyWarnIfError/acutPrintf 的函数 0 个；同名一行转发仅剩 PyColor/PyDbDate 值对象包装
