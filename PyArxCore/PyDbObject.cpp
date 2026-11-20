@@ -247,11 +247,11 @@ void bind_PyDbObject(pym& m)
 		}, py::arg("owner"))
 		.def("addPersistentReactor", [](PyDbObject& self, const AcDbObjectId& id) {
 			if (self.isNull()) return;
-			self.impObj()->addPersistentReactor(id);
+			PyWarnIfError(self.impObj()->addPersistentReactor(id), L"AcDbObject::addPersistentReactor");
 		}, py::arg("id"))
 		.def("removePersistentReactor", [](PyDbObject& self, const AcDbObjectId& id) {
 			if (self.isNull()) return;
-			self.impObj()->removePersistentReactor(id);
+			PyWarnIfError(self.impObj()->removePersistentReactor(id), L"AcDbObject::removePersistentReactor");
 		}, py::arg("id"))
 		.def("isAcDbObjectIdsInFlux", [](PyDbObject& self) {
 			return static_cast<bool>(self.impObj()->isAcDbObjectIdsInFlux());
@@ -280,7 +280,7 @@ void bind_PyDbObject(pym& m)
 		}, py::arg("prop"), py::arg("field"))
 		.def("removeField", [](PyDbObject& self, const AcDbObjectId& fieldId) {
 			if (self.isNull()) return;
-			self.impObj()->removeField(fieldId);
+			PyWarnIfError(self.impObj()->removeField(fieldId), L"AcDbObject::removeField");
 		}, py::arg("id"))
 
 		// 实例属性：块定义内部的 INSERT 在 Python 侧只拿到 PyDbObject，

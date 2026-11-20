@@ -586,3 +586,6 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 10:18 PyDbUcsTableRecord.cpp:8/11/13 ③ 通过 SDK dbsymtb.h AcDbUcsTableRecord setOrigin/setXAxis/setYAxis 均为 void
 2026-11-20 10:18 PyDbLoftOptions/PyDbSweepOptions/PyDbTextStyleTableRecord/PyDbLinetypeTableRecord/PyDbRevolveOptions setter ③ 通过 已核 SDK 对应类 setter 返回 void（setSimplify/setClosed/setNormal/setTwistAngle/setScaleFactor/setAlignAngle/setSweepEntityTransform 均为 void）
 2026-11-20 10:18 PyDbFcf.cpp:10/12/27 ③ 通过 dbfcf.h AcDbFcf setText/setLocation/setDimensionStyle 返回 void
+2026-11-20 11:18 PyDbObject.cpp:250/254/283 ④ 已改 3 处 ErrorStatus 接 PyWarnIfError
+2026-11-20 11:18 PyDbColor.cpp:39 ③ 通过 AcCmColor::setColor 为 void（dbmain.h），绑定返回 True 仅表示完成
+2026-11-20 11:18 PyDbBlockTableRecord.cpp:106/268 PyDbTrans.cpp:301 ③ 通过 close() 返回 ErrorStatus 但均在 append/挂接失败后的清理路径，状态无附加信息，保留
