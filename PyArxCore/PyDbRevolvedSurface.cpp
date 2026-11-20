@@ -15,12 +15,10 @@ AcGeVector3d PyDbRevolvedSurface::getAxisVec() const {
 }
 
 double PyDbRevolvedSurface::getRevolveAngle() const {
-	if (!impObj()) return 0.0;
 	return impObj() ? impObj()->getRevolveAngle() : 0.0;
 }
 
 double PyDbRevolvedSurface::getStartAngle() const {
-	if (!impObj()) return 0.0;
 	return impObj() ? impObj()->getStartAngle() : 0.0;
 }
 

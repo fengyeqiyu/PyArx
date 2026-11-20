@@ -29,7 +29,6 @@ namespace
 }
 
 int PyApDocManager::count() const {
-	if (!impObj()) return 0;
     return impObj() ? impObj()->documentCount() : 0;
 }
 
@@ -39,17 +38,14 @@ bool PyApDocManager::isApplicationContext() const {
 }
 
 PyApDocument PyApDocManager::mdiActiveDocument() const {
-	if (!impObj()) return PyApDocument();
     return impObj() ? PyApDocument(impObj()->mdiActiveDocument()) : PyApDocument(nullptr);
 }
 
 PyApDocument PyApDocManager::curDocument() const {
-	if (!impObj()) return PyApDocument();
     return impObj() ? PyApDocument(impObj()->curDocument()) : PyApDocument(nullptr);
 }
 
 PyApDocument PyApDocManager::getDocument(const PyDbDatabase& db) const {
-	if (!impObj()) return PyApDocument();
     if (!impObj() || !db.impObj()) return PyApDocument(nullptr);
     return PyApDocument(impObj()->document(db.impObj()));
 }
@@ -93,26 +89,22 @@ std::wstring PyApDocManager::quit() {
 }
 
 std::wstring PyApDocManager::lockDocument(PyApDocument doc) {
-	if (!impObj()) return std::wstring();
     if (!impObj() || !doc.impObj()) return L"eNullObjectPointer";
     return ErrName(impObj()->lockDocument(doc.impObj(), AcAp::kWrite));
 }
 
 std::wstring PyApDocManager::unlockDocument(PyApDocument doc) {
-	if (!impObj()) return std::wstring();
     if (!impObj() || !doc.impObj()) return L"eNullObjectPointer";
     return ErrName(impObj()->unlockDocument(doc.impObj()));
 }
 
 std::wstring PyApDocManager::setCurrentDocument(PyApDocument doc, bool activate) {
-	if (!impObj()) return std::wstring();
     if (!impObj() || !doc.impObj()) return L"eNullObjectPointer";
     return ErrName(impObj()->setCurDocument(doc.impObj(),
                         AcAp::kNone, activate));
 }
 
 std::wstring PyApDocManager::activateDocument(PyApDocument doc) {
-	if (!impObj()) return std::wstring();
     if (!impObj() || !doc.impObj()) return L"eNullObjectPointer";
     return ErrName(impObj()->activateDocument(doc.impObj(), false));
 }

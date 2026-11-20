@@ -213,3 +213,10 @@
 2026-11-20 21:19 | PyDbBlockTableRecord.cpp:280 | ④ | entityIds 的 newIterator 失败静默返回空 list → 补 PyWarnIfError
 2026-11-20 21:19 | PyDbBlockTableRecord.cpp:295 | ④ | entityAt 的 newIterator 失败静默返回空包装 → 补 PyWarnIfError
 2026-11-20 21:19 | PyDbBlockTableRecord.cpp:324 | ④ | refIds 的 newBlockReferenceIdIterator 失败静默 → 补 PyWarnIfError
+2026-11-20 23:19 | PyApDocManager.cpp:32/42/47/52/96/102/108/115 | ⑤ | 冗余重复判空（后一行已含 !impObj 或 null 安全三元）→ 删前置多余守卫，共删 8 行
+2026-11-20 23:19 | PyDbHyperlink.cpp:12/22/32/42/52/57 | ⑤ | 同上删 6 行冗余前置判空
+2026-11-20 23:19 | PyDbHyperlinkCollection.cpp:47/13 | ⑤ | 删 2 行冗余前置判空
+2026-11-20 23:19 | PyDbModelDocViewStyle.cpp:38/47 | ⑤ | 删 2 行冗余前置判空
+2026-11-20 23:19 | PyDbRegion.cpp:19 | ⑤ | 删 1 行冗余前置判空
+2026-11-20 23:19 | PyDbRevolvedSurface.cpp:2 处 | ⑤ | 删 2 行冗余前置判空
+2026-11-20 23:19 | PyDbSummaryInfo.cpp:14 处 | ⑤ | 删 14 行冗余前置判空（setter 已用 impObj() ? ... : false）

@@ -35,7 +35,6 @@ bool PyDbModelDocViewStyle::isViewNameValid(const AcString& name) const {
 }
 
 std::tuple<bool, uint64_t> PyDbModelDocViewStyle::postViewStyleToDb(PyDbDatabase& db, const AcString& styleName) {
-	if (!impObj()) return {};
 	if (!impObj() || !db.impObj()) return std::make_tuple(false, 0ULL);
 	AcDbObjectId id;
 	Acad::ErrorStatus es = impObj()->postViewStyleToDb(db.impObj(), styleName.kwszPtr(), id);
@@ -44,7 +43,6 @@ std::tuple<bool, uint64_t> PyDbModelDocViewStyle::postViewStyleToDb(PyDbDatabase
 }
 
 bool PyDbModelDocViewStyle::setDatabaseDefaults(PyDbDatabase& db) {
-	if (!impObj()) return false;
 	if (!impObj() || !db.impObj()) return false;
 	impObj()->setDatabaseDefaults(db.impObj());
 	return true;

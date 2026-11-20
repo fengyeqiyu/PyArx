@@ -9,7 +9,6 @@ AcString PyDbDatabaseSummaryInfo::title() const {
 	return s;
 }
 bool PyDbDatabaseSummaryInfo::setTitle(const AcString& v) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setTitle(v.kwszPtr()), L"SummaryInfo.setTitle") : false;
 }
 
@@ -20,7 +19,6 @@ AcString PyDbDatabaseSummaryInfo::subject() const {
 	return s;
 }
 bool PyDbDatabaseSummaryInfo::setSubject(const AcString& v) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setSubject(v.kwszPtr()), L"SummaryInfo.setSubject") : false;
 }
 
@@ -31,7 +29,6 @@ AcString PyDbDatabaseSummaryInfo::author() const {
 	return s;
 }
 bool PyDbDatabaseSummaryInfo::setAuthor(const AcString& v) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setAuthor(v.kwszPtr()), L"SummaryInfo.setAuthor") : false;
 }
 
@@ -42,7 +39,6 @@ AcString PyDbDatabaseSummaryInfo::keywords() const {
 	return s;
 }
 bool PyDbDatabaseSummaryInfo::setKeywords(const AcString& v) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setKeywords(v.kwszPtr()), L"SummaryInfo.setKeywords") : false;
 }
 
@@ -53,7 +49,6 @@ AcString PyDbDatabaseSummaryInfo::comments() const {
 	return s;
 }
 bool PyDbDatabaseSummaryInfo::setComments(const AcString& v) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setComments(v.kwszPtr()), L"SummaryInfo.setComments") : false;
 }
 
@@ -64,7 +59,6 @@ AcString PyDbDatabaseSummaryInfo::lastSavedBy() const {
 	return s;
 }
 bool PyDbDatabaseSummaryInfo::setLastSavedBy(const AcString& v) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setLastSavedBy(v.kwszPtr()), L"SummaryInfo.setLastSavedBy") : false;
 }
 
@@ -75,7 +69,6 @@ AcString PyDbDatabaseSummaryInfo::revisionNumber() const {
 	return s;
 }
 bool PyDbDatabaseSummaryInfo::setRevisionNumber(const AcString& v) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setRevisionNumber(v.kwszPtr()), L"SummaryInfo.setRevisionNumber") : false;
 }
 
@@ -86,27 +79,22 @@ AcString PyDbDatabaseSummaryInfo::hyperlinkBase() const {
 	return s;
 }
 bool PyDbDatabaseSummaryInfo::setHyperlinkBase(const AcString& v) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setHyperlinkBase(v.kwszPtr()), L"SummaryInfo.setHyperlinkBase") : false;
 }
 
 int PyDbDatabaseSummaryInfo::numCustomInfo() const {
-	if (!impObj()) return 0;
 	return impObj() ? impObj()->numCustomInfo() : 0;
 }
 
 bool PyDbDatabaseSummaryInfo::addCustomInfo(const AcString& key, const AcString& value) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->addCustomSummaryInfo(key.kwszPtr(), value.kwszPtr()), L"SummaryInfo.addCustomInfo") : false;
 }
 
 bool PyDbDatabaseSummaryInfo::deleteCustomInfoAt(int index) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->deleteCustomSummaryInfo(index), L"SummaryInfo.deleteCustomInfoAt") : false;
 }
 
 bool PyDbDatabaseSummaryInfo::deleteCustomInfoByKey(const AcString& key) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->deleteCustomSummaryInfo(key.kwszPtr()), L"SummaryInfo.deleteCustomInfoByKey") : false;
 }
 
@@ -119,7 +107,6 @@ py::tuple PyDbDatabaseSummaryInfo::getCustomInfoAt(int index) const {
 }
 
 bool PyDbDatabaseSummaryInfo::setCustomInfoAt(int index, const AcString& key, const AcString& value) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setCustomSummaryInfo(index, key.kwszPtr(), value.kwszPtr()), L"SummaryInfo.setCustomInfoAt") : false;
 }
 
@@ -131,7 +118,6 @@ AcString PyDbDatabaseSummaryInfo::getCustomInfoByKey(const AcString& key) const 
 }
 
 bool PyDbDatabaseSummaryInfo::setCustomInfoByKey(const AcString& key, const AcString& value) {
-	if (!impObj()) return false;
 	return impObj() ? PyWarnIfError(impObj()->setCustomSummaryInfo(key.kwszPtr(), value.kwszPtr()), L"SummaryInfo.setCustomInfoByKey") : false;
 }
 

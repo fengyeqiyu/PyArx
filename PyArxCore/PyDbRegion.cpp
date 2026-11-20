@@ -16,7 +16,6 @@ std::tuple<AcGePlane, int> PyDbRegion::getPlane() const {
 	return { plane, static_cast<int>(type) };
 }
 bool PyDbRegion::booleanOper(int operation, PyDbRegion& other) {
-	if (!impObj()) return false;
 	if(!impObj() || !other.impObj()) return false;
 	return PyWarnIfError(impObj()->booleanOper(static_cast<AcDb::BoolOperType>(operation), other.impObj()), L"AcDbRegion::booleanOper");
 }

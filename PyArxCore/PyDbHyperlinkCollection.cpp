@@ -3,7 +3,6 @@
 #include "PyDbHyperlinkCollection.h"
 
 int PyDbHyperlinkCollection::count() const {
-	if (!impObj()) return 0;
 	return impObj() ? impObj()->count() : 0;
 }
 
@@ -44,7 +43,6 @@ bool PyDbHyperlinkCollection::removeAt(int index) {
 }
 
 PyDbHyperlink PyDbHyperlinkCollection::item(int index) const {
-	if (!impObj()) return PyDbHyperlink(nullptr);
 	if (!impObj() || index < 0 || index >= impObj()->count()) return PyDbHyperlink(nullptr);
 	return PyDbHyperlink(impObj()->item(index));
 }

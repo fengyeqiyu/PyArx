@@ -685,3 +685,21 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 21:19 PyDbBlockReference.cpp:169、PyDbEntity.cpp:106 ④ 通过 内部 static 辅助函数返回 false 由调用方回退，非用户路径
 2026-11-20 21:19 PyDbBlockTableRecord.cpp:303/307、PyDbBlockReference.cpp:159 ④ 通过 eWasOpenForWrite 回退只读重试路径，非静默丢弃
 2026-11-20 21:19 PyArxCore 全量 ①⑥⑦⑧⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / TEMP_RESIDUE=0 / python315t=0 / PYBIND11_MODULE 唯一且带 mod_gil_not_used / 空 catch 9 处已核合理 / ofstream 3 处均为日志或 .pyi 功能用途
+2026-11-20 23:19 PyApDocManager.cpp ⑤ 已改 删 8 行冗余前置判空
+2026-11-20 23:19 PyDbHyperlink.cpp ⑤ 已改 删 6 行冗余前置判空
+2026-11-20 23:19 PyDbHyperlinkCollection.cpp ⑤ 已改 删 2 行
+2026-11-20 23:19 PyDbModelDocViewStyle.cpp ⑤ 已改 删 2 行
+2026-11-20 23:19 PyDbRegion.cpp ⑤ 已改 删 1 行
+2026-11-20 23:19 PyDbRevolvedSurface.cpp ⑤ 已改 删 2 行
+2026-11-20 23:19 PyDbSummaryInfo.cpp ⑤ 已改 删 14 行
+2026-11-20 23:19 PyDbDeepCloneFiler.cpp:32 ③ 通过 setFilerStatus 为 SDK void 接口（dbfiler.h:114）
+2026-11-20 23:19 PyDbDgnDefinition.cpp:20/30/40、PyDbDgnReference.cpp:16 ③ 通过 setUseMasterUnits/setXrefDepth/setShowRasterRef 均为 void
+2026-11-20 23:19 PyDbHyperlink.cpp:18/28/38/63、PyDbHyperlinkCollection.cpp:13-43 ③ 通过 setName 等均为 void 接口
+2026-11-20 23:19 PyDbMaterial.cpp:44/53 ③ 通过 setFinalGather/setGlobalIllumination 为 AcGiMaterialTraits void 接口
+2026-11-20 23:19 PyGiTransient.cpp:193/216 ③ 通过 acgitransient.h:48/57 updateTransient/updateChildTransient 为 void
+2026-11-20 23:19 PyDbModelDocViewStyle.cpp:50 ③ 通过 dbModelDocViewStyle.h:151 setDatabaseDefaults 为 void
+2026-11-20 23:19 PyDbBlockTableRecordIterator.cpp:31 ③ 通过 m_pIter->step 为 void，返回 true 表示可继续遍历
+2026-11-20 23:19 PyDbLayerTableRecord.cpp:125/134 ③ 通过 AcDbLayerTableRecord::setColor(AcCmColor) 为 void
+2026-11-20 23:19 PyDbXrecord.cpp:16 ③ 通过 setXlateReferences 为 void
+2026-11-20 23:19 PyDbDatabase.cpp:744、PyDbObject.cpp:110 ③ 通过 disableUndoRecording 为 void
+2026-11-20 23:19 PyArxCore 全量 ①⑥⑦⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / TEMP_RESIDUE=0 / python314=0 / PYBIND11_MODULE 唯一且带 mod_gil_not_used / 相邻重复行仅 4 处为注释分隔与格式串
