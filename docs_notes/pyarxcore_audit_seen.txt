@@ -659,3 +659,10 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 18:19 PyUt.cpp:334 ⑧ 通过 诊断文件写失败静默，随后 acutPrintf 报出
 2026-11-20 18:19 PyDbOsnapOverrule.cpp:14/PyDbPropertiesOverrule.cpp:14/PyDbSubentityOverrule.cpp:14/PyDbTransformOverrule.cpp:14/PyDbVisibilityOverrule.cpp:14 ⑧ 通过 Overrule 回调有意静默
 2026-11-20 18:19 PyArxCore 全量 ①⑥⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / GIL_BAD=0 / PYBIND_MODULE=2 / BARE_CATCH=69（9 空体全部核为合理）
+2026-11-20 19:18 PyDbViewport.cpp:216-237 ② 已改 22 处补判空（参数名 o 漏扫口径）
+2026-11-20 19:18 PyDbMLeader.cpp:205-209 ② 已改 5 处补判空
+2026-11-20 19:18 PyDbDatabase.cpp:3148-3255 ② 通过 该类仅 py::init<>()/(bool,bool) 构造，无 None 路径（扫描按 d 参数误报）
+2026-11-20 19:18 PyDbObject.cpp:22-136 ② 未改 44 个成员函数缺判空，默认错误码属返回值语义变更、超 20 行，只报不改
+2026-11-20 19:18 PyDbNurbSurface.cpp:33-237 ② 未改 38 处 lambda 只报不改（沿用台账）
+2026-11-20 19:18 PyArxCore ⑨ 通过 唯一 PYBIND11_MODULE 在 PyArxBinder.cpp:62 已带 py::mod_gil_not_used()
+2026-11-20 19:18 PyArxCore 全量 ①⑥⑦⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / GIL_BAD=0；头文件内联方法缺判空=0；es 声明未使用=0

@@ -202,11 +202,11 @@ void bind_PyDbMLeader(pym& m) {
 		PyWrapper_BIND(DbMLeader)
 		.def("__repr__", &PyDbMLeader::toString)
 		// ---- PyRx getter 对齐补齐（自动生成，纯读无副作用） ----
-		.def("arrowSymbolId", [](const PyDbMLeader& o) -> uint64_t { auto id = o.impObj()->arrowSymbolId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
-		.def("doglegLength", [](const PyDbMLeader& o) -> double { return o.impObj()->doglegLength(); })
-		.def("enableFrameText", [](const PyDbMLeader& o) -> bool { return o.impObj()->enableFrameText(); })
-		.def("leaderLineTypeId", [](const PyDbMLeader& o) -> uint64_t { auto id = o.impObj()->leaderLineTypeId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
-		.def("textStyleId", [](const PyDbMLeader& o) -> uint64_t { auto id = o.impObj()->textStyleId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+		.def("arrowSymbolId", [](const PyDbMLeader& o) -> uint64_t { if (!o.impObj()) return 0ULL; auto id = o.impObj()->arrowSymbolId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+		.def("doglegLength", [](const PyDbMLeader& o) -> double { if (!o.impObj()) return 0.0; return o.impObj()->doglegLength(); })
+		.def("enableFrameText", [](const PyDbMLeader& o) -> bool { if (!o.impObj()) return false; return o.impObj()->enableFrameText(); })
+		.def("leaderLineTypeId", [](const PyDbMLeader& o) -> uint64_t { if (!o.impObj()) return 0ULL; auto id = o.impObj()->leaderLineTypeId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+		.def("textStyleId", [](const PyDbMLeader& o) -> uint64_t { if (!o.impObj()) return 0ULL; auto id = o.impObj()->textStyleId(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
 		;
 }
 

@@ -196,3 +196,5 @@
 2026-11-20 18:19 | PyDbAttributeDefinition.cpp:42/43 | ② | getMTextAttributeDefinition(Const) 同上补空守卫与空指针判定
 2026-11-20 18:19 | PyDbLeader.cpp:64 | ② | getDimstyleData 补 if(!impObj()) return nullptr
 2026-11-20 18:19 | PyDbOle2Frame.cpp:19 | ② | setPosition3d 补 if(!impObj()) return
+2026-11-20 19:18 | PyDbViewport.cpp:216-237 | ② | 22 个 getter lambda 用 o 参数且无判空，补 if(!o.impObj()) 返回 0ULL/0.0/false/0
+2026-11-20 19:18 | PyDbMLeader.cpp:205-209 | ② | 5 个 getter lambda 补 if(!o.impObj()) 默认返回
