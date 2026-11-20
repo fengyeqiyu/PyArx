@@ -75,7 +75,7 @@ bool PyDbViewportTableRecord::setFrontClipEnabled(bool enabled) { if (!impObj())
 bool PyDbViewportTableRecord::backClipEnabled() const { if (!impObj()) return false; return impObj()->backClipEnabled(); }
 bool PyDbViewportTableRecord::setBackClipEnabled(bool enabled) { if (!impObj()) return false; impObj()->setBackClipEnabled(enabled); return true; }
 double PyDbViewportTableRecord::elevation() const { if (!impObj()) return 0.0; return impObj()->elevation(); }
-bool PyDbViewportTableRecord::setElevation(double e) { if (!impObj()) return false; impObj()->setElevation(e); return true; }
+bool PyDbViewportTableRecord::setElevation(double e) { if (!impObj()) return false; return PyWarnIfError(impObj()->setElevation(e), L"AcDbAbstractViewTableRecord::setElevation"); }
 
 // ---- 背景与快速缩放（AcDbViewportTableRecord 自己）----
 bool PyDbViewportTableRecord::fastZoomsEnabled() const { if (!impObj()) return false; return impObj()->fastZoomsEnabled(); }

@@ -15,7 +15,7 @@ AcGePoint3d PyDbMline::vertexAt(int i) const { if (!impObj()) return AcGePoint3d
 bool PyDbMline::closedMline() const { if (!impObj()) return false; return impObj()->closedMline(); }
 
 // SDK 原型为 void（非 ErrorStatus），无状态可回传；按包装约定恒返回 true。
-bool PyDbMline::setClosedMline(bool c) { if (!impObj()) return false; impObj()->setClosedMline(c); return true; }
+bool PyDbMline::setClosedMline(bool c) { if (!impObj()) return false; return PyWarnIfError(impObj()->setClosedMline(c), L"AcDbMline::setClosedMline"); }
 
 int PyDbMline::justification() const { if (!impObj()) return 0; return static_cast<int>(impObj()->justification()); }
 bool  PyDbMline::setJustification(int v) { if (!impObj()) return false; return PyWarnIfError(impObj()->setJustification(static_cast<Mline::MlineJustification>(v)), L"AcDbMline::setJustification"); }

@@ -167,3 +167,4 @@
 2026-11-20 07:17 | PyDbObject.cpp:241/248/251/265/271/277/310 | ② | getHandle/addPersistentReactor/removePersistentReactor/getField/setField/removeField/clone 先判 isNull（setField 同时判 field.impObj），空对象安全返回或抛 ValueError
 2026-11-20 08:18 | PyDbOleFrame.cpp:19 PyDbSpatialFilter.cpp:69 PyDbDictionaryWithDefault.cpp:17 PyDbDatabase.cpp:3173 PyDbBlockTableRecord.cpp:279 PyDbLayerStateManager.cpp:84 | ② | 6 处补 isNull/impObj 判空（getOleObject/queryBounds/defaultId/getSymbolTableId/newIterator/importLayerState），空对象安全返回默认值
 2026-11-20 09:21 | PyDbObjectContext.cpp:14/20/24/28 | ② | getName/setName/uniqueIdentifier/collectionName 补 isNull 判空，空包装（p=None 默认）安全返回空串/false/0
+2026-11-20 10:18 | PyDbMline.cpp:18 PyDbViewportTableRecord.cpp:78 PyDbViewTableRecord.cpp:114 | ③ | setClosedMline / setElevation 返回 Acad::ErrorStatus 却丢弃，改为 return PyWarnIfError(...)

@@ -111,7 +111,7 @@ bool PyDbViewTableRecord::setFrontClipEnabled(bool enabled) { if (!impObj()) ret
 bool PyDbViewTableRecord::backClipEnabled() const { if (!impObj()) return false; return impObj()->backClipEnabled(); }
 bool PyDbViewTableRecord::setBackClipEnabled(bool enabled) { if (!impObj()) return false; impObj()->setBackClipEnabled(enabled); return true; }
 double PyDbViewTableRecord::elevation() const { if (!impObj()) return 0.0; return impObj()->elevation(); }
-bool PyDbViewTableRecord::setElevation(double e) { if (!impObj()) return false; impObj()->setElevation(e); return true; }
+bool PyDbViewTableRecord::setElevation(double e) { if (!impObj()) return false; return PyWarnIfError(impObj()->setElevation(e), L"AcDbAbstractViewTableRecord::setElevation"); }
 
 void bind_PyDbViewTableRecord(pym& m) {
 	py::class_<PyDbViewTableRecord, PyDbSymbolTableRecord>(m, "PyDbViewTableRecord")

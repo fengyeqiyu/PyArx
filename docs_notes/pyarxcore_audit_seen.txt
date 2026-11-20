@@ -582,3 +582,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 09:21 PyDbNurbSurface.cpp:33-237 ② 未改 17 个 lambda 直接 s.impObj()-> 且 init<AcDbNurbSurface*> 可传 None，单批 >20 行只报不改
 2026-11-20 09:21 PyDbSweepOptions/PyDbLoftOptions ② 通过 init<> 内部 new，wrapper 恒非空
 2026-11-20 09:21 PyDbTrans.cpp:29 ⑦ 通过 pdtDiag 在调试开关下写 stderr，非 ofstream 埋点
+2026-11-20 10:18 PyDbMline.cpp:18 PyDbViewportTableRecord.cpp:78 PyDbViewTableRecord.cpp:114 ③ 已改 3 处 ErrorStatus 接 PyWarnIfError
+2026-11-20 10:18 PyDbUcsTableRecord.cpp:8/11/13 ③ 通过 SDK dbsymtb.h AcDbUcsTableRecord setOrigin/setXAxis/setYAxis 均为 void
+2026-11-20 10:18 PyDbLoftOptions/PyDbSweepOptions/PyDbTextStyleTableRecord/PyDbLinetypeTableRecord/PyDbRevolveOptions setter ③ 通过 已核 SDK 对应类 setter 返回 void（setSimplify/setClosed/setNormal/setTwistAngle/setScaleFactor/setAlignAngle/setSweepEntityTransform 均为 void）
+2026-11-20 10:18 PyDbFcf.cpp:10/12/27 ③ 通过 dbfcf.h AcDbFcf setText/setLocation/setDimensionStyle 返回 void
