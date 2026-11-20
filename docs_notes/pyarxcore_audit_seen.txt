@@ -724,3 +724,9 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 02:18 PyArxCore 全量 ③ 通过 以 SDK 头 2980 个返回 Acad::ErrorStatus 的方法名为索引扫描全项目：裸丢弃调用 0 处
 2026-11-21 02:18 PyArxCore 全量 ⑨ 通过 GIL 相关只剩 py::gil_scoped_acquire（PyArxCompat/PyDbMText/Reactor/Overrule 共 40+ 处，free-threaded 下为空操作），无 PyGILState_/PyEval_SaveThread/Py_BEGIN_ALLOW_THREADS
 2026-11-21 02:18 PyArxCore 全量 ①②④⑤⑥⑦⑧ 通过 本轮复扫无新增（lambda 级判空已清、es 判断均有报错、602/602 登记、残留仅功能用途、catch 均隔离）
+2026-11-21 03:18 PyDbLayerStateManager.cpp:29-120 ② 已改 14 个方法补 impObj 判空（p=None 可构造空包装，原实现直接解引用）
+2026-11-21 03:18 PyDbObjectContext.cpp:13-34 ② 通过 4 个方法均用 s.isNull() 前置守卫
+2026-11-21 03:18 PyDbPlotSettingsValidator.cpp:30-56 ② 通过 每处 lambda 均 if(!self.impObj()||!ps.impObj()) 守卫
+2026-11-21 03:18 PyDb3dProfile/PyDbBlendOptions/PyDbLoftOptions/PyDbRevolveOptions/PyDbSweepOptions ② 通过 指针构造未暴露给 Python（仅 py::init<>()），impObj() 恒非空
+2026-11-21 03:18 PyArxCore 全量 ① 通过 py::class_<...Array> 0 处、派生 public AcArray<T> 0 处（数组只走 PyArrayCaster.h）
+2026-11-21 03:18 PyArxCore 全量 ③④⑤⑥⑦⑧⑨ 通过 本轮复扫无新增

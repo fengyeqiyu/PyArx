@@ -26,16 +26,19 @@ void bind_PyDbLayerStateManager(pym& m) {
 		// ---- layer state layer list management ----
 		.def("addLayerStateLayers", [](PyDbLayerStateManager& self, const AcString& name,
 				const AcDbObjectIdArray& layerIds) {
+				if (!self.impObj()) return false;
 			return PyWarnIfError(self.impObj()->addLayerStateLayers(name.kwszPtr(), layerIds),
 				L"AcDbLayerStateManager::addLayerStateLayers");
 		}, py::arg("name"), py::arg("layerIds"))
 		.def("removeLayerStateLayers", [](PyDbLayerStateManager& self, const AcString& name,
 				const AcStringArray& layerNames) {
+				if (!self.impObj()) return false;
 			return PyWarnIfError(self.impObj()->removeLayerStateLayers(name.kwszPtr(), layerNames),
 				L"AcDbLayerStateManager::removeLayerStateLayers");
 		}, py::arg("name"), py::arg("layerNames"))
 		.def("getLayerStateLayers", [](PyDbLayerStateManager& self, const AcString& name,
 				bool invert) -> AcStringArray {
+				if (!self.impObj()) return AcStringArray();
 			AcStringArray arr;
 			if (!PyWarnIfError(self.impObj()->getLayerStateLayers(arr, name.kwszPtr(), invert),
 				L"AcDbLayerStateManager::getLayerStateLayers")) return AcStringArray();
@@ -44,6 +47,7 @@ void bind_PyDbLayerStateManager(pym& m) {
 
 		// ---- description ----
 		.def("getLayerStateDescription", [](PyDbLayerStateManager& self, const AcString& name) -> AcString {
+		if (!self.impObj()) return AcString();
 			ACHAR* pDesc = nullptr;
 			if (!PyWarnIfError(self.impObj()->getLayerStateDescription(name.kwszPtr(), pDesc),
 				L"AcDbLayerStateManager::getLayerStateDescription")) return AcString();
@@ -51,18 +55,21 @@ void bind_PyDbLayerStateManager(pym& m) {
 		}, py::arg("name"))
 		.def("setLayerStateDescription", [](PyDbLayerStateManager& self, const AcString& name,
 				const AcString& desc) {
+				if (!self.impObj()) return false;
 			return PyWarnIfError(self.impObj()->setLayerStateDescription(name.kwszPtr(), desc.kwszPtr()),
 				L"AcDbLayerStateManager::setLayerStateDescription");
 		}, py::arg("name"), py::arg("desc"))
 
 		// ---- mask ----
 		.def("getLayerStateMask", [](PyDbLayerStateManager& self, const AcString& name) -> int {
+		if (!self.impObj()) return 0;
 			AcDbLayerStateManager::LayerStateMask mask;
 			if (!PyWarnIfError(self.impObj()->getLayerStateMask(name.kwszPtr(), mask),
 				L"AcDbLayerStateManager::getLayerStateMask")) return 0;
 			return static_cast<int>(mask);
 		}, py::arg("name"))
 		.def("setLayerStateMask", [](PyDbLayerStateManager& self, const AcString& name, int mask) {
+		if (!self.impObj()) return false;
 			return PyWarnIfError(self.impObj()->setLayerStateMask(name.kwszPtr(),
 				static_cast<AcDbLayerStateManager::LayerStateMask>(mask)),
 				L"AcDbLayerStateManager::setLayerStateMask");
@@ -71,10 +78,12 @@ void bind_PyDbLayerStateManager(pym& m) {
 		// ---- import / export ----
 		.def("exportLayerState", [](PyDbLayerStateManager& self, const AcString& name,
 				const AcString& filename) {
+				if (!self.impObj()) return false;
 			return PyWarnIfError(self.impObj()->exportLayerState(name.kwszPtr(), filename.kwszPtr()),
 				L"AcDbLayerStateManager::exportLayerState");
 		}, py::arg("name"), py::arg("filename"))
 		.def("importLayerState", [](PyDbLayerStateManager& self, const AcString& filename) {
+		if (!self.impObj()) return false;
 			return PyWarnIfError(self.impObj()->importLayerState(filename.kwszPtr()),
 				L"AcDbLayerStateManager::importLayerState");
 		}, py::arg("filename"))
@@ -88,6 +97,7 @@ void bind_PyDbLayerStateManager(pym& m) {
 		}, py::arg("filename"))
 		.def("importLayerStateFromDb", [](PyDbLayerStateManager& self, const AcString& stateName,
 				PyDbDatabase& db) {
+				if (!self.impObj()) return false;
 			return PyWarnIfError(self.impObj()->importLayerStateFromDb(stateName.kwszPtr(), db.impObj()),
 				L"AcDbLayerStateManager::importLayerStateFromDb");
 		}, py::arg("stateName"), py::arg("db"))
@@ -95,6 +105,7 @@ void bind_PyDbLayerStateManager(pym& m) {
 		// ---- query ----
 		.def("getLastRestoredLayerState", [](PyDbLayerStateManager& self)
 				-> std::tuple<AcString, uint64_t> {
+				if (!self.impObj()) return std::make_tuple(AcString(), 0ULL);
 			AcString sName;
 			AcDbObjectId id;
 			if (!PyWarnIfError(self.impObj()->getLastRestoredLayerState(sName, id),
@@ -104,12 +115,15 @@ void bind_PyDbLayerStateManager(pym& m) {
 		})
 		.def("compareLayerStateToDb", [](PyDbLayerStateManager& self, const AcString& name,
 				uint64_t vpId) {
+				if (!self.impObj()) return false;
 			return self.impObj()->compareLayerStateToDb(name.kwszPtr(), u64ToId(vpId));
 		}, py::arg("name"), py::arg("vpId"))
 		.def("layerStateHasViewportData", [](PyDbLayerStateManager& self, const AcString& name) {
+		if (!self.impObj()) return false;
 			return self.impObj()->layerStateHasViewportData(name.kwszPtr());
 		}, py::arg("name"))
 		.def("isDependentLayerState", [](PyDbLayerStateManager& self, const AcString& name) {
+		if (!self.impObj()) return false;
 			return self.impObj()->isDependentLayerState(name.kwszPtr());
 		}, py::arg("name"))
 		;

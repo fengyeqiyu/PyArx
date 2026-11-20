@@ -224,3 +224,4 @@
 2026-11-21 01:18 | PyDb3dSolid.cpp:67 | ② | revolve 前补 self/region impObj() 判空，空对象返回 False
 2026-11-21 01:18 | PyDbBlockReference.cpp:327 | ② | appendAttribute 前补 self/attr impObj() 判空，空对象返回 False
 2026-11-21 01:18 | PyDbCurve.cpp:168 | ② | setFromAcGeCurve 前补 self impObj() 判空，空对象返回 False
+2026-11-21 03:18 | PyDbLayerStateManager.cpp:29-120 | ② | 14 个方法 lambda 补 self.impObj() 判空（该构造 py::arg("p")=nullptr 可造出空包装），按返回类型给 false/0/AcString()/AcStringArray()/空 tuple
