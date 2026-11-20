@@ -58,11 +58,13 @@ PyRxObject::~PyRxObject() {
 
 bool PyRxObject::isDerivedFrom(const PyRxClass& base) const
 {
+	if (!impObj() || !base.impObj()) return false;
 	return AcRxClass::isDerivedFrom(impObj()->isA(), base.impObj());
 }
 
 bool PyRxObject::isKindOf(const PyRxClass& aClass) const
 {
+	if (!impObj() || !aClass.impObj()) return false;
 	return impObj()->isKindOf(aClass.impObj());
 }
 
@@ -92,6 +94,7 @@ void PyRxObject::detachDbObject()
 
 bool PyRxObject::isEqualTo(const PyRxObject& other) const
 {
+	if (!impObj() || !other.impObj()) return impObj() == other.impObj();
 	return impObj()->isEqualTo(other.impObj());
 }
 
@@ -108,11 +111,13 @@ size_t PyRxObject::hash() const
 
 PyRxObject PyRxObject::queryX(const PyRxClass& protocolClass) const
 {
+	if (!impObj() || !protocolClass.impObj()) return PyRxObject();
 	return impObj()->queryX(protocolClass.impObj());
 }
 
 AcRx::Ordering PyRxObject::comparedTo(const PyRxObject& other) const
 {
+	if (!impObj() || !other.impObj()) return AcRx::kNotOrderable;
 	return impObj()->comparedTo(other.impObj());
 }
 
@@ -128,6 +133,7 @@ bool PyRxObject::operator!=(const PyRxObject& other) const
 
 PyRxObject PyRxObject::clone() const
 {
+	if (!impObj()) throw std::runtime_error("clone: null object");
 	AcRxObject* pNew = impObj()->clone();
 	if (!pNew) throw std::runtime_error("clone: 该对象不支持克隆");
 	// 克隆出的 AcDbObject 处于「未入库但仍打开」状态；若直接交给自动 delete 的包装，
@@ -141,5 +147,6 @@ PyRxObject PyRxObject::clone() const
 
 Acad::ErrorStatus PyRxObject::copyFrom(const PyRxObject& other)
 {
+	if (!impObj() || !other.impObj()) return Acad::eNullObjectPointer;
 	return this->impObj()->copyFrom(other.impObj());
 }

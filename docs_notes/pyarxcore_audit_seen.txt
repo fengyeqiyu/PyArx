@@ -730,3 +730,10 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 03:18 PyDb3dProfile/PyDbBlendOptions/PyDbLoftOptions/PyDbRevolveOptions/PyDbSweepOptions ② 通过 指针构造未暴露给 Python（仅 py::init<>()），impObj() 恒非空
 2026-11-21 03:18 PyArxCore 全量 ① 通过 py::class_<...Array> 0 处、派生 public AcArray<T> 0 处（数组只走 PyArrayCaster.h）
 2026-11-21 03:18 PyArxCore 全量 ③④⑤⑥⑦⑧⑨ 通过 本轮复扫无新增
+2026-11-21 04:21 PyRxObject.cpp:59-144 ② 已改 7 个方法补空对象守卫（isNull() 存在即空包装合法；原实现直接 impObj()-> 解引用）
+2026-11-21 04:21 PyRxObject.cpp 全文件 ② 通过 PyWrapper_Cpp 宏展开的 8 处 impObj()-> 均在宏内自带判空；detachDbObject/hash/intPtr 空安全
+2026-11-21 04:21 PyArxCore 全量 ② 通过 行窗口扫描 299 处 impObj()-> 全部分类为宏展开/已有守卫/PyDbNurbSurface+PyDbObject 已知只报项
+2026-11-21 04:21 PyArxCore 全量 ① 通过 py::class_<...Array> 0、public AcArray<T> 派生 0
+2026-11-21 04:21 PyArxCore 全量 ⑥ 通过 vcxproj 602/602 登记，missing=0
+2026-11-21 04:21 PyArxCore 全量 ⑦⑧⑨ 通过 TEMP/调试残留 0、catch(...) 69 处均为收敛兜底、PyGILState_ 0、python314 0、PYBIND11_MODULE 已带 mod_gil_not_used
+2026-11-21 04:21 PyMfcXml 全量 ⑦⑧⑨ 只报 无调试残留、无 python314/PyGILState；catch(...) 26 处为回调兜底，不属 PyArxCore 修复范围

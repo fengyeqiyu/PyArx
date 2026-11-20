@@ -225,3 +225,4 @@
 2026-11-21 01:18 | PyDbBlockReference.cpp:327 | ② | appendAttribute 前补 self/attr impObj() 判空，空对象返回 False
 2026-11-21 01:18 | PyDbCurve.cpp:168 | ② | setFromAcGeCurve 前补 self impObj() 判空，空对象返回 False
 2026-11-21 03:18 | PyDbLayerStateManager.cpp:29-120 | ② | 14 个方法 lambda 补 self.impObj() 判空（该构造 py::arg("p")=nullptr 可造出空包装），按返回类型给 false/0/AcString()/AcStringArray()/空 tuple
+2026-11-21 04:21 | PyRxObject.cpp:59-144 | ② | 7 个方法补空对象守卫：isDerivedFrom/isKindOf/isEqualTo/queryX/comparedTo 返回 false/空包装/kNotOrderable，clone 空指针抛 runtime_error，copyFrom 返回 eNullObjectPointer
