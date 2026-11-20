@@ -234,3 +234,5 @@
 2026-11-21 06:19 | PyDbSubentityOverrule.cpp:13/14 | ⑧ | Python 异常与未知异常改为 e.restore()+PyErr_Print / PyErr_Occurred 检查，返回值仍为 true
 2026-11-21 06:19 | PyDbTransformOverrule.cpp:13/14 | ⑧ | Python 异常与未知异常改为 e.restore()+PyErr_Print / PyErr_Occurred 检查，返回值仍为 true
 2026-11-21 06:19 | PyDbVisibilityOverrule.cpp:13/14 | ⑧ | Python 异常与未知异常改为 e.restore()+PyErr_Print / PyErr_Occurred 检查，返回值仍为 true
+2026-11-21 07:18 | PyPaletteSet.cpp:72-86 | ⑦ | 删除停靠自愈线程里 i%5 的 fopen 埋点块（硬编码 G:\PyArx\docs\_pal_fix.log）
+2026-11-21 07:18 | PyPaletteSet.cpp:138-153 | ⑦ | 删除浮动定位线程里 i%10 的 fopen 埋点块（同上硬编码路径）

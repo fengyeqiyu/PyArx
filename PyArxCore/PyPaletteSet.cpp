@@ -69,21 +69,6 @@ namespace PyArx
                                availHeight > 0 ? availHeight : fallbackHeight,
                                SWP_NOZORDER | SWP_NOACTIVATE);
 
-                if (i % 5 == 0)
-                {
-                    RECT rcBar{};
-                    if (bar != nullptr && ::IsWindow(bar))
-                        ::GetWindowRect(bar, &rcBar);
-                    FILE* fp = ::fopen("G:\\PyArx\\docs\\_pal_fix.log", "a");
-                    if (fp != nullptr)
-                    {
-                        ::fprintf(fp, "dock i=%d width=%d availH=%d bar=%ld,%ld %ldx%ld\n",
-                                  i, width, availHeight,
-                                  rcBar.left, rcBar.top,
-                                  rcBar.right - rcBar.left, rcBar.bottom - rcBar.top);
-                        ::fclose(fp);
-                    }
-                }
             }
         }).detach();
     }
@@ -148,23 +133,6 @@ namespace PyArx
                                        SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
                     }
                     child = ::GetWindow(child, GW_HWNDNEXT);
-                }
-
-                if (i % 10 == 0)
-                {
-                    RECT rcBar;
-                    ::GetWindowRect(setWnd, &rcBar);
-                    FILE* fp = ::fopen("G:\\PyArx\\docs\\_pal_fix.log", "a");
-                    if (fp != nullptr)
-                    {
-                        ::fprintf(fp, "i=%d miniHwnd=%p mini=%ld,%ld %ldx%ld set=%ld,%ld %ldx%ld\n",
-                                  i, (void*)mini,
-                                  rcMini.left, rcMini.top,
-                                  rcMini.right - rcMini.left, rcMini.bottom - rcMini.top,
-                                  rcBar.left, rcBar.top,
-                                  rcBar.right - rcBar.left, rcBar.bottom - rcBar.top);
-                        ::fclose(fp);
-                    }
                 }
             }
         }).detach();

@@ -750,3 +750,8 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 06:19 PyArxCore 全量 ⑧ 通过 69 处 catch(...) 全扫，静默 19 处逐条核：PyArxBinder:133 ApLog 日志 sink、PyDbMText:165 停止枚举属注释在设计、PyGeNurbCurve3d:28/36 与 PyGiTextEngine 回退值、PyArrayCaster.h:29/63 caster 返回 false、PyUt:189/213/334 守卫，均合理
 2026-11-21 06:19 PyArxCore 全量 ⑤ 通过 纯同名转发 23 处全为 PyColor/PyDbDate/PyGiFill/PyGiPolyline 值对象同位同名 getter（仅报不改），另有 PyDbIdTypes.cpp:18/22 PyErr_Clear 为 __index__ 防御
 2026-11-21 06:19 PyArxCore 全量 ② 通过 .h 内 inline 解引用仅 3 处（PyDbBlockTableRecord.h:43、PyDbDatabase.h:51/329）均已判空；③⑥⑦⑨ 复扫计数不变（AcArray 注册 0、vcxproj missing 0、TEMP 0、PY314 0、GILState 0）
+2026-11-21 07:18 PyPaletteSet.cpp:72/138 ⑦ 已改 删除 2 处 fopen(_pal_fix.log) 调试埋点（共 32 行）
+2026-11-21 07:18 PyDbTrans.cpp:26-33 ⑦ 未改 pdtDiag 诊断日志（30+ 调用点无条件写 pyd 目录 log\pydbtrans_diag.log）——超 20 行且涉行为，只报
+2026-11-21 07:18 PyArxCore 全量 ⑦ 通过 硬编码盘符路径全扫仅上述 2 处，已清零；OutputDebugString/AllocConsole/std::cerr/std::cout 均为 0
+2026-11-21 07:18 PyArxCore 全量 ⑧ 通过 Python 回调点全扫（PyArxCompat CallWithGil 抛 error_already_set、PyGiStreamStyle build 回调 discard_as_unraisable）均已隔离
+2026-11-21 07:18 PyArxCore 全量 ①⑥ 通过 AcArray 族 py::class_ 注册 0、vcxproj 未登记 0、未跟踪的 .cpp/.h 0
