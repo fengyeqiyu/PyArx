@@ -183,3 +183,8 @@
 2026-11-20 15:22 | PyDbPolygonMesh.cpp:27-86 | ② | 12 个 setter（setPolyMeshType/convertToPolyMeshType/setMSize/setNSize/makeMClosed/makeMOpen/makeNClosed/makeNOpen/setMSurfaceDensity/setNSurfaceDensity/straighten/surfaceFit）在 PyWarnIfError 前补 isNull 守卫；polyMeshType 守卫缩进由空格改 tab
 2026-11-20 15:22 | PyDbEvalExpr.cpp:15/19/23 | ② | nodeId/value/getGraph 补 isNull/impObj 守卫，空包装返回 0u / 空 PyDbEvalVariant / PyDbObject(nullptr)
 2026-11-20 15:22 | PyDbDictionaryWithDefault.cpp:25 | ② | setDefaultId 补 isNull 守卫返回 False
+2026-11-20 16:20 | PyDbEntity.cpp:228 | ③④ | getGripPoints 丢弃 ErrorStatus → 改 if(!PyWarnIfError(...)) return py::tuple();
+2026-11-20 16:20 | PyDbEntity.cpp:240 | ③④ | moveGripPointsAt 丢弃 ErrorStatus → 包 PyWarnIfError(...,L\"AcDbEntity::moveGripPointsAt\")
+2026-11-20 16:20 | PyDbEntity.cpp:272 | ③④ | moveStretchPointsAt 丢弃 ErrorStatus → 包 PyWarnIfError
+2026-11-20 16:20 | PyDbEntity.cpp:262 | ④ | getStretchPoints 静默失败 → 改 PyWarnIfError 并返回空列表
+2026-11-20 16:20 | PyDbField.cpp:140 | ③④ | evaluate 丢弃 ErrorStatus → if(!PyWarnIfError(...)) return py::make_tuple(0,0)

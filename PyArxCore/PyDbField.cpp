@@ -137,7 +137,7 @@ py::tuple PyDbField::evaluate(int context, PyDbDatabase* db)
 	int nFound = 0;
 	int nEvaluated = 0;
 	AcDbDatabase* pDb = (db != nullptr) ? db->impObj() : nullptr;
-	impObj()->evaluate(context, pDb, &nFound, &nEvaluated);
+	if (!PyWarnIfError(impObj()->evaluate(context, pDb, &nFound, &nEvaluated), L"AcDbField::evaluate")) return py::make_tuple(0, 0);
 	py::tuple t(2);
 	t[0] = nFound;
 	t[1] = nEvaluated;

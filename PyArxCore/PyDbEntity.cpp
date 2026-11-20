@@ -225,7 +225,7 @@ py::tuple PyDbEntity::getGripPoints() const {
 	if (!impObj()) return py::tuple();
 	AcGePoint3dArray gripPoints;
 	AcDbIntArray osnapModes, geomIds;
-	impObj()->getGripPoints(gripPoints, osnapModes, geomIds);
+	if (!PyWarnIfError(impObj()->getGripPoints(gripPoints, osnapModes, geomIds), L"AcDbEntity::getGripPoints")) return py::tuple();
 	py::list pyGrip, pyOsnap, pyGeom;
 	for (int i = 0; i < gripPoints.length(); i++) pyGrip.append(gripPoints[i]);
 	for (int i = 0; i < osnapModes.length(); i++) pyOsnap.append(osnapModes[i]);
@@ -237,7 +237,7 @@ void PyDbEntity::moveGripPointsAt(const std::vector<int>& indices, const AcGeVec
 	if (!impObj()) return;
 	AcDbIntArray idx;
 	for (int i : indices) idx.append(i);
-	impObj()->moveGripPointsAt(idx, offset);
+	PyWarnIfError(impObj()->moveGripPointsAt(idx, offset), L"AcDbEntity::moveGripPointsAt");
 }
 
 // --- 高亮 ---
@@ -259,7 +259,7 @@ bool PyDbEntity::popHighlight() {
 py::tuple PyDbEntity::getStretchPoints() const {
 	if (!impObj()) return py::tuple();
 	AcGePoint3dArray pts;
-	if (impObj()->getStretchPoints(pts) != Acad::eOk) return py::make_tuple(py::list());
+	if (!PyWarnIfError(impObj()->getStretchPoints(pts), L"AcDbEntity::getStretchPoints")) return py::make_tuple(py::list());
 	py::list out;
 	for (int i = 0; i < pts.length(); ++i) out.append(pts[i]);
 	return py::make_tuple(out);
@@ -269,7 +269,7 @@ void PyDbEntity::moveStretchPointsAt(const std::vector<int>& indices, const AcGe
 	if (!impObj()) return;
 	AcDbIntArray idx;
 	for (int i : indices) idx.append(i);
-	impObj()->moveStretchPointsAt(idx, offset);
+	PyWarnIfError(impObj()->moveStretchPointsAt(idx, offset), L"AcDbEntity::moveStretchPointsAt");
 }
 
 void bind_PyDbEntity(pym& m) {

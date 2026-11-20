@@ -617,3 +617,15 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 15:22 PyDbDictionaryWithDefault.cpp:25 ② 已改 1 处补判空
 2026-11-20 15:22 PyDbBlockReference.cpp:29 / PyDbEntity.cpp:81-90 / PyDbSymbolTable.cpp:79-108 / PyDbSpline.cpp:33-53 / PyDbMLeaderStyle.cpp:163 ② 通过 已有 !impObj() 前置守卫（扫描误报）
 2026-11-20 15:22 全项目 602 文件 ①⑥⑦⑧⑨ 全量 Grep 通过 AcArray py::class_=0、vcxproj 未登记=0、调试残留=0、python315t/PyGILState=0、mod_gil_not_used 在位、裸 catch 69 处为既有已知静默项
+2026-11-20 16:20 PyDbEntity.cpp:228/240/262/272 ③④ 已改 4 处补 es 判定与报错
+2026-11-20 16:20 PyDbField.cpp:140 ③④ 已改 1 处补 es 判定与报错
+2026-11-20 16:20 PyDbPolyline.cpp:116 ③ 通过 SDK dbpl.h:122 reset 返回 void
+2026-11-20 16:20 PyDbLayerTableRecord.cpp:124 ③ 通过 SDK dbsymtb.h:244 setColor(AcCmColor) 返回 void
+2026-11-20 16:20 PyDbLayout.cpp:37 ③ 通过 SDK dblayout.h:117 getExtents 返回 void
+2026-11-20 16:20 PyDbOle2Frame.cpp:23 ③ 通过 SDK dbole.h:123 setPosition(CRectangle3d) 返回 void
+2026-11-20 16:20 PyDbHyperlink.cpp:17/27、PyDbHyperlinkCollection.cpp:42、PyDbMlineStyle.cpp:75、PyDbBlockTableRecord.cpp:106/268、PyDbTrans.cpp:301、PyDbColor.cpp:39 ③ 通过 均为 void 接口或 CheckErrorStatus 已包（扫描误报）
+2026-11-20 16:20 PyGiSubEntityTraits.cpp:14-87 ③ 通过 SDK acgi.h:1140-1158 全部 void
+2026-11-20 16:20 PyDbDatabase.cpp 200+ 处 ③ 通过 均为 CheckErrorStatus(...) 已包（扫描按裸语句误报）
+2026-11-20 16:20 PyDbModelDocViewStyle.cpp:16 ③ 通过 getDescription 出参接口无 es
+2026-11-20 16:20 PyMfcXml 全量 ⑨ 通过 stdafx.h:19-23 按 _DEBUG/Py_GIL_DISABLED 选 python315t.lib/python315.lib，无 python315t/PyGILState
+2026-11-20 16:20 PyArxEngine ⑨ 未改（只报）PyEngine.cpp:73/82/206/227 仍拼 python315.zip（free-threaded 应为 python315t.zip）、acrxEntryPoint.cpp:346 文案 python315t.dll、PyEngineC.h:4 注释 python315t.lib
