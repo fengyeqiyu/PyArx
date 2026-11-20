@@ -276,6 +276,7 @@ void bind_PyDbBlockTableRecord(pym& m) {
 		.def("entityIds", [](PyDbBlockTableRecord& self) -> py::list {
 			py::list out;
 			AcDbBlockTableRecordIterator* it = nullptr;
+			if (self.isNull()) return out;
 			if (self.impObj()->newIterator(it) != Acad::eOk || !it) return out;
 			for (it->start(true, true); !it->done(); it->step(true, true)) {
 				AcDbObjectId eid;

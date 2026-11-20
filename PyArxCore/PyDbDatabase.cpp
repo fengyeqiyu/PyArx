@@ -3170,6 +3170,7 @@ void bind_PyDbDatabase(pym& m)
 		.def("get3dDwfPrec", [](const PyDbDatabase& d) -> double { return d.impObj()->get3dDwfPrec(); })
 		.def("getSymbolTableId", [](const PyDbDatabase& d) -> uint64_t {
 			// 模板签名需显式指定表类型；PyRx 侧默认语义为块表（与 blockTableId 一致）
+			if (d.isNull()) return 0ULL;
 			auto id = d.impObj()->getSymbolTableId<AcDbBlockTable>();
 			return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 		})

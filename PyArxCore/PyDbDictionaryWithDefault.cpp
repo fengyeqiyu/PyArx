@@ -14,6 +14,7 @@ void bind_PyDbDictionaryWithDefault(pym& m) {
 		PyWrapper_BIND(DbDictionaryWithDefault)
 		// ---- defaultId() -> uint64 ObjectId ----
 		.def("defaultId", [](const PyDbDictionaryWithDefault& s) -> uint64_t {
+			if (s.isNull()) return 0ULL;
 			AcDbObjectId id = s.impObj()->defaultId();
 			return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId());
 		}, "默认条目的 ObjectId（0=空）")

@@ -16,6 +16,7 @@ void bind_PyDbOleFrame(pym& m) {
 		PyWrapper_BIND(DbOleFrame)
 		// ---- getOleObject() -> intptr（内部 OLE 指针地址，只读） ----
 		.def("getOleObject", [](const PyDbOleFrame& s) -> uint64_t {
+			if (s.isNull()) return 0;
 			void* p = s.impObj()->getOleObject();
 			return reinterpret_cast<uint64_t>(p);
 		}, "返回内部 OLE 对象指针地址（整数，只读）")

@@ -81,6 +81,7 @@ void bind_PyDbLayerStateManager(pym& m) {
 		.def("importLayerStateWithName", [](PyDbLayerStateManager& self, const AcString& filename)
 				-> std::tuple<bool, AcString> {
 			AcString sName;
+			if (self.isNull()) return std::make_tuple(false, AcString());
 			bool ok = PyWarnIfError(self.impObj()->importLayerState(filename.kwszPtr(), sName),
 				L"AcDbLayerStateManager::importLayerState");
 			return std::make_tuple(ok, ok ? sName : AcString());

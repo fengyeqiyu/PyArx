@@ -66,6 +66,7 @@ void bind_PyDbSpatialFilter(pym& m) {
 		// ---- queryBounds(ext)：SDK 中带 pRefBlkRef 的重载标注 To Be Obsoleted，这里绑无参版本 ----
 		.def("queryBounds", [](const PyDbSpatialFilter& s, PyDbExtents3d& ext) {
 			// 直接写入用户提供的 AcDbExtents（m_isEmpty 由用户自行管理）
+			if (s.isNull() || !ext.impObj()) return;
 			s.impObj()->queryBounds(ext.impObj());
 		}, py::arg("ext"), "计算裁剪后包围盒（写入 ext.impObj()）")
 		// ---- setPerspectiveCamera(fromPt) -> bool ----
