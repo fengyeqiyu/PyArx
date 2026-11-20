@@ -629,3 +629,15 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 16:20 PyDbModelDocViewStyle.cpp:16 ③ 通过 getDescription 出参接口无 es
 2026-11-20 16:20 PyMfcXml 全量 ⑨ 通过 stdafx.h:19-23 按 _DEBUG/Py_GIL_DISABLED 选 python315t.lib/python315.lib，无 python315t/PyGILState
 2026-11-20 16:20 PyArxEngine ⑨ 未改（只报）PyEngine.cpp:73/82/206/227 仍拼 python315.zip（free-threaded 应为 python315t.zip）、acrxEntryPoint.cpp:346 文案 python315t.dll、PyEngineC.h:4 注释 python315t.lib
+2026-11-20 17:18 PyApp.cpp:116 ⑦ 已改 删除 update_display.log 诊断埋点
+2026-11-20 17:18 PyApp.cpp ⑦ 通过 acedUpdateDisplay/RedrawWindow 部分无残留
+2026-11-20 17:18 PyDbTrans.cpp:29 ⑦ 通过 pydbtrans_diag.log 为受控调试开关（非默认启用）
+2026-11-20 17:18 PyArxBinder.cpp:131 ⑦ 通过 ap_bind_err.txt 为异常路径日志（功能用途）
+2026-11-20 17:18 PyDbDimStyleTableRecord.cpp ② 通过 65 个 lambda 均已有 !s.impObj() 前置守卫（扫描按 isNull 口径误报）
+2026-11-20 17:18 PyDbSweepOptions.cpp/PyDbLoftOptions.cpp/PyDbBlendOptions.cpp/PyDbRevolveOptions.cpp ② 通过 仅 py::init<>()，恒非空
+2026-11-20 17:18 PyDb3dProfile.cpp/PyDbLongTransaction.cpp/PyDbLayerFilter.cpp/PyDbColor.cpp/PyDbDgnReference.cpp/PyDbDwfDefinition.cpp/PyDbFilter.cpp/PyDbLoftProfile.cpp ② 通过 守卫为 !s.impObj() 或 isNull() 写法，已覆盖
+2026-11-20 17:18 PyDbDgnDefinition.cpp/PyDbSpatialFilter.cpp ② 通过 前轮已修守卫仍在位
+2026-11-20 17:18 PyDbNurbSurface.cpp:33-237 ② 未改 38 处 lambda 逐条补默认返回值超 20 行且有返回值语义风险，只报不改（沿用台账）
+2026-11-20 17:18 PyMfcXml 全量 ⑨ 通过 stdafx.h:19-23 按条件选 lib，无 python315t/PyGILState
+2026-11-20 17:18 PyArxEngine ⑨ 未改（只报）PyEngine.cpp:73/82/206/227 python315.zip 名失配、acrxEntryPoint.cpp:346 文案 python315t.dll、PyEngineC.h:4 注释 python315t.lib
+2026-11-20 17:18 PyArxCore 全量 ①⑥⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / GIL_BAD=0 / PYBIND_MODULE=2 / BARE_CATCH=69（⑧ 唯一未隔离项 PyArxBinder.cpp:93-122 只报不改）

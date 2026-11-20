@@ -113,17 +113,6 @@ namespace
             HWND client = main ? ::FindWindowExW(main, nullptr, L"MDIClient", nullptr) : nullptr;
             HWND view = client ? ::GetWindow(client, GW_CHILD) : nullptr;
 
-            // 诊断日志
-            FILE* pf = nullptr;
-            if (_wfopen_s(&pf, pyarxLogFile(L"update_display.log", L"PyArxCore.pyd").c_str(), L"a, ccs=UTF-8") == 0 && pf)
-            {
-                wchar_t cls[128] = {};
-                if (view) ::GetClassNameW(view, cls, 128);
-                fwprintf(pf, L"main=%p client=%p view=%p cls=%s\n",
-                         main, client, view, cls);
-                fclose(pf);
-            }
-
             if (main)
                 ::RedrawWindow(main, nullptr, nullptr,
                                RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);

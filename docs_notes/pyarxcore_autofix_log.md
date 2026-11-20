@@ -188,3 +188,4 @@
 2026-11-20 16:20 | PyDbEntity.cpp:272 | ③④ | moveStretchPointsAt 丢弃 ErrorStatus → 包 PyWarnIfError
 2026-11-20 16:20 | PyDbEntity.cpp:262 | ④ | getStretchPoints 静默失败 → 改 PyWarnIfError 并返回空列表
 2026-11-20 16:20 | PyDbField.cpp:140 | ③④ | evaluate 丢弃 ErrorStatus → if(!PyWarnIfError(...)) return py::make_tuple(0,0)
+2026-11-20 17:18 | PyApp.cpp:116 | ⑦ | 删除 UpdateDisplay 内每次刷新写 update_display.log 的 HWND 诊断埋点（11 行）
