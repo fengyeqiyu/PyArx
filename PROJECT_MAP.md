@@ -9,7 +9,7 @@
 | `MfcXmlCore` / `MfcXmlFrame` / `MfcXmlRuntime` / `PyMfcXml` | MFC + XAML 体系 |
 | `pyarx_vision` | 扫描与识别（`scan.py`、detect、build_plan、regress） |
 | `examples\cad2d` | **看图主线**：`webview.py`（scan → scene JSON）、`webview_template.html`（Canvas2D 渲染器）、`scan_load.py` |
-| `X64\Release` | 构建产物：python 3.15.2、PyArxCore.pyd、PyArxEngine.crx |
+| `X64\Release` | 构建产物：python 3.15t（free-threaded）、PyArxCore.pyd、PyArxEngine.arx/crx |
 | `ACAD` | accoreconsole 完整镜像（5199 文件 / 2896 MB），必须整目录，裁剪即崩 |
 | `third_party` / `pylibs` | 第三方依赖 |
 | `tools` | `cadmcp`、`hotbuild`、`shxtext`、`Text2Line` 等 |

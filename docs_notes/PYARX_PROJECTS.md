@@ -12,7 +12,7 @@ Python 业务脚本
               │
               ├─ MfcXmlCore.dll     控件库 + XML 运行时（无 MFC 依赖）
               ├─ MfcXmlFrame.lib    无框/有边顶层窗口框架（静态库）
-              └─ Table.cpp / PlanGL 表格与配电画布绘制
+              └─ Table.cpp / DwgGL 表格与绘图画布绘制
 
 PyMfcXml.pyd ← acad.exe 通过 PyArxEngine.arx 装载（提供 PYRUNFILE/PYLOAD/PYEXEC 命令）
 UIDesign.exe / Viewer.exe ← 同一批 MfcXmlCore 绘制函数（设计器 / 预览器）
@@ -49,7 +49,7 @@ UIDesign.exe / Viewer.exe ← 同一批 MfcXmlCore 绘制函数（设计器 / �
 - 核心：`XmlCore.cpp/.h`（解析 + 布局 + 控件注册 + 属性反射）、`XmlAppearance.h`、`XmlTheme.h`。
 - 绘制：`XmlDraw.h`、`XmlLeafPaint.h`、`XmlBackBuffer.h`、`XmlSurface.cpp`、`XmlD2D.h`（D2D11 后端）、`XmlSvgScene.cpp`（nanosvg）。
 - 几何：`XmlGeometry.cpp`（Boost.Geometry）。
-- 复合/特色：`XmlPowerPlan.cpp`（配电规划图）、`XmlPowerCanvasView.h`、`XmlRibbon.h`（Ribbon/Backstage）、`XFrameWindow.h`。
+- 复合/特色：`XmlPowerPlan.cpp`（配电规划图）、`XmlDwgCanvasView.h`、`XmlRibbon.h`（Ribbon/Backstage）、`XFrameWindow.h`。
 - 控件：`controls\Xml*.cpp/.h`（约 60 个：Button/TextBox/ComboBox/ListView/TableView/TreeView/Grid/Panel/Tab/Menu/Slider/ProgressBar/Calendar/CodeEditor/Dial/Tumbler…）。
 - 控件契约：`controls\XmlEvents.h`（事件名契约表）、`controls\XmlTypes.h`（属性表类型）、`controls\XmlMfcTags.h`（标签名）、`controls\RegisterPyMfcControls.cpp`（注册入口）。
 - **边界**：不依赖 MFC；控件实体由宿主（`PyMfcHost` / 设计器）提供工厂实现。
@@ -68,11 +68,11 @@ UIDesign.exe / Viewer.exe ← 同一批 MfcXmlCore 绘制函数（设计器 / �
 
 - `PyMfcBind.cpp`：**全工程唯一的**模块定义，Python 接口都在这。
 - `PyMfcHost.cpp/.h`：`class PyMfcHost`（控件创建、皮肤、事件、画布、XML 桥）。
-- `PyMfcProcs.cpp`：窗口过程（全控件自绘、配电画布鼠标状态机、可编辑 Grid、滚轮安装）。
+- `PyMfcProcs.cpp`：窗口过程（全控件自绘、绘图画布鼠标状态机、可编辑 Grid、滚轮安装）。
 - `PyMfcWrap.cpp/.h`：`PyMfcTopWnd` / `PyMfcWindow` / `PyMfcPanel` / `PyMfcStore`（顶层窗口与面板句柄层）。
 - `PyMfcLoad.cpp`：`guiload` —— XML 文件 → 控件树（布局运行时 + 控件工厂）。
 - `PyMfcOffscreen.cpp`：BGRA→PNG(WIC)、D2D 配电图、SVG 离屏导出。
-- `Table.cpp/.h`：可编辑表格 Grid 的实现；`PyMfcPlanGL.cpp`：配电图 GL 渲染；`XmlBindings.cpp`：XmlRuntime/XmlElement 绑定。
+- `Table.cpp/.h`：可编辑表格 Grid 的实现；`PyMfcDwgGL.cpp`：绘图画布 GL 渲染；`XmlBindings.cpp`：XmlRuntime/XmlElement 绑定。
 - 回调约定：XML 里 `on_click="fn"`，或加载后 `child.click = fn`（两种等价，可混用）。
 - **边界**：pyd 依赖 MFC 模块态；改接口只动 `PyMfcBind.cpp`，不要另开模块定义。
 
