@@ -22,6 +22,7 @@ void bind_PyDbOleFrame(pym& m) {
 		}, "返回内部 OLE 对象指针地址（整数，只读）")
 		// ---- setOleObject(addr) ----
 		.def("setOleObject", [](PyDbOleFrame& s, uint64_t addr) {
+			if (s.isNull()) return;
 			s.impObj()->setOleObject(reinterpret_cast<const void*>(addr));
 		}, py::arg("addr"), "按整数地址设置 OLE 对象（高级用法，需自行保证指针有效）")
 		;

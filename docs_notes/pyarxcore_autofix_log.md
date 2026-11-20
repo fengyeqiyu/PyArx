@@ -171,3 +171,5 @@
 2026-11-20 11:18 | PyDbObject.cpp:250/254/283 | ④ | addPersistentReactor/removePersistentReactor/removeField 的 ErrorStatus 原先静默丢弃，改为 PyWarnIfError 报错
 2026-11-20 12:18 | PyEdSelectionSets.cpp:71/93/102 | ④ | acdbGetAdsName 失败原静默返回，改为 PyWarnIfError 报错
 2026-11-20 12:18 | PyDbDatabase.cpp:2042/2050/2058 | ④ | getDimblk/getDimblk1/getDimblk2 失败静默返回空串，改 PyWarnIfError；顺带清掉两行乱码注释
+2026-11-20 13:21 | PyDbTextStyleTableRecord.cpp:13/15/19/21/25/27/31/33/37/39/43/45/49/51/55 | ② | 15 处 getter/setter lambda 补 s.isNull() 守卫，空包装返回默认值
+2026-11-20 13:21 | PyDbOleFrame.cpp:25 | ② | setOleObject 补 isNull 守卫（init<AcDbOleFrame*> 可传 None）

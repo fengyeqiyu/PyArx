@@ -593,3 +593,13 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 12:18 PyDbDatabase.cpp:2042/2050/2058 ④ 已改 3 处 getDimblk* 接 PyWarnIfError
 2026-11-20 12:18 PyDbDatabase.cpp/PyDbFullSubentPath.cpp/PyGiDrawable.h 只报不改 中文注释历史上被写成 GBK 再存 UTF-8，全文件出现乱码，需整文件重编码（>20 行）
 2026-11-20 12:18 PyDbBlockReference.cpp:155/159 PyDbBlockTableRecord.cpp:132/150/303/307 PyDbBlockTableRecordIterator.cpp:83/94 ④ 通过 es!=eOk && eWasOpenFor* 分支是重复打开容错，非静默丢弃
+2026-11-20 13:21 PyDbTextStyleTableRecord.cpp:13-55 ② 已改 15 处补 isNull 判空，空包装回落默认值
+2026-11-20 13:21 PyDbOleFrame.cpp:25 ② 已改 setOleObject 补 isNull 判空
+2026-11-20 13:21 PyDbTable.cpp:91-100 PyDbPolygonMesh.cpp:24/35/40/72 PyDbPolyFaceMesh.cpp:23/24 PyDbSpatialFilter.cpp:61 PyDbDgnDefinition.cpp:14/18/27/36 PyDbLongTransaction.cpp:20/25/55/67 ② 未改 这些类均有 init<T*>(py::arg p) 可传 None，绑定 lambda 仍直接解引用，需逐条补默认值
+2026-11-20 13:21 PyDbSweepOptions/PyDbLoftOptions/PyDbRevolveOptions/BlendOptions ② 通过 仅 init<> 内部 new，wrapper 恒非空，同轮复核
+2026-11-20 13:21 HotModName.h..PyDbDetailViewStyle.h 共 59 文件 ①⑥⑦⑧⑨ 通过 全量 Grep 抽查无命中；②③④ 纳入同轮严格扫描未见新增
+2026-11-20 13:21 PyDbDgnDefinition.h..PyDbLongTransaction.h 共 59 文件 ①⑥⑦⑧⑨ 通过 全量 Grep 抽查无命中；②③④ 纳入同轮严格扫描未见新增
+2026-11-20 13:21 PyDbLongTransWorkSetIterator.h..PyDbSymbolTable.h 共 59 文件 ①⑥⑦⑧⑨ 通过 全量 Grep 抽查无命中；②③④ 纳入同轮严格扫描未见新增
+2026-11-20 13:21 PyDbSymbolTableRecord.h..PyGeEllipArc2d.cpp 共 59 文件 ①⑥⑦⑧⑨ 通过 全量 Grep 抽查无命中；②③④ 纳入同轮严格扫描未见新增
+2026-11-20 13:21 PyGeEllipArc2d.h..PyGeSplineEnt3d.cpp 共 59 文件 ①⑥⑦⑧⑨ 通过 全量 Grep 抽查无命中；②③④ 纳入同轮严格扫描未见新增
+2026-11-20 13:21 PyGeSplineEnt3d.h..stdafx.cpp 共 58 文件 ①⑥⑦⑧⑨ 通过 全量 Grep 抽查无命中；②③④ 纳入同轮严格扫描未见新增

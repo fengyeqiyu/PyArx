@@ -10,42 +10,50 @@ void bind_PyDbTextStyleTableRecord(pym& m) {
 		.def(py::init<AcDbTextStyleTableRecord*>(), py::arg("p"))
 		PyWrapper_BIND(DbTextStyleTableRecord)
 		// ---- isShapeFile ----
-		.def("isShapeFile", [](PyDbTextStyleTableRecord& s) { return s.impObj()->isShapeFile() == Adesk::kTrue; })
+		.def("isShapeFile", [](PyDbTextStyleTableRecord& s) { if (s.isNull()) return false; return s.impObj()->isShapeFile() == Adesk::kTrue; })
 		.def("setIsShapeFile", [](PyDbTextStyleTableRecord& s, bool v) {
+			if (s.isNull()) return false;
 			s.impObj()->setIsShapeFile(v ? Adesk::kTrue : Adesk::kFalse); return true;
 		}, py::arg("v"))
 		// ---- isVertical ----
-		.def("isVertical", [](PyDbTextStyleTableRecord& s) { return s.impObj()->isVertical() == Adesk::kTrue; })
+		.def("isVertical", [](PyDbTextStyleTableRecord& s) { if (s.isNull()) return false; return s.impObj()->isVertical() == Adesk::kTrue; })
 		.def("setIsVertical", [](PyDbTextStyleTableRecord& s, bool v) {
+			if (s.isNull()) return false;
 			s.impObj()->setIsVertical(v ? Adesk::kTrue : Adesk::kFalse); return true;
 		}, py::arg("v"))
 		// ---- textSize ----
-		.def("textSize", [](PyDbTextStyleTableRecord& s) { return s.impObj()->textSize(); })
+		.def("textSize", [](PyDbTextStyleTableRecord& s) { if (s.isNull()) return 0.0; return s.impObj()->textSize(); })
 		.def("setTextSize", [](PyDbTextStyleTableRecord& s, double v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setTextSize(v), L"AcDbTextStyleTableRecord::setTextSize");
 		}, py::arg("v"))
 		// ---- xScale ----
-		.def("xScale", [](PyDbTextStyleTableRecord& s) { return s.impObj()->xScale(); })
+		.def("xScale", [](PyDbTextStyleTableRecord& s) { if (s.isNull()) return 0.0; return s.impObj()->xScale(); })
 		.def("setXScale", [](PyDbTextStyleTableRecord& s, double v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setXScale(v), L"AcDbTextStyleTableRecord::setXScale");
 		}, py::arg("v"))
 		// ---- obliquingAngle ----
-		.def("obliquingAngle", [](PyDbTextStyleTableRecord& s) { return s.impObj()->obliquingAngle(); })
+		.def("obliquingAngle", [](PyDbTextStyleTableRecord& s) { if (s.isNull()) return 0.0; return s.impObj()->obliquingAngle(); })
 		.def("setObliquingAngle", [](PyDbTextStyleTableRecord& s, double v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setObliquingAngle(v), L"AcDbTextStyleTableRecord::setObliquingAngle");
 		}, py::arg("v"))
 		// ---- flagBits（Adesk::UInt8 以 int 暴露） ----
-		.def("flagBits", [](PyDbTextStyleTableRecord& s) { return static_cast<int>(s.impObj()->flagBits()); })
+		.def("flagBits", [](PyDbTextStyleTableRecord& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->flagBits()); })
 		.def("setFlagBits", [](PyDbTextStyleTableRecord& s, int v) {
+			if (s.isNull()) return false;
 			s.impObj()->setFlagBits(static_cast<Adesk::UInt8>(v)); return true;
 		}, py::arg("v"))
 		// ---- priorSize ----
-		.def("priorSize", [](PyDbTextStyleTableRecord& s) { return s.impObj()->priorSize(); })
+		.def("priorSize", [](PyDbTextStyleTableRecord& s) { if (s.isNull()) return 0.0; return s.impObj()->priorSize(); })
 		.def("setPriorSize", [](PyDbTextStyleTableRecord& s, double v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setPriorSize(v), L"AcDbTextStyleTableRecord::setPriorSize");
 		}, py::arg("v"))
 		// ---- fileName ----
 		.def("fileName", [](PyDbTextStyleTableRecord& s) -> AcString {
+			if (s.isNull()) return AcString();
 			AcString sOut;
 			if (!PyWarnIfError(s.impObj()->fileName(sOut), L"AcDbTextStyleTableRecord::fileName")) return AcString();
 			return sOut;
