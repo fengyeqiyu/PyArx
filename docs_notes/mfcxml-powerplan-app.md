@@ -4,7 +4,7 @@
 实现：Python + `PyMfcXaml.pyd`（自绘 `PowerCanvas` 控件 + 原生 MFC 控件），**不需要 CAD，独立 Python 直接运行**。
 
 ```
-D:\Program Files\Python315t\python.exe G:\PyArx\tests\mfc_xaml\pp_app.py
+G:\PyArx\X64\Release\python.exe G:\PyArx\tests\mfc_xaml\pp_app.py
 ```
 
 ---

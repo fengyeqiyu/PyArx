@@ -29,7 +29,7 @@
 
 **迭代器收敛**：Python 侧只保留容器本体协议（`for ent in btr`、`for rec in layerTable`、`table['0']`、`'0' in table`、`keys/values/items/get`），退役 15 个公开类（`PyDbBlockTableRecordIterator`、`PyDbBlockTableRecordEntityIter`（私有名）、`PyDbSymbolTableIterator`、`PyDbBlockTableIterator`、`PyDbLayerTableIterator`、`PyDbLinetypeTableIterator`、`PyDbTextStyleTableIterator`、`PyDbRegAppTableIterator`、`PyDbDimStyleTableIterator`、`PyDbViewTableIterator`、`PyDbViewportTableIterator`、`PyDbUCSTableIterator`、`PyDbAbstractViewTableIterator`、`PyDbXrecordIterator`、`PyDbObjectIterator`），C++ 类保留内部使用；7 个携带查询状态的迭代器（`PyDbFilteredBlockIterator`、`PyDbCompositeFilteredBlockIterator`、`PyDbSpatialIndexIterator`、`PyDbLayerIndexIterator`、`PyDbIndexUpdateDataIterator`、`PyDbBlockChangeIterator`、`PyDbLongTransWorkSetIterator`）保留公开。
 
-**宿主层**：`XWindow` 的 `Background` 解析链路已接入（`win.setBackground(r,g,b)`）；新增 `win.getSize(id) -> (w,h)`；`XPowerCanvas` SVG 模式改为 `zoom=1, ox=oy=0`、取消 8px 内边距与等比 fit。
+**宿主层**：`XWindow` 的 `Background` 解析链路已接入（`win.setBackground(r,g,b)`）；新增 `win.getSize(id) -> (w,h)`；`XDwgCanvas` SVG 模式改为 `zoom=1, ox=oy=0`、取消 8px 内边距与等比 fit。
 
 **编译**：`PyArxCore` 与 `PyMfcXml` 均 0 error（日志 `docs\_pyarxbuild_pyarxcore.txt`、`_pyarxbuild_pymfcxml.txt`、`_pyarxbuild_hot.txt`）。`PyArxCore.pyd` 被运行中的 acad 占用时走 hotbuild 产物验证，正式链接需先关闭 CAD。
 
@@ -98,9 +98,9 @@ cd G:\PyArx\X64\Release; .\python.exe G:\PyArx\examples\cad2d\app.py --batch
 
 ## 五、环境修复
 
-`X64\Release\python.exe` 缺 `python315t.dll`，直接运行退出码 `-1073741515`（STATUS_DLL_NOT_FOUND），cad2d 全部启动命令失效。已从 `D:\Program Files\Python315t\` 复制 `python315t.dll` 与 `python3.dll` 到 `X64\Release\`，验证：
+`X64\Release\python.exe` 缺 `python315t.dll`，直接运行退出码 `-1073741515`（STATUS_DLL_NOT_FOUND），cad2d 全部启动命令失效。已把 `python315t.dll` 与 `python3t.dll` 放到 `X64\Release\`，验证：
 
-- `.\python.exe -c "import sys;print(sys.version)"` → `3.15.2 (tags/v3.15.2:8e6e75d ...) [MSC v.1944 64 bit (AMD64)]`
+- `.\python.exe -c "import sys;print(sys.version)"` → `3.15.2 free-threaded`
 - `.\python.exe -c "import PyMfcXml;print('ok')"` → `PyMfcXml ok`
 
 部署脚本或新机器上必须带上这两个 dll，否则 `python.exe` 与 `PyMfcXml.pyd` 都起不来。
@@ -131,4 +131,4 @@ cd G:\PyArx\X64\Release; .\python.exe G:\PyArx\examples\cad2d\app.py --batch
 - SVG 矩形/多边形边界还原单独修一轮，修好用同一个 probe 判定 `(0,0)-(1343,103)±2px`。
 - `entget/entmod` 阻塞在 PYRUNFILE 上下文的成因需单独立项（可能与命令上下文里的数据库锁有关），不影响事务内直接改属性。
 - cad2d 下一步：DIM 三点定点、DXF 持久化，再按选型接 DWG（先外部转换）。
-- 部署清单补 `python315t.dll` / `python3.dll`；测试设施固化「实例上限 2 + 每批 Quit + 只按 PID 精确关闭、禁止窗口广播」。
+- 部署清单补 `python315t.dll` / `python3t.dll`；测试设施固化「实例上限 2 + 每批 Quit + 只按 PID 精确关闭、禁止窗口广播」。

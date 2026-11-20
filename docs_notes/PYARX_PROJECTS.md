@@ -177,7 +177,7 @@ UIDesign.exe / Viewer.exe ← 同一批 MfcXmlCore 绘制函数（设计器 / �
 ## 16. 构建
 
 ```powershell
-MSBuild PyArx.sln /t:PyMfcXml /p:Configuration=Release /p:Platform=x64 /p:VcpkgApplocalDeps=false
+MSBuild PyArx.sln /t:PyMfcXml /p:Configuration=Release /p:Platform=x64
 ```
 
 - 只改控件库：`/t:MfcXmlCore`；改 Python 接口：`/t:MfcXmlCore;PyMfcXml`（`PyMfcXml` 引用 `MfcXmlCore`）。

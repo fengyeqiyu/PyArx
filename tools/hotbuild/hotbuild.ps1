@@ -46,7 +46,7 @@ $nameHdr = @"
 
 $log = "G:\PyArx\tools\hotbuild\build_" + $Tag + ".log"
 $sw = [Diagnostics.Stopwatch]::StartNew()
-$null = & $msbuild $Project /t:Build /p:Configuration=Release /p:Platform=x64 /p:TargetName=$modName /p:VcpkgEnabled=false /v:m /nologo *> $log
+$null = & $msbuild $Project /t:Build /p:Configuration=Release /p:Platform=x64 /p:TargetName=$modName /v:m /nologo *> $log
 $code = $LASTEXITCODE
 $sw.Stop()
 Write-Output ("msbuild exit=" + $code + " in " + [int]$sw.Elapsed.TotalSeconds + "s")

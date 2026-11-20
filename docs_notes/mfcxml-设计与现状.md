@@ -28,7 +28,7 @@
 ## 三、控件封装现状（已完成）
 
 - **属性统一走声明式属性表** `XamlPropEntry{Name, Aliases, Type, EnumValues, Set, Get}`（`controls\XamlTypes.h`）：名字、类型、只读/只写、读写实现只在一处定义，基类 `properties()` 统一分派。
-- **覆盖 39 个控件**：Button、TextBlock、CheckBox、RadioButton、GroupBox、Switch、ListBox、Choice、ListCtrl、TabControl、TreeCtrl、Grid、ListView、TreeView、GridView、PathView、PageIndicator、TextBox、ComboBox、TableView、Slider、ProgressBar、SpinBox、Dial、Tumbler、ScrollBar、RangeSlider、Menu、MenuBar、ToolBar、ToolTip、ToggleButton、Hyperlink、RichText、CodeEditor、ScrolledWindow、DatePicker、QCanvas、PowerCanvas、Popup、PageView、StaticBitmap、BitmapButton，以及无自有属性的 StaticLine/Splitter/Panel/Flickable/BusyIndicator/CalendarCtrl。
+- **覆盖 39 个控件**：Button、TextBlock、CheckBox、RadioButton、GroupBox、Switch、ListBox、Choice、ListCtrl、TabControl、TreeCtrl、Grid、ListView、TreeView、GridView、PathView、PageIndicator、TextBox、ComboBox、TableView、Slider、ProgressBar、SpinBox、Dial、Tumbler、ScrollBar、RangeSlider、Menu、MenuBar、ToolBar、ToolTip、ToggleButton、Hyperlink、RichText、CodeEditor、ScrolledWindow、DatePicker、QCanvas、DwgCanvas、Popup、PageView、StaticBitmap、BitmapButton，以及无自有属性的 StaticLine/Splitter/Panel/Flickable/BusyIndicator/CalendarCtrl。
 - **迁移契约**：值在 attach 前缓存到成员、在 `createNative` 里下发；`Set == nullptr` 即只读；`Name` 不作为自有属性（基类 `IsLayoutAttribute` 已处理）。
 - **schema 导出**：`XamlPropertySchemaJson()`（`MfcXamlCore\XamlCore.h/.cpp`）+ Python `PyMfcXaml.prop_schema()`，结构 `{"version":1,"controls":[{"tag":"Button","properties":[{"name":"Text","type":"String","readOnly":false,"enum":""}]}]}`；实测 51 个控件、77137 字节。
 - **事件**：`XamlEvents.h` 契约表，XAML 只写事件名，控件申报 `events()`，宿主按契约绑定派发。
@@ -88,7 +88,7 @@
 
 - 全量自动测试 **118 项**：`pp_test_all` 27、`pp_split_test` 13、`pp_cell_test` 15、`pp_event_test` 8、`pp_grid_test` 18、`pp_select_test` 7、`pp_real_test` 6、`pp_cursor_test` 5、`pp_click_test` 5、`pp_runtime_test` 9、`pp_plugin_test` 5。
 - **批次跑（`_run_regression.ps1`）实测 118/118 全绿**，这也是交付判据；单脚本复跑用于定位单点问题。
-- 写真实输入类用例（点卡片 / 点连线 / 滚轮 / 拖动）时，**先把详情浮层收起**（`app.hideDetail()`）：`planHit` 先判 `detailHit`，浮层压在连线上会让点击判成"没点中"，历史上就是这么偶发失败的。
+- 写真实输入类用例（点卡片 / 点连线 / 滚轮 / 拖动）时，**先把详情浮层收起**（`app.hideDetail()`）：`hitDwg` 先判 `detailHit`，浮层压在连线上会让点击判成"没点中"，历史上就是这么偶发失败的。
 - 已修（v0.10.10–v0.10.14）：①Ctrl+V 粘贴触发的 `pybind11 inc_ref ... GIL` 崩溃（`fireGridAction` 在取 GIL 前就拷贝 `py::object`）；②原地单元格编辑按 Esc 仍写回（C++ 回抛 `cellend` 时 `col` 槽位恒为 0，Python 收不到 27）；③连线命中用例取三次贝塞尔 t=0.5 的点，而绘制与命中都按 4 拐点正交折线走（改为沿折线取弧长中点）。
 - 批次脚本 `_run_regression.ps1`：每个 GUI 用例前杀 python 进程并 sleep ≥1.4 s（残留窗口抢焦点会造成假失败），连跑两个 GUI 用例之间同样要杀进程 + sleep。
 - 断言只允许"让输入真实发生"（真鼠标 `SetCursorPos` + `GetCursor`），不允许放宽断言；`_smoke_proptable.py`（属性表冒烟）与 `_sim_msgs.py`（模拟消息）结果要求均为 0 项失败。
@@ -96,11 +96,11 @@
 
 ## 八、构建与环境
 
-- Python：`D:\Program Files\Python315t\python.exe`（3.15.2）；PATH 上的 3.13 加载不了 pyd。
+- Python：`G:\PyArx\X64\Release\python.exe`（3.15t，free-threaded）。
 - ObjectArx：`G:\ObjectArx\2024`（inc / inc-x64 / utils\brep / lib-x64）。
-- 构建（`VcpkgApplocalDeps=false` 必带，否则失败）：
+- 构建：
   ```
-  MSBuild G:\PyArx\PyArx.sln /t:PyMfcXaml /p:Configuration=Release /p:Platform=x64 /p:VcpkgApplocalDeps=false /m /nologo /v:m
+  MSBuild G:\PyArx\PyArx.sln /t:PyMfcXaml /p:Configuration=Release /p:Platform=x64 /m /nologo /v:m
   ```
   `ComSpec` 用 `System32\cmd.exe`（`SysWOW64` 版对 UIDesign 报提权失败）。编前关掉占用 pyd 的 python，否则 LNK1104。
 - 跑测：`$env:PYARX_D2D_RT='software'`、`$env:PYTHONIOENCODING='utf-8'`，`cd G:\PyArx\tests\mfc_xaml`；产物在 `X64\Release`（`PyMfcXaml.pyd`、`MfcXamlCore.dll`、`PyArxCore.pyd`）。

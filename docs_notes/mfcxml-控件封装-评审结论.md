@@ -200,8 +200,8 @@ struct IHostServices {  // 只留真正通用的能力
 
 ### 验证
 
-- 编译：`MfcXamlCore` + `PyMfcXaml` Release x64 通过（本机需加 `/p:VcpkgApplocalDeps=false`，否则 vcpkg 的 applocal 步骤会因 `cmd.exe` 提权失败中断；该步骤只负责拷贝依赖 DLL）。
-  解释器必须是 `D:\Program Files\Python315t\python.exe`（PATH 上的 `python` 是 3.13，加载不了按 3.14 编译的 pyd）。
+- 编译：`MfcXamlCore` + `PyMfcXaml` Release x64 通过。
+  解释器必须是 free-threaded 3.15t 的 `G:\PyArx\X64\Release\python.exe`；GIL 版或旧版解释器加载不了按 3.15t 编译的 pyd。
 - 冒烟 `tests\mfc_xaml\_smoke_proptable.py`：10 项全通过——别名 `Caption`/`IsReadOnly` 加载生效、`SelectedIndex` 回填文字、`Rows` 行数正确、`DoubleClick="不存在函数"` 现在报错（证明非 Click 事件进了绑定）、`Scroll="不存在函数"` 只告警不报错、未知属性 `FooBar` 落进诊断日志。
 - 模拟消息 `tests\mfc_xaml\_sim_msgs.py`：15/15 通过——不发真实鼠标键盘，直接把 `WM_COMMAND(BN_CLICKED / BN_DOUBLECLICKED / EN_CHANGE / CBN_SELCHANGE / CBN_DROPDOWN)`、`WM_HSCROLL`、`WM_KEYDOWN/UP`、`WM_SETFOCUS`、`WM_LBUTTONDOWN/UP` 投给宿主与控件。
   结论：Click / DoubleClick / TextChanged / SelectionChanged / DropDown / CheckedChanged / ValueChanged / KeyDown / KeyUp / GotFocus / MouseDown / MouseUp 十二条通路全部真回调；
@@ -256,7 +256,7 @@ struct IHostServices {  // 只留真正通用的能力
 - 手型（`IDC_HAND`）：真控件 hover——`Button/ToggleButton/BitmapButton`、`Hyperlink`（SysLink）、
   `ComboBox`、皮肤件里的 `ScrollBar/Switch/SpinBox/RangeSlider/PageIndicator/Dial/Tumbler/Table/Tree/ListView/GridView/PathView/Menu/MenuBar`，
   以及任何绑了 `Click`/`DoubleClick` 的卡片类控件；`ScrollView` 只在右侧 18px 滚动条条带上给手型。
-- 爪型：`QCanvas` / `Flickable` / `PowerCanvas`。系统光标表里没有 grab 手型（`C:\Windows\Cursors` 只有
+- 爪型：`QCanvas` / `Flickable` / `DwgCanvas`。系统光标表里没有 grab 手型（`C:\Windows\Cursors` 只有
   aero_arrow / aero_link / aero_move 等，Win32 光标 ID 也无 grab），所以用资源文件 `res\grab.cur`：
   **当前版本是直接从浏览器实际使用的 HCURSOR 抓出来的原图**（见文末"直接从浏览器提取光标"一节），
   造型、描边粗细与浏览器 `cursor:grab` 完全一致；只为对齐已认可的观感，把手形高度缩到画布 32px 的 58%
@@ -274,7 +274,7 @@ struct IHostServices {  // 只留真正通用的能力
 验证（`SendMessage(WM_SETCURSOR)` + `GetCursor()` 对比句柄，不动真实鼠标）：
 `tests\mfc_xaml\_sim_cursor.py` 8/8——按钮/Toggle/超链接/ScrollBar 均为 `IDC_HAND`，label 与 Panel 空白为箭头，
 QCanvas 句柄既非手型也非箭头（`res\grab.cur` 载入的爪型），`WM_MOUSELEAVE` 后复位箭头；
-`tests\mfc_xaml\_sim_cursor_plan.py` 1/1——PowerCanvas 同为资源爪型。
+`tests\mfc_xaml\_sim_cursor_plan.py` 1/1——DwgCanvas 同为资源爪型。
 回归：`_sim_wheel.py` 7/7、`_sim_scrolled.py` 7/7、`_sim_scrollbar.py` 5/5、`_sim_msgs.py` 15/15、`_smoke_proptable.py` 10/10。
 
 ### 追加：直接从浏览器提取光标（2026-11-13）
@@ -324,7 +324,7 @@ Windows 版 Chromium 的 `cursor:grab` / `cursor:grabbing` 是运行时用内部
 
 **验证**
 
-- `tests\mfc_xaml\_sim_cursor.py` 8/8、`_sim_cursor_plan.py` 1/1（QCanvas / PowerCanvas 句柄既非箭头也非 `IDC_HAND`）。
+- `tests\mfc_xaml\_sim_cursor.py` 8/8、`_sim_cursor_plan.py` 1/1（QCanvas / DwgCanvas 句柄既非箭头也非 `IDC_HAND`）。
 - 新增 `tests\mfc_xaml\_probe_plan_cursor.py`：在真实运行的配电图应用上移动鼠标并按住左键，
   读 `GetCursorInfo`——悬浮 `0xb641e65`（grab）、按下与拖动 `0x4a6f1471`（grabbing，与悬浮不同）、
   松开回 `0xb641e65`，三项检查全过。
@@ -360,8 +360,8 @@ Windows 版 Chromium 的 `cursor:grab` / `cursor:grabbing` 是运行时用内部
 
 1. **表里声明了、set 里没有分支 → 写了静默返回 false**
    - `XamlBusyIndicator.cpp`：`Running`
-   - `XamlPowerCanvas.cpp`：`Source`
-   XAML 里写 `<XPowerCanvas Source="…">` 从属性接口进去时直接被拒，且因为 `ownProperties` 里声明过，
+   - `XmlDwgCanvas.cpp`：`Source`
+   XAML 里写 `<XDwgCanvas Source="…">` 从属性接口进去时直接被拒，且因为 `ownProperties` 里声明过，
    调用方会以为"这是合法属性"，比未知属性更难查。
 2. **实现认别名、表里没声明 → 别名回读/诊断都看不到**（23 个控件）
    最典型：`XamlScrollBar.cpp`（`page`、`position`）、`XamlRangeSlider.cpp`（`from`、`to`）、

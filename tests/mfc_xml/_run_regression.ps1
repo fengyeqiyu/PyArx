@@ -5,12 +5,12 @@ $tests = @(
   'pp_runtime_test','pp_plugin_test','pp_model_list_test','pp_delegate_swap_test','pp_baseline_test'
 )
 $env:PYARX_D2D_RT = 'software'
-$py = 'D:\Program Files\Python315t\python.exe'
+$py = 'G:\PyArx\X64\Release\python.exe'
 $dir = 'G:\PyArx\tests\mfc_xml'
 $logDir = 'G:\PyArx\docs'
 $grandOk = 0; $grandBad = 0; $summary = @()
 foreach ($t in $tests) {
-  Get-Process python* -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*Python315t*' } | Stop-Process -Force
+  Get-Process python* -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*X64\Release*' } | Stop-Process -Force
   Start-Sleep -Milliseconds 2600
   $out = & $py (Join-Path $dir "$t.py") 2>&1
   $out | Out-File -LiteralPath (Join-Path $logDir "_regress_$t.txt") -Encoding utf8

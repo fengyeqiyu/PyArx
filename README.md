@@ -56,7 +56,7 @@ PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XML UI 技术桥接到 Py
 ### 构建命令
 
 ```bash
-MSBuild PyArx.sln /t:PyMfcXml /p:Configuration=Release /p:Platform=x64 /p:VcpkgApplocalDeps=false
+MSBuild PyArx.sln /t:PyMfcXml /p:Configuration=Release /p:Platform=x64
 ```
 
 ### 构建产物

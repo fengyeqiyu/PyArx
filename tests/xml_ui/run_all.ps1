@@ -5,7 +5,7 @@ param([string]$Filter = '')
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$py = 'D:\Program Files\Python315t\python.exe'
+$py = 'G:\PyArx\X64\Release\python.exe'
 $logDir = Join-Path $root 'log\after\xml_ui'
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 

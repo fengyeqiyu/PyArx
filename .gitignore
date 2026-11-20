@@ -29,7 +29,7 @@ obj/
 *.mui
 *.manifest.bak
 
-# 第三方依赖（体积大，按需自行拉取：pybind11 / zlib / python315t / vcpkg）
+# 第三方依赖（体积大，按需自行拉取：pybind11 / zlib / python315t）
 third_party/
 
 # 运行时数据与日志

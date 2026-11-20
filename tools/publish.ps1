@@ -47,7 +47,7 @@ if ($Build) {
     $env:ComSpec = 'C:\Windows\System32\cmd.exe'
     Write-Host '==> 编译 Release x64'
     & $msb (Join-Path $root 'PyArx.sln') '/t:UIDesign;Viewer' `
-        /p:Configuration=Release /p:Platform=x64 /p:VcpkgApplocalDeps=false /m /nologo /v:m
+        /p:Configuration=Release /p:Platform=x64 /m /nologo /v:m
     if ($LASTEXITCODE -ne 0) { throw '编译失败，已中止发布' }
 }
 
