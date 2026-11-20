@@ -62,6 +62,7 @@ bool  PyDbLeader::setDimstyleData(uint64_t styleId) { if (!impObj()) return fals
 bool  PyDbLeader::setDimtxsty(uint64_t txstyId) { if (!impObj()) return false; AcDbObjectId id; id.setFromOldId(static_cast<Adesk::UIntPtr>(txstyId)); return PyWarnIfError(impObj()->setDimtxsty(id), L"AcDbLeader::setDimtxsty"); }
 void PyDbLeader::setPlane(const AcGePlane& plane) { if (!impObj()) return; impObj()->setPlane(plane); }
 PyDbDimStyleTableRecord* PyDbLeader::getDimstyleData() const {
+	if (!impObj()) return nullptr;
 	AcDbDimStyleTableRecord* pRec = nullptr;
 	if (!PyWarnIfError(impObj()->getDimstyleData(pRec), L"AcDbLeader::getDimstyleData")) return nullptr;
 	return new PyDbDimStyleTableRecord(pRec);

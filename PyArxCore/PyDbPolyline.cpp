@@ -102,7 +102,7 @@ AcGeCircArc2d PyDbPolyline::getArcSegAt(unsigned int index) const {
 	if (!plReadIndexOk(impObj(), index)) return AcGeCircArc2d();
 	AcGeCircArc2d arc; if(!PyWarnIfError(impObj()->getArcSegAt(index, arc), L"AcDbPolyline::getArcSegAt")) return AcGeCircArc2d(); return arc;
 }
-AcGeMatrix3d PyDbPolyline::getEcs() const { AcGeMatrix3d m; impObj()->getEcs(m); return m; }
+AcGeMatrix3d PyDbPolyline::getEcs() const { if (!impObj()) return AcGeMatrix3d(); AcGeMatrix3d m; impObj()->getEcs(m); return m; }
 
 std::tuple<bool, double> PyDbPolyline::onSegAt(unsigned int index, const AcGePoint2d& pt2d) const {
 	if (!impObj()) return {};

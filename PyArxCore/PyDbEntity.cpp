@@ -208,7 +208,7 @@ bool PyDbEntity::setVisualStyle(uint64_t visualStyleId, bool doSubents) {
 	return PyWarnIfError(impObj()->setVisualStyle(oid, AcDbEntity::kFullVisualStyle, doSubents ? Adesk::kTrue : Adesk::kFalse), L"AcDbEntity::setVisualStyle");
 }
 uint64_t PyDbEntity::blockId() const { if (!impObj()) return 0ULL; return static_cast<uint64_t>(impObj()->blockId().asOldId()); }
-AcGeMatrix3d PyDbEntity::getEcs() const { AcGeMatrix3d m; impObj()->getEcs(m); return m; }
+AcGeMatrix3d PyDbEntity::getEcs() const { if (!impObj()) return AcGeMatrix3d(); AcGeMatrix3d m; impObj()->getEcs(m); return m; }
 
 // ---- 打印样式 ----
 AcString PyDbEntity::plotStyleName() const { if (!impObj()) return AcString(); AcString s; impObj()->plotStyleName(s); return s; }

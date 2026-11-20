@@ -42,8 +42,8 @@ bool PyDbAttribute::setMTextAttributeConst(const PyDbMText* pMText) {
 	return PyWarnIfError(impObj()->setMTextAttributeConst(pMText->impObj()), L"AcDbAttribute::setMTextAttributeConst");
 }
 bool PyDbAttribute::updateMTextAttribute() { if (!impObj()) return false; return PyWarnIfError(impObj()->updateMTextAttribute(), L"AcDbAttribute::updateMTextAttribute"); }
-PyDbMText PyDbAttribute::getMTextAttribute() const { return PyDbMText(impObj()->getMTextAttribute()); }
-PyDbMText PyDbAttribute::getMTextAttributeConst() const { return PyDbMText(const_cast<AcDbMText*>(impObj()->getMTextAttributeConst())); }
+PyDbMText PyDbAttribute::getMTextAttribute() const { if (!impObj()) return PyDbMText(); AcDbMText* p = impObj()->getMTextAttribute(); if (!p) return PyDbMText(); return PyDbMText(p); }
+PyDbMText PyDbAttribute::getMTextAttributeConst() const { if (!impObj()) return PyDbMText(); const AcDbMText* p = impObj()->getMTextAttributeConst(); if (!p) return PyDbMText(); return PyDbMText(const_cast<AcDbMText*>(p)); }
 
 void bind_PyDbAttribute(pym& m) {
 	py::class_<PyDbAttribute, PyDbText>(m, "PyDbAttribute")

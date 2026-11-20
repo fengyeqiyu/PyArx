@@ -641,3 +641,21 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 17:18 PyMfcXml 全量 ⑨ 通过 stdafx.h:19-23 按条件选 lib，无 python315t/PyGILState
 2026-11-20 17:18 PyArxEngine ⑨ 未改（只报）PyEngine.cpp:73/82/206/227 python315.zip 名失配、acrxEntryPoint.cpp:346 文案 python315t.dll、PyEngineC.h:4 注释 python315t.lib
 2026-11-20 17:18 PyArxCore 全量 ①⑥⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / GIL_BAD=0 / PYBIND_MODULE=2 / BARE_CATCH=69（⑧ 唯一未隔离项 PyArxBinder.cpp:93-122 只报不改）
+2026-11-20 18:19 PyDbBlockReference.cpp:32/36/38/40 ② 已改 4 处补判空
+2026-11-20 18:19 PyDbEntity.cpp:211 ② 已改 补判空
+2026-11-20 18:19 PyDbPolyline.cpp:105 ② 已改 补判空
+2026-11-20 18:19 PyDbAttribute.cpp:45/46 ② 已改 2 处补判空+空指针
+2026-11-20 18:19 PyDbAttributeDefinition.cpp:42/43 ② 已改 2 处补判空+空指针
+2026-11-20 18:19 PyDbLeader.cpp:64 ② 已改 补判空
+2026-11-20 18:19 PyDbOle2Frame.cpp:19 ② 已改 补判空
+2026-11-20 18:19 PyDbObject.cpp:22-136 ② 未改 44 个成员函数缺判空，但默认错误码取值涉及返回值语义、超 20 行，只报不改
+2026-11-20 18:19 PyDbOle2Frame.cpp:11/14 ③ 通过 SDK dbole.h:119 position(CRectangle3d&) 返回 void
+2026-11-20 18:19 PyDbOle2Frame.cpp:23 ③ 通过 SDK dbole.h:123 setPosition 返回 void
+2026-11-20 18:19 PyDbEntity.cpp:211/PyDbPolyline.cpp:105 ③ 通过 SDK dbmain.h:1937 getEcs 返回 void
+2026-11-20 18:19 PyDbLoftOptions.cpp:49/52、PyDbSweepOptions.cpp:42/45 ③ 通过 SDK dbLoftOptions.h:86/91、dbSweepOptions.h:76/81 均为 void（同名接口 es 索引误报）
+2026-11-20 18:19 PyDbBlendOptions.cpp:17-31 ③④ 通过 AcDbBlendOptions::setSimplify 返回 ErrorStatus 且已用 PyWarnIfError
+2026-11-20 18:19 PyArxBinder.cpp:133 ⑧ 通过 日志写失败的 catch(...) 静默，异常已由 acutPrintf 报出
+2026-11-20 18:19 PyUt.cpp:189/213 ⑧ 通过 docstring 提取 best-effort，静默有兜底
+2026-11-20 18:19 PyUt.cpp:334 ⑧ 通过 诊断文件写失败静默，随后 acutPrintf 报出
+2026-11-20 18:19 PyDbOsnapOverrule.cpp:14/PyDbPropertiesOverrule.cpp:14/PyDbSubentityOverrule.cpp:14/PyDbTransformOverrule.cpp:14/PyDbVisibilityOverrule.cpp:14 ⑧ 通过 Overrule 回调有意静默
+2026-11-20 18:19 PyArxCore 全量 ①⑥⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / GIL_BAD=0 / PYBIND_MODULE=2 / BARE_CATCH=69（9 空体全部核为合理）

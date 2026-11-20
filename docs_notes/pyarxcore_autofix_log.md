@@ -189,3 +189,10 @@
 2026-11-20 16:20 | PyDbEntity.cpp:262 | ④ | getStretchPoints 静默失败 → 改 PyWarnIfError 并返回空列表
 2026-11-20 16:20 | PyDbField.cpp:140 | ③④ | evaluate 丢弃 ErrorStatus → if(!PyWarnIfError(...)) return py::make_tuple(0,0)
 2026-11-20 17:18 | PyApp.cpp:116 | ⑦ | 删除 UpdateDisplay 内每次刷新写 update_display.log 的 HWND 诊断埋点（11 行）
+2026-11-20 18:19 | PyDbBlockReference.cpp:32/36/38/40 | ② | 4 个几何 getter 补 if(!impObj()) 返回默认 AcGeScale3d/AcGeMatrix3d
+2026-11-20 18:19 | PyDbEntity.cpp:211 | ② | getEcs 补 if(!impObj()) 返回空 AcGeMatrix3d
+2026-11-20 18:19 | PyDbPolyline.cpp:105 | ② | getEcs 补 if(!impObj()) 返回空 AcGeMatrix3d
+2026-11-20 18:19 | PyDbAttribute.cpp:45/46 | ② | getMTextAttribute(Const) 补空守卫并判 SDK 返回空指针，空则返回 PyDbMText()
+2026-11-20 18:19 | PyDbAttributeDefinition.cpp:42/43 | ② | getMTextAttributeDefinition(Const) 同上补空守卫与空指针判定
+2026-11-20 18:19 | PyDbLeader.cpp:64 | ② | getDimstyleData 补 if(!impObj()) return nullptr
+2026-11-20 18:19 | PyDbOle2Frame.cpp:19 | ② | setPosition3d 补 if(!impObj()) return

@@ -29,15 +29,15 @@ bool  PyDbBlockReference::setBlockTableRecord(uint64_t blockRecordId) {
 	return PyWarnIfError(impObj()->setBlockTableRecord(id), L"AcDbBlockReference::setBlockTableRecord");
 }
 
-AcGeScale3d PyDbBlockReference::scaleFactors() const { return impObj()->scaleFactors(); }
+AcGeScale3d PyDbBlockReference::scaleFactors() const { if (!impObj()) return AcGeScale3d(); return impObj()->scaleFactors(); }
 
 bool  PyDbBlockReference::setScaleFactors(const AcGeScale3d& s) { if (!impObj()) return false; return PyWarnIfError(impObj()->setScaleFactors(s), L"AcDbBlockReference::setScaleFactors"); }
 
-AcGeScale3d PyDbBlockReference::nonAnnotationScaleFactors() const { return impObj()->nonAnnotationScaleFactors(); }
+AcGeScale3d PyDbBlockReference::nonAnnotationScaleFactors() const { if (!impObj()) return AcGeScale3d(); return impObj()->nonAnnotationScaleFactors(); }
 
-AcGeMatrix3d PyDbBlockReference::blockTransform() const { return impObj()->blockTransform(); }
+AcGeMatrix3d PyDbBlockReference::blockTransform() const { if (!impObj()) return AcGeMatrix3d(); return impObj()->blockTransform(); }
 
-AcGeMatrix3d PyDbBlockReference::nonAnnotationBlockTransform() const { return impObj()->nonAnnotationBlockTransform(); }
+AcGeMatrix3d PyDbBlockReference::nonAnnotationBlockTransform() const { if (!impObj()) return AcGeMatrix3d(); return impObj()->nonAnnotationBlockTransform(); }
 
 AcGeVector3d PyDbBlockReference::normal() const { if (!impObj()) return AcGeVector3d(); return impObj()->normal(); }
 

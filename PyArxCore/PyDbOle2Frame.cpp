@@ -17,6 +17,7 @@ std::tuple<AcGePoint3d, AcGePoint3d, AcGePoint3d, AcGePoint3d> PyDbOle2Frame::po
 
 void PyDbOle2Frame::setPosition3d(const AcGePoint3d& upLeft, const AcGePoint3d& upRight,
 	const AcGePoint3d& lowLeft, const AcGePoint3d& lowRight) {
+	if (!impObj()) return;
 	CRectangle3d r{};
 	r.upLeft = upLeft; r.upRight = upRight;
 	r.lowLeft = lowLeft; r.lowRight = lowRight;
