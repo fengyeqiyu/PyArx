@@ -742,3 +742,11 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 05:20 PyDbBlockTableRecord.cpp:115/166/309 ④ 已改 3 处 newIterator 与 getEntityById 失败补报错
 2026-11-21 05:20 PyArxCore 全量 ② 通过 isNull 类全扫 28 处剩余全部落在 PyDbObject.cpp（已知只报项），无新命中
 2026-11-21 05:20 PyArxCore 全量 ③ 通过 判 es 但无报错的 67 处逐条核为 iterator/内部 continue 跳过型或已报错分支，仅上述 8 处属用户可见静默
+2026-11-21 06:19 PyDbOsnapOverrule.cpp:13/14 ⑧ 已改 isApplicable 回调 catch 由静默 PyErr_Clear()/空体改为 e.restore()+PyErr_Print 与 PyErr_Occurred 检查
+2026-11-21 06:19 PyDbPropertiesOverrule.cpp:13/14 ⑧ 已改 isApplicable 回调 catch 由静默 PyErr_Clear()/空体改为 e.restore()+PyErr_Print 与 PyErr_Occurred 检查
+2026-11-21 06:19 PyDbSubentityOverrule.cpp:13/14 ⑧ 已改 isApplicable 回调 catch 由静默 PyErr_Clear()/空体改为 e.restore()+PyErr_Print 与 PyErr_Occurred 检查
+2026-11-21 06:19 PyDbTransformOverrule.cpp:13/14 ⑧ 已改 isApplicable 回调 catch 由静默 PyErr_Clear()/空体改为 e.restore()+PyErr_Print 与 PyErr_Occurred 检查
+2026-11-21 06:19 PyDbVisibilityOverrule.cpp:13/14 ⑧ 已改 isApplicable 回调 catch 由静默 PyErr_Clear()/空体改为 e.restore()+PyErr_Print 与 PyErr_Occurred 检查
+2026-11-21 06:19 PyArxCore 全量 ⑧ 通过 69 处 catch(...) 全扫，静默 19 处逐条核：PyArxBinder:133 ApLog 日志 sink、PyDbMText:165 停止枚举属注释在设计、PyGeNurbCurve3d:28/36 与 PyGiTextEngine 回退值、PyArrayCaster.h:29/63 caster 返回 false、PyUt:189/213/334 守卫，均合理
+2026-11-21 06:19 PyArxCore 全量 ⑤ 通过 纯同名转发 23 处全为 PyColor/PyDbDate/PyGiFill/PyGiPolyline 值对象同位同名 getter（仅报不改），另有 PyDbIdTypes.cpp:18/22 PyErr_Clear 为 __index__ 防御
+2026-11-21 06:19 PyArxCore 全量 ② 通过 .h 内 inline 解引用仅 3 处（PyDbBlockTableRecord.h:43、PyDbDatabase.h:51/329）均已判空；③⑥⑦⑨ 复扫计数不变（AcArray 注册 0、vcxproj missing 0、TEMP 0、PY314 0、GILState 0）

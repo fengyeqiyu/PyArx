@@ -229,3 +229,8 @@
 2026-11-21 05:20 | PyDbCurve.cpp:59/68 | ④ | getSplitCurves 与 getOffsetCurvesGivenPlaneNormal 改判 es 并 PyWarnIfError，失败原有空返回不变
 2026-11-21 05:20 | PyDbHatch.cpp:41/139/148 | ④ | getPatternDefinitionAt / getAssocObjIds / getAssocObjIdsAt 补 PyWarnIfError，返回零值或空列表不变
 2026-11-21 05:20 | PyDbBlockTableRecord.cpp:115/166/309 | ④ | numEntities / attdefData 的 newIterator 失败补报错；getEntityById 失败分支补 PyWarnIfError 并独立判 pEnt
+2026-11-21 06:19 | PyDbOsnapOverrule.cpp:13/14 | ⑧ | Python 异常与未知异常改为 e.restore()+PyErr_Print / PyErr_Occurred 检查，返回值仍为 true
+2026-11-21 06:19 | PyDbPropertiesOverrule.cpp:13/14 | ⑧ | Python 异常与未知异常改为 e.restore()+PyErr_Print / PyErr_Occurred 检查，返回值仍为 true
+2026-11-21 06:19 | PyDbSubentityOverrule.cpp:13/14 | ⑧ | Python 异常与未知异常改为 e.restore()+PyErr_Print / PyErr_Occurred 检查，返回值仍为 true
+2026-11-21 06:19 | PyDbTransformOverrule.cpp:13/14 | ⑧ | Python 异常与未知异常改为 e.restore()+PyErr_Print / PyErr_Occurred 检查，返回值仍为 true
+2026-11-21 06:19 | PyDbVisibilityOverrule.cpp:13/14 | ⑧ | Python 异常与未知异常改为 e.restore()+PyErr_Print / PyErr_Occurred 检查，返回值仍为 true
