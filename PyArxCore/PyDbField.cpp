@@ -93,8 +93,7 @@ AcString PyDbField::getFieldCode(int flag) const
 {
 	if (!impObj()) return AcString(L"");
 	AcString sCode;
-	Acad::ErrorStatus es = impObj()->getFieldCode(sCode, static_cast<AcDbField::FieldCodeFlag>(flag));
-	if (es != Acad::eOk)
+	if (!PyWarnIfError(impObj()->getFieldCode(sCode, static_cast<AcDbField::FieldCodeFlag>(flag)), L"PyDbField::getFieldCode"))
 		return AcString(L"");
 	return sCode;
 }
@@ -110,7 +109,7 @@ AcString PyDbField::getFormat() const
 {
 	if (!impObj()) return AcString(L"");
 	AcString sFormat;
-	if (impObj()->getFormat(sFormat) != Acad::eOk)
+	if (!PyWarnIfError(impObj()->getFormat(sFormat), L"PyDbField::getFormat"))
 		return AcString(L"");
 	return sFormat;
 }
@@ -126,7 +125,7 @@ AcString PyDbField::getValue() const
 {
 	if (!impObj()) return AcString(L"");
 	AcString sValue;
-	if (impObj()->getValue(sValue) != Acad::eOk)
+	if (!PyWarnIfError(impObj()->getValue(sValue), L"PyDbField::getValue"))
 		return AcString(L"");
 	return sValue;
 }

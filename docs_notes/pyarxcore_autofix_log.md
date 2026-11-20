@@ -198,3 +198,8 @@
 2026-11-20 18:19 | PyDbOle2Frame.cpp:19 | ② | setPosition3d 补 if(!impObj()) return
 2026-11-20 19:18 | PyDbViewport.cpp:216-237 | ② | 22 个 getter lambda 用 o 参数且无判空，补 if(!o.impObj()) 返回 0ULL/0.0/false/0
 2026-11-20 19:18 | PyDbMLeader.cpp:205-209 | ② | 5 个 getter lambda 补 if(!o.impObj()) 默认返回
+2026-11-20 20:19 | PyDbField.cpp:96 | ④ | getFieldCode 失败返回空串且无报错 → 改 PyWarnIfError 再返回空
+2026-11-20 20:19 | PyDbField.cpp:113 | ④ | getFormat 同上补 PyWarnIfError
+2026-11-20 20:19 | PyDbField.cpp:129 | ④ | getValue 同上补 PyWarnIfError
+2026-11-20 20:19 | PyDbObject.cpp:436 | ④ | getBinaryData 失败静默返回 (False, b'') → 补 PyWarnIfError(es, ...)
+2026-11-20 20:19 | PyDbDatabase.cpp:491 | ④ | purge 失败静默返回输入 ids → 补 PyWarnIfError

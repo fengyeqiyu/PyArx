@@ -666,3 +666,15 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 19:18 PyDbNurbSurface.cpp:33-237 ② 未改 38 处 lambda 只报不改（沿用台账）
 2026-11-20 19:18 PyArxCore ⑨ 通过 唯一 PYBIND11_MODULE 在 PyArxBinder.cpp:62 已带 py::mod_gil_not_used()
 2026-11-20 19:18 PyArxCore 全量 ①⑥⑦⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / GIL_BAD=0；头文件内联方法缺判空=0；es 声明未使用=0
+2026-11-20 20:19 PyDbField.cpp:96/113/129 ④ 已改 3 处失败补报错
+2026-11-20 20:19 PyDbObject.cpp:436 ④ 已改 补报错
+2026-11-20 20:19 PyDbDatabase.cpp:491 ④ 已改 补报错
+2026-11-20 20:19 PyDbObject.cpp:445 ④ 通过 getField 失败返回 0 为文档约定的「无该字段」，非静默错误
+2026-11-20 20:19 PyDbGripOverrule.cpp:71/115 ④ 通过 es 直接 return 给 SDK 调用方，非静默
+2026-11-20 20:19 PyDbSymbolTable.cpp:20/27 ④ 通过 失败路径 throw runtime_error 带 es 文本
+2026-11-20 20:19 PyDbDatabase.h:52 ④ 通过 失败 throw 带修法提示
+2026-11-20 20:19 PyDbOpenCache.h:27-50 ④ 通过 失败经 es 出参返回给调用方，调用方已判
+2026-11-20 20:19 DbTrans.h:14/131/173/179 ④ 通过 失败分支均 acutPrintf 报出
+2026-11-20 20:19 PyDbBlockReference.cpp:155/159、PyDbBlockTableRecord.cpp:132-307、PyDbBlockTableRecordIterator.cpp:83-94 ④ 通过 为 eWasOpenForRead 兼容分支，非错误静默
+2026-11-20 20:19 PyColor.cpp:62-77、PyDbDate.cpp:22-37 ⑤ 未改 同名一行转发 AcCmColor/AcDbDate 值对象，属值包装非冗余层；删除改动 Python 侧接口，只报不改
+2026-11-20 20:19 PyArxCore 全量 ①⑥⑦⑧⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / GIL_BAD=0 / mod_gil_not_used 在位 / 空 catch 9 处已核合理

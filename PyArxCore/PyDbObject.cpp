@@ -433,7 +433,7 @@ void bind_PyDbObject(pym& m)
 			int dataSize = 0;
 			char* data = nullptr;
 			Acad::ErrorStatus es = self.getBinaryData(key.c_str(), dataSize, data);
-			if (es != Acad::eOk || !data) return py::make_tuple(false, py::bytes());
+			if (!PyWarnIfError(es, L"PyDbObject.getBinaryData") || !data) return py::make_tuple(false, py::bytes());
 			py::bytes result(data, dataSize);
 			// 注意：SDK 分配的内存需要调用者释放，这里简单返回 bytes（不完美但可用）
 			return py::make_tuple(true, result);

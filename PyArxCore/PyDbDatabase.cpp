@@ -488,7 +488,7 @@ PyDbObjectIdArray PyDbDatabase::purge(const PyDbObjectIdArray& ids)
 {
 	auto arr = VecToAcArray<AcDbObjectId>(ids);
 	auto es = impObj()->purge(arr);
-	if (es != Acad::eOk) {
+	if (!PyWarnIfError(es, L"PyDbDatabase.purge")) {
 		return ids;
 	}
 	return AcArrayToVec<AcDbObjectId>(arr);
