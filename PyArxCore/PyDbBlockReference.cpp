@@ -324,6 +324,7 @@ void bind_PyDbBlockReference(pym& m) {
 		.def("attribData", &PyDbBlockReference::attribData,
 		     "实例属性列表：{tag,txt,x,y,ax,ay,h,rot,ha,va,inv,ly,ci}")
 		.def("appendAttribute", [](PyDbBlockReference& self, PyDbAttribute& attr) {
+			if (!self.impObj() || !attr.impObj()) return false;
 			return PyWarnIfError(self.impObj()->appendAttribute(attr.impObj()), L"appendAttribute");
 		}, py::arg("attribute"), "向块参照追加一个属性")
 		// ---- 属性块：ATTRIB 遍历（原 attributeIterator 折叠进本体）----

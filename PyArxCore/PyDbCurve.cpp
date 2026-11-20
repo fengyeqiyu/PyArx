@@ -165,6 +165,7 @@ void bind_PyDbCurve(pym& m) {
 		}, py::arg("ge_curve"), "由 AcGeCurve3d 创建 AcDbCurve（未入库，需 appendEntity）")
 		// 用 GE 曲线重设当前曲线
 		.def("setFromAcGeCurve", [](PyDbCurve& self, const AcGeCurve3d& geCurve) -> bool {
+			if (!self.impObj()) return false;
 			return PyWarnIfError(self.impObj()->setFromAcGeCurve(geCurve), L"AcDbCurve::setFromAcGeCurve");
 		}, py::arg("ge_curve"))
 		PyWrapper_BIND(DbCurve)

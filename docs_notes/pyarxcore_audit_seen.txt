@@ -714,3 +714,9 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 00:21 PyMfcXml ⑨ 通过 PyMfcXml.cpp:91 带 mod_gil_not_used()，vcxproj 定义 Py_GIL_DISABLED，stdafx.h 条件链接
 2026-11-21 00:21 PyArxEngine ⑨ 未改 PyEngine.cpp:73/82/206/227 仍拼 python315.zip（free-threaded 标准库应为 python315t.zip）；acrxEntryPoint.cpp:244、PyAppDispatcher.cpp:93 仍用 PyGILState_Ensure（只读核对，未改）
 2026-11-21 00:21 PyArxCore 全量 ③④⑤ 通过 函数级扫描：含 es 判断但无 PyWarnIfError/acutPrintf 的函数 0 个；同名一行转发仅剩 PyColor/PyDbDate 值对象包装
+2026-11-21 01:18 PyDb3dSolid.cpp:66-68 ② 已改 revolve 补 self/region 判空返回 False
+2026-11-21 01:18 PyDbBlockReference.cpp:326-328 ② 已改 appendAttribute 补 self/attr 判空返回 False
+2026-11-21 01:18 PyDbCurve.cpp:167-169 ② 已改 setFromAcGeCurve 补 self 判空返回 False
+2026-11-21 01:18 PyDbBlockTableRecord.cpp:276-289 ② 通过 entityIds 用 self.isNull() 前置守卫，newIterator 失败已 PyWarnIfError
+2026-11-21 01:18 PyDbDatabase.cpp:3141-3221 等 400+ 变量 getter ② 通过 PyDbDatabase 仅默认构造 new AcDbDatabase()，无指针构造路径，impObj() 恒非空
+2026-11-21 01:18 PyArxCore 全量 ①⑥⑦⑧⑨ 通过 lambda 级扫描后无新增：AcArray 注册 0、vcxproj 602/602、残留仅功能用途、catch 均隔离、GIL 标志齐备

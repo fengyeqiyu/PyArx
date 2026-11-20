@@ -64,6 +64,7 @@ void bind_PyDb3dSolid(pym& m) {
 			return PyWarnIfError(self.impObj()->extrude(region.impObj(), height, taper), L"extrude");
 		}, py::arg("region"), py::arg("height"), py::arg("taperAngle") = 0.0, "由 Region 沿法向拉伸成实体")
 		.def("revolve", [](PyDb3dSolid& self, PyDbRegion& region, const AcGePoint3d& axisPt, const AcGeVector3d& axisDir, double angle) {
+			if (!self.impObj() || !region.impObj()) return false;
 			return PyWarnIfError(self.impObj()->revolve(region.impObj(), axisPt, axisDir, angle), L"revolve");
 		}, py::arg("region"), py::arg("axisPoint"), py::arg("axisDir"), py::arg("angle"), "由 Region 绕轴旋转成实体")
 		PyWrapper_BIND(Db3dSolid)
