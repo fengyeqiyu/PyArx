@@ -2039,7 +2039,7 @@ AcString PyDbDatabase::getDimblk() const
 {
 	AcString result;
 	auto es = impObj()->getDimblk(result);
-	if (es != Acad::eOk) return AcString();
+	if (!PyWarnIfError(es, L"AcDbDatabase::getDimblk")) return AcString();
 	return result;
 }
 
@@ -2047,7 +2047,7 @@ AcString PyDbDatabase::getDimblk1() const
 {
 	AcString result;
 	auto es = impObj()->getDimblk1(result);
-	if (es != Acad::eOk) return AcString();//���뱨���ˣ���ӡ��ǰ����λ��
+	if (!PyWarnIfError(es, L"AcDbDatabase::getDimblk1")) return AcString();
 	return result;
 }
 
@@ -2055,7 +2055,7 @@ AcString PyDbDatabase::getDimblk2() const
 {
 	AcString result;
 	auto es = impObj()->getDimblk2(result);
-	if (es != Acad::eOk) return AcString();//���뱨���ˣ���ӡ��ǰ����λ��
+	if (!PyWarnIfError(es, L"AcDbDatabase::getDimblk2")) return AcString();
 	return result;
 }
 

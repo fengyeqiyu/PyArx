@@ -68,7 +68,7 @@ void PyEdSelectionSets::add(const AcDbObjectId& objId)
 {
 	PyAdsName entname;
 	auto es = acdbGetAdsName(entname.data(), objId);
-	if (es != eOk) return;
+	if (!PyWarnIfError(es, L"acdbGetAdsName")) return;
 	if (isEmpty()) {
 		auto rc = acedSSAdd(entname.data(), NULL, m_data);
 		if (rc != RTNORM) {
@@ -90,7 +90,7 @@ void PyEdSelectionSets::remove(const AcDbObjectId& objId)
 {
 	PyAdsName ent;
 	auto es = acdbGetAdsName(ent.data(), objId);
-	if (es != eOk) return;
+	if (!PyWarnIfError(es, L"acdbGetAdsName")) return;
 	auto rc = acedSSDel(ent.data(), m_data);
 	if (rc != RTNORM) return;
 }
@@ -99,7 +99,7 @@ bool PyEdSelectionSets::hasMember(const AcDbObjectId& objId) const
 {
 	PyAdsName ent;
 	auto es = acdbGetAdsName(ent.data(), objId);
-	if (es != eOk) return false;
+	if (!PyWarnIfError(es, L"acdbGetAdsName")) return false;
 	return acedSSMemb(ent.data(), m_data) == RTNORM;
 }
 

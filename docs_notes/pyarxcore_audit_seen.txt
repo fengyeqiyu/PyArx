@@ -589,3 +589,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 11:18 PyDbObject.cpp:250/254/283 ④ 已改 3 处 ErrorStatus 接 PyWarnIfError
 2026-11-20 11:18 PyDbColor.cpp:39 ③ 通过 AcCmColor::setColor 为 void（dbmain.h），绑定返回 True 仅表示完成
 2026-11-20 11:18 PyDbBlockTableRecord.cpp:106/268 PyDbTrans.cpp:301 ③ 通过 close() 返回 ErrorStatus 但均在 append/挂接失败后的清理路径，状态无附加信息，保留
+2026-11-20 12:18 PyEdSelectionSets.cpp:71/93/102 ④ 已改 3 处 acdbGetAdsName 接 PyWarnIfError
+2026-11-20 12:18 PyDbDatabase.cpp:2042/2050/2058 ④ 已改 3 处 getDimblk* 接 PyWarnIfError
+2026-11-20 12:18 PyDbDatabase.cpp/PyDbFullSubentPath.cpp/PyGiDrawable.h 只报不改 中文注释历史上被写成 GBK 再存 UTF-8，全文件出现乱码，需整文件重编码（>20 行）
+2026-11-20 12:18 PyDbBlockReference.cpp:155/159 PyDbBlockTableRecord.cpp:132/150/303/307 PyDbBlockTableRecordIterator.cpp:83/94 ④ 通过 es!=eOk && eWasOpenFor* 分支是重复打开容错，非静默丢弃
