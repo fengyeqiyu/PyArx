@@ -2,7 +2,7 @@
 """生成《MFCXml 控件接口清单》——数据来自运行中的 PyMfcXml.prop_schema() 与控件源码。
 
 用法（构建后执行，schema 变了重跑）：
-    & 'D:\\Program Files\\Python315t\\python.exe' G:\\PyArx\\tools\\gen_control_doc.py
+    & 'G:\\PyArx\\X64\\Release\\python.exe' G:\\PyArx\\tools\\gen_control_doc.py
 """
 import io
 import json
@@ -40,7 +40,7 @@ INFO = {
     'Pane':          ('原生 MFC Static 容器', 'XmlPanel.cpp', 'panel'),
     'SplitView':       ('原生 MFC 自注册拖动条', 'XmlSplitter.cpp', 'splitter'),
     'Divider':     ('原生 MFC Static(SS_ETCHEDHORZ)', 'XmlStaticLine.cpp', 'pointer'),
-    'PowerCanvas':    ('宿主自绘画布（配电规划图）', 'XmlPowerCanvas.cpp', 'canvas'),
+    'DwgCanvas':      ('宿主自绘画布（绘图画布，DWG 为主，兼容已算坐标的布局输入）', 'XmlDwgCanvas.cpp', 'canvas'),
     'Hyperlink':      ('原生 MFC SysLink', 'XmlHyperlink.cpp', 'link'),
     'TextArea':       ('原生 MFC RICHEDIT50W', 'XmlRichText.cpp', 'text'),
     'ToggleButton':   ('原生 MFC Button(BS_AUTOCHECKBOX 自绘)', 'XmlToggleButton.cpp', 'check'),
@@ -132,7 +132,7 @@ ALIAS = {
     'Pane': 'panel',
     'SplitView': 'splitter, SplitterWindow',
     'Divider': 'staticline',
-    'PowerCanvas': 'powercanvas, PlanCanvas',
+    'DwgCanvas': 'dwgcanvas',
     'Hyperlink': 'hyperlink, HyperlinkCtrl',
     'TextArea': 'richtext, RichTextCtrl',
     'ToggleButton': 'togglebutton, ToggleBtn',
