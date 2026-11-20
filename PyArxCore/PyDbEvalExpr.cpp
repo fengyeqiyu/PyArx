@@ -13,14 +13,17 @@ void bind_PyDbEvalExpr(pym& m) {
 		PyWrapper_BIND(DbEvalExpr)
 		// ---- nodeId() -> uint32 (AcDbEvalNodeId = Adesk::UInt32，kNullNodeId=0) ----
 		.def("nodeId", [](PyDbEvalExpr& s) -> uint32_t {
+			if (s.isNull()) return 0u;
 			return static_cast<uint32_t>(s.impObj()->nodeId());
 		})
 		// ---- value() -> PyDbEvalVariant（按值返回表达式值） ----
 		.def("value", [](const PyDbEvalExpr& s) {
+			if (!s.impObj()) return PyDbEvalVariant();
 			return PyDbEvalVariant(s.impObj()->value());
 		}, "返回表达式求值后的 AcDbEvalVariant 值（默认 kNone）。")
 		// ---- getGraph(AcDbEvalGraph** pGraph, OpenMode) -> PyDbObject（基类包装，调用方用完 close） ----
 		.def("getGraph", [](PyDbEvalExpr& s, int mode) -> PyDbObject {
+			if (s.isNull()) return PyDbObject(nullptr);
 			AcDbEvalGraph* pGraph = nullptr;
 			if (!PyWarnIfError(s.impObj()->getGraph(&pGraph, static_cast<AcDb::OpenMode>(mode)), L"AcDbEvalExpr::getGraph"))
 				return PyDbObject(nullptr);

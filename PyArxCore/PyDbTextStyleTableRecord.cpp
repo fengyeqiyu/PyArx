@@ -59,20 +59,24 @@ void bind_PyDbTextStyleTableRecord(pym& m) {
 			return sOut;
 		})
 		.def("setFileName", [](PyDbTextStyleTableRecord& s, const AcString& v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setFileName(v.kwszPtr()), L"AcDbTextStyleTableRecord::setFileName");
 		}, py::arg("v"))
 		// ---- bigFontFileName ----
 		.def("bigFontFileName", [](PyDbTextStyleTableRecord& s) -> AcString {
+			if (s.isNull()) return AcString();
 			AcString sOut;
 			if (!PyWarnIfError(s.impObj()->bigFontFileName(sOut), L"AcDbTextStyleTableRecord::bigFontFileName")) return AcString();
 			return sOut;
 		})
 		.def("setBigFontFileName", [](PyDbTextStyleTableRecord& s, const AcString& v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setBigFontFileName(v.kwszPtr()), L"AcDbTextStyleTableRecord::setBigFontFileName");
 		}, py::arg("v"))
 		// ---- setFont（PAL FontUtils 枚举以 int 传入，内部 static_cast） ----
 		.def("setFont", [](PyDbTextStyleTableRecord& s, const AcString& typeface, bool bold, bool italic,
 				int charset, int pitch, int family, bool bAllowMissingFont) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setFont(typeface.kwszPtr(),
 				bold ? Adesk::kTrue : Adesk::kFalse,
 				italic ? Adesk::kTrue : Adesk::kFalse,
@@ -90,6 +94,7 @@ void bind_PyDbTextStyleTableRecord(pym& m) {
 			Charset charset = kUndefinedCharset;
 			Autodesk::AutoCAD::PAL::FontUtils::FontPitch pitch = Autodesk::AutoCAD::PAL::FontUtils::FontPitch::kDefault;
 			Autodesk::AutoCAD::PAL::FontUtils::FontFamily family = Autodesk::AutoCAD::PAL::FontUtils::FontFamily::kDoNotCare;
+			if (s.isNull()) return std::make_tuple(AcString(), false, false, 0, 0, 0);
 			if (!PyWarnIfError(s.impObj()->font(sTypeface, bold, italic, charset, pitch, family), L"AcDbTextStyleTableRecord::font")) {
 				return std::make_tuple(AcString(), false, false, 0, 0, 0);
 			}

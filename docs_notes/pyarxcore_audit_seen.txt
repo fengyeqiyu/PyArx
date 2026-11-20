@@ -610,3 +610,10 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 14:19 PyDbPolygonMesh.cpp:24/35/40/67/72 ② 已改 5 处补 isNull 判空
 2026-11-20 14:19 PyDbLongTransaction.cpp:14-72 ② 通过 全部 lambda 已有 !s.impObj() 前缀判空（扫描误报）
 2026-11-20 14:19 PyDbPolygonMesh.cpp:27/31/37/42/51/54/61/64/69/74 ② 未改 setter 侧 PyWarnIfError 前未判空，PyWarnIfError 仍会先解引用，下轮批量补
+2026-11-20 15:22 PyDbLinetypeTableRecord.cpp:13-116 ② 已改 21 处补 isNull 判空
+2026-11-20 15:22 PyDbTextStyleTableRecord.cpp:61-98 ② 已改 5 处补 isNull 判空
+2026-11-20 15:22 PyDbPolygonMesh.cpp:27-86 ② 已改 12 处 setter 补 isNull 判空
+2026-11-20 15:22 PyDbEvalExpr.cpp:15/19/23 ② 已改 3 处补判空
+2026-11-20 15:22 PyDbDictionaryWithDefault.cpp:25 ② 已改 1 处补判空
+2026-11-20 15:22 PyDbBlockReference.cpp:29 / PyDbEntity.cpp:81-90 / PyDbSymbolTable.cpp:79-108 / PyDbSpline.cpp:33-53 / PyDbMLeaderStyle.cpp:163 ② 通过 已有 !impObj() 前置守卫（扫描误报）
+2026-11-20 15:22 全项目 602 文件 ①⑥⑦⑧⑨ 全量 Grep 通过 AcArray py::class_=0、vcxproj 未登记=0、调试残留=0、python315t/PyGILState=0、mod_gil_not_used 在位、裸 catch 69 处为既有已知静默项

@@ -20,6 +20,7 @@ void bind_PyDbDictionaryWithDefault(pym& m) {
 		}, "默认条目的 ObjectId（0=空）")
 		// ---- setDefaultId(objId) -> bool ----
 		.def("setDefaultId", [](PyDbDictionaryWithDefault& s, uint64_t idv) -> bool {
+			if (s.isNull()) return false;
 			AcDbObjectId id;
 			id.setFromOldId(static_cast<Adesk::UIntPtr>(idv));
 			return PyWarnIfError(s.impObj()->setDefaultId(id), L"AcDbDictionaryWithDefault::setDefaultId");

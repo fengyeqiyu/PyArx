@@ -21,25 +21,29 @@ void bind_PyDbPolygonMesh(pym& m) {
 		PyWrapper_BIND(DbPolygonMesh)
 		// ---- polyMeshType（AcDb::PolyMeshType：0=kSimpleMesh 5=kQuad 6=kCubic 8=kBezier）----
 		.def("polyMeshType", [](PyDbPolygonMesh& s) {
-      if (s.isNull()) return 0;
+			if (s.isNull()) return 0;
 			return static_cast<int>(s.impObj()->polyMeshType());
 		})
 		.def("setPolyMeshType", [](PyDbPolygonMesh& s, int v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setPolyMeshType(static_cast<AcDb::PolyMeshType>(v)),
 				L"AcDbPolygonMesh::setPolyMeshType");
 		}, py::arg("v"))
 		.def("convertToPolyMeshType", [](PyDbPolygonMesh& s, int v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->convertToPolyMeshType(static_cast<AcDb::PolyMeshType>(v)),
 				L"AcDbPolygonMesh::convertToPolyMeshType");
 		}, py::arg("v"))
 		// ---- mSize / nSize ----
 		.def("mSize", [](PyDbPolygonMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->mSize()); })
 		.def("setMSize", [](PyDbPolygonMesh& s, int v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setMSize(static_cast<Adesk::Int16>(v)),
 				L"AcDbPolygonMesh::setMSize");
 		}, py::arg("v"))
 		.def("nSize", [](PyDbPolygonMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->nSize()); })
 		.def("setNSize", [](PyDbPolygonMesh& s, int v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setNSize(static_cast<Adesk::Int16>(v)),
 				L"AcDbPolygonMesh::setNSize");
 		}, py::arg("v"))
@@ -49,9 +53,11 @@ void bind_PyDbPolygonMesh(pym& m) {
 			return s.impObj()->isMClosed() != Adesk::kFalse;
 		})
 		.def("makeMClosed", [](PyDbPolygonMesh& s) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->makeMClosed(), L"AcDbPolygonMesh::makeMClosed");
 		})
 		.def("makeMOpen", [](PyDbPolygonMesh& s) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->makeMOpen(), L"AcDbPolygonMesh::makeMOpen");
 		})
 		.def("isNClosed", [](PyDbPolygonMesh& s) {
@@ -59,27 +65,33 @@ void bind_PyDbPolygonMesh(pym& m) {
 			return s.impObj()->isNClosed() != Adesk::kFalse;
 		})
 		.def("makeNClosed", [](PyDbPolygonMesh& s) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->makeNClosed(), L"AcDbPolygonMesh::makeNClosed");
 		})
 		.def("makeNOpen", [](PyDbPolygonMesh& s) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->makeNOpen(), L"AcDbPolygonMesh::makeNOpen");
 		})
 		// ---- 曲面密度 ----
 		.def("mSurfaceDensity", [](PyDbPolygonMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->mSurfaceDensity()); })
 		.def("setMSurfaceDensity", [](PyDbPolygonMesh& s, int v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setMSurfaceDensity(static_cast<Adesk::Int16>(v)),
 				L"AcDbPolygonMesh::setMSurfaceDensity");
 		}, py::arg("v"))
 		.def("nSurfaceDensity", [](PyDbPolygonMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->nSurfaceDensity()); })
 		.def("setNSurfaceDensity", [](PyDbPolygonMesh& s, int v) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setNSurfaceDensity(static_cast<Adesk::Int16>(v)),
 				L"AcDbPolygonMesh::setNSurfaceDensity");
 		}, py::arg("v"))
 		// ---- straighten / surfaceFit ----
 		.def("straighten", [](PyDbPolygonMesh& s) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->straighten(), L"AcDbPolygonMesh::straighten");
 		})
 		.def("surfaceFit", [](PyDbPolygonMesh& s, int surfType, int surfu, int surfv) {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->surfaceFit(static_cast<AcDb::PolyMeshType>(surfType),
 				static_cast<Adesk::Int16>(surfu), static_cast<Adesk::Int16>(surfv)),
 				L"AcDbPolygonMesh::surfaceFit");

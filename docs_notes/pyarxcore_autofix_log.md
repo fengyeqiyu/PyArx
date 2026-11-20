@@ -178,3 +178,8 @@
 2026-11-20 14:19 | PyDbDgnDefinition.cpp:14/23/32 | ② | useMasterUnits/xrefDepth/showRasterRef 补 isNull 守卫
 2026-11-20 14:19 | PyDbPolyFaceMesh.cpp:23/24 | ② | numVertices/numFaces 补 isNull 守卫
 2026-11-20 14:19 | PyDbPolygonMesh.cpp:24/35/40/67/72 | ② | polyMeshType/mSize/nSize/mSurfaceDensity/nSurfaceDensity 补 isNull 守卫
+2026-11-20 15:22 | PyDbLinetypeTableRecord.cpp:13-116 | ② | 21 处 lambda（comments/asciiDescription/setComments/setAsciiDescription/dashLengthAt/setDashLengthAt/shapeStyleAt/shapeNumberAt/shapeOffsetAt/shapeScaleAt/shapeIsUcsOrientedAt/shapeRotationAt/setShape*/textAt/setTextAt/setIsScaledToFit 等）补 isNull 守卫
+2026-11-20 15:22 | PyDbTextStyleTableRecord.cpp:61-98 | ② | setFileName/bigFontFileName/setBigFontFileName/setFont/font 5 处补 isNull 守卫
+2026-11-20 15:22 | PyDbPolygonMesh.cpp:27-86 | ② | 12 个 setter（setPolyMeshType/convertToPolyMeshType/setMSize/setNSize/makeMClosed/makeMOpen/makeNClosed/makeNOpen/setMSurfaceDensity/setNSurfaceDensity/straighten/surfaceFit）在 PyWarnIfError 前补 isNull 守卫；polyMeshType 守卫缩进由空格改 tab
+2026-11-20 15:22 | PyDbEvalExpr.cpp:15/19/23 | ② | nodeId/value/getGraph 补 isNull/impObj 守卫，空包装返回 0u / 空 PyDbEvalVariant / PyDbObject(nullptr)
+2026-11-20 15:22 | PyDbDictionaryWithDefault.cpp:25 | ② | setDefaultId 补 isNull 守卫返回 False
