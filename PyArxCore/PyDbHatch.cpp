@@ -38,7 +38,8 @@ std::tuple<double, double, double, double, double, AcGeDoubleArray> PyDbHatch::g
 	if (!impObj()) return std::make_tuple(0.0, 0.0, 0.0, 0.0, 0.0, AcGeDoubleArray());
 	double angle = 0.0, baseX = 0.0, baseY = 0.0, offX = 0.0, offY = 0.0;
 	AcGeDoubleArray dashes;
-	if (impObj()->getPatternDefinitionAt(index, angle, baseX, baseY, offX, offY, dashes) != Acad::eOk)
+	Acad::ErrorStatus es = impObj()->getPatternDefinitionAt(index, angle, baseX, baseY, offX, offY, dashes);
+	if (!PyWarnIfError(es, L"AcDbHatch::getPatternDefinitionAt"))
 		return { 0.0, 0.0, 0.0, 0.0, 0.0, AcGeDoubleArray() };
 	return { angle, baseX, baseY, offX, offY, dashes };
 }
@@ -136,7 +137,8 @@ void bind_PyDbHatch(pym& m) {
 		.def("getAssocObjIds", [](const PyDbHatch& self) -> std::vector<uint64_t> {
 			AcDbObjectIdArray ids;
 			if (!self.impObj()) return {};
-			if (self.impObj()->getAssocObjIds(ids) != Acad::eOk) return {};
+			Acad::ErrorStatus es = self.impObj()->getAssocObjIds(ids);
+			if (!PyWarnIfError(es, L"AcDbHatch::getAssocObjIds")) return {};
 			std::vector<uint64_t> out;
 			out.reserve(ids.length());
 			for (int i = 0; i < ids.length(); ++i) out.push_back((uint64_t)ids[i].asOldId());
@@ -145,7 +147,8 @@ void bind_PyDbHatch(pym& m) {
 		.def("getAssocObjIdsAt", [](const PyDbHatch& self, int loopIndex) -> std::vector<uint64_t> {
 			AcDbObjectIdArray ids;
 			if (!self.impObj()) return {};
-			if (self.impObj()->getAssocObjIdsAt(loopIndex, ids) != Acad::eOk) return {};
+			Acad::ErrorStatus es = self.impObj()->getAssocObjIdsAt(loopIndex, ids);
+			if (!PyWarnIfError(es, L"AcDbHatch::getAssocObjIdsAt")) return {};
 			std::vector<uint64_t> out;
 			out.reserve(ids.length());
 			for (int i = 0; i < ids.length(); ++i) out.push_back((uint64_t)ids[i].asOldId());

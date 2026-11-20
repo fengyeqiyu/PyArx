@@ -56,7 +56,8 @@ std::vector<PyDbEntity> PyDbCurve::getSplitCurves(const std::vector<AcGePoint3d>
 	AcGePoint3dArray arr;
 	for (const auto& p : points) arr.append(p);
 	AcDbVoidPtrArray segs;
-	if (impObj()->getSplitCurves(arr, segs) != Acad::eOk) return out;
+	Acad::ErrorStatus es = impObj()->getSplitCurves(arr, segs);
+	if (!PyWarnIfError(es, L"AcDbCurve::getSplitCurves")) return out;
 	for (int i = 0; i < segs.length(); ++i) out.emplace_back(static_cast<AcDbEntity*>(segs[i]));
 	return out;
 }
@@ -65,7 +66,8 @@ std::vector<PyDbEntity> PyDbCurve::getOffsetCurvesGivenPlaneNormal(const AcGeVec
 	if (!impObj()) return {};
 	std::vector<PyDbEntity> out;
 	AcDbVoidPtrArray arr;
-	if (impObj()->getOffsetCurvesGivenPlaneNormal(normal, offsetDist, arr) != Acad::eOk) return out;
+	Acad::ErrorStatus es = impObj()->getOffsetCurvesGivenPlaneNormal(normal, offsetDist, arr);
+	if (!PyWarnIfError(es, L"AcDbCurve::getOffsetCurvesGivenPlaneNormal")) return out;
 	for (int i = 0; i < arr.length(); ++i) out.emplace_back(static_cast<AcDbEntity*>(arr[i]));
 	return out;
 }

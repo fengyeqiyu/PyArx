@@ -112,7 +112,8 @@ uint64_t PyDbBlockTableRecord::appendAcDbEntityId(PyDbEntity& pEntity) {
 int PyDbBlockTableRecord::numEntities() const {
 	if (!impObj()) return 0;
 	AcDbBlockTableRecordIterator* it = nullptr;
-	if (impObj()->newIterator(it) != Acad::eOk || !it) return 0;
+	Acad::ErrorStatus es = impObj()->newIterator(it);
+	if (!PyWarnIfError(es, L"AcDbBlockTableRecord::newIterator") || !it) return 0;
 	int n = 0;
 	for (it->start(true, true); !it->done(); it->step(true, true)) {
 		AcDbObjectId eid;
@@ -163,7 +164,8 @@ py::list PyDbBlockTableRecord::attdefData() const {
 	py::list out;
 	if (!impObj()) return out;
 	AcDbBlockTableRecordIterator* it = nullptr;
-	if (impObj()->newIterator(it) != Acad::eOk || !it) return out;
+	Acad::ErrorStatus es = impObj()->newIterator(it);
+	if (!PyWarnIfError(es, L"AcDbBlockTableRecord::newIterator") || !it) return out;
 	for (it->start(true, true); !it->done(); it->step(true, true)) {
 		AcDbObjectId eid;
 		if (it->getEntityId(eid) != Acad::eOk || eid.isNull()) continue;
@@ -306,7 +308,8 @@ void bind_PyDbBlockTableRecord(pym& m) {
 					pEnt = nullptr;
 					es = it->getEntity(pEnt, AcDb::kForRead, false);
 					delete it;
-					if (es != Acad::eOk || !pEnt) return PyDbEntity(nullptr);
+					if (!PyWarnIfError(es, L"AcDbBlockTableRecord::getEntityById")) return PyDbEntity(nullptr);
+					if (!pEnt) return PyDbEntity(nullptr);
 					PyDbOpenCache::Track(pEnt, AcDb::kForRead);
 					return PyDbEntity(pEnt);
 				}
