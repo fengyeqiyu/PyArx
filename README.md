@@ -4,7 +4,9 @@ AutoCAD（ObjectArx）+ MFC/XML 的 Python 绑定与控件库。C++ 侧用 pybin
 
 **一句话**：给 AutoCAD 二次开发一套「Python 写逻辑、XML 写界面」的桌面 UI 方案——自带 50+ MFC 自绘控件、可视化 UI 设计器（拖控件、改属性、所见即所得）和独立预览器。
 
-**关键词**：AutoCAD 二次开发 · ObjectArx · pybind11 · Python 3.15t · MFC · XML · 可视化 UI 设计器 · 自绘控件库 · 声明式界面 · 桌面 GUI 框架
+**关键词**：AutoCAD 二次开发 · ObjectArx · pybind11 · Python 3.15 · free-threaded · 无 GIL · MFC · XML · 可视化 UI 设计器 · 自绘控件库 · 声明式界面 · 桌面 GUI 框架 · AutoCAD plugin · CAD automation
+
+仓库地址：https://gitee.com/fengyeqiyu/PyArx
 
 ## 这个项目能做什么
 
@@ -28,7 +30,7 @@ PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XML UI 技术桥接到 Py
 | 目录 | 说明 |
 |------|------|
 | `PyArxCore` | ObjectArx 核心封装，包含 Python 模块入口、CAD 数据库交互、实体对象、事务管理等 |
-| `PyArxEngine` | 几何计算与业务逻辑引擎 |
+| `PyArxEngine` | AutoCAD `.arx` 入口：在 CAD 进程内加载 Python 运行时、注册命令、把命令派发给 PyArxCore |
 | `MfcXmlCore` | XML 解析引擎、控件库（controls\Xml*.h/.cpp）、属性表（XmlTypes.h）、事件契约（XmlEvents.h） |
 | `PyMfcXml` | MFC 宿主程序，包含窗口管理、皮肤自绘、事件派发（PyMfcHost / PyMfcProcs / PyMfcLoad） |
 | `MfcXmlRuntime` | 复合控件运行框架（Python 实现） |
@@ -48,8 +50,8 @@ PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XML UI 技术桥接到 Py
 
 - Windows 64 位系统
 - Visual Studio / MSBuild
-- Python 3.15t 或兼容版本
-- ObjectArx SDK
+- Python 3.15：默认 free-threaded（3.15t，`python315t.dll`）；GIL 版 3.15（`python315.dll`）同样可用，源码按 `Py_GIL_DISABLED` 自动选择 `python315t.lib` / `python315.lib`
+- ObjectArx SDK 2024
 
 ### 构建命令
 
@@ -61,8 +63,11 @@ MSBuild PyArx.sln /t:PyMfcXml /p:Configuration=Release /p:Platform=x64 /p:VcpkgA
 
 - 输出目录：`X64\Release`
 - 主要产物：
-  - `PyMfcXml.pyd` - Python 可导入模块
-  - `MfcXmlCore.dll` - 核心控件库
+  - `PyArxCore.pyd` - CAD 绑定模块（在 AutoCAD 进程内加载）
+  - `PyArxEngine.arx` / `PyArxEngine.dll` - CAD 入口、命令注册与派发
+  - `PyMfcXml.pyd` - MFC 宿主模块（Python 可导入）
+  - `MfcXmlCore.dll` / `MfcXamlCore.dll` - 基础控件库与 XAML 组合层
+  - `python315t.dll` 等运行时依赖 - Python 3.15 free-threaded，需随产物一起分发
 
 > **注意**：`res` 目录不随构建自动拷贝，修改资源后需手工复制到产物目录。
 
@@ -105,6 +110,13 @@ ObjectArx 核心 Python 绑定，包含：
 - 反应器（数据库反应器、对象反应器）
 - 侧栏（CAdUiPaletteSet / CAdUiPalette），页内控件宿主由 GUI 层回填
 
+### PyArxEngine
+
+AutoCAD ARX 入口与 Python 运行时宿主：
+- 加载 `PyArxEngine.arx` 后注册命令：`PYLOAD` / `PYRUN` / `PYRUNFILE` / `PYEXEC` / `PYDEBUG` / `PIPM` / `PYARXDEPLOY`
+- 首次执行命令时按需初始化 Python 引擎，运行时 dll 按 `Py_GIL_DISABLED` 选择 `python315t.dll`（free-threaded）/ `python315.dll`
+- 执行结果与错误回显到 CAD 命令行；初始化细节写入 `pyengine.log`
+
 ### MfcXmlCore
 
 XML 解析与控件系统：
@@ -122,6 +134,13 @@ XML 解析与控件系统：
 - Runtime：控件运行时管理
 - 自动事件绑定与属性映射
 
+## 运行时与依赖
+
+- 目标 Python 为 3.15 free-threaded（无 GIL，`python315t.dll`）；GIL 版 `python315.dll` 走同一套源码。
+- `python315t.lib` / `python315.lib` 由 `Py_GIL_DISABLED` 决定，源码中不硬编码单一 dll 名。
+- 模块入口用 `PYBIND11_MODULE(..., py::mod_gil_not_used())` 声明，free-threaded 下可直接调用。
+- 打包分发时把 `python315t.dll` 及其依赖（`python3t.dll`、`libffi-8.dll` 等）与 `PyArxCore.pyd` / `PyArxEngine.arx` / `PyMfcXml.pyd` 放同一目录；依赖链可 `dumpbin /DEPENDENTS` 复核。
+
 ## 版本与分支约定
 
 - `master` 永远是最新代码，所有提交直接落在 `master` 上；历史版本不靠分支保存，靠 **tag** 固定。
@@ -134,4 +153,4 @@ XML 解析与控件系统：
 
 ## 许可
 
-见 `LICENSE` 文件。
+MIT License，见 `LICENSE` 文件（Copyright (c) 2023 陈辉）。
