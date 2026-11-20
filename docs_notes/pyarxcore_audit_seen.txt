@@ -578,3 +578,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 07:17 PyDbDynBlockReference.cpp:51/60/95/103 ② 通过 全部已由 DBREF_GUARD 宏前置判空（扫描误报）
 2026-11-20 08:18 PyDbOleFrame.cpp:19 PyDbSpatialFilter.cpp:69 PyDbDictionaryWithDefault.cpp:17 PyDbDatabase.cpp:3173 PyDbBlockTableRecord.cpp:279 PyDbLayerStateManager.cpp:84 ② 已改 6 处补判空
 2026-11-20 08:18 PyDbSweepOptions/PyDbLoftOptions/PyDbTextStyleTableRecord/PyDbLinetypeTableRecord setter 绑定 ③ 通过 已核 SDK 头文件 setAlign/setMiterOption/setBasePoint/setSweepEntityTransform/setNormal/setIsShapeFile/setIsVertical/setFlagBits/setIsScaledToFit 均为 void，return true 非丢弃 es
+2026-11-20 09:21 PyDbObjectContext.cpp:14/20/24/28 ② 已改 4 处补 isNull 判空
+2026-11-20 09:21 PyDbNurbSurface.cpp:33-237 ② 未改 17 个 lambda 直接 s.impObj()-> 且 init<AcDbNurbSurface*> 可传 None，单批 >20 行只报不改
+2026-11-20 09:21 PyDbSweepOptions/PyDbLoftOptions ② 通过 init<> 内部 new，wrapper 恒非空
+2026-11-20 09:21 PyDbTrans.cpp:29 ⑦ 通过 pdtDiag 在调试开关下写 stderr，非 ofstream 埋点
