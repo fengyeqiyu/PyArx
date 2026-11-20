@@ -203,3 +203,13 @@
 2026-11-20 20:19 | PyDbField.cpp:129 | ④ | getValue 同上补 PyWarnIfError
 2026-11-20 20:19 | PyDbObject.cpp:436 | ④ | getBinaryData 失败静默返回 (False, b'') → 补 PyWarnIfError(es, ...)
 2026-11-20 20:19 | PyDbDatabase.cpp:491 | ④ | purge 失败静默返回输入 ids → 补 PyWarnIfError
+2026-11-20 21:19 | PyDbCurve.cpp:103 | ④ | getOffsetCurves 失败静默返回空 list → 补 PyWarnIfError 再返回
+2026-11-20 21:19 | PyDbCurve.cpp:115 | ④ | getSplitCurves(参数) 同上补 PyWarnIfError
+2026-11-20 21:19 | PyDbCurve.cpp:126 | ④ | getSpline 失败静默返回空包装 → 补 PyWarnIfError
+2026-11-20 21:19 | PyDbCurve.cpp:137 | ④ | getProjectedCurve 同上补 PyWarnIfError
+2026-11-20 21:19 | PyDbCurve.cpp:143 | ④ | getOrthoProjectedCurve 同上补 PyWarnIfError
+2026-11-20 21:19 | PyDbCurve.cpp:150 | ④ | getAcGeCurve 失败静默返回 nullptr → 补 PyWarnIfError
+2026-11-20 21:19 | PyDbCurve.cpp:157 | ④ | createFromAcGeCurve 失败静默返回空包装 → 补 PyWarnIfError
+2026-11-20 21:19 | PyDbBlockTableRecord.cpp:280 | ④ | entityIds 的 newIterator 失败静默返回空 list → 补 PyWarnIfError
+2026-11-20 21:19 | PyDbBlockTableRecord.cpp:295 | ④ | entityAt 的 newIterator 失败静默返回空包装 → 补 PyWarnIfError
+2026-11-20 21:19 | PyDbBlockTableRecord.cpp:324 | ④ | refIds 的 newBlockReferenceIdIterator 失败静默 → 补 PyWarnIfError

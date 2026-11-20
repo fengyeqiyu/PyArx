@@ -678,3 +678,10 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 20:19 PyDbBlockReference.cpp:155/159、PyDbBlockTableRecord.cpp:132-307、PyDbBlockTableRecordIterator.cpp:83-94 ④ 通过 为 eWasOpenForRead 兼容分支，非错误静默
 2026-11-20 20:19 PyColor.cpp:62-77、PyDbDate.cpp:22-37 ⑤ 未改 同名一行转发 AcCmColor/AcDbDate 值对象，属值包装非冗余层；删除改动 Python 侧接口，只报不改
 2026-11-20 20:19 PyArxCore 全量 ①⑥⑦⑧⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / GIL_BAD=0 / mod_gil_not_used 在位 / 空 catch 9 处已核合理
+2026-11-20 21:19 PyDbCurve.cpp:103/115/126/137/143/150/157 ④ 已改 7 处失败补报错
+2026-11-20 21:19 PyDbBlockTableRecord.cpp:280/295/324 ④ 已改 3 处迭代器创建失败补报错
+2026-11-20 21:19 PyDbIndexUpdateDataIterator.cpp:37 ④ 通过 迭代器协议约定，失败返回 0 由 __next__ 上层判断，不刷告警
+2026-11-20 21:19 PyDbBlockTableRecordIterator.cpp:37 ④ 通过 currentId 返回 0 表示已到末尾，迭代器协议语义
+2026-11-20 21:19 PyDbBlockReference.cpp:169、PyDbEntity.cpp:106 ④ 通过 内部 static 辅助函数返回 false 由调用方回退，非用户路径
+2026-11-20 21:19 PyDbBlockTableRecord.cpp:303/307、PyDbBlockReference.cpp:159 ④ 通过 eWasOpenForWrite 回退只读重试路径，非静默丢弃
+2026-11-20 21:19 PyArxCore 全量 ①⑥⑦⑧⑨ 通过 ACARRAY_CLASS=0 / UNREGISTERED=0 / TEMP_RESIDUE=0 / python315t=0 / PYBIND11_MODULE 唯一且带 mod_gil_not_used / 空 catch 9 处已核合理 / ofstream 3 处均为日志或 .pyi 功能用途

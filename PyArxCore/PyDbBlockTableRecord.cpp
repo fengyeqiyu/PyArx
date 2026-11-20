@@ -277,7 +277,8 @@ void bind_PyDbBlockTableRecord(pym& m) {
 			py::list out;
 			AcDbBlockTableRecordIterator* it = nullptr;
 			if (self.isNull()) return out;
-			if (self.impObj()->newIterator(it) != Acad::eOk || !it) return out;
+			Acad::ErrorStatus es = self.impObj()->newIterator(it);
+			if (!PyWarnIfError(es, L"PyDbBlockTableRecord.newIterator") || !it) return out;
 			for (it->start(true, true); !it->done(); it->step(true, true)) {
 				AcDbObjectId eid;
 				if (it->getEntityId(eid) == Acad::eOk && !eid.isNull())
@@ -290,7 +291,8 @@ void bind_PyDbBlockTableRecord(pym& m) {
 		.def("entityAt", [](PyDbBlockTableRecord& self, int index, int mode) -> PyDbEntity {
 			if (!self.impObj()) return PyDbEntity(nullptr);
 			AcDbBlockTableRecordIterator* it = nullptr;
-			if (self.impObj()->newIterator(it, true, true) != Acad::eOk || !it) return PyDbEntity(nullptr);
+			Acad::ErrorStatus es0 = self.impObj()->newIterator(it, true, true);
+			if (!PyWarnIfError(es0, L"PyDbBlockTableRecord.newIterator") || !it) return PyDbEntity(nullptr);
 			int total = 0;
 			for (it->start(true, true); !it->done(); it->step(true, true)) ++total;
 			if (index < 0) index += total;
@@ -319,7 +321,8 @@ void bind_PyDbBlockTableRecord(pym& m) {
 			py::list out;
 			if (!self.impObj()) return out;
 			AcDbBlockReferenceIdIterator* it = nullptr;
-			if (self.impObj()->newBlockReferenceIdIterator(it) != Acad::eOk || !it) return out;
+			Acad::ErrorStatus es = self.impObj()->newBlockReferenceIdIterator(it);
+			if (!PyWarnIfError(es, L"PyDbBlockTableRecord.newBlockReferenceIdIterator") || !it) return out;
 			for (it->start(); !it->done(); it->step()) {
 				AcDbObjectId id;
 				if (it->getBlockReferenceId(id) == Acad::eOk && !id.isNull())

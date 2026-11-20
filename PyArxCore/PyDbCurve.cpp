@@ -100,7 +100,8 @@ void bind_PyDbCurve(pym& m) {
 			py::list out;
 			AcDbVoidPtrArray arr;
 			if (!self.impObj()) return out;
-			if (self.impObj()->getOffsetCurves(dist, arr) != Acad::eOk) return out;
+			Acad::ErrorStatus es = self.impObj()->getOffsetCurves(dist, arr);
+			if (!PyWarnIfError(es, L"PyDbCurve.getOffsetCurves")) return out;
 			for (int i = 0; i < arr.length(); ++i)
 				out.append(PyDbEntity(static_cast<AcDbEntity*>(arr[i])));
 			return out;
@@ -112,7 +113,8 @@ void bind_PyDbCurve(pym& m) {
 			for (double d : params) arr.append(d);
 			AcDbVoidPtrArray segs;
 			if (!self.impObj()) return out;
-			if (self.impObj()->getSplitCurves(arr, segs) != Acad::eOk) return out;
+			Acad::ErrorStatus es = self.impObj()->getSplitCurves(arr, segs);
+			if (!PyWarnIfError(es, L"PyDbCurve.getSplitCurves")) return out;
 			for (int i = 0; i < segs.length(); ++i)
 				out.append(PyDbEntity(static_cast<AcDbEntity*>(segs[i])));
 			return out;
@@ -121,7 +123,8 @@ void bind_PyDbCurve(pym& m) {
 		.def("getSpline", [](const PyDbCurve& self) -> PyDbSpline {
 			AcDbSpline* sp = nullptr;
 			if (!self.impObj()) return PyDbSpline(nullptr);
-			if (self.impObj()->getSpline(sp) != Acad::eOk) sp = nullptr;
+			Acad::ErrorStatus es = self.impObj()->getSpline(sp);
+			if (!PyWarnIfError(es, L"PyDbCurve.getSpline")) sp = nullptr;
 			return PyDbSpline(sp);
 		}, "拟合为样条曲线（未入库）")
 		// 按点列分割曲线，返回新曲线列表（未入库）
@@ -134,26 +137,30 @@ void bind_PyDbCurve(pym& m) {
 		.def("getProjectedCurve", [](const PyDbCurve& self, const AcGePlane& pl, const AcGeVector3d& projDir) -> PyDbCurve {
 			AcDbCurve* c = nullptr;
 			if (!self.impObj()) return PyDbCurve(nullptr);
-			if (self.impObj()->getProjectedCurve(pl, projDir, c) != Acad::eOk) c = nullptr;
+			Acad::ErrorStatus es = self.impObj()->getProjectedCurve(pl, projDir, c);
+			if (!PyWarnIfError(es, L"PyDbCurve.getProjectedCurve")) c = nullptr;
 			return PyDbCurve(c);
 		}, py::arg("plane"), py::arg("proj_dir"), "沿方向投影到平面，返回新曲线（未入库）")
 		.def("getOrthoProjectedCurve", [](const PyDbCurve& self, const AcGePlane& pl) -> PyDbCurve {
 			AcDbCurve* c = nullptr;
 			if (!self.impObj()) return PyDbCurve(nullptr);
-			if (self.impObj()->getOrthoProjectedCurve(pl, c) != Acad::eOk) c = nullptr;
+			Acad::ErrorStatus es = self.impObj()->getOrthoProjectedCurve(pl, c);
+			if (!PyWarnIfError(es, L"PyDbCurve.getOrthoProjectedCurve")) c = nullptr;
 			return PyDbCurve(c);
 		}, py::arg("plane"), "正交投影到平面，返回新曲线（未入库）")
 		// 取出对应的 GE 曲线（堆对象，返回裸指针由 Python 接管 delete）
 		.def("getAcGeCurve", [](const PyDbCurve& self) -> AcGeCurve3d* {
 			AcGeCurve3d* g = nullptr;
 			if (!self.impObj()) return nullptr;
-			if (self.impObj()->getAcGeCurve(g) != Acad::eOk) return nullptr;
+			Acad::ErrorStatus es = self.impObj()->getAcGeCurve(g);
+			if (!PyWarnIfError(es, L"PyDbCurve.getAcGeCurve")) return nullptr;
 			return g;
 		}, "返回对应的 AcGeCurve3d（堆对象，Python 接管内存）")
 		// 由 GE 曲线新建 AcDbCurve（静态，未入库）
 		.def_static("createFromAcGeCurve", [](const AcGeCurve3d& geCurve) -> PyDbCurve {
 			AcDbCurve* dbc = nullptr;
-			if (AcDbCurve::createFromAcGeCurve(geCurve, dbc) != Acad::eOk) dbc = nullptr;
+			Acad::ErrorStatus es = AcDbCurve::createFromAcGeCurve(geCurve, dbc);
+			if (!PyWarnIfError(es, L"PyDbCurve.createFromAcGeCurve")) dbc = nullptr;
 			return PyDbCurve(dbc);
 		}, py::arg("ge_curve"), "由 AcGeCurve3d 创建 AcDbCurve（未入库，需 appendEntity）")
 		// 用 GE 曲线重设当前曲线
