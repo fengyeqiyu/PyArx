@@ -11,6 +11,7 @@ void bind_PyDbDgnDefinition(pym& m) {
 		PyWrapper_BIND(DbDgnDefinition)
 		// ---- useMasterUnits ----
 		.def("useMasterUnits", [](PyDbDgnDefinition& s) -> bool {
+			if (s.isNull()) return false;
 			return s.impObj()->useMasterUnits();
 		})
 		.def("setUseMasterUnits", [](PyDbDgnDefinition& s, bool v) -> bool {
@@ -19,6 +20,7 @@ void bind_PyDbDgnDefinition(pym& m) {
 			return true;
 		}, py::arg("v"))
 		// ---- xrefDepth ----
+		if (s.isNull()) return 0;
 		.def("xrefDepth", [](PyDbDgnDefinition& s) -> int {
 			return s.impObj()->xrefDepth();
 		})
@@ -27,6 +29,7 @@ void bind_PyDbDgnDefinition(pym& m) {
 			s.impObj()->setXrefDepth(v);
 			return true;
 		}, py::arg("v"))
+		if (s.isNull()) return false;
 		// ---- showRasterRef ----
 		.def("showRasterRef", [](PyDbDgnDefinition& s) -> bool {
 			return s.impObj()->showRasterRef();

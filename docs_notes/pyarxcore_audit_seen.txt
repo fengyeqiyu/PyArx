@@ -603,3 +603,10 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-20 13:21 PyDbSymbolTableRecord.h..PyGeEllipArc2d.cpp 共 59 文件 ①⑥⑦⑧⑨ 通过 全量 Grep 抽查无命中；②③④ 纳入同轮严格扫描未见新增
 2026-11-20 13:21 PyGeEllipArc2d.h..PyGeSplineEnt3d.cpp 共 59 文件 ①⑥⑦⑧⑨ 通过 全量 Grep 抽查无命中；②③④ 纳入同轮严格扫描未见新增
 2026-11-20 13:21 PyGeSplineEnt3d.h..stdafx.cpp 共 58 文件 ①⑥⑦⑧⑨ 通过 全量 Grep 抽查无命中；②③④ 纳入同轮严格扫描未见新增
+2026-11-20 14:19 PyDbTable.cpp:91-100 ② 已改 9 处补 isNull 判空
+2026-11-20 14:19 PyDbSpatialFilter.cpp:57/61/64/74 ② 已改 4 处补 isNull 判空
+2026-11-20 14:19 PyDbDgnDefinition.cpp:14/23/32 ② 已改 3 处补 isNull 判空
+2026-11-20 14:19 PyDbPolyFaceMesh.cpp:23/24 ② 已改 2 处补 isNull 判空
+2026-11-20 14:19 PyDbPolygonMesh.cpp:24/35/40/67/72 ② 已改 5 处补 isNull 判空
+2026-11-20 14:19 PyDbLongTransaction.cpp:14-72 ② 通过 全部 lambda 已有 !s.impObj() 前缀判空（扫描误报）
+2026-11-20 14:19 PyDbPolygonMesh.cpp:27/31/37/42/51/54/61/64/69/74 ② 未改 setter 侧 PyWarnIfError 前未判空，PyWarnIfError 仍会先解引用，下轮批量补

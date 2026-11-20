@@ -54,13 +54,16 @@ void bind_PyDbSpatialFilter(pym& m) {
 		}, "返回视图体 (相机点, 目标点, up, viewField)")
 		// ---- hasPerspectiveCamera() -> bool ----
 		.def("hasPerspectiveCamera", [](const PyDbSpatialFilter& s) -> bool {
+			if (s.isNull()) return false;
 			return s.impObj()->hasPerspectiveCamera() != Adesk::kFalse;
 		}, "是否使用透视相机")
 		// ---- isInverted() / setInverted ----
 		.def("isInverted", [](const PyDbSpatialFilter& s) -> bool {
+			if (s.isNull()) return false;
 			return s.impObj()->isInverted();
 		}, "裁剪是否反转")
 		.def("setInverted", [](PyDbSpatialFilter& s, bool b) -> bool {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setInverted(b), L"AcDbSpatialFilter::setInverted");
 		}, py::arg("inverted"), "设置裁剪反转")
 		// ---- queryBounds(ext)：SDK 中带 pRefBlkRef 的重载标注 To Be Obsoleted，这里绑无参版本 ----
@@ -71,6 +74,7 @@ void bind_PyDbSpatialFilter(pym& m) {
 		}, py::arg("ext"), "计算裁剪后包围盒（写入 ext.impObj()）")
 		// ---- setPerspectiveCamera(fromPt) -> bool ----
 		.def("setPerspectiveCamera", [](PyDbSpatialFilter& s, const AcGePoint3d& fromPt) -> bool {
+			if (s.isNull()) return false;
 			return PyWarnIfError(s.impObj()->setPerspectiveCamera(fromPt),
 				L"AcDbSpatialFilter::setPerspectiveCamera");
 		}, py::arg("from_pt"), "设置透视相机位置")

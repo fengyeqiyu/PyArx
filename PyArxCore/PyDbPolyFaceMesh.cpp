@@ -20,8 +20,8 @@ void bind_PyDbPolyFaceMesh(pym& m) {
 		.def(py::init<AcDbPolyFaceMesh*>(), py::arg("p"))
 		PyWrapper_BIND(DbPolyFaceMesh)
 		// ---- numVertices / numFaces ----
-		.def("numVertices", [](PyDbPolyFaceMesh& s) { return static_cast<int>(s.impObj()->numVertices()); })
-		.def("numFaces", [](PyDbPolyFaceMesh& s) { return static_cast<int>(s.impObj()->numFaces()); })
+		.def("numVertices", [](PyDbPolyFaceMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->numVertices()); })
+		.def("numFaces", [](PyDbPolyFaceMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->numFaces()); })
 		// ---- openSequenceEnd（返回 PyDbSequenceEnd 包装，内部接管）----
 		.def("openSequenceEnd", &PyDbPolyFaceMesh::openSequenceEnd, py::arg("mode"))
 		;

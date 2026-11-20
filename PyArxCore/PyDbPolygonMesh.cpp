@@ -21,6 +21,7 @@ void bind_PyDbPolygonMesh(pym& m) {
 		PyWrapper_BIND(DbPolygonMesh)
 		// ---- polyMeshType（AcDb::PolyMeshType：0=kSimpleMesh 5=kQuad 6=kCubic 8=kBezier）----
 		.def("polyMeshType", [](PyDbPolygonMesh& s) {
+      if (s.isNull()) return 0;
 			return static_cast<int>(s.impObj()->polyMeshType());
 		})
 		.def("setPolyMeshType", [](PyDbPolygonMesh& s, int v) {
@@ -32,12 +33,12 @@ void bind_PyDbPolygonMesh(pym& m) {
 				L"AcDbPolygonMesh::convertToPolyMeshType");
 		}, py::arg("v"))
 		// ---- mSize / nSize ----
-		.def("mSize", [](PyDbPolygonMesh& s) { return static_cast<int>(s.impObj()->mSize()); })
+		.def("mSize", [](PyDbPolygonMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->mSize()); })
 		.def("setMSize", [](PyDbPolygonMesh& s, int v) {
 			return PyWarnIfError(s.impObj()->setMSize(static_cast<Adesk::Int16>(v)),
 				L"AcDbPolygonMesh::setMSize");
 		}, py::arg("v"))
-		.def("nSize", [](PyDbPolygonMesh& s) { return static_cast<int>(s.impObj()->nSize()); })
+		.def("nSize", [](PyDbPolygonMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->nSize()); })
 		.def("setNSize", [](PyDbPolygonMesh& s, int v) {
 			return PyWarnIfError(s.impObj()->setNSize(static_cast<Adesk::Int16>(v)),
 				L"AcDbPolygonMesh::setNSize");
@@ -64,12 +65,12 @@ void bind_PyDbPolygonMesh(pym& m) {
 			return PyWarnIfError(s.impObj()->makeNOpen(), L"AcDbPolygonMesh::makeNOpen");
 		})
 		// ---- 曲面密度 ----
-		.def("mSurfaceDensity", [](PyDbPolygonMesh& s) { return static_cast<int>(s.impObj()->mSurfaceDensity()); })
+		.def("mSurfaceDensity", [](PyDbPolygonMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->mSurfaceDensity()); })
 		.def("setMSurfaceDensity", [](PyDbPolygonMesh& s, int v) {
 			return PyWarnIfError(s.impObj()->setMSurfaceDensity(static_cast<Adesk::Int16>(v)),
 				L"AcDbPolygonMesh::setMSurfaceDensity");
 		}, py::arg("v"))
-		.def("nSurfaceDensity", [](PyDbPolygonMesh& s) { return static_cast<int>(s.impObj()->nSurfaceDensity()); })
+		.def("nSurfaceDensity", [](PyDbPolygonMesh& s) { if (s.isNull()) return 0; return static_cast<int>(s.impObj()->nSurfaceDensity()); })
 		.def("setNSurfaceDensity", [](PyDbPolygonMesh& s, int v) {
 			return PyWarnIfError(s.impObj()->setNSurfaceDensity(static_cast<Adesk::Int16>(v)),
 				L"AcDbPolygonMesh::setNSurfaceDensity");

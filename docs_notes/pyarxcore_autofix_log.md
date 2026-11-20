@@ -173,3 +173,8 @@
 2026-11-20 12:18 | PyDbDatabase.cpp:2042/2050/2058 | ④ | getDimblk/getDimblk1/getDimblk2 失败静默返回空串，改 PyWarnIfError；顺带清掉两行乱码注释
 2026-11-20 13:21 | PyDbTextStyleTableRecord.cpp:13/15/19/21/25/27/31/33/37/39/43/45/49/51/55 | ② | 15 处 getter/setter lambda 补 s.isNull() 守卫，空包装返回默认值
 2026-11-20 13:21 | PyDbOleFrame.cpp:25 | ② | setOleObject 补 isNull 守卫（init<AcDbOleFrame*> 可传 None）
+2026-11-20 14:19 | PyDbTable.cpp:91-100 | ② | 9 处 getter lambda 补 o.isNull() 守卫，空包装返回 0/False
+2026-11-20 14:19 | PyDbSpatialFilter.cpp:57/61/64/74 | ② | hasPerspectiveCamera/isInverted/setInverted/setPerspectiveCamera 补 isNull 守卫
+2026-11-20 14:19 | PyDbDgnDefinition.cpp:14/23/32 | ② | useMasterUnits/xrefDepth/showRasterRef 补 isNull 守卫
+2026-11-20 14:19 | PyDbPolyFaceMesh.cpp:23/24 | ② | numVertices/numFaces 补 isNull 守卫
+2026-11-20 14:19 | PyDbPolygonMesh.cpp:24/35/40/67/72 | ② | polyMeshType/mSize/nSize/mSurfaceDensity/nSurfaceDensity 补 isNull 守卫
