@@ -4,7 +4,10 @@ AutoCAD（ObjectArx）+ MFC/XML 的 Python 绑定与控件库。C++ 侧用 pybin
 
 **一句话**：给 AutoCAD 二次开发一套「Python 写逻辑、XML 写界面」的桌面 UI 方案——自带 50+ MFC 自绘控件、可视化 UI 设计器（拖控件、改属性、所见即所得）和独立预览器。
 
-**关键词**：AutoCAD 二次开发 · ObjectArx · pybind11 · Python 3.15 · free-threaded · 无 GIL · MFC · XML · 可视化 UI 设计器 · 自绘控件库 · 声明式界面 · 桌面 GUI 框架 · AutoCAD plugin · CAD automation
+**关键词 / Keywords**
+
+- 中文：AutoCAD 二次开发、ObjectARX 开发、Python 写 CAD 插件、MFC 自绘控件库、XML 声明式界面、可视化 UI 设计器、桌面 GUI 框架、CAD automation
+- 英文：PyArx, ObjectARX binding, Python for AutoCAD, AutoCAD plugin in Python, pybind11 binding, MFC custom control library, XML declarative UI, declarative GUI engine, UI designer, CAD automation, free-threaded Python 3.15
 
 仓库地址：
 
