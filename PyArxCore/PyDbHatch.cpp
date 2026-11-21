@@ -163,7 +163,8 @@ void bind_PyDbHatch(pym& m) {
 			AcGePoint2dArray verts;
 			AcGeDoubleArray bulges;
 			if (!self.impObj()) return { 0, AcGePoint2dArray(), AcGeDoubleArray() };
-			if (self.impObj()->getLoopAt(loopIndex, loopType, verts, bulges) != Acad::eOk)
+			Acad::ErrorStatus es = self.impObj()->getLoopAt(loopIndex, loopType, verts, bulges);
+			if (!PyWarnIfError(es, L"AcDbHatch::getLoopAt"))
 				return { 0, AcGePoint2dArray(), AcGeDoubleArray() };
 			return { (int)loopType, verts, bulges };
 		}, py::arg("loop_index"), "读取环: 返回 (loopType, 顶点列, 凸度列)")
@@ -190,7 +191,8 @@ void bind_PyDbHatch(pym& m) {
 		.def("evaluateGradientColorAt", [](PyDbHatch& self, float value) -> std::tuple<int, int, int> {
 			AcCmColor c;
 			if (!self.impObj()) return { 0, 0, 0 };
-			if (self.impObj()->evaluateGradientColorAt(value, c) != Acad::eOk) return { 0, 0, 0 };
+			Acad::ErrorStatus es = self.impObj()->evaluateGradientColorAt(value, c);
+			if (!PyWarnIfError(es, L"AcDbHatch::evaluateGradientColorAt")) return { 0, 0, 0 };
 			return { (int)c.red(), (int)c.green(), (int)c.blue() };
 		}, py::arg("value"), "评估渐变在 value[0..1] 处的颜色 (r,g,b)")
 		.def("setShadeTintValueAndColor2", [](PyDbHatch& self, float value) -> bool {
@@ -201,7 +203,8 @@ void bind_PyDbHatch(pym& m) {
 			AcCmColor* colors = nullptr;
 			float* values = nullptr;
 			if (!self.impObj()) return { {}, {} };
-			if (self.impObj()->getGradientColors(count, colors, values) != Acad::eOk) return { {}, {} };
+			Acad::ErrorStatus es = self.impObj()->getGradientColors(count, colors, values);
+			if (!PyWarnIfError(es, L"AcDbHatch::getGradientColors")) return { {}, {} };
 			std::vector<std::tuple<int, int, int>> cc;
 			std::vector<float> vals;
 			cc.reserve(count);

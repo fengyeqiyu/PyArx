@@ -85,10 +85,12 @@ uint64_t PyDbDatabase::addToCurrentspace(PyDbObject& entity) {
 py::list PyDbDatabase::objectIds(const std::string& className) const {
 	py::list result;
 	AcDbBlockTableRecordPointer modelSpace(acdbSymUtil()->blockModelSpaceId(impObj()), AcDb::kForRead);
-	if (modelSpace.openStatus() != Acad::eOk) return result;
+	Acad::ErrorStatus es = modelSpace.openStatus();
+	if (!PyWarnIfError(es, L"AcDbBlockTableRecordPointer::openStatus")) return result;
 
 	AcDbBlockTableRecordIterator* pIter = nullptr;
-	if (modelSpace->newIterator(pIter) != Acad::eOk) return result;
+	es = modelSpace->newIterator(pIter);
+	if (!PyWarnIfError(es, L"AcDbBlockTableRecord::newIterator")) return result;
 
 	// 空串或 "AcDbEntity" 视为通配，返回模型空间全部对象；否则按注册类名（含派生类）匹配。
 	const bool wildcard = className.empty() || className == "AcDbEntity";

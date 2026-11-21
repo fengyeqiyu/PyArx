@@ -27,7 +27,8 @@ std::vector<PyDbEntity> PyDbLine::getOffsetCurvesGivenPlaneNormal(const AcGeVect
 	if (!impObj()) return {};
 	std::vector<PyDbEntity> out;
 	AcDbVoidPtrArray arr;
-	if (!impObj() || impObj()->getOffsetCurvesGivenPlaneNormal(nrm, offsetDist, arr) != Acad::eOk) return out;
+	Acad::ErrorStatus es = impObj()->getOffsetCurvesGivenPlaneNormal(nrm, offsetDist, arr);
+	if (!PyWarnIfError(es, L"AcDbLine::getOffsetCurvesGivenPlaneNormal")) return out;
 	for (int i = 0; i < arr.length(); ++i)
 		out.emplace_back(static_cast<AcDbEntity*>(arr[i]));
 	return out;

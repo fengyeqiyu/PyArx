@@ -65,7 +65,9 @@ void bind_PyDbMPolygon(pym& m) {
 		.def("parentLoop", [](const PyDbMPolygon& s, int cur){ return static_cast<AcDbMPolygon*>(s.impObj())->getParentLoop(cur); }, py::arg("current_loop"))
 		.def("loopDirection", [](const PyDbMPolygon& s, int i) -> int {
 			AcDbMPolygon::loopDir d = AcDbMPolygon::kExterior;
-			if (static_cast<AcDbMPolygon*>(s.impObj())->getLoopDirection(i, d) != Acad::eOk) return -1;
+			if (!s.impObj()) return -1;
+			Acad::ErrorStatus es = static_cast<AcDbMPolygon*>(s.impObj())->getLoopDirection(i, d);
+			if (!PyWarnIfError(es, L"AcDbMPolygon::getLoopDirection")) return -1;
 			return (int)d;
 		}, py::arg("index"), "环方向 0=外/1=内/2=标注")
 		.def("setLoopDirection", [](PyDbMPolygon& s, int i, int d){
@@ -82,7 +84,9 @@ void bind_PyDbMPolygon(pym& m) {
 		.def("getPatternDefinitionAt", [](const PyDbMPolygon& s, int index) -> std::tuple<double, double, double, double, double, AcGeDoubleArray> {
 			double angle = 0, baseX = 0, baseY = 0, offX = 0, offY = 0;
 			AcGeDoubleArray dashes;
-			if (static_cast<AcDbMPolygon*>(s.impObj())->getPatternDefinitionAt(index, angle, baseX, baseY, offX, offY, dashes) != Acad::eOk)
+			if (!s.impObj()) return { 0, 0, 0, 0, 0, AcGeDoubleArray() };
+			Acad::ErrorStatus es = static_cast<AcDbMPolygon*>(s.impObj())->getPatternDefinitionAt(index, angle, baseX, baseY, offX, offY, dashes);
+			if (!PyWarnIfError(es, L"AcDbMPolygon::getPatternDefinitionAt"))
 				return { 0, 0, 0, 0, 0, AcGeDoubleArray() };
 			return { angle, baseX, baseY, offX, offY, dashes };
 		}, py::arg("index"), "读取图案定义: (angle, baseX, baseY, offsetX, offsetY, dashes)")
@@ -160,7 +164,9 @@ void bind_PyDbMPolygon(pym& m) {
 		.def("getMPolygonLoopAt", [](const PyDbMPolygon& s, int index) -> std::tuple<AcGePoint2dArray, AcGeDoubleArray> {
 			AcGePoint2dArray verts;
 			AcGeDoubleArray bulges;
-			if (static_cast<AcDbMPolygon*>(s.impObj())->getMPolygonLoopAt(index, verts, bulges) != Acad::eOk)
+			if (!s.impObj()) return { AcGePoint2dArray(), AcGeDoubleArray() };
+			Acad::ErrorStatus es = static_cast<AcDbMPolygon*>(s.impObj())->getMPolygonLoopAt(index, verts, bulges);
+			if (!PyWarnIfError(es, L"AcDbMPolygon::getMPolygonLoopAt"))
 				return { AcGePoint2dArray(), AcGeDoubleArray() };
 			return { verts, bulges };
 		}, py::arg("index"), "读取环: (顶点列, 凸度列)")
@@ -177,14 +183,18 @@ void bind_PyDbMPolygon(pym& m) {
 		}, py::arg("current_loop"), "获取子环索引列表")
 		.def("getLoopAtGsMarker", [](const PyDbMPolygon& s, int gsMark) -> int {
 			int loop = -1;
-			if (static_cast<AcDbMPolygon*>(s.impObj())->getLoopAtGsMarker(gsMark, loop) != Acad::eOk) return -1;
+			if (!s.impObj()) return -1;
+			Acad::ErrorStatus es = static_cast<AcDbMPolygon*>(s.impObj())->getLoopAtGsMarker(gsMark, loop);
+			if (!PyWarnIfError(es, L"AcDbMPolygon::getLoopAtGsMarker")) return -1;
 			return loop;
 		}, py::arg("gs_marker"), "gsMarker 对应的环索引，失败返回 -1")
 		// ---- 环树：扁平为 (loopIndex, parentLoopIndex)，遍历后内部 deleteMPolygonTree 释放 ----
 		.def("getMPolygonTree", [](const PyDbMPolygon& s) -> std::vector<std::pair<int, int>> {
 			auto* p = static_cast<AcDbMPolygon*>(s.impObj());
 			AcDbMPolygonNode* root = nullptr;
-			if (p->getMPolygonTree(root) != Acad::eOk || root == nullptr) return {};
+			if (!p) return {};
+			Acad::ErrorStatus es = p->getMPolygonTree(root);
+			if (!PyWarnIfError(es, L"AcDbMPolygon::getMPolygonTree") || root == nullptr) return {};
 			std::vector<std::pair<int, int>> out;
 			std::function<void(AcDbMPolygonNode*, int)> walk = [&](AcDbMPolygonNode* node, int parent) {
 				if (node == nullptr) return;

@@ -236,3 +236,9 @@
 2026-11-21 06:19 | PyDbVisibilityOverrule.cpp:13/14 | ⑧ | Python 异常与未知异常改为 e.restore()+PyErr_Print / PyErr_Occurred 检查，返回值仍为 true
 2026-11-21 07:18 | PyPaletteSet.cpp:72-86 | ⑦ | 删除停靠自愈线程里 i%5 的 fopen 埋点块（硬编码 G:\PyArx\docs\_pal_fix.log）
 2026-11-21 07:18 | PyPaletteSet.cpp:138-153 | ⑦ | 删除浮动定位线程里 i%10 的 fopen 埋点块（同上硬编码路径）
+2026-11-21 08:21 | PyDbHatch.cpp:166/194/206 | ④ | getLoopAt / evaluateGradientColorAt / getGradientColors 改判 es 并 PyWarnIfError，原有零值或空返回不变
+2026-11-21 08:21 | PyDbLine.cpp:30 | ④ | getOffsetCurvesGivenPlaneNormal 改判 es 并 PyWarnIfError，同时去掉与上一行重复的 !impObj() 判断
+2026-11-21 08:21 | PyDbEntity.cpp:330 | ④ | explode 改判 es 并 PyWarnIfError，失败仍返回空列表
+2026-11-21 08:21 | PyDbMPolygon.cpp:68/85/163/180/187 | ②④ | 五个 lambda 补 impObj() 判空并改判 es + PyWarnIfError，失败返回 -1 / 零值元组 / 空列表不变
+2026-11-21 08:21 | PyDbDatabase.cpp:88/92 | ④ | objectIds 的 openStatus 与 newIterator 失败补 PyWarnIfError，仍返回空 list
+2026-11-21 08:21 | PyDbLayerTable.cpp:15 | ④ | getAt 的 getIdAt 失败补 PyWarnIfError，仍返回 nullptr

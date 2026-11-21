@@ -12,7 +12,8 @@ PyDbLayerTableRecord* PyDbLayerTable::getAt(const AcString& name, int mode) cons
 	// 走 acdbOpenObject：事务内打开会被登记为「事务驻留」，set 属性才安全。
 	// 此前直接调 AcDbLayerTable::getAt 打开，对象不在事务里，改属性直接杀进程（无头实测）。
 	AcDbObjectId id;
-	if (impObj()->getIdAt(name.kwszPtr(), id) != Acad::eOk || id.isNull())
+	Acad::ErrorStatus es = impObj()->getIdAt(name.kwszPtr(), id);
+	if (!PyWarnIfError(es, L"AcDbLayerTable::getIdAt") || id.isNull())
 		return nullptr;
 	AcDbLayerTableRecord* pRec = nullptr;
 	if (!PyWarnIfError(acdbOpenObject(pRec, id, static_cast<AcDb::OpenMode>(mode)), L"LayerTable.getAt"))

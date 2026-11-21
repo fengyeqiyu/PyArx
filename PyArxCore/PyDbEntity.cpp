@@ -327,7 +327,8 @@ void bind_PyDbEntity(pym& m) {
 			std::vector<PyDbEntity> out;
 			AcDbVoidPtrArray arr;
 			if (!self.impObj()) return out;
-			if (self.impObj()->explode(arr) != Acad::eOk) return out;
+			Acad::ErrorStatus es = self.impObj()->explode(arr);
+			if (!PyWarnIfError(es, L"AcDbEntity::explode")) return out;
 			for (int i = 0; i < arr.length(); ++i) out.emplace_back(static_cast<AcDbEntity*>(arr[i]));
 			return out;
 		}, "炸开实体，返回新实体列表（未入库，需 appendEntity）")

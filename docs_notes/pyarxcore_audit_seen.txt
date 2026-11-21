@@ -755,3 +755,9 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 07:18 PyArxCore 全量 ⑦ 通过 硬编码盘符路径全扫仅上述 2 处，已清零；OutputDebugString/AllocConsole/std::cerr/std::cout 均为 0
 2026-11-21 07:18 PyArxCore 全量 ⑧ 通过 Python 回调点全扫（PyArxCompat CallWithGil 抛 error_already_set、PyGiStreamStyle build 回调 discard_as_unraisable）均已隔离
 2026-11-21 07:18 PyArxCore 全量 ①⑥ 通过 AcArray 族 py::class_ 注册 0、vcxproj 未登记 0、未跟踪的 .cpp/.h 0
+2026-11-21 08:21 PyDbHatch.cpp:166/194/206、PyDbLine.cpp:30、PyDbEntity.cpp:330、PyDbMPolygon.cpp:68/85/163/180/187、PyDbDatabase.cpp:88/92、PyDbLayerTable.cpp:15 ④ 已改 13 处静默失败补 PyWarnIfError（PyDbMPolygon 五处同时补 ② 判空）
+2026-11-21 08:21 PyDbDatabase.h:76/238-249 ②⑤ 未改 悬空声明 13 处（openObject 与 osmode/pickbox/grips/gripsize/highlight/textfill 的 get/set）全项目无定义也无 .def 绑定，删除属接口变更故只报
+2026-11-21 08:21 PyDbMPolygon.cpp:11/62/65/79/89/170 ② 未改 6 处 lambda/方法仍直接 static_cast 解引用 impObj()（构造可传 None），批量补判空留待下轮
+2026-11-21 08:21 PyArxCore 全量 ⑤ 通过 重复 .def 64 处逐条核为合法重载（同名不同 py::arg 类型），无遮蔽型重复注册
+2026-11-21 08:21 PyArxCore 全量 ⑦ 通过 acutPrintf 调试类输出 14 处全在 PyUt 调试 API（debug_attach/debugBreak/debug_stop），属功能提示；无 #if 0 / OutputDebugString / TEMP
+2026-11-21 08:21 PyArxCore 全量 ⑥ 通过 声明无定义扫描 miss=10，除 PyDbDatabase.h 悬空声明外 IsGsWorkerThread/PaletteSet GetMaximumSize/GetMinimumSize 均为误报（自由函数或类内 inline）
