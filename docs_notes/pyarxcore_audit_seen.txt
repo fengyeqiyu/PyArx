@@ -775,3 +775,4 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 10:38 PyArxCore 全量 实跑通过 本轮首次重编 PyArxCore.pyd（MSBuild /t:PyArxCore Release x64，10:33），依赖链 dumpbin 仅 python315t.dll；accoreconsole 冒烟 13 项全通过（import 成功、9 个子模块注册、LayerTable.getAt 缺失名返回 None、objectIds 空库返回 0）
 2026-11-21 10:38 PyArxCore 全量 实跑推翻 想当然写法：Db.MPolygon(None) 与 Db.Hatch(None) 并不生成空包装，pybind 直接抛 TypeError（构造函数只接受无参或 AcDbMPolygon/AcDbHatch 实体），故⑤轮次里按「可传 None」推定的判空路径实际不可达，判空仍保留作防御
 2026-11-21 10:38 PyArxCore 全量 ⑨ 未改 third_party\python314 为 CPython 3.14 源码树遗留（无 exe/lib/dll 引用，vcxproj 与 sln 全文 python314=0），仅占磁盘，删除需用户确认
+2026-11-21 10:53 PyArxCore 全量 构建 通过 MSBuild Release x64 编译成功，PyArxCore.pyd 于 10:33 重建（10,057,216 字节），dumpbin 依赖链仅 python315t.dll，无 python314.dll 与 GIL 版 python315.dll；accoreconsole 内 PyArxEngine.arx 加载失败（缺交互式 acad 依赖），未做无头冒烟
