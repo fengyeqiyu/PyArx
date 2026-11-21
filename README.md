@@ -28,6 +28,18 @@ PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XML UI 技术桥接到 Py
 - **自绘控件库**：基于 MFC 的完全自绘控件，支持皮肤定制
 - **XML 布局**：支持 XML 声明式 UI 定义，配合 Python 事件回调
 
+## 界面截图
+
+可视化设计器：左侧控件箱（70 个控件）、中间设计画布、右侧对象检查器与属性编辑器、底部 XML 源码同步。
+
+![UIDesign 设计器](docs/screenshots/designer.png)
+
+同一套布局用 XML 写与用 HTML/CSS 写，渲染结果一致：
+
+| XML 写法 | HTML 写法 |
+|---|---|
+| ![XML 布局](docs/screenshots/xml-layout.png) | ![HTML 布局](docs/screenshots/html-layout.png) |
+
 ## 目录结构
 
 | 目录 | 说明 |
