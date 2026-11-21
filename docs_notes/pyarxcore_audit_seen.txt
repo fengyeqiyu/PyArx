@@ -776,3 +776,8 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 10:38 PyArxCore 全量 实跑推翻 想当然写法：Db.MPolygon(None) 与 Db.Hatch(None) 并不生成空包装，pybind 直接抛 TypeError（构造函数只接受无参或 AcDbMPolygon/AcDbHatch 实体），故⑤轮次里按「可传 None」推定的判空路径实际不可达，判空仍保留作防御
 2026-11-21 10:38 PyArxCore 全量 ⑨ 未改 third_party\python314 为 CPython 3.14 源码树遗留（无 exe/lib/dll 引用，vcxproj 与 sln 全文 python314=0），仅占磁盘，删除需用户确认
 2026-11-21 10:53 PyArxCore 全量 构建 通过 MSBuild Release x64 编译成功，PyArxCore.pyd 于 10:33 重建（10,057,216 字节），dumpbin 依赖链仅 python315t.dll，无 python314.dll 与 GIL 版 python315.dll；accoreconsole 内 PyArxEngine.arx 加载失败（缺交互式 acad 依赖），未做无头冒烟
+2026-11-21 11:03 PyDbMPolygon.cpp:40 ③④ 已改 patternType 返回 int（实跑取证：旧 pyd 调用抛 TypeError Unable to convert AcDbHatch::HatchPatternType，PyArxExtraEnums.cpp:633 注册的是同名桩枚举而非真实类型）；重编后实测 patternType 0 → setPattern(1,ANSI31) → 1、patternName=ANSI31
+2026-11-21 11:03 PyArxCore 全量 构建 通过 第二次 Release x64 重编（11:01:15），PyArxCore.pyd 与源码同步；按约定 PyArxEngine.arx 复制为 PyArxEngine.crx 供 accoreconsole 无头加载（arx 直载失败，crx 成功）
+2026-11-21 11:03 PyArxCore 全量 实跑 通过 无头冒烟：Db.MPolygon() 空对象 getArea=0.0 / numLoops=0 / elevation=0.0 / normal=(0,0,1) / patternName='' / patternAngle=0.0 / patternColor=(0,0,0) / getOffsetVector=AcGeVector2d(0,0) / parentLoop=-2 / closestLoopTo=-1，均不崩
+2026-11-21 11:03 PyDbMPolygon.cpp:18 ② 更正 实跑证明 Db.MPolygon(None) 抛 TypeError（py::init<AcDbMPolygon*> 无默认参数，不支持 None），故第 36/37 轮补的 12+9 处判空对 MPolygon 属预防性防御、非必需；同理「可传 None 构造」类假设仅对 py::arg-p-等于-nullptr 的 3 个类成立
+2026-11-21 11:03 PyArxCore 全量 ①③④ 实跑新发现 Db.Database() 无 layerTable() 方法（须用 layerTableId() + 事务 openObject），无 transactionManager().startTransaction()（Python 侧用 Db.PyDbTrans(db) 上下文）；均属 API 名差异，只报不改

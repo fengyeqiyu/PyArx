@@ -36,7 +36,7 @@ void bind_PyDbMPolygon(pym& m) {
 		.def("getOffsetVector", [](const PyDbMPolygon& s){ if (!s.impObj()) return AcGeVector2d(); return static_cast<AcDbMPolygon*>(s.impObj())->getOffsetVector(); })
 		.def("includesTouchingLoops", [](const PyDbMPolygon& s){ if (!s.impObj()) return false; return static_cast<AcDbMPolygon*>(s.impObj())->includesTouchingLoops(); })
 		// ---- 图案 ----
-		.def("patternType", [](const PyDbMPolygon& s){ if (!s.impObj()) return AcDbHatch::kUserDefined; return static_cast<AcDbMPolygon*>(s.impObj())->patternType(); })
+		.def("patternType", [](const PyDbMPolygon& s) -> int { if (!s.impObj()) return 0; return (int)static_cast<AcDbMPolygon*>(s.impObj())->patternType(); }, "图案类型: 0=用户自定义 1=预定义 2=自定义")
 		.def("patternName", [](const PyDbMPolygon& s) -> AcString { if (!s.impObj()) return AcString(); return static_cast<AcDbMPolygon*>(s.impObj())->patternName(); })
 		.def("setPattern", [](PyDbMPolygon& s, int type, const AcString& name){
 			return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setPattern(static_cast<AcDbHatch::HatchPatternType>(type), name.kwszPtr()), L"setPattern");

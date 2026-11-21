@@ -255,3 +255,4 @@
 2026-11-21 10:38 | PyDbDgnDefinition.cpp:23/32 | 编译失败 | 删除两行被错误插在 .def 链中间的 if (s.isNull()) return X;（第 19 轮误插入），恢复 py::class_ 链语法
 2026-11-21 10:38 | PyDbDgnDefinition.cpp:25/35 | ② | xrefDepth / showRasterRef lambda 补 !s.impObj() 守卫，返回 0 / false
 2026-11-21 10:38 | PyDbSpatialFilter.cpp:72 | 编译失败 | queryBounds 守卫由 !ext.impObj() 改为只判 s.isNull()（SDK 为 AcDbExtents& 出参，PyDbExtents3d::impObj() 返回引用不可取反）
+2026-11-21 11:03 | PyDbMPolygon.cpp:40 | ③④ | patternType 改为显式 -> int 并返回 (int)enum，修掉 enum 未注册导致的 TypeError（旧 pyd 该 API 完全不可用），附中文 docstring
