@@ -807,3 +807,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 15:05 PyAppDispatcher.cpp:回调 PyGILState_Ensure/Release 已删,改 Ready() 检查(无状态直接跳过任务)
 2026-11-21 15:05 PyCmdBinder.cpp:命令回调 gil_scoped_acquire 改 PyThreadScope
 2026-11-21 15:05 无头回归 accoreconsole(crx=dll同hash 7150EA0C):通过-8/8 exit=0 entity_count 0->6,日志 [RUNSCRIPT 2] free-threaded: no GIL
+2026-11-21 15:18 ap\PyPaletteSet.cpp:295,304 ⑤ 未改 addPage/getPalette 绑定用 return_value_policy::reference 返回借用指针（页由 PaletteSet 拥有、侧栏由注册表拥有），但未用 reference_internal 挂靠 parent，destroyAllPalettes 后 Python 侧句柄悬垂；补 reference_internal 需改绑定签名语义，只报不改
+2026-11-21 15:18 PyArxCore 全量 ①⑤ 通过 新口径10：扫描 602 个 .cpp/.h 的 py::class_<T / py::enum_<E 注册，同名同类型重复注册 0 处（PyApp.cpp 命中为注释、PyArxExtraEnums.cpp 为 Tag<N>::type 互异类型）；py::class_<AcArray 仍 0 处，仅有 6 处 PyArrayCaster
+2026-11-21 15:18 PyArxCore 全量 ③ 通过 新口径11：return_value_policy::reference 共 74 处逐一分类核对=borrow/self/registry/静态单例（reactor 与 overrule 的 py::cast(this,reference) 共 46 处、复合曲线 getSubCurves 借用、Scale/gTol 返回 *this 或静态），未见「对 new 出的对象用 reference」造成泄漏
+2026-11-21 15:18 PyArxCore 全量 ⑦⑧⑨ 通过 全量计数复核：TEMP-DIAG/_diagAppend/OutputDebugString/#if 0=0，ofstream 3 处功能用途，catch(...) 69 处均为已核合理项；PYBIND11_MODULE 真实宏 1 处且带 py::mod_gil_not_used()（PyArxBinder.cpp:62，第二处命中为字面量日志串），PyGILState_/python314=0，python315 字面量 3 处全在 stdafx.h 的 Py_GIL_DISABLED 条件分支
