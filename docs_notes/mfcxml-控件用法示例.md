@@ -1,12 +1,12 @@
-# MFCXaml 控件用法示例
+# MFCXml 控件用法示例
 
 > 示例以 **UIDesign 可直接打开的文档** 为准，放在 `UIDesign\samples\` 下，用主标签、不用别名：
-> `01_basic_controls.xaml`（按钮/文本/选择/取值/指示，32 个控件）、
-> `02_data_controls.xaml`（表格/树/列表/虚拟化/分页，16 个）、
-> `03_overlay_canvas.xaml`（菜单/工具条/浮层/画布/日期/容器，17 个）。
+> `01_basic_controls.xml`（按钮/文本/选择/取值/指示，32 个控件）、
+> `02_data_controls.xml`（表格/树/列表/虚拟化/分页，16 个）、
+> `03_overlay_canvas.xml`（菜单/工具条/浮层/画布/日期/容器，17 个）。
 > 三份合计覆盖 `prop_schema()` 的 51 个主标签。
 >
-> 打开方式：`G:\PyArx\X64\Release\UIDesign.exe "G:\PyArx\UIDesign\samples\01_basic_controls.xaml"`
+> 打开方式：`G:\PyArx\X64\Release\UIDesign.exe "G:\PyArx\UIDesign\samples\01_basic_controls.xml"`
 > （也可以在设计器里「文件 → 打开 XAML…」）。
 >
 > 校验：`python tools\check_design_samples.py`（逐份 guiload 建窗并核对主标签覆盖，当前 65 个控件实例、51/51 PASS）；
@@ -17,7 +17,7 @@
 ## 零、先看 UIDesign 的用法
 
 设计器左侧「控件箱」直接拖控件，右侧「属性编辑器」改值，底部是 XAML 源码；
-`预览` 按钮会把当前文档交给 XamlViewer 真渲染。文档本身仍是标准 XAML，保存后
+`预览` 按钮会把当前文档交给 XmlViewer 真渲染。文档本身仍是标准 XAML，保存后
 `guiload` 能直接加载运行。控件箱条目来自 `UIDesign\control_catalog.xml`，
 目录按 `prop_schema()` 生成，缺条目时设计器会提示“未知标签”。
 
@@ -30,7 +30,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="按钮族" Width="420" Height="340">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="按钮族" Width="420" Height="340">
   <XStackPanel Margin="12" Spacing="8">
     <XButton x:Name="Run" Text="运行" Height="32" Click="on_run"/>
     <XToggleButton x:Name="Night" Text="夜间模式" Height="32" CheckedChanged="on_night"/>
@@ -52,7 +52,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="文本族" Width="460" Height="380">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="文本族" Width="460" Height="380">
   <XStackPanel Margin="12" Spacing="8">
     <XLabel x:Name="Title" Text="回路参数" Height="26" FontSize="14" FontWeight="Bold"/>
     <XTextField x:Name="Name" Text="WL-AT1-1" Placeholder="请输入回路编号" MaxLength="32" Height="30"
@@ -61,7 +61,7 @@
     <XTextField x:Name="Code" Text="只读内容" IsReadOnly="true" Height="30"/>
     <XTextArea x:Name="Rtf" Text="富文本段落" Bold="true" Italic="false" FontSize="11"
               Foreground="#334155" Height="80"/>
-    <XCodeEditor x:Name="Src" Syntax="xaml" Text="&lt;Button Text=&quot;运行&quot;/&gt;" Height="90"/>
+    <XCodeEditor x:Name="Src" Syntax="xml" Text="&lt;Button Text=&quot;运行&quot;/&gt;" Height="90"/>
     <XHyperlink x:Name="Help" Text="查看规范" Url="https://example.com/doc" Height="26"
                Click="on_help"/>
   </XStackPanel>
@@ -69,7 +69,7 @@
 ```
 
 要点：`TextArea` 的字号与前景色就是通用外观字段 `FontSize` / `Foreground`（v0.10.17 起不再重复声明）；
-`CodeEditor` 的 `Syntax` 取 `xaml` / `python`。
+`CodeEditor` 的 `Syntax` 取 `xml` / `python`。
 
 ## 三、选择类
 
@@ -77,7 +77,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="选择族" Width="420" Height="300">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="选择族" Width="420" Height="300">
   <XStackPanel Margin="12" Spacing="8">
     <XComboBox x:Name="Cable" Items="YJV22-4×35|YJV22-4×25|VV-3×10" SelectedIndex="0"
               DropDownStyle="DropDown" Height="28" SelectionChanged="on_cable"/>
@@ -95,7 +95,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="取值族" Width="440" Height="420">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="取值族" Width="440" Height="420">
   <XStackPanel Margin="12" Spacing="8">
     <XProgressBar x:Name="Pct" Minimum="0" Maximum="100" Value="65" Height="22"/>
     <XSlider x:Name="Level" Minimum="0" Maximum="100" Value="45" Height="34" ValueChanged="on_level"/>
@@ -119,7 +119,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="列表族" Width="620" Height="560">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="列表族" Width="620" Height="560">
   <XStackPanel Margin="12" Spacing="8">
     <XListCtrl x:Name="Files" Columns="名称:140|类型:90" Rows="图框	A3|标注	箭头" Height="90"/>
     <XTreeView x:Name="Tree1" Nodes="项目根|图纸 A|图纸 B|图层组" Height="90"/>
@@ -146,7 +146,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="容器族" Width="460" Height="420">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="容器族" Width="460" Height="420">
   <XStackPanel Margin="12" Spacing="8">
     <XPane x:Name="Host" Height="70"/>
     <XDivider x:Name="Sep1" Height="10"/>
@@ -166,7 +166,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="页族" Width="460" Height="420">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="页族" Width="460" Height="420">
   <XStackPanel Margin="12" Spacing="8">
     <XTabBar x:Name="Tabs" Pages="常规|高级|关于" Height="110"/>
     <XStackView x:Name="Stack" SelectedIndex="0" PageCount="3" Height="90"/>
@@ -177,7 +177,7 @@
 </XWindow>
 ```
 
-要点：`StackView` / `SwipeView` / `Page` 是同一实现（`XamlPageView`）的三个语义名，
+要点：`StackView` / `SwipeView` / `Page` 是同一实现（`XmlPageView`）的三个语义名，
 `SelectedIndex` + `PageCount` 同口径；`PageIndicator` 用 `Count`。
 
 ## 八、菜单、工具条与浮层
@@ -186,7 +186,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="浮层族" Width="460" Height="380">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="浮层族" Width="460" Height="380">
   <XStackPanel Margin="12" Spacing="8">
     <XMenuBar x:Name="Top" Items="文件|编辑|视图" SelectedIndex="0" Height="28"/>
     <XToolBar x:Name="Bar1" Items="新建|打开|保存|运行" SelectedIndex="2" Height="32"
@@ -203,19 +203,19 @@
 
 ## 九、画布
 
-覆盖：`PowerCanvas` / `QCanvas`
+覆盖：`DwgCanvas` / `QCanvas`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="画布族" Width="520" Height="360">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="画布族" Width="520" Height="360">
   <XStackPanel Margin="12" Spacing="8">
-    <XPowerCanvas x:Name="Plan" Data="{}" Height="200" Click="on_plan_click"/>
+    <XDwgCanvas x:Name="Plan" Data="{}" Height="200" Click="on_plan_click"/>
     <XQCanvas x:Name="Draw" Height="120"/>
   </XStackPanel>
 </XWindow>
 ```
 
-要点：`PowerCanvas` 吃配电规划模型（`Data` 是规划 JSON，实际运行用 `loadPowerPlan` 灌）；
+要点：`DwgCanvas` 吃绘图画布模型（`Data` 是已算坐标的布局 JSON，实际运行用 `loadDwgLayout` 灌）；
 `QCanvas` 吃绘制命令（`Commands`）或脚本（`Script`），单击/双击/滚轮/键事件齐全。
 
 ## 十、日期
@@ -224,7 +224,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="日期族" Width="420" Height="320">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="日期族" Width="420" Height="320">
   <XStackPanel Margin="12" Spacing="8">
     <XDatePicker x:Name="Day" Value="2026-11-13" Height="30" ValueChanged="on_day"/>
     <XMonthGrid x:Name="Cal" Value="2026-11-13" Height="180" SelectionChanged="on_cal"/>
@@ -241,7 +241,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="指示" Width="320" Height="200">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="指示" Width="320" Height="200">
   <XStackPanel Margin="12" Spacing="8">
     <XBusyIndicator x:Name="Busy" Height="56"/>
   </XStackPanel>
@@ -258,7 +258,7 @@
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="回路参数卡" Width="640" Height="520">
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml" Title="回路参数卡" Width="640" Height="520">
   <XStackPanel Margin="14" Spacing="10">
     <XLabel x:Name="Head" Text="AT1-1 回路参数" Height="28" FontSize="15" FontWeight="Bold"/>
 
@@ -286,7 +286,7 @@ Python 侧接线（回调名在 XAML 里声明，函数从 `context` 里解析�
 
 ```python
 import os
-import PyMfcXaml as M
+import PyMfcXml as M
 
 names = {}
 
@@ -299,13 +299,13 @@ def on_load(comp, name):
 def on_detail(comp, name):
     print('选中行', name)
 
-xml = r'G:\PyArx\examples\circuit_card.xaml'
+xml = r'G:\PyArx\examples\circuit_card.xml'
 win = M.guiload(xml, context=globals(), names=names)
 win.show()
 M.pump(300)
 
 # 加载后改属性 / 绑回调同样可以
-win.setXamlValue('Code', 'WL-AT1-2')
+win.setXmlValue('Code', 'WL-AT1-2')
 c = names.get('Apply')
 if c is not None:
     win.setControlCallback(c, 'click', on_apply) if hasattr(win, 'setControlCallback') else None
@@ -329,7 +329,7 @@ win.close() if hasattr(win, 'close') else None
 | 六 容器 | Panel / ScrolledWindow / Splitter / StaticLine / Flickable |
 | 七 页 | TabControl / StackView / SwipeView / Page / PageIndicator |
 | 八 浮层 | Menu / MenuStrip / ToolStrip / ToolTip / Popup |
-| 九 画布 | PowerCanvas / QCanvas |
+| 九 画布 | DwgCanvas / QCanvas |
 | 十 日期 | DatePicker / CalendarCtrl |
 | 十一 指示 | BusyIndicator |
 

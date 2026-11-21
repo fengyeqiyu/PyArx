@@ -1,17 +1,17 @@
-﻿# 配电规划图：MFCXaml 完整实现（对齐 power-plan.html）
+﻿# 配电规划图：MFCXml 完整实现（对齐 power-plan.html）
 
 源基准：`G:\配电规划设计\power-plan.html`（1842 行 / 68.9 KB）。
-实现：Python + `PyMfcXaml.pyd`（自绘 `PowerCanvas` 控件 + 原生 MFC 控件），**不需要 CAD，独立 Python 直接运行**。
+实现：Python + `PyMfcXml.pyd`（自绘 `PowerCanvas` 控件 + 原生 MFC 控件），**不需要 CAD，独立 Python 直接运行**。
 
 ```
-G:\PyArx\X64\Release\python.exe G:\PyArx\tests\mfc_xaml\pp_app.py
+G:\PyArx\X64\Release\python.exe G:\PyArx\tests\mfc_xml\pp_app.py
 ```
 
 ---
 
-## 1. 功能对照（HTML 每一项 → MFCXaml 实现）
+## 1. 功能对照（HTML 每一项 → MFCXml 实现）
 
-| # | HTML 原功能 | MFCXaml 实现 | 实测结果 |
+| # | HTML 原功能 | MFCXml 实现 | 实测结果 |
 |---|---|---|---|
 | 1 | `#docTitle` 图名（contenteditable） | 工具栏 Edit，`onChange` 触发重新布图 | 改「改过命的配电图」→ 标题与图名同步，节点 4 ✓ |
 | 2 | `#btnSample` 文档示例 | 13 节点内置样例（与 SAMPLE_CSV 同构） | 1480×436，13 卡 ✓ |
@@ -109,12 +109,12 @@ G:\PyArx\X64\Release\python.exe G:\PyArx\tests\mfc_xaml\pp_app.py
 
 | 改动 | 文件 |
 |---|---|
-| 应用主体（工具栏/画布/小地图/详情/编辑/导入导出/搜索/折叠） | `G:\PyArx\tests\mfc_xaml\pp_app.py` |
+| 应用主体（工具栏/画布/小地图/详情/编辑/导入导出/搜索/折叠） | `G:\PyArx\tests\mfc_xml\pp_app.py` |
 | 验收脚本 | `pp_app_check.py`、`pp_app_check2.py`、`pp_probe_table.py`、`pp_probe_cv.py` |
-| 原生表格行 / 字体 / 小地图精确点击 / JSON 方向 | `G:\PyArx\PyMfcXaml\PyMfcXaml.cpp` |
-| 侧板白底 `addWhiteRect`（新接口，默认退化） | `XamlMfcCore\controls\XamlMfcHost.h` + `PyMfcXaml.cpp`（`SS_WHITERECT \| WS_BORDER`，`PyMfcWindow/PyMfcPanel` 各一层 wrapper） |
-| `parseJson` 读 `dir` | `G:\PyArx\MfcXamlCore\XamlPowerPlan.h` / `.cpp` |
-| 绘制（屏幕与离屏共用） | `PyMfcXaml.cpp` 全局 `drawPowerPlanContent` |
+| 原生表格行 / 字体 / 小地图精确点击 / JSON 方向 | `G:\PyArx\PyMfcXml\PyMfcXml.cpp` |
+| 侧板白底 `addWhiteRect`（新接口，默认退化） | `MfcXmlCore\controls\XmlMfcHost.h` + `PyMfcXml.cpp`（`SS_WHITERECT \| WS_BORDER`，`PyMfcWindow/PyMfcPanel` 各一层 wrapper） |
+| `parseJson` 读 `dir` | `G:\PyArx\MfcXmlCore\XmlPowerPlan.h` / `.cpp` |
+| 绘制（屏幕与离屏共用） | `PyMfcXml.cpp` 全局 `drawPowerPlanContent` |
 
 ## 6. 闪烁 / 拖影：根因与修复（实测定位，非推测）
 
@@ -144,7 +144,7 @@ w.saveControlPng(TBL, r'G:\PyArx\docs\_ctl_table.png')    # 60081 B
 
 ## 8. 事件驱动验证（不需要真人操作）
 
-`tests/mfc_xaml/pp_events.py` 把模拟输入封成函数，全部走 `user32.SendMessageW` 直接投递到控件过程：
+`tests/mfc_xml/pp_events.py` 把模拟输入封成函数，全部走 `user32.SendMessageW` 直接投递到控件过程：
 
 ```python
 cv  = E.find_control(app.win.hwnd, pp_app.CV)   # 递归找句柄（GetDlgItem 取不到自绘控件）

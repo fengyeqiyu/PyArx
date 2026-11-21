@@ -66,7 +66,7 @@ MSBuild PyArx.sln /t:PyMfcXml /p:Configuration=Release /p:Platform=x64
   - `PyArxCore.pyd` - CAD 绑定模块（在 AutoCAD 进程内加载）
   - `PyArxEngine.arx` / `PyArxEngine.dll` - CAD 入口、命令注册与派发
   - `PyMfcXml.pyd` - MFC 宿主模块（Python 可导入）
-  - `MfcXmlCore.dll` / `MfcXamlCore.dll` - 基础控件库与 XAML 组合层
+  - `MfcXmlCore.dll` - 基础控件库（含 `MfcXmlFrame` 静态库）；`MfcXmlRuntime` 为复合控件运行时（Python 侧）
   - `python315t.dll` 等运行时依赖 - Python 3.15 free-threaded，需随产物一起分发
 
 > **注意**：`res` 目录不随构建自动拷贝，修改资源后需手工复制到产物目录。

@@ -26,19 +26,19 @@
 整窗 82 ms 意味着只要有一次全窗失效（重排、主题变化、窗口尺寸变化），就一定掉帧；
 表格 22.5 ms 的填充意味着每次编辑提交、排序、粘贴、增删行都会闪一下。
 
-## 二、控件分类（`G:\PyArx\MfcXamlCore\controls`，60 个头文件）
+## 二、控件分类（`G:\PyArx\MfcXmlCore\controls`，60 个头文件）
 
-**基础控件（够用，不动）**：`XamlButton` `XamlTextBlock` `XamlTextBox` `XamlCheckBox` `XamlRadioButton`
-`XamlComboBox` `XamlSlider` `XamlProgressBar` `XamlGroupBox` `XamlSpinBox` `XamlSwitch` `XamlRangeSlider`
-`XamlDatePicker` `XamlHyperlink` `XamlToolTip` `XamlMenu` `XamlStaticLine` `XamlStaticBitmap` `XamlBusyIndicator`。
+**基础控件（够用，不动）**：`XmlButton` `XmlTextBlock` `XmlTextBox` `XmlCheckBox` `XmlRadioButton`
+`XmlComboBox` `XmlSlider` `XmlProgressBar` `XmlGroupBox` `XmlSpinBox` `XmlSwitch` `XmlRangeSlider`
+`XmlDatePicker` `XmlHyperlink` `XmlToolTip` `XmlMenu` `XmlStaticLine` `XmlStaticBitmap` `XmlBusyIndicator`。
 
 **薄壳（只是 `createNative(host, kind, id, ...)` 转手给宿主，自己没有任何状态与行为）**：
-`XamlTableView` `XamlListCtrl` `XamlListView` `XamlSplitter` `XamlScrolledWindow` `XamlScrollBar`
-`XamlTreeView` `XamlTabControl` `XamlToolBar` `XamlPopup` `XamlPageView` `XamlStackView` `XamlSwipeView`
-`XamlGridView` `XamlPathView` `XamlTumbler` `XamlDial` `XamlMenuBar` `XamlPageIndicator` ——
+`XmlTableView` `XmlListCtrl` `XmlListView` `XmlSplitter` `XmlScrolledWindow` `XmlScrollBar`
+`XmlTreeView` `XmlTabControl` `XmlToolBar` `XmlPopup` `XmlPageView` `XmlStackView` `XmlSwipeView`
+`XmlGridView` `XmlPathView` `XmlTumbler` `XmlDial` `XmlMenuBar` `XmlPageIndicator` ——
 **这些正是"复合控件"该长的地方，现在全是空壳。**
 
-**自绘业务控件**：`XamlPowerCanvas`（配电画布，唯一有真实内部状态的）、`XamlCodeEditor`。
+**自绘业务控件**：`XmlDwgCanvas`（绘图画布，唯一有真实内部状态的）、`XmlCodeEditor`。
 
 ## 三、复合控件该长什么样（接口草案）
 
@@ -82,9 +82,9 @@
 
 ## 六、当前基线脚本
 
-- `G:\PyArx\tests\mfc_xaml\_perf_table.py` —— 布局/填表/读回/选中
-- `G:\PyArx\tests\mfc_xaml\_perf_table2.py` —— 表格重绘 / 整窗重绘 / 点击 / 滚动（本节数字来源）
-- `G:\PyArx\tests\mfc_xaml\_perf_ctl.py` —— 逐控件重绘耗时
+- `G:\PyArx\tests\mfc_xml\_perf_table.py` —— 布局/填表/读回/选中
+- `G:\PyArx\tests\mfc_xml\_perf_table2.py` —— 表格重绘 / 整窗重绘 / 点击 / 滚动（本节数字来源）
+- `G:\PyArx\tests\mfc_xml\_perf_ctl.py` —— 逐控件重绘耗时
 
 ## 七、已落地的第一刀（表格灌数据）
 

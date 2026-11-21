@@ -1,17 +1,17 @@
-# MFCXaml 设计与现状
+# MFCXml 设计与现状
 
-> 本文是 `MfcXamlCore` / `PyMfcXaml` 的**唯一总文档**：架构规矩、控件封装现状、绘制架构阶段状态、性能基线、缺陷台账、回归口径、构建环境。
-> 2026-11-13 合并 `mfcxaml-render-refactor-plan.md`、`mfcxaml-s1-verify.md`、`mfcxaml-s2-migration-map.md`、`mfcxaml-s3-spec.md`、`mfcxaml-s4-s5-spec.md`、`session-2026-11-11-mfcxaml-digest.md` 六份过程文档而成；原始长文留在 git 历史（`v0.10.8` 及更早标签）。
+> 本文是 `MfcXmlCore` / `PyMfcXml` 的**唯一总文档**：架构规矩、控件封装现状、绘制架构阶段状态、性能基线、缺陷台账、回归口径、构建环境。
+> 2026-11-13 合并 `mfcxml-render-refactor-plan.md`、`mfcxml-s1-verify.md`、`mfcxml-s2-migration-map.md`、`mfcxml-s3-spec.md`、`mfcxml-s4-s5-spec.md`、`session-2026-11-11-mfcxml-digest.md` 六份过程文档而成；原始长文留在 git 历史（`v0.10.8` 及更早标签）。
 > 过程中被推翻的旧结论一律不写进来；留下的都是复核过的现状与待办。
 
 ## 一、架构规矩（最高优先级）
 
-1. **MFCXaml 只提供控件库**：`Button/Label/TextBox/ListCtrl/ListBox/Panel/StaticLine/StaticBitmap` 等基础控件；不在 C++ 里为业务界面写布局，也不在 Python 里算像素。
-2. **复合控件用 XAML 组合基础控件**，放 `G:\PyArx\plugins`：一个 `<XWindow Name="...">` 文件 = 一个复合控件，`x:Name` 是子控件名，几何来自 `M.xamlLayout(path, w, h)`。
+1. **MFCXml 只提供控件库**：`Button/Label/TextBox/ListCtrl/ListBox/Panel/StaticLine/StaticBitmap` 等基础控件；不在 C++ 里为业务界面写布局，也不在 Python 里算像素。
+2. **复合控件用 XAML 组合基础控件**，放 `G:\PyArx\plugins`：一个 `<XWindow Name="...">` 文件 = 一个复合控件，`x:Name` 是子控件名，几何来自 `M.xmlLayout(path, w, h)`。
 3. **通用组合可下沉成 C++ 控件类**，接口不变（XAML 标签名、属性、`on_*` 回调名都不改，只把创建与事件搬进 C++）；判定标准见 `plugins\README.md`。
 4. **所有回调一律回 Python**，两种写法等价可混用：
    - XAML 预声明：`<XButton Name="BtnApply" Text="应用" on_click="on_apply"/>`，加载时按名字在调用方作用域解析；
-   - 运行期赋值：`btn = xamlload(path); btn.BtnApply.click = fn`。
+   - 运行期赋值：`btn = xmlload(path); btn.BtnApply.click = fn`。
    事件名：`click / dblclick / change / grid`（`grid` 回调签名 `(action, row, col, text)`）。
 5. **布局大小交给 XAML**；Python 侧仍存的手算坐标属未完成项，不是规范。
 
@@ -19,21 +19,21 @@
 
 | 层 | 位置 | 职责 |
 |---|---|---|
-| 控件库/解析 | `MfcXamlCore\`（`XamlCore.cpp`、`controls\Xaml*.h/.cpp`、`XamlDraw.h`、`XamlD2D.h`、`XamlSurface.h`、`PyMfcSkin.h`） | XAML 解析、布局、样式、模板、绑定表达式、自绘控件、D2D/GDI 绘制原语、表面层 |
-| MFC 宿主 + 绑定 | `PyMfcXaml\`（`PyMfcHost.*`、`PyMfcProcs.*`、`PyMfcLoad.*`、`PyMfcWrap.h`、`PyMfcBind.cpp`） | 窗口、消息泵、皮肤自绘、事件派发、`addXxx/setXxx` 级 API、`prop_schema()` |
-| 复合控件框架 | `MfcXamlRuntime\`（Python） | Composite / Runtime / 自动事件绑定与属性映射 |
-| 复合控件实例 | `plugins\`（`side_panel.xaml/.py`、`README.md`） | 用 XAML 组合出的业务面板，含"何时下沉 C++"判定 |
-| 回归 | `tests\mfc_xaml\`（`pp_*.py`、`_smoke_proptable.py`、`_sim_msgs.py`、`_audit_*.py`、`_run_regression.ps1`） | 模拟消息/真实点击用例、属性表冒烟、契约与标签审计 |
+| 控件库/解析 | `MfcXmlCore\`（`XmlCore.cpp`、`controls\Xml*.h/.cpp`、`XmlDraw.h`、`XmlD2D.h`、`XmlSurface.h`、`PyMfcSkin.h`） | XAML 解析、布局、样式、模板、绑定表达式、自绘控件、D2D/GDI 绘制原语、表面层 |
+| MFC 宿主 + 绑定 | `PyMfcXml\`（`PyMfcHost.*`、`PyMfcProcs.*`、`PyMfcLoad.*`、`PyMfcWrap.h`、`PyMfcBind.cpp`） | 窗口、消息泵、皮肤自绘、事件派发、`addXxx/setXxx` 级 API、`prop_schema()` |
+| 复合控件框架 | `MfcXmlRuntime\`（Python） | Composite / Runtime / 自动事件绑定与属性映射 |
+| 复合控件实例 | `plugins\`（`side_panel.xml/.py`、`README.md`） | 用 XAML 组合出的业务面板，含"何时下沉 C++"判定 |
+| 回归 | `tests\mfc_xml\`（`pp_*.py`、`_smoke_proptable.py`、`_sim_msgs.py`、`_audit_*.py`、`_run_regression.ps1`） | 模拟消息/真实点击用例、属性表冒烟、契约与标签审计 |
 
 ## 三、控件封装现状（已完成）
 
-- **属性统一走声明式属性表** `XamlPropEntry{Name, Aliases, Type, EnumValues, Set, Get}`（`controls\XamlTypes.h`）：名字、类型、只读/只写、读写实现只在一处定义，基类 `properties()` 统一分派。
+- **属性统一走声明式属性表** `XmlPropEntry{Name, Aliases, Type, EnumValues, Set, Get}`（`controls\XmlTypes.h`）：名字、类型、只读/只写、读写实现只在一处定义，基类 `properties()` 统一分派。
 - **覆盖 39 个控件**：Button、TextBlock、CheckBox、RadioButton、GroupBox、Switch、ListBox、Choice、ListCtrl、TabControl、TreeCtrl、Grid、ListView、TreeView、GridView、PathView、PageIndicator、TextBox、ComboBox、TableView、Slider、ProgressBar、SpinBox、Dial、Tumbler、ScrollBar、RangeSlider、Menu、MenuBar、ToolBar、ToolTip、ToggleButton、Hyperlink、RichText、CodeEditor、ScrolledWindow、DatePicker、QCanvas、DwgCanvas、Popup、PageView、StaticBitmap、BitmapButton，以及无自有属性的 StaticLine/Splitter/Panel/Flickable/BusyIndicator/CalendarCtrl。
 - **迁移契约**：值在 attach 前缓存到成员、在 `createNative` 里下发；`Set == nullptr` 即只读；`Name` 不作为自有属性（基类 `IsLayoutAttribute` 已处理）。
-- **schema 导出**：`XamlPropertySchemaJson()`（`MfcXamlCore\XamlCore.h/.cpp`）+ Python `PyMfcXaml.prop_schema()`，结构 `{"version":1,"controls":[{"tag":"Button","properties":[{"name":"Text","type":"String","readOnly":false,"enum":""}]}]}`；实测 51 个控件、77137 字节。
-- **事件**：`XamlEvents.h` 契约表，XAML 只写事件名，控件申报 `events()`，宿主按契约绑定派发。
+- **schema 导出**：`XmlPropertySchemaJson()`（`MfcXmlCore\XmlCore.h/.cpp`）+ Python `PyMfcXml.prop_schema()`，结构 `{"version":1,"controls":[{"tag":"Button","properties":[{"name":"Text","type":"String","readOnly":false,"enum":""}]}]}`；实测 51 个控件、77137 字节。
+- **事件**：`XmlEvents.h` 契约表，XAML 只写事件名，控件申报 `events()`，宿主按契约绑定派发。
 - **只读属性槽位缺陷已修**：`properties()` 曾把 `writable` 填进 `readable` 槽位，导致 TableView.RowCount、Menu.SelectedIndex 等在 schema 里显示为可写；现为 `{e.Name, e.Type, true, writable, e.EnumValues}`。
-- 迁移审计脚本 `tests\mfc_xaml\_audit_prop_migration.py` 当前输出 **0 个控件待迁移、0 项属性**。
+- 迁移审计脚本 `tests\mfc_xml\_audit_prop_migration.py` 当前输出 **0 个控件待迁移、0 项属性**。
 
 ## 四、绘制架构现状
 
@@ -51,7 +51,7 @@
 
 | 阶段 | 内容 | 状态 |
 |---|---|---|
-| S1 设备层 | `XamlSurface`：D3D11 flip 交换链成帧、设备丢失重建、resize、软件/硬件 D2D 后端；与旧路径六场景像素等价（最大差 0.0259%，仅文字 AA） | **已完成**（默认值仍 `0`） |
+| S1 设备层 | `XmlSurface`：D3D11 flip 交换链成帧、设备丢失重建、resize、软件/硬件 D2D 后端；与旧路径六场景像素等价（最大差 0.0259%，仅文字 AA） | **已完成**（默认值仍 `0`） |
 | S2-A 装饰件节点化 | 纯装饰件迁移为表面绘制节点（绘制节点表 + 单次成帧），三类装饰件句柄策略已落地 | **已完成** |
 | S2-B | 标签 / 按钮等带命中语义控件节点化（"隐藏 HWND 节点化"或 `WS_EX_TRANSPARENT` 覆盖层） | **未开始** |
 | S3 | 详情卡底板 + 阴影并入画布 D2D 层；④初始视图 fit 补丁；⑤滚动条缺口 | **仅规格，未施工** |
@@ -100,10 +100,10 @@
 - ObjectArx：`G:\ObjectArx\2024`（inc / inc-x64 / utils\brep / lib-x64）。
 - 构建：
   ```
-  MSBuild G:\PyArx\PyArx.sln /t:PyMfcXaml /p:Configuration=Release /p:Platform=x64 /m /nologo /v:m
+  MSBuild G:\PyArx\PyArx.sln /t:PyMfcXml /p:Configuration=Release /p:Platform=x64 /m /nologo /v:m
   ```
   `ComSpec` 用 `System32\cmd.exe`（`SysWOW64` 版对 UIDesign 报提权失败）。编前关掉占用 pyd 的 python，否则 LNK1104。
-- 跑测：`$env:PYARX_D2D_RT='software'`、`$env:PYTHONIOENCODING='utf-8'`，`cd G:\PyArx\tests\mfc_xaml`；产物在 `X64\Release`（`PyMfcXaml.pyd`、`MfcXamlCore.dll`、`PyArxCore.pyd`）。
+- 跑测：`$env:PYARX_D2D_RT='software'`、`$env:PYTHONIOENCODING='utf-8'`，`cd G:\PyArx\tests\mfc_xml`；产物在 `X64\Release`（`PyMfcXml.pyd`、`MfcXmlCore.dll`、`PyArxCore.pyd`）。
 - 版本：`master` 为最新代码，每次提交由 `tools\git_tag_version.ps1` 打 `vX.Y.Z` 标签；历史版本用标签回看。
 
 ## 九、待办（按影响排序）
@@ -114,5 +114,5 @@
 4. **S4**：resize 只置脏、泵内统一 layout+draw，消除"每步重绘整窗"。
 5. **S5**：表格 owner-data 虚拟列表，顺带清 ③ 闪烁。
 6. 整窗按失效矩形裁剪（目标 ≤20 ms）、画布缓存位图（6 ms → <1 ms）。
-7. `pp_app` 改读 `power_plan.xaml`（现在仍是手算 `_layout`）。
+7. `pp_app` 改读 `power_plan.xml`（现在仍是手算 `_layout`）。
 8. 待补容器控件：`SplitPane`、`SidePanel`、`OverlayCard`、`MiniMap`、`ToolBar`。

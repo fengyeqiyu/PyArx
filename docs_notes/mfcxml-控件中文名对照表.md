@@ -1,9 +1,9 @@
-# MFCXaml 控件类名 / 中文名 / QML / WPF / WinForms 对照表
+# MFCXml 控件类名 / 中文名 / QML / WPF / WinForms 对照表
 
 > 由 `tools\gen_control_names.py` 生成，勿手改。
-> XAML 标签（类名）就是 `guiload` / `xamlload` 里写的标签；中文名只用于界面与文档。
+> XAML 标签（类名）就是 `guiload` / `xmlload` 里写的标签；中文名只用于界面与文档。
 > QML 列统一按 Qt Quick Controls 2（Qt 5.15 / Qt 6 通用）对照；纯图元（Rectangle/Ellipse/Line/Arc）按 QtQuick 基础类型，窗口类按 QtQuick.Window。
-> 档位口径见 `docs\mfcxaml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。
+> 档位口径见 `docs\mfcxml-控件接口清单.md`：S 完整 / A 基本 / B 薄 / C 仅布局。
 > QML / WPF / WinForms 三列是"同一套界面换引擎时落在哪个类型"，"QML 方式"只说 QML 侧的同名/组合/自绘；
 > 写"无"的表示该平台没有等价内置控件，只能组合或自绘，迁移时是重写而不是换标签。
 
@@ -107,7 +107,7 @@
 
 | 类名（XAML 标签） | 中文名 | QML（Qt Quick Controls 2） | WPF | WinForms | QML 方式 | 档位 | 属性数 |
 |---|---|---|---|---|---|---|---|
-| `XPowerCanvas` | 配电规划画布 | Canvas / Shape | Canvas（自绘 Path） | Panel（Graphics 自绘） | 自绘 | B 薄 | 20 |
+| `XDwgCanvas` | 绘图画布 | Canvas / Shape | Canvas（自绘 Path） | Panel（Graphics 自绘） | 自绘 | B 薄 | 20 |
 | `XQCanvas` | 通用画布 | Canvas / Item | Canvas（自绘） | Panel（Graphics 自绘） | 自绘 | B 薄 | 21 |
 
 ## 绘制图元（4）
@@ -121,7 +121,7 @@
 
 ## 属性对应
 
-| MFCXaml 属性 | QML 写法 |
+| MFCXml 属性 | QML 写法 |
 |---|---|
 | BackColor / FrontColor | background: Rectangle { color: ... }（QML 无全局底色属性） |
 | Foreground / FrontColor(文字) | color（Text / Label）或 palette.text |
@@ -163,9 +163,9 @@
 
 三处必须注意的结构差异：
 
-1. **表格与列表是 model + delegate**：MFCXaml 的 `Rows` / `Items` / `Columns` 是字符串直填，QML 侧要换 `ListModel` 或 `QAbstractTableModel` + delegate，这是迁移时工作量最大的地方。
+1. **表格与列表是 model + delegate**：MFCXml 的 `Rows` / `Items` / `Columns` 是字符串直填，QML 侧要换 `ListModel` 或 `QAbstractTableModel` + delegate，这是迁移时工作量最大的地方。
 2. **没有原生 TreeTable / GridCtrl**：QML 需 TreeView 或多列 delegate 自己组，不是换个标签就能完成。
-3. **自绘控件（PowerCanvas / QCanvas / Line / Ellipse / Arc）**：MFCXaml 走 GDI 自绘，QML 侧对应 Canvas 或 Shape，绘制代码要重写而不是映射。
+3. **自绘控件（DwgCanvas / QCanvas / Line / Ellipse / Arc）**：MFCXml 走 GDI 自绘，QML 侧对应 Canvas 或 Shape，绘制代码要重写而不是映射。
 
 另外两条工程差异：QML 默认按 96 DPI 的像素单位布局，MFC 是物理像素，尺寸要按 `devicePixelRatio` 折算；QML 的焦点与 Tab 顺序靠 `activeFocusOnTab` + `KeyNavigation`，不像 XAML 有 `TabIndex`。
 
@@ -290,9 +290,9 @@ delegate 行模板（`XItemView`，对应 QML ListView 的 delegate）：
 | QML 写法 | 这里的写法 |
 |---|---|
 | `model: [...]` | `Model="a\|b;c\|d"`（`;` 分行，行内竖线分字段） |
-| Python 喂 list | `win.setXamlValue("LV", "model", [["AT1-1", "回路一"], ["AT1-2", "回路二"]])`，按新行数重建行控件 |
+| Python 喂 list | `win.setXmlValue("LV", "model", [["AT1-1", "回路一"], ["AT1-2", "回路二"]])`，按新行数重建行控件 |
 | `delegate: Item { ... }` | `XItemView` 的子节点就是行模板，按行数逐行实例化 |
-| 换行模板（换 Component） | 模板写进 `<ControlTemplate x:Key="RowA">`，`Delegate="RowA"` 指定；运行时 `win.setXamlValue("LV", "delegate", "RowB")` 换掉 |
+| 换行模板（换 Component） | 模板写进 `<ControlTemplate x:Key="RowA">`，`Delegate="RowA"` 指定；运行时 `win.setXmlValue("LV", "delegate", "RowB")` 换掉 |
 | `anchors.baseline: A` | `anchors.baseline="A"`，本控件文字基线压到 A 的基线（字体度量走 GDI ascent，设计器与运行时同源） |
 | `anchors.top: A.baseline` | `anchors.top="A.baseline"`，顶边落在 A 的文字基线 |
 | `Layout.alignment: Qt.AlignBaseline` | 同一行不同字号文字基线齐平（按行内最大 ascent 落位） |
