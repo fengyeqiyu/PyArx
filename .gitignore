@@ -68,3 +68,48 @@ docs/_probe_profile/
 
 # 免安装 CAD 运行时（AutoCAD 2024 完整镜像，2.9 GB，不入库）
 ACAD/
+
+# ── 2026-11-21 代码整理补充 ──
+# 归档区：旧版本源码、清理出的根目录散落文件，本地保留不入库
+_attic/
+
+# 临时工作区（接口抓取/审计中间产物）
+tmp_*/
+
+# 根目录遗留的导出与日志残留
+*.tsv
+*.err
+ref_map_full.txt
+Drawing1_recover*.dwg
+
+# 图纸与示例数据（体积大，本地保留）
+*.dwg
+*.dwl
+*.dwl2
+*.dxf
+samples/
+
+# 模型与训练数据（本地保留，不入库）
+tools/local_llm/
+tools/train/**/*.jsonl
+tools/train/*.jsonl
+
+# DwgReader：构建产物与规格资料 PDF
+DwgReader/build/
+DwgReader/docs/
+
+# 第三方源码与体积型资料
+docs/libredwg_src/
+docs/dwg_spec/
+
+# viewer 生成物：场景数据/截图/导出/打包
+viewer/web/
+viewer/export/
+viewer/_*.png
+viewer/_*.jpg
+*.zip
+
+# 免安装看图工具与测试大样张
+CAD快速看图/
+tests/*.html
+tests/*.png
