@@ -20,8 +20,8 @@ void bind_PyDbDgnDefinition(pym& m) {
 			return true;
 		}, py::arg("v"))
 		// ---- xrefDepth ----
-		if (s.isNull()) return 0;
 		.def("xrefDepth", [](PyDbDgnDefinition& s) -> int {
+			if (!s.impObj()) return 0;
 			return s.impObj()->xrefDepth();
 		})
 		.def("setXrefDepth", [](PyDbDgnDefinition& s, int v) -> bool {
@@ -29,9 +29,9 @@ void bind_PyDbDgnDefinition(pym& m) {
 			s.impObj()->setXrefDepth(v);
 			return true;
 		}, py::arg("v"))
-		if (s.isNull()) return false;
 		// ---- showRasterRef ----
 		.def("showRasterRef", [](PyDbDgnDefinition& s) -> bool {
+			if (!s.impObj()) return false;
 			return s.impObj()->showRasterRef();
 		})
 		.def("setShowRasterRef", [](PyDbDgnDefinition& s, bool v) -> bool {
