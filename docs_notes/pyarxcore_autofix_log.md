@@ -262,3 +262,4 @@
 2026-11-21 12:18 | PyDbEntity.cpp:399 | ④ | boundingBoxIntersectWith(无投影面) 失败时补 PyWarnIfError
 2026-11-21 14:34 | PyArxCore 目录 | 整理 | 602 个 .cpp/.h 按模块拆入 db/ge/gi/ed/ap/ads/rx/framework/core 子目录（stdafx.h/stdafx.cpp/dllmain.cpp 留根），vcxproj/filters 同步改路径并加 include 目录；Release x64 重编零错误，pyd 14:33 重建，依赖仍只有 python315t.dll，无头冒烟通过
 2026-11-21 16:19 | PyArxCore/db/PyDbTable.cpp:99 | ② | def(tableStyle) lambda 补 isNull() 判空，空表对象返回 0ULL
+2026-11-21 17:18 | PyArxCore/db/PyDbColor.cpp:38 | ③ | AcCmColor::setRGB 返回值存 es 并 PyWarnIfError，失败返回 False

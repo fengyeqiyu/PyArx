@@ -817,3 +817,6 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 16:19 db\PyDbSweepOptions.cpp:29-72 (23 处) ② 未改 同上，批改超 20 行只报不改
 2026-11-21 16:19 core\PyDbBinder.cpp:262,263 ⑤ 未改 PyRxClass::queryX 用 const/non-const 各绑定一次但 Python 签名完全相同，后者不可达属冗余；删任一行都是接口可见变化，只报不改
 2026-11-21 16:19 PyArxCore 全量 ⑤ 通过 新口径12：py::class_ 块内同名 .def 且 py::arg 个数相同的重复绑定扫描，PyDbCurve getSplitCurves、PyDbText removeField×2、PyDbVisualStyle setTrait×3 均为真实 C++ 重载（参数类型不同），非重复注册
+2026-11-21 17:18 db\PyDbColor.cpp:38 ③ 已改 setColorByRgb lambda 内 AcCmColor::setRGB 返回的 es 原被丢弃，改为存 es + PyWarnIfError，失败返回 False
+2026-11-21 17:18 db\PyDbColor.cpp:29,39 ④ 通过 AcDbColor::getColor/setColor 在 SDK dbmain.h:1739-1740 声明为 void，无 es 可判，非静默失败
+2026-11-21 17:18 PyArxCore 全量 ③ 通过 新口径13：36 处「setter lambda 直接 return true 且块内无 es」逐一对 SDK 头核实，全部是返回 void 的 setter（dbLoftOptions/dbSweepOptions/dbRevolveOptions 的 set*、dbunderlaydef 的 setUseMasterUnits/setXrefDepth/setShowRasterRef、dbsymtb 的 setFlagBits/setIsShapeFile/setIsVertical/setIsScaledToFit），无缺陷

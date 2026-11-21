@@ -35,7 +35,8 @@ void bind_PyDbColor(pym& m) {
 			if (!s.impObj()) return false;
 			auto clamp = [](int v) { return static_cast<Adesk::UInt8>(v < 0 ? 0 : (v > 255 ? 255 : v)); };
 			AcCmColor c;
-			c.setRGB(clamp(r), clamp(g), clamp(b));
+			Acad::ErrorStatus es = c.setRGB(clamp(r), clamp(g), clamp(b));
+			if (!PyWarnIfError(es, L"AcCmColor::setRGB")) return false;
 			s.impObj()->setColor(c);
 			return true;
 		}, py::arg("r"), py::arg("g"), py::arg("b"), "按 RGB 设置颜色（分量夹紧 0-255）")
