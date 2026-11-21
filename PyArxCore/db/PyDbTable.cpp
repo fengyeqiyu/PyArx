@@ -96,7 +96,7 @@ void bind_PyDbTable(pym& m) {
 		.def("isTitleSuppressed", [](const PyDbTable& o) -> bool { if (o.isNull()) return false; return o.impObj()->isTitleSuppressed(); })
 		.def("minimumTableHeight", [](const PyDbTable& o) -> double { if (o.isNull()) return 0.0; return o.impObj()->minimumTableHeight(); })
 		.def("minimumTableWidth", [](const PyDbTable& o) -> double { if (o.isNull()) return 0.0; return o.impObj()->minimumTableWidth(); })
-		.def("tableStyle", [](const PyDbTable& o) -> uint64_t { auto id = o.impObj()->tableStyle(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
+		.def("tableStyle", [](const PyDbTable& o) -> uint64_t { if (o.isNull()) return 0ULL; auto id = o.impObj()->tableStyle(); return id.isNull() ? 0ULL : static_cast<uint64_t>(id.asOldId()); })
 		.def("vertCellMargin", [](const PyDbTable& o) -> double { if (o.isNull()) return 0.0; return o.impObj()->vertCellMargin(); })
 		;
 }

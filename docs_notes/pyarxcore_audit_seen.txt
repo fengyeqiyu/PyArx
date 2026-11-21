@@ -811,3 +811,9 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 15:18 PyArxCore 全量 ①⑤ 通过 新口径10：扫描 602 个 .cpp/.h 的 py::class_<T / py::enum_<E 注册，同名同类型重复注册 0 处（PyApp.cpp 命中为注释、PyArxExtraEnums.cpp 为 Tag<N>::type 互异类型）；py::class_<AcArray 仍 0 处，仅有 6 处 PyArrayCaster
 2026-11-21 15:18 PyArxCore 全量 ③ 通过 新口径11：return_value_policy::reference 共 74 处逐一分类核对=borrow/self/registry/静态单例（reactor 与 overrule 的 py::cast(this,reference) 共 46 处、复合曲线 getSubCurves 借用、Scale/gTol 返回 *this 或静态），未见「对 new 出的对象用 reference」造成泄漏
 2026-11-21 15:18 PyArxCore 全量 ⑦⑧⑨ 通过 全量计数复核：TEMP-DIAG/_diagAppend/OutputDebugString/#if 0=0，ofstream 3 处功能用途，catch(...) 69 处均为已核合理项；PYBIND11_MODULE 真实宏 1 处且带 py::mod_gil_not_used()（PyArxBinder.cpp:62，第二处命中为字面量日志串），PyGILState_/python314=0，python315 字面量 3 处全在 stdafx.h 的 Py_GIL_DISABLED 条件分支
+2026-11-21 16:19 db\PyDbTable.cpp:99 ② 已改 def(tableStyle) 一行 lambda 补 if (o.isNull()) return 0ULL; 与同文件其它 9 个 getter 判空风格一致
+2026-11-21 16:19 db\PyDbDatabase.cpp:3143-3263 (115 处) ② 未改 PyRx 名对齐生成块 lambda 直接 impObj()-> 解引用无判空，批量改写超 20 行只报不改（该类默认构造 new AcDbDatabase()，仅按指针外部构造时 impObj 可能为空）
+2026-11-21 16:19 db\PyDbLoftOptions.cpp:26-57 (23 处) ② 未改 同上，生成块一行 getter/setter lambda 无判空，批改超 20 行只报不改
+2026-11-21 16:19 db\PyDbSweepOptions.cpp:29-72 (23 处) ② 未改 同上，批改超 20 行只报不改
+2026-11-21 16:19 core\PyDbBinder.cpp:262,263 ⑤ 未改 PyRxClass::queryX 用 const/non-const 各绑定一次但 Python 签名完全相同，后者不可达属冗余；删任一行都是接口可见变化，只报不改
+2026-11-21 16:19 PyArxCore 全量 ⑤ 通过 新口径12：py::class_ 块内同名 .def 且 py::arg 个数相同的重复绑定扫描，PyDbCurve getSplitCurves、PyDbText removeField×2、PyDbVisualStyle setTrait×3 均为真实 C++ 重载（参数类型不同），非重复注册
