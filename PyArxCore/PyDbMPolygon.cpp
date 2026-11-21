@@ -8,7 +8,10 @@
 #include "dbpl.h"
 #include "PyUtils.h"
 
-double PyDbMPolygon::getArea() const { return static_cast<AcDbMPolygon*>(impObj())->getArea(); }
+double PyDbMPolygon::getArea() const {
+	if (!impObj()) return 0.0;
+	return static_cast<AcDbMPolygon*>(impObj())->getArea();
+}
 
 AcString PyDbMPolygon::toString() const { return AcString(std::format("AcDbMPolygon[wrapper]").c_str(), AcString::Utf8); }
 
@@ -22,15 +25,15 @@ void bind_PyDbMPolygon(pym& m) {
 			auto* h = static_cast<AcDbMPolygon*>(s.impObj())->hatch();
 			return PyDbHatch(h);  // 内部成员，不接管内存
 		}, "内部 AcDbHatch 对象")
-		.def("elevation", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->elevation(); })
+		.def("elevation", [](const PyDbMPolygon& s){ if (!s.impObj()) return 0.0; return static_cast<AcDbMPolygon*>(s.impObj())->elevation(); })
 		.def("setElevation", [](PyDbMPolygon& s, double v){ return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setElevation(v), L"setElevation"); }, py::arg("v"))
-		.def("normal", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->normal(); })
+		.def("normal", [](const PyDbMPolygon& s){ if (!s.impObj()) return AcGeVector3d(); return static_cast<AcDbMPolygon*>(s.impObj())->normal(); })
 		.def("setNormal", [](PyDbMPolygon& s, const AcGeVector3d& n){ return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setNormal(n), L"setNormal"); }, py::arg("n"))
 		// ---- 几何 ----
-		.def("getPerimeter", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->getPerimeter(); })
-		.def("isBalanced", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->isBalanced(); })
+		.def("getPerimeter", [](const PyDbMPolygon& s){ if (!s.impObj()) return 0.0; return static_cast<AcDbMPolygon*>(s.impObj())->getPerimeter(); })
+		.def("isBalanced", [](const PyDbMPolygon& s){ if (!s.impObj()) return false; return static_cast<AcDbMPolygon*>(s.impObj())->isBalanced(); })
 		.def("getOffsetVector", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->getOffsetVector(); })
-		.def("includesTouchingLoops", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->includesTouchingLoops(); })
+		.def("includesTouchingLoops", [](const PyDbMPolygon& s){ if (!s.impObj()) return false; return static_cast<AcDbMPolygon*>(s.impObj())->includesTouchingLoops(); })
 		// ---- 图案 ----
 		.def("patternType", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->patternType(); })
 		.def("patternName", [](const PyDbMPolygon& s) -> AcString { return static_cast<AcDbMPolygon*>(s.impObj())->patternName(); })
@@ -39,14 +42,14 @@ void bind_PyDbMPolygon(pym& m) {
 		}, py::arg("type"), py::arg("name"))
 		.def("patternAngle", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->patternAngle(); })
 		.def("setPatternAngle", [](PyDbMPolygon& s, double v){ return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setPatternAngle(v), L"setPatternAngle"); }, py::arg("v"))
-		.def("patternSpace", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->patternSpace(); })
+		.def("patternSpace", [](const PyDbMPolygon& s){ if (!s.impObj()) return 0.0; return static_cast<AcDbMPolygon*>(s.impObj())->patternSpace(); })
 		.def("setPatternSpace", [](PyDbMPolygon& s, double v){ return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setPatternSpace(v), L"setPatternSpace"); }, py::arg("v"))
-		.def("patternScale", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->patternScale(); })
+		.def("patternScale", [](const PyDbMPolygon& s){ if (!s.impObj()) return 0.0; return static_cast<AcDbMPolygon*>(s.impObj())->patternScale(); })
 		.def("setPatternScale", [](PyDbMPolygon& s, double v){ return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setPatternScale(v), L"setPatternScale"); }, py::arg("v"))
-		.def("patternDouble", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->patternDouble(); })
+		.def("patternDouble", [](const PyDbMPolygon& s){ if (!s.impObj()) return false; return static_cast<AcDbMPolygon*>(s.impObj())->patternDouble(); })
 		.def("setPatternDouble", [](PyDbMPolygon& s, bool v){ return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setPatternDouble(v), L"setPatternDouble"); }, py::arg("v"))
 		// ---- 环操作 ----
-		.def("numLoops", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->numMPolygonLoops(); }, "环数量")
+		.def("numLoops", [](const PyDbMPolygon& s){ if (!s.impObj()) return 0; return static_cast<AcDbMPolygon*>(s.impObj())->numMPolygonLoops(); }, "环数量")
 		.def("appendLoop", [](PyDbMPolygon& s, const AcGePoint2dArray& verts, const AcGeDoubleArray& bulges){
 			auto* p = static_cast<AcDbMPolygon*>(s.impObj());
 			return PyWarnIfError(p->appendMPolygonLoop(verts, bulges), L"MPolygon.appendLoop");
@@ -62,7 +65,7 @@ void bind_PyDbMPolygon(pym& m) {
 		.def("closestLoopTo", [](const PyDbMPolygon& s, const AcGePoint3d& pt){
 			return static_cast<AcDbMPolygon*>(s.impObj())->getClosestLoopTo(pt);
 		}, py::arg("world_pt"), "离世界点最近的环索引")
-		.def("parentLoop", [](const PyDbMPolygon& s, int cur){ return static_cast<AcDbMPolygon*>(s.impObj())->getParentLoop(cur); }, py::arg("current_loop"))
+		.def("parentLoop", [](const PyDbMPolygon& s, int cur){ if (!s.impObj()) return -1; return static_cast<AcDbMPolygon*>(s.impObj())->getParentLoop(cur); }, py::arg("current_loop"))
 		.def("loopDirection", [](const PyDbMPolygon& s, int i) -> int {
 			AcDbMPolygon::loopDir d = AcDbMPolygon::kExterior;
 			if (!s.impObj()) return -1;
@@ -79,6 +82,7 @@ void bind_PyDbMPolygon(pym& m) {
 		}, "重新计算填充路径")
 		// ---- 图案定义 / 图案色 / 显示 ----
 		.def("numPatternDefinitions", [](const PyDbMPolygon& s){
+			if (!s.impObj()) return 0;
 			return static_cast<AcDbMPolygon*>(s.impObj())->numPatternDefinitions();
 		}, "图案定义数量")
 		.def("getPatternDefinitionAt", [](const PyDbMPolygon& s, int index) -> std::tuple<double, double, double, double, double, AcGeDoubleArray> {

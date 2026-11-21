@@ -761,3 +761,10 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 08:21 PyArxCore 全量 ⑤ 通过 重复 .def 64 处逐条核为合法重载（同名不同 py::arg 类型），无遮蔽型重复注册
 2026-11-21 08:21 PyArxCore 全量 ⑦ 通过 acutPrintf 调试类输出 14 处全在 PyUt 调试 API（debug_attach/debugBreak/debug_stop），属功能提示；无 #if 0 / OutputDebugString / TEMP
 2026-11-21 08:21 PyArxCore 全量 ⑥ 通过 声明无定义扫描 miss=10，除 PyDbDatabase.h 悬空声明外 IsGsWorkerThread/PaletteSet GetMaximumSize/GetMinimumSize 均为误报（自由函数或类内 inline）
+2026-11-21 09:18 PyDbMPolygon.cpp:11/25/27/30/31/33/42/44/46/49/65/82 ② 已改 12 处 lambda/成员函数补 impObj() 判空，默认返回 0.0/AcGeVector3d()/false/0/-1，其余逻辑不变
+2026-11-21 09:18 PyDbMPolygon.cpp:22/32/35/36/40/94/140/178 ② 未改 8 处仍直接解引用可空 impObj()（hatch/getOffsetVector/patternType/patternName/patternAngle/patternColor/isPointOnLoopBoundary/getChildLoops），非空返回类型需逐个核 SDK 头，留下轮
+2026-11-21 09:18 PyDbMPolygon.cpp:63 ② 未改 closestLoopTo 返回 getClosestLoopTo 的 tuple，空对象默认值语义待核，只报
+2026-11-21 09:18 PyArxCore 全部 .h ② 通过 309 个头文件 inline 体逐行扫 impObj()-> 与 static_cast<...>(impObj())-> 直接解引用 = 0（全在 .cpp 中）
+2026-11-21 09:18 PyArxCore 全部 .h ⑤ 通过 头文件内纯同名一行转发（return this->同名(...)） = 0
+2026-11-21 09:18 PyArxCore 全部 ⑨ 通过 gil_scoped_release / PyEval_SaveThread / PyEval_RestoreThread = 0，未按 GIL 释放假设编写；PyGILState_ = 0
+2026-11-21 09:18 PyArxCore 全部 ⑦ 通过 注释掉的调试输出（// acutPrintf|printf|cout|OutputDebugString）= 0

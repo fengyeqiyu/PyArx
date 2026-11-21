@@ -242,3 +242,7 @@
 2026-11-21 08:21 | PyDbMPolygon.cpp:68/85/163/180/187 | ②④ | 五个 lambda 补 impObj() 判空并改判 es + PyWarnIfError，失败返回 -1 / 零值元组 / 空列表不变
 2026-11-21 08:21 | PyDbDatabase.cpp:88/92 | ④ | objectIds 的 openStatus 与 newIterator 失败补 PyWarnIfError，仍返回空 list
 2026-11-21 08:21 | PyDbLayerTable.cpp:15 | ④ | getAt 的 getIdAt 失败补 PyWarnIfError，仍返回 nullptr
+2026-11-21 09:18 | PyDbMPolygon.cpp:11 | ② | getArea 成员函数补 !impObj() 守卫返回 0.0（可 None 构造）
+2026-11-21 09:18 | PyDbMPolygon.cpp:25/27/30/31/33 | ② | elevation / normal / getPerimeter / isBalanced / includesTouchingLoops 五个 lambda 补 !s.impObj() 守卫，返回 0.0 / AcGeVector3d() / false
+2026-11-21 09:18 | PyDbMPolygon.cpp:42/44/46/49 | ② | patternSpace / patternScale / patternDouble / numLoops 四个 lambda 补 !s.impObj() 守卫，返回 0.0 / false / 0
+2026-11-21 09:18 | PyDbMPolygon.cpp:65/82 | ② | parentLoop 补守卫返回 -1；numPatternDefinitions 拆出 if (!s.impObj()) return 0;
