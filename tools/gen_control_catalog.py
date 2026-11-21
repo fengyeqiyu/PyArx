@@ -46,7 +46,7 @@ CATEGORY = {
     'Page': 'Data Views',
     'StackView': 'Data Views',
     'SwipeView': 'Data Views',
-    'PowerCanvas': 'Canvas',
+    'DwgCanvas': 'Canvas',
     'QCanvas': 'Canvas',
     'Flickable': 'Containers',
     'BusyIndicator': 'Display Widgets',
@@ -60,7 +60,7 @@ CAT_ORDER = ['Buttons', 'Input Widgets', 'Display Widgets', 'Data Views', 'Conta
 
 SIZE = {
     'Table': (320, 140), 'TreeTable': (320, 140), 'VirtualList': (240, 140),
-    'GridView': (320, 160), 'PathView': (320, 140), 'PowerCanvas': (420, 260),
+    'GridView': (320, 160), 'PathView': (320, 140), 'DwgCanvas': (420, 260),
     'QCanvas': (420, 200), 'Flickable': (320, 160), 'TabBar': (360, 160),
     'Page': (360, 160), 'StackView': (360, 160), 'SwipeView': (360, 160),
     'BusyIndicator': (56, 56), 'MonthGrid': (260, 200), 'PageIndicator': (160, 22),

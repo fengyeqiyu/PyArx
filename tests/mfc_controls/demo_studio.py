@@ -200,19 +200,19 @@ class Studio:
         self.logs.insert(0, text)
         del self.logs[8:]
         w = self.w
-        w.clearListItems(self.n['logs'])
+        w.clear_list_items(self.n['logs'])
         for line in self.logs:
             parts = line.split('|', 1)
-            w.addListItem(self.n['logs'], (parts[0] + '|' + parts[1]) if len(parts) > 1 else (line + '|'))
+            w.add_list_item(self.n['logs'], (parts[0] + '|' + parts[1]) if len(parts) > 1 else (line + '|'))
 
     def status(self, text):
-        self.w.setText(self.n['status'], text)
+        self.w.set_text(self.n['status'], text)
 
     # ---- 页切换 ----
     def goto(self, i):
         w = self.w
-        w.setViewIndex(self.n['sv'], i)
-        w.animatePage(self.n['sv'], i)
+        w.set_view_index(self.n['sv'], i)
+        w.animate_page(self.n['sv'], i)
         self.page = i
         self.on_page_changed()
 
@@ -228,19 +228,19 @@ class Studio:
     def schedule(self, i):
         w, n = self.w, self.n
         if i == 0:
-            w.animateFrom(n['p1a'], 'Value', 30, 92, SEG, 'outCubic', 0, False)
-            w.animateFrom(n['p1a'], 'Value', 92, 30, SEG, 'outCubic', SEG, False)
-            w.animateFrom(n['p1b'], 'Value', 44, 70, SEG, 'outCubic', 0, False)
-            w.animateFrom(n['p1b'], 'Value', 70, 44, SEG, 'outCubic', SEG, False)
-            w.animateFrom(n['p1c'], 'Value', 20, 66, SEG, 'inOutQuad', 0, False)
-            w.animateFrom(n['p1c'], 'Value', 66, 20, SEG, 'inOutQuad', SEG, False)
+            w.animate_from(n['p1a'], 'Value', 30, 92, SEG, 'outCubic', 0, False)
+            w.animate_from(n['p1a'], 'Value', 92, 30, SEG, 'outCubic', SEG, False)
+            w.animate_from(n['p1b'], 'Value', 44, 70, SEG, 'outCubic', 0, False)
+            w.animate_from(n['p1b'], 'Value', 70, 44, SEG, 'outCubic', SEG, False)
+            w.animate_from(n['p1c'], 'Value', 20, 66, SEG, 'inOutQuad', 0, False)
+            w.animate_from(n['p1c'], 'Value', 66, 20, SEG, 'inOutQuad', SEG, False)
         elif i == 3:
-            w.animateFrom(n['ab'], 'Width', 160, 300, SEG, 'linear', 0, False)
-            w.animateFrom(n['ab'], 'Width', 300, 160, SEG, 'linear', SEG, False)
-            w.animateFrom(n['ad'], 'Value', 0, 100, SEG, 'outCubic', 0, False)
-            w.animateFrom(n['ad'], 'Value', 100, 0, SEG, 'outCubic', SEG, False)
-            w.animateFrom(n['ap'], 'Value', 0, 100, SEG, 'inOutQuad', 0, False)
-            w.animateFrom(n['ap'], 'Value', 100, 0, SEG, 'inOutQuad', SEG, False)
+            w.animate_from(n['ab'], 'Width', 160, 300, SEG, 'linear', 0, False)
+            w.animate_from(n['ab'], 'Width', 300, 160, SEG, 'linear', SEG, False)
+            w.animate_from(n['ad'], 'Value', 0, 100, SEG, 'outCubic', 0, False)
+            w.animate_from(n['ad'], 'Value', 100, 0, SEG, 'outCubic', SEG, False)
+            w.animate_from(n['ap'], 'Value', 0, 100, SEG, 'inOutQuad', 0, False)
+            w.animate_from(n['ap'], 'Value', 100, 0, SEG, 'inOutQuad', SEG, False)
 
     def start(self, i):
         if self.running[i] or i not in (0, 3):
@@ -248,9 +248,9 @@ class Studio:
         self.running[i] = True
         self.schedule(i)
         if i == 0:
-            self.w.setText(self.n['p1note'], '本页动画运行中')
+            self.w.set_text(self.n['p1note'], '本页动画运行中')
         else:
-            self.w.setText(self.n['p4note'], '本页动画运行中 · 切页即停')
+            self.w.set_text(self.n['p4note'], '本页动画运行中 · 切页即停')
 
     def stop(self, i):
         if not self.running[i]:
@@ -259,18 +259,18 @@ class Studio:
         w, n = self.w, self.n
         if i == 0:
             for k in ('p1a', 'p1b', 'p1c'):
-                w.stopAnimations(n[k])
-            w.setText(n['p1note'], '本页动画已停止')
+                w.stop_animations(n[k])
+            w.set_text(n['p1note'], '本页动画已停止')
         else:
             for k in ('ab', 'ad', 'ap'):
-                w.stopAnimations(n[k])
-            w.setText(n['p4note'], '本页动画已停止 · 切页即停')
+                w.stop_animations(n[k])
+            w.set_text(n['p4note'], '本页动画已停止 · 切页即停')
 
     def tick(self):
         w, n = self.w, self.n
         # 每页自己的开关（第 1 页与第 4 页）
         for i, sw in ((0, 'sw1'), (3, 'sw4')):
-            on = bool(w.getSwitch(n[sw]))
+            on = bool(w.get_switch(n[sw]))
             if on != self.want[i]:
                 self.want[i] = on
                 if not on:
@@ -279,7 +279,7 @@ class Studio:
                     self.start(i)
                 self.log('第 %d 页动画开关 → %s' % (i + 1, '开' if on else '关'))
         # 总开关：关的时候把所有页的意愿清掉
-        master = bool(w.getSwitch(n['swDemo']))
+        master = bool(w.get_switch(n['swDemo']))
         if master != getattr(self, 'master', None):
             self.master = master
             if not master:
@@ -298,39 +298,39 @@ class Studio:
 def wire(w, names, st):
     # 导航按钮：零参回调，所以要闭包绑死页码
     for i in range(4):
-        w.onClick(names['nav%d' % i], (lambda k: (lambda: st.goto(k)))(i))
+        w.on_click(names['nav%d' % i], (lambda k: (lambda: st.goto(k)))(i))
 
     # 画布：可编辑 + 图元状态 + 选择回调
     cv = names['cv']
-    w.setCanvasCommands(cv, PLAN)
-    w.setCanvasEditable(cv, True)
+    w.set_canvas_commands(cv, PLAN)
+    w.set_canvas_editable(cv, True)
 
     def refresh_cv(*a):
-        sel = w.getCanvasSelection(cv)
-        n = w.getCanvasItemCount(cv)
-        cap = sum(1 for i in range(n) if w.getCanvasItemOp(cv, i) not in ('Clear',))
+        sel = w.get_canvas_selection(cv)
+        n = w.get_canvas_item_count(cv)
+        cap = sum(1 for i in range(n) if w.get_canvas_item_op(cv, i) not in ('Clear',))
         if sel:
-            ops = [w.getCanvasItemOp(cv, i) for i in sel]
-            w.setText(names['cvstat'], '共 %d 个图元 · 选中 %d 个（%s）'
+            ops = [w.get_canvas_item_op(cv, i) for i in sel]
+            w.set_text(names['cvstat'], '共 %d 个图元 · 选中 %d 个（%s）'
                      % (n, len(sel), '、'.join(sorted(set(ops)))))
             st.log('布置图选中 %d 个图元' % len(sel))
         else:
-            w.setText(names['cvstat'], '共 %d 个图元 · 未选中' % n)
+            w.set_text(names['cvstat'], '共 %d 个图元 · 未选中' % n)
         (void)(cap)
 
-    w.onCanvasSelect(cv, refresh_cv) if False else w.onCanvasSelect(cv, refresh_cv)
+    w.on_canvas_select(cv, refresh_cv) if False else w.on_canvas_select(cv, refresh_cv)
     refresh_cv()
 
     # 刷新 / 导出 两个动作按钮
-    w.onClick(names['btnRefresh'], lambda: st.log('手动刷新一次采样') or st.status('已刷新采样数据'))
-    w.onClick(names['btnExport'], lambda: st.log('导出当前看板为 PNG') or st.status('已导出看板快照'))
+    w.on_click(names['btnRefresh'], lambda: st.log('手动刷新一次采样') or st.status('已刷新采样数据'))
+    w.on_click(names['btnExport'], lambda: st.log('导出当前看板为 PNG') or st.status('已导出看板快照'))
 
     # 滑块 / 步进框联动节拍
     def on_tick_value(*a):
-        v = w.getPos(names['sl'])
-        w.setText(names['slLabel'], '目标节拍 %d 件/时' % v)
+        v = w.get_pos(names['sl'])
+        w.set_text(names['slLabel'], '目标节拍 %d 件/时' % v)
 
-    w.onValue(names['sl'], on_tick_value)
+    w.on_value(names['sl'], on_tick_value)
 
 
 def main():
@@ -340,24 +340,24 @@ def main():
     p.pump(300)
 
     sv = names['sv']
-    w.addPage(sv, [names['pg1'], names['lA'], names['p1a'], names['lB'], names['p1b'],
+    w.add_page(sv, [names['pg1'], names['lA'], names['p1a'], names['lB'], names['p1b'],
                    names['lC'], names['p1c'], names['slLabel'], names['sl'],
                    names['sw1Label'], names['sw1'], names['p1note']])
-    w.addPage(sv, [names['pg2'], names['cv'], names['cvhint'], names['cvstat']])
-    w.addPage(sv, [names['pg3'], names['tv'], names['p3note']])
-    w.addPage(sv, [names['pg4'], names['sw4Label'], names['sw4'], names['ab'], names['ad'],
+    w.add_page(sv, [names['pg2'], names['cv'], names['cvhint'], names['cvstat']])
+    w.add_page(sv, [names['pg3'], names['tv'], names['p3note']])
+    w.add_page(sv, [names['pg4'], names['sw4Label'], names['sw4'], names['ab'], names['ad'],
                    names['ap'], names['p4note']])
-    w.setViewIndex(sv, 0)
+    w.set_view_index(sv, 0)
 
     tv = names['tv']
-    w.setTableColumns(tv, '设备\t类型\t上次维护\t状态')
+    w.set_table_columns(tv, '设备\t类型\t上次维护\t状态')
     for row in ('冲压机 01\t液压\t08-12\t正常',
                 '冲压机 02\t液压\t08-19\t待检',
                 '送料台 01\t输送\t07-30\t正常',
                 '装配台 01\t装配\t08-02\t正常',
                 '检测台 01\t视觉\t08-21\t告警',
                 '缓存仓 01\t仓储\t07-11\t正常'):
-        w.addTableRow(tv, row)
+        w.add_table_row(tv, row)
 
     st = Studio(w, names)
     wire(w, names, st)

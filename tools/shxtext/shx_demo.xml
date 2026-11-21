@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SHX 字体渲染示例（MfcXmlCore 的 C++ 封装）
+     渲染通路：.shx/.bigfont → ShxFontCore（C++ 解析+排版）→ <XScene> 折线
+     → host->setDwgXml → 宿主自绘画布。不依赖 AutoCAD，也不依赖 TrueType。 -->
+<XWindow Title="SHX 字体渲染 - C++ 封装" Width="900" Height="280" Background="#FFFFFF">
+  <XGrid Background="#FFFFFF">
+    <XGrid.RowDefinitions>
+      <RowDefinition Height="44"/>
+      <RowDefinition Height="44"/>
+      <RowDefinition Height="44"/>
+      <RowDefinition Height="44"/>
+      <RowDefinition Height="44"/>
+    </XGrid.RowDefinitions>
+    <XShxText Grid.Row="0" Text="SHX single-line font 0123456789"
+              FontFile="romans.shx" FontHeight="22" Stroke="#1A1A1A"/>
+    <XShxText Grid.Row="1" Text="图纸设计 建筑说明 结构"
+              FontFile="romans.shx" BigFontFile="hztxt.shx" FontHeight="24" Stroke="#1A1A1A"/>
+    <XShxText Grid.Row="2" Text="汉字ABC 123"
+              FontFile="romans.shx" BigFontFile="hztxt.shx" FontHeight="24" Stroke="#0A4C8B"/>
+    <XShxText Grid.Row="3" Text="Tilted 15 deg text"
+              FontFile="romans.shx" FontHeight="22" Oblique="15" Stroke="#8A2BE2"/>
+    <XShxText Grid.Row="4" Text="Width factor 0.75 窄体"
+              FontFile="romans.shx" BigFontFile="hztxt.shx"
+              FontHeight="22" WidthFactor="0.75" Stroke="#1A6B3C"/>
+  </XGrid>
+</XWindow>

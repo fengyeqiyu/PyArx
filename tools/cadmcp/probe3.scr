@@ -1,0 +1,7 @@
+(setvar "SECURELOAD" 0)
+(setq r1 (vl-catch-all-apply 'arxload '("C:/Program Files/Autodesk/AutoCAD 2024/AcArray.arx")))
+(princ (strcat "\nTEST_AcArray=" (if (vl-catch-all-error-p r1) "FAIL" "OK")))
+(setq r2 (vl-catch-all-apply 'arxload '("G:/PyArx/X64/Release/PyArxEngine.arx")))
+(princ (strcat "\nTEST_PyArx=" (if (vl-catch-all-error-p r2) "FAIL" "OK")))
+(if (vl-catch-all-error-p r2) (princ (strcat "\nMSG=" (vl-catch-all-error-message r2))))
+(princ)

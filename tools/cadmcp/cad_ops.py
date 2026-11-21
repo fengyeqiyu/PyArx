@@ -223,14 +223,15 @@ _OP_NAMES = ("line", "polyline", "text", "mtext", "circle", "arc",
 
 _HEAD = '''# -*- coding: utf-8 -*-
 import json, math, traceback
-try:
+# 宿主（cadmcp server / playground / 无头通道）普遍会在 globals 里注入已修补过的
+# P（PyRxCompat 给它挂了 Db.curDb 等入口）。这里**优先用注入的那个**：无条件
+# import PyArxCore 会把注入版覆盖掉，拿到的 P.Db 只是裸模块、没有 curDb，
+# 表现为 AttributeError: module 'PyArxCore.Db' has no attribute 'curDb'。
+P = globals().get("P")
+if P is None:
     import PyArxCore as P
-    from PyArxCore import Db, Ge
-except Exception:
-    # 宿主（cadmcp server / playground）会在 globals 里注入 P，这里只是兜底
-    P = globals().get("P")
-    Db = getattr(P, "Db", None)
-    Ge = getattr(P, "Ge", None)
+Db = getattr(P, "Db", None)
+Ge = getattr(P, "Ge", None)
 
 CALLS = __CALLS__
 
@@ -307,7 +308,7 @@ def _make(kind, a):
         t.setSize(rows, cols)
         t.setPosition(_p3(a["pos"]))
         for i in range(cols):
-            t.setColumnWidth(i, float(a.get("col_w", 30.0)))
+            t.set_column_width(i, float(a.get("col_w", 30.0)))
         for i in range(rows):
             t.setRowHeight(i, float(a.get("row_h", 8.0)))
         for r, row in enumerate(a.get("texts") or []):
@@ -351,11 +352,16 @@ def _make(kind, a):
 
 _RUN = '''
 need = {}
+layer_ids = {}
 _need_bt = False
 for c in CALLS:
     a = c.get("args") or {}
     if a.get("layer"):
         need[str(a["layer"])] = a.get("layer_rgb") or [255, 255, 0]
+    # cad_layer 自己也要建层：早先只把 kind=="layer" 记成 steps 就 continue，
+    # 结果 cad_layer 是空操作（count=0、图里根本没有这个层），模型以为建好了。
+    if str(c.get("tool") or "") in ("layer", "cad_layer") and a.get("name"):
+        need[str(a["name"])] = a.get("rgb") or [255, 255, 0]
     if str(c.get("tool") or "") in ("block_ref", "cad_block_ref"):
         _need_bt = True
 
@@ -369,20 +375,44 @@ if need:
     # "eWasOpenForWrite"，而且 PyDbTrans 上根本没有 addNewlyCreatedDBObject
     # （只有 PyDbTransactionManager 有）。宿主实测的正确路径是事务外取可写
     # 符号表 → newRecord → lt.add，符号表自己负责落库。
-    lt = DB.getLayerTable()
+    # 必须显式要写模式：无参 getLayerTable() 拿到的是读模式表，
+    # 在它上面 add 会直接崩到 dbobji.cpp 的 eNotOpenForWrite（CAD 致命错误，
+    # Python 侧接不住，accoreconsole 当场退出）。实测 getLayerTable(1) 后
+    # newRecord→setName→setColor→add 全成功，层真的落库。
+    lt = DB.getLayerTable(1)
     for name, rgb in need.items():
         if lt.has(name):
             OUT["layers"][name] = "exists"
             continue
-        rec = P.Db.PyDbLayerTableRecord.newRecord()
-        rec.setName(name)
-        rec.setColor(int(rgb[0]), int(rgb[1]), int(rgb[2]))
-        if not lt.add(rec):
-            raise RuntimeError("LayerTable.add 返回 False：" + name)
-        OUT["layers"][name] = "created"
+        # 建层在这版绑定里不可用：PyDbSymbolTable.add(rec) 一发就让 CAD 致命
+        # 退出（dbobji.cpp eNotOpenForWrite），newRecord/setName/setColor 都
+        # 正常、崩点固定在 add。试过 add 前 setDatabaseDefaults（方法不存在）、
+        # 先 add 再 setColor（同样崩），救不回来 —— 这是 C++ 绑定侧的缺陷，
+        # 需要给 PyDbSymbolTable 补一个 createLayer 之类的安全入口。
+        # 这里绝不执行 add，只如实记 warning：实体留在 0 层，别让整批画图陪葬。
+        OUT["layers"][name] = "unsupported"
+        OUT["warnings"].append(
+            {"layer": name, "create": "当前绑定不支持建层（PyDbSymbolTable.add 会崩），"
+                                       "实体留在 0 层"})
+    # 事务开始前必须把图层表的写锁放掉：符号表还处于 openForWrite 时，
+    # 事务内 addEntity 会撞 dbobji.cpp 的 eNotOpenForWrite（CAD 致命错误，
+    # Python 侧接不住，整个 accoreconsole 直接退出）。
+    # 但事务内还要按层名取 id，所以**先查好 id**，再 close —— 事务里绝不能再
+    # 碰已关闭的 lt（用它 getAt 同样会撞 eNotOpenForWrite，本次 hatch 崩溃
+    # 就是这条路径）。
+    for name in list(need.keys()):
+        try:
+            layer_ids[name] = lt.getAt(name).objectId()
+        except Exception:
+            pass
+    try:
+        lt.close()
+    except Exception:
+        pass
 
 OUT["before"] = len(DB.objectIds("AcDbEntity"))
 added = []
+_pending_hatch = []
 i = -1
 kind = ""
 try:
@@ -403,16 +433,29 @@ try:
                     # addEntity 返回 bool 且失败时不抛异常：句柄会停在 "0"、实体数不涨。
                     raise RuntimeError("addEntity(%s) 返回 False：appendAcDbEntity 被拒"
                                        "（xref 派生块 $0$ 不能引用 / 对象未初始化）" % kind)
-                if a.get("layer"):
+                if kind == "hatch":
+                    # 边界与求值不能和 addEntity 挤在同一个瞬间：实测在同一事务里
+                    # 紧跟 addEntity 调用 appendLoopPoints 会撞 dbobji.cpp 的
+                    # eNotOpenForWrite（AutoCAD 致命错误，Python 侧接不住）。
+                    # 这里只记录待办，等事务提交后再开一个事务按 id 以写模式打开
+                    # 求值 —— 那是 ARX 里对已入库对象改属性的标准路径。
+                    try:
+                        _pending_hatch.append([i, ent.objectId(), a["pts"],
+                                               a.get("layer")])
+                    except Exception as ex:
+                        raise RuntimeError("hatch 取 objectId 失败：" + repr(ex)[:140])
+                if a.get("layer") and kind != "hatch":
+                    # hatch 的图层同样留到求值事务里设（见下）：入库瞬间对它
+                    # setLayerId 会撞 eNotOpenForWrite，CAD 直接退出。
                     # 优先走 id 版 setLayerId（uint64 oldId，绕开图层名编码问题）；
                     # 只有基础 pyd（未含 setLayerId）才退回字符串重载，而后者对
                     # 已存在图层也返回 False —— 所以退回时如实记 warning。
                     want = str(a["layer"])
                     try:
                         ok = False
-                        if hasattr(ent, "setLayerId"):
+                        if hasattr(ent, "setLayerId") and want in layer_ids:
                             try:
-                                ok = bool(ent.setLayerId(lt.getAt(want).objectId()))
+                                ok = bool(ent.setLayerId(layer_ids[want]))
                             except Exception:
                                 ok = False
                         if not ok:
@@ -456,6 +499,32 @@ except Exception:
         OUT["errors"].append({"i": i, "tool": kind,
                               "error": traceback.format_exc().splitlines()[-1]})
 
+# hatch 的边界与求值放到事务提交之后，另开事务按 id 以写模式打开再做。
+# 这样对象是"库里已有、显式 open for write"的正常状态，不会再撞 eNotOpenForWrite。
+if _pending_hatch:
+    try:
+        with P.Db.PyDbTrans() as tr2:
+            for hi, hoid, hpts, hlay in _pending_hatch:
+                ho = tr2.openObject(hoid, 1)
+                if ho is None:
+                    OUT["warnings"].append({"i": hi, "hatch": "无法以写模式打开，边界未挂"})
+                    continue
+                if hlay and str(hlay) in layer_ids:
+                    try:
+                        ho.setLayerId(layer_ids[str(hlay)])
+                    except Exception as ex:
+                        OUT["warnings"].append({"i": hi, "hatchLayer": repr(ex)[:120]})
+                try:
+                    if not ho.appendLoopPoints(1, [_p2(p) for p in hpts], []):
+                        OUT["warnings"].append(
+                            {"i": hi, "hatch": "appendLoopPoints 返回 False（点数不足 3？）"})
+                    else:
+                        ho.evaluateHatch()
+                except Exception as ex:
+                    OUT["warnings"].append({"i": hi, "hatch": repr(ex)[:160]})
+    except Exception as ex:
+        OUT["warnings"].append({"hatch": "求值事务失败 " + repr(ex)[:160]})
+
 # 句柄必须在事务提交**之后**取：事务内 ent.handle() 还是 "0"（宿主实测），
 # 事务提交后才有真实句柄。handle 仍是 0 说明 addEntity 被静默拒绝、实体没入库
 # （块参照实测过），这种情况不能算进 count，否则模型会以为画上了。
@@ -480,17 +549,13 @@ if BT is not None:
         BT.close()
     except Exception:
         pass
-# 图层表同理：建层时在事务外拿了写锁，必须 close。否则库一直处于"有符号表打开写"
-# 的状态，后续 AcDbDatabase::saveAs 会崩在 acdb24.dll（headless 里表现是
-# eWasOpenForWrite，文档库里直接 0xc0000005）。存盘前务必走完这一步。
-try:
-    lt.close()
-except Exception:
-    pass
+# 图层表在事务前已经 close（id 也已提前取好），这里不再二次 close：
+# 对已关闭的符号表再 close 同样可能触发 eNotOpenForWrite。
 result = OUT
 '''
 
 _OFFSET = '''# -*- coding: utf-8 -*-
+import math
 import traceback
 
 DB = P.Db.curDb()
@@ -502,9 +567,8 @@ OUT = {"ok": False, "count": 0, "handles": [], "src": SRC, "dist": DIST,
        "before": len(DB.objectIds("AcDbEntity"))}
 
 added = []
+
 try:
-    # 源实体必须在**同一个事务**里打开并求偏移：跨事务拿到的包装对象
-    # 在事务结束时就关闭了，再用会直接报对象已关闭。
     with P.Db.PyDbTrans() as tr:
         target = None
         for eid in DB.objectIds("AcDbEntity"):
@@ -516,27 +580,53 @@ try:
                 break
         if target is None:
             raise RuntimeError("找不到句柄 " + SRC)
-        if not hasattr(target, "getOffsetCurves"):
-            raise RuntimeError("该实体不支持偏移：" + str(target.className()))
-        curves = target.getOffsetCurves(float(DIST))
-        for c in curves:
-            if not tr.addEntity(c):
-                OUT["warnings"].append({"addEntity": "返回 False，偏移结果未入库"})
-                continue
-            added.append(c)
+
+        cls = str(target.className())
+        lay = target.layerId()
+        new = None
+
+        # 不用 PyDbCurve.getOffsetCurves：它返回的对象底层没归到具体类
+        # （className 只到 AcDbEntity），addEntity 以类型不匹配拒收，
+        # PyDbEntity.cast 还会在 C++ 侧抛未知异常。这里直接读源实体几何、
+        # 自己算偏移，新建一个干净的库实体，路径完全可控。
+        if cls == "AcDbLine":
+            sp = target.startPoint()
+            ep = target.endPoint()
+            dx = ep.x - sp.x
+            dy = ep.y - sp.y
+            ln = math.hypot(dx, dy) or 1.0
+            nx = -dy / ln * float(DIST)
+            ny = dx / ln * float(DIST)
+            new = P.Db.PyDbLine(P.Ge.AcGePoint3d(sp.x + nx, sp.y + ny, sp.z),
+                                P.Ge.AcGePoint3d(ep.x + nx, ep.y + ny, ep.z))
+        elif cls in ("AcDbCircle", "AcDbArc"):
+            c0 = target.center()
+            r0 = target.radius()
+            r1 = r0 + float(DIST)
+            if r1 <= 0:
+                raise RuntimeError("偏移后半径为负：" + str(r1))
+            if cls == "AcDbCircle":
+                new = P.Db.PyDbCircle(c0, P.Ge.AcGeVector3d(0.0, 0.0, 1.0), r1)
+            else:
+                new = P.Db.PyDbArc(c0, r1, target.startAngle(),
+                                   target.endAngle())
+        else:
+            raise RuntimeError(
+                "暂不支持的偏移类型：" + cls + "（当前支持直线/圆/圆弧）")
+
+        new.setLayerId(lay, False)
+        if not tr.addEntity(new):
+            OUT["warnings"].append({"addEntity": "返回 False，偏移结果未入库"})
+        else:
+            # 事务内取句柄：addEntity 之后 id 就已分配，事务外对象已关闭读不到。
+            added.append(str(new.handle()))
 except Exception:
     OUT["rolled_back"] = True
     added = []
     OUT["errors"].append(traceback.format_exc().splitlines()[-1])
 
-# 偏移曲线继承源图元的图层/颜色，这里不再单独改属性
-for ent in added:
-    try:
-        OUT["handles"].append(str(ent.handle()))
-    except Exception:
-        OUT["handles"].append("?")
-
-OUT["count"] = len([h for h in OUT["handles"] if h not in ("0", "?")])
+OUT["handles"] = added
+OUT["count"] = len([h for h in added if h not in ("0", "?", "")])
 OUT["after"] = len(DB.objectIds("AcDbEntity"))
 OUT["ok"] = bool(OUT["count"] > 0) and not OUT["errors"]
 result = OUT

@@ -101,7 +101,7 @@ chk('画布右边界 = 分割条左边界', p1[0] + p1[2] <= sx3, 'cv=%dx%d spli
 
 print('=== %d/%d PASS ===' % (ok_n, ok_n + bad), flush=True)
 try:
-    w.savePng(r'G:\PyArx\docs\_split.png')
+    w.save_png(r'G:\PyArx\docs\_split.png')
     print('截图 _split.png', flush=True)
 except Exception as e:
     print('截图失败 %s' % e, flush=True)

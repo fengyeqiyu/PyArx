@@ -189,7 +189,7 @@ def main():
     if th:
         user32.SendMessageW(th, WM_SETTEXT, 0, wstr('灌入'))
         check(HITS.get('text', 0) >= 1, 'TextChanged 触发', HITS.get('text'))
-        v = win.getXmlValue(tid, 'text')
+        v = win.get_xml_value(tid, 'text')
         check(v == '灌入', 'TextChanged 后宿主文本已更新', v)
     else:
         check(False, '找不到 TextBox 子窗口')
@@ -252,7 +252,7 @@ def main():
         print('（Slider 没有独立子窗口，跳过 WM_HSCROLL）')
 
     print('HITS=%r' % HITS)
-    win.savePng(r'G:\PyArx\docs\_sim_msgs.png')
+    win.save_png(r'G:\PyArx\docs\_sim_msgs.png')
     win.close()
     print('\n结果：%d 项失败' % len(fails))
     return 1 if fails else 0

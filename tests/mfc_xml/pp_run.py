@@ -109,7 +109,7 @@ if _pos:
         M.pump(400)
         app.rebuild(fit=True)      # 换屏后按新画布尺寸重排 + 适配
         M.pump(120)
-    print('画布 %sx%s 视图 %s' % (app.cvW, app.cvH, app.win.getPlanView(pp_app.CV)), flush=True)
+    print('画布 %sx%s 视图 %s' % (app.cvW, app.cvH, app.win.get_dwg_view(pp_app.CV)), flush=True)
 # 尺寸变过之后按新画布重算 fit（否则 C++ 那套按宽算的比例会把下方裁掉）
 app.fitView()
 M.pump(150)
@@ -132,7 +132,7 @@ if '--shot' in sys.argv:
     time.sleep(0.3)
     user32.SetWindowPos(hwnd, wt.HWND(-1), 40, 30, 0, 0, 0x0001 | 0x0040)
     M.pump(400)
-    app.win.savePng(r'G:\PyArx\docs\_pp_live.png')
+    app.win.save_png(r'G:\PyArx\docs\_pp_live.png')
     M.pump(80)
     print('已截图 docs/_pp_live.png', flush=True)
 
@@ -148,8 +148,8 @@ while user32.IsWindow(hwnd):
         app._pendingMini = None
         if txt is True:
             # 直接拷主画布已解析好的场景（省掉再解析一遍 4.8 MB 的 40~60 ms）
-            app.win.copyPowerScene(pp_app.MINI, pp_app.CV)
+            app.win.copy_dwg_scene(pp_app.MINI, pp_app.CV)
         else:
-            app.win.loadPowerScene(pp_app.MINI, txt)
-        app.win.setPlanOptions(pp_app.MINI, False, True, pp_app.CV)
+            app.win.load_dwg_scene(pp_app.MINI, txt)
+        app.win.set_dwg_options(pp_app.MINI, False, True, pp_app.CV)
 print('窗口已关闭，进程退出。', flush=True)

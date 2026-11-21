@@ -51,26 +51,26 @@ def main():
     a, b, status = names['a'], names['b'], names['status']
 
     def refresh(*_):
-        w.setText(status, 'A.Level=%d  B.Level=%d ｜ Tab 序：e2(1) → e3(2) → e1(3)'
-                   % (w.getLevel(a), w.getLevel(b)))
+        w.set_text(status, 'A.Level=%d  B.Level=%d ｜ Tab 序：e2(1) → e3(2) → e1(3)'
+                   % (w.get_level(a), w.get_level(b)))
 
     def on_top(*_):
-        w.bringToFront(b)
-        w.setText(status, 'B 已置顶（Level=%d）' % w.getLevel(b))
+        w.bring_to_front(b)
+        w.set_text(status, 'B 已置顶（Level=%d）' % w.get_level(b))
 
     def on_bottom(*_):
-        w.sendToBack(b)
-        w.setText(status, 'B 已置底（Level=%d）' % w.getLevel(b))
+        w.send_to_back(b)
+        w.set_text(status, 'B 已置底（Level=%d）' % w.get_level(b))
 
     def on_swap(*_):
-        la, lb = w.getLevel(a), w.getLevel(b)
-        w.setLevel(a, lb)
-        w.setLevel(b, la)
-        w.setText(status, '交换后 A.Level=%d  B.Level=%d' % (w.getLevel(a), w.getLevel(b)))
+        la, lb = w.get_level(a), w.get_level(b)
+        w.set_level(a, lb)
+        w.set_level(b, la)
+        w.set_text(status, '交换后 A.Level=%d  B.Level=%d' % (w.get_level(a), w.get_level(b)))
 
-    w.onClick(names['btnTop'], on_top)
-    w.onClick(names['btnBottom'], on_bottom)
-    w.onClick(names['btnSwap'], on_swap)
+    w.on_click(names['btnTop'], on_top)
+    w.on_click(names['btnBottom'], on_bottom)
+    w.on_click(names['btnSwap'], on_swap)
     refresh()
 
     p.pump(1200)

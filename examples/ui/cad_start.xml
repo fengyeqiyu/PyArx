@@ -2,7 +2,7 @@
 <!-- CAD 风格起始页（框架能力示例）：应用图标 + 工程名 + 快捷命令区 + 最近文档区 + 底部按钮。
      整页只有 XML，没有任何 C++ 布局代码；换配色/换项/换宽度都只改这份文件。
      对应多数桌面程序（AutoCAD / Office / IDE）的“开始页”骨架：
-       顶栏：圆形应用图标 + 当前工程名 + 右侧共享类动作
+       顶栏：圆形应用图标 + 当前工程名
        左栏：大尺寸命令项（新建/打开/保存/输入输出/发布/打印/工具/关闭）
        右栏：最近文档列表 + 底部“选项/退出”
 -->
@@ -14,7 +14,6 @@
         <XStackPanel Orientation="Horizontal" Height="48">
             <XImage x:Name="appLogo" Source="res/logo.png" Width="30" Height="30"/>
             <XLabel x:Name="lblDocTitle" Content="二次配电用电点位" Height="48"/>
-            <XButton x:Name="btnShare" Content="共享" Width="90" Height="30"/>
         </XStackPanel>
 
         <XDivider Height="1"/>

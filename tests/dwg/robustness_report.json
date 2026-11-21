@@ -1,0 +1,221 @@
+{
+ "mutation_threshold_s": 2.0,
+ "mutations": [
+  {
+   "dwg": "G:\\PyArx\\tests\\楼层平面-10KV电缆桥架.dwg",
+   "cases": [
+    {
+     "kind": "truncate_50pct",
+     "note": "截断到 53392 字节",
+     "bytes": 53392,
+     "evidence": {},
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.1285979000003863,
+     "stdout_tail": "",
+     "stderr_tail": "error: DWG read overrun at file offset 0x17D20 [system page at rel offset 0x178A0]: need 4080 byte(s), range ends at 0xD090",
+     "stderr_first_line": "error: DWG read overrun at file offset 0x17D20 [system page at rel offset 0x178A0]: need 4080 byte(s), range ends at 0xD090",
+     "crashed": false,
+     "locatable_error": true
+    },
+    {
+     "kind": "truncate_25pct",
+     "note": "截断到 26696 字节",
+     "bytes": 26696,
+     "evidence": {},
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.10244789999887871,
+     "stdout_tail": "",
+     "stderr_tail": "error: DWG read overrun at file offset 0x17D20 [system page at rel offset 0x178A0]: need 4080 byte(s), range ends at 0x6848",
+     "stderr_first_line": "error: DWG read overrun at file offset 0x17D20 [system page at rel offset 0x178A0]: need 4080 byte(s), range ends at 0x6848",
+     "crashed": false,
+     "locatable_error": true
+    },
+    {
+     "kind": "truncate_drop_tail200",
+     "note": "删除末 200 字节",
+     "bytes": 106584,
+     "evidence": {},
+     "status": "fail",
+     "rc": 0,
+     "elapsed": 0.12045450000005076,
+     "stdout_tail": "",
+     "stderr_tail": "",
+     "stderr_first_line": "",
+     "crashed": false,
+     "locatable_error": false
+    },
+    {
+     "kind": "magic_ac9999",
+     "note": "版本串改为 AC9999",
+     "bytes": 106784,
+     "evidence": {},
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.1072163000008004,
+     "stdout_tail": "",
+     "stderr_tail": "error: unsupported version tag b'AC9999' at offset 0x0; only AC1021 (R2007) is supported",
+     "stderr_first_line": "error: unsupported version tag b'AC9999' at offset 0x0; only AC1021 (R2007) is supported",
+     "crashed": false,
+     "locatable_error": true
+    },
+    {
+     "kind": "header_ff_from_0x0B",
+     "note": "0x0B 起 32 字节置 0xFF",
+     "bytes": 106784,
+     "evidence": {},
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.11187919999974838,
+     "stdout_tail": "",
+     "stderr_tail": "error: codepage 65535 at offset 0x13 is outside the supported range",
+     "stderr_first_line": "error: codepage 65535 at offset 0x13 is outside the supported range",
+     "crashed": false,
+     "locatable_error": true
+    },
+    {
+     "kind": "section_offset_overlarge",
+     "note": "AcDb:AcDbObjects 首个页槽位 @0x11D60 偏移/字段改为 0xFFFFFF",
+     "bytes": 106784,
+     "evidence": {
+      "patched_offset": "0x11D60",
+      "pattern_hits": 1,
+      "data_offset": 0,
+      "compressed": 18209,
+      "uncompressed": 68096
+     },
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.10746480000125302,
+     "stdout_tail": "",
+     "stderr_tail": "error: DWG read overrun at file offset 0x11E6A [R2007 LZ77: back-reference before start of output]: need 1 byte(s), range ends at 0x4721",
+     "stderr_first_line": "error: DWG read overrun at file offset 0x11E6A [R2007 LZ77: back-reference before start of output]: need 1 byte(s), range ends at 0x4721",
+     "crashed": false,
+     "locatable_error": true
+    }
+   ]
+  },
+  {
+   "dwg": "G:\\PyArx\\tests\\楼层平面-强电.dwg",
+   "cases": [
+    {
+     "kind": "truncate_50pct",
+     "note": "截断到 683168 字节",
+     "bytes": 683168,
+     "evidence": {},
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.10146159999931115,
+     "stdout_tail": "",
+     "stderr_tail": "error: DWG read overrun at file offset 0x14BF40 [system page at rel offset 0x14BAC0]: need 2550 byte(s), range ends at 0xA6CA0",
+     "stderr_first_line": "error: DWG read overrun at file offset 0x14BF40 [system page at rel offset 0x14BAC0]: need 2550 byte(s), range ends at 0xA6CA0",
+     "crashed": false,
+     "locatable_error": true
+    },
+    {
+     "kind": "truncate_25pct",
+     "note": "截断到 341584 字节",
+     "bytes": 341584,
+     "evidence": {},
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.10108070000023872,
+     "stdout_tail": "",
+     "stderr_tail": "error: DWG read overrun at file offset 0x14BF40 [system page at rel offset 0x14BAC0]: need 2550 byte(s), range ends at 0x53650",
+     "stderr_first_line": "error: DWG read overrun at file offset 0x14BF40 [system page at rel offset 0x14BAC0]: need 2550 byte(s), range ends at 0x53650",
+     "crashed": false,
+     "locatable_error": true
+    },
+    {
+     "kind": "truncate_drop_tail200",
+     "note": "删除末 200 字节",
+     "bytes": 1366136,
+     "evidence": {},
+     "status": "fail",
+     "rc": 0,
+     "elapsed": 0.610348399999566,
+     "stdout_tail": "",
+     "stderr_tail": "",
+     "stderr_first_line": "",
+     "crashed": false,
+     "locatable_error": false
+    },
+    {
+     "kind": "magic_ac9999",
+     "note": "版本串改为 AC9999",
+     "bytes": 1366336,
+     "evidence": {},
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.11348109999926237,
+     "stdout_tail": "",
+     "stderr_tail": "error: unsupported version tag b'AC9999' at offset 0x0; only AC1021 (R2007) is supported",
+     "stderr_first_line": "error: unsupported version tag b'AC9999' at offset 0x0; only AC1021 (R2007) is supported",
+     "crashed": false,
+     "locatable_error": true
+    },
+    {
+     "kind": "header_ff_from_0x0B",
+     "note": "0x0B 起 32 字节置 0xFF",
+     "bytes": 1366336,
+     "evidence": {},
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.16286570000011125,
+     "stdout_tail": "",
+     "stderr_tail": "error: codepage 65535 at offset 0x13 is outside the supported range",
+     "stderr_first_line": "error: codepage 65535 at offset 0x13 is outside the supported range",
+     "crashed": false,
+     "locatable_error": true
+    },
+    {
+     "kind": "section_offset_overlarge",
+     "note": "AcDb:AcDbObjects 首个页槽位 @0x11660 偏移/字段改为 0xFFFFFF",
+     "bytes": 1366336,
+     "evidence": {
+      "patched_offset": "0x11660",
+      "pattern_hits": 1,
+      "data_offset": 0,
+      "compressed": 28347,
+      "uncompressed": 56704
+     },
+     "status": "pass",
+     "rc": 1,
+     "elapsed": 0.10948730000018259,
+     "stdout_tail": "",
+     "stderr_tail": "error: DWG read overrun at file offset 0x1176B [R2007 LZ77: back-reference before start of output]: need 1 byte(s), range ends at 0x6EBB",
+     "stderr_first_line": "error: DWG read overrun at file offset 0x1176B [R2007 LZ77: back-reference before start of output]: need 1 byte(s), range ends at 0x6EBB",
+     "crashed": false,
+     "locatable_error": true
+    }
+   ]
+  }
+ ],
+ "timing": [
+  {
+   "dwg": "G:\\PyArx\\tests\\楼层平面-10KV电缆桥架.dwg",
+   "size": 106784,
+   "elapsed": 0.12809550000019954,
+   "rc": 0,
+   "succeeded": true,
+   "threshold_s": 2.0,
+   "over_threshold": false,
+   "status": "pass",
+   "note": "当前 rc=0 仅代表容器层解码成功；对象/实体层耗时尚不可测",
+   "stderr_first_line": ""
+  },
+  {
+   "dwg": "G:\\PyArx\\tests\\楼层平面-强电.dwg",
+   "size": 1366336,
+   "elapsed": 0.6248328999990918,
+   "rc": 0,
+   "succeeded": true,
+   "threshold_s": 2.0,
+   "over_threshold": false,
+   "status": "pass",
+   "note": "当前 rc=0 仅代表容器层解码成功；对象/实体层耗时尚不可测",
+   "stderr_first_line": ""
+  }
+ ]
+}

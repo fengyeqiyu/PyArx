@@ -1,0 +1,15 @@
+﻿module,scope,pyrx_classes,matched_classes,class_pct,pyrx_members,aligned_members,member_pct,pyarx_submodule,found_in,note
+PyDb,已对齐模块,372,142,38.2,7653,3220,42.1,Db,Db:128/Ed:1/Enum:13,
+PyGe,已对齐模块,86,51,59.3,1454,610,42.0,Ge,Ge:51,
+PyEd,已对齐模块,27,9,33.3,560,104,18.6,Ed,Ed:4/Enum:5,
+PyGi,已对齐模块,31,22,71.0,257,143,55.6,Gi,Gi:22,
+PyRx,已对齐模块,7,2,28.6,70,7,10.0,Rx,Rx:2,
+PyAp,已对齐模块,21,5,23.8,340,14,4.1,Ap,Ap:5,
+PyGs,未覆盖模块,6,0,0.0,54,0,0.0,-,-,AutoCAD 正式 API（AcGs 视图/显示）
+PySm,未覆盖模块,32,1,3.1,273,2,0.7,-,Db:1,AutoCAD 正式 API（图纸集）
+PyPl,未覆盖模块,27,0,0.0,327,0,0.0,-,-,AutoCAD 正式 API（打印/发布）
+PyAx,未覆盖模块,232,1,0.4,4340,0,0.0,-,Db:1,COM 自动化（AcAx）
+PyBr,未覆盖模块,38,4,10.5,296,19,6.4,-,Db:3/Enum:1,BricsCAD 专有
+PyBrx,未覆盖模块,22,0,0.0,195,0,0.0,-,-,BricsCAD 专有
+PyBrxBim,未覆盖模块,56,0,0.0,1649,0,0.0,-,-,BricsCAD 专有
+PyBrxCv,未覆盖模块,152,1,0.7,1891,0,0.0,-,Gi:1,BricsCAD 专有（土木）

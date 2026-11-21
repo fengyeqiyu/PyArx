@@ -21,9 +21,9 @@ w = p.guiload(path, names=names)
 w.show()
 p.pump(300)
 lv = names['lv']
-w.setListSelected(lv, 0)
+w.set_list_selected(lv, 0)
 p.pump(120)
-print('count=%d sel=%d scroll=%d' % (w.getListItemCount(lv), w.getListSelected(lv),
-                                     w.getListScroll(lv)), flush=True)
+print('count=%d sel=%d scroll=%d' % (w.get_list_item_count(lv), w.get_list_selected(lv),
+                                     w.get_list_scroll(lv)), flush=True)
 while True:
     p.pump(50)

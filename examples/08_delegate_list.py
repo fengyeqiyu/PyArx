@@ -25,15 +25,15 @@ win.show()
 
 # 二维 list：一行三个字段，对应模板里的 {0} {1} {2}
 rows = [["AT1-1", "回路一", "正常"], ["AT1-2", "回路二", "告警"], ["AT1-3", "回路三", "断开"]]
-win.setXmlValue("LV", "model", rows)
-print("二维 list ->", win.getText(names["Txt1"]), "|", win.getText(names["Sub2"]))
+win.set_xml_value("LV", "model", rows)
+print("二维 list ->", win.get_text(names["Txt1"]), "|", win.get_text(names["Sub2"]))
 
 # 一维 list：每个元素一行，{modelData} 取整行文字
-win.setXmlValue("LV", "model", ["甲", "乙"])
-print("一维 list ->", win.getText(names["Txt0"]), "|", win.getText(names["Txt1"]))
+win.set_xml_value("LV", "model", ["甲", "乙"])
+print("一维 list ->", win.get_text(names["Txt0"]), "|", win.get_text(names["Txt1"]))
 
 # 空 list：清空全部行
-win.setXmlValue("LV", "model", [])
+win.set_xml_value("LV", "model", [])
 print("空 list   -> 行控件全销毁")
 
 win.close()

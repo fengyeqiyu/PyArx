@@ -1,0 +1,10 @@
+{
+ "db_type": "PyDbDatabase",
+ "db.getBlockTable()": "PyDbBlockTable = <PyArxCore.Db.PyDbBlockTable object at 0x0000022B5D716630>",
+ "db.currentSpaceId()": "int = 2385717620480",
+ "db.textStyleTableId()": "int = 2385717618736",
+ "Utility": "list = ['pyreload', 'pyreloadAll']",
+ "bt.getAt(space)": "ERR TypeError('getAt(): incompatible function arguments. The following argument types are supported:\\n    1. (self: PyArxCore.Db.PyDbBlockTable, name: str, mode: int = 0) -> PyArxCore.Db.PyDbBlockTableRecord\\n\\nInvoked with: <PyArxCore.Db.PyDbBlockTable object at 0x0000022B5D715630>, 2385717620480')",
+ "bt.getAt0(space)": "ERR TypeError('getAt(): incompatible function arguments. The following argument types are supported:\\n    1. (self: PyArxCore.Db.PyDbBlockTable, name: str, mode: int = 0) -> PyArxCore.Db.PyDbBlockTableRecord\\n\\nInvoked with: <PyArxCore.Db.PyDbBlockTable object at 0x0000022B5D715630>, 2385717620480, 0')",
+ "bt.names": "list = ['*Model_Space', '*Paper_Space', '*Paper_Space0']"
+}

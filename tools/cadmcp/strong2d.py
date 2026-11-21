@@ -2,7 +2,7 @@
 """按 CAD 图样绘制 2D 平面图（分幅 + 铺满客户区）。
 
 铺满的关键是顺序：先建窗、show、取真实客户区尺寸，再按该尺寸生成 SVG。
-否则 loadPowerSvg 内部 fitPlanCanvas 会等比缩放，SVG 比例与客户区比例不一致时
+否则 loadDwgSvg 内部 fitDwgCanvas 会等比缩放，SVG 比例与客户区比例不一致时
 左右（或上下）必然留出画布底色带。
 数据源 strong_2d.json（export_2d.py 从 DWG 原样导出，WCS mm）。"""
 import ctypes
@@ -167,11 +167,11 @@ WIN_H = int(SCR_H * 0.84)
 
 N0 = 1    # 单幅 1:1，不分图
 win = M.Window("强电桥架·二维图（1:1 单幅）", WIN_W, WIN_H)
-win.setTheme(False)
-win.addPowerCanvas(7200, 0, 0, WIN_W, WIN_H)
+win.set_theme(False)
+win.add_dwg_canvas(7200, 0, 0, WIN_W, WIN_H)
 win.show()
 time.sleep(0.6)
-CW, CH = win.clientSize()
+CW, CH = win.client_size()
 print("client", CW, CH)
 
 # 第二步：按真实客户区出 SVG，画布回填到客户区 → 整个窗口都是画布
@@ -179,20 +179,20 @@ GH = CH                           # 画布已去掉 WS_HSCROLL，客户区高度
 svg, N = build_svg(CW, GH, N0)
 win.move(7200, 0, 0, CW, GH)
 t0 = time.time()
-win.loadPowerSvg(7200, svg)
+win.load_dwg_svg(7200, svg)
 print("svg %d chars, load %.1fs" % (len(svg), time.time() - t0))
-win.setPlanView(7200, 1.0, 0, 0)     # 1:1 映射：SVG 尺寸==客户区，跳过 fit 的 4px 留边
+win.set_dwg_view(7200, 1.0, 0, 0)     # 1:1 映射：SVG 尺寸==客户区，跳过 fit 的 4px 留边
 svg_path = os.path.join(OUT, "strong2d_cad.svg")
 with open(svg_path, "w", encoding="utf-8") as fp:
     fp.write(svg)
 time.sleep(0.8)
-win.saveControlPng(7200, os.path.join(OUT, "strong2d_cad.png"))
+win.save_control_png(7200, os.path.join(OUT, "strong2d_cad.png"))
 print("png", os.path.getsize(os.path.join(OUT, "strong2d_cad.png")))
 
 zoom = 8.0
-win.setPlanView(7200, zoom, int(1400 - 900 * zoom), int(CH / 2.0 - (CH / 2.0) * zoom))
+win.set_dwg_view(7200, zoom, int(1400 - 900 * zoom), int(CH / 2.0 - (CH / 2.0) * zoom))
 time.sleep(0.6)
-win.saveControlPng(7200, os.path.join(OUT, "strong2d_cad_zoom.png"))
+win.save_control_png(7200, os.path.join(OUT, "strong2d_cad_zoom.png"))
 print("zoom png", os.path.getsize(os.path.join(OUT, "strong2d_cad_zoom.png")))
 
 KEEP = float(os.environ.get("STRONG_KEEP", "0"))

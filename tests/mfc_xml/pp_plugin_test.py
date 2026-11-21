@@ -14,7 +14,7 @@ def ck(n, c, d=''):
 class App:
     def __init__(self, w): self.win = w
 
-win = M.Window('attr-test', 700, 460); win.show(); M.pump(250); win.setTheme(False)
+win = M.Window('attr-test', 700, 460); win.show(); M.pump(250); win.set_theme(False)
 app = App(win)
 
 c = pp_plugin.xmlload(r'G:\PyArx\plugins\side_panel.xml', app=app, x=10, y=10, w=640, h=380)
@@ -35,7 +35,7 @@ ck('XML 声明的 on_click', c._decl.get('BtnLoad',{}).get('click') == 'on_load'
 
 rows = [[u'AT1-%d'%(i+1), u'变压器', u'AT1', u'YJV22-4x35', u'630', u'10kV', u'12'] for i in range(39)]
 c.set_rows('Table', rows); M.pump(50)
-ck('一次灌入 39 行', win.getTableRowCount(c.Table.id) == 39, str(win.getTableRowCount(c.Table.id)))
+ck('一次灌入 39 行', win.get_table_row_count(c.Table.id) == 39, str(win.get_table_row_count(c.Table.id)))
 
 print('=== %d/%d PASS ==='%(PASS[0], PASS[0]+FAIL[0]), flush=True)
 os._exit(0)

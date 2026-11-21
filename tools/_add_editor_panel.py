@@ -14,7 +14,7 @@ assert anchor in s
 s=s.replace(anchor,add,1)
 
 # 2) 主画布宽度可直接改（侧板展开时收窄），并保持 Name
-assert '<PowerCanvas Name="Plan" Width="978" Height="660"' in s
+assert '<XDwgCanvas Name="Plan" Width="978" Height="660"' in s
 
 # 3) 右板之后追加节点编辑侧板
 rows=[("P0","10kV 总进线","—","YJV22-3x70","10kV","0","—"),

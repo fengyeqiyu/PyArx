@@ -45,8 +45,8 @@ def main():
     # 控件级真 opacity 走一遍，确认 /O2 下离屏合成路径没被优化坏
     qcv = names.get("qcv")
     if qcv:
-        w.setLayerOpacity(qcv, 255)
-        _log("[o2] getLayerOpacity=%d" % w.getLayerOpacity(qcv))
+        w.set_layer_opacity(qcv, 255)
+        _log("[o2] getLayerOpacity=%d" % w.get_layer_opacity(qcv))
 
     _log("[o2] ok，窗口已显示，保留不关")
     print("[PyArx] O2 冒烟完成：%d 个控件" % len(names))

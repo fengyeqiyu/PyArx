@@ -4,7 +4,7 @@ src = io.open(p, encoding='utf-8').read()
 lines = src.split('\n')
 start = None
 for i, ln in enumerate(lines):
-    if ln.startswith('static void drawPowerPlanContent'):
+    if ln.startswith('static void drawDwgPlanContent'):
         start = i
         break
 if start is None:
@@ -29,7 +29,7 @@ assert lines[end].strip() == '}', lines[end]
 new = [
     u'// 画法本体已下沉到控件库（MfcXmlCore\\XmlPowerPlanDraw.h）：',
     u'// 屏幕自绘画布 / Viewer 预览 / 设计器表面 / 离屏出图共用同一份实现，三端不会再各画一套。',
-    u'static void drawPowerPlanContent(XmlCanvas& cv, const xmlplan::PowerPlan& plan,',
+    u'static void drawDwgPlanContent(XmlCanvas& cv, const xmlplan::PowerPlan& plan,',
     u'                                 float k, int ox, int oy, const std::wstring& sel,',
     u'                                 bool showCable = true, const RECT* clip = nullptr)',
     u'{',

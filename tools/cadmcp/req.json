@@ -1,0 +1,1 @@
+{"id": "809a42787a3b", "code": "import time\n# 关闭 FileTab 缩略图悬停加载与大图预览，保留文件选项卡本身\nfor v,val in [(\"FILETABTHUMBHOVER\",0),(\"FILETABPREVIEW\",0),(\"UPDATETHUMBNAIL\",0)]:\n    try: P.Ed.acedSetVar(v,val)\n    except Exception as e: pass\nout={}\nfor v in [\"FILETABTHUMBHOVER\",\"FILETABPREVIEW\",\"UPDATETHUMBNAIL\",\"LAYOUTREGENCTL\"]:\n    out[v]=P.Ed.acedGetVar(v)\nresult=out"}

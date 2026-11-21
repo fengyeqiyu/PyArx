@@ -15,7 +15,7 @@
 保留不动的（QML 无同名类型，硬套会造出假名）：
     ListBox / ListCtrl / Choice / TreeTable / CalendarCtrl / Hyperlink /
     CodeEditor / StaticLine / DatePicker / BitmapButton / VirtualList /
-    TabControl / Panel / PowerCanvas / QCanvas / Arc
+    TabControl / Panel / DwgCanvas / QCanvas / Arc
 
 用法：
     python tools\\migrate_tags_qml_names.py --dry    只统计不写

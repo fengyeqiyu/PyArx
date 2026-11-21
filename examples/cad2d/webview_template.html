@@ -1,0 +1,1801 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PyArx 快速看图</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #14181B; overflow: hidden;
+               font: 12px/1.4 "Microsoft YaHei", "Segoe UI", sans-serif; color: #C9D1D9; }
+  #cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+  /* 拖动中的预览层：整帧位图放在独立 canvas 上，只改 transform，由 GPU 平移。
+     拖动时不重绘任何像素，所以没有拖影、没有重采样抖动。 */
+  #pvc { position: absolute; inset: 0; width: 100%; height: 100%; display: none;
+         pointer-events: none; will-change: transform; }
+  #hud { position: absolute; left: 10px; top: 10px; padding: 6px 10px; border-radius: 4px;
+         background: rgba(24,27,30,.82); border: 1px solid #3D434A; pointer-events: none;
+         font-variant-numeric: tabular-nums; }
+  #hud b { color: #E6E8EB; font-weight: 600; }
+  #bar { position: absolute; left: 0; right: 0; bottom: 0; height: 26px; display: flex;
+         align-items: center; gap: 18px; padding: 0 12px; background: #22262A;
+         border-top: 1px solid #3D434A; font-variant-numeric: tabular-nums; }
+  #bar .hint { color: #8A94A6; margin-left: auto; }
+  #sel { position: absolute; display: none; pointer-events: none; z-index: 6;
+         border: 1px dashed #6BA5FF; background: rgba(107,165,255,.12); }
+  #exp { position: absolute; right: 14px; top: 14px; width: 300px; display: none; z-index: 8;
+         background: rgba(24,27,30,.96); border: 1px solid #3D434A; border-radius: 6px;
+         padding: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+  #exp .hd { color: #E6E8EB; font-weight: 600; margin-bottom: 8px; }
+  #exp img { width: 100%; border: 1px solid #3D434A; background: #14181B; display: block; }
+  #exp .inf { color: #8A94A6; margin: 8px 0; line-height: 1.6; font-variant-numeric: tabular-nums; }
+  #exp .bt { display: flex; gap: 8px; margin-top: 6px; }
+  #exp .bt a { flex: 1; text-align: center; padding: 4px 0; border-radius: 4px; cursor: pointer;
+               border: 1px solid #3D434A; color: #C9D1D9; text-decoration: none; }
+  #exp .bt a.on { border-color: #6BA5FF; color: #6BA5FF; }
+  #exp .bt a.main { border-color: #6BA5FF; color: #6BA5FF; }
+  #lyr { position: absolute; left: 14px; top: 46px; width: 272px; max-height: 66vh; display: none; z-index: 7;
+         background: rgba(20,24,27,.96); border: 1px solid #3D434A; border-radius: 6px; padding: 8px;
+         box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+  #lyr .hd { color: #E6E8EB; font-weight: 600; display: flex; gap: 12px; align-items: center; margin-bottom: 6px; }
+  #lyr .hd a { color: #6BA5FF; text-decoration: none; font-weight: 400; cursor: pointer; }
+  #lylist { overflow: auto; max-height: calc(66vh - 34px); }
+  .lyr-row { display: flex; gap: 8px; align-items: center; padding: 3px 4px; border-radius: 3px;
+             cursor: pointer; font-variant-numeric: tabular-nums; }
+  .lyr-row:hover { background: #22262A; }
+  .lyr-row.off { color: #5A6470; }
+  .lyr-row .cb { width: 12px; color: #5FD08A; }
+  .lyr-row.off .cb { color: #4A525C; }
+  .lyr-row .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lyr-row .ct { color: #8A94A6; font-size: 11px; }
+  #hit { position: absolute; right: 14px; bottom: 44px; width: 272px; display: none; z-index: 9;
+         background: rgba(20,24,27,.96); border: 1px solid #3D434A; border-radius: 6px; padding: 10px;
+         box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+  #hit .hd { color: #E6E8EB; font-weight: 600; margin-bottom: 6px; }
+  #hitinfo { color: #8A94A6; line-height: 1.7; margin-bottom: 8px; word-break: break-all; }
+  #hitinfo div:first-child { color: #C9D1D9; }
+  #hit .bt { display: flex; gap: 8px; margin-top: 6px; }
+  #hit .bt a { flex: 1; text-align: center; padding: 4px 0; border-radius: 4px; cursor: pointer;
+               border: 1px solid #3D434A; color: #C9D1D9; text-decoration: none; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<canvas id="pvc"></canvas>
+<div id="sel"></div>
+<div id="exp">
+  <div class="hd">区域导出</div>
+  <img id="pv" alt="">
+  <div id="inf" class="inf"></div>
+  <div class="bt" id="sz"><a data-l="1200">1200px</a><a data-l="2400">2400px</a><a data-l="4800">4800px</a></div>
+  <div class="bt"><a id="dlex" class="main">导出 PNG</a><a id="cxl">取消</a></div>
+  <div class="bt"><a id="dljs">导出 JSON</a><a id="dlht">导出 HTML</a></div>
+</div>
+<div id="hit">
+  <div class="hd">选中图元</div>
+  <div id="hitinfo"></div>
+  <div class="bt"><a id="hitoff">隐藏此图元</a><a id="hitly">隐藏整层</a></div>
+  <div class="bt"><a id="hitclr">恢复隐藏</a><a id="hitx">关闭</a></div>
+</div>
+<div id="lyr">
+  <div class="hd">图层 <a id="lyall">全开</a><a id="lynone">全关</a><a id="lydef">默认</a></div>
+  <div id="lylist"></div>
+</div>
+<div id="hud"><b id="z">--</b> &nbsp; <span id="fps">--</span></div>
+<div id="bar">
+  <span id="file">--</span>
+  <span id="cnt">--</span>
+  <span id="views"></span>
+  <span id="lybk" style="color:#6BA5FF;cursor:pointer">图层</span>
+  <span id="pick" style="color:#6BA5FF;cursor:pointer">框选导出</span>
+  <span id="cur">--</span>
+  <span class="hint">滚轮缩放 · 拖动平移 · Shift+拖动 框选导出 · 双击或按 0 全图</span>
+</div>
+<script id="scene" type="application/json">__SCENE__</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById('scene').textContent);
+  const COL = D.c;
+  // ByBlock(-1)：块内图元跟随块参照色，顶层图元退到 7 号色
+  const DEFC = COL[7] || '#E6E8EB';
+  const C = c => (typeof c === 'number' && c >= 0 ? (COL[c] || DEFC) : DEFC);
+  // 文字亮度下限：CAD 里大量标注是深灰/近黑，压在近黑底图上等于看不见。
+  // 只在绘制文字时把亮度抬到 0.58 以上，色相不变，几何图元仍用 CAD 原色。
+  const TC = c => {
+    const hx = C(c).replace('#', '');
+    if (hx.length < 6) return C(c);
+    const r = parseInt(hx.substr(0, 2), 16), g = parseInt(hx.substr(2, 2), 16), b = parseInt(hx.substr(4, 2), 16);
+    const L = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+    if (L >= 0.58) return C(c);
+    const k = 0.58 / Math.max(L, 0.10);
+    const cl = v => Math.max(0, Math.min(255, Math.round(v * k)));
+    return 'rgb(' + cl(r) + ',' + cl(g) + ',' + cl(b) + ')';
+  };
+  const cv = document.getElementById('cv');
+  let ctx = cv.getContext('2d', { alpha: false, desynchronized: true });
+  const mainCtx = ctx;      // tile 渲染时会把 ctx 切到离屏画布，这里留主画布的引用
+  const pvc = document.getElementById('pvc');
+  const pvCtx = pvc.getContext('2d');
+  const elZ = document.getElementById('z'), elFps = document.getElementById('fps');
+  const elFile = document.getElementById('file'), elCnt = document.getElementById('cnt');
+  const elCur = document.getElementById('cur');
+
+  elFile.textContent = D.f;
+  elCnt.textContent = '图元 ' + D.n;
+
+  // 图面上本来就是两处独立的图（比如系统图 + 平面图）时，给两个直达视图
+  const elViews = document.getElementById('views');
+  if (D.v && D.v.length > 1) {
+    const names = ['平面图', '视图 2', '视图 3', '视图 4', '视图 5', '视图 6', '视图 7', '视图 8'];
+    D.v.forEach((b, i) => {
+      const a = document.createElement('a');
+      a.href = 'javascript:void 0';
+      a.textContent = names[i] || ('视图 ' + (i + 1));
+      a.style.cssText = 'color:#6BA5FF;text-decoration:none;margin-right:12px';
+      a.onclick = () => { fitBox(b); baseK = view.k; draw(); };
+      elViews.appendChild(a);
+    });
+    const a = document.createElement('a');
+    a.href = 'javascript:void 0';
+    a.textContent = '全图';
+    a.style.cssText = 'color:#6BA5FF;text-decoration:none';
+    a.onclick = () => { fitBox(D.b); baseK = view.k; draw(); };
+    elViews.appendChild(a);
+  }
+
+  const view = { k: 1, x0: D.b[0], y1: D.b[3] };
+  let BASE = new DOMMatrix();   // 世界坐标 → 屏幕坐标（含 y 轴翻转），每帧重建
+  let W = 1, H = 1, dpr = 1, baseK = 1;
+  let CACHE = null, CACHED = null, lastInput = -1e9, SELFTEST = true, redrawT = 0, FORCE = false, lastWheelDraw = -1e9;
+  // NOSPLIT：整屏一次渲染（不分块）。分块贴图会各自重采样并裁剪边缘，拼起来就是
+  // 网格状马赛克 + 块边界闪烁；这张图整屏重画只要几十毫秒，不值得换那点增量。
+  let NOSPLIT = true;
+  // 线宽倍率：屏幕帧恒为 1；导出高清图时按倍率放大，否则 2400px 的图上是 1px 细发丝。
+  let LW = 1, NOHUD = false;
+
+  function snapshot() {
+    if (!CACHE) CACHE = document.createElement('canvas');
+    if (CACHE.width !== cv.width || CACHE.height !== cv.height) {
+      CACHE.width = cv.width;
+      CACHE.height = cv.height;
+    }
+    const c2 = CACHE.getContext('2d');
+    c2.setTransform(1, 0, 0, 1, 0, 0);
+    c2.clearRect(0, 0, CACHE.width, CACHE.height);
+    c2.drawImage(cv, 0, 0);
+    CACHED = { k: view.k, x0: view.x0, y1: view.y1 };
+  }
+
+  // 拖动预览：把上一帧整帧位图摆到覆盖层，之后只改 transform。
+  // 拖动期间主画布一个像素都不重画，所以不会有拖影、也不会有重采样抖动。
+  let pvShown = false;
+  function showPrev(dx, dy) {
+    if (!CACHE) return;
+    if (pvc.width !== CACHE.width || pvc.height !== CACHE.height) {
+      pvc.width = CACHE.width; pvc.height = CACHE.height;
+      pvShown = false;
+    }
+    if (!pvShown) {
+      pvCtx.setTransform(1, 0, 0, 1, 0, 0);
+      pvCtx.clearRect(0, 0, pvc.width, pvc.height);
+      pvCtx.drawImage(CACHE, 0, 0);
+      pvc.style.display = 'block';
+      pvShown = true;
+      // 主画布先抹成底色：预览层移开后露出的是底色，而不是上一帧的旧画面（那看着就是拖影）
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = '#14181B';
+      ctx.fillRect(0, 0, cv.width, cv.height);
+    }
+    pvc.style.transform = 'translate3d(' + (dx / dpr) + 'px,' + (dy / dpr) + 'px,0)';
+  }
+  // 缩放预览：不重采样，直接给覆盖层加 CSS scale，由 GPU 合成完成放大缩小。
+  // 之前每格滚轮都 drawImage 缩放一次整屏位图（CPU 双线性，1926×1160 一次几十毫秒），
+  // 滚起来就是一格一顿。scale 走 transform-origin:center，正好配合“视口中心锚”。
+  function showPrevScale(s) {
+    if (!CACHE) return;
+    if (pvc.width !== CACHE.width || pvc.height !== CACHE.height) {
+      pvc.width = CACHE.width; pvc.height = CACHE.height;
+      pvShown = false;
+    }
+    if (!pvShown) {
+      pvCtx.setTransform(1, 0, 0, 1, 0, 0);
+      pvCtx.clearRect(0, 0, pvc.width, pvc.height);
+      pvCtx.drawImage(CACHE, 0, 0);
+      pvc.style.display = 'block';
+      pvShown = true;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = '#14181B';
+      ctx.fillRect(0, 0, cv.width, cv.height);
+    }
+    pvc.style.transform = 'scale(' + s + ')';
+  }
+
+  function hidePrev() {
+    if (!pvShown) return;
+    pvc.style.display = 'none';
+    pvc.style.transform = 'translate3d(0,0,0)';
+    pvShown = false;
+  }
+
+  function drawPreview() {
+    // 预览一律用“视口中心锚”映射：拖动和缩放都走这一套。
+    // 缩放时如果按旧位图左上角硬平移，倍数一大图就整个被推出视口，屏幕只剩底色；
+    // 用当前视口中心对准旧位图里同一个世界点，放大缩小过程画面始终在正中，不会黑。
+    const s = view.k / CACHED.k;
+    const cxw = view.x0 + (W / 2) / view.k;
+    const cyw = view.y1 - (H / 2) / view.k;
+    const pox = (cxw - CACHED.x0) * CACHED.k;
+    const poy = (CACHED.y1 - cyw) * CACHED.k;
+    const same = Math.abs(s - 1) < 1e-9;
+    if (same) {
+      // 纯平移：交给覆盖层 GPU 平移，不碰主画布
+      showPrev((W / 2 - pox) * dpr, (H / 2 - poy) * dpr);
+      return;
+    }
+    // 缩放：交给覆盖层 GPU 缩放，同样不碰主画布
+    showPrevScale(s);
+  }
+
+  function schedule() {   // 停手后补画精细帧
+    clearTimeout(redrawT);
+    redrawT = setTimeout(() => {
+      // 记住视图这件事放到停手后做：之前每格滚轮都同步写一次 localStorage（同步 I/O），
+      // 连发几十格就是在主线程上连着卡几十次。
+      try { localStorage.setItem('pyarx_view', JSON.stringify({ k: view.k, x0: view.x0, y1: view.y1 })); } catch (e) { }
+      // 不要先 hidePrev：覆盖层一旦隐藏，下一格滚轮就得把整帧位图重贴一遍（1926×1160 拷贝），
+      // 慢滚时每格都在做这件事，就是那一下一下的顿。精确帧画完后 paintFull 末尾自己会 hidePrev。
+      FORCE = true; draw(); FORCE = false;
+    }, 150);
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    // 用“真实设备像素比”回代：1.5 倍屏时 round(W*1.5) 未必正好等于 1.5*W，
+    // 差那半像素会让整屏每次绘制都重新采样，细线发虚、拖动时闪。回代后就是 1:1。
+    dpr = cv.width / W;
+    setKLimits();
+    draw();
+  }
+
+  // 缩放上下限 + 视图不许跑出图纸：滚轮一路放大能把视图顶到图框外面，
+  // 屏幕上就只剩背景色，看着就像“下面整块内容缺了”。这里两头都焊死。
+  let KMIN = 0.00001, KMAX = 1e9;
+  function setKLimits() {
+    // 比例尺以图框 D.b 为准：图框是标准幅面，字高、线宽都和它成比例；
+    // 内容框 cb 因为铺到图框外会大出几倍，用它算出来的 fk 偏小，放大上限跟着被压掉。
+    const b = D.b; if (!b || !W || !H) return;
+    const fk = Math.min(W / (b[2] - b[0]), H / (b[3] - b[1]));
+    // 上限按“字看清楚”定：fk*200 时正文（约 250 单位）约 32px，够认；
+    // 再往上就只剩几个字、没有图，纯属滚过头。
+    if (fk > 0) { KMIN = fk * 0.25; KMAX = fk * 200; }
+  }
+  function clampView() {
+    // 边界用内容框 D.cb（图形实际外接），不是图框 D.b：这张图的内容一直铺到图框外，
+    // 用图框当边界会把用户从真实内容上拽回图框里，看着就是“不让我放大 / 拖不过去”。
+    const b = D.cb || D.b; if (!b) return;
+    const ww = W / view.k, hh = H / view.k;
+    const cx = view.x0 + ww / 2, cy = view.y1 - hh / 2;
+    // 中心落在内容框内；但视口比内容框还宽（缩到很小）时改居中——
+    // 否则中心贴边、整屏落在框外，就是满屏底色。
+    const wideX = ww >= (b[2] - b[0]), wideY = hh >= (b[3] - b[1]);
+    const ncx = wideX ? (b[0] + b[2]) / 2 : Math.min(Math.max(cx, b[0]), b[2]);
+    const ncy = wideY ? (b[1] + b[3]) / 2 : Math.min(Math.max(cy, b[1]), b[3]);
+    view.x0 = ncx - ww / 2;
+    view.y1 = ncy + hh / 2;
+  }
+
+  function fit() {
+    // URL 定位：?cx=..&cy=..&k=.. 或 ?box=x0,y0,x1,y1 —— 直接开在指定柜/区域
+    const q = new URLSearchParams(location.search);
+    if (q.has('box')) {
+      const v = (q.get('box') || '').split(',').map(Number);
+      if (v.length === 4 && v.every(n => isFinite(n))) { fitBox(v); return; }
+    }
+    if (q.has('k') && q.has('cx') && q.has('cy')) {
+      const k = Number(q.get('k')), cx = Number(q.get('cx')), cy = Number(q.get('cy'));
+      if (isFinite(k) && isFinite(cx) && isFinite(cy) && k > 0) {
+        view.k = k;
+        view.x0 = cx - W / 2 / k;
+        view.y1 = cy + H / 2 / k;
+        if (!baseK) baseK = view.k;
+        draw();
+        return;
+      }
+    }
+    fitBox(D.v && D.v.length ? D.v[0] : D.b);
+  }
+
+  // 宿主 PyArxViewer 通过 PostWebMessageAsJson 下发页面切换（{cmd:"ui",page:"plan"…}）。
+  // 没有这段监听时，顶部菜单点"平面图"只换标签、画布不动。
+  function applyPage(page) {
+    if (page === 'plan') {
+      if (D.v && D.v.length) { fitBox(D.v[0]); }
+      else { fitBox(D.b); }
+    } else if (page === 'topo' || page === 'all' || page === 'raw') {
+      fitBox(D.b);
+    }
+    baseK = view.k;
+    draw();
+  }
+  if (window.chrome && window.chrome.webview) {
+    window.chrome.webview.addEventListener('message', ev => {
+      const m = ev.data || {};
+      if (m.cmd === 'ui' && m.page) applyPage(m.page);
+    });
+  }
+
+  function fitBox(b) {
+    const bw = Math.max(1e-9, b[2] - b[0]);
+    const bh = Math.max(1e-9, b[3] - b[1]);
+    view.k = Math.min((W - 40) / bw, (H - 40) / bh);
+    const mx = (W - bw * view.k) / 2;      // 垂直/水平都居中，避免顶部贴边、下方大片空
+    const my = (H - bh * view.k) / 2;
+    view.x0 = b[0] - mx / view.k;
+    view.y1 = b[3] + my / view.k;
+    if (!baseK) baseK = view.k;
+    draw();
+  }
+
+  // 参与裁剪的窗口：视口 ∩ 有效范围（有效范围外再留 15% 余量）。
+  // 图纸里常有些画在图面之外的残留碎图元，不挡掉就会飘在留白处，看着像渲染出错。
+  const CULL = { l: -1e9, t: -1e9, r: 1e9, b: 1e9 };
+  function updateCull() {
+    // 可见矩形 = 当前视口像素范围 ∩ 内容框；只按内容框算等于没有剔除，
+    // 分块渲染时每块都会把整张图纸画一遍（实测每 tile 590ms）。
+    const cb = D.cb || D.b;
+    const pad = 8;
+    CULL.l = Math.max(-pad, (cb[0] - view.x0) * view.k);
+    CULL.r = Math.min(W + pad, (cb[2] - view.x0) * view.k);
+    CULL.t = Math.max(-pad, (view.y1 - cb[3]) * view.k);
+    CULL.b = Math.min(H + pad, (view.y1 - cb[1]) * view.k);
+  }
+
+  function visible(b, pad) {
+    const sx0 = (b[0] - view.x0) * view.k, sx1 = (b[2] - view.x0) * view.k;
+    if (sx1 < CULL.l - pad || sx0 > CULL.r + pad) return false;
+    const sy0 = (view.y1 - b[3]) * view.k, sy1 = (view.y1 - b[1]) * view.k;
+    if (sy1 < CULL.t - pad || sy0 > CULL.b + pad) return false;
+    return true;
+  }
+
+  let ema = 16, frames = 0, fpsAt = 0;
+  const TXT_MC = new Map();   // 字号|文本 → [字形上沿, 下沿]，省掉逐条 measureText
+  const STAGE = [0, 0, 0, 0, 0];   // 线 / 块 / 字 / 块数 / 字数
+
+  // ---- 图层：每个图元带一个图层下标，画布按图层开关决定画不画 ----
+  const LY = D.ly || [], LYC = D.lyc || [];
+  const LOFF = [];                       // true = 该层隐藏
+  for (let i = 0; i < LY.length; i++) LOFF[i] = false;
+  for (const i of (D.lyh || [])) LOFF[i] = true;     // 修改痕迹层默认关掉（去噪）
+  let HIT = null;                                    // 鼠标选中的图元（描黄框 + 可单独隐藏）
+
+  // 顶层图元按颜色分组：一次预建，每帧每色只 stroke 一次。
+  // 图层开关 / 单图元隐藏都靠重建这四张表生效（3.8 万图元重建 10~20ms，只在操作时跑）。
+  const LG = [], PG = [], CG = [], AG = [];
+  const HD = { L: [], P: [], C: [], A: [], T: [], I: [], B: [] };   // 单个图元隐藏
+  let HIDDEN = 0;
+
+  function buildGroups() {
+    LG.length = 0; PG.length = 0; CG.length = 0; AG.length = 0;
+    const LN = D.ln, bl = new Map();
+    let id = 0;
+    for (let i = 0; i < LN.length; i += 6, id++) {
+      if (LOFF[LN[i + 5]] || HD.L[id]) continue;
+      const c = LN[i + 4];
+      let s = bl.get(c);
+      if (!s) bl.set(c, s = []);
+      s.push(LN[i], LN[i + 1], LN[i + 2], LN[i + 3]);
+    }
+    for (const [c, s] of bl) LG.push({ c, s });
+
+    const bp = new Map();
+    D.pl.forEach((e, id) => {
+      if (LOFF[e.li] || HD.P[id]) return;
+      let g = bp.get(e.c);
+      if (!g) bp.set(e.c, g = []);
+      g.push(e);
+    });
+    for (const [c, e] of bp) PG.push({ c, e });
+
+    const bc = new Map(), CR = D.cr;
+    for (let i = 0, id = 0; i < CR.length; i += 5, id++) {
+      if (LOFF[CR[i + 4]] || HD.C[id]) continue;
+      const c = CR[i + 3];
+      let g = bc.get(c);
+      if (!g) bc.set(c, g = []);
+      g.push([CR[i], CR[i + 1], CR[i + 2], CR[i + 4]]);
+    }
+    for (const [c, e] of bc) CG.push({ c, e });
+
+    const ba = new Map(), AR = D.ar;
+    for (let i = 0, id = 0; i < AR.length; i += 7, id++) {
+      if (LOFF[AR[i + 6]] || HD.A[id]) continue;
+      const c = AR[i + 5];
+      let g = ba.get(c);
+      if (!g) ba.set(c, g = []);
+      g.push([AR[i], AR[i + 1], AR[i + 2], AR[i + 3], AR[i + 4], AR[i + 6]]);
+    }
+    for (const [c, e] of ba) AG.push({ c, e });
+    buildBuckets();
+  }
+
+  // ---- 世界网格索引：分块渲染的基础 ----
+  // 顶层 4M 条线原来压成"每色一条 Path2D"，分块时每块都要把整张图的路径重新光栅化一遍
+  //（实测 86ms/块）。按世界格切成小 Path2D 后，一块 tile 只碰自己格子里的几十条。
+  const GX = { cell: 1, ox: 0, oy: 0, nx: 1, ny: 1 };
+  const BKT = new Map();
+  const TMPT = [], TMPI = [];
+  let BIGINS = [], BCOUNT = 0, MK = 0;
+
+  function bidOf(x, y) {
+    let ix = Math.floor((x - GX.ox) / GX.cell);
+    let iy = Math.floor((y - GX.oy) / GX.cell);
+    if (ix < 0) ix = 0; else if (ix >= GX.nx) ix = GX.nx - 1;
+    if (iy < 0) iy = 0; else if (iy >= GX.ny) iy = GX.ny - 1;
+    return iy * GX.nx + ix;
+  }
+  function bkt(bid) {
+    let o = BKT.get(bid);
+    if (!o) BKT.set(bid, o = { lin: new Map(), poly: new Map(), ins: [], txt: [] });
+    return o;
+  }
+
+  function buildBuckets() {
+    const b = D.cb || D.b;
+    const diag = Math.max(b[2] - b[0], b[3] - b[1]) || 1;
+    GX.cell = diag / 192;
+    GX.ox = b[0]; GX.oy = b[1];
+    GX.nx = Math.ceil((b[2] - b[0]) / GX.cell) + 1;
+    GX.ny = Math.ceil((b[3] - b[1]) / GX.cell) + 1;
+    BKT.clear(); BIGINS = []; BCOUNT = 0;
+
+    const LN = D.ln;
+    for (let i = 0, id = 0; i < LN.length; i += 6, id++) {
+      if (LOFF[LN[i + 5]] || HD.L[id]) continue;
+      const o = bkt(bidOf((LN[i] + LN[i + 2]) / 2, (LN[i + 1] + LN[i + 3]) / 2));
+      const c = LN[i + 4];
+      let p = o.lin.get(c);
+      if (!p) o.lin.set(c, p = new Path2D());
+      p.moveTo(LN[i], LN[i + 1]);
+      p.lineTo(LN[i + 2], LN[i + 3]);
+      BCOUNT++;
+    }
+
+    D.pl.forEach((e, id) => {
+      if (LOFF[e.li] || HD.P[id]) return;
+      const o = bkt(bidOf((e.b[0] + e.b[2]) / 2, (e.b[1] + e.b[3]) / 2));
+      let p = o.poly.get(e.c);
+      if (!p) o.poly.set(e.c, p = new Path2D());
+      const w = e.p;
+      p.moveTo(w[0], w[1]);
+      for (let i = 2; i < w.length; i += 2) p.lineTo(w[i], w[i + 1]);
+      if (e.z) p.closePath();
+      BCOUNT++;
+    });
+
+    // 块参照：登记到包围盒相交的每一格（跨格实例在相邻块里都能画到，收集时再去重）；
+    // 跨 16 格以上的（图框这类离群框）放进"大块层"每帧单独判定
+    for (let k2 = 0; k2 < D.ins.length; k2++) {
+      const e = D.ins[k2];
+      if (LOFF[e.li] || HD.I[k2] || (e.b && (e.b[2] - e.b[0]) > 5e7)) continue;
+      if (!e.b) { BIGINS.push(e); continue; }
+      const ix0 = Math.floor((e.b[0] - GX.ox) / GX.cell), ix1 = Math.floor((e.b[2] - GX.ox) / GX.cell);
+      const iy0 = Math.floor((e.b[1] - GX.oy) / GX.cell), iy1 = Math.floor((e.b[3] - GX.oy) / GX.cell);
+      if ((ix1 - ix0 + 1) * (iy1 - iy0 + 1) > 64) { BIGINS.push(e); continue; }
+      for (let iy = Math.max(0, iy0); iy <= Math.min(GX.ny - 1, iy1); iy++) {
+        for (let ix = Math.max(0, ix0); ix <= Math.min(GX.nx - 1, ix1); ix++) {
+          bkt(iy * GX.nx + ix).ins.push(e);
+        }
+      }
+      BCOUNT++;
+    }
+
+    const TX = D.tx || [];
+    for (let i = 0; i < TX.length; i++) {
+      const t = TX[i];
+      if (LOFF[t[7]] || HD.T[i]) continue;
+      bkt(bidOf(t[0], t[1])).txt.push(t);
+      BCOUNT++;
+    }
+  }
+
+  // 分桶绘制：返回 true 表示已画完线/多段线/块参照，文字已收集进 TMPT 由调用方画
+  function drawBucketed() {
+    const k = view.k, x0 = view.x0, y1 = view.y1;
+    const wx1 = x0 + W / k, wy0 = y1 - H / k;
+    const ix0 = Math.max(0, Math.floor((x0 - GX.ox) / GX.cell) - 1);
+    const ix1 = Math.min(GX.nx - 1, Math.floor((wx1 - GX.ox) / GX.cell) + 1);
+    const iy0 = Math.max(0, Math.floor((wy0 - GX.oy) / GX.cell) - 1);
+    const iy1 = Math.min(GX.ny - 1, Math.floor((y1 - GX.oy) / GX.cell) + 1);
+    const nb = (ix1 - ix0 + 1) * (iy1 - iy0 + 1);
+    if (nb > 420) return false;        // 视口横跨几百格（全图缩略）：一次性全量反而更快
+
+    const _a = performance.now();
+    ctx.save();
+    // Path2D 存的是世界坐标，交给视图矩阵变换（与块参照同一套思路）
+    ctx.setTransform(BASE.a * dpr, BASE.b * dpr, BASE.c * dpr, BASE.d * dpr, BASE.e * dpr, BASE.f * dpr);
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'miter';
+    ctx.lineWidth = LW / Math.max(1e-9, k);
+    for (let iy = iy0; iy <= iy1; iy++) {
+      for (let ix = ix0; ix <= ix1; ix++) {
+        const o = BKT.get(iy * GX.nx + ix);
+        if (!o) continue;
+        for (const [c, p] of o.lin) { ctx.strokeStyle = C(c); ctx.stroke(p); }
+        for (const [c, p] of o.poly) { ctx.strokeStyle = C(c); ctx.stroke(p); }
+      }
+    }
+    ctx.restore();
+    const _b = performance.now();
+
+    TMPI.length = 0;
+    TMPT.length = 0;
+    MK++;
+    for (let iy = iy0; iy <= iy1; iy++) {
+      for (let ix = ix0; ix <= ix1; ix++) {
+        const o = BKT.get(iy * GX.nx + ix);
+        if (!o) continue;
+        for (let i = 0; i < o.ins.length; i++) {
+          const e = o.ins[i];
+          if (e._mk === MK) continue;      // 跨格实例只画一次
+          e._mk = MK;
+          TMPI.push(e);
+        }
+        for (let i = 0; i < o.txt.length; i++) TMPT.push(o.txt[i]);
+      }
+    }
+    // 大框统一在这里补：不按 tile 归属，避免每块重复画。TILER 只表示“当前画的是 tile”，
+    // 不再用它拦掉大框——之前用它当开关，一次 buildFull 中断就会让整张图的底图永久消失。
+    for (let i = 0; i < BIGINS.length; i++) {
+      const e = BIGINS[i];
+      if (!e.b || visible(e.b, 24)) TMPI.push(e);
+    }
+    const _c = performance.now();
+    for (let i = 0; i < TMPI.length; i++) drawInsert(TMPI[i], null);
+    const _d = performance.now();
+    if (TILER) window.__tsub = [_b - _a, _c - _b, _d - _c, nb, TMPI.length, TMPT.length];
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineWidth = LW;
+    return true;
+  }
+  buildGroups();
+
+  // ---- 图层面板：勾选即开关，关掉的层这一帧整个不画（数据仍在，随时能开回来） ----
+  const elLyr = document.getElementById('lyr'), elLyList = document.getElementById('lylist');
+  function syncLayers() {
+    for (const row of elLyList.children) {
+      const i = +row.dataset.i;
+      row.querySelector('.cb').textContent = LOFF[i] ? '○' : '●';
+      row.classList.toggle('off', !!LOFF[i]);
+    }
+  }
+  (function buildLayers() {
+    const order = LY.map((n, i) => [i, n, LYC[i] || 0]).sort((a, b) => b[2] - a[2]);
+    for (const [i, n, cnt] of order) {
+      const row = document.createElement('div');
+      row.className = 'lyr-row';
+      row.dataset.i = i;
+      row.innerHTML = '<span class="cb"></span><span class="nm"></span><span class="ct"></span>';
+      row.querySelector('.nm').textContent = n;
+      row.querySelector('.ct').textContent = cnt;
+      row.onclick = () => { LOFF[i] = !LOFF[i]; syncLayers(); dropTiles(); draw(); };
+      elLyList.appendChild(row);
+    }
+    syncLayers();
+  })();
+  document.getElementById('lybk').onclick = () => {
+    elLyr.style.display = (elLyr.style.display === 'block') ? 'none' : 'block';
+  };
+  document.getElementById('lyall').onclick = () => { LOFF.fill(false); syncLayers(); dropTiles(); draw(); };
+  document.getElementById('lynone').onclick = () => { LOFF.fill(true); syncLayers(); dropTiles(); draw(); };
+  document.getElementById('lydef').onclick = () => {
+    LOFF.fill(false);
+    for (const i of (D.lyh || [])) LOFF[i] = true;
+    syncLayers(); dropTiles(); draw();
+  };
+
+  // ============ 分块位图缓存（tile）============
+  // 场景是静态的：一屏切成 256px 的块，每块只矢量渲染一次就存成位图。
+  // 平移时直接贴已有的块，只补新露出的块；缩放按 1.15 倍一级换块级别，
+  // 新级别没画好之前先用相邻级别的块缩放顶上（带裁剪），不会闪白。
+  // 块取 512：一屏 3×2 块，首铺只要 6~12 帧。每块里那几个大框实例是固定重复成本，
+  // 块数少四倍等于把重复成本也砍到四分之一（256 时实测每块 30ms、共 28 帧）。
+  const TS = 512, TILES = new Map(), TLIMIT = 48;
+  let REGION = false, TILER = false, THIT = 0, TMISS = 0, PEND = 0, WARM = false;
+
+  function zlevel(k) { return Math.round(Math.log2(Math.max(1e-9, k / (baseK || 1))) * 5); }
+  function kOfLevel(z) { return (baseK || 1) * Math.pow(2, z / 5); }
+  function tileAt(z, tx, ty) { return TILES.get(z + '/' + tx + '/' + ty); }
+
+  function putTile(z, tx, ty, c) {
+    TILES.set(z + '/' + tx + '/' + ty, c);
+    if (TILES.size > TLIMIT) TILES.delete(TILES.keys().next().value);   // 先进先出淘汰
+  }
+
+  // 大框实例（图框这类跨几十格、每块都躲不掉的块参照）单独画成整屏一层，
+  // 否则每块 tile 都得重画一遍它们（实测每块 61ms 里大半是这笔）。
+  let OV = null, OVT = 0;
+
+  function dropTiles() { TILES.clear(); PEND = 0; WARM = false; OV = null; FUL = null; if (OVT) { clearTimeout(OVT); OVT = 0; } if (FULT) { clearTimeout(FULT); FULT = 0; } }
+
+  // 缩略级别（一屏几百格、分桶失效）整屏画一次要四百多毫秒，所以整屏结果也存成位图：
+  // 平移贴旧图（1ms），停手 150ms 再重画一次。
+  let FUL = null, FULT = 0;
+
+  function buildFull() {
+    const c = document.createElement('canvas');
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    const sv = { ctx, NOHUD, SELFTEST, CACHE, HIT, TILER };
+    ctx = c.getContext('2d', { alpha: false });
+    NOHUD = true; SELFTEST = true; CACHE = null; HIT = null; TILER = false;
+    paintFull();
+    ctx = mainCtx;
+    NOHUD = sv.NOHUD; SELFTEST = sv.SELFTEST; CACHE = sv.CACHE; HIT = sv.HIT; TILER = sv.TILER;
+    FUL = { c, k: view.k, x0: view.x0, y1: view.y1, w: W, h: H };
+  }
+
+  function blitFull() {
+    const sc = view.k / FUL.k;
+    const dx = Math.round((FUL.x0 - view.x0) * view.k * dpr);
+    const dy = Math.round((view.y1 - FUL.y1) * view.k * dpr);
+    const dw = Math.round(W * sc * dpr), dh = Math.round(H * sc * dpr);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#14181B';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    const same = Math.abs(sc - 1) < 1e-9;
+    ctx.imageSmoothingEnabled = !same;
+    ctx.drawImage(FUL.c, dx, dy, dw, dh);
+    ctx.imageSmoothingEnabled = true;
+  }
+
+  function paintBig() {
+    BASE = new DOMMatrix([view.k, 0, 0, -view.k, -view.x0 * view.k, view.y1 * view.k]);
+    updateCull();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineWidth = LW;
+    for (let i = 0; i < BIGINS.length; i++) {
+      const e = BIGINS[i];
+      if (e.b && !visible(e.b, 24)) continue;
+      drawInsert(e, null);
+    }
+  }
+
+  function buildOverlay() {
+    if (!BIGINS.length) { OV = null; return; }
+    const c = document.createElement('canvas');
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+    const sv = { ctx, NOHUD, SELFTEST, CACHE, HIT, TILER };
+    ctx = c.getContext('2d', { alpha: true });
+    NOHUD = true; SELFTEST = true; CACHE = null; HIT = null; TILER = true;
+    paintBig();
+    ctx = mainCtx;
+    NOHUD = sv.NOHUD; SELFTEST = sv.SELFTEST; CACHE = sv.CACHE; HIT = sv.HIT; TILER = sv.TILER;
+    OV = { c, k: view.k, x0: view.x0, y1: view.y1, w: W, h: H };
+  }
+
+  // 画一块 tile：临时把全局视图切到这一块的世界窗口，复用同一套绘制代码
+  // 比例用当前视图的精确 k（不再走 1.15 分级）：分级渲染再缩放贴图会让跨块图元边缘
+  // 各扩半像素，在块边界处叠成一道“重影”。s 恒为 1 就没有重采样混叠。
+  function renderTile(tx, ty, tag, kz) {
+    const tw = TS / kz;
+    const c = document.createElement('canvas');
+    c.width = Math.round(TS * dpr); c.height = Math.round(TS * dpr);
+    const sv = { W, H, NOHUD, SELFTEST, CACHE, HIT, bk: view.k, bx0: view.x0, by1: view.y1 };
+    ctx = c.getContext('2d', { alpha: false });
+    W = TS; H = TS; NOHUD = true; SELFTEST = true; CACHE = null; HIT = null; TILER = true;
+    view.k = kz; view.x0 = tx * tw; view.y1 = (ty + 1) * tw;
+    paintFull();
+    TILER = false;
+    ctx = mainCtx; W = sv.W; H = sv.H; NOHUD = sv.NOHUD; SELFTEST = sv.SELFTEST;
+    CACHE = sv.CACHE; HIT = sv.HIT;
+    view.k = sv.bk; view.x0 = sv.bx0; view.y1 = sv.by1;
+    updateCull();
+    putTile(tag, tx, ty, c);
+  }
+
+  function drawTiles(keepBg) {
+    const kz = view.k, tw = TS / kz, tag = kz.toFixed(5);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!keepBg) {
+      ctx.fillStyle = '#14181B';
+      ctx.fillRect(0, 0, W, H);
+    }
+    // 缩略到一屏几百格时每块 tile 都退化成整图重画（分桶失效），分块只剩重复劳动，
+    // 这种级别直接整屏画一次（实测 6 块 × 393ms → 一帧 393ms）。
+    if (GX.cell && (Math.ceil(W / view.k / GX.cell) * Math.ceil(H / view.k / GX.cell)) > 420) {
+      if (!FUL || FUL.w !== W || FUL.h !== H) { buildFull(); blitFull(); PEND = 0; TMISS = 0; return; }
+      const dk = Math.abs(view.k / FUL.k - 1);
+      const dx = (FUL.x0 - view.x0) * view.k, dy = (view.y1 - FUL.y1) * view.k;
+      if (dk > 0.6 || Math.abs(dx) > W * 0.9 || Math.abs(dy) > H * 0.9) { buildFull(); blitFull(); }
+      else {
+        blitFull();
+        if (dk > 0.0005 || Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          if (FULT) clearTimeout(FULT);
+          FULT = setTimeout(function () { FULT = 0; buildFull(); draw(); }, 150);
+        }
+      }
+      PEND = 0; TMISS = 0; return;
+    }
+    const wy0 = view.y1 - H / view.k, wx1 = view.x0 + W / view.k;
+    const tx0 = Math.floor(view.x0 / tw), tx1 = Math.floor((wx1 - tw * 1e-6) / tw);
+    const ty0 = Math.floor(wy0 / tw), ty1 = Math.floor((view.y1 - tw * 1e-6) / tw);
+    const miss = [];
+    THIT = 0;
+    for (let tx = tx0; tx <= tx1; tx++) {
+      for (let ty = ty0; ty <= ty1; ty++) {
+        const c = tileAt(tag, tx, ty);
+        if (c) {
+          ctx.drawImage(c, (tx * tw - view.x0) * view.k, (view.y1 - (ty + 1) * tw) * view.k, TS, TS);
+          THIT++;
+        } else miss.push([tx, ty]);
+      }
+    }
+    // 缺块多（缩放换档/大幅移动）时不拿旧位图放大顶着——那会把上一比例的像素糊在新比例上，
+    // 看着就是“两层影”。直接精确重画一帧（放大视图只要几十毫秒），tile 随后只做增量。
+    let drawn = false;
+    if (miss.length > 8) { paintFull(); drawn = true; }
+    if (miss.length && !drawn && CACHED && CACHE) {
+      const cs = view.k / CACHED.k;
+      ctx.setTransform(dpr * cs, 0, 0, dpr * cs,
+                       dpr * ((CACHED.x0 - view.x0) * view.k), dpr * ((view.y1 - CACHED.y1) * view.k));
+      ctx.drawImage(CACHE, 0, 0, W, H);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    // 补块：一帧只画到时间预算为止，剩下的排下一帧，交互不会被长帧卡住
+    const budget = 28, t1 = performance.now();
+    for (let i = 0; i < miss.length; i++) {
+      if (performance.now() - t1 > budget) { PEND = miss.length - i; break; }
+      PEND = miss.length - i - 1;
+      renderTile(miss[i][0], miss[i][1], tag, kz);
+      ctx.drawImage(tileAt(tag, miss[i][0], miss[i][1]),
+                    (miss[i][0] * tw - view.x0) * view.k,
+                    (view.y1 - (miss[i][1] + 1) * tw) * view.k, TS, TS);
+    }
+    TMISS = PEND;
+    // 大框覆盖层：拖动/缩放进行中绝不重建（重建一次就是一次整屏重画，那正是拖不动的原因），
+    // 先按新旧视图的位移/缩放把旧层贴上去，停手 150ms 后再重建一版清晰的。
+    if (!OV || OV.w !== W || OV.h !== H) { buildOverlay(); }
+    else {
+      const dk = Math.abs(view.k / OV.k - 1);
+      const dx = (OV.x0 - view.x0) * view.k, dy = (view.y1 - OV.y1) * view.k;
+      if (dk > 0.6 || Math.abs(dx) > W * 0.9 || Math.abs(dy) > H * 0.9) buildOverlay();
+      else if (dk > 0.0005 || Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+        if (OVT) clearTimeout(OVT);
+        OVT = setTimeout(function () { OVT = 0; buildOverlay(); draw(); }, 150);
+      }
+    }
+    if (OV) {
+      const sc = view.k / OV.k;
+      const ox = (OV.x0 - view.x0) * view.k, oy = (view.y1 - OV.y1) * view.k;
+      ctx.setTransform(dpr * sc, 0, 0, dpr * sc, dpr * ox, dpr * oy);
+      ctx.drawImage(OV.c, 0, 0, W, H);
+    }
+  }
+
+  function draw() {
+    const t0 = performance.now();
+    // 每次出图前把视图归位：交互里东改西改很容易漏调 clampView，
+    // 一旦漏掉，滚几格中心就漂到图纸外（画面只剩底色，用户说的“不能放大/看不清”）。
+    clampView();
+    // 选中单个图元时走全量，保证黄框与高亮不被 tile 缓存固化
+    if (REGION || (HIT && HIT.b)) { paintFull(); return; }
+    // 冷启动：先用一次全量（113ms）把整屏内容摆出来，tile 在后台逐块顶上去，
+    // 不必等 24 块拼完才有画面。
+    let keepBg = false;
+    if (!WARM) { WARM = true; paintFull(); keepBg = true; }
+    // 分块贴图会让每块各自重采样、各自裁剪边缘，拼起来就是网格状“马赛克”和闪烁，
+    // 这条图纸整屏重画只要几十毫秒，所以默认走单次整屏渲染，tile 只当兜底不再参与显示。
+    if (NOSPLIT) paintFull(); else drawTiles(keepBg);
+    if (PEND > 0 && !NOSPLIT) {
+      if (SELFTEST) { while (PEND > 0) drawTiles(); }   // 无头/自测：同步铺满，保证截图完整
+      else requestAnimationFrame(draw);
+    }
+    const dt = performance.now() - t0;
+    ema = ema * 0.85 + dt * 0.15;
+    frames++;
+    const now = performance.now();
+    if (now - fpsAt > 400 && !NOHUD) {
+      elFps.textContent = 'tile ' + THIT + '+' + TMISS + ' · ' + TILES.size
+                        + ' | 大框 ' + BIGINS.length + ' 块 ' + BCOUNT
+                        + ' k=' + view.k.toFixed(5);
+      elZ.textContent = (view.k / baseK * 100).toFixed(0) + '%';
+      fpsAt = now;
+    }
+  }
+
+  function paintFull() {
+    const t0 = performance.now();
+    // 这里再归位一次：预览帧也读 view，绕过 draw 的调用点（松手、命中、导出）都得过这道，
+    // 否则视图漂到内容框外，用户看到的就是“放大了却什么都没有”。
+    clampView();
+    // 交互中（拖动/滚轮）先用上一帧的整帧位图做变换预览，松手后再精细重绘。
+    // 精细帧本身是全量矢量，不抽稀；这里只是把"每动一下重画一遍"变成"动完画一次"。
+    // 交互中（拖动/滚轮）一律只做位图变换预览，松手/停手后再落精确帧。
+    // 关键：缩放也走预览。之前缩放去重画整屏，每滚一格画 90ms，滚起来就是“卡顿严重”；
+    // 而预览用视口中心锚映射，画面永远在正中，不会像硬平移那样把整张图推出去变黑。
+    if (!FORCE && CACHE && CACHED && !SELFTEST) {
+      drawPreview();
+      return;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#14181B';
+    ctx.fillRect(0, 0, W, H);
+
+    const k = view.k, x0 = view.x0, y1 = view.y1;
+    BASE = new DOMMatrix([k, 0, 0, -k, -x0 * k, y1 * k]);
+    const SX = x => (x - x0) * k, SY = y => (y1 - y) * k;
+    updateCull();
+
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'miter';
+    ctx.lineWidth = LW;
+
+    // ---- 顶层图元 ----
+    // 分桶模式只画视口覆盖格子里的图元；视口过大（全图缩略）时退回一次性全量。
+    const fastGeo = drawBucketed();
+    if (!fastGeo) {
+      for (const g of LG) {
+        const s = g.s;
+        ctx.strokeStyle = C(g.c);
+        ctx.beginPath();
+        for (let i = 0; i < s.length; i += 4) {
+          const xa = (s[i] - x0) * k, ya = (y1 - s[i + 1]) * k;
+          const xb = (s[i + 2] - x0) * k, yb = (y1 - s[i + 3]) * k;
+          if ((xa < -8 && xb < -8) || (xa > W + 8 && xb > W + 8)) continue;
+          if ((ya < -8 && yb < -8) || (ya > H + 8 && yb > H + 8)) continue;
+          ctx.moveTo(xa, ya);
+          ctx.lineTo(xb, yb);
+        }
+        ctx.stroke();
+      }
+      for (const g of PG) {
+        ctx.strokeStyle = C(g.c);
+        ctx.beginPath();
+        for (const e of g.e) {
+          if (!visible(e.b, 8)) continue;
+          const p = e.p;
+          ctx.moveTo(SX(p[0]), SY(p[1]));
+          for (let i = 2; i < p.length; i += 2) ctx.lineTo(SX(p[i]), SY(p[i + 1]));
+          if (e.z) ctx.closePath();
+        }
+        ctx.stroke();
+      }
+    }
+    // 圆/弧只有几百条、自带视口剔除，两种模式都走这里
+    for (const g of CG) {
+      ctx.strokeStyle = C(g.c);
+      ctx.beginPath();
+      for (const a of g.e) {
+        if (Math.abs((a[1] - y1) * k) > H + a[2] * k + 8 || Math.abs((a[0] - x0) * k) > W + a[2] * k + 8) continue;
+        ctx.moveTo(SX(a[0]) + Math.max(0.7 * LW, a[2] * k), SY(a[1]));
+        ctx.arc(SX(a[0]), SY(a[1]), Math.max(0.7 * LW, a[2] * k), 0, 6.2832);
+      }
+      ctx.stroke();
+    }
+    for (const g of AG) {
+      ctx.strokeStyle = C(g.c);
+      ctx.beginPath();
+      for (const a of g.e) {
+        ctx.moveTo(SX(a[0]) + Math.max(0.7 * LW, a[2] * k) * Math.cos(-a[4] * 0.0174533),
+                   SY(a[1]) + Math.max(0.7 * LW, a[2] * k) * Math.sin(-a[4] * 0.0174533));
+        ctx.arc(SX(a[0]), SY(a[1]), Math.max(0.7 * LW, a[2] * k),
+                -a[4] * 0.0174533, -a[3] * 0.0174533, false);
+      }
+      ctx.stroke();
+    }
+
+    // ---- 块参照：块内几何预编译成 Path2D，一个矩阵 + 几次 stroke 画完 ----
+    const tGeo = performance.now();
+    if (!fastGeo) {
+      for (let k2 = 0; k2 < D.ins.length; k2++) {
+        const e = D.ins[k2];
+        // 包围盒宽过 5e7 的是块内坐标带世界级残差、被实例缩放到几亿单位的坏框
+        //（$equip_U 那批，CAD 里也在图纸外），不挡掉每块 tile 都要白画一遍。
+        if (LOFF[e.li] || HD.I[k2] || !visible(e.b, 24) || (e.b && (e.b[2] - e.b[0]) > 5e7)) continue;
+        drawInsert(e, null);
+      }
+    }
+    const tIns = performance.now();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineWidth = LW;
+    drawTables(D.tb, SX, SY, k);
+    if (fastGeo) drawTexts(TMPT, null, true); else drawTexts(D.tx, null);
+    if (HIT && HIT.b) {          // 选中的图元描个黄框，便于确认点到的是哪一条
+      const b = HIT.b, pad = 2;
+      ctx.strokeStyle = '#FFD166';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(SX(b[0]) - pad, SY(b[3]) - pad,
+                     (b[2] - b[0]) * k + pad * 2, (b[3] - b[1]) * k + pad * 2);
+      ctx.setLineDash([]);
+    }
+    const tTxt = performance.now();
+    STAGE[0] = tGeo - t0; STAGE[1] = tIns - tGeo; STAGE[2] = tTxt - tIns;
+    STAGE[3] = D.cg || 0; STAGE[4] = D.tg || 0;
+    if (TILER) return;      // 画 tile 时不要污染帧统计、也不要覆盖整屏快照
+
+    // ---- 帧统计 ----
+    const dt = performance.now() - t0;
+    ema = ema * 0.85 + dt * 0.15;
+    frames++;
+    const now = performance.now();
+    if (now - fpsAt > 400 && !NOHUD) {
+      elFps.textContent = (1000 / Math.max(1, ema)).toFixed(0) + ' fps';
+      elZ.textContent = (view.k / baseK * 100).toFixed(0) + '%';
+      fpsAt = now;
+    }
+    if (!SELFTEST) snapshot();
+    if (!SELFTEST) hidePrev();
+  }
+
+  function drawInsert(e, pm) {
+    const def = D.blk[e.k];
+    if (!def) return;
+    let m;
+    const ax = e.m;
+    if (ax) {
+      // CAD 原始 2D 仿射：列向量 (m00,m10) 是块 x 轴，(m01,m11) 是块 y 轴。
+      // canvas 的 [a,b,c,d,e,f] 语义是 x'=a*x+c*y+e，y'=b*x+d*y+f，故 a=m00,b=m10,c=m01,d=m11。
+      const lm = new DOMMatrix([ax[0], ax[2], ax[1], ax[3], ax[4], ax[5]]);
+      m = pm ? pm.multiply(lm) : BASE.multiply(lm);
+    } else {
+      if (pm) {
+        m = pm.translate(e.x, e.y);
+      } else {
+        m = BASE.translate(e.x, e.y);
+      }
+      if (e.r) m.rotateSelf(e.r);
+      if (e.sx !== 1 || e.sy !== 1) m.scaleSelf(e.sx, e.sy);
+    }
+    // 直接把矩阵装进画布，几何用块内坐标画，浏览器自己做变换
+    const sc = Math.hypot(m.a, m.b);
+    ctx.setTransform(m.a * dpr, m.b * dpr, m.c * dpr, m.d * dpr, m.e * dpr, m.f * dpr);
+    ctx.lineWidth = 1 / Math.max(1e-9, sc);
+    // 全量绘制，不做抽稀/跳层：缩小后看不清的线也必须落笔画出来，否则放大就对不上
+    // ByBlock(-1) 用本块参照自身的颜色
+    const bc = (e.c >= 0 && COL[e.c]) || DEFC;
+    const bands = defBands(def);
+    // 只有“块在屏幕上明显大于视口”才分桶：那种时候 9 成线段在屏幕外，切桶才划算；
+    // 块本身小于视口时全部桶都可见，逐桶 stroke 反而比一次大 stroke 更慢（实测 72ms→112ms）。
+    if (bands && (def._ext2 || 0) * sc > 12000) {
+      // 每桶只算一次屏幕位置（桶中心 + 保守半径），与视口不相交就整桶跳过
+      const kx = m.a * m.a + m.b * m.b, ky = m.c * m.c + m.d * m.d;
+      const kr = Math.sqrt(Math.max(kx, ky));
+      for (const bd of bands) {
+        const mx = (bd.x0 + bd.x1) * 0.5, my = (bd.y0 + bd.y1) * 0.5;
+        const sx = m.a * mx + m.c * my + m.e, sy = m.b * mx + m.d * my + m.f;
+        const r = Math.hypot(bd.x1 - bd.x0, bd.y1 - bd.y0) * 0.5 * kr + 2;
+        if (sx < -r || sx > W + r || sy < -r || sy > H + r) continue;
+        for (const [c, p] of bd.p) {
+          ctx.strokeStyle = c < 0 ? bc : (COL[c] || DEFC);
+          ctx.stroke(p);
+        }
+      }
+    } else {
+      for (const g of defPaths(def)) {
+        ctx.strokeStyle = g.c < 0 ? bc : (COL[g.c] || DEFC);
+        ctx.stroke(g.p);
+      }
+    }
+    if (def.ins) for (const s of def.ins) drawInsert(s, m);
+    if (def.tx) drawTexts(def.tx, m);
+    // 块内属性块的 ATTRIB 值（轴号圈字母）：随本块参照的矩阵画，不查图层显隐
+    if (e.atx) drawTexts(e.atx, m);
+  }
+
+  // 块内几何预编译成 Path2D（每种颜色一条），块参照再多也只做变换 + 几次 stroke
+  function defPaths(def) {
+    if (def._p) return def._p;
+    {
+      def._p = {};
+      // 量一下块的世界尺寸与图元数，用于 LOD 判定
+      let x0 = 1e30, y0 = 1e30, x1 = -1e30, y1 = -1e30, n = 0;
+      const ln = def.ln;
+      if (ln) {
+        n += ln.length / 5;
+        for (let i = 0; i < ln.length; i += 5) {
+          if (ln[i] < x0) x0 = ln[i];
+          if (ln[i] > x1) x1 = ln[i];
+          if (ln[i + 2] < x0) x0 = ln[i + 2];
+          if (ln[i + 2] > x1) x1 = ln[i + 2];
+          if (ln[i + 1] < y0) y0 = ln[i + 1];
+          if (ln[i + 1] > y1) y1 = ln[i + 1];
+          if (ln[i + 3] < y0) y0 = ln[i + 3];
+          if (ln[i + 3] > y1) y1 = ln[i + 3];
+        }
+      }
+      if (def.pl) n += def.pl.length;
+      if (def.cr) n += def.cr.length / 4;
+      if (def.ar) n += def.ar.length / 6;
+      def._cnt = n;
+      def._ext = n ? Math.max(x1 - x0, y1 - y0) : 0;
+    }
+    const byC = new Map();
+    const get = c => {
+      let p = byC.get(c);
+      if (!p) byC.set(c, p = new Path2D());
+      return p;
+    };
+    const ln = def.ln;
+    if (ln) {
+      for (let i = 0; i < ln.length; i += 5) {
+        const p = get(ln[i + 4]);
+        p.moveTo(ln[i], ln[i + 1]);
+        p.lineTo(ln[i + 2], ln[i + 3]);
+      }
+    }
+    if (def.pl) {
+      for (const e of def.pl) {
+        const p = get(e.c), q = e.p;
+        p.moveTo(q[0], q[1]);
+        for (let i = 2; i < q.length; i += 2) p.lineTo(q[i], q[i + 1]);
+        if (e.z) p.closePath();
+      }
+    }
+    const cr = def.cr;
+    if (cr) {
+      for (let i = 0; i < cr.length; i += 4) {
+        const p = get(cr[i + 3]), r = Math.max(1e-9, cr[i + 2]);
+        p.moveTo(cr[i] + r, cr[i + 1]);
+        p.arc(cr[i], cr[i + 1], r, 0, 6.2832);
+      }
+    }
+    const ar = def.ar;
+    if (ar) {
+      for (let i = 0; i < ar.length; i += 6) {
+        const p = get(ar[i + 5]), r = Math.max(1e-9, ar[i + 2]);
+        const s0 = ar[i + 3] * 0.0174533, s1 = ar[i + 4] * 0.0174533;
+        p.moveTo(ar[i] + r * Math.cos(s0), ar[i + 1] + r * Math.sin(s0));
+        p.arc(ar[i], ar[i + 1], r, s0, s1, false);
+      }
+    }
+    def._p = [...byC].map(([c, p]) => ({ c, p }));
+    return def._p;
+  }
+
+  // 块内分桶：单个块定义可能有 26 万段线段（建筑底图），整条 Path2D 每帧全提交，
+  // 哪怕视口只看到其中 1%，浏览器也要把 26 万段走一遍 tessellation——精确帧慢就差在这。
+  // 按块内坐标切网格，每桶每种颜色一条 Path2D，只 stroke 与视口相交的桶。
+  // 段数不多的块不切（切桶本身有开销，小块反而变慢）。
+  function defBands(def) {
+    if (def._bands !== undefined) return def._bands;
+    const ln = def.ln, seg = ln ? ln.length / 5 : 0;
+    if (!ln || seg < 12000) { def._bands = null; return null; }
+    let x0 = 1e30, y0 = 1e30, x1 = -1e30, y1 = -1e30;
+    for (let i = 0; i < ln.length; i += 5) {
+      if (ln[i] < x0) x0 = ln[i];
+      if (ln[i] > x1) x1 = ln[i];
+      if (ln[i + 1] < y0) y0 = ln[i + 1];
+      if (ln[i + 1] > y1) y1 = ln[i + 1];
+      if (ln[i + 2] < x0) x0 = ln[i + 2];
+      if (ln[i + 2] > x1) x1 = ln[i + 2];
+      if (ln[i + 3] < y0) y0 = ln[i + 3];
+      if (ln[i + 3] > y1) y1 = ln[i + 3];
+    }
+    const w = Math.max(1e-9, x1 - x0), h = Math.max(1e-9, y1 - y0);
+    // 每桶约 255 段：切到 32×32 时，桶在世界里约是块尺寸的 1/32，
+    // 落到屏幕上才比视口小、可见性判断才真的起作用（8×8 时桶比屏幕还大，等于没切）。
+    const n = Math.min(24, Math.max(3, Math.round(Math.sqrt(seg / 255))));
+    const cw = w / n, ch = h / n;
+    const cells = new Array(n * n);
+    const idx = (px, py) => {
+      let ix = ((px - x0) / cw) | 0; if (ix < 0) ix = 0; else if (ix >= n) ix = n - 1;
+      let iy = ((py - y0) / ch) | 0; if (iy < 0) iy = 0; else if (iy >= n) iy = n - 1;
+      return iy * n + ix;
+    };
+    for (let i = 0; i < ln.length; i += 5) {
+      const ci = idx(ln[i], ln[i + 1]);
+      let cell = cells[ci];
+      if (!cell) cells[ci] = cell = { m: new Map(), n: 0 };
+      const c = ln[i + 4];
+      let p = cell.m.get(c);
+      if (!p) cell.m.set(c, p = new Path2D());
+      p.moveTo(ln[i], ln[i + 1]); p.lineTo(ln[i + 2], ln[i + 3]);
+      cell.n++;
+    }
+    const out = [];
+    for (let ci = 0; ci < cells.length; ci++) {
+      const cell = cells[ci]; if (!cell) continue;
+      const gx = ci % n, gy = (ci / n) | 0;
+      out.push({ x0: x0 + gx * cw, y0: y0 + gy * ch,
+                 x1: x0 + (gx + 1) * cw, y1: y0 + (gy + 1) * ch, p: cell.m });
+    }
+    def._bands = out.length ? out : null;
+    def._ext2 = Math.max(w, h);       // 块内几何跨度，用于判断“这块要不要分桶”
+    return def._bands;
+  }
+
+  // 表格：ACAD_TABLE 只给了行列数和单元格文字，按 bbox 均分铺网格 + 文字。
+  // 系统图的 Pe=/Kx=/COS∅=/Pjs=/Ijs= 就在这些表格里，不画等于系统图是空的。
+  function drawTables(list, SX, SY, k) {
+    if (!list) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    for (let ti = 0; ti < list.length; ti++) {
+      const t = list[ti];
+      const b = t.b;
+      if (LOFF[t.li] || HD.B[ti] || !visible(b, 0)) continue;
+      const cw = (b[2] - b[0]) / t.c, ch = (b[3] - b[1]) / t.r;
+      const xa = SX(b[0]), xb = SX(b[2]), ya = SY(b[3]), yb = SY(b[1]);
+      if (xb - xa < 2 || yb - ya < 2) continue;
+      ctx.strokeStyle = COL[0];
+      ctx.lineWidth = LW;
+      ctx.beginPath();
+      for (let i = 0; i <= t.r; i++) {
+        const y = SY(b[1] + i * ch);
+        if (y < -8 || y > H + 8) continue;
+        ctx.moveTo(Math.max(xa, -8), y); ctx.lineTo(Math.min(xb, W + 8), y);
+      }
+      for (let j = 0; j <= t.c; j++) {
+        const x = SX(b[0] + j * cw);
+        if (x < -8 || x > W + 8) continue;
+        ctx.moveTo(x, Math.max(ya, -8)); ctx.lineTo(x, Math.min(yb, H + 8));
+      }
+      ctx.stroke();
+      const ph = ch * k;                      // 行高（屏幕像素）
+      if (ph < 4) continue;
+      ctx.font = Math.max(4, ph * 0.55).toFixed(1) + 'px "Microsoft YaHei", "SimSun", sans-serif';
+      ctx.fillStyle = COL[0];
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      // 单元格逐个做视口剔除：16 个图框表格几千格，分块渲染时每块都全画是最大的一笔固定开销
+      for (let r = 0; r < t.r; r++) {
+        const cy = SY(b[1] + (r + 0.5) * ch);
+        if (cy < -30 || cy > H + 30) continue;
+        for (let c = 0; c < t.c; c++) {
+          const cx = SX(b[0] + c * cw);
+          if (cx < -120 || cx > W + 60) continue;
+          const s = t.t[r][c];
+          if (!s) continue;
+          ctx.fillText(s, cx + 2, cy);
+        }
+      }
+    }
+  }
+
+  // 文字：外层用矩阵算屏幕位置/字号/角度，统一在屏幕空间画；
+  // 小于 5px 的跳过——图上三千多个字如果全画，既看不清也拖慢帧率。
+  function drawTexts(list, m, isTopFlag) {
+    if (!list) return;
+    const isTop = (isTopFlag === undefined) ? (list === D.tx) : !!isTopFlag;
+    // 分桶收集来的 list 下标已不对应 D.tx 原序号（收集时已按 HD.T 过滤过），不再重复判定
+    const noHd = (isTopFlag !== undefined);
+    const m0 = m || new DOMMatrix([view.k, 0, 0, -view.k, -view.x0 * view.k, view.y1 * view.k]);
+    const sxp = Math.hypot(m0.a, m0.b);       // 屏幕像素 / 本地单位
+    const Wr = W + 60, Hr = H + 40;
+    let tid = -1;
+    // 一万多条字逐条重设 font / textAlign 并 save+rotate，是精细帧里最贵的一段。
+    // 这里字体按 0.5px 分档、只在变化时设置；不旋转的字走不 save/restore 的快路径。
+    let lastFont = '', lastCol = '', lastAlign = -1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.textBaseline = 'alphabetic';
+    // 一万多条字里，逐条 new DOMPoint + 逐条 measureText 是最大两笔开销：
+    // 世界→屏幕换成内联乘加（数学等价，省掉对象分配），字形上下沿按「字号|文本」缓存。
+    const MC = TXT_MC;
+    if (MC.size > 24000) MC.clear();
+    for (const t of list) {
+      tid++;
+      if ((isTop && !noHd && HD.T[tid]) || LOFF[t[7]]) continue;  // 块内文字没有图层下标（undefined → 不跳过）
+      const wpx = m0.a * t[0] + m0.c * t[1] + m0.e;
+      const wpy = m0.b * t[0] + m0.d * t[1] + m0.f;
+      const px = t[2] * sxp;
+      if (px < 3.2) continue;   // 只有真正不到 3px 字形时才跳，缩小时文字也必须能看见
+      if (wpx < -60 || wpx > Wr || wpy < -40 || wpy > Hr) continue;
+      const pxr = Math.round(px * 2) / 2;
+      const fs = pxr.toFixed(1) + 'px "Microsoft YaHei", "SimSun", sans-serif';
+      if (fs !== lastFont) { ctx.font = fs; lastFont = fs; }
+      const col = TC(t[5]);
+      if (col !== lastCol) { ctx.fillStyle = col; lastCol = col; }
+      // ha: 0=左 1=中 2=右 3=对齐 4=正中 5=布满 —— 3/4/5 都按居中处理（轴号圆内数字就是这个）
+      const al = t[4] === 2 ? 2 : ((t[4] === 1 || t[4] === 3 || t[4] === 4 || t[4] === 5) ? 1 : 0);
+      if (al !== lastAlign) {
+        ctx.textAlign = al === 1 ? 'center' : (al === 2 ? 'right' : 'left');
+        lastAlign = al;
+      }
+      // va: 0=基线 1=底 2=中 3=顶。canvas 的 'middle'/'top' 按 em 框算，数字落在 em 框
+      // 上半部，直接用会让轴号在圈里偏下；这里统一用基线 + 字形真实包围盒换算偏移。
+      // va=0 的轴号锚点本来就是基线位（CAD 里就是居中的），不再额外下移。
+      const vmode = t[8] === 2 ? 2 : (t[8] === 3 ? 3 : (t[8] === 1 ? 1 : 0));
+      let dyv = 0;
+      if (vmode) {
+        const key = pxr + '\u0001' + t[6];
+        let vb = MC.get(key);
+        if (vb === undefined) {
+          const m2 = ctx.measureText(t[6]);
+          vb = [m2.actualBoundingBoxAscent || 0, m2.actualBoundingBoxDescent || 0];
+          MC.set(key, vb);
+        }
+        dyv = vmode === 2 ? (vb[0] - vb[1]) / 2 : (vmode === 3 ? vb[0] : -vb[1]);
+      }
+      const a = (t[3] || 0) * 0.0174533;
+      if (!a) {
+        ctx.fillText(t[6], wpx, wpy + dyv);
+        continue;
+      }
+      // 旋转角不用再变换一次点：世界方向 (cos,sin) 经矩阵线性部分直接得到屏幕方向
+      const ca = Math.cos(a), sa = Math.sin(a);
+      const dx2 = m0.a * ca + m0.c * sa, dy2 = m0.b * ca + m0.d * sa;
+      ctx.save();
+      ctx.translate(wpx, wpy);
+      ctx.rotate(Math.atan2(dy2, dx2));
+      ctx.fillText(t[6], 0, dyv);
+      ctx.restore();
+      lastFont = ''; lastCol = ''; lastAlign = -1;   // restore 把 canvas 状态弹回去了
+    }
+  }
+
+  // ---- 指定区域高清导出 ----
+  // 不是把屏幕位图放大，而是换一个倍率把整幅矢量重画到离屏 canvas：
+  // 所以 4800px 输出和屏幕上看到的是同一批几何，边缘不插值、不糊。
+  const elSel = document.getElementById('sel'), elExp = document.getElementById('exp');
+  const elPv = document.getElementById('pv'), elInf = document.getElementById('inf');
+  let EXPBOX = null, EXPLONG = 2400;
+
+  function renderRegion(box, longSide) {
+    const bw = Math.max(1e-6, box[2] - box[0]), bh = Math.max(1e-6, box[3] - box[1]);
+    const k2 = longSide / Math.max(bw, bh);
+    const w = Math.max(1, Math.round(bw * k2)), h = Math.max(1, Math.round(bh * k2));
+    const off = document.createElement('canvas');
+    off.width = w; off.height = h;
+    const c2 = off.getContext('2d', { alpha: false });
+    const sv = { ctx, W, H, dpr, BASE, LW, NOHUD, CACHE, SELFTEST, HIT,
+                 bk: view.k, bx0: view.x0, by1: view.y1 };
+    ctx = c2; W = w; H = h; dpr = 1;
+    LW = Math.max(1, k2 / (baseK || 1));
+    view.k = k2; view.x0 = box[0]; view.y1 = box[3];
+    CACHE = null; SELFTEST = true; NOHUD = true; HIT = null;
+    REGION = true;
+    draw();
+    REGION = false;
+    ctx = sv.ctx; W = sv.W; H = sv.H; dpr = sv.dpr; BASE = sv.BASE; LW = sv.LW;
+    NOHUD = sv.NOHUD; CACHE = sv.CACHE; SELFTEST = sv.SELFTEST; HIT = sv.HIT;
+    view.k = sv.bk; view.x0 = sv.bx0; view.y1 = sv.by1;
+    return off;
+  }
+
+  function showPanel() {
+    const b = EXPBOX;
+    const bw = b[2] - b[0], bh = b[3] - b[1];
+    const k2 = EXPLONG / Math.max(bw, bh);
+    const w = Math.round(bw * k2), h = Math.round(bh * k2);
+    const off = renderRegion(b, EXPLONG);
+    const pv = document.createElement('canvas');
+    const sw = 282, sh = Math.max(1, Math.round(sw * h / w));
+    pv.width = sw; pv.height = sh;
+    pv.getContext('2d').drawImage(off, 0, 0, sw, sh);
+    elPv.src = pv.toDataURL('image/png');
+    elInf.textContent = '区域 ' + Math.round(bw) + ' × ' + Math.round(bh) + ' 图纸单位\n'
+                      + '输出 ' + w + ' × ' + h + ' px\n'
+                      + '相对当前视图 ' + (k2 / view.k).toFixed(1) + ' 倍';
+    for (const a of document.querySelectorAll('#sz a')) a.className = (+a.dataset.l === EXPLONG) ? 'on' : '';
+    elExp.style.display = 'block';
+  }
+
+  function selBox(s) {
+    const xa = Math.min(s.sx, s.ex), xb = Math.max(s.sx, s.ex);
+    const ya = Math.min(s.sy, s.ey), yb = Math.max(s.sy, s.ey);
+    return [view.x0 + xa / view.k, view.y1 - yb / view.k, view.x0 + xb / view.k, view.y1 - ya / view.k];
+  }
+
+  let sel = null, picking = false;
+  document.getElementById('pick').onclick = () => {
+    picking = !picking;
+    document.getElementById('pick').style.color = picking ? '#FFD166' : '#6BA5FF';
+  };
+  for (const a of document.querySelectorAll('#sz a')) {
+    a.onclick = () => { EXPLONG = +a.dataset.l; showPanel(); };
+  }
+  document.getElementById('dlex').onclick = () => {
+    const off = renderRegion(EXPBOX, EXPLONG);
+    off.toBlob(bl => {
+      const a2 = document.createElement('a');
+      a2.href = URL.createObjectURL(bl);
+      a2.download = (D.f || 'view').replace(/\.dwg$/i, '') + '_'
+        + Math.round(EXPBOX[0]) + '_' + Math.round(EXPBOX[1]) + '_' + EXPLONG + 'px.png';
+      a2.click();
+      setTimeout(() => URL.revokeObjectURL(a2.href), 4000);
+    }, 'image/png');
+  };
+  document.getElementById('cxl').onclick = () => { elExp.style.display = 'none'; EXPBOX = null; };
+
+  // ---- 区域数据导出：给 AI 读的是结构，不是像素 ----
+  // 整幅 scene 里图元是压缩数组（步长 6/5/7/8），这里按框选区裁出来并展开成带字段的对象，
+  // 图层写回名字、坐标保留 1 位小数、文字按从上到下排序，直接就是一份可核对的清单。
+  function regionData(box) {
+    const x0 = Math.min(box[0], box[2]), x1 = Math.max(box[0], box[2]);
+    const y0 = Math.min(box[1], box[3]), y1 = Math.max(box[1], box[3]);
+    const lay = i => (D.ly && D.ly[i] != null ? D.ly[i] : ('layer_' + i));
+    const R = v => Math.round(v * 10) / 10;
+    const lines = [], circles = [], arcs = [], plines = [], texts = [], blocks = [], tables = [];
+
+    const L = D.ln || [];
+    for (let i = 0; i + 5 < L.length; i += 6) {
+      const ax = L[i], ay = L[i + 1], bx = L[i + 2], by = L[i + 3];
+      if (Math.min(ax, bx) <= x1 && Math.max(ax, bx) >= x0
+          && Math.min(ay, by) <= y1 && Math.max(ay, by) >= y0) {
+        lines.push({ x1: R(ax), y1: R(ay), x2: R(bx), y2: R(by), layer: lay(L[i + 5]) });
+      }
+    }
+    const C = D.cr || [];
+    for (let i = 0; i + 4 < C.length; i += 5) {
+      const cx = C[i], cy = C[i + 1], r = C[i + 2];
+      if (cx + r >= x0 && cx - r <= x1 && cy + r >= y0 && cy - r <= y1) {
+        circles.push({ x: R(cx), y: R(cy), r: R(r), layer: lay(C[i + 4]) });
+      }
+    }
+    const A = D.ar || [];
+    for (let i = 0; i + 6 < A.length; i += 7) {
+      const cx = A[i], cy = A[i + 1], r = A[i + 2];
+      if (cx + r >= x0 && cx - r <= x1 && cy + r >= y0 && cy - r <= y1) {
+        arcs.push({ x: R(cx), y: R(cy), r: R(r), a0: R(A[i + 3]), a1: R(A[i + 4]), layer: lay(A[i + 6]) });
+      }
+    }
+    for (const p of (D.pl || [])) {
+      const raw = p.p || [];
+      // pl.p 是扁平坐标 [x1,y1,x2,y2,...]，也兼容 [[x,y],...]
+      const pts = (raw.length && typeof raw[0] === 'number')
+        ? Array.from({ length: Math.floor(raw.length / 2) }, (_, i) => [raw[2 * i], raw[2 * i + 1]])
+        : raw;
+      let hit = false;
+      for (const q of pts) {
+        if (q[0] >= x0 && q[0] <= x1 && q[1] >= y0 && q[1] <= y1) { hit = true; break; }
+      }
+      if (hit) plines.push({ points: pts.map(q => [R(q[0]), R(q[1])]), closed: !!p.z, layer: lay(p.li) });
+    }
+    // tx 每项是一个 8 元数组：[x, y, h, rot, ha, ci, text, li]
+    for (const t of (D.tx || [])) {
+      const x = t[0], y = t[1];
+      if (x >= x0 && x <= x1 && y >= y0 && y <= y1) {
+        texts.push({ text: t[6], x: R(x), y: R(y), h: R(t[2]),
+                     rot: R(t[3] || 0), layer: lay(t[7]) });
+      }
+    }
+    texts.sort((a, b) => b.y - a.y || a.x - b.x);
+    for (const b of (D.ins || [])) {
+      if (b.x >= x0 && b.x <= x1 && b.y >= y0 && b.y <= y1) {
+        blocks.push({ name: (typeof b.k === 'string' ? b.k : (typeof b.n === 'string' ? b.n : '')),
+                      x: R(b.x), y: R(b.y),
+                      rot: R(b.r || 0), sx: R(b.sx || 1), sy: R(b.sy || 1), layer: lay(b.li) });
+      }
+    }
+    for (const tb of (D.tb || [])) {
+      const bb = tb.b || [];
+      if (bb.length === 4 && !(bb[2] >= x0 && bb[0] <= x1 && bb[3] >= y0 && bb[1] <= y1)) continue;
+      const rows = tb.r || 0, cols = tb.c || 0;
+      // tb.t 已经是按行铺好的二维网格：[['Pe=','222.5','kW'], ...]
+      const raw = tb.t || [];
+      const grid = [];
+      for (let r = 0; r < rows; r++) {
+        const src = raw[r] || [];
+        const row = [];
+        for (let c = 0; c < cols; c++) row.push(src[c] == null ? '' : String(src[c]));
+        grid.push(row);
+      }
+      let filled = 0;
+      for (const row of grid) for (const v of row) if (v.trim()) filled++;
+      if (!filled) continue;
+      tables.push({ box: bb.map(R), rows: rows, cols: cols, filled: filled, grid: grid });
+    }
+
+    return {
+      file: D.f || '',
+      box: [R(x0), R(y0), R(x1), R(y1)],
+      unit: 'drawing unit',
+      counts: { lines: lines.length, circles: circles.length, arcs: arcs.length,
+                polylines: plines.length, texts: texts.length,
+                blocks: blocks.length, tables: tables.length },
+      layers: [...new Set(texts.map(t => t.layer).concat(blocks.map(b => b.layer)))],
+      texts: texts,
+      blocks: blocks,
+      tables: tables,
+      lines: lines,
+      circles: circles,
+      arcs: arcs,
+      polylines: plines
+    };
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function buildRegionHTML(r, pngUrl) {
+    const c = r.counts;
+    const th = '<tr><td>文字</td><td>' + c.texts + '</td></tr>'
+             + '<tr><td>块参照</td><td>' + c.blocks + '</td></tr>'
+             + '<tr><td>表格</td><td>' + c.tables + '</td></tr>'
+             + '<tr><td>直线</td><td>' + c.lines + '</td></tr>'
+             + '<tr><td>圆</td><td>' + c.circles + '</td></tr>'
+             + '<tr><td>圆弧</td><td>' + c.arcs + '</td></tr>'
+             + '<tr><td>多段线</td><td>' + c.polylines + '</td></tr>';
+
+    const textRows = r.texts.map(t =>
+      '<tr><td>' + escHtml(t.text) + '</td><td>' + escHtml(t.layer) + '</td><td>'
+      + t.x + '</td><td>' + t.y + '</td><td>' + t.h + '</td></tr>').join('');
+
+    const blockRows = r.blocks.map(b =>
+      '<tr><td>' + escHtml(b.name) + '</td><td>' + escHtml(b.layer) + '</td><td>'
+      + b.x + '</td><td>' + b.y + '</td><td>' + b.rot + '°</td></tr>').join('');
+
+    let tableBlocks = '';
+    for (let i = 0; i < r.tables.length; i++) {
+      const tb = r.tables[i];
+      let rows = '';
+      for (let rr = 0; rr < tb.rows; rr++) {
+        let tds = '';
+        for (let cc = 0; cc < tb.cols; cc++) {
+          const v = tb.grid[rr] && tb.grid[rr][cc] != null ? tb.grid[rr][cc] : '';
+          tds += '<td>' + escHtml(v) + '</td>';
+        }
+        rows += '<tr>' + tds + '</tr>';
+      }
+      tableBlocks += '<h3>表格 ' + (i + 1) + ' · ' + tb.rows + ' 行 × ' + tb.cols + ' 列</h3>'
+                   + '<table class="grid">' + rows + '</table>';
+    }
+
+    const title = (r.file || '图纸') + ' · 区域 ' + r.box[0] + ', ' + r.box[1];
+    return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'
+      + '<title>' + escHtml(title) + '</title><style>'
+      + 'body{font:14px/1.6 "Microsoft YaHei",system-ui,sans-serif;margin:0;padding:24px;'
+      + 'background:#fff;color:#1b1f23;max-width:1500px}'
+      + 'h1{font-size:20px;margin:0 0 6px}h2{font-size:16px;margin:26px 0 8px;'
+      + 'border-left:3px solid #2f6fdf;padding-left:8px}h3{font-size:13px;margin:16px 0 6px;color:#444}'
+      + '.meta{color:#667;font-size:12px;margin:0 0 14px}'
+      + 'img{max-width:100%;border:1px solid #d5d9df;background:#14181B}'
+      + 'table{border-collapse:collapse;font-size:12.5px;width:auto;min-width:340px}'
+      + 'td,th{border:1px solid #d8dce2;padding:3px 8px;vertical-align:top}'
+      + 'th{background:#f2f4f7;text-align:left}'
+      + 'table.grid td{white-space:pre-wrap}'
+      + 'table.kv td:first-child{background:#f7f8fa;white-space:nowrap}'
+      + '</style></head><body>'
+      + '<h1>' + escHtml(r.file || '未命名图纸') + '</h1>'
+      + '<div class="meta">区域 X ' + r.box[0] + ' ~ ' + r.box[2] + ' ，Y ' + r.box[1] + ' ~ ' + r.box[3]
+      + ' （' + r.unit + '） · 含图层：' + escHtml(r.layers.join(' / ')) + '</div>'
+      + '<img src="' + pngUrl + '" alt="区域渲染">'
+      + '<h2>图元统计</h2><table class="kv">' + th + '</table>'
+      + '<h2>表格参数（' + r.tables.length + '）</h2>' + (tableBlocks || '<p class="meta">该区域没有表格</p>')
+      + '<h2>文字（' + r.texts.length + '）</h2>'
+      + (r.texts.length
+          ? '<table><tr><th>文字</th><th>图层</th><th>x</th><th>y</th><th>字高</th></tr>' + textRows + '</table>'
+          : '<p class="meta">无</p>')
+      + '<h2>块参照（' + r.blocks.length + '）</h2>'
+      + (r.blocks.length
+          ? '<table><tr><th>块名</th><th>图层</th><th>x</th><th>y</th><th>旋转</th></tr>' + blockRows + '</table>'
+          : '<p class="meta">无</p>')
+      + '</body></html>';
+  }
+
+  function dlText(name, text, mime) {
+    const blob = new Blob([text], { type: mime + ';charset=utf-8' });
+    const a2 = document.createElement('a');
+    a2.href = URL.createObjectURL(blob);
+    a2.download = name;
+    a2.click();
+    setTimeout(() => URL.revokeObjectURL(a2.href), 4000);
+  }
+
+  document.getElementById('dljs').onclick = () => {
+    const r = regionData(EXPBOX);
+    const nm = (D.f || 'view').replace(/\.dwg$/i, '') + '_'
+             + Math.round(EXPBOX[0]) + '_' + Math.round(EXPBOX[1]) + '.region.json';
+    dlText(nm, JSON.stringify(r, null, 1), 'application/json');
+  };
+
+  document.getElementById('dlht').onclick = () => {
+    const r = regionData(EXPBOX);
+    const off = renderRegion(EXPBOX, EXPLONG);
+    const nm = (D.f || 'view').replace(/\.dwg$/i, '') + '_'
+             + Math.round(EXPBOX[0]) + '_' + Math.round(EXPBOX[1]) + '.region.html';
+    dlText(nm, buildRegionHTML(r, off.toDataURL('image/png')), 'text/html');
+  };
+
+  // ---- 图元点选：点一下命中最近的图元，可以只藏这一条，或藏它所在的整层 ----
+  const elHit = document.getElementById('hit'), elHitInfo = document.getElementById('hitinfo');
+
+  function segDist(px, py, x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const L2 = dx * dx + dy * dy;
+    let t = L2 ? ((px - x1) * dx + (py - y1) * dy) / L2 : 0;
+    t = t < 0 ? 0 : (t > 1 ? 1 : t);
+    return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+  }
+
+  function hitTest(mx, my) {
+    const k = view.k, x0 = view.x0, y1 = view.y1, tol = 7;
+    const SX = x => (x - x0) * k, SY = y => (y1 - y) * k;
+    let ln = null, lnD = tol;          // 线/圆/弧/多段线：取屏幕距离最近的
+    let bx = null, bxA = 1e18;         // 文字/块/表格：取屏幕面积最小的（小块不会被大图框抢）
+
+    const LN = D.ln;
+    for (let i = 0, id = 0; i < LN.length; i += 6, id++) {
+      if (LOFF[LN[i + 5]] || HD.L[id]) continue;
+      const d = segDist(mx, my, SX(LN[i]), SY(LN[i + 1]), SX(LN[i + 2]), SY(LN[i + 3]));
+      if (d < lnD) {
+        lnD = d;
+        ln = { k: 'L', id, li: LN[i + 5], c: LN[i + 4],
+               b: [Math.min(LN[i], LN[i + 2]), Math.min(LN[i + 1], LN[i + 3]),
+                   Math.max(LN[i], LN[i + 2]), Math.max(LN[i + 1], LN[i + 3])],
+               info: '长度 ' + Math.round(Math.hypot(LN[i + 2] - LN[i], LN[i + 3] - LN[i + 1])) };
+      }
+    }
+    D.pl.forEach((e, id) => {
+      if (LOFF[e.li] || HD.P[id]) return;
+      const p = e.p;
+      for (let i = 0; i + 3 < p.length; i += 2) {
+        const d = segDist(mx, my, SX(p[i]), SY(p[i + 1]), SX(p[i + 2]), SY(p[i + 3]));
+        if (d < lnD) {
+          lnD = d;
+          ln = { k: 'P', id, li: e.li, c: e.c, b: e.b,
+                 info: '多段线 ' + (p.length / 2) + ' 点' + (e.z ? '（闭合）' : '') };
+        }
+      }
+    });
+    const CR = D.cr;
+    for (let i = 0, id = 0; i < CR.length; i += 5, id++) {
+      if (LOFF[CR[i + 4]] || HD.C[id]) continue;
+      const d = Math.abs(Math.hypot(mx - SX(CR[i]), my - SY(CR[i + 1])) - CR[i + 2] * k);
+      if (d < lnD) {
+        lnD = d;
+        ln = { k: 'C', id, li: CR[i + 4], c: CR[i + 3],
+               b: [CR[i] - CR[i + 2], CR[i + 1] - CR[i + 2], CR[i] + CR[i + 2], CR[i + 1] + CR[i + 2]],
+               info: '半径 ' + Math.round(CR[i + 2]) };
+      }
+    }
+    const AR = D.ar;
+    for (let i = 0, id = 0; i < AR.length; i += 7, id++) {
+      if (LOFF[AR[i + 6]] || HD.A[id]) continue;
+      const b = [AR[i] - AR[i + 2], AR[i + 1] - AR[i + 2], AR[i] + AR[i + 2], AR[i + 1] + AR[i + 2]];
+      if (mx < SX(b[0]) - 4 || mx > SX(b[2]) + 4 || my < SY(b[3]) - 4 || my > SY(b[1]) + 4) continue;
+      const d = Math.abs(Math.hypot(mx - SX(AR[i]), my - SY(AR[i + 1])) - AR[i + 2] * k) + 1;
+      if (d < lnD) {
+        lnD = d;
+        ln = { k: 'A', id, li: AR[i + 6], c: AR[i + 5], b,
+               info: '半径 ' + Math.round(AR[i + 2]) + '，' + Math.round(AR[i + 3]) + '°~' + Math.round(AR[i + 4]) + '°' };
+      }
+    }
+
+    const put = (o, area) => { if (area < bxA) { bxA = area; bx = o; } };
+    D.tx.forEach((t, id) => {
+      if (LOFF[t[7]] || HD.T[id]) return;
+      const ph = Math.abs(t[2]) * k;
+      if (ph < 3) return;
+      const w = Math.max(ph, t[6].length * ph * 0.62), ha = t[4];
+      let xa = SX(t[0]);
+      if (ha === 1) xa -= w / 2; else if (ha === 2) xa -= w;
+      const ya = SY(t[1]) - ph;
+      if (mx >= xa - 2 && mx <= xa + w + 2 && my >= ya - 2 && my <= ya + ph + 2) {
+        put({ k: 'T', id, li: t[7], c: t[5], b: [t[0], t[1], t[0] + w / k, t[1] + ph / k],
+              info: '文字「' + (t[6].length > 22 ? t[6].slice(0, 22) + '…' : t[6]) + '」 字高 ' + Math.round(t[2]) }, w * ph);
+      }
+    });
+    const IN = D.ins;
+    for (let id = 0; id < IN.length; id++) {
+      const e = IN[id];
+      if (LOFF[e.li] || HD.I[id]) continue;
+      if (mx < SX(e.b[0]) - 3 || mx > SX(e.b[2]) + 3 || my < SY(e.b[3]) - 3 || my > SY(e.b[1]) + 3) continue;
+      put({ k: 'I', id, li: e.li, c: e.c, b: e.b, info: '块「' + e.k + '」' },
+          (e.b[2] - e.b[0]) * k * (e.b[3] - e.b[1]) * k);
+    }
+    D.tb.forEach((t, id) => {
+      if (LOFF[t.li] || HD.B[id]) return;
+      const b = t.b;
+      if (mx < SX(b[0]) || mx > SX(b[2]) || my < SY(b[3]) || my > SY(b[1])) return;
+      put({ k: 'B', id, li: t.li, b, info: '表格 ' + t.r + '×' + t.c },
+          (b[2] - b[0]) * k * (b[3] - b[1]) * k);
+    });
+
+    if (bx && (!ln || bxA < 900)) return bx;      // 小对象（符号/文字/表格）优先
+    return ln || bx;
+  }
+
+  function showHit(o) {
+    HIT = o;
+    const nm = LY[o.li] !== undefined ? LY[o.li] : '—';
+    elHitInfo.innerHTML = '';
+    const line = (a, bb) => { const d = document.createElement('div'); d.textContent = a; elHitInfo.appendChild(d); };
+    line('类型 ' + ({ L: '直线', P: '多段线', C: '圆', A: '弧', T: '文字', I: '块参照', B: '表格' }[o.k] || o.k));
+    line('图层 ' + nm);
+    line(o.info || '');
+    elHit.style.display = 'block';
+    draw();
+  }
+
+  function hideOne() {
+    if (!HIT) return;
+    HD[HIT.k][HIT.id] = true;
+    HIDDEN++;
+    HIT = null; elHit.style.display = 'none';
+    buildGroups(); draw();
+  }
+  document.getElementById('hitoff').onclick = hideOne;
+  document.getElementById('hitly').onclick = () => {
+    if (!HIT) return;
+    LOFF[HIT.li] = true;
+    HIT = null; elHit.style.display = 'none';
+    syncLayers(); buildGroups(); draw();
+  };
+  document.getElementById('hitclr').onclick = () => {
+    for (const kk in HD) HD[kk].length = 0;
+    HIDDEN = 0;
+    HIT = null; elHit.style.display = 'none';
+    buildGroups(); draw();
+  };
+  document.getElementById('hitx').onclick = () => { HIT = null; elHit.style.display = 'none'; draw(); };
+
+  // ---- 交互 ----
+  let drag = null, downPt = null;
+  cv.addEventListener('mousedown', e => {
+    if (picking || e.shiftKey) {
+      sel = { sx: e.clientX, sy: e.clientY, ex: e.clientX, ey: e.clientY };
+      elSel.style.display = 'block';
+      elExp.style.display = 'none';
+      return;
+    }
+    downPt = { x: e.clientX, y: e.clientY };
+    drag = { x: e.clientX, y: e.clientY, x0: view.x0, y1: view.y1 };
+    cv.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mouseup', () => {
+    if (sel) {
+      const s = sel; sel = null;
+      elSel.style.display = 'none';
+      if (picking) document.getElementById('pick').style.color = '#6BA5FF';
+      picking = false;
+      if (Math.abs(s.ex - s.sx) > 10 && Math.abs(s.ey - s.sy) > 10) {
+        EXPBOX = selBox(s);
+        showPanel();
+      }
+      return;
+    }
+    drag = null; cv.style.cursor = 'crosshair';
+    // 松手立刻补一帧精确画面：平移预览只搬了位图，露出的边是底色，
+    // 若还等 150ms 再画，用户会以为“下面缺内容”。这里直接落精确帧。
+    clearTimeout(redrawT);
+    lastInput = -1e9;
+    try { localStorage.setItem('pyarx_view', JSON.stringify({ k: view.k, x0: view.x0, y1: view.y1 })); } catch (e) { }
+    // 覆盖层保持显示，等精确帧画完由 paintFull 末尾收起，避免中间闪一帧空白
+    FORCE = true; draw(); FORCE = false;
+    // 没拖动就是一次点选：命中最接近的图元，弹小面板
+    if (downPt && Math.abs(e.clientX - downPt.x) < 4 && Math.abs(e.clientY - downPt.y) < 4) {
+      const o = hitTest(e.clientX, e.clientY);
+      if (o) showHit(o);
+      else { HIT = null; elHit.style.display = 'none'; draw(); }
+    }
+    downPt = null;
+  });
+  window.addEventListener('mousemove', e => {
+    if (sel) {
+      sel.ex = e.clientX; sel.ey = e.clientY;
+      const r = elSel.style;
+      r.left = Math.min(sel.sx, sel.ex) + 'px';
+      r.top = Math.min(sel.sy, sel.ey) + 'px';
+      r.width = Math.abs(sel.ex - sel.sx) + 'px';
+      r.height = Math.abs(sel.ey - sel.sy) + 'px';
+      return;
+    }
+    if (drag) {
+      view.x0 = drag.x0 - (e.clientX - drag.x) / view.k;
+      view.y1 = drag.y1 + (e.clientY - drag.y) / view.k;
+      clampView();
+      lastInput = performance.now();
+      // 拖动中只走 GPU 平移这一个动作，不重画：重画哪怕 90ms，一次占掉三成时间就是顿挫。
+      // 拖出 1.2 屏才补一帧（paintFull 里那道阈值管着），松手立刻落精确帧。
+      draw();
+      schedule();
+    }
+    // 读一个视图中心的坐标，别读鼠标点的坐标：鼠标坐标会落到视图外，
+    // 看着像“已经漂出图纸”，其实是屏幕边缘的换算值，判断 clamp 有没有生效会被它带偏。
+    elCur.textContent = (view.x0 + W / 2 / view.k).toFixed(1) + ', '
+                      + (view.y1 - H / 2 / view.k).toFixed(1);
+  });
+  cv.addEventListener('wheel', e => {
+    e.preventDefault();
+    const mx = e.clientX, my = e.clientY;
+    const wx = view.x0 + mx / view.k, wy = view.y1 - my / view.k;
+    // 按 deltaY 的绝对量算格数：WebView2 会把连续滚轮合并成一个 deltaY=360 的事件，
+    // 只看符号就只放大一格，滚十下才涨一格——用户会觉得“滚不动、不能放大”。
+    const steps = (e.deltaY || 0) / 120;
+    const f = Math.pow(1.15, -steps);
+    view.k = Math.min(KMAX, Math.max(KMIN, view.k * f));
+    view.x0 = wx - mx / view.k;
+    view.y1 = wy + my / view.k;
+    clampView();
+    lastInput = performance.now();
+    // 滚轮期间只更新位图预览（几毫秒），停手 150ms 后由 schedule 落一帧精确矢量画面。
+    draw();
+    schedule();
+  }, { passive: false });
+  cv.addEventListener('dblclick', fit);
+  window.addEventListener('keydown', e => { if (e.key === '0') fit(); });
+
+  resize();
+  fit();
+  baseK = view.k;
+  draw();
+  // 记住上次停手时的视图：重启/换页回来直接落回原处，不必每次从全图再找一遍
+  try {
+    const sv = JSON.parse(localStorage.getItem('pyarx_view') || 'null');
+    if (sv && isFinite(sv.k) && isFinite(sv.x0) && isFinite(sv.y1) && !location.hash) {
+      view.k = sv.k; view.x0 = sv.x0; view.y1 = sv.y1; baseK = sv.k; draw();
+    }
+  } catch (e) { }
+  // 便于直接定位某一块：xxx.html#v2（视图 2）、#all（全图）
+  const hv = location.hash;
+  if (hv === '#all') { fitBox(D.b); baseK = view.k; draw(); }
+  else if (/^#lyr/.test(hv)) { fitBox(D.b); baseK = view.k; draw(); elLyr.style.display = 'block'; }
+  else if (hv === '#hitc') {
+    // 自测/分享用：从视图中心向外扫一圈，命中第一个图元并弹面板
+    let o = null;
+    for (let r = 0; r <= 140 && !o; r += 10) {
+      for (let a = 0; a < 20 && !o; a++) {
+        const th = a / 20 * 6.2832;
+        o = hitTest(W / 2 + r * Math.cos(th), H / 2 + r * Math.sin(th));
+      }
+    }
+    if (o) showHit(o);
+  }
+  else if (/^#b=/.test(hv)) {
+    // 直接给一个世界坐标框：xxx.html#b=x0,y0,x1,y1（定位到某台设备/某段桥架）
+    const q = hv.slice(3).split(',').map(Number);
+    if (q.length === 4 && q.every(v => isFinite(v))) {
+      fitBox(q); baseK = view.k; draw();
+    }
+  }
+  else if (/^#v\d$/.test(hv) && D.v) {
+    const i = +hv.slice(2) - 1;
+    if (D.v[i]) { fitBox(D.v[i]); baseK = view.k; draw(); }
+  }
+  else if (/^#ex=/.test(hv)) {
+    // 直接导出某块：xxx.html#ex=x0,y0,x1,y1,长边像素（例如给 AI 核对用的高清切片）
+    const q = hv.slice(4).split(',').map(Number);
+    if (q.length >= 4 && q.slice(0, 4).every(v => isFinite(v))) {
+      EXPBOX = [q[0], q[1], q[2], q[3]];
+      EXPLONG = q[4] > 0 ? q[4] : 2400;
+      fitBox(EXPBOX); baseK = view.k; draw();
+      showPanel();
+    }
+  }
+  window.__pyarx = { fit, view, draw };
+
+  // 自测：分别测「全量一次」「首次铺满整屏 tile」「缓存命中后的平移帧」
+  const bt = performance.now();
+  const acc = [0, 0, 0, 0, 0];
+  for (let i = 0; i < 8; i++) {
+    paintFull();
+    for (let j = 0; j < 5; j++) acc[j] += STAGE[j];
+  }
+  const fullMs = (performance.now() - bt) / 8;
+
+  dropTiles();
+  const t2 = performance.now();
+  let nTile = 0, mxIns = 0, mxTxt = 0, mxGeo = 0, mxTxtMs = 0, sumGeo = 0, sumTxt = 0;
+  do {
+    drawTiles();
+    nTile++;
+    if (TMPI.length > mxIns) mxIns = TMPI.length;
+    if (TMPT.length > mxTxt) mxTxt = TMPT.length;
+    if (STAGE[1] > mxGeo) mxGeo = STAGE[1];
+    if (STAGE[2] > mxTxtMs) mxTxtMs = STAGE[2];
+    sumGeo += STAGE[1]; sumTxt += STAGE[2];
+  } while (PEND > 0 && nTile < 80);
+  const firstFill = performance.now() - t2;
+
+  const t3 = performance.now();
+  for (let i = 0; i < 20; i++) drawTiles();
+  const hitMs = (performance.now() - t3) / 20;
+
+  elFps.textContent = '首铺 ' + firstFill.toFixed(0) + 'ms · 命中 ' + hitMs.toFixed(1)
+                    + 'ms · 全量 ' + fullMs.toFixed(0) + 'ms'
+                    + ' | 块 ins ' + mxIns + ' txt ' + mxTxt
+                    + ' · 线 ' + (window.__tsub ? window.__tsub[0].toFixed(1) : '-')
+                    + ' 收集 ' + (window.__tsub ? window.__tsub[1].toFixed(1) : '-')
+                    + ' 块 ' + (window.__tsub ? window.__tsub[2].toFixed(1) : '-')
+                    + ' 格 ' + (window.__tsub ? window.__tsub[3] : '-');
+  elZ.textContent = '100%';
+  SELFTEST = false;
+  snapshot();
+})();
+</script>
+</body>
+</html>

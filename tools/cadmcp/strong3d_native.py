@@ -137,9 +137,9 @@ import PyMfcXml as M
 import PyMfcXml as M
 
 win = M.Window("强电桥架·三维画布（XView3D）", 1500, 940)
-win.setTheme(False)
-win.addView3D(7100, 8, 8, 1484, 924)
-win.view3DSetStyle(7100, 0xF7FAFD, True, False)
+win.set_theme(False)
+win.add_view3d(7100, 8, 8, 1484, 924)
+win.view3d_set_style(7100, 0xF7FAFD, True, False)
 
 def fit_color(name):
     if "四通" in name: return 0x8E7CC3
@@ -153,7 +153,7 @@ def fit_color(name):
 t0 = time.time()
 for r in runs:
     for bx_ in boxes_of(r):
-        win.view3DAppendBox(7100, *bx_)
+        win.view3d_append_box(7100, *bx_)
 skipped = []
 for f in real_fits:
     cx, cy, wxy, hxy = fit_xy(f)
@@ -171,19 +171,19 @@ for f in real_fits:
     sx = max(wxy, disp) / 2.0
     sy = max(hxy, disp) / 2.0
     z0, z1 = best["z"] * ZEX, (best["z"] + best["hh"]) * ZEX
-    win.view3DAppendBox(7100, cx - sx, cy - sy, z0, cx + sx, cy + sy, z1, fit_color(f["block"]))
+    win.view3d_append_box(7100, cx - sx, cy - sy, z0, cx + sx, cy + sy, z1, fit_color(f["block"]))
 
 win.show()
 time.sleep(0.6)
-win.view3DFit(7100)
+win.view3d_fit(7100)
 time.sleep(0.4)
-print("camera", win.view3DGetCamera(7100))
-win.saveControlPng(7100, os.path.join(OUT, "strong3d_native%s.png" % TAG))
+print("camera", win.view3d_get_camera(7100))
+win.save_control_png(7100, os.path.join(OUT, "strong3d_native%s.png" % TAG))
 
 # 旋转视角：从另一个方向看，验证 yaw/pitch 生效
-win.view3DSetCamera(7100, 125.0, 40.0, 0.86, 0, 0)
+win.view3d_set_camera(7100, 125.0, 40.0, 0.86, 0, 0)
 time.sleep(0.4)
-win.saveControlPng(7100, os.path.join(OUT, "strong3d_native%s_rot.png" % TAG))
+win.save_control_png(7100, os.path.join(OUT, "strong3d_native%s_rot.png" % TAG))
 # 默认不关窗口：留在屏幕上供手动拖动旋转 / 滚轮缩放，pump 消息持续响应
 KEEP = float(os.environ.get("STRONG_KEEP", "150"))
 if KEEP > 0:

@@ -74,7 +74,7 @@ CN = {
     'ToolTip': '提示气泡',
     'Menu': '弹出菜单',
     'Popup': '浮层',
-    'PowerCanvas': '配电规划画布',
+    'DwgCanvas': '绘图画布',
     'QCanvas': '通用画布',
     'Line': '直线',
     'Rectangle': '矩形',
@@ -165,7 +165,7 @@ QML = {
     'ToolTip': ('ToolTip', '同名'),
     'Menu': ('Menu', '同名'),
     'Popup': ('Popup', '同名'),
-    'PowerCanvas': ('Canvas / Shape', '自绘'),
+    'DwgCanvas': ('Canvas / Shape', '自绘'),
     'QCanvas': ('Canvas / Item', '自绘'),
     'Line': ('Shape + Path', '自绘'),
     'Rectangle': ('Rectangle', '同名'),
@@ -237,7 +237,7 @@ WPF = {
     'ToolTip': 'ToolTip',
     'Menu': 'ContextMenu',
     'Popup': 'Popup',
-    'PowerCanvas': 'Canvas（自绘 Path）',
+    'DwgCanvas': 'Canvas（自绘 Path）',
     'QCanvas': 'Canvas（自绘）',
     'Line': 'Line / Path',
     'Rectangle': 'Rectangle',
@@ -309,7 +309,7 @@ WIN = {
     'ToolTip': 'ToolTip',
     'Menu': 'ContextMenuStrip',
     'Popup': 'ToolStripDropDown',
-    'PowerCanvas': 'Panel（Graphics 自绘）',
+    'DwgCanvas': 'Panel（Graphics 自绘）',
     'QCanvas': 'Panel（Graphics 自绘）',
     'Line': 'Graphics.DrawLine（自绘）',
     'Rectangle': 'Graphics.DrawRectangle（自绘）',
@@ -352,7 +352,7 @@ EVENT_MAP = [
     ('value', 'onValueChanged / onPositionChanged'),
     ('checked', 'onCheckedChanged / onToggled'),
     ('dropdown', 'onPressedChanged（Popup 开合）'),
-    ('scroll', 'WheelHandler.onWheel'),
+    ('scroll', 'WheelHandler.on_wheel'),
     ('mousedown / mouseup / mousemove', 'MouseArea.onPressed / onReleased / onPositionChanged'),
     ('keydown / keyup', 'Keys.onPressed / Keys.onReleased'),
     ('gotfocus / lostfocus', 'onActiveFocusChanged'),
@@ -495,7 +495,7 @@ def main():
                  'QML 侧要换 `ListModel` 或 `QAbstractTableModel` + delegate，这是迁移时工作量最大的地方。')
     lines.append('2. **没有原生 TreeTable / GridCtrl**：QML 需 TreeView 或多列 delegate 自己组，'
                  '不是换个标签就能完成。')
-    lines.append('3. **自绘控件（PowerCanvas / QCanvas / Line / Ellipse / Arc）**：MFCXml 走 GDI 自绘，'
+    lines.append('3. **自绘控件（DwgCanvas / QCanvas / Line / Ellipse / Arc）**：MFCXml 走 GDI 自绘，'
                  'QML 侧对应 Canvas 或 Shape，绘制代码要重写而不是映射。')
     lines.append('')
     lines.append('另外两条工程差异：QML 默认按 96 DPI 的像素单位布局，MFC 是物理像素，'
@@ -581,9 +581,9 @@ def qml_usage_section():
             "delegate 行模板（`XItemView`，对应 QML ListView 的 delegate）：", "",
             "| QML 写法 | 这里的写法 |", "|---|---|",
             "| `model: [...]` | `Model=\"a\\|b;c\\|d\"`（`;` 分行，行内竖线分字段） |",
-            "| Python 喂 list | `win.setXmlValue(\"LV\", \"model\", [[\"AT1-1\", \"回路一\"], [\"AT1-2\", \"回路二\"]])`，按新行数重建行控件 |",
+            "| Python 喂 list | `win.set_xml_value(\"LV\", \"model\", [[\"AT1-1\", \"回路一\"], [\"AT1-2\", \"回路二\"]])`，按新行数重建行控件 |",
             "| `delegate: Item { ... }` | `XItemView` 的子节点就是行模板，按行数逐行实例化 |",
-            "| 换行模板（换 Component） | 模板写进 `<ControlTemplate x:Key=\"RowA\">`，`Delegate=\"RowA\"` 指定；运行时 `win.setXmlValue(\"LV\", \"delegate\", \"RowB\")` 换掉 |",
+            "| 换行模板（换 Component） | 模板写进 `<ControlTemplate x:Key=\"RowA\">`，`Delegate=\"RowA\"` 指定；运行时 `win.set_xml_value(\"LV\", \"delegate\", \"RowB\")` 换掉 |",
             "| `anchors.baseline: A` | `anchors.baseline=\"A\"`，本控件文字基线压到 A 的基线（字体度量走 GDI ascent，设计器与运行时同源） |",
             "| `anchors.top: A.baseline` | `anchors.top=\"A.baseline\"`，顶边落在 A 的文字基线 |",
             "| `Layout.alignment: Qt.AlignBaseline` | 同一行不同字号文字基线齐平（按行内最大 ascent 落位） |",

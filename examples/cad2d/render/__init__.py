@@ -8,6 +8,7 @@
 换渲染目标（PNG 出图 / DXF 导出 / 打印）时，只换这一层，实体和界面都不动。
 """
 import math
+import re
 
 from geom import arc_points
 
@@ -49,7 +50,7 @@ class ViewTransform(object):
         self.u = float(unit or SCREEN_UNIT)
         self.zoom = float(zoom or 1.0)   # 画布缩放系数（屏幕 = 世界差 × u × zoom）
         # absolute=True：场景坐标只由世界坐标决定（不平移、不随视图原点变），
-        # 于是整图只序列化/解析一次，之后平移缩放全交给画布 setPlanView。
+        # 于是整图只序列化/解析一次，之后平移缩放全交给画布 setDwgView。
         self.absolute = bool(absolute)
         # 参照宽度（SVG 用户单位）：线宽/字号的下限按它等比缩放。
         self.ref_w = max(1e-6, (self.x1 - self.x0) * self.u)
@@ -342,7 +343,7 @@ def transform_insert(sub, blk, ins):
 
 
 def grid_svg(vt, view, step_mm, color="#3A4046"):
-    """栅格：按世界坐标铺线，随缩放/平移一起被 planView 变换。"""
+    """栅格：按世界坐标铺线，随缩放/平移一起被 dwgView 变换。"""
     x0, y0, x1, y1 = view
     if step_mm <= 0:
         return ""
@@ -422,7 +423,7 @@ def to_svg(symbols, entities, view, grid=False, grid_step=0.0,
            unit=None, cull=True, absolute=False):
     """符号表 + 实体表 → 一份完整 SVG 文本。
 
-    首帧先铺一块比视口大得多的底色矩形：XPowerCanvas 的 Background 属性在宿主里
+    首帧先铺一块比视口大得多的底色矩形：XDwgCanvas 的 Background 属性在宿主里
     不生效（画布永远浅底），深色主题只能靠 SVG 自己带背景。矩形给得足够大，
     平移/缩放出图幅也不会露白边。
 
@@ -463,12 +464,353 @@ def to_svg(symbols, entities, view, grid=False, grid_step=0.0,
     return "\n".join(parts)
 
 
+# ============================ 第二种前端语言：<XScene> 显示列表 ============================
+# 和上面 *_svg 那套一一对应：同样的实体分派、同样的视口裁剪、同样的块复用，只是把
+# "拼 SVG 文本" 换成 "拼 XML 场景节点"。画布那头直接扫标签建场景（parseXmlSceneText），
+# 不再做 SVG 词法 + nanosvg 二次解析，万级图元省掉一整趟序列化/解析。
+#
+#   <XScene Width="950" Height="613">
+#     <XLine X1="10" Y1="20" X2="300" Y2="20" Stroke="#F2F4F6" Width="1.2"/>
+#     <XCircle Cx="100" Cy="100" R="40" Stroke="#FF6B6B"/>
+#     <XArc Cx="100" Cy="100" R="40" Start="0" End="90" Stroke="#FF6B6B"/>
+#     <XPolyline Points="10,10 200,10 200,80 10,80" Closed="1" Stroke="#F2F4F6"/>
+#     <XText X="10" Y="30" Size="14" Color="#F2F4F6" Anchor="middle">门厅说明</XText>
+#     <XGroup Transform="translate(300 200) rotate(-30) scale(0.5 0.5)">…</XGroup>
+#   </XScene>
+
+
+def _xe(s):
+    """XML 文本 / 属性值转义。"""
+    return (str(s).replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;"))
+
+
+def _xf(v):
+    """场景数值：统一两位小数，顺手把 -0.00 归一成 0.00（免得下游拿到负零）。"""
+    if abs(v) < 0.005:
+        v = 0.0
+    return "%.2f" % v
+
+
+def _dash_pair(vt, e):
+    """线型 → (实线段, 空档)；连续线返回 None。"""
+    s = vt.dash_of(e)
+    if not s:
+        return None
+    nums = [float(t) for t in re.findall(r"[0-9]+(?:\.[0-9]+)?", s)]
+    if not nums:
+        return None
+    on = nums[0]
+    off = nums[1] if len(nums) > 1 else nums[0]
+    return max(0.5, on), max(0.5, off)
+
+
+def _xstroke(vt, e, color=None, width=None):
+    """描边属性：Stroke/Width/Dash（= SVG 的 stroke / stroke-width / stroke-dasharray）。"""
+    col = color if color is not None else vt.color_of(e)
+    w = width if width is not None else vt.width_of(e)
+    out = ' Stroke="%s" Width="%s"' % (col, _xf(w))
+    pair = _dash_pair(vt, e)
+    if pair:
+        out += ' Dash="%s,%s"' % (_xf(pair[0]), _xf(pair[1]))
+    return out
+
+
+def _xtext_size_family(vt, e):
+    """文字字号与字体族（与 _svg_text_extra 同口径）。"""
+    st = vt.symbols.textstyles.get(e.style)
+    if st is None:
+        if e.style and e.style != "Standard":
+            fam = e.style
+            size_mm = e.size
+        else:
+            st = vt.symbols.textstyles.get("Standard")
+            size_mm = e.size or (st.height if st else 0.0) or (vt.y1 - vt.y0) * 0.025
+            fam = st.font if st else "Microsoft YaHei"
+    else:
+        size_mm = e.size or (st.height if st else 0.0) or (vt.y1 - vt.y0) * 0.025
+        fam = st.font
+    return max(1.0 * vt.k, vt.plen(size_mm)), fam
+
+
+def _xtext(x, y, text, size, color, anchor="start", rotate=0.0, family="Microsoft YaHei"):
+    out = ('<XText X="%s" Y="%s" Size="%s" Color="%s" Anchor="%s" Family="%s"'
+           % (_xf(x), _xf(y), _xf(size), color, anchor, _xe(family)))
+    if abs(rotate) > 0.01:
+        out += ' Rotate="%s"' % _xf(rotate)
+    return out + ">%s</XText>" % _xe(text)
+
+
+def _xline(x1, y1, x2, y2, col, w):
+    return ('<XLine X1="%s" Y1="%s" X2="%s" Y2="%s" Stroke="%s" Width="%s"/>'
+            % (_xf(x1), _xf(y1), _xf(x2), _xf(y2), col, _xf(w)))
+
+
+def entity_xml(e, vt, cache=None):
+    """单个实体 → XML 场景节点。与 entity_svg 一对一（同一套坐标/颜色/线型）。"""
+    kind = e.kind
+    if kind == "line":
+        return ('<XLine X1="%s" Y1="%s" X2="%s" Y2="%s"%s/>'
+                % (_xf(vt.px(e.x1)), _xf(vt.py(e.y1)),
+                   _xf(vt.px(e.x2)), _xf(vt.py(e.y2)), _xstroke(vt, e)))
+    if kind == "circle":
+        return ('<XCircle Cx="%s" Cy="%s" R="%s"%s/>'
+                % (_xf(vt.px(e.cx)), _xf(vt.py(e.cy)), _xf(vt.plen(e.r)), _xstroke(vt, e)))
+    if kind == "arc":
+        cx, cy = e.center
+        return ('<XArc Cx="%s" Cy="%s" R="%s" Start="%s" End="%s"%s/>'
+                % (_xf(vt.px(cx)), _xf(vt.py(cy)), _xf(vt.plen(e.r)),
+                   _xf(e.a1), _xf(e.a2), _xstroke(vt, e)))
+    if kind in ("rect", "polyline"):
+        pts = e.points()
+        flat = " ".join("%s,%s" % (_xf(vt.px(p[0])), _xf(vt.py(p[1]))) for p in pts)
+        closed = "1" if (e.is_closed() and len(pts) > 2) else "0"
+        return '<XPolyline Points="%s" Closed="%s"%s/>' % (flat, closed, _xstroke(vt, e))
+    if kind == "text":
+        size, fam = _xtext_size_family(vt, e)
+        return _xtext(vt.px(e.x), vt.py(e.y), e.text, size, vt.color_of(e),
+                      anchor=_text_anchor(getattr(e, "align", 7)),
+                      rotate=-(getattr(e, "rot", 0.0) or 0.0), family=fam)
+    if kind == "dimension":
+        q1, q2, t1, t2, mid = e.dim_points()
+        col = vt.color_of(e)
+        w = vt.width_of(e)
+        parts = [
+            _xline(vt.px(e.p1[0]), vt.py(e.p1[1]), vt.px(t1[0]), vt.py(t1[1]), col, w),
+            _xline(vt.px(e.p2[0]), vt.py(e.p2[1]), vt.px(t2[0]), vt.py(t2[1]), col, w),
+            _xline(vt.px(q1[0]), vt.py(q1[1]), vt.px(q2[0]), vt.py(q2[1]), col, w),
+        ]
+        ux = q2[0] - q1[0]
+        uy = q2[1] - q1[1]
+        ln = math.hypot(ux, uy) or 1.0
+        ux, uy = ux / ln, uy / ln
+        ah = max(4.0 * vt.k, vt.plen(max(60.0, e.length * 0.04)))
+        for q in (q1, q2):
+            sx = -ux if q is q1 else ux
+            sy = -uy if q is q1 else uy
+            nx, ny = -uy, ux
+            a = (q[0] + sx * ah, q[1] + sy * ah)
+            b = (q[0] + nx * ah * 0.35, q[1] + ny * ah * 0.35)
+            c = (q[0] - nx * ah * 0.35, q[1] - ny * ah * 0.35)
+            parts.append('<XPolygon Points="%s,%s %s,%s %s,%s" Fill="%s"/>'
+                         % (_xf(vt.px(a[0])), _xf(vt.py(a[1])),
+                            _xf(vt.px(b[0])), _xf(vt.py(b[1])),
+                            _xf(vt.px(c[0])), _xf(vt.py(c[1])), col))
+        label = "%.1f" % e.length
+        size = max(6.0 * vt.k, vt.plen(160.0))
+        parts.append(_xtext(vt.px(mid[0]), vt.py(mid[1]) - 2.0, label, size, col,
+                            anchor="middle"))
+        return "".join(parts)
+    if kind == "hatch":
+        col = vt.color_of(e)
+        w = vt.width_of(e)
+        th = math.radians(e.angle)
+        ux, uy = math.cos(th), math.sin(th)
+        nx, ny = -uy, ux
+        pts = e.pts
+        cs = [nx * p[0] + ny * p[1] for p in pts]
+        cmin, cmax = min(cs), max(cs)
+        parts = []
+        c = cmin
+        while c <= cmax + 1e-6:
+            hits = []
+            m = len(pts)
+            for i in range(m):
+                a = pts[i]
+                b = pts[(i + 1) % m]
+                den = nx * (b[0] - a[0]) + ny * (b[1] - a[1])
+                if abs(den) < 1e-9:
+                    continue
+                s = (c - (nx * a[0] + ny * a[1])) / den
+                if -1e-6 <= s <= 1.0 + 1e-6:
+                    hx = a[0] + s * (b[0] - a[0])
+                    hy = a[1] + s * (b[1] - a[1])
+                    hits.append((ux * hx + uy * hy, (hx, hy)))
+            hits.sort(key=lambda t: t[0])
+            for k in range(0, len(hits) - 1, 2):
+                p1, p2 = hits[k][1], hits[k + 1][1]
+                parts.append(_xline(vt.px(p1[0]), vt.py(p1[1]),
+                                    vt.px(p2[0]), vt.py(p2[1]), col, w))
+            c += e.gap
+        return "".join(parts)
+    if kind == "insert":
+        blk = vt.symbols.blocks.get(e.name)
+        if blk is None:
+            return ('<XCircle Cx="%s" Cy="%s" R="%s"%s/>'
+                    % (_xf(vt.px(e.x)), _xf(vt.py(e.y)),
+                       _xf(vt.plen(e.size if hasattr(e, "size") else 20.0)), _xstroke(vt, e)))
+        frag = _block_xml(blk, vt, cache)
+        if not frag:
+            return ""
+        sx = float(getattr(e, "sx", 1.0) or 1.0)
+        sy = float(getattr(e, "sy", 1.0) or sx)
+        rot = float(getattr(e, "rot", 0.0) or 0.0)
+        xf = "translate(%s %s)" % (_xf(vt.px(e.x)), _xf(vt.py(e.y)))
+        if rot:
+            xf += " rotate(%s)" % _xf(-rot)
+        if sx != 1.0 or sy != 1.0:
+            xf += " scale(%.4f %.4f)" % (sx, sy)
+        return '<XGroup Transform="%s">%s</XGroup>' % (xf, frag)
+    return ""
+
+
+def _block_xml(blk, vt, cache):
+    """块定义 → 块局部坐标的 XML 片段（同名块只算一次，供所有块参照复用）。"""
+    if cache is None:
+        return _build_block_xml(blk, vt, None)
+    frag = cache.get(blk.name)
+    if frag is None:
+        frag = _build_block_xml(blk, vt, cache)
+        cache[blk.name] = frag
+    return frag
+
+
+def _build_block_xml(blk, vt, cache):
+    lvt = vt.local(blk.base)
+    parts = []
+    for sub in blk.entities:
+        frag = entity_xml(sub, lvt, cache)
+        if frag:
+            parts.append(frag)
+    return "".join(parts)
+
+
+def grid_xml(vt, view, step_mm, color="#3A4046"):
+    """栅格：按世界坐标铺线，与 grid_svg 同布局。"""
+    x0, y0, x1, y1 = view
+    if step_mm <= 0:
+        return ""
+    parts = []
+    x = math.ceil(x0 / step_mm) * step_mm
+    while x <= x1:
+        parts.append(_xline(vt.px(x), vt.py(y0), vt.px(x), vt.py(y1), color, 0.6))
+        x += step_mm
+    y = math.ceil(y0 / step_mm) * step_mm
+    while y <= y1:
+        parts.append(_xline(vt.px(x0), vt.py(y), vt.px(x1), vt.py(y), color, 0.6))
+        y += step_mm
+    return "".join(parts)
+
+
+def grips_xml(vt, entities, color="#E8B23D"):
+    """选中实体的夹点小方块。"""
+    half = max(2.0, vt.plen(22.0))
+    parts = []
+    for e in entities:
+        for gx, gy in e.grips():
+            sx, sy = vt.px(gx), vt.py(gy)
+            parts.append('<XRect X="%s" Y="%s" W="%s" H="%s" Fill="%s" Stroke="#1B1D20" Width="0.80"/>'
+                         % (_xf(sx - half), _xf(sy - half), _xf(half * 2), _xf(half * 2), color))
+    return "".join(parts)
+
+
+def _xalpha(color, alpha_hex):
+    """给 #RRGGBB 加上 alpha，输出 #AARRGGBB（XML 侧统一 AARRGGBB，与 XAML 一致）。"""
+    if not color.startswith('#'):
+        return color
+    return '#%s%s' % (alpha_hex, color[1:7])
+
+
+def rubber_xml(vt, p1, p2, color="#E8B23D"):
+    """窗口选择橡皮框（半透明填充 + 虚线边）。"""
+    x0, y0, x1, y1 = geom_rect_norm(p1[0], p1[1], p2[0], p2[1])
+    return ('<XRect X="%s" Y="%s" W="%s" H="%s" Fill="%s" Stroke="%s" Width="1.0" Dash="4.0,3.0"/>'
+            % (_xf(vt.px(x0)), _xf(vt.py(y1)), _xf(vt.plen(x1 - x0)), _xf(vt.plen(y1 - y0)),
+               _xalpha(color, '22'), color))
+
+
+def crosshair_xml(vt, p, color="#C9D1D9"):
+    """CAD 十字光标：贯穿视口的横竖线 + 中心空心方框（屏幕固定尺寸）。"""
+    cx, cy = p
+    x0, y0, x1, y1 = vt.x0, vt.y0, vt.x1, vt.y1
+    zoom = vt.zoom if vt.zoom > 1e-6 else 1.0
+    h = 6.0 / (zoom * vt.u)
+    sw = 1.0 / zoom
+    st = ' Stroke="%s" Width="%s"' % (color, _xf(sw))
+    segs = [
+        (vt.px(x0), vt.py(cy), vt.px(x1), vt.py(cy)),
+        (vt.px(cx), vt.py(y0), vt.px(cx), vt.py(y1)),
+        (vt.px(cx - h), vt.py(cy + h), vt.px(cx + h), vt.py(cy + h)),
+        (vt.px(cx - h), vt.py(cy - h), vt.px(cx + h), vt.py(cy - h)),
+        (vt.px(cx - h), vt.py(cy - h), vt.px(cx - h), vt.py(cy + h)),
+        (vt.px(cx + h), vt.py(cy - h), vt.px(cx + h), vt.py(cy + h)),
+    ]
+    return "".join('<XLine X1="%s" Y1="%s" X2="%s" Y2="%s"%s/>'
+                   % (_xf(a), _xf(b), _xf(c), _xf(d), st) for a, b, c, d in segs)
+
+
+def to_xml(symbols, entities, view, grid=False, grid_step=0.0,
+           selection=None, rubber=None, overlays=None, cursor=None, zoom=1.0,
+           unit=None, cull=True, absolute=False):
+    """符号表 + 实体表 → 一份 <XScene> 场景 XML（to_svg 的 XML 版）。
+
+    首帧同样铺一块比视口大得多的底色矩形（画布 Background 属性在宿主里不生效，
+    深色主题只能靠场景自己带底）。cull 语义与 to_svg 完全一致。
+    """
+    vt = ViewTransform(symbols, view, zoom=zoom, unit=unit, absolute=absolute)
+    vw = vt.plen(view[2] - view[0])
+    vh = vt.plen(view[3] - view[1])
+    parts = ['<XScene Width="%s" Height="%s">' % (_xf(vw), _xf(vh)),
+             '<XRect X="%s" Y="%s" W="%s" H="%s" Fill="%s"/>'
+             % (_xf(vt.px(view[0]) - vw * 4), _xf(vt.py(view[3]) - vh * 4),
+                _xf(vw * 9), _xf(vh * 9), CANVAS_BG)]
+    if grid:
+        parts.append(grid_xml(vt, view, grid_step))
+    cache = {}
+    margin = 24.0 / max(vt.u, 1e-12)
+    lo_x, hi_x = view[0] - margin, view[2] + margin
+    lo_y, hi_y = view[1] - margin, view[3] + margin
+    for e in entities:
+        if cull:
+            b = e.bbox()
+            if b[2] < lo_x or b[0] > hi_x or b[3] < lo_y or b[1] > hi_y:
+                continue
+        frag = entity_xml(e, vt, cache)
+        if frag:
+            parts.append(frag)
+    if selection:
+        parts.append(grips_xml(vt, selection))
+    if rubber is not None:
+        parts.append(rubber_xml(vt, rubber[0], rubber[1]))
+    if overlays:
+        parts.extend(overlays)
+    if cursor is not None:
+        parts.append(crosshair_xml(vt, cursor))
+    parts.append("</XScene>")
+    return "\n".join(parts)
+
+
+def to_overlay_xml(symbols, view, unit=None, zoom=1.0, grid=False, grid_step=0.0,
+                   selection=None, rubber=None, preview=None, cursor=None,
+                   absolute=False):
+    """动态叠加层（栅格 + 夹点 + 橡皮筋 + 预显 + 十字光标）：to_overlay_svg 的 XML 版。"""
+    vt = ViewTransform(symbols, view, zoom=zoom, unit=unit, absolute=absolute)
+    vw = vt.plen(view[2] - view[0])
+    vh = vt.plen(view[3] - view[1])
+    parts = ['<XScene Width="%s" Height="%s">' % (_xf(vw), _xf(vh))]
+    if grid:
+        parts.append(grid_xml(vt, view, grid_step))
+    if preview is not None:
+        frag = entity_xml(preview, vt, {})
+        if frag:
+            parts.append(frag)
+    if selection:
+        parts.append(grips_xml(vt, selection))
+    if rubber is not None:
+        parts.append(rubber_xml(vt, rubber[0], rubber[1]))
+    if cursor is not None:
+        parts.append(crosshair_xml(vt, cursor))
+    parts.append("</XScene>")
+    return "\n".join(parts)
+
+
+
 def to_overlay_svg(symbols, view, unit=None, zoom=1.0, grid=False, grid_step=0.0,
                    selection=None, rubber=None, preview=None, cursor=None,
                    absolute=False):
     """动态叠加层：栅格 + 选中夹点 + 橡皮筋 + 预显图元 + 十字光标。
 
-    这几样每帧都变，所以单独一层喂给画布的叠加场景（loadPlanOverlay）；
+    这几样每帧都变，所以单独一层喂给画布的叠加场景（loadDwgOverlay）；
     底图（to_svg）只在图元真正变化时才重灌。坐标系与底图完全一致，
     画布用同一组 zoom/ox/oy 画，天然对齐。
     """

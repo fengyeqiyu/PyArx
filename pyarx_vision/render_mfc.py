@@ -1,11 +1,11 @@
 # -*- utf-8 -*-
-"""render_mfc —— 用项目自研 MFCXaml 画布（PyMfcXml PowerCanvas）把每张图渲染成 PNG
+"""render_mfc —— 用项目自研 MFCXaml 画布（PyMfcXml DwgCanvas）把每张图渲染成 PNG
 
 与 render.py(PIL) 的区别：这里是真正的画布控件 view —— SVG 交给控件解析、
 文字旋转由控件绕锚点实现、再由 saveControlPng 截屏，所见即控件所见。
 
-调用链：Window(title,w,h) → addPowerCanvas(id,0,0,w,h) → loadPowerSvg(id,svg)
-        → setPlanView(id,1,0,0) → saveControlPng(id,png)
+调用链：Window(title,w,h) → addDwgCanvas(id,0,0,w,h) → loadDwgSvg(id,svg)
+        → setDwgView(id,1,0,0) → saveControlPng(id,png)
 """
 import ctypes
 import json
@@ -396,11 +396,11 @@ def main():
     WW, WH = int(CW0 * 0.93), int(CH0 * 0.86)
 
     win = M.Window("PyArx 图纸 view 核对", WW, WH)
-    win.setTheme(False)
-    win.addPowerCanvas(CANVAS_ID, 0, 0, WW, WH)
+    win.set_theme(False)
+    win.add_dwg_canvas(CANVAS_ID, 0, 0, WW, WH)
     win.show()
     M.pump(900)
-    CW, CH = win.clientSize()
+    CW, CH = win.client_size()
     win.move(CANVAS_ID, 0, 0, CW, CH)        # 画布对齐客户区，否则截图留黑边
     M.pump(300)
     print("canvas client = %dx%d" % (CW, CH))
@@ -415,12 +415,12 @@ def main():
         sp = os.path.join(OUT_SVG, name + ".svg")
         with open(sp, "w", encoding="utf-8") as fp:
             fp.write(svg)
-        win.loadPowerSvg(CANVAS_ID, svg)
+        win.load_dwg_svg(CANVAS_ID, svg)
         M.pump(120)
-        win.setPlanView(CANVAS_ID, 1.0, 0, 0)
+        win.set_dwg_view(CANVAS_ID, 1.0, 0, 0)
         M.pump(60)
         pp = os.path.join(OUT_PNG, name + ".png")
-        win.saveControlPng(CANVAS_ID, pp)
+        win.save_control_png(CANVAS_ID, pp)
         rows.append({"no": f["no"], "title": title, "kind": kind, "png": pp, "svg": sp,
                      "texts": nt, "k": round(k, 5), "scale": "1:%d" % round(1.0 / k),
                      "kb": round(os.path.getsize(pp) / 1024), "svg_kb": round(len(svg) / 1024)})

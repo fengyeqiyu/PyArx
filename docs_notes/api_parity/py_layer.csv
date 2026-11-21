@@ -1,0 +1,16 @@
+﻿pyrx_module,scope,functions,classes
+pyrx/__init__.py,需对齐,,
+pyrx/config.py,需对齐,_get_toml_settings_files;_read_file;get_pyrx_settings;set_pyrx_settings;settings_customise_sources,PyRxSettings;TomlConfigPyRxSettingsSource
+pyrx/console.py,需对齐,console,ConsoleAlreadyExist;redirect_stdin
+pyrx/commands.py,需对齐,another_command;command;decorator;my_command;session_command;wrapper,
+pyrx/db/block.py,需对齐,__init__;add_block_definition;get_block_by_name;get_block_reference,BlockAlreadyExistsError;BlockNotFoundError
+pyrx/db/database.py,需对齐,working_db,
+pyrx/db/layout.py,需对齐,get_layouts,
+pyrx/db/block_reference.py,需对齐,attributes;get_attribute;get_attribute_text,BlockReference
+pyrx/ed/prompt.py,需对齐,__enter__;__exit__;__init__;__iter__;__str__;_check_kwords;_ent_type_to_desc;_prompt;as_init_get;as_prompt;call;entsel;get_angle;get_corner;get_dist;get_double;get_integer;get_kword;get_point;get_string;init_get;prompt_exception_from_status;raise_for_status,InitGetCtx;InitGetFlags;Kwords;PromptException;PromptExceptionCancel;PromptExceptionDirect;PromptExceptionError;PromptExceptionFailed;PromptExceptionKword;PromptExceptionModeless;PromptExceptionNone;PromptExceptionRejected
+pyrx/ge/point.py,需对齐,point_2d;point_3d,
+pyrx/ap/utils.py,需对齐,call_after;call_in_main_thread;wrapper,_Result;_ResultEnum
+pyrx/utils/decorators.py,需对齐,__call__;__init__;fix_params;func;get_db;pass_working_db,_PassWorkingDb
+pyrx/utils/reload.py,需对齐,__init__;modules_to_reload;on_reload;register;reload;reload_modules;wrapper,Reloader
+pyrx/utils/test_runner.py,需对齐,__init__;get_test_args;run_tests;set_pytest_args_cmd;start;test_args,CmdlineTestArgsProvider;FileTestArgsProvider;PytestTestRunner;TestArgsProvider;TestRunner
+pyrx/utils/wx.py,wx(排除),set_top_window_title;show_inspection_frame,

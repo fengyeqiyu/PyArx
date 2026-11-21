@@ -17,7 +17,7 @@ import draw_toolbar
 def main():
     hits = []
     win = M.Window('绘图工具条', 360, 900)
-    win.setTheme(True)
+    win.set_theme(True)
     bar = draw_toolbar.ToolBar(
         win, 8, 8,
         on_cmd=lambda c: hits.append(('py', c)),
@@ -29,13 +29,13 @@ def main():
     bar.hover('I_line')
     bar.set_active('I_rect')
     M.pump(800)
-    win.savePng(r'C:\temp\toolbar_win.png')
+    win.save_png(r'C:\temp\toolbar_win.png')
 
     # 走一遍真实点击链路（直接调事件处理）
     bar._clicked(bar.ids['I_circle'])
     bar._clicked(bar.ids['Sep1'])          # 分隔无 cmd，应被忽略
     M.pump(400)
-    win.savePng(r'C:\temp\toolbar_win2.png')
+    win.save_png(r'C:\temp\toolbar_win2.png')
 
     print('units=%d ids=%d hot=%s' % (len(bar.items), len(bar.ids), bar.hot))
     print('cmds=%s' % [c for _, c, _ in bar.items if c])

@@ -1,0 +1,8 @@
+{
+ "DocumentManager()": "DocumentManager() -> ERR __init__(): incompatible constructor arguments. The following argument types are supported: |     1. PyArxCore.Ap.DocumentManager(object: AcApDocManager) |  | Invoked with: ",
+ "A.current entityIds": 0,
+ "B": "ERR AttributeError(\"'NoneType' object has no attribute 'mdiActiveDocument'\")",
+ "closed": "setClosed -> OK None",
+ "add": "addToModelspace -> OK 0",
+ "after": 0
+}

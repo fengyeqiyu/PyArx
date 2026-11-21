@@ -17,14 +17,14 @@ hits = []
 def on_click(*args):
     sel = -1
     try:
-        sel = int(w.getXmlValue(names["tbRoot"], "SelectedIndex"))
+        sel = int(w.get_xml_value(names["tbRoot"], "SelectedIndex"))
     except Exception as exc:
         print("read sel ERR", exc)
     hits.append((args, sel))
     print("CLICK args=%s selected=%d" % (args, sel))
 
 
-w.onClick(names["tbRoot"], on_click)
+w.on_click(names["tbRoot"], on_click)
 p.pump(300)
 
 u = ctypes.windll.user32
@@ -47,7 +47,7 @@ else:
     time.sleep(0.06)
     u.mouse_event(4, 0, 0, 0, 0)
     p.pump(500)
-    w.savePng(r"G:\PyArx\docs\_tb_click.png")
+    w.save_png(r"G:\PyArx\docs\_tb_click.png")
 
 print("HITS:", hits)
 p.pump(200)

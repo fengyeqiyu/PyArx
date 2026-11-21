@@ -1,5 +1,5 @@
 # -*- utf-8 -*-
-"""逐个配电箱出一张 XML 画布图，用 loadPowerPlan 核对箱内回路识别。
+"""逐个配电箱出一张 XML 画布图，用 loadDwgLayout 核对箱内回路识别。
 
 一箱一图理由：31 个箱共 610 条回路，全塞一张图会挤成一团没法核字；
 拆开后每张就是"箱 → 它的回路"，箱号、断路器、电缆、功率都能一眼对上。
@@ -37,11 +37,11 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     WW, WH = 1680, 960
     win = M.Window("配电箱回路核对", WW, WH)
-    win.setTheme(False)
-    win.addPowerCanvas(CANVAS, 0, 0, WW, WH)
+    win.set_theme(False)
+    win.add_dwg_canvas(CANVAS, 0, 0, WW, WH)
     win.show()
     M.pump(900)
-    cw, ch = win.clientSize()
+    cw, ch = win.client_size()
     if cw > 0 and ch > 0:
         win.move(CANVAS, 0, 0, cw, ch)
         M.pump(300)
@@ -60,12 +60,12 @@ def main():
         title = "#%d %s %s (%d回路)" % (b.get("sheet", 0), b["code"],
                                         b["name"] or "", len(ls))
         plan = M.powerplan.build(sub, M.powerplan.Style(), title, True)   # 横向
-        win.loadPowerPlan(CANVAS, plan["json"])
+        win.load_dwg_layout(CANVAS, plan["json"])
         M.pump(120)
-        # 保持 loadPowerPlan 自动 fit 的视图，不覆盖成 1:1
+        # 保持 loadDwgLayout 自动 fit 的视图，不覆盖成 1:1
         name = "%02d_%s.png" % (i + 1, safe(b["code"]))
         png = os.path.join(OUT, name)
-        win.saveControlPng(CANVAS, png)
+        win.save_control_png(CANVAS, png)
         kb = os.path.getsize(png) // 1024 if os.path.exists(png) else 0
         print("%-42s %-3d回路 %dx%d dir=%s %dKB" % (name, len(ls), plan["width"],
                                                  plan["height"], plan["dir"], kb))

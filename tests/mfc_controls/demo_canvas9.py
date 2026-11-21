@@ -35,18 +35,18 @@ r = wintypes.RECT()
 ctypes.windll.user32.GetWindowRect(w.hwnd, ctypes.byref(r))
 print('rect', r.left, r.top, r.right - r.left, r.bottom - r.top, flush=True)
 gv, pv, qc = names['gv'], names['pv'], names['qc']
-w.setCanvasCommands(qc, CMDS)
+w.set_canvas_commands(qc, CMDS)
 
 titles = ['工程 %02d' % i for i in range(1, 13)]
 subs = ['动力源', '配电', '照明', '桥架', '接地', '通风']
 for i, t in enumerate(titles):
-    w.addListItem(gv, '%s|%s|%d' % (t, subs[i % len(subs)], (i + 1) * 4))
-w.setListSelected(gv, 3)
+    w.add_list_item(gv, '%s|%s|%d' % (t, subs[i % len(subs)], (i + 1) * 4))
+w.set_list_selected(gv, 3)
 
 for i, t in enumerate(['封面', '总图', '配电室', '动力源', '桥架', '详图']):
-    w.addListItem(pv, '%s|第 %d 张' % (t, i + 1))
-w.setListSelected(pv, 2)
+    w.add_list_item(pv, '%s|第 %d 张' % (t, i + 1))
+w.set_list_selected(pv, 2)
 p.pump(400)
-print('grid=%d path=%d canvas=%d sel=%d/%d' % (w.getListItemCount(gv), w.getListItemCount(pv), qc, w.getListSelected(gv), w.getListSelected(pv)), flush=True)
+print('grid=%d path=%d canvas=%d sel=%d/%d' % (w.get_list_item_count(gv), w.get_list_item_count(pv), qc, w.get_list_selected(gv), w.get_list_selected(pv)), flush=True)
 while True:
     p.pump(50)

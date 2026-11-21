@@ -1,0 +1,27 @@
+{
+ "db_type": "<class 'PyArxCore.Db.PyDbDatabase'>",
+ "db.dir_hint": [
+  "addToBlock",
+  "byBlockLinetype",
+  "byBlockMaterial",
+  "currentSpaceId",
+  "dimStyleTableId",
+  "getBlockTable",
+  "getDimStyleTable",
+  "getMLStyleDictionary",
+  "getPlotStyleNameDictionary",
+  "getTextStyleTable",
+  "getVisualStyleDictionary",
+  "getVisualStyleList",
+  "paperSpaceVportId",
+  "plotStyleMode",
+  "textStyleTableId"
+ ],
+ "db.getBlockTable": "OK-call",
+ "db.currentSpaceId": "OK-call",
+ "db.addToModelspace": "SIG: addToModelspace(): incompatible function arguments. The following argument types are supported: |     1. (self: PyArxCore.Db.PyDbDatabase, entity: PyArxCore.Db.PyDbObject) -> int |  | Invoked with: <PyArxCore.Db.PyDbDatabase object at 0x0000022B5D6BA230>",
+ "db.getTextStyleTable": "OK-call",
+ "getBlockTable_try": "TypeError('__init__(): incompatible constructor arguments. The following argument types are supported:\\n    1. PyArxCore.Db.PyDbBlockTable(p: AcDbBlockTable)\\n\\nInvoked with: ')",
+ "bt": "None",
+ "OpenMode": "MISSING"
+}

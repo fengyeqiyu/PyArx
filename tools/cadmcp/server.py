@@ -234,7 +234,7 @@ TOOLS = [
             "properties": {
                 "mode": {"type": "string", "default": "install",
                          "enum": ["install", "status", "remove"]},
-                "loader": {"type": "string", "description": "arx 全路径，默认 X64\\Release\\PyArxEngine.arx"},
+                "loader": {"type": "string", "description": "arx 全路径，默认 X64\\Release\\PyArxEngine.crx"},
             },
         },
     },

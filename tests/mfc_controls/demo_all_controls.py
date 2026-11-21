@@ -109,77 +109,77 @@ def decorate(w, tag, cid):
     """给各控件填上示例内容，让窗口里看得出状态。"""
     try:
         if tag in ('ComboBox', 'Choice', 'ListBox'):
-            w.clearStrings(cid)
+            w.clear_strings(cid)
             for item in ('甲选项', '乙选项', '丙选项'):
-                w.addString(cid, item)
-            w.setCurSel(cid, 1)
+                w.add_string(cid, item)
+            w.set_cur_sel(cid, 1)
         elif tag == 'ProgressBar':
-            w.setRange(cid, 0, 100)
-            w.setPos(cid, 65)
+            w.set_range(cid, 0, 100)
+            w.set_pos(cid, 65)
         elif tag == 'Slider':
-            w.setRange(cid, 0, 100)
-            w.setPos(cid, 45)
+            w.set_range(cid, 0, 100)
+            w.set_pos(cid, 45)
         elif tag in ('CheckBox', 'ToggleButton', 'Switch'):
             if tag == 'Switch':
-                w.setSwitch(cid, True)
+                w.set_switch(cid, True)
             else:
-                w.setCheck(cid, True)
+                w.set_check(cid, True)
         elif tag == 'SpinBox':
-            w.setSpinRange(cid, 0, 99)
-            w.setSpin(cid, 30)
+            w.set_spin_range(cid, 0, 99)
+            w.set_spin(cid, 30)
         elif tag == 'RangeSlider':
-            w.setRange(cid, 0, 100)
-            w.setRangeValues(cid, 25, 75)
+            w.set_range(cid, 0, 100)
+            w.set_range_values(cid, 25, 75)
         elif tag == 'PageIndicator':
-            w.setPageCount(cid, 5)
-            w.setPageIndex(cid, 2)
+            w.set_page_count(cid, 5)
+            w.set_page_index(cid, 2)
         elif tag == 'Dial':
-            w.setRange(cid, 0, 100)
-            w.setDial(cid, 40)
+            w.set_range(cid, 0, 100)
+            w.set_dial(cid, 40)
         elif tag == 'Tumbler':
-            w.setTumblerCount(cid, 12)
-            w.setTumblerValue(cid, 3)
+            w.set_tumbler_count(cid, 12)
+            w.set_tumbler_value(cid, 3)
         elif tag == 'ScrollBar':
-            w.setScrollBarRange(cid, 0, 100, 20, False)
-            w.setScrollBarValue(cid, 35)
+            w.set_scroll_bar_range(cid, 0, 100, 20, False)
+            w.set_scroll_bar_value(cid, 35)
         elif tag == 'TableView':
-            w.setTableColumns(cid, '名称\t数值\t状态')
+            w.set_table_columns(cid, '名称\t数值\t状态')
             for row in ('甲\t30\t正常', '乙\t12\t警告', '丙\t21\t正常', '丁\t48\t正常'):
-                w.addTableRow(cid, row)
-            w.setTableSelectedRow(cid, 1)
+                w.add_table_row(cid, row)
+            w.set_table_selected_row(cid, 1)
         elif tag == 'TreeTable':
-            w.addTreeItem(cid, '项目根', 0, True)
-            w.addTreeItem(cid, '图纸 A', 1, False)
-            w.addTreeItem(cid, '图纸 B', 1, False)
-            w.addTreeItem(cid, '图层组', 1, True)
-            w.addTreeItem(cid, '墙体', 2, False)
-            w.setTreeSelectedRow(cid, 1)
+            w.add_tree_item(cid, '项目根', 0, True)
+            w.add_tree_item(cid, '图纸 A', 1, False)
+            w.add_tree_item(cid, '图纸 B', 1, False)
+            w.add_tree_item(cid, '图层组', 1, True)
+            w.add_tree_item(cid, '墙体', 2, False)
+            w.set_tree_selected_row(cid, 1)
         elif tag == 'ToolBar':
             for it in ('新建', '打开', '保存', '运行'):
-                w.addToolBarItem(cid, it)
-            w.setToolBarSelected(cid, 2)
+                w.add_tool_bar_item(cid, it)
+            w.set_tool_bar_selected(cid, 2)
         elif tag in ('TextField', 'TextArea'):
-            w.setText(cid, '可以在里面输入文字')
+            w.set_text(cid, '可以在里面输入文字')
         elif tag == 'TabBar':
             # 上一版这里是 pass，页签里什么都没有，看上去就是一块白板
-            w.addTabItem(cid, '常规')
-            w.addTabItem(cid, '高级')
-            w.addTabItem(cid, '关于')
+            w.add_tab_item(cid, '常规')
+            w.add_tab_item(cid, '高级')
+            w.add_tab_item(cid, '关于')
         elif tag == 'TreeView':
             # addString 对 TreeView 无效，必须走 addTreeNode
-            w.addTreeNode(cid, '根节点', -1)
-            w.addTreeNode(cid, '子节点 A', 0)
-            w.addTreeNode(cid, '子节点 B', 0)
+            w.add_tree_node(cid, '根节点', -1)
+            w.add_tree_node(cid, '子节点 A', 0)
+            w.add_tree_node(cid, '子节点 B', 0)
         elif tag in ('ListCtrl', 'GridLayout'):
             # addString 对 ListView 无效，必须 addColumn + addRow（\t 分列）
-            w.addColumn(cid, '名称', 100)
-            w.addColumn(cid, '数值', 80)
-            w.addRow(cid, '甲\t12')
-            w.addRow(cid, '乙\t34')
-            w.addRow(cid, '丙\t56')
+            w.add_column(cid, '名称', 100)
+            w.add_column(cid, '数值', 80)
+            w.add_row(cid, '甲\t12')
+            w.add_row(cid, '乙\t34')
+            w.add_row(cid, '丙\t56')
         elif tag == 'Image':
             # 不装图就是一块空白，看上去和坏掉没区别
-            w.setImage(cid, os.path.join(HERE, 'res', 'dot.png'))
+            w.set_image(cid, os.path.join(HERE, 'res', 'dot.png'))
         elif tag in ('Button', 'Label', 'IconButton', 'Hyperlink', 'RadioButton'):
             pass
     except Exception as exc:                      # 装饰失败不该阻断演示

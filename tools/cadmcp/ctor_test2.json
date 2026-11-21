@@ -1,0 +1,9 @@
+{
+ "line_add": "2117081497136",
+ "line_back": "PyDbLine AcGePoint3d(0.000, 0.000,0.000) AcGePoint3d(100.000, 0.000,0.000) 3",
+ "layer_ctor_add": "True",
+ "layer_back": "PyDbLayerTableRecord lock=True color=(44, 0, 0, 0)",
+ "table_add": "2117081497184",
+ "table_back": "PyDbTable A1 B2",
+ "EXC": "RuntimeError('Caught an unknown exception!')\nTraceback (most recent call last):\n  File \"C:/temp/ctor_test2.py\", line 59, in <module>\n    d.add(\"CTOR_D\", P.Db.PyDbDictionary())\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: Caught an unknown exception!\n"
+}

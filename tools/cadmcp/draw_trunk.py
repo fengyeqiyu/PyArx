@@ -1,5 +1,5 @@
 # -*- utf-8 -*-
-"""recog.json → MfcXml 配电画布：干线图重绘（最终版）
+"""recog.json → MfcXml 绘图画布：干线图重绘（最终版）
 - 同一水平高度上的母线并排成一行（4# 与 2# 在原图同排，就按同排画，中间分组隔开）
 - 备用回路用虚线支路 + 虚线断路器框 + 品红"备用"标记区分
 - 每段按回路数均分出线：引线→断路器→容量/CT/kWh→编号与电缆竖排
@@ -46,11 +46,11 @@ for bb in D["busbars"]:
     })
 d = {"buses": _buses}
 win = M.Window("干线系统图 · 四条母线（识别数据重绘）", WIN_W, WIN_H)
-win.setTheme(False)
-win.addPowerCanvas(7200, 0, 0, WIN_W, WIN_H)
+win.set_theme(False)
+win.add_dwg_canvas(7200, 0, 0, WIN_W, WIN_H)
 win.show()
 time.sleep(0.6)
-CW, CH = win.clientSize()
+CW, CH = win.client_size()
 print("client", CW, CH)
 
 L0, R0 = 46, CW - 46
@@ -167,17 +167,17 @@ for label, col, dash in items:
 p.append('</svg>')
 svg = "".join(p)
 win.move(7200, 0, 0, CW, CH)
-win.loadPowerSvg(7200, svg)
-win.setPlanView(7200, 1.0, 0, 0)
+win.load_dwg_svg(7200, svg)
+win.set_dwg_view(7200, 1.0, 0, 0)
 open(os.path.join(OUT, "trunk_cad.svg"), "w", encoding="utf-8").write(svg)
 time.sleep(0.8)
-win.saveControlPng(7200, os.path.join(OUT, "trunk_cad.png"))
+win.save_control_png(7200, os.path.join(OUT, "trunk_cad.png"))
 print("png", os.path.getsize(os.path.join(OUT, "trunk_cad.png")))
 # 局部：第 3 行（4#|2# 同排）放大
-win.setPlanView(7200, 1.9, -200, -420)
+win.set_dwg_view(7200, 1.9, -200, -420)
 time.sleep(0.5)
-win.saveControlPng(7200, os.path.join(OUT, "trunk_cad_zoom.png"))
-win.setPlanView(7200, 1.0, 0, 0)
+win.save_control_png(7200, os.path.join(OUT, "trunk_cad_zoom.png"))
+win.set_dwg_view(7200, 1.0, 0, 0)
 print("zoom ok")
 
 KEEP = float(os.environ.get("TRUNK_KEEP", "0"))

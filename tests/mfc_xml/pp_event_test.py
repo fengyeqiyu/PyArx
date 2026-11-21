@@ -40,31 +40,31 @@ chk('按 id 递归找到表格', tbl != 0, hex(tbl))
 
 # 1. 单击卡片：事件驱动
 code = app.nodes[2]['code']
-rc = app.win.cardRectPlan(pp_app.CV, code)
+rc = app.win.card_rect_dwg(pp_app.CV, code)
 E.click(cv, int(rc[0] + rc[2] / 2), int(rc[1] + rc[3] / 2))
-chk('发事件单击 -> 选中卡片', app.win.getPlanSelection(pp_app.CV) == code,
-    app.win.getPlanSelection(pp_app.CV))
+chk('发事件单击 -> 选中卡片', app.win.get_dwg_selection(pp_app.CV) == code,
+    app.win.get_dwg_selection(pp_app.CV))
 
 # 2. 滚轮缩放：事件驱动
-z0 = app.win.getPlanView(pp_app.CV)[0]
+z0 = app.win.get_dwg_view(pp_app.CV)[0]
 E.wheel(cv, 120, int(cv and 300), 300)
-z1 = app.win.getPlanView(pp_app.CV)[0]
+z1 = app.win.get_dwg_view(pp_app.CV)[0]
 chk('发事件滚轮 -> 放大', z1 > z0 + 1e-4, '%.4f -> %.4f' % (z0, z1))
 E.wheel(cv, -120, 300, 300)
-z2 = app.win.getPlanView(pp_app.CV)[0]
+z2 = app.win.get_dwg_view(pp_app.CV)[0]
 chk('发事件反向滚轮 -> 缩回', abs(z2 - z0) < 1e-3, '%.4f' % z2)
 
 # 3. 左键拖动平移：事件驱动
-v0 = app.win.getPlanView(pp_app.CV)
+v0 = app.win.get_dwg_view(pp_app.CV)
 E.drag(cv, 400, 300, 560, 400)
-v1 = app.win.getPlanView(pp_app.CV)
+v1 = app.win.get_dwg_view(pp_app.CV)
 chk('发事件拖动 -> 视口平移', abs(v1[1] - v0[1]) > 1 and abs(v1[2] - v0[2]) > 1,
     '(%s,%s) -> (%s,%s)' % (v0[1], v0[2], v1[1], v1[2]))
 
 # 4. 表格：F2 打开行编辑条 + 改编号写回
 E.click(tbl, 60, 60)               # 选中一行
 M.pump(60)
-row = app.win.getTableSelectedRow(pp_app.TBL)
+row = app.win.get_table_selected_row(pp_app.TBL)
 E.key(tbl, 0x71)                   # VK_F2 = 0x71
 M.pump(150)
 chk('发事件 F2 -> 原地编辑开启', bool(app._ce), 'row=%s ce=%s' % (row, app._ce))

@@ -1,0 +1,8 @@
+{
+ "src_type": "PyDbLayerTableRecord",
+ "err": "TypeError('__init__(): incompatible constructor arguments. The following argument types are supported:\\n    1. PyArxCore.Db.PyDbLayerTableRecord(p: AcDbLayerTableRecord)\\n\\nInvoked with: <PyArxCore.Db.PyDbLayerTableRecord object at 0x0000015421B772F0>')",
+ "layers": [
+  "0"
+ ],
+ "has_PYX_API": false
+}

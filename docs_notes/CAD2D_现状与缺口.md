@@ -16,10 +16,10 @@
 - 持久化：图纸 JSON 存盘 / 读盘，图幅、当前图层、图层全字段、图元几何 / 图层 / 颜色随存随还原。
 - 栅格：`grid_on` 开关联动画布 SVG 栅格，随缩放 / 平移重绘。
 - 既有基线能力保留：文字图元、属性栏、自绘工具条画布与命中表、命令行（命令名 / 别名 / 中文 / 坐标）、SVG 导出、PNG 截图。
-- 外壳 UI 扁平化（2026-11-15）：右栏特性/视图只读行、命令标签/提示改用 `XPowerCanvas` 自绘 SVG（`ui.props_panel / ui.text_bar`），深色下面板底色、标签次色、值主色右对齐；原生 Label/Button 的外观属性在当前底层不生效（见 `_API_CHANGES.md` 12–14），仅 `XTextField` 与「执行」按钮保留原生。
+- 外壳 UI 扁平化（2026-11-15）：右栏特性/视图只读行、命令标签/提示改用 `XDwgCanvas` 自绘 SVG（`ui.props_panel / ui.text_bar`），深色下面板底色、标签次色、值主色右对齐；原生 Label/Button 的外观属性在当前底层不生效（见 `_API_CHANGES.md` 12–14），仅 `XTextField` 与「执行」按钮保留原生。
 - 特性面板分组（2026-11-15）：按 CAD 习惯分「常规 / 几何图形」两组（暂不做三维效果）；常规出颜色 / 图层 / 线型 / 线宽，几何按图元类型出明细——直线（起终点 / 增量 / 长度 / 角度）、圆（圆心 / 半径 / 直径 / 周长）、弧（圆心 / 半径 / 起止角 / 夹角 / 弧长）、矩形（角点 / 宽高 / 周长）、多段线（顶点数 / 闭合 / 周长）、文字（位置 / 内容 / 字高 / 旋转 / 样式）、块参照（块名 / 插入点 / XY 比例 / 旋转）。
 - 面板可编辑（2026-11-15）：点值行选中字段后，原生下拉改图层 / 颜色 / 线型，原生输入框改线宽与几何标量（坐标 / 半径 / 角度 / 字高 / 比例 / 文字内容），写回前快照入撤销栈，可 UNDO/REDO；块名 / 多段线顶点暂为只读。下拉选图层 / 颜色 / 线型即时生效，数值经「应用」按钮提交；控件显隐与条目在 Python 侧切换。
-- 功能区下沉原生控件库（2026-11-15）：顶部 Ribbon 由自绘 SVG 画布改为控件库 `xmlctl::XRibbon`（模型 `ribbonParse` / 布局 `ribbonLayout` / 绘制 `ribbonDraw` / 命中 `ribbonHitTest` 成套复用）；PyMfcXml 新增 `XRibbon` 控件类与宿主 `addRibbon / setRibbonElement / drawRibbon / ribbonMouse / fireRibbonButton`，XML 声明 `<XRibbonTab/Group/Button>`，按钮 `Name` 经 `onClick` 回传 Python 派发命令。左工具条 / 状态栏仍为自绘 `XPowerCanvas`。
+- 功能区下沉原生控件库（2026-11-15）：顶部 Ribbon 由自绘 SVG 画布改为控件库 `xmlctl::XRibbon`（模型 `ribbonParse` / 布局 `ribbonLayout` / 绘制 `ribbonDraw` / 命中 `ribbonHitTest` 成套复用）；PyMfcXml 新增 `XRibbon` 控件类与宿主 `addRibbon / setRibbonElement / drawRibbon / ribbonMouse / fireRibbonButton`，XML 声明 `<XRibbonTab/Group/Button>`，按钮 `Name` 经 `onClick` 回传 Python 派发命令。左工具条 / 状态栏仍为自绘 `XDwgCanvas`。
 
 ### 已接线命令
 - 线性标注 DIM：三点（第一原点 → 第二原点 → 尺寸线位置）生成 `ent.Dimension`，第三点投影到 p1p2 法向得垂直偏移；渲染出延伸线 / 尺寸线 / 箭头 / 长度文字；命令行别名「标注」，Ribbon 标注按钮派发。
@@ -37,7 +37,7 @@
 - C++ 绑定与控件库（PyArxCore / PyArxEngine / MfcXmlCore / PyMfcXml）本轮零改动；底层缺口只在 `docs/_API_CHANGES.md` 登记，Python 侧兜底。
 
 ## 已知缺口（接口层，详见 docs/_API_CHANGES.md，共 5 条）
-1. XPowerCanvas 未派发键盘事件与右键事件，Esc / 右键取消无底层入口。中键已接入：WM_MBUTTONDOWN/UP 转发到画布，按住中键拖拽平移，按下为握紧爪型；静止时系统指针隐藏，由 Python 在 SVG 上自绘贯穿视口的十字线 + 中心方块（CAD 风格），鼠标 move 时同步 C++ 视图偏移供命中换算。
+1. XDwgCanvas 未派发键盘事件与右键事件，Esc / 右键取消无底层入口。中键已接入：WM_MBUTTONDOWN/UP 转发到画布，按住中键拖拽平移，按下为握紧爪型；静止时系统指针隐藏，由 Python 在 SVG 上自绘贯穿视口的十字线 + 中心方块（CAD 风格），鼠标 move 时同步 C++ 视图偏移供命中换算。
 2. 画布控件尺寸 API 缺失，`getSize(id)` 未绑定，fit 走兜底尺寸。
 3. XML `XTableView` 的 `tableViewRows` 视口行计数返回 0（写入与读取单元格正常）。
 4. SVG 场景（nanosvg）只识别纯色 / 渐变填充，`pattern / clipPath / fill-rule` 不支持；HATCH 已改用 Python 扫描线剖面线兜底，不再依赖该链路。

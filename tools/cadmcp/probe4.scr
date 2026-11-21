@@ -1,0 +1,6 @@
+(setvar "SECURELOAD" 0)
+(setq r1 (vl-catch-all-apply 'arxload '("C:/temp/AcArray.crx")))
+(princ (strcat "\nTEST_AcArray_crx=" (if (vl-catch-all-error-p r1) "FAIL" "OK")))
+(setq r2 (vl-catch-all-apply 'arxload '("C:/temp/PyArxEngine.crx")))
+(princ (strcat "\nTEST_PyArx_crx=" (if (vl-catch-all-error-p r2) "FAIL" "OK")))
+(princ)

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- flex 布局示例 · HTML 写法版：与 flex_demo.xml 同一界面，但全部用 HTML/CSS 写法。
+     div + style="display:flex" 开 flex；flex-direction 定方向；gap 定间距；
+     justify-content / align-items 定分布与对齐；flex:1 吃剩余空间。
+     标签用 button / input / label，属性名与 CSS 完全一致（大小写不敏感）。 -->
+<XWindow Title="flex demo — HTML 写法" Width="720" Height="420" Theme="dark"
+         Background="#FF1E2226">
+  <div Name="page" style="display:flex;flex-direction:column;gap:12px;padding:16px;width:100%;height:100%">
+
+    <!-- 顶栏：左右两端（justify-content:space-between），纵向居中 -->
+    <div Name="bar" style="display:flex;flex-direction:row;justify-content:space-between;align-items:center;height:44px">
+      <label Name="title" style="width:360px;height:30px;color:#F2F4F6;font-size:15px;font-weight:bold;text-align:left">flex 布局 · 全部用 HTML 写法排版</label>
+      <div Name="tools" style="display:flex;flex-direction:row;gap:8px;height:32px">
+        <button Name="bNew" style="width:76px;height:32px;background:#2B3036;color:#E6EDF3">新建</button>
+        <button Name="bSave" style="width:76px;height:32px;background:#2B3036;color:#E6EDF3">保存</button>
+      </div>
+    </div>
+
+    <!-- 三栏卡片：flex:1 平均分宽度，内部各自竖排 -->
+    <div Name="cards" style="display:flex;flex-direction:row;gap:12px;flex:1;height:190px">
+      <div Name="c1" style="display:flex;flex-direction:column;gap:8px;padding:12px;flex:1;background:#262B31">
+        <label Name="c1t" style="height:24px;color:#F2F4F6;font-size:12px;font-weight:bold;text-align:left">图纸解析</label>
+        <label Name="c1d" style="flex:1;color:#A9B4BF;font-size:10px;text-align:left;white-space:wrap;vertical-align:top">DWG/DXF 走 PyArx 解析，输出显示列表。</label>
+        <button Name="c1b" style="height:30px;background:#2F353B;color:#E6EDF3">打开</button>
+      </div>
+      <div Name="c2" style="display:flex;flex-direction:column;gap:8px;padding:12px;flex:1;background:#262B31">
+        <label Name="c2t" style="height:24px;color:#F2F4F6;font-size:12px;font-weight:bold;text-align:left">场景渲染</label>
+        <label Name="c2d" style="flex:1;color:#A9B4BF;font-size:10px;text-align:left;white-space:wrap;vertical-align:top">XML 场景声明 XLine/XCircle/XText，走同一支绘制。</label>
+        <button Name="c2b" style="height:30px;background:#2F353B;color:#E6EDF3">重绘</button>
+      </div>
+      <div Name="c3" style="display:flex;flex-direction:column;gap:8px;padding:12px;flex:1;background:#262B31">
+        <label Name="c3t" style="height:24px;color:#F2F4F6;font-size:12px;font-weight:bold;text-align:left">模型内省</label>
+        <label Name="c3d" style="flex:1;color:#A9B4BF;font-size:10px;text-align:left;white-space:wrap;vertical-align:top">Python 读图元、改属性、绑定回调。</label>
+        <button Name="c3b" style="height:30px;background:#2F353B;color:#E6EDF3">查看</button>
+      </div>
+    </div>
+
+    <!-- 表单行：标签固定宽，输入框 flex:1 吸收剩余，按钮贴右 -->
+    <div Name="form" style="display:flex;flex-direction:row;gap:10px;align-items:center;height:34px">
+      <label Name="lab" style="width:64px;height:24px;color:#E6EDF3;font-size:11px;text-align:left">图层名</label>
+      <input Name="inp" style="flex:1;height:30px;background:#2B3036;color:#E6EDF3" value="WALL"/>
+      <button Name="apply" style="width:72px;height:30px;background:#2F353B;color:#E6EDF3">应用</button>
+    </div>
+
+    <!-- 底部按钮条：靠右（justify-content:flex-end），间距 8 -->
+    <div Name="foot" style="display:flex;flex-direction:row;justify-content:flex-end;gap:8px;height:34px">
+      <button Name="ok" style="width:84px;height:34px;background:#3B82F6;color:#FFFFFF">确定</button>
+      <button Name="cancel" style="width:84px;height:34px;background:#2B3036;color:#E6EDF3">取消</button>
+    </div>
+  </div>
+</XWindow>
+

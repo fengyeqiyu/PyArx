@@ -1,0 +1,199 @@
+[
+  {
+    "variant": "v1 单栏 docx",
+    "parser": "朴素",
+    "name": true,
+    "email": true,
+    "phone": true,
+    "linkedin": true,
+    "exp": 3,
+    "edu": 2,
+    "skills": 6,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "__head__",
+      "Summary",
+      "Experience",
+      "Education",
+      "Skills"
+    ]
+  },
+  {
+    "variant": "v1 单栏 docx",
+    "parser": "有能力",
+    "name": true,
+    "email": true,
+    "phone": true,
+    "linkedin": true,
+    "exp": 3,
+    "edu": 2,
+    "skills": 6,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "__head__",
+      "Summary",
+      "Experience",
+      "Education",
+      "Skills"
+    ]
+  },
+  {
+    "variant": "v2 技能表格 docx",
+    "parser": "朴素",
+    "name": true,
+    "email": true,
+    "phone": true,
+    "linkedin": true,
+    "exp": 3,
+    "edu": 2,
+    "skills": 1,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "__head__",
+      "Summary",
+      "Experience",
+      "Education"
+    ]
+  },
+  {
+    "variant": "v2 技能表格 docx",
+    "parser": "有能力",
+    "name": true,
+    "email": true,
+    "phone": true,
+    "linkedin": true,
+    "exp": 3,
+    "edu": 2,
+    "skills": 6,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "__head__",
+      "Summary",
+      "Experience",
+      "Education",
+      "Skills"
+    ]
+  },
+  {
+    "variant": "v3 联系方式页眉 docx",
+    "parser": "朴素",
+    "name": true,
+    "email": false,
+    "phone": false,
+    "linkedin": false,
+    "exp": 3,
+    "edu": 2,
+    "skills": 6,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "Summary",
+      "Experience",
+      "Education",
+      "Skills"
+    ]
+  },
+  {
+    "variant": "v3 联系方式页眉 docx",
+    "parser": "有能力",
+    "name": true,
+    "email": true,
+    "phone": true,
+    "linkedin": true,
+    "exp": 3,
+    "edu": 2,
+    "skills": 6,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "Summary",
+      "Experience",
+      "Education",
+      "Skills"
+    ]
+  },
+  {
+    "variant": "v4 单栏 PDF",
+    "parser": "朴素",
+    "name": true,
+    "email": true,
+    "phone": true,
+    "linkedin": true,
+    "exp": 3,
+    "edu": 2,
+    "skills": 6,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "__head__",
+      "Summary",
+      "Experience",
+      "Education",
+      "Skills"
+    ]
+  },
+  {
+    "variant": "v4 单栏 PDF",
+    "parser": "有能力",
+    "name": true,
+    "email": true,
+    "phone": true,
+    "linkedin": true,
+    "exp": 3,
+    "edu": 2,
+    "skills": 6,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "__head__",
+      "Summary",
+      "Experience",
+      "Education",
+      "Skills"
+    ]
+  },
+  {
+    "variant": "v5 双栏 PDF",
+    "parser": "朴素",
+    "name": true,
+    "email": true,
+    "phone": true,
+    "linkedin": true,
+    "exp": 1,
+    "edu": 2,
+    "skills": 6,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "__head__",
+      "Summary",
+      "Experience",
+      "Education",
+      "Skills"
+    ]
+  },
+  {
+    "variant": "v5 双栏 PDF",
+    "parser": "有能力",
+    "name": true,
+    "email": true,
+    "phone": true,
+    "linkedin": true,
+    "exp": 3,
+    "edu": 2,
+    "skills": 6,
+    "jd": 85.7,
+    "must_miss": [],
+    "sections": [
+      "__head__",
+      "Summary",
+      "Experience",
+      "Education",
+      "Skills"
+    ]
+  }
+]

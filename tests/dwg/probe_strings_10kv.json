@@ -1,0 +1,1436 @@
+{
+ "dwg": "G:\\PyArx\\tests\\楼层平面-10KV电缆桥架.dwg",
+ "dxf": "G:\\PyArx\\tests\\dwg\\楼层平面-10KV电缆桥架.dxf",
+ "object_section_len": 180032,
+ "handle_count": 516,
+ "layers": [
+  {
+   "kind": "LAYER",
+   "handle": "54",
+   "truth_name": "0",
+   "truth_ltype": "Continuous",
+   "object_offset": 1348,
+   "window_hex": "80972174000877a47fc7bd52fa0d83064267e27f8f627eba04165e7e20152c",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [
+     3125,
+     3987,
+     4849,
+     5656,
+     5711
+    ],
+    "ascii": [
+     2354,
+     2370,
+     2402,
+     2471,
+     2487
+    ],
+    "gbk": [
+     2354,
+     2370,
+     2402,
+     2471,
+     2487
+    ]
+   },
+   "found": true
+  },
+  {
+   "kind": "LAYER",
+   "handle": "BC",
+   "truth_name": "E-CABL-TRAY",
+   "truth_ltype": "Continuous",
+   "object_offset": 1979,
+   "window_hex": "9f89fe3c19080d82627eba04165e7e2057b53961846a152c12a51bcf5f9c11",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "found": false
+  },
+  {
+   "kind": "LAYER",
+   "handle": "EC",
+   "truth_name": "E-CABL-TRAY-CNTR",
+   "truth_ltype": "中心",
+   "object_offset": 3759,
+   "window_hex": "7efd7de0a8389fae8105979f88054946f3e5ed740044e380c0000080475485",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "found": false
+  },
+  {
+   "kind": "LAYER",
+   "handle": "26F",
+   "truth_name": "E-CABL-TRAY-IDEN",
+   "truth_ltype": "Continuous",
+   "object_offset": 18002,
+   "window_hex": "000000001f07e000000000000142010e31002d0031002f003200220020003d",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "found": false
+  }
+ ],
+ "blocks": [
+  {
+   "kind": "BLOCK_RECORD",
+   "handle": "70",
+   "truth_name": "*Model_Space",
+   "truth_ltype": null,
+   "object_offset": 1665,
+   "window_hex": "e1740008771b9a0f6344e80d822402a6562a5e7e20152c12351bcf25392900",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [
+     31426
+    ],
+    "ascii": [],
+    "gbk": []
+   },
+   "found": true
+  },
+  {
+   "kind": "BLOCK_RECORD",
+   "handle": "6C",
+   "truth_name": "*Paper_Space",
+   "truth_ltype": null,
+   "object_offset": 1616,
+   "window_hex": "00008098a1740008771b9a0f6344e80d83593ec0f7cba4a402a6562a5e7e20",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [
+     32103,
+     38389
+    ],
+    "ascii": [],
+    "gbk": []
+   },
+   "found": true
+  },
+  {
+   "kind": "BLOCK_RECORD",
+   "handle": "74",
+   "truth_name": "*Paper_Space0",
+   "truth_ltype": null,
+   "object_offset": 1910,
+   "window_hex": "81152c12851bcfb4fe290044c900400000809a6174000877a47fc7bd52fa0d",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [
+     38389
+    ],
+    "ascii": [],
+    "gbk": []
+   },
+   "found": true
+  },
+  {
+   "kind": "BLOCK_RECORD",
+   "handle": "BD",
+   "truth_name": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "truth_ltype": null,
+   "object_offset": 1877,
+   "window_hex": "c900400000809a21740008775bb2be3d5efe0d822402a6562a5e7e20459798",
+   "window_hits": {
+    "utf-16-le": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [
+     38458
+    ],
+    "gbk": []
+   },
+   "found": true
+  },
+  {
+   "kind": "BLOCK_RECORD",
+   "handle": "16A",
+   "truth_name": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "truth_ltype": null,
+   "object_offset": 7906,
+   "window_hex": "20046010000070031003200330039003400360031000201020046050000060",
+   "window_hits": {
+    "utf-16-le": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [
+     38688
+    ],
+    "gbk": []
+   },
+   "found": true
+  },
+  {
+   "kind": "BLOCK_RECORD",
+   "handle": "198",
+   "truth_name": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "truth_ltype": null,
+   "object_offset": 9686,
+   "window_hex": "02d003200300030003800310033003000020195d00021dd0fdf7db17438360",
+   "window_hits": {
+    "utf-16-le": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [
+     38905
+    ],
+    "gbk": []
+   },
+   "found": true
+  },
+  {
+   "kind": "BLOCK_RECORD",
+   "handle": "212",
+   "truth_name": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "truth_ltype": null,
+   "object_offset": 14390,
+   "window_hex": "00809dd4a51780200460100000700310032003600350032003300300002010",
+   "window_hits": {
+    "utf-16-le": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [
+     39128
+    ],
+    "gbk": []
+   },
+   "found": true
+  },
+  {
+   "kind": "BLOCK_RECORD",
+   "handle": "240",
+   "truth_name": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "truth_ltype": null,
+   "object_offset": 15891,
+   "window_hex": "16001c001a801b80190017001a8016001c001c001c80180017001800180018",
+   "window_hits": {
+    "utf-16-le": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [
+     31153
+    ],
+    "gbk": []
+   },
+   "found": true
+  }
+ ],
+ "ltypes": [
+  {
+   "kind": "LTYPE",
+   "handle": "5B",
+   "truth_name": "ByBlock",
+   "truth_ltype": null,
+   "object_offset": 1612,
+   "window_hex": "44c9004000008098a1740008771b9a0f6344e80d83593ec0f7cba4a402a656",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "found": false
+  },
+  {
+   "kind": "LTYPE",
+   "handle": "5C",
+   "truth_name": "ByLayer",
+   "truth_ltype": null,
+   "object_offset": 1647,
+   "window_hex": "152c12251bcfd08b230044fd000000008098e1740008771b9a0f6344e80d82",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "found": false
+  },
+  {
+   "kind": "LTYPE",
+   "handle": "5D",
+   "truth_name": "Continuous",
+   "truth_ltype": null,
+   "object_offset": 1540,
+   "window_hex": "080d8357bfd6ecaf8f2402a6562a5e7e20152c12051bcf1724290044c90040",
+   "window_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   },
+   "found": false
+  },
+  {
+   "kind": "LTYPE",
+   "handle": "EB",
+   "truth_name": "中心",
+   "truth_ltype": null,
+   "object_offset": 3790,
+   "window_hex": "17802004601000007003100310030003100350032003200020102004605000",
+   "window_hits": {
+    "utf-16-le": [],
+    "gbk": []
+   },
+   "object_section_hits": {
+    "utf-16-le": [],
+    "gbk": []
+   },
+   "found": false
+  }
+ ],
+ "mtext": {
+  "kind": "MTEXT",
+  "handle": "273",
+  "truth_name": "\\pt317.50012,634.99987,952.5,1270.00013,1587.49988,1905,2222.50013,2539.99988,2857.5,3175.00012,3492.49987,3810,4127.50012,4444.99987,4762.5,5080.00012,5397.49987,5715,6032.50012,6349.99987,6667.5,6985.00012,7302.49987,7620,7937.50012,8254.99987,8572",
+  "truth_ltype": null,
+  "object_offset": 17903,
+  "window_hex": "0c33002f003400220020003d002000310027002d0030002200ca00e08620a1",
+  "window_hits": {
+   "utf-16-le": [],
+   "ascii": [],
+   "gbk": []
+  },
+  "object_section_hits": {
+   "utf-16-le": [],
+   "ascii": [],
+   "gbk": []
+  },
+  "found": false
+ },
+ "section_search": {
+  "0": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [
+      98,
+      108,
+      112,
+      432,
+      448
+     ],
+     "ascii": [
+      98,
+      108,
+      112,
+      432,
+      448
+     ],
+     "gbk": [
+      98,
+      108,
+      112,
+      432,
+      448
+     ]
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [
+      66,
+      76,
+      80
+     ],
+     "ascii": [
+      66,
+      76,
+      80
+     ],
+     "gbk": [
+      66,
+      76,
+      80
+     ]
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [
+      3125,
+      3987,
+      4849,
+      5656,
+      5711
+     ],
+     "ascii": [
+      2354,
+      2370,
+      2402,
+      2471,
+      2487
+     ],
+     "gbk": [
+      2354,
+      2370,
+      2402,
+      2471,
+      2487
+     ]
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [
+      407,
+      413
+     ],
+     "gbk": [
+      407,
+      413
+     ]
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [
+      54,
+      137,
+      175,
+      270,
+      322
+     ],
+     "gbk": [
+      54,
+      137,
+      175,
+      270,
+      322
+     ]
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [
+      564
+     ],
+     "ascii": [
+      52,
+      411,
+      422,
+      516,
+      564
+     ],
+     "gbk": [
+      52,
+      411,
+      422,
+      516,
+      564
+     ]
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [
+     69858,
+     69868,
+     69872,
+     70306,
+     70316
+    ],
+    "ascii": [
+     3,
+     718,
+     967,
+     69286,
+     69690
+    ],
+    "gbk": [
+     3,
+     718,
+     967,
+     69286,
+     69690
+    ]
+   }
+  },
+  "E-CABL-TRAY": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   }
+  },
+  "E-CABL-TRAY-CNTR": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   }
+  },
+  "E-CABL-TRAY-IDEN": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   }
+  },
+  "*Model_Space": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [
+      31426
+     ],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   }
+  },
+  "*Paper_Space": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [
+      32103,
+      38389
+     ],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   }
+  },
+  "*Paper_Space0": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [
+      38389
+     ],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   }
+  },
+  "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [
+      38458
+     ],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "gbk": []
+   }
+  },
+  "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [
+      38688
+     ],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "gbk": []
+   }
+  },
+  "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [
+      38905
+     ],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "gbk": []
+   }
+  },
+  "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [
+      39128
+     ],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "gbk": []
+   }
+  },
+  "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [
+      31153
+     ],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "gbk": []
+   }
+  },
+  "ByBlock": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   }
+  },
+  "ByLayer": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   }
+  },
+  "Continuous": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "ascii": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "ascii": [],
+    "gbk": []
+   }
+  },
+  "中心": {
+   "sections": {
+    "AcDb:AppInfoHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AppInfo": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Preview": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:RevHistory": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AcDbObjects": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:ObjFreeSpace": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Template": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Handles": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Classes": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:AuxHeader": {
+     "utf-16-le": [],
+     "gbk": []
+    },
+    "AcDb:Header": {
+     "utf-16-le": [],
+     "gbk": []
+    }
+   },
+   "raw_dwg": {
+    "utf-16-le": [],
+    "gbk": []
+   }
+  }
+ },
+ "utf16_runs_matched_blocks": [],
+ "summary": {
+  "layer_count": 4,
+  "layer_found": 1,
+  "block_count": 8,
+  "block_found": 8,
+  "ltype_count": 4,
+  "ltype_found": 0
+ }
+}

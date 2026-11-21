@@ -60,20 +60,20 @@ def main():
     apg = names.get("apg")
     if apg:
         try:
-            w.setRange(apg, 0, 100)
-            w.setPos(apg, 20)                       # 有值才不是一条空轨道
+            w.set_range(apg, 0, 100)
+            w.set_pos(apg, 20)                       # 有值才不是一条空轨道
             w.animate(apg, "Value", 100, 900, "outCubic")
-            w.animateColor(apg, 0x00A8E8, 700, "linear")
+            w.animate_color(apg, 0x00A8E8, 700, "linear")
             _log("[anim] 进度 20→100 + 颜色动画已启动")
         except Exception as e:
             _log("[anim] 进度/颜色动画跳过：%s" % e)
 
     sv = names.get("sv")
     if sv:
-        w.addPage(sv, [names["pg1"]])
-        w.addPage(sv, [names["pg2"]])
-        w.setViewIndex(sv, 1)
-        _log("[anim] 页容器 pages=%d index=%d" % (w.getViewCount(sv), w.getViewIndex(sv)))
+        w.add_page(sv, [names["pg1"]])
+        w.add_page(sv, [names["pg2"]])
+        w.set_view_index(sv, 1)
+        _log("[anim] 页容器 pages=%d index=%d" % (w.get_view_count(sv), w.get_view_index(sv)))
 
     _log("[anim] 完成")
     print("[PyArx] 动画窗体已加载：%s" % names)

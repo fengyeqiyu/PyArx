@@ -39,15 +39,15 @@ def schedule():
     # 12 段 900ms：140 → 420 → 140 …（SequentialAnimation 的等价写法：t0 依次累加）
     for i in range(12):
         a, b = (140, 420) if i % 2 == 0 else (420, 140)
-        w.animateFrom(bt, 'Width', a, b, 900, 'linear', i * 900, False)
+        w.animate_from(bt, 'Width', a, b, 900, 'linear', i * 900, False)
     # NumberAnimation：6 个来回，每半程 750ms
     for i in range(12):
         a, b = (0, 99) if i % 2 == 0 else (99, 0)
-        w.animateFrom(sp, 'Value', a, b, 750, 'outCubic', i * 900, False)
+        w.animate_from(sp, 'Value', a, b, 750, 'outCubic', i * 900, False)
     # ColorAnimation：3 个来回，每半程 1800ms
     for i in range(6):
         c = 0x00D27800 if i % 2 == 0 else 0x00313832
-        w.animateColor(sw, c, 1800, 'outCubic', i * 1800)
+        w.animate_color(sw, c, 1800, 'outCubic', i * 1800)
 
 
 schedule()

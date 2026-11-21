@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XWindow Title="XML 看图 · brkline" Width="1280" Height="866" Theme="dark" Background="#FF14181B">
+  <!-- page 全部用 HTML 写法：div + style 里的 display:flex 与 100% 宽高，
+       尺寸随窗口走（QML 的 anchors.fill 已删除） -->
+  <div Name="page" style="display:flex;flex-direction:column;width:100%;height:100%">
+
+    <div Name="top" style="display:flex;flex-direction:row;align-items:center;gap:10px;height:40px;padding:0 12px;background:#22262A">
+      <XLabel Name="lbTitle" Text="brkline" Width="360" Height="24" ForeColor="#FFE6EDF3"
+              FontSize="12" FontWeight="Bold" TextAlign="Left"/>
+      <XLabel Name="lbInfo" Text="图元 0 · 图层 1 · 视图 1 · 隐藏 0 层" Grow="1" Height="24"
+              ForeColor="#FF8A94A6" FontSize="10" TextAlign="Left"/>
+      <XButton Name="btAnno" Text="批注层" Width="70" Height="26" Background="#FF2B3036"
+               ForeColor="#FFE6EDF3"/>
+      <XButton Name="btNext" Text="下一幅" Width="70" Height="26" Background="#FF2B3036"
+               ForeColor="#FFE6EDF3"/>
+      <XButton Name="btFit" Text="全图" Width="62" Height="26" Background="#FF2B3036"
+               ForeColor="#FFE6EDF3"/>
+      <XButton Name="btZoomOut" Text="缩小" Width="62" Height="26" Background="#FF2B3036"
+               ForeColor="#FFE6EDF3"/>
+      <XButton Name="btZoomIn" Text="放大" Width="62" Height="26" Background="#FF2B3036"
+               ForeColor="#FFE6EDF3"/>
+    </div>
+
+    <div Name="mid" style="display:flex;flex-direction:row;flex:1">
+      <div Name="side" style="display:flex;flex-direction:column;gap:6px;width:232px;padding:8px;background:#1A1E22">
+        <XLabel Name="lbLy" Text="图层 · 修改痕迹默认隐藏" Height="20" ForeColor="#FF6BA5FF"
+                FontSize="10" FontWeight="Bold" TextAlign="Left"/>
+        <XTableView Name="tblLayer" Columns="显&#9;名称&#9;图元" Rows="✓&#9;0&#9;1" Grow="1"
+                    Background="#FF1A1E22" ForeColor="#FFC9D1D9" FontSize="10"/>
+      </div>
+      <XDwgCanvas Name="cvMain" Grow="1" Background="#FF14181B"/>
+    </div>
+
+    <div Name="sta" style="display:flex;flex-direction:row;align-items:center;gap:18px;height:26px;padding:0 12px;background:#22262A">
+      <XLabel Name="stView" Text="视图 1/1" Width="470" Height="20" ForeColor="#FFC9D1D9"
+              FontSize="10" TextAlign="Left"/>
+      <XLabel Name="stTip" Text="XML 场景 · 画布直扫 &lt;XScene&gt; 标签" Width="300" Height="20"
+              ForeColor="#FF8A94A6" FontSize="10" TextAlign="Right"/>
+      <XButton Name="btLW" Text="线宽 关" Width="84" Height="20" Background="#FF2B3036"
+               ForeColor="#FFC9D1D9" FontSize="10"/>
+    </div>
+  </div>
+</XWindow>

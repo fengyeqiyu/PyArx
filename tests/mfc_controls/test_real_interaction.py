@@ -267,7 +267,7 @@ def main():
     # ============ 1. 真鼠标命中 ============
     print('\n== 真鼠标点击 ==')
     hits = {'click': 0}
-    w.onClick(names['btn'], lambda *a: hits.__setitem__('click', hits['click'] + 1))
+    w.on_click(names['btn'], lambda *a: hits.__setitem__('click', hits['click'] + 1))
     click_at(cmap['btn'], 0.5, 0.5, 400)
     record('鼠标', 'Button 真点击命中', hits['click'] >= 1, f'onClick={hits["click"]}')
 
@@ -283,10 +283,10 @@ def main():
            f'像素变化 {0 if ratio is None else round(ratio * 100, 2)}%')
 
     # 走 API 设状态时是否重绘（演示截图里“设了勾选却看不到勾”就是这一项）
-    w.setCheck(names['chk'], False)
+    w.set_check(names['chk'], False)
     p.pump(250)
     b_off = print_snapshot(cmap['chk'])
-    w.setCheck(names['chk'], True)
+    w.set_check(names['chk'], True)
     p.pump(250)
     b_on = print_snapshot(cmap['chk'])
     r_api = diff_ratio(b_off, b_on)
@@ -320,7 +320,7 @@ def main():
 
     # ListBox：点击第 2 项应改变选中项
     for i in range(12):
-        w.addString(names['lst'], f'条目 {i}')
+        w.add_string(names['lst'], f'条目 {i}')
     p.pump(120)
     item_rect = wintypes.RECT()
     sm(cmap['lst'], LB_GETITEMRECT, 1, ctypes.cast(ctypes.byref(item_rect), ctypes.c_void_p).value)
@@ -344,7 +344,7 @@ def main():
     p1 = sm(cmap['sld'], TBM_GETPOS)
     record('鼠标', 'Slider 点击轨道改变位置', p1 != p0, f'{p0} -> {p1}')
     before_s = print_snapshot(cmap['sld'])
-    w.setPos(names['sld'], 10)
+    w.set_pos(names['sld'], 10)
     p.pump(200)
     after_s = print_snapshot(cmap['sld'])
     rs = diff_ratio(before_s, after_s)
@@ -352,11 +352,11 @@ def main():
            f'像素变化 {0 if rs is None else round(rs * 100, 2)}%')
 
     # ProgressBar：进度变化必须可见
-    w.setRange(names['prg'], 0, 100)
-    w.setPos(names['prg'], 20)
+    w.set_range(names['prg'], 0, 100)
+    w.set_pos(names['prg'], 20)
     p.pump(200)
     before_p = print_snapshot(cmap['prg'])
-    w.setPos(names['prg'], 90)
+    w.set_pos(names['prg'], 90)
     p.pump(250)
     after_p = print_snapshot(cmap['prg'])
     rp = diff_ratio(before_p, after_p)
@@ -366,27 +366,27 @@ def main():
     # ============ 2. 真键盘输入 ============
     print('\n== 真键盘输入 ==')
     hits2 = {'change': 0}
-    w.onChange(names['txt'], lambda *a: hits2.__setitem__('change', hits2['change'] + 1))
-    w.setFocus(names['txt'])
+    w.on_change(names['txt'], lambda *a: hits2.__setitem__('change', hits2['change'] + 1))
+    w.set_focus(names['txt'])
     p.pump(150)
     focus_now = user32.GetFocus()
     record('键盘', 'TextBox 抢到键盘焦点', focus_now == cmap['txt'], hex(focus_now or 0))
-    w.setText(names['txt'], '')
+    w.set_text(names['txt'], '')
     p.pump(100)
     for ch in 'AB1':
         user32.SendMessageW(cmap['txt'], WM_CHAR, ord(ch), 1)
     p.pump(300)
-    text = w.getText(names['txt'])
+    text = w.get_text(names['txt'])
     record('键盘', 'TextBox 逐字符键入', text == 'AB1', repr(text))
     record('键盘', 'onChange 跟随键入触发', hits2['change'] >= 3, f'count={hits2["change"]}')
 
     # 退格
     user32.SendMessageW(cmap['txt'], WM_CHAR, 0x08, 1)
     p.pump(200)
-    record('键盘', 'TextBox 退格删除', w.getText(names['txt']) == 'AB', repr(w.getText(names['txt'])))
+    record('键盘', 'TextBox 退格删除', w.get_text(names['txt']) == 'AB', repr(w.get_text(names['txt'])))
 
     # ListBox 方向键
-    w.setFocus(names['lst'])
+    w.set_focus(names['lst'])
     p.pump(150)
     ls0 = sm(cmap['lst'], LB_GETCURSEL)
     user32.SendMessageW(cmap['lst'], WM_KEYDOWN, VK_DOWN, 0)
@@ -396,7 +396,7 @@ def main():
     record('键盘', 'ListBox 方向键移动选中', ls1 > ls0 or ls1 >= 0, f'{ls0} -> {ls1}')
 
     # Tab 焦点切换
-    w.setFocus(names['txt'])
+    w.set_focus(names['txt'])
     p.pump(150)
     f0 = user32.GetFocus()
     user32.PostMessageW(cmap['txt'], WM_KEYDOWN, VK_TAB, 0)   # 钩子只认队列消息，SendMessage 到不了
@@ -407,10 +407,10 @@ def main():
     # ============ 3. 滚轮滚动 ============
     print('\n== 滚轮 ==')
     for i in range(12, 20):
-        w.addString(names['lst'], f'条目 {i}')
+        w.add_string(names['lst'], f'条目 {i}')
     p.pump(150)
     top0 = sm(cmap['lst'], LB_GETTOPINDEX)
-    w.setFocus(names['lst'])
+    w.set_focus(names['lst'])
     p.pump(100)
     wheel_at(cmap['lst'], -120, 350)
     top1 = sm(cmap['lst'], LB_GETTOPINDEX)

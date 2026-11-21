@@ -1,0 +1,4 @@
+(setvar "SECURELOAD" 0)
+(setq a2 (arxload "G:/PyArx/X64/Release/PyArxEngine.crx" nil))
+(princ (if a2 " CRXOK " " CRXFAIL "))
+(princ)

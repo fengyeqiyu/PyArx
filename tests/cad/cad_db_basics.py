@@ -216,7 +216,7 @@ def make_table():
         for i in range(4):
             tb.setRowHeight(i, 12.0)
         for j in range(3):
-            tb.setColumnWidth(j, 40.0)
+            tb.set_column_width(j, 40.0)
         data = [['序号', '名称', '数量'], ['1', '桥架', '12'],
                 ['2', '电缆', '30'], ['3', '端子', '48']]
         for r in range(4):

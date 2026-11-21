@@ -140,7 +140,7 @@ CODE = app.nodes[2]['code']
 def card_screen_pt():
     """每次现算卡片中心 → 屏幕坐标。窗口位置/尺寸会随系统摆放变化，
     算一次复用会让点击落到画布空白处（历史上 4/6 就是这个原因）。"""
-    rc = app.win.cardRectPlan(pp_app.CV, CODE)
+    rc = app.win.card_rect_dwg(pp_app.CV, CODE)
     p = wt.POINT(int(rc[0] + rc[2] / 2), int(rc[1] + rc[3] / 2))
     user32.ClientToScreen(cv, ctypes.byref(p))
     return p
@@ -169,7 +169,7 @@ fg2 = user32.GetForegroundWindow()
 print('激活后前台 = %s' % hex(fg2 or 0), flush=True)
 
 # 1. 真实单击卡片
-app.win.selectPlan(pp_app.CV, '')
+app.win.select_dwg(pp_app.CV, '')
 M.pump(150)
 # 现算一次：窗口已经被激活/置顶过，位置和尺寸可能都变了
 pt = card_screen_pt()
@@ -177,9 +177,9 @@ real_click(pt.x, pt.y)
 # 第一次点击可能只用于激活窗口，连点两下再判定
 pt = card_screen_pt()
 real_click(pt.x, pt.y)
-sel = app.win.getPlanSelection(pp_app.CV)
+sel = app.win.get_dwg_selection(pp_app.CV)
 print('探针 (lastMsg, upX, upY, wasDrag, moved, lastHit) = %s'
-      % (app.win.planProbe(pp_app.CV),), flush=True)
+      % (app.win.dwg_probe(pp_app.CV),), flush=True)
 chk('真实鼠标单击选中卡片', sel == app.nodes[2]['code'], repr(sel))
 chk('真实点击后详情浮层打开', bool(app._detailVisible),
     'visible=%s cur=%s' % (app._detailVisible, app.curSel))
@@ -193,17 +193,17 @@ user32.GetClientRect.argtypes = [wt.HWND, ctypes.POINTER(wt.RECT)]
 user32.GetClientRect(cv, ctypes.byref(rcv))
 pvb = wt.POINT(rcv.right - 12, rcv.bottom // 2)
 user32.ClientToScreen(cv, ctypes.byref(pvb))
-z0 = app.win.getPlanView(pp_app.CV)[0]
+z0 = app.win.get_dwg_view(pp_app.CV)[0]
 real_wheel(pvb.x, pvb.y, 120)
-z1 = app.win.getPlanView(pp_app.CV)[0]
+z1 = app.win.get_dwg_view(pp_app.CV)[0]
 chk('真实滚轮放大画布', z1 > z0 + 1e-4, '%.4f -> %.4f' % (z0, z1))
 real_wheel(pvb.x, pvb.y, -120)
-z2 = app.win.getPlanView(pp_app.CV)[0]
+z2 = app.win.get_dwg_view(pp_app.CV)[0]
 chk('真实滚轮缩回画布', abs(z2 - z0) < 1e-3, '%.4f' % z2)
 
 # 3. 真实左键拖动平移：屏幕坐标轨迹，每步 SetCursorPos 绝对定位，
 #    再按当下客户原点补一条带 MK_LBUTTON 的 WM_MOUSEMOVE（与 pp_events.drag 同法）。
-v0 = app.win.getPlanView(pp_app.CV)
+v0 = app.win.get_dwg_view(pp_app.CV)
 sx0, sy0 = pvb.x, pvb.y
 user32.SetCursorPos(sx0, sy0)
 time.sleep(0.15)
@@ -221,7 +221,7 @@ for i in range(1, 7):
 time.sleep(0.05)
 send(MOUSEEVENTF_LEFTUP)
 M.pump(150)
-v1 = app.win.getPlanView(pp_app.CV)
+v1 = app.win.get_dwg_view(pp_app.CV)
 chk('真实左键拖动平移', abs(v1[1] - v0[1]) > 1 or abs(v1[2] - v0[2]) > 1,
     '(%s,%s) -> (%s,%s)' % (v0[1], v0[2], v1[1], v1[2]))
 

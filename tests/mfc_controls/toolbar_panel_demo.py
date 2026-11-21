@@ -21,21 +21,21 @@ BACK = 1202
 def main():
     log = []
     win = M.Window('Draw 面板 — 工具条宿主', 520, 900)
-    win.setTheme(True)
+    win.set_theme(True)
 
     def on_py(cmd):
         log.append(cmd)
         try:
-            win.setText(LBL, '当前命令：%s    已选 %d 次' % (cmd.upper(), len(log)))
+            win.set_text(LBL, '当前命令：%s    已选 %d 次' % (cmd.upper(), len(log)))
         except Exception:
             pass
 
     def on_cad(cmd):
         print('CAD 通道 →', cmd)
 
-    win.addLabel(LBL, '当前命令：无', 60, 10, 440, 24)
+    win.add_label(LBL, '当前命令：无', 60, 10, 440, 24)
     # 深色绘图区背板
-    win.addShadowBox(BACK, 56, 44, 452, 840, 0, 4, 0, 0, 0,
+    win.add_shadow_box(BACK, 56, 44, 452, 840, 0, 4, 0, 0, 0,
                      '#00000000', '#1E2530', '#1E2530', '#33404F', 1)
 
     bar = draw_toolbar.ToolBar(win, 8, 8, on_cmd=on_py, cad_cmd=on_cad)
@@ -47,7 +47,7 @@ def main():
         M.pump(250)
     bar.hover('I_arc')
     M.pump(600)
-    win.savePng(r'C:\temp\toolbar_panel.png')
+    win.save_png(r'C:\temp\toolbar_panel.png')
     print('log=%s cmd=%s' % (log, bar.cmd))
 
 

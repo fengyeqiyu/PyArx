@@ -77,7 +77,7 @@ def wait_canvas_ready(timeout_ms=2500, step_ms=100):
     last = None
     waited = 0
     while waited < timeout_ms:
-        cur = app.win.getPlanView(pp_app.CV)
+        cur = app.win.get_dwg_view(pp_app.CV)
         if last is not None and cur == last:
             return cur
         last = cur
@@ -105,13 +105,13 @@ def click_card(code, tries=4):
     先前算好的矩形在 20ms 后点下去就可能落在卡片外，所以按需重取重试。
     """
     for _ in range(tries):
-        rc = app.win.cardRectPlan(pp_app.CV, code)
+        rc = app.win.card_rect_dwg(pp_app.CV, code)
         if not rc or len(rc) != 4 or rc[2] <= 0:
             M.pump(100)
             continue
         cx, cy = int(rc[0] + rc[2] / 2), int(rc[1] + rc[3] / 2)
         click(cv, cx, cy)
-        if app.win.getPlanSelection(pp_app.CV) == code:
+        if app.win.get_dwg_selection(pp_app.CV) == code:
             return cx, cy
         M.pump(100)
     return None
@@ -119,7 +119,7 @@ def click_card(code, tries=4):
 
 # --- 1. 点卡片：拿卡片屏幕矩形 -> 中心点击 ---
 code0 = app.nodes[2]['code']
-print('卡片 %s 客户区 rect=%s' % (code0, app.win.cardRectPlan(pp_app.CV, code0)), flush=True)
+print('卡片 %s 客户区 rect=%s' % (code0, app.win.card_rect_dwg(pp_app.CV, code0)), flush=True)
 hit = click_card(code0)
 if hit:
     cx, cy = hit
@@ -141,17 +141,17 @@ for fx, fy in ((0.06, 0.06), (0.94, 0.06), (0.06, 0.94), (0.94, 0.94),
     app.hideDetail()
     M.pump(80)
     click(cv, px, py)
-    if app.win.getPlanSelection(pp_app.CV) == '':
+    if app.win.get_dwg_selection(pp_app.CV) == '':
         cleared_at = (px, py)
         break
 chk('点空白清空选中', cleared_at is not None,
     '在 %s 处清空' % (cleared_at,) if cleared_at else '八个候选空白点都没清空')
 
 # --- 3. 点连线：取某条线的中点（模型坐标按当前 view 折算成客户区） ---
-# 详情浮层若还在屏上会吃掉这一下（planHit 先判 detailHit），先显式收起再取视口参数。
+# 详情浮层若还在屏上会吃掉这一下（hitDwg 先判 detailHit），先显式收起再取视口参数。
 app.hideDetail()
 M.pump(150)
-view = app.win.getPlanView(pp_app.CV)
+view = app.win.get_dwg_view(pp_app.CV)
 for l in app.view.get('links', [])[:6]:
     print('link', l, flush=True)
     break
@@ -165,7 +165,7 @@ def click_link(tries=5):
     """
     last = None
     for _ in range(tries):
-        view = app.win.getPlanView(pp_app.CV)
+        view = app.win.get_dwg_view(pp_app.CV)
         zoom, ox, oy = view[0], view[1], view[2]
         if zoom <= 0:
             M.pump(120)
@@ -194,7 +194,7 @@ def click_link(tries=5):
         hit = (int(ox + px * zoom), int(oy + py * zoom), l['to'])
         click(cv, hit[0], hit[1])
         M.pump(60)
-        sel2 = app.win.getPlanSelection(pp_app.CV)
+        sel2 = app.win.get_dwg_selection(pp_app.CV)
         last = (hit, sel2)
         if sel2 == hit[2]:
             return last
@@ -213,8 +213,8 @@ else:
 # --- 4. 控件级导出 PNG ---
 p1 = r'G:\PyArx\docs\_ctl_canvas.png'
 p2 = r'G:\PyArx\docs\_ctl_table.png'
-r1 = app.win.saveControlPng(pp_app.CV, p1)
-r2 = app.win.saveControlPng(pp_app.TBL, p2)
+r1 = app.win.save_control_png(pp_app.CV, p1)
+r2 = app.win.save_control_png(pp_app.TBL, p2)
 chk('画布控件导出 PNG', bool(r1) and os.path.exists(p1),
     '%s B' % (os.path.getsize(p1) if os.path.exists(p1) else 0))
 chk('表格控件导出 PNG', bool(r2) and os.path.exists(p2),

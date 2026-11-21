@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """全功能回归：按 HTML 的 24 项操作逐条跑，打印 PASS/FAIL 与实测数字。"""
 import os
 import sys
@@ -39,31 +39,31 @@ def main():
     # 2 适应窗口
     app.fitView()
     M.pump(20)
-    k, ox, oy = w.getPlanView(pp_app.CV)
+    k, ox, oy = w.get_dwg_view(pp_app.CV)
     chk('适应窗口 fit', 0.05 < k < 0.35, 'zoom %.0f%%' % (k * 100))
 
     # 3 放大 / 4 缩小
     app.zoomAt(1.25)
     M.pump(20)
-    k1 = w.getPlanView(pp_app.CV)[0]
+    k1 = w.get_dwg_view(pp_app.CV)[0]
     app.zoomAt(1.0 / 1.25)
     M.pump(20)
-    k2 = w.getPlanView(pp_app.CV)[0]
+    k2 = w.get_dwg_view(pp_app.CV)[0]
     chk('放大/缩小', k1 > k2, '%.0f%% -> %.0f%%' % (k1 * 100, k2 * 100))
 
     # 5 100%
     app.setZoom(1.0)
     M.pump(20)
-    chk('100%', abs(w.getPlanView(pp_app.CV)[0] - 1.0) < 0.02,
-        'zoom %.0f%%' % (w.getPlanView(pp_app.CV)[0] * 100))
+    chk('100%', abs(w.get_dwg_view(pp_app.CV)[0] - 1.0) < 0.02,
+        'zoom %.0f%%' % (w.get_dwg_view(pp_app.CV)[0] * 100))
 
     # 6 横向（dirSel 第 0 项 = 左→右）
-    w.setCurSel(pp_app.C_HORIZ, 0)
+    w.set_cur_sel(pp_app.C_HORIZ, 0)
     app.onDirChange()
     M.pump(30)
     chk('切成横向', app.view['height'] > app.view['width'],
         '画布 %dx%d' % (app.view['width'], app.view['height']))
-    w.setCurSel(pp_app.C_HORIZ, 1)
+    w.set_cur_sel(pp_app.C_HORIZ, 1)
     app.onDirChange()
     M.pump(20)
     chk('切回纵向', app.view['width'] > app.view['height'],
@@ -84,23 +84,23 @@ def main():
     M.pump(30)
 
     # 8 搜索
-    w.setText(pp_app.E_SEARCH, 'AT2-1-3')
+    w.set_text(pp_app.E_SEARCH, 'AT2-1-3')
     app.onSearchChange()
     M.pump(30)
     chk('搜索定位', app.curSel == 'AT2-1-3', '选中 %s' % app.curSel)
-    w.setText(pp_app.E_SEARCH, '')
+    w.set_text(pp_app.E_SEARCH, '')
     app.onSearchChange()
     M.pump(10)
 
     # 9 选中 + 详情浮层
-    w.selectPlan(pp_app.CV, 'AT1-1')
+    w.select_dwg(pp_app.CV, 'AT1-1')
     app.onCanvasClick()
     M.pump(20)
-    chk('选中出详情', w.getText(pp_app.DT_TITLE) == '节点 AT1-1',
-        '%s / 电缆 %s' % (w.getText(pp_app.DT_TITLE), w.getText(pp_app.D_F0 + 3)))
+    chk('选中出详情', w.get_text(pp_app.DT_TITLE) == '节点 AT1-1',
+        '%s / 电缆 %s' % (w.get_text(pp_app.DT_TITLE), w.get_text(pp_app.D_F0 + 3)))
 
     # 10 详情保存
-    w.setText(pp_app.D_F0 + 1, '1号柜1号回路-详情改')
+    w.set_text(pp_app.D_F0 + 1, '1号柜1号回路-详情改')
     app.onDetailSave()
     M.pump(30)
     n = app.nodeOf('AT1-1')
@@ -126,7 +126,7 @@ def main():
 
     # 14 表格改值 -> 应用（表格是原生 ListView，数据源在 Python）
     #    当前 11 列口径：0起点 1回路 2终点 3型号 4电压 5根数 6水平 7垂直 8余量 9合计 10功率
-    w.setTableCell(pp_app.TBL, 2, 10, '15')
+    w.set_table_cell(pp_app.TBL, 2, 10, '15')
     app.onApplyAll()
     M.pump(40)
     chk('表格改功率并重绘', abs(float(app.nodes[2].get('loadKw') or 0) - 15) < 1e-6,
@@ -134,18 +134,18 @@ def main():
                                  app.view['width'], app.view['height']))
 
     # 15 校验：空终点（终点即设备编号）
-    w.setTableCell(pp_app.TBL, 2, 2, '')
+    w.set_table_cell(pp_app.TBL, 2, 2, '')
     app.onApplyAll()
-    chk('校验空编号', '终点不能为空' in (w.getText(pp_app.L_EDIT_COUNT) or ''),
-        w.getText(pp_app.L_EDIT_COUNT))
-    w.setTableCell(pp_app.TBL, 2, 2, app.nodes[2]['code'])
+    chk('校验空编号', '终点不能为空' in (w.get_text(pp_app.L_EDIT_COUNT) or ''),
+        w.get_text(pp_app.L_EDIT_COUNT))
+    w.set_table_cell(pp_app.TBL, 2, 2, app.nodes[2]['code'])
 
     # 16 校验：起点是终点自己
-    w.setTableCell(pp_app.TBL, 2, 0, app.nodes[2]['code'])
+    w.set_table_cell(pp_app.TBL, 2, 0, app.nodes[2]['code'])
     app.onApplyAll()
-    chk('校验起点即终点', '起点不能是终点自己' in (w.getText(pp_app.L_EDIT_COUNT) or ''),
-        w.getText(pp_app.L_EDIT_COUNT))
-    w.setTableCell(pp_app.TBL, 2, 0, app.nodes[2].get('upstream') or '')
+    chk('校验起点即终点', '起点不能是终点自己' in (w.get_text(pp_app.L_EDIT_COUNT) or ''),
+        w.get_text(pp_app.L_EDIT_COUNT))
+    w.set_table_cell(pp_app.TBL, 2, 0, app.nodes[2].get('upstream') or '')
 
     # 17 ✕ 删行
     last = app.nodes[-1]['code']
@@ -210,7 +210,7 @@ def main():
     # 24 抓最终图
     M.pump(60)
     out = os.path.join(D, '_pp_test_final.png')
-    w.savePng(out)
+    w.save_png(out)
     chk('最终截图', os.path.getsize(out) > 20000, '%d B' % os.path.getsize(out))
 
     print('\n汇总：PASS %d / FAIL %d' % (ok, bad))

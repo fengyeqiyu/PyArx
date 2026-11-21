@@ -39,7 +39,7 @@ ALIAS_TO_MAIN = {
     'TrackBar': 'Slider', 'TreeView': 'TreeView', 'ListView': 'ListCtrl',
     'Checkbox': 'CheckBox', 'Radio': 'RadioButton', 'Group': 'GroupBox',
     'Combo': 'ComboBox', 'DataGrid': 'ListCtrl', 'Separator': 'Divider',
-    'PlanCanvas': 'PowerCanvas', 'Knob': 'Dial', 'Gauge': 'Dial',
+    'Knob': 'Dial', 'Gauge': 'Dial',
     'Spinner': 'BusyIndicator', 'ActivityIndicator': 'BusyIndicator',
     'NumberBox': 'SpinBox', 'NumericUpDown': 'SpinBox',
     'TileView': 'GridView', 'CoverFlow': 'PathView', 'PagerDots': 'PageIndicator',

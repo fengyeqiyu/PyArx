@@ -2,7 +2,7 @@
 <!--
   power-plan 界面布局（对应 docs/_ref/power-plan.html / G:\配电规划设计\power-plan.html）
   分工：本文件负责"界面结构与尺寸"，Python 只按这里算出的矩形摆放控件、写业务逻辑。
-  控件本身仍由 C++ 控件库创建（PowerCanvas / SysListView32 等 guiload 不支持的类型也能用）。
+  控件本身仍由 C++ 控件库创建（DwgCanvas / SysListView32 等 guiload 不支持的类型也能用）。
   改动布局 = 改这个文件，不改 pp_app.py。
 
   行：0 顶部工具栏 78 / 1 主内容 * / 2 底部留白 8

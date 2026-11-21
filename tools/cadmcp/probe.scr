@@ -1,0 +1,2 @@
+(arxload "G:/PyArx/X64/Release/PyArxEngine.arx")
+(command "PYRUNFILE" "G:/PyArx/tools/cadmcp/probe_sig.py")

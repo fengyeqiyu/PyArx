@@ -5,7 +5,7 @@
 所以一台柜一张，不会把同列上下两台框进同一张。
 
 渲染走 render_mfc.build_svg 的完整绘制链（块递归展开 + 坐标变换 +
-ByLayer/ByBlock 取色 + 文字旋转），再用 MFCXaml 画布 loadPowerSvg 出 PNG。
+ByLayer/ByBlock 取色 + 文字旋转），再用 MFCXaml 画布 loadDwgSvg 出 PNG。
 """
 
 import ctypes
@@ -41,11 +41,11 @@ def main():
     u = ctypes.windll.user32
     WW, WH = int(u.GetSystemMetrics(0) * 0.93), int(u.GetSystemMetrics(1) * 0.86)
     win = M.Window("柜体原图核对", WW, WH)
-    win.setTheme(False)
-    win.addPowerCanvas(CANVAS, 0, 0, WW, WH)
+    win.set_theme(False)
+    win.add_dwg_canvas(CANVAS, 0, 0, WW, WH)
     win.show()
     M.pump(900)
-    CW, CH = win.clientSize()
+    CW, CH = win.client_size()
     win.move(CANVAS, 0, 0, CW, CH)
     M.pump(300)
 
@@ -67,12 +67,12 @@ def main():
         nm = "%02d_%s" % (seq, safe(b["code"] or ("柜%d" % b["sheet"])))
         svg_p = os.path.join(OUT, nm + ".svg")
         open(svg_p, "w", encoding="utf-8").write(svg)
-        win.loadPowerSvg(CANVAS, svg)
+        win.load_dwg_svg(CANVAS, svg)
         M.pump(120)
-        win.setPlanView(CANVAS, 1.0, 0, 0)
+        win.set_dwg_view(CANVAS, 1.0, 0, 0)
         M.pump(60)
         png = os.path.join(OUT, nm + ".png")
-        win.saveControlPng(CANVAS, png)
+        win.save_control_png(CANVAS, png)
         kb = os.path.getsize(png) // 1024
         rows.append({"no": seq, "sheet": b["sheet"], "box": b["code"],
                      "x0": b["x0"], "y0": b["y0"], "x1": b["x1"], "y1": b["y1"],

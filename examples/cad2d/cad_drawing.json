@@ -1,0 +1,206 @@
+{
+ "width": 12000.0,
+ "height": 8000.0,
+ "current_layer": "0",
+ "layers": [
+  {
+   "name": "0",
+   "color": 7,
+   "width": 1.0,
+   "linetype": "Continuous",
+   "visible": true,
+   "locked": false,
+   "frozen": false
+  },
+  {
+   "name": "WALL",
+   "color": 7,
+   "width": 3.0,
+   "linetype": "Continuous",
+   "visible": true,
+   "locked": false,
+   "frozen": false
+  },
+  {
+   "name": "DOOR",
+   "color": 5,
+   "width": 1.5,
+   "linetype": "Continuous",
+   "visible": true,
+   "locked": false,
+   "frozen": false
+  },
+  {
+   "name": "MARK",
+   "color": 7,
+   "width": 1.0,
+   "linetype": "Continuous",
+   "visible": true,
+   "locked": false,
+   "frozen": false
+  }
+ ],
+ "blocks": [
+  {
+   "name": "门",
+   "base": [
+    2513.0889968702672,
+    5556.719004190924
+   ],
+   "entities": [
+    {
+     "layer": "WALL",
+     "color": 0,
+     "width": 0.0,
+     "linetype": "",
+     "kind": "line",
+     "x1": 1000.0,
+     "y1": 4000.0,
+     "x2": 6000.0,
+     "y2": 4000.0
+    }
+   ]
+  }
+ ],
+ "entities": [
+  {
+   "layer": "WALL",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "polyline",
+   "pts": [
+    [
+     1000.0,
+     1000.0
+    ],
+    [
+     10000.0,
+     1000.0
+    ],
+    [
+     10000.0,
+     6500.0
+    ],
+    [
+     1000.0,
+     6500.0
+    ]
+   ],
+   "closed": true
+  },
+  {
+   "layer": "WALL",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "line",
+   "x1": 1000.0,
+   "y1": 4000.0,
+   "x2": 6000.0,
+   "y2": 4000.0
+  },
+  {
+   "layer": "WALL",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "line",
+   "x1": 6000.0,
+   "y1": 1000.0,
+   "x2": 6000.0,
+   "y2": 4000.0
+  },
+  {
+   "layer": "DOOR",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "arc",
+   "cx": 6000.0,
+   "cy": 4000.0,
+   "r": 900.0,
+   "a1": 0.0,
+   "a2": 90.0
+  },
+  {
+   "layer": "MARK",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "circle",
+   "cx": 3000.0,
+   "cy": 2500.0,
+   "r": 800.0
+  },
+  {
+   "layer": "MARK",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "rect",
+   "x1": 7600.0,
+   "y1": 4600.0,
+   "x2": 9200.0,
+   "y2": 6000.0
+  },
+  {
+   "layer": "MARK",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "text",
+   "x": 1400.0,
+   "y": 6800.0,
+   "text": "PyArx CAD — 二维绘图演示",
+   "size": 420.0,
+   "style": "Standard",
+   "rot": 0.0
+  },
+  {
+   "layer": "0",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "line",
+   "x1": 3909.2495506870823,
+   "y1": 4000.0,
+   "x2": 6701.570658320712,
+   "y2": 2415.3577581030904
+  },
+  {
+   "layer": "0",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "circle",
+   "cx": 8376.96332290089,
+   "cy": 1298.4293150496378,
+   "r": 1116.9284430534517
+  },
+  {
+   "layer": "0",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "rect",
+   "x1": 2513.0889968702672,
+   "y1": 6184.991253408491,
+   "x2": 4188.481661450445,
+   "y2": 4928.446754973358
+  },
+  {
+   "layer": "0",
+   "color": 0,
+   "width": 0.0,
+   "linetype": "",
+   "kind": "insert",
+   "name": "门",
+   "x": 8097.731212137528,
+   "y": 4090.750422683269,
+   "sx": 0.5,
+   "sy": 0.5,
+   "rot": 30.0
+  }
+ ]
+}

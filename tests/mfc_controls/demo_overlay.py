@@ -31,9 +31,9 @@ u.SetWindowPos(w.hwnd, ctypes.c_void_p(-1), 180, 100, 720, 540, 0x0040)
 u.SetForegroundWindow(w.hwnd)
 p.pump(400)
 
-w.setMenuBarSelected(names['mb'], 1)
-w.showToolTip(names['bt'], '这是一个自绘 ToolTip', 0)
-w.showPopup(names['pp'], '关于 PyArx', ['版本 1.0', '自绘浮层族', 'Menu · MenuStrip', 'ToolTip · Popup'],
+w.set_menu_bar_selected(names['mb'], 1)
+w.show_tool_tip(names['bt'], '这是一个自绘 ToolTip', 0)
+w.show_popup(names['pp'], '关于 PyArx', ['版本 1.0', '自绘浮层族', 'Menu · MenuStrip', 'ToolTip · Popup'],
             380, 120, 300, 170)
 
 while True:

@@ -1,0 +1,39 @@
+{
+ "entity_count_before": {
+  "ok": true,
+  "val": "0"
+ },
+ "leader_make": {
+  "ok": true,
+  "val": "696 append_ok=True"
+ },
+ "spline_make": {
+  "ok": true,
+  "val": "697 setFitData=True"
+ },
+ "hatch_make": {
+  "ok": true,
+  "val": "h=698 pattern=True loop=True eval=True"
+ },
+ "table_make": {
+  "ok": true,
+  "val": "700"
+ },
+ "poly3d_make": {
+  "ok": true,
+  "val": "719"
+ },
+ "block_make": {
+  "ok": true,
+  "val": "add=True btr=2596655705616 append=True ref=725"
+ },
+ "layer_make": {
+  "ok": true,
+  "val": "PYARX_LAYER"
+ },
+ "entity_count_after": {
+  "ok": true,
+  "val": "6"
+ },
+ "done": true
+}

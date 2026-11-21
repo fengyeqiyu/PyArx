@@ -1,0 +1,10 @@
+﻿module,func,status
+PyDb,curDb,present
+PyDb,setWorkingDb,missing
+PyDb,workingDb,missing
+PyEd,print,missing
+PyAp,Command,missing
+PyAp,LispFunction,missing
+PyAp,curDoc,missing
+PyAp,fireOnbeginConsole,missing
+PyAp,using_scope,missing

@@ -191,7 +191,7 @@ ENTITY = {
                   "e.setSize(int(a.get('rows', 3)), int(a.get('cols', 3)))\n"
                   "e.setPosition(_p3(a['pos']))\n"
                   "for _i in range(int(a.get('cols', 3))):\n"
-                  "    e.setColumnWidth(_i, float(a.get('col_w', 30.0)))\n"
+                  "    e.set_column_width(_i, float(a.get('col_w', 30.0)))\n"
                   "for _i in range(int(a.get('rows', 3))):\n"
                   "    e.setRowHeight(_i, float(a.get('row_h', 8.0)))\n"
                   "for _r, _row in enumerate(a.get('texts') or []):\n"

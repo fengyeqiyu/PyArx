@@ -1,0 +1,67 @@
+{
+ "PyApp": [
+  "acadApplication",
+  "displayTextScreen",
+  "documentManager",
+  "documentWindowCollection",
+  "infoCenter",
+  "isInCustomizationMode",
+  "loadPartialMenu",
+  "mainWindow",
+  "menuBar",
+  "menuGroups",
+  "nonInPlaceMainWindow",
+  "preferences",
+  "reloadAllMenus",
+  "setCurrentWorkspace",
+  "setFocus",
+  "statusBar",
+  "uiBindings",
+  "unloadPartialMenu",
+  "updateDisplay"
+ ],
+ "Document": [
+  "activate",
+  "database",
+  "docTitle",
+  "downgradeDocOpen",
+  "isActive",
+  "isNamedDrawing",
+  "isQuiescent",
+  "isReadOnly",
+  "lockDocument",
+  "lockMode",
+  "name",
+  "popDbmod",
+  "pushDbmod",
+  "sendStringToExecute",
+  "setDocTitle",
+  "setFocus",
+  "unlockDocument",
+  "upgradeDocOpen",
+  "windowHandle"
+ ],
+ "DocumentManager": [
+  "activateDocument",
+  "count",
+  "curDocument",
+  "getDocument",
+  "isApplicationContext",
+  "lockDocument",
+  "mdiActiveDocument",
+  "newDocument",
+  "openDocument",
+  "sendStringToExecute",
+  "setCurrentDocument",
+  "unlockDocument"
+ ],
+ "PyAcadDatabase": [
+  "current",
+  "isAvailable"
+ ],
+ "tries": {
+  "PyApp()": "ERR TypeError('PyArxCore.Ap.PyApp: No constructor defined!')",
+  "app.document()": "ERR TypeError('PyArxCore.Ap.PyApp: No constructor defined!')",
+  "doc.database()": "ERR TypeError('PyArxCore.Ap.PyApp: No constructor defined!')"
+ }
+}

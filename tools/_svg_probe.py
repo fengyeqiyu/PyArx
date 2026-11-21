@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""_svg_probe.py —— 判定 PowerCanvas 到底接受哪些 SVG 元素。
+"""_svg_probe.py —— 判定 DwgCanvas 到底接受哪些 SVG 元素。
 
 逐个往同一块画布喂"只有一种元素"的 SVG，每次抓一张 PNG。
 """
@@ -14,7 +14,7 @@ XML = r'''<?xml version="1.0" encoding="utf-8"?>
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="svg-probe"
          Width="640" Height="480">
   <XStackPanel>
-    <XPowerCanvas Name="cv" Width="620" Height="440"/>
+    <XDwgCanvas Name="cv" Width="620" Height="440"/>
   </XStackPanel>
 </XWindow>'''
 XMLP = os.path.join(OUT, '_svg_probe.xml')
@@ -47,12 +47,12 @@ def main():
     p.pump(300)
     cv = names['cv']
     for key, svg in CASES.items():
-        w.loadPowerSvg(cv, svg)
-        w.setPlanView(cv, 1.0, 10, 10)
+        w.load_dwg_svg(cv, svg)
+        w.set_dwg_view(cv, 1.0, 10, 10)
         p.pump(400)
         shot = os.path.join(OUT, '_svgprobe_%s.png' % key)
-        w.saveControlPng(cv, shot)
-        z, ox, oy = w.getPlanView(cv)
+        w.save_control_png(cv, shot)
+        z, ox, oy = w.get_dwg_view(cv)
         print('%-8s zoom=%.2f ox=%d oy=%d -> %s' % (key, z, ox, oy, os.path.basename(shot)))
     p.pump(200)
 

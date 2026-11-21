@@ -1,0 +1,11 @@
+{
+ "before": 0,
+ "pt2d_ctor": "PyGePoint2d(0,0) -> ERR module 'PyArxCore.Ge' has no attribute 'PyGePoint2d'",
+ "addVertexAt(0,pt)": "addVertexAt(0, pt2d) -> ERR module 'PyArxCore.Ge' has no attribute 'PyGePoint2d'",
+ "addVertexAt(1,xy)": "addVertexAt(1, 100, 0) -> ERR addVertexAt(): incompatible function arguments. The following argument types are supported: |     1. (self: PyArxCore.Db.PyDbPolyline, index: int, pt: PyArxCore.Ge.AcGePoint2d, bulge: float = 0.0, startWidth: float = -1.0, endWidth: float = -1.0) -> bool |  | ",
+ "addVertexAt(2,xy)": "addVertexAt(2, 100, 100) -> ERR addVertexAt(): incompatible function arguments. The following argument types are supported: |     1. (self: PyArxCore.Db.PyDbPolyline, index: int, pt: PyArxCore.Ge.AcGePoint2d, bulge: float = 0.0, startWidth: float = -1.0, endWidth: float = -1.0) -> bool |  | ",
+ "addVertexAt(3,xy)": "addVertexAt(3, 0, 100) -> ERR addVertexAt(): incompatible function arguments. The following argument types are supported: |     1. (self: PyArxCore.Db.PyDbPolyline, index: int, pt: PyArxCore.Ge.AcGePoint2d, bulge: float = 0.0, startWidth: float = -1.0, endWidth: float = -1.0) -> bool |  | ",
+ "setClosed": "setClosed(True) -> OK None",
+ "add": "db.addToModelspace(pl) -> OK 0",
+ "after": 0
+}

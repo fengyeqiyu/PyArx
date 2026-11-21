@@ -5,7 +5,7 @@
   工具栏   图名可改 / 文档示例 / 三级配电示例 / 节点编辑 / 导入 CSV XLSX JSON /
            粘贴 JSON / 导出 JSON CSV SVG PNG / 缩小 100% 放大 / 适应窗口 /
            连线标注电缆 / 布局走向 / 搜索编号或名称
-  画布     PowerCanvas 自绘（滚轮缩放、拖动平移、单击选中、双击折叠、选中联动高亮）
+  画布     DwgCanvas 自绘（滚轮缩放、拖动平移、单击选中、双击折叠、选中联动高亮）
   小地图   缩略图 + 视口红框，点击跳转
   详情     编号 / 名称 / 上游 / 电缆 / 电压 / 负载 / 长度 / 下游数
   编辑     8 列表格 + 选中行表单 + 新增 / 删除 / 应用并重绘
@@ -492,7 +492,7 @@ def voltText(v):
 class App:
     def __init__(self):
         self.win = M.Window('配电规划图 — MFCXml', APP_W, APP_H)
-        self.win.setTheme(False)
+        self.win.set_theme(False)
         self._new_table = hasattr(self.win, 'addTable')     # 新自绘表格 PyMfcTable（旧 SysListView32 路径保留兼容）
         self.nodes = sampleThreeLevel()
         self.collapsed = set()
@@ -572,12 +572,12 @@ class App:
 
         def btn(bid, text, x, bw, y=None):
             yy = y1 if y is None else y
-            w.addButton(bid, text, x, yy, bw, bh)
+            w.add_button(bid, text, x, yy, bw, bh)
             self._font_ids.append((bid, 13, False))
             return x + bw + 8
 
         # 第一行：h1(图名) + 数据按钮 + 导出组（顺序与 HTML 一致）
-        w.addEdit(E_TITLE, self.titleText, 12, y1, 130, bh)
+        w.add_edit(E_TITLE, self.titleText, 12, y1, 130, bh)
         self._font_ids.append((E_TITLE, 15, True))
         x = 12 + 130 + 8
         x = btn(B_DOC, '文档示例', x, 78)
@@ -602,36 +602,36 @@ class App:
         x = btn(B_Z100, '100%', x, 62, y2) - 8 + 4
         x = btn(B_ZIN, '＋', x, 34, y2) - 8 + 4
         x = btn(B_FIT, '适应窗口', x, 78, y2) + 4
-        w.addCheckBox(C_CABLE, '连线标注电缆', x, y2, 116, bh)
+        w.add_check_box(C_CABLE, '连线标注电缆', x, y2, 116, bh)
         self._font_ids.append((C_CABLE, 13, False))
-        w.setCheck(C_CABLE, True)
+        w.set_check(C_CABLE, True)
         x += 116 + 8
-        w.addLabel(L_HINT, '布局', x, y2 + 4, 34, 20)
+        w.add_label(L_HINT, '布局', x, y2 + 4, 34, 20)
         self._font_ids.append((L_HINT, 13, False))
         x += 34
-        w.addCombo(C_HORIZ, x, y2, 112, bh)
-        w.addString(C_HORIZ, '横向 左→右')
-        w.addString(C_HORIZ, '纵向 上→下')
-        w.setCurSel(C_HORIZ, 0)
+        w.add_combo(C_HORIZ, x, y2, 112, bh)
+        w.add_string(C_HORIZ, '横向 左→右')
+        w.add_string(C_HORIZ, '纵向 上→下')
+        w.set_cur_sel(C_HORIZ, 0)
         self._font_ids.append((C_HORIZ, 13, False))
         x += 112 + 8
-        w.addEdit(E_SEARCH, '', x, y2, 170, bh)     # 输入即搜（HTML 的 input 事件）
+        w.add_edit(E_SEARCH, '', x, y2, 170, bh)     # 输入即搜（HTML 的 input 事件）
         self._font_ids.append((E_SEARCH, 13, False))
 
         # 画布：全宽，工具栏下方到底部
-        w.addPowerCanvas(CV, CV_X, CV_Y, CV_W, CV_H)
+        w.add_dwg_canvas(CV, CV_X, CV_Y, CV_W, CV_H)
 
         # 状态栏：浮在画布左下（白底圆角近似）
-        w.addWhiteRect(ST_PANEL, ST_X, ST_Y, ST_W, ST_H)   # HTML .status 无阴影
-        w.addLabel(L_STATUS, '拖动平移 · 滚轮缩放', ST_X + 4, ST_Y + 4, ST_W - 8, 18)
+        w.add_white_rect(ST_PANEL, ST_X, ST_Y, ST_W, ST_H)   # HTML .status 无阴影
+        w.add_label(L_STATUS, '拖动平移 · 滚轮缩放', ST_X + 4, ST_Y + 4, ST_W - 8, 18)
         self._font_ids.append((L_STATUS, 12, False))
 
         # 小地图：外框 188×134 + 内 canvas 180×126，浮在画布右下
         # HTML .mini: box-shadow 0 2px 8px rgba(16,24,40,.08)，radius 4
-        w.addShadowBox(MI_PANEL, MI_FRAME[0], MI_FRAME[1], MI_FRAME[2], MI_FRAME[3],
+        w.add_shadow_box(MI_PANEL, MI_FRAME[0], MI_FRAME[1], MI_FRAME[2], MI_FRAME[3],
                        10, 4, 0, 2, 8, '#14101828', '#FFFFFF', '#FFFFFF', '#E4E7EC', 1)
-        w.addPowerCanvas(MINI, *MI_CANVAS)
-        w.setPlanOptions(MINI, False, True, CV)
+        w.add_dwg_canvas(MINI, *MI_CANVAS)
+        w.set_dwg_options(MINI, False, True, CV)
 
         # 详情浮层：默认隐藏，选中节点时出现在画布右上 272 宽
         self.buildDetail()
@@ -640,32 +640,32 @@ class App:
         self.buildEditor()
 
         # 回调
-        w.onClick(B_DOC, self.onSampleDoc)
-        w.onClick(B_3L, self.onThreeLevel)
-        w.onClick(B_DUAL, self.onDualSource)
-        w.onClick(B_EDIT, self.onToggleEditor)
-        w.onClick(B_CSV, self.onImportCsv)
-        w.onClick(B_XLSX, self.onImportXlsx)
-        w.onClick(B_JSON, self.onImportJson)
-        w.onClick(B_PASTE, self.onPasteJson)
-        w.onClick(B_EJSON, self.onExportJson)
-        w.onClick(B_ECSV, self.onExportCsv)
-        w.onClick(B_EXLSX, self.onExportXlsx)
-        w.onClick(B_ESVG, self.onExportSvg)
-        w.onClick(B_EPNG, self.onExportPng)
-        w.onClick(B_ZOUT, lambda: self.zoomAt(1.0 / 1.25))
-        w.onClick(B_ZIN, lambda: self.zoomAt(1.25))
-        w.onClick(B_Z100, lambda: self.setZoom(1.0))
-        w.onClick(B_FIT, self.fitView)
-        w.onChange(E_TITLE, self.onTitleChange)
-        w.onChange(E_SEARCH, self.onSearchChange)
-        w.onChecked(C_CABLE, self.onCableToggle)
-        w.onChange(C_HORIZ, self.onDirChange)
+        w.on_click(B_DOC, self.onSampleDoc)
+        w.on_click(B_3L, self.onThreeLevel)
+        w.on_click(B_DUAL, self.onDualSource)
+        w.on_click(B_EDIT, self.onToggleEditor)
+        w.on_click(B_CSV, self.onImportCsv)
+        w.on_click(B_XLSX, self.onImportXlsx)
+        w.on_click(B_JSON, self.onImportJson)
+        w.on_click(B_PASTE, self.onPasteJson)
+        w.on_click(B_EJSON, self.onExportJson)
+        w.on_click(B_ECSV, self.onExportCsv)
+        w.on_click(B_EXLSX, self.onExportXlsx)
+        w.on_click(B_ESVG, self.onExportSvg)
+        w.on_click(B_EPNG, self.onExportPng)
+        w.on_click(B_ZOUT, lambda: self.zoomAt(1.0 / 1.25))
+        w.on_click(B_ZIN, lambda: self.zoomAt(1.25))
+        w.on_click(B_Z100, lambda: self.setZoom(1.0))
+        w.on_click(B_FIT, self.fitView)
+        w.on_change(E_TITLE, self.onTitleChange)
+        w.on_change(E_SEARCH, self.onSearchChange)
+        w.on_checked(C_CABLE, self.onCableToggle)
+        w.on_change(C_HORIZ, self.onDirChange)
         # 单击：C++ 画布做完命中（卡片或连线）后回调，Python 取回选中编号弹详情
-        w.onClick(CV, self.onCanvasClick)
-        w.onDoubleClick(CV, self.onCanvasDblclick)
-        w.onClick(MINI, self.onMiniClick)
-        w.onResize(self.onResize)    # 窗口尺寸变化 → 按网格重排（见 layout）
+        w.on_click(CV, self.onCanvasClick)
+        w.on_double_click(CV, self.onCanvasDblclick)
+        w.on_click(MINI, self.onMiniClick)
+        w.on_resize(self.on_resize)    # 窗口尺寸变化 → 按网格重排（见 layout）
 
         self.hideEditor()
         self.hideDetail()
@@ -675,7 +675,7 @@ class App:
     # ---------- 版式（grid 自适应） ----------
     def clientSize(self):
         try:
-            cw, ch = self.win.clientSize()
+            cw, ch = self.win.client_size()
         except Exception:
             cw, ch = CW, CH
         if not cw or not ch or cw < 400 or ch < 300:
@@ -686,7 +686,7 @@ class App:
         """侧板宽度的合法区间。上限不只由偏好决定，还要给画布留 CV_MIN_W：
         窗口越窄，上限越低；窗口窄到连下限都放不下时退回下限。"""
         if cw is None:
-            cw, _ = self.clientSize()
+            cw, _ = self.client_size()
         room = cw - CV_X - 8 - SPLIT_W - CV_MIN_W        # 扣掉画布最小宽后剩下的空间
         lo = SPLIT_MIN_W
         hi = max(lo, min(SPLIT_MAX_W, int(room)))
@@ -704,7 +704,7 @@ class App:
           列：画布（*）/ 侧板（640，仅编辑时占位）
         窗口放大时新增空间全部给画布，和 HTML 的 flex/grid 行为一致。"""
         w = self.win
-        cw, ch = self.clientSize()
+        cw, ch = self.client_size()
         ed_w = (self.sideWidth(cw) + SPLIT_W) if self.editing else 0
         cvW = max(CV_MIN_W, cw - CV_X - 8 - ed_w)
         cvH = max(200, ch - CV_Y - 8)
@@ -736,7 +736,7 @@ class App:
             for cid, (x, y, ww, hh) in self._detail_rc.items():
                 items.append((cid, dtx + (x - DT_X), dty + (y - DT_Y), ww, hh, vis))
         if items:
-            w.moveMany(items)
+            w.move_many(items)
 
     def layoutEditor(self, cw, ch):
         """侧板内部：头部（标题 / 3 按钮）→ 表格（原生 ListView 撑满）→ 行编辑条 → footer。"""
@@ -770,13 +770,13 @@ class App:
         if widths != self._colw_now:
             self._colw_now = widths
             if self._new_table:
-                self.win.setTableColumns(TBL, widths[:len(FIELDS) + 1], HIDX_COLS)
-                self.win.setTableColTypes(TBL, [0, 0, 0, 0, 2, 0, 2])
+                self.win.set_table_columns(TBL, widths[:len(FIELDS) + 1], HIDX_COLS)
+                self.win.set_table_col_types(TBL, [0, 0, 0, 0, 2, 0, 2])
             elif hasattr(self.win, 'setColumnWidths'):
-                self.win.setColumnWidths(TBL, widths)
+                self.win.set_column_widths(TBL, widths)
             elif hasattr(self.win, 'setColumnWidth'):
                 for i, pxw in enumerate(widths):
-                    self.win.setColumnWidth(TBL, i, pxw)
+                    self.win.set_column_width(TBL, i, pxw)
         # 行编辑条：7 个输入框必须用"缩放后的列宽"排，才能和表格的列一一对齐；
         # 用原始 COLW 排会让输入框边界和列边界错开，看起来就是"乱套"。
         x = px
@@ -797,7 +797,7 @@ class App:
         rowH, hdr_h = 21, 24
         if hasattr(self.win, 'getTableMetrics'):
             try:
-                m = self.win.getTableMetrics(TBL)
+                m = self.win.get_table_metrics(TBL)
                 if m and m[0] > 0:
                     rowH, hdr_h = int(m[0]), int(m[1])
             except Exception:
@@ -842,7 +842,7 @@ class App:
             return
         self._split_last = int(x)
         self._split_t = now
-        cw, _ = self.clientSize()
+        cw, _ = self.client_size()
         lo, hi = self.sideBounds(cw)
         new_w = max(lo, min(hi, cw - int(x) - SPLIT_W))
         if new_w != self._ed_w:
@@ -857,28 +857,28 @@ class App:
 
     # ---------- 新旧表格统一访问层（旧 SysListView32 路径保留兼容） ----------
     def tblSel(self):
-        return self.win.tableSelectedRow(TBL) if self._new_table else self.win.getTableSelectedRow(TBL)
+        return self.win.table_selected_row(TBL) if self._new_table else self.win.get_table_selected_row(TBL)
 
     def tblSetSel(self, r):
         if self._new_table:
-            self.win.tableSetSelectedRow(TBL, r)
+            self.win.table_set_selected_row(TBL, r)
             if hasattr(self.win, 'tableEnsureVisible'):
-                self.win.tableEnsureVisible(TBL, r)
+                self.win.table_ensure_visible(TBL, r)
         else:
-            self.win.setTableSelectedRow(TBL, r)
+            self.win.set_table_selected_row(TBL, r)
 
     def tblGet(self, r, c):
-        return self.win.tableGetCell(TBL, r, c) if self._new_table else self.win.getTableCell(TBL, r, c)
+        return self.win.table_get_cell(TBL, r, c) if self._new_table else self.win.get_table_cell(TBL, r, c)
 
     def tblSet(self, r, c, s):
         if self._new_table:
-            self.win.tableSetCell(TBL, r, c, s)
+            self.win.table_set_cell(TBL, r, c, s)
         else:
-            self.win.setTableCell(TBL, r, c, s)
+            self.win.set_table_cell(TBL, r, c, s)
 
     def tblCellRect(self, r, c):
-        return (self.win.tableCellRect(TBL, r, c) if self._new_table
-                else self.win.cellRect(TBL, r, c))
+        return (self.win.table_cell_rect(TBL, r, c) if self._new_table
+                else self.win.cell_rect(TBL, r, c))
 
     # ---------- 行编辑（双击表格某行） ----------
     def onGridDbl(self):
@@ -896,25 +896,25 @@ class App:
         self._row_edit_row = r
         self._row_edit_open = True
         for j in range(7):
-            w.setText(E_F0 + j, self.tblGet(r, j) or '')
+            w.set_text(E_F0 + j, self.tblGet(r, j) or '')
         self.layout()
         ids = self.rowEditIds()
         for i in ids:
-            w.setVisible(i, True)
-        w.raiseMany(ids)
-        w.setText(L_EDIT_COUNT, '正在编辑第 %d 行' % (r + 1))
+            w.set_visible(i, True)
+        w.raise_many(ids)
+        w.set_text(L_EDIT_COUNT, '正在编辑第 %d 行' % (r + 1))
 
     def rowEditClose(self):
         w = self.win
         was_open = getattr(self, '_row_edit_open', False)
         self._row_edit_open = False
         for i in self.rowEditIds():
-            w.setVisible(i, False)
+            w.set_visible(i, False)
         if was_open:
-            w.setText(L_EDIT_COUNT, '共 %d 行' % len(self.tableRows()))
+            w.set_text(L_EDIT_COUNT, '共 %d 行' % len(self.tableRows()))
 
     def rowVals(self):
-        return [(self.win.getText(E_F0 + i) or '').strip() for i in range(7)]
+        return [(self.win.get_text(E_F0 + i) or '').strip() for i in range(7)]
 
     def onRowOk(self):
         r = getattr(self, '_row_edit_row', -1)
@@ -922,7 +922,7 @@ class App:
             return
         err = self.applyRow(r, self.rowVals())
         if err:
-            self.win.setText(L_EDIT_COUNT, '第 %d 行：%s' % (r + 1, err))
+            self.win.set_text(L_EDIT_COUNT, '第 %d 行：%s' % (r + 1, err))
             return
         self.rowEditClose()
         self.fillTable()
@@ -931,7 +931,7 @@ class App:
         cur = getattr(self, 'curSel', '') or ''
         if cur and any(n.get('code') == cur for n in self.nodes):
             self.fillDetail(cur)
-        self.win.setText(L_EDIT_COUNT, '第 %d 行已更新' % (r + 1))
+        self.win.set_text(L_EDIT_COUNT, '第 %d 行已更新' % (r + 1))
 
     def onRowDel(self):
         r = getattr(self, '_row_edit_row', -1)
@@ -953,7 +953,7 @@ class App:
             return
         col = int(col)
         if self._new_table and hasattr(w, 'tableEnsureVisible'):
-            w.tableEnsureVisible(TBL, row)
+            w.table_ensure_visible(TBL, row)
         rect_fn = getattr(w, 'tableCellRect', None) if self._new_table else getattr(w, 'cellRect', None)
         if not rect_fn:
             self.openRowEdit(row)          # 宿主不带该能力时退回底部编辑条
@@ -966,12 +966,12 @@ class App:
         tx, ty = self._tbl_pos
         eid = E_F0 + col
         self._ce = (row, col, eid)
-        w.moveMany([(eid, tx + cx, ty + cy, max(40, cw), max(20, ch), True)])
-        w.setText(eid, self.tblGet(row, col) or '')
-        w.setVisible(eid, True)
-        w.raiseMany([eid])
-        w.setFocus(eid)
-        w.setText(L_EDIT_COUNT, '正在编辑第 %d 行的「%s」' % (row + 1, COLS[col]))
+        w.move_many([(eid, tx + cx, ty + cy, max(40, cw), max(20, ch), True)])
+        w.set_text(eid, self.tblGet(row, col) or '')
+        w.set_visible(eid, True)
+        w.raise_many([eid])
+        w.set_focus(eid)
+        w.set_text(L_EDIT_COUNT, '正在编辑第 %d 行的「%s」' % (row + 1, COLS[col]))
 
     def cellBlur(self, *a):
         """EDIT 失焦 = 提交（点别处/点另一个格都算确认）。"""
@@ -983,8 +983,8 @@ class App:
             return
         self._ce = None                       # 先清，避免 setVisible 触发失焦再进一遍
         row, col, eid = ce
-        txt = (self.win.getText(eid) or '').strip()
-        self.win.setVisible(eid, False)
+        txt = (self.win.get_text(eid) or '').strip()
+        self.win.set_visible(eid, False)
         if commit:
             self.cellApply(row, col, txt)
 
@@ -999,7 +999,7 @@ class App:
         vals[col] = txt
         err = self.applyRow(row, vals, edited=key)
         if err:
-            w.setText(L_EDIT_COUNT, '第 %d 行：%s' % (row + 1, err))
+            w.set_text(L_EDIT_COUNT, '第 %d 行：%s' % (row + 1, err))
             return
         self.fillTable()                     # 双电源的行会一起变（编号/长度联动）
         self.tblSetSel(row)
@@ -1007,7 +1007,7 @@ class App:
         cur = getattr(self, 'curSel', '') or ''
         if cur and any(n.get('code') == cur for n in self.nodes):
             self.fillDetail(cur)
-        w.setText(L_EDIT_COUNT, '第 %d 行「%s」已更新' % (row + 1, COLS[col]))
+        w.set_text(L_EDIT_COUNT, '第 %d 行「%s」已更新' % (row + 1, COLS[col]))
     # ---------- 表格键盘 / 排序 / 粘贴 ----------
     def onGridAction(self, action, row, col, text):
         """宿主回调：F2=edit，Delete=delete，Insert=insert，Ctrl+V=paste，点列头=sort。"""
@@ -1053,7 +1053,7 @@ class App:
                 cells += [''] * (len(FIELDS) - len(cells))
                 rows.append(cells)
         if not rows:
-            self.win.setText(L_EDIT_COUNT, '剪贴板里没有可粘贴的行')
+            self.win.set_text(L_EDIT_COUNT, '剪贴板里没有可粘贴的行')
             return
         have = set(x['code'] for x in self.nodes)
         added = skipped = 0
@@ -1074,8 +1074,8 @@ class App:
         self.fillTable()
         if added:
             self.rebuild(fit=False)
-        self.win.setText(L_EDIT_COUNT, '已粘贴 %d 行%s' % (added, ('，跳过 %d 行' % skipped) if skipped else ''))
-        self.win.setText(L_STATUS, '已粘贴 %d 行，共 %d 行' % (added, len(self.nodes)))
+        self.win.set_text(L_EDIT_COUNT, '已粘贴 %d 行%s' % (added, ('，跳过 %d 行' % skipped) if skipped else ''))
+        self.win.set_text(L_STATUS, '已粘贴 %d 行，共 %d 行' % (added, len(self.nodes)))
 
     def gridSort(self, col):
         """点列头排序：按该列重排 nodes（数值列按数值，其余按文本）。"""
@@ -1093,7 +1093,7 @@ class App:
         self.nodes = sorted(self.nodes, key=k, reverse=not self._sort_asc)
         self.fillTable()
         self.rebuild(fit=False)
-        self.win.setText(L_EDIT_COUNT, '按「%s」%s排序'
+        self.win.set_text(L_EDIT_COUNT, '按「%s」%s排序'
                          % (COLS[col], '升序' if self._sort_asc else '降序'))
 
 
@@ -1105,7 +1105,7 @@ class App:
             return
         for cid, px, bold in self._font_ids:
             try:
-                self.win.setControlFont(cid, 'Microsoft YaHei', px, bold)
+                self.win.set_control_font(cid, 'Microsoft YaHei', px, bold)
             except Exception:
                 pass
 
@@ -1117,13 +1117,13 @@ class App:
             self._detail_rc[cid] = (x, y, ww, hh)
 
         # HTML .detail: box-shadow 0 4px 12px rgba(16,24,40,.1)，radius 6、边框 #D0D5DD
-        w.addShadowBox(DT_PANEL, DT_X, DT_Y, DT_W, DT_H,
+        w.add_shadow_box(DT_PANEL, DT_X, DT_Y, DT_W, DT_H,
                        14, 6, 0, 4, 12, '#1A101828', '#FFFFFF', '#FFFFFF', '#D0D5DD', 1)
         put(DT_PANEL, DT_X, DT_Y, DT_W, DT_H)
         x0 = DT_X + 12
         inner = DT_W - 24
         self._detail_ids = [DT_PANEL, D_SAVE, D_ADDCHILD, D_DEL, DT_TITLE, DT_TIP]
-        w.addLabel(DT_TITLE, '节点', x0, DT_Y + 8, inner, 20)
+        w.add_label(DT_TITLE, '节点', x0, DT_Y + 8, inner, 20)
         put(DT_TITLE, x0, DT_Y + 8, inner, 20)
         self._font_ids.append((DT_TITLE, 13, True))
 
@@ -1131,26 +1131,26 @@ class App:
         fields = [('用电点', D_F0 + 1), ('起点', D_F0 + 2), ('回路', D_F0 + 0), ('电缆型号', D_F0 + 3)]
         y = DT_Y + 34
         for i, (lb, fid) in enumerate(fields):
-            w.addLabel(DT_L0 + i, lb, x0, y, inner, 15)
+            w.add_label(DT_L0 + i, lb, x0, y, inner, 15)
             put(DT_L0 + i, x0, y, inner, 15)
-            w.addEdit(fid, '', x0, y + 16, inner, 26)
+            w.add_edit(fid, '', x0, y + 16, inner, 26)
             put(fid, x0, y + 16, inner, 26)
             self._detail_ids += [DT_L0 + i, fid]
             self._font_ids += [(DT_L0 + i, 12, False), (fid, 12, False)]
             y += 48
 
         # .ne-row：电压 / 功率 / 长度 三列并排（gap 8）
-        w.addLabel(DT_LV, '电压', x0, y, 104, 15)
+        w.add_label(DT_LV, '电压', x0, y, 104, 15)
         put(DT_LV, x0, y, 104, 15)
-        w.addCombo(D_VOL, x0, y + 16, 104, 26)
+        w.add_combo(D_VOL, x0, y + 16, 104, 26)
         put(D_VOL, x0, y + 16, 104, 26)
-        w.addLabel(DT_LLOAD, '功率 kW', x0 + 112, y, 64, 15)
+        w.add_label(DT_LLOAD, '功率 kW', x0 + 112, y, 64, 15)
         put(DT_LLOAD, x0 + 112, y, 64, 15)
-        w.addEdit(D_LOAD, '', x0 + 112, y + 16, 64, 26)
+        w.add_edit(D_LOAD, '', x0 + 112, y + 16, 64, 26)
         put(D_LOAD, x0 + 112, y + 16, 64, 26)
-        w.addLabel(DT_LL, '长度 m', x0 + 184, y, 64, 15)
+        w.add_label(DT_LL, '长度 m', x0 + 184, y, 64, 15)
         put(DT_LL, x0 + 184, y, 64, 15)
-        w.addEdit(D_LEN, '', x0 + 184, y + 16, 64, 26)
+        w.add_edit(D_LEN, '', x0 + 184, y + 16, 64, 26)
         put(D_LEN, x0 + 184, y + 16, 64, 26)
         for i in (DT_LV, DT_LL, DT_LLOAD):
             self._detail_ids.append(i)
@@ -1161,22 +1161,22 @@ class App:
         y += 48
 
         # .ne-actions：保存并重绘（primary） / ＋下游节点 / 删除
-        w.addButton(D_SAVE, '保存并重绘', x0, y + 4, 96, 26)
+        w.add_button(D_SAVE, '保存并重绘', x0, y + 4, 96, 26)
         put(D_SAVE, x0, y + 4, 96, 26)
-        w.addButton(D_ADDCHILD, '＋下游节点', x0 + 104, y + 4, 80, 26)
+        w.add_button(D_ADDCHILD, '＋下游节点', x0 + 104, y + 4, 80, 26)
         put(D_ADDCHILD, x0 + 104, y + 4, 80, 26)
-        w.addButton(D_DEL, '删除', x0 + 192, y + 4, 52, 26)
+        w.add_button(D_DEL, '删除', x0 + 192, y + 4, 52, 26)
         put(D_DEL, x0 + 192, y + 4, 52, 26)
         self._font_ids += [(D_SAVE, 12, False), (D_ADDCHILD, 12, False), (D_DEL, 12, False)]
         y += 36
-        w.addLabel(DT_TIP, '', x0, y, inner, 16)
+        w.add_label(DT_TIP, '', x0, y, inner, 16)
         put(DT_TIP, x0, y, inner, 16)
         self._detail_ids.append(DT_TIP)
         self._font_ids.append((DT_TIP, 11, False))
 
-        w.onClick(D_SAVE, self.onDetailSave)
-        w.onClick(D_ADDCHILD, self.onDetailAddchild)
-        w.onClick(D_DEL, self.onDetailDel)
+        w.on_click(D_SAVE, self.onDetailSave)
+        w.on_click(D_ADDCHILD, self.onDetailAddchild)
+        w.on_click(D_DEL, self.onDetailDel)
 
     def buildEditor(self):
         """HTML 的 .editor 侧板。
@@ -1185,71 +1185,71 @@ class App:
         弹出下面这条行编辑条（7 个输入 + 确定/删除/取消），确认后写回对应单元格。
         """
         w = self.win
-        w.addWhiteRect(ED_PANEL, ED_X, ED_Y, ED_W, ED_H)
+        w.add_white_rect(ED_PANEL, ED_X, ED_Y, ED_W, ED_H)
         # 画布与侧板之间：6px 拖动热区（自身不着色）+ 1px 可见分割线。
         # 热区原来是 addWhiteRect：白底 + WS_BORDER，浅色背景上既看不到"线"，
         # 又能看到 1px 深框压在表格左边，看着就像表格画面越过了分割线。
-        w.addStaticLine(SPLIT, ED_X - SPLIT_W, ED_Y, SPLIT_W, ED_H)
+        w.add_static_line(SPLIT, ED_X - SPLIT_W, ED_Y, SPLIT_W, ED_H)
         if hasattr(w, 'onDrag'):
-            w.onDrag(SPLIT, self.onSplitDrag)
+            w.on_drag(SPLIT, self.onSplitDrag)
         # z 序：分割条必须压在表格/编辑框之上。子窗口是谁后建谁在上，
         # 而表格比分割条晚建 -> 表格边缘会盖住分割条，肉眼看就是"表格越过了分割线"。
         # 建完所有控件后统一把分割条提到最前（逐个 bringToFront 是 O(n²)，用 raiseMany）。
-        w.raiseMany([SPLIT])
+        w.raise_many([SPLIT])
         px = ED_X + ED_PAD
         self._font_ids += [(L_EDIT_TITLE, 13, False), (L_EDIT_COUNT, 13, False),
                            (L_EDIT_FOOT, 12, False)]
-        w.addLabel(L_EDIT_TITLE, '节点数据', px, ED_Y + 12, 120, 20)
-        w.addLabel(L_EDIT_COUNT, '', px + 78, ED_Y + 12, 100, 20)
+        w.add_label(L_EDIT_TITLE, '节点数据', px, ED_Y + 12, 120, 20)
+        w.add_label(L_EDIT_COUNT, '', px + 78, ED_Y + 12, 100, 20)
         bx = ED_X + ED_W - ED_PAD - 72
-        w.addButton(B_CLOSE, '关闭', bx, ED_Y + 8, 72, 26)
-        w.addButton(B_APPLY, '应用并重绘', bx - 100, ED_Y + 8, 96, 26)
-        w.addButton(B_ADDROW, '＋ 新增节点', bx - 196, ED_Y + 8, 92, 26)
+        w.add_button(B_CLOSE, '关闭', bx, ED_Y + 8, 72, 26)
+        w.add_button(B_APPLY, '应用并重绘', bx - 100, ED_Y + 8, 96, 26)
+        w.add_button(B_ADDROW, '＋ 新增节点', bx - 196, ED_Y + 8, 92, 26)
         self._font_ids += [(B_CLOSE, 13, False), (B_APPLY, 13, False), (B_ADDROW, 13, False)]
 
         # 表格：新自绘表格 PyMfcTable（命中/选中/矩形同源）；宿主不带 addTable 时退回旧 ListView
         if self._new_table:
-            w.addTable(TBL, px, ED_Y + ED_HEAD_H + 2, ED_W - 2 * ED_PAD, 300)
-            w.setTableColumns(TBL, self.gridColumns(ED_W - 2 * ED_PAD), COLS)
+            w.add_table(TBL, px, ED_Y + ED_HEAD_H + 2, ED_W - 2 * ED_PAD, 300)
+            w.set_table_columns(TBL, self.gridColumns(ED_W - 2 * ED_PAD), COLS)
             # code/name/upstream/cable/voltage = Text；loadKw/length = Double（右对齐 + 数值排序）
             # 11 列 + 删除列：name/code/upstream/circuit=Text，功率/拼数/水平/垂直/合计=Numeric
             # 起点/回路/终点/型号规格 = Text；根数/水平/垂直/余量/合计/功率 = Numeric；电压/删除 = Text
-            w.setTableColTypes(TBL, [0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0])
+            w.set_table_col_types(TBL, [0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0])
         else:
-            w.addListCtrl(TBL, px, ED_Y + ED_HEAD_H + 2, ED_W - 2 * ED_PAD, 300)
-            w.setControlFont(TBL, 'Microsoft YaHei', 12, False)
+            w.add_list_ctrl(TBL, px, ED_Y + ED_HEAD_H + 2, ED_W - 2 * ED_PAD, 300)
+            w.set_control_font(TBL, 'Microsoft YaHei', 12, False)
             for i, name in enumerate(COLS):
-                w.addColumn(TBL, name, COLW[i])
+                w.add_column(TBL, name, COLW[i])
 
         # 行编辑条（双击行才出现）
         for i in range(7):
-            w.addEdit(E_F0 + i, '', px, ED_Y, 1, 1)
+            w.add_edit(E_F0 + i, '', px, ED_Y, 1, 1)
             self._font_ids.append((E_F0 + i, 12, False))
-        w.addButton(B_LOADROW, '确定', px, ED_Y, 72, 26)
-        w.addButton(B_APPLYROW, '删除', px + 76, ED_Y, 72, 26)
-        w.addButton(B_DELROW, '取消', px + 152, ED_Y, 72, 26)
+        w.add_button(B_LOADROW, '确定', px, ED_Y, 72, 26)
+        w.add_button(B_APPLYROW, '删除', px + 76, ED_Y, 72, 26)
+        w.add_button(B_DELROW, '取消', px + 152, ED_Y, 72, 26)
         self._font_ids += [(B_LOADROW, 12, False), (B_APPLYROW, 12, False), (B_DELROW, 12, False)]
 
-        w.addLabel(L_EDIT_FOOT, '上游填现有编号即挂到该节点下；留空为起点。双击某行改值，确定后点「应用并重绘」。',
+        w.add_label(L_EDIT_FOOT, '上游填现有编号即挂到该节点下；留空为起点。双击某行改值，确定后点「应用并重绘」。',
                    px, ED_Y + ED_H - 30, ED_W - 2 * ED_PAD, 20)
 
-        w.onClick(B_ADDROW, self.onAddRow)
-        w.onClick(B_APPLY, self.onApplyAll)
-        w.onClick(B_CLOSE, self.onCloseEditor)
-        w.onDoubleClick(TBL, self.onGridDbl)
+        w.on_click(B_ADDROW, self.onAddRow)
+        w.on_click(B_APPLY, self.onApplyAll)
+        w.on_click(B_CLOSE, self.onCloseEditor)
+        w.on_double_click(TBL, self.onGridDbl)
         if hasattr(w, 'onBlur'):
             for i in range(7):
-                w.onBlur(E_F0 + i, self.cellBlur)
-        w.onClick(B_LOADROW, self.onRowOk)
-        w.onClick(B_APPLYROW, self.onRowDel)
-        w.onClick(B_DELROW, self.onRowCancel)
+                w.on_blur(E_F0 + i, self.cellBlur)
+        w.on_click(B_LOADROW, self.onRowOk)
+        w.on_click(B_APPLYROW, self.onRowDel)
+        w.on_click(B_DELROW, self.onRowCancel)
         # 表格的键盘与列头动作（F2/Delete/Insert/Ctrl+C/V/点列头排序）在宿主里拦，
         # 动作回到这里处理 —— 数据源始终在 Python 这一侧。
         if hasattr(w, 'onGridAction'):
-            w.onGridAction(self.onGridAction)
+            w.on_grid_action(self.on_grid_action)
 
     def title(self):
-        t = self.win.getText(E_TITLE)
+        t = self.win.get_text(E_TITLE)
         return t.strip() if t else self.titleText
 
     def style(self):
@@ -1292,33 +1292,33 @@ class App:
         self.view['crossings'] = ENG.countCrossings(self.view['links'])
         sceneText = json.dumps(scene, ensure_ascii=False)
         self._scene_text = sceneText          # 导出复用同一份坐标，绝不重排
-        win.loadPowerScene(CV, sceneText)
+        win.load_dwg_scene(CV, sceneText)
         # 大图要把同一份 4.8 MB 场景再解析一遍给缩略图，约 90 ms；推到下一帧做
         if len(view_nodes) >= 3000:
             self._pendingMini = sceneText if MINI_VIA_JSON else True
         elif MINI_VIA_JSON:
-            win.loadPowerScene(MINI, sceneText)
-            win.setPlanOptions(MINI, False, True, CV)
+            win.load_dwg_scene(MINI, sceneText)
+            win.set_dwg_options(MINI, False, True, CV)
         else:
-            win.copyPowerScene(MINI, CV)      # 拷主画布已解析好的场景，省一次 4.8 MB 解析
-            win.setPlanOptions(MINI, False, True, CV)
-        win.setPlanOptions(CV, self.showCable, False, -1)
+            win.copy_dwg_scene(MINI, CV)      # 拷主画布已解析好的场景，省一次 4.8 MB 解析
+            win.set_dwg_options(MINI, False, True, CV)
+        win.set_dwg_options(CV, self.showCable, False, -1)
         if fit:
             self.fitView()
         else:
             self.centerKeep()
         self.updateStatus()
         if self.curSel and any(n['code'] == self.curSel for n in self.view['nodes']):
-            win.selectPlan(CV, self.curSel)
+            win.select_dwg(CV, self.curSel)
             self.fillDetail(self.curSel)
         else:
             self.curSel = ''
             self.fillDetail(None)
         # 一次提交：逐个 bringToFront 每次都要全表重排 z 序 + 整窗重画（4 次约 120 ms）
-        win.bringToFrontMany([MI_PANEL, MINI, ST_PANEL, L_STATUS])
+        win.bring_to_front_many([MI_PANEL, MINI, ST_PANEL, L_STATUS])
         if self.editing:
             # 侧板是画布内右侧的绝对定位层：必须压过状态栏，否则底栏文字会穿到侧板底
-            win.bringToFrontMany(self.panelIds())
+            win.bring_to_front_many(self.panelIds())
             self._detail_raised = False
         if self.curSel:
             self.showDetail()
@@ -1331,9 +1331,9 @@ class App:
         r = self.view
         if not r:
             return
-        k = self.win.getPlanView(CV)[0]
+        k = self.win.get_dwg_view(CV)[0]
         # 文案与统计全交给规则引擎（HTML 的 updateStatus 逐字一致由 rules.json 里的 status 段控制）
-        self.win.setText(L_STATUS, ENG.statusText(r, self.nodes, k, self.countOverlaps()))
+        self.win.set_text(L_STATUS, ENG.statusText(r, self.nodes, k, self.countOverlaps()))
 
     # ---------- 视图 ----------
     def viewArea(self):
@@ -1348,66 +1348,66 @@ class App:
             return
         W, H = self.view['width'], self.view['height']
         aw, ah = self.viewArea()
-        # 与 C++ fitPlanCanvas 同一套口径：=1 地板 0.05/不封顶；=0 旧 HTML 口径 0.2/封顶 1.0。
+        # 与 C++ fitDwgCanvas 同一套口径：=1 地板 0.05/不封顶；=0 旧 HTML 口径 0.2/封顶 1.0。
         k = min((aw - 24) / W, (ah - 24) / H, PLAN_FIT_CAP)
         k = max(PLAN_ZOOM_MIN, min(PLAN_ZOOM_MAX, k))
         ox = int((aw - W * k) * 0.5)
         oy = int((ah - H * k) * 0.5)
         if not SURFACE_ON:
             ox = max(0, ox); oy = max(0, oy)
-        self.win.setPlanView(CV, k, ox, oy)
+        self.win.set_dwg_view(CV, k, ox, oy)
         self.updateStatus()
 
     def zoomAt(self, factor):
-        zoom, ox, oy = self.win.getPlanView(CV)
+        zoom, ox, oy = self.win.get_dwg_view(CV)
         if zoom <= 0:
             return
         nk = max(PLAN_ZOOM_MIN, min(PLAN_ZOOM_MAX, zoom * factor))
         cx, cy = self.cvW * 0.5, self.cvH * 0.5
         nox = int(cx - (cx - ox) * (nk / zoom))
         noy = int(cy - (cy - oy) * (nk / zoom))
-        self.win.setPlanView(CV, nk, nox, noy)
+        self.win.set_dwg_view(CV, nk, nox, noy)
         self.updateStatus()
-        self.win.setPlanOptions(MINI, False, True, CV)
+        self.win.set_dwg_options(MINI, False, True, CV)
 
     def setZoom(self, k):
-        zoom, ox, oy = self.win.getPlanView(CV)
+        zoom, ox, oy = self.win.get_dwg_view(CV)
         if zoom <= 0:
             return
         k = max(PLAN_ZOOM_MIN, min(PLAN_ZOOM_MAX, k))
         cx, cy = self.cvW * 0.5, self.cvH * 0.5
         nox = int(cx - (cx - ox) * (k / zoom))
         noy = int(cy - (cy - oy) * (k / zoom))
-        self.win.setPlanView(CV, k, nox, noy)
+        self.win.set_dwg_view(CV, k, nox, noy)
         self.updateStatus()
-        self.win.setPlanOptions(MINI, False, True, CV)
+        self.win.set_dwg_options(MINI, False, True, CV)
 
     def centerKeep(self):
         """布局重排后用同一个 zoom 重新居中（不跳到屏幕外）。"""
         if not self.view:
             return
-        zoom = self.win.getPlanView(CV)[0] or 1.0
+        zoom = self.win.get_dwg_view(CV)[0] or 1.0
         W, H = self.view['width'], self.view['height']
         aw, ah = self.viewArea()
         ox = int((aw - W * zoom) * 0.5)
         oy = int((ah - H * zoom) * 0.5)
-        self.win.setPlanView(CV, zoom, ox, oy)
+        self.win.set_dwg_view(CV, zoom, ox, oy)
 
     def centerOn(self, code):
-        rc = self.win.cardRectPlan(CV, code)
+        rc = self.win.card_rect_dwg(CV, code)
         if rc is None:
             return False
-        zoom = self.win.getPlanView(CV)[0] or 1.0
+        zoom = self.win.get_dwg_view(CV)[0] or 1.0
         x, y, w, h = rc
-        # cardRectPlan 是客户端矩形 → 反算到模型中心，再摆到视口中心
-        _, ox, oy = self.win.getPlanView(CV)
+        # cardRectDwg 是客户端矩形 → 反算到模型中心，再摆到视口中心
+        _, ox, oy = self.win.get_dwg_view(CV)
         mx = (x - ox) / zoom + w / (2 * zoom)
         my = (y - oy) / zoom + h / (2 * zoom)
         aw, ah = self.viewArea()
         nox = int(aw * 0.5 - mx * zoom)
         noy = int(ah * 0.5 - my * zoom)
-        self.win.setPlanView(CV, zoom, nox, noy)
-        self.win.setPlanOptions(MINI, False, True, CV)
+        self.win.set_dwg_view(CV, zoom, nox, noy)
+        self.win.set_dwg_options(MINI, False, True, CV)
         return True
 
     # ---------- 交互 ----------
@@ -1418,20 +1418,20 @@ class App:
 
     def onDirChange(self):
         # HTML 的 dirSel：0 = 横向 左→右（h），1 = 纵向 上→下（v）
-        self.horiz = (self.win.getCurSel(C_HORIZ) == 0)
+        self.horiz = (self.win.get_cur_sel(C_HORIZ) == 0)
         self.rebuild(fit=True)
 
     def onCableToggle(self):
-        self.showCable = bool(self.win.getCheck(C_CABLE))
-        self.win.setPlanOptions(CV, self.showCable, False, -1)
+        self.showCable = bool(self.win.get_check(C_CABLE))
+        self.win.set_dwg_options(CV, self.showCable, False, -1)
 
     def onCanvasClick(self):
-        code = self.win.getPlanSelection(CV)
+        code = self.win.get_dwg_selection(CV)
         self.curSel = code
         self.fillDetail(code)
 
     def onCanvasDblclick(self):
-        code = self.win.getPlanSelection(CV)
+        code = self.win.get_dwg_selection(CV)
         if not code:
             return
         if not self.descendants(code):
@@ -1464,13 +1464,13 @@ class App:
         u = ctypes.windll.user32
         down = bool(u.GetAsyncKeyState(0x11) & 0x8000) and bool(u.GetAsyncKeyState(0x46) & 0x8000)
         if down and not getattr(self, '_fDown', False):
-            self.win.setText(E_SEARCH, '')
-            self.win.setFocus(E_SEARCH)
-            self.win.setText(L_STATUS, 'Ctrl+F：输入编号或名称，敲字即定位节点')
+            self.win.set_text(E_SEARCH, '')
+            self.win.set_focus(E_SEARCH)
+            self.win.set_text(L_STATUS, 'Ctrl+F：输入编号或名称，敲字即定位节点')
         self._fDown = down
 
     def doSearch(self):
-        q = (self.win.getText(E_SEARCH) or '').strip()
+        q = (self.win.get_text(E_SEARCH) or '').strip()
         if not q:
             return
         hit = None
@@ -1479,7 +1479,7 @@ class App:
                 hit = n['code']
                 break
         if not hit:
-            self.win.setText(L_STATUS, '没有匹配 "%s" 的节点' % q)
+            self.win.set_text(L_STATUS, '没有匹配 "%s" 的节点' % q)
             return
         # 命中的节点若被折叠，先展开其祖先
         cm = self.childrenMap()
@@ -1498,7 +1498,7 @@ class App:
         if changed:
             self.rebuild(fit=False)
         self.curSel = hit
-        self.win.selectPlan(CV, hit)
+        self.win.select_dwg(CV, hit)
         self.centerOn(hit)
         self.fillDetail(hit)
         self.updateStatus()
@@ -1518,7 +1518,7 @@ class App:
         # 只隐藏控件，不撤销原生 z 序：详情控件置顶关系在隐藏期间仍然有效，
         # 再次弹出时不必重跑 raiseMany / RDW_ALLCHILDREN。编辑器开合会显式重置该标记。
         for i in self._detail_ids:
-            self.win.setVisible(i, False)
+            self.win.set_visible(i, False)
 
     def showDetail(self):
         # layout 里 detail 那几条已经带 show 标志，位置和显隐一次做完；
@@ -1536,10 +1536,10 @@ class App:
         self._detail_raised = True
         ids = self._detail_ids
         if hasattr(self.win, 'raiseMany'):
-            self.win.raiseMany(ids)    # 一次批量置顶，避免 O(n²) 逐个 bringToFront
+            self.win.raise_many(ids)    # 一次批量置顶，避免 O(n²) 逐个 bringToFront
         else:
             for i in ids:
-                self.win.bringToFront(i)
+                self.win.bring_to_front(i)
 
     def positionDetail(self):
         """HTML positionDetail：详情浮层固定在画布右上角，位置由 layout 统一算
@@ -1553,11 +1553,11 @@ class App:
             self.hideDetail()
             return
         win = self.win
-        win.setText(DT_TITLE, '节点 %s' % n['code'])
-        win.setText(D_F0 + 0, n['code'])
-        win.setText(D_F0 + 1, n.get('name') or '')
-        win.setText(D_F0 + 2, n.get('upstream') or '')
-        win.setText(D_F0 + 3, n.get('cable') or '')
+        win.set_text(DT_TITLE, '节点 %s' % n['code'])
+        win.set_text(D_F0 + 0, n['code'])
+        win.set_text(D_F0 + 1, n.get('name') or '')
+        win.set_text(D_F0 + 2, n.get('upstream') or '')
+        win.set_text(D_F0 + 3, n.get('cable') or '')
 
         # 电压下拉：选项是固定的 5 档，建控件时只灌一次；每次点节点只改选中项。
         # （CB_ADDSTRING 每条约 5ms，逐节点重建下拉串会白白拖慢详情弹出。）
@@ -1568,32 +1568,32 @@ class App:
             opts.append((cur, voltText(cur)))
         keys = tuple(o[0] for o in opts)
         if keys != self._vol_opts_seen:
-            win.clearStrings(D_VOL)
+            win.clear_strings(D_VOL)
             for o in opts:
-                win.addString(D_VOL, o[1])
+                win.add_string(D_VOL, o[1])
             self._vol_opts_seen = keys
-        win.setCurSel(D_VOL, next((i for i, o in enumerate(opts) if o[0] == cur), 0))
+        win.set_cur_sel(D_VOL, next((i for i, o in enumerate(opts) if o[0] == cur), 0))
 
         vlen = float(n.get('length') or 0)
         vload = float(n.get('loadKw') or 0)
-        win.setText(D_LEN, ('%g' % vlen) if vlen > 0 else '')
-        win.setText(D_LOAD, ('%g' % vload) if vload > 0 else '')
+        win.set_text(D_LEN, ('%g' % vlen) if vlen > 0 else '')
+        win.set_text(D_LOAD, ('%g' % vload) if vload > 0 else '')
 
         down = len(self.descendants(n['code']))
         tip = '第 %d 层 · 下游 %d 个' % (self.depthOf(n['code']) + 1, down)
         if n['code'] in self.collapsed:
             tip += '（已折叠）'
-        win.setText(DT_TIP, tip)
+        win.set_text(DT_TIP, tip)
         self.showDetail()
 
     # ---------- 详情里的节点编辑（照 HTML 的 saveNodeEdit / addChildNode / deleteNode）----------
     def detailValues(self):
-        code = (self.win.getText(D_F0 + 0) or '').strip()
-        name = (self.win.getText(D_F0 + 1) or '').strip()
-        upstream = (self.win.getText(D_F0 + 2) or '').strip()
-        cable = (self.win.getText(D_F0 + 3) or '').strip()
-        sel = self.win.getCurSel(D_VOL)
-        volt_label = self.win.getString(D_VOL, sel) if sel >= 0 else '380V 三相'
+        code = (self.win.get_text(D_F0 + 0) or '').strip()
+        name = (self.win.get_text(D_F0 + 1) or '').strip()
+        upstream = (self.win.get_text(D_F0 + 2) or '').strip()
+        cable = (self.win.get_text(D_F0 + 3) or '').strip()
+        sel = self.win.get_cur_sel(D_VOL)
+        volt_label = self.win.get_string(D_VOL, sel) if sel >= 0 else '380V 三相'
         volt_key = '380'
         if volt_label == '220V 单相':
             volt_key = '220'
@@ -1606,8 +1606,8 @@ class App:
                 return 0.0
         return dict(code=code, name=name, upstream=upstream, cable=cable,
                     voltage=volt_key,
-                    length=num((self.win.getText(D_LEN) or '').strip()),
-                    loadKw=num((self.win.getText(D_LOAD) or '').strip()))
+                    length=num((self.win.get_text(D_LEN) or '').strip()),
+                    loadKw=num((self.win.get_text(D_LOAD) or '').strip()))
 
     def onDetailSave(self):
         if not self.curSel:
@@ -1632,7 +1632,7 @@ class App:
         self.curSel = nd['code']
         self.fillTable()
         self.rebuild(fit=False)
-        self.win.selectPlan(CV, nd['code'])
+        self.win.select_dwg(CV, nd['code'])
         self.fillDetail(nd['code'])
 
     def onDetailAddchild(self):
@@ -1652,7 +1652,7 @@ class App:
         self.curSel = code
         self.fillTable()
         self.rebuild(fit=False)
-        self.win.selectPlan(CV, code)
+        self.win.select_dwg(CV, code)
         self.fillDetail(code)
 
     def onDetailDel(self):
@@ -1672,10 +1672,10 @@ class App:
         self.fillTable()
         self.rebuild(fit=False)
         if up:
-            self.win.selectPlan(CV, up)
+            self.win.select_dwg(CV, up)
             self.fillDetail(up)
         else:
-            self.win.selectPlan(CV, '')
+            self.win.select_dwg(CV, '')
             self.hideDetail()
 
     # ---------- 示例 ----------
@@ -1687,7 +1687,7 @@ class App:
         # E_TITLE 挂 onChange→rebuild：程序改标题会同步触发一次整图重排（10221 节点约 0.5 s）
         self._suppressTitleRebuild = True
         try:
-            self.win.setText(E_TITLE, title)
+            self.win.set_text(E_TITLE, title)
             # 标题框是节点化自绘：抑制 onChange 后没有 rebuild 帮它重画，这里单独失效一次
             self.win.repaint(E_TITLE)
         finally:
@@ -1758,10 +1758,10 @@ class App:
             rows = self.parseCsvText(text)
             nodes = self.nodesFromRows(rows)
         except Exception as e:
-            self.win.setText(L_STATUS, '导入失败：%s' % e)
+            self.win.set_text(L_STATUS, '导入失败：%s' % e)
             return
         if not nodes:
-            self.win.setText(L_STATUS, '导入失败：文件里没有有效数据行')
+            self.win.set_text(L_STATUS, '导入失败：文件里没有有效数据行')
             return
         self.loadNodes(nodes, title, rawRows=rows)
 
@@ -1772,18 +1772,18 @@ class App:
         try:
             rows = readXlsx(p)
         except Exception as e:
-            self.win.setText(L_STATUS, 'XLSX 解析失败：%s' % e)
+            self.win.set_text(L_STATUS, 'XLSX 解析失败：%s' % e)
             return
         if not rows:
-            self.win.setText(L_STATUS, 'XLSX 里没有可读的行')
+            self.win.set_text(L_STATUS, 'XLSX 里没有可读的行')
             return
         try:
             nodes = self.nodesFromRows(self.parseCsvText(rowsToCsv(rows)))
         except Exception as e:
-            self.win.setText(L_STATUS, 'XLSX 导入失败：%s' % e)
+            self.win.set_text(L_STATUS, 'XLSX 导入失败：%s' % e)
             return
         if not nodes:
-            self.win.setText(L_STATUS, 'XLSX 里没有有效的设备行')
+            self.win.set_text(L_STATUS, 'XLSX 里没有有效的设备行')
             return
         self.loadNodes(nodes, os.path.basename(p))
     def onImportJson(self):
@@ -1796,14 +1796,14 @@ class App:
         try:
             r = M.powerplan.parseJson(text)
         except Exception as e:
-            self.win.setText(L_STATUS, '导入失败：%s' % e)
+            self.win.set_text(L_STATUS, '导入失败：%s' % e)
             return
         self.loadNodes(r['nodes'], title)
 
     def onPasteJson(self):
         txt = clipboardText()
         if not txt.strip():
-            self.win.setText(L_STATUS, '剪贴板里没有文本')
+            self.win.set_text(L_STATUS, '剪贴板里没有文本')
             return
         self.importJsonText(txt, '粘贴的 JSON')
 
@@ -1830,7 +1830,7 @@ class App:
         if not p:
             return
         writeText(p, self.sceneView()['json'])
-        self.win.setText(L_STATUS, '已导出 JSON：%s' % p)
+        self.win.set_text(L_STATUS, '已导出 JSON：%s' % p)
 
     def onExportCsv(self):
         if not self.view:
@@ -1849,9 +1849,9 @@ class App:
         try:
             rows = list(csv.reader(io.StringIO(self.csvText())))
         except Exception as e:
-            self.win.setText(L_STATUS, '导出 XLSX 失败：%s' % e)
+            self.win.set_text(L_STATUS, '导出 XLSX 失败：%s' % e)
             return
-        self.win.setText(L_STATUS, '已导出 XLSX：%s' % p)
+        self.win.set_text(L_STATUS, '已导出 XLSX：%s' % p)
 
     def onExportSvg(self):
         if not self.view:
@@ -1860,7 +1860,7 @@ class App:
         if not p:
             return
         writeText(p, self.sceneView()['svg'])
-        self.win.setText(L_STATUS, '已导出 SVG：%s' % p)
+        self.win.set_text(L_STATUS, '已导出 SVG：%s' % p)
 
     def onExportPng(self):
         if not self.view:
@@ -1871,9 +1871,9 @@ class App:
         try:
             size = M.powerplan.renderScenePng(p, self.sceneText(), 2)
         except Exception as e:
-            self.win.setText(L_STATUS, '导出 PNG 失败：%s' % e)
+            self.win.set_text(L_STATUS, '导出 PNG 失败：%s' % e)
             return
-        self.win.setText(L_STATUS, '已导出 PNG（2x %dx%d）：%s' % (size[0], size[1], p))
+        self.win.set_text(L_STATUS, '已导出 PNG（2x %dx%d）：%s' % (size[0], size[1], p))
 
     # ---------- 编辑侧板 ----------
     def panelIds(self):
@@ -1891,12 +1891,12 @@ class App:
         self.fillTable()
         self.layout()
         for i in self.panelIds():
-            self.win.setVisible(i, True)
+            self.win.set_visible(i, True)
         for i in self.rowEditIds():
-            self.win.setVisible(i, False)
-        self.win.raiseMany(self.panelIds())
+            self.win.set_visible(i, False)
+        self.win.raise_many(self.panelIds())
         self._detail_raised = False
-        self.win.setText(L_EDIT_COUNT, '共 %d 行' % len(self.tableRows()))
+        self.win.set_text(L_EDIT_COUNT, '共 %d 行' % len(self.tableRows()))
         self.fitView()
 
     show_editor = showEditor
@@ -1905,16 +1905,16 @@ class App:
         self.editing = False
         self._row_edit_open = False
         for i in self.panelIds() + self.rowEditIds():
-            self.win.setVisible(i, False)
+            self.win.set_visible(i, False)
         self.layout()
         if self.view:
             self.fitView()
-        self.win.bringToFront(CV)
-        self.win.bringToFront(MI_PANEL)
-        self.win.bringToFront(MINI)
+        self.win.bring_to_front(CV)
+        self.win.bring_to_front(MI_PANEL)
+        self.win.bring_to_front(MINI)
         self._detail_raised = False
-        self.win.bringToFront(ST_PANEL)
-        self.win.bringToFront(L_STATUS)
+        self.win.bring_to_front(ST_PANEL)
+        self.win.bring_to_front(L_STATUS)
         self.positionDetail()
         if self.curSel:
             self.showDetail()
@@ -2126,9 +2126,9 @@ class App:
         self._rawRows = None
         if raw and self._new_table and len(raw) == len(self.nodes):
             # 一次导入：CSV 行本身就是表格要显示的文本，直接拼串（10221 行省掉 11 万次 gridText）
-            w.setTableRows(TBL, u'\n'.join(u'\t'.join([(c or '') for c in r]) for r in raw))
+            w.set_table_rows(TBL, u'\n'.join(u'\t'.join([(c or '') for c in r]) for r in raw))
             self._grid_rows = len(raw)
-            w.setText(L_EDIT_COUNT, '共 %d 行' % len(raw))
+            w.set_text(L_EDIT_COUNT, '共 %d 行' % len(raw))
             return
         rows = self.tableRows()
         lines = []
@@ -2137,13 +2137,13 @@ class App:
             if not self._new_table:
                 cells.append(u'\u2715')
             lines.append(u'\t'.join(cells))
-        w.setTableRows(TBL, u'\n'.join(lines))
+        w.set_table_rows(TBL, u'\n'.join(lines))
         self._grid_rows = len(rows)
-        w.setText(L_EDIT_COUNT, '共 %d 行' % len(rows))
+        w.set_text(L_EDIT_COUNT, '共 %d 行' % len(rows))
     def collectGrid(self):
         """从表格读回全部行（FIELDS 顺序）；同终点多行并进 feeds。"""
         w = self.win
-        nrows = len(self.tableRows()) if self._new_table else w.getTableRowCount(TBL)
+        nrows = len(self.tableRows()) if self._new_table else w.get_table_row_count(TBL)
         rows = []
         for i in range(nrows):
             vals = [(self.tblGet(i, j) or '').strip() for j in range(len(FIELDS))]
@@ -2175,12 +2175,12 @@ class App:
             self.syncFeeds(n)
             self.fillTable()
             self.rebuild(fit=False)
-            self.win.setText(L_EDIT_COUNT, '已删除 %s 的第 %d 条进线' % (code, fi + 1))
+            self.win.set_text(L_EDIT_COUNT, '已删除 %s 的第 %d 条进线' % (code, fi + 1))
             return
         self.onGridDelete(n.get('code'))
     def onGridDelete(self, code):
         if self.descendants(code):
-            self.win.setText(L_EDIT_COUNT, '节点 %s 还有下游，先删下游' % code)
+            self.win.set_text(L_EDIT_COUNT, '节点 %s 还有下游，先删下游' % code)
             return
         self.nodes = [n for n in self.nodes if n['code'] != code]
         self.collapsed.discard(code)
@@ -2188,10 +2188,10 @@ class App:
             self.curSel = ''
         self.fillTable()
         self.rebuild(fit=False)
-        self.win.setText(L_EDIT_COUNT, '已删除 %s' % code)
+        self.win.set_text(L_EDIT_COUNT, '已删除 %s' % code)
 
     def readForm(self):
-        vals = [self.win.getText(E_F0 + i) or '' for i in range(7)]
+        vals = [self.win.get_text(E_F0 + i) or '' for i in range(7)]
         out = dict(code=vals[0].strip(), name=vals[1].strip(), upstream=vals[2].strip(),
                    cable=vals[3].strip())
         try:
@@ -2218,7 +2218,7 @@ class App:
         self.curSel = code
         self.fillTable()
         self.rebuild(fit=False)
-        self.win.selectPlan(CV, code)
+        self.win.select_dwg(CV, code)
         self.fillDetail(code)
         r = len(self.tableRows()) - 1
         self.tblSetSel(r)
@@ -2226,7 +2226,7 @@ class App:
     def onDelRow(self):
         r = self.tblSel()
         if r < 0 or r >= len(self.tableRows()):
-            self.win.setText(L_EDIT_COUNT, '先在表格里点一行')
+            self.win.set_text(L_EDIT_COUNT, '先在表格里点一行')
             return
         self.gridDeleteRow(r)
 
@@ -2234,14 +2234,14 @@ class App:
         """HTML edApply：收回表格里每一行的值，校验后重绘。"""
         nodes, err = self.collectGrid()
         if err:
-            self.win.setText(L_EDIT_COUNT, err)
-            self.win.setText(L_STATUS, err)
+            self.win.set_text(L_EDIT_COUNT, err)
+            self.win.set_text(L_STATUS, err)
             return
         self.nodes = nodes
         self.rowEditClose()
         self.rebuild(fit=True)
         self.fillTable()
-        self.win.setText(L_EDIT_COUNT, '已按当前数据重绘')
+        self.win.set_text(L_EDIT_COUNT, '已按当前数据重绘')
 
 
 def readText(path):

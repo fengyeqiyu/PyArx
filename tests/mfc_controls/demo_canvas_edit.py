@@ -48,16 +48,16 @@ def main():
     p.pump(250)
 
     cv = names['cv']
-    w.setCanvasCommands(cv, CMDS)
-    w.setCanvasEditable(cv, True)
+    w.set_canvas_commands(cv, CMDS)
+    w.set_canvas_editable(cv, True)
     hint = names['hint']
 
     def on_sel(*a):
-        sel = w.getCanvasSelection(cv)
-        n = w.getCanvasItemCount(cv)
-        w.setText(hint, '共 %d 个图元 · 选中 %s' % (n, sel if sel else '无'))
+        sel = w.get_canvas_selection(cv)
+        n = w.get_canvas_item_count(cv)
+        w.set_text(hint, '共 %d 个图元 · 选中 %s' % (n, sel if sel else '无'))
 
-    w.onCanvasSelect(cv, on_sel)
+    w.on_canvas_select(cv, on_sel)
     on_sel()
 
     while True:

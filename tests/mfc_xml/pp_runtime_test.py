@@ -22,7 +22,7 @@ import PyMfcXml as M
 class App:
     def __init__(self, w): self.win = w
 
-win = M.Window('runtime-test', 700, 460); win.show(); M.pump(250); win.setTheme(False)
+win = M.Window('runtime-test', 700, 460); win.show(); M.pump(250); win.set_theme(False)
 app = App(win)
 
 c = Runtime.create('side_panel', app, 10, 10, 640, 380)
@@ -38,7 +38,7 @@ ck('XML 声明 on_click 仍在', c._decl.get('BtnLoad',{}).get('click')=='on_loa
 
 rows=[[u'AT1-%d'%(i+1),u'变压器',u'AT1',u'YJV22-4x35',u'630',u'10kV',u'12'] for i in range(39)]
 c.set_rows('Table', rows); M.pump(50)
-ck('批量灌 39 行', win.getTableRowCount(c.Table.id)==39, str(win.getTableRowCount(c.Table.id)))
+ck('批量灌 39 行', win.get_table_row_count(c.Table.id)==39, str(win.get_table_row_count(c.Table.id)))
 ck('重排外框', (c.move(20,20,500,300) or True) and c.Table.rect[3]==226, str(c.Table.rect))
 
 print('=== %d/%d PASS ==='%(PASS[0], PASS[0]+FAIL[0]), flush=True)

@@ -19,19 +19,19 @@ import PyMfcXml as M  # noqa: E402
 
 
 def dump(win, cid):
-    n = win.countStrings(cid)
-    return [win.getString(cid, i) for i in range(n)]
+    n = win.count_strings(cid)
+    return [win.get_string(cid, i) for i in range(n)]
 
 
 names = {}
 win = M.guiload(r"G:\PyArx\UIDesign\samples\06_qml_layout.xml", names=names)
 lid = names["Right"]
 
-win.setXmlValue("Right", "model", ["甲", "乙", "丙"])
+win.set_xml_value("Right", "model", ["甲", "乙", "丙"])
 print("一维 list  ->", dump(win, lid))
 
-win.setXmlValue("Right", "model", [["回路", 1], ["负载", 2]])
+win.set_xml_value("Right", "model", [["回路", 1], ["负载", 2]])
 print("二维 list  ->", dump(win, lid))
 
-win.setXmlValue("Right", "Items", "A|B")
+win.set_xml_value("Right", "Items", "A|B")
 print("字符串写法 ->", dump(win, lid))

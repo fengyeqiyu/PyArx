@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""XPowerCanvas 1:1 独立宿主探针：guiload 顶层窗口，不依赖 CAD 父 HWND。"""
+"""XDwgCanvas 1:1 独立宿主探针：guiload 顶层窗口，不依赖 CAD 父 HWND。"""
 import json
 import os
 import sys
@@ -23,10 +23,10 @@ try:
     win.show()
     p.pump(300)
     cid = names["cv"]
-    win.loadPowerSvg(cid, SVG)
+    win.load_dwg_svg(cid, SVG)
     p.pump(120)
-    size = win.getSize(cid)
-    saved = win.saveControlPng(cid, PNG)
+    size = win.get_size(cid)
+    saved = win.save_control_png(cid, PNG)
     R["names"] = names
     R["size"] = list(size)
     R["saved"] = bool(saved)

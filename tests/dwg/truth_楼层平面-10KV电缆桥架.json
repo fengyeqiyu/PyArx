@@ -1,0 +1,6977 @@
+{
+ "source_dxf": "楼层平面-10KV电缆桥架.dxf",
+ "encoding_used": "utf-8",
+ "dxf_version": "AC1027",
+ "dwg_codepage": null,
+ "summary": {
+  "model_space_entities": 80,
+  "block_internal_entities": 210,
+  "type_counts": {
+   "INSERT": 6,
+   "LINE": 278,
+   "MTEXT": 6
+  },
+  "type_counts_model_space": {
+   "INSERT": 6,
+   "LINE": 68,
+   "MTEXT": 6
+  },
+  "type_counts_in_blocks": {
+   "LINE": 210
+  },
+  "handle_count_unique": 290
+ },
+ "dictionaries": {
+  "count": 30,
+  "key_total": 114,
+  "keys": [
+   "2dWireframe",
+   "A0",
+   "A1",
+   "A2",
+   "A3",
+   "A4",
+   "A5",
+   "A6",
+   "A7",
+   "A8",
+   "A9",
+   "ACAD_CIP_PREVIOUS_PRODUCT_INFO",
+   "ACAD_COLOR",
+   "ACAD_DETAILVIEWSTYLE",
+   "ACAD_GROUP",
+   "ACAD_IMAGE_VARS",
+   "ACAD_LAST_SAVED_VERSION_INFO",
+   "ACAD_LAYOUT",
+   "ACAD_MATERIAL",
+   "ACAD_MLEADERSTYLE",
+   "ACAD_MLINESTYLE",
+   "ACAD_MTEXT_2008_RT",
+   "ACAD_MTEXT_2008_RT",
+   "ACAD_MTEXT_2008_RT",
+   "ACAD_MTEXT_2008_RT",
+   "ACAD_MTEXT_2008_RT",
+   "ACAD_MTEXT_2008_RT",
+   "ACAD_PLOTSETTINGS",
+   "ACAD_PLOTSTYLENAME",
+   "ACAD_ROUNDTRIP_2008_TABLESTYLE_CELLSTYLEMAP",
+   "ACAD_SCALELIST",
+   "ACAD_SECTIONVIEWSTYLE",
+   "ACAD_SORTENTS",
+   "ACAD_TABLESTYLE",
+   "ACAD_VISUALSTYLE",
+   "ACAD_XREC_ROUNDTRIP",
+   "ACAD_XREC_ROUNDTRIP",
+   "ACAD_XREC_ROUNDTRIP",
+   "ACAD_XREC_ROUNDTRIP",
+   "ACDB_RECOMPOSE_DATA",
+   "AcDbVariableDictionary",
+   "B0",
+   "B1",
+   "B2",
+   "B3",
+   "B4",
+   "B5",
+   "B6",
+   "BUMPTILE",
+   "BUMPTILE",
+   "BUMPTILE",
+   "Basic",
+   "Brighten",
+   "ByBlock",
+   "ByLayer",
+   "CANNOSCALE",
+   "CMLEADERSTYLE",
+   "CTABLESTYLE",
+   "CVIEWDETAILSTYLE",
+   "CVIEWSECTIONSTYLE",
+   "ColorChange",
+   "Conceptual",
+   "DIFFUSETILE",
+   "DIFFUSETILE",
+   "DIFFUSETILE",
+   "DRAWING_TOOL",
+   "Dim",
+   "EdgeColorOff",
+   "Facepattern",
+   "Flat",
+   "FlatWithEdges",
+   "Global",
+   "Gouraud",
+   "GouraudWithEdges",
+   "Hidden",
+   "Imperial24",
+   "Imperial24",
+   "JitterOff",
+   "Layout1",
+   "Layout2",
+   "Linepattern",
+   "MARKUPASSISTMODE",
+   "Metric50",
+   "Metric50",
+   "Model",
+   "OPACITYTILE",
+   "OPACITYTILE",
+   "OPACITYTILE",
+   "OverhangOff",
+   "REFLECTIONTILE",
+   "REFLECTIONTILE",
+   "REFLECTIONTILE",
+   "REFRACTIONTILE",
+   "REFRACTIONTILE",
+   "REFRACTIONTILE",
+   "REVIT_CATEGORY_MAPPING",
+   "REVIT_DICTIONARY",
+   "REVIT_GET_SITE",
+   "REVIT_SUB_CATEGORY_MAPPING",
+   "REVIT_TYPE_MAPPING",
+   "Realistic",
+   "SPECULARTILE",
+   "SPECULARTILE",
+   "SPECULARTILE",
+   "Shaded",
+   "Shaded with edges",
+   "Shades of Gray",
+   "Sketchy",
+   "Standard",
+   "Standard",
+   "Standard",
+   "Thicken",
+   "Wireframe",
+   "X-Ray"
+  ]
+ },
+ "classes": {
+  "count": 12,
+  "dxf_names": [
+   "ACDBDETAILVIEWSTYLE",
+   "ACDBDICTIONARYWDFLT",
+   "ACDBSECTIONVIEWSTYLE",
+   "CELLSTYLEMAP",
+   "DICTIONARYVAR",
+   "MATERIAL",
+   "MLEADERSTYLE",
+   "RASTERVARIABLES",
+   "SCALE",
+   "SORTENTSTABLE",
+   "TABLESTYLE",
+   "VISUALSTYLE"
+  ],
+  "rows": [
+   {
+    "dxf": "ACDBDICTIONARYWDFLT",
+    "cpp": "AcDbDictionaryWithDefault",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 0,
+    "is_entity": 0
+   },
+   {
+    "dxf": "MATERIAL",
+    "cpp": "AcDbMaterial",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 1153,
+    "is_entity": 0
+   },
+   {
+    "dxf": "VISUALSTYLE",
+    "cpp": "AcDbVisualStyle",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 4095,
+    "is_entity": 0
+   },
+   {
+    "dxf": "SCALE",
+    "cpp": "AcDbScale",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 1153,
+    "is_entity": 0
+   },
+   {
+    "dxf": "TABLESTYLE",
+    "cpp": "AcDbTableStyle",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 4095,
+    "is_entity": 0
+   },
+   {
+    "dxf": "MLEADERSTYLE",
+    "cpp": "AcDbMLeaderStyle",
+    "app": "ACDB_MLEADERSTYLE_CLASS",
+    "proxy_flags": 4095,
+    "is_entity": 0
+   },
+   {
+    "dxf": "ACDBSECTIONVIEWSTYLE",
+    "cpp": "AcDbSectionViewStyle",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 1025,
+    "is_entity": 0
+   },
+   {
+    "dxf": "ACDBDETAILVIEWSTYLE",
+    "cpp": "AcDbDetailViewStyle",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 1025,
+    "is_entity": 0
+   },
+   {
+    "dxf": "RASTERVARIABLES",
+    "cpp": "AcDbRasterVariables",
+    "app": "ISM",
+    "proxy_flags": 0,
+    "is_entity": 0
+   },
+   {
+    "dxf": "CELLSTYLEMAP",
+    "cpp": "AcDbCellStyleMap",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 1152,
+    "is_entity": 0
+   },
+   {
+    "dxf": "DICTIONARYVAR",
+    "cpp": "AcDbDictionaryVar",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 0,
+    "is_entity": 0
+   },
+   {
+    "dxf": "SORTENTSTABLE",
+    "cpp": "AcDbSortentsTable",
+    "app": "ObjectDBX Classes",
+    "proxy_flags": 0,
+    "is_entity": 0
+   }
+  ]
+ },
+ "header_vars": {
+  "$ACADVER": "AC1027",
+  "$ACADMAINTVER": 125.0,
+  "$DWGCODEPAGE": "ANSI_936",
+  "$REQUIREDVERSIONS": 0.0,
+  "$INSBASE": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$EXTMIN": [
+   -190734.480173338,
+   96402.99473356426,
+   -0.0015258207003583
+  ],
+  "$EXTMAX": [
+   200286.3771513731,
+   164455.7095921014,
+   3.49246037e-08
+  ],
+  "$LIMMIN": [
+   0.0,
+   0.0,
+   null
+  ],
+  "$LIMMAX": [
+   12.0,
+   9.0,
+   null
+  ],
+  "$ORTHOMODE": 0.0,
+  "$REGENMODE": 1.0,
+  "$FILLMODE": 1.0,
+  "$QTEXTMODE": 0.0,
+  "$MIRRTEXT": 0.0,
+  "$LTSCALE": 1.0,
+  "$ATTMODE": 1.0,
+  "$TEXTSIZE": 0.2,
+  "$TRACEWID": 0.05,
+  "$TEXTSTYLE": null,
+  "$CLAYER": 0.0,
+  "$CELTYPE": null,
+  "$CECOLOR": 256.0,
+  "$CELTSCALE": 1.0,
+  "$DISPSILH": 0.0,
+  "$DIMSCALE": 1.0,
+  "$DIMASZ": 0.18,
+  "$DIMEXO": 0.0625,
+  "$DIMDLI": 0.38,
+  "$DIMRND": 0.0,
+  "$DIMDLE": 0.0,
+  "$DIMEXE": 0.18,
+  "$DIMTP": 0.0,
+  "$DIMTM": 0.0,
+  "$DIMTXT": 0.18,
+  "$DIMCEN": 0.09,
+  "$DIMTSZ": 0.0,
+  "$DIMTOL": 0.0,
+  "$DIMLIM": 0.0,
+  "$DIMTIH": 1.0,
+  "$DIMTOH": 1.0,
+  "$DIMSE1": 0.0,
+  "$DIMSE2": 0.0,
+  "$DIMTAD": 0.0,
+  "$DIMZIN": 0.0,
+  "$DIMBLK": "",
+  "$DIMASO": 1.0,
+  "$DIMSHO": 1.0,
+  "$DIMPOST": "",
+  "$DIMAPOST": "",
+  "$DIMALT": 0.0,
+  "$DIMALTD": 2.0,
+  "$DIMALTF": 25.4,
+  "$DIMLFAC": 1.0,
+  "$DIMTOFL": 0.0,
+  "$DIMTVP": 0.0,
+  "$DIMTIX": 0.0,
+  "$DIMSOXD": 0.0,
+  "$DIMSAH": 0.0,
+  "$DIMBLK1": "",
+  "$DIMBLK2": "",
+  "$DIMSTYLE": null,
+  "$DIMCLRD": 0.0,
+  "$DIMCLRE": 0.0,
+  "$DIMCLRT": 0.0,
+  "$DIMTFAC": 1.0,
+  "$DIMGAP": 0.09,
+  "$DIMJUST": 0.0,
+  "$DIMSD1": 0.0,
+  "$DIMSD2": 0.0,
+  "$DIMTOLJ": 1.0,
+  "$DIMTZIN": 0.0,
+  "$DIMALTZ": 0.0,
+  "$DIMALTTZ": 0.0,
+  "$DIMUPT": 0.0,
+  "$DIMDEC": 4.0,
+  "$DIMTDEC": 4.0,
+  "$DIMALTU": 2.0,
+  "$DIMALTTD": 2.0,
+  "$DIMTXSTY": null,
+  "$DIMAUNIT": 0.0,
+  "$DIMADEC": 0.0,
+  "$DIMALTRND": 0.0,
+  "$DIMAZIN": 0.0,
+  "$DIMDSEP": 46.0,
+  "$DIMATFIT": 3.0,
+  "$DIMFRAC": 0.0,
+  "$DIMLDRBLK": "",
+  "$DIMLUNIT": 2.0,
+  "$DIMLWD": -2.0,
+  "$DIMLWE": -2.0,
+  "$DIMTMOVE": 0.0,
+  "$DIMFXL": 1.0,
+  "$DIMFXLON": 0.0,
+  "$DIMJOGANG": 0.7853981633974483,
+  "$DIMTFILL": 0.0,
+  "$DIMTFILLCLR": 0.0,
+  "$DIMARCSYM": 0.0,
+  "$DIMLTYPE": null,
+  "$DIMLTEX1": null,
+  "$DIMLTEX2": null,
+  "$DIMTXTDIRECTION": 0.0,
+  "$LUNITS": 2.0,
+  "$LUPREC": 4.0,
+  "$SKETCHINC": 0.1,
+  "$FILLETRAD": 0.0,
+  "$AUNITS": 0.0,
+  "$AUPREC": 0.0,
+  "$MENU": ".",
+  "$ELEVATION": 0.0,
+  "$PELEVATION": 0.0,
+  "$THICKNESS": 0.0,
+  "$LIMCHECK": 0.0,
+  "$CHAMFERA": 0.0,
+  "$CHAMFERB": 0.0,
+  "$CHAMFERC": 0.0,
+  "$CHAMFERD": 0.0,
+  "$SKPOLY": 0.0,
+  "$TDCREATE": 2461279.509722222,
+  "$TDUCREATE": 2461279.176388889,
+  "$TDUPDATE": 2461360.483402778,
+  "$TDUUPDATE": 2461360.150069445,
+  "$TDINDWG": 0.000162037,
+  "$TDUSRTIMER": 0.000162037,
+  "$USRTIMER": 1.0,
+  "$ANGBASE": 0.0,
+  "$ANGDIR": 0.0,
+  "$PDMODE": 0.0,
+  "$PDSIZE": 0.0,
+  "$PLINEWID": 0.0,
+  "$SPLFRAME": 0.0,
+  "$SPLINETYPE": 6.0,
+  "$SPLINESEGS": 8.0,
+  "$HANDSEED": "2EB",
+  "$SURFTAB1": 6.0,
+  "$SURFTAB2": 6.0,
+  "$SURFTYPE": 6.0,
+  "$SURFU": 6.0,
+  "$SURFV": 6.0,
+  "$UCSBASE": null,
+  "$UCSNAME": null,
+  "$UCSORG": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$UCSXDIR": [
+   1.0,
+   0.0,
+   0.0
+  ],
+  "$UCSYDIR": [
+   0.0,
+   1.0,
+   0.0
+  ],
+  "$UCSORTHOREF": null,
+  "$UCSORTHOVIEW": 0.0,
+  "$UCSORGTOP": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$UCSORGBOTTOM": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$UCSORGLEFT": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$UCSORGRIGHT": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$UCSORGFRONT": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$UCSORGBACK": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$PUCSBASE": null,
+  "$PUCSNAME": null,
+  "$PUCSORG": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$PUCSXDIR": [
+   1.0,
+   0.0,
+   0.0
+  ],
+  "$PUCSYDIR": [
+   0.0,
+   1.0,
+   0.0
+  ],
+  "$PUCSORTHOREF": null,
+  "$PUCSORTHOVIEW": 0.0,
+  "$PUCSORGTOP": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$PUCSORGBOTTOM": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$PUCSORGLEFT": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$PUCSORGRIGHT": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$PUCSORGFRONT": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$PUCSORGBACK": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$USERI1": 0.0,
+  "$USERI2": 0.0,
+  "$USERI3": 0.0,
+  "$USERI4": 0.0,
+  "$USERI5": 0.0,
+  "$USERR1": 0.0,
+  "$USERR2": 0.0,
+  "$USERR3": 0.0,
+  "$USERR4": 0.0,
+  "$USERR5": 0.0,
+  "$WORLDVIEW": 1.0,
+  "$SHADEDGE": 3.0,
+  "$SHADEDIF": 70.0,
+  "$TILEMODE": 1.0,
+  "$MAXACTVP": 64.0,
+  "$PINSBASE": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "$PLIMCHECK": 0.0,
+  "$PEXTMIN": [
+   1e+20,
+   1e+20,
+   1e+20
+  ],
+  "$PEXTMAX": [
+   -1e+20,
+   -1e+20,
+   -1e+20
+  ],
+  "$PLIMMIN": [
+   0.0,
+   0.0,
+   null
+  ],
+  "$PLIMMAX": [
+   12.0,
+   9.0,
+   null
+  ],
+  "$UNITMODE": 0.0,
+  "$VISRETAIN": 1.0,
+  "$PLINEGEN": 0.0,
+  "$PSLTSCALE": 1.0,
+  "$TREEDEPTH": 3020.0,
+  "$CMLSTYLE": null,
+  "$CMLJUST": 0.0,
+  "$CMLSCALE": 1.0,
+  "$PROXYGRAPHICS": 1.0,
+  "$MEASUREMENT": 1.0,
+  "$CELWEIGHT": -1.0,
+  "$ENDCAPS": 0.0,
+  "$JOINSTYLE": 0.0,
+  "$LWDISPLAY": 0.0,
+  "$INSUNITS": 4.0,
+  "$HYPERLINKBASE": "",
+  "$STYLESHEET": "",
+  "$XEDIT": 1.0,
+  "$CEPSNTYPE": 0.0,
+  "$PSTYLEMODE": 1.0,
+  "$FINGERPRINTGUID": null,
+  "$VERSIONGUID": null,
+  "$EXTNAMES": 1.0,
+  "$PSVPSCALE": 0.0,
+  "$OLESTARTUP": 0.0,
+  "$SORTENTS": 127.0,
+  "$INDEXCTL": 0.0,
+  "$HIDETEXT": 1.0,
+  "$XCLIPFRAME": 2.0,
+  "$HALOGAP": 0.0,
+  "$OBSCOLOR": 257.0,
+  "$OBSLTYPE": 0.0,
+  "$INTERSECTIONDISPLAY": 0.0,
+  "$INTERSECTIONCOLOR": 257.0,
+  "$DIMASSOC": 2.0,
+  "$PROJECTNAME": "",
+  "$CAMERADISPLAY": 0.0,
+  "$LENSLENGTH": 50.0,
+  "$CAMERAHEIGHT": 0.0,
+  "$STEPSPERSEC": 2.0,
+  "$STEPSIZE": 6.0,
+  "$3DDWFPREC": 2.0,
+  "$PSOLWIDTH": 0.25,
+  "$PSOLHEIGHT": 4.0,
+  "$LOFTANG1": 1.570796326794896,
+  "$LOFTANG2": 1.570796326794896,
+  "$LOFTMAG1": 0.0,
+  "$LOFTMAG2": 0.0,
+  "$LOFTPARAM": 7.0,
+  "$LOFTNORMALS": 1.0,
+  "$LATITUDE": 37.795,
+  "$LONGITUDE": -122.394,
+  "$NORTHDIRECTION": 0.0,
+  "$TIMEZONE": -8000.0,
+  "$LIGHTGLYPHDISPLAY": 1.0,
+  "$TILEMODELIGHTSYNCH": 1.0,
+  "$CMATERIAL": 11.0,
+  "$SOLIDHIST": 0.0,
+  "$SHOWHIST": 1.0,
+  "$DWFFRAME": 2.0,
+  "$DGNFRAME": 0.0,
+  "$REALWORLDSCALE": 1.0,
+  "$INTERFERECOLOR": 1.0,
+  "$INTERFEREOBJVS": 33.0,
+  "$INTERFEREVPVS": 30.0,
+  "$CSHADOW": 0.0,
+  "$SHADOWPLANELOCATION": 0.0
+ },
+ "layers": [
+  {
+   "name": "0",
+   "color": 7,
+   "ltype": "Continuous",
+   "flags": 0,
+   "frozen": false,
+   "locked": false,
+   "off": false
+  },
+  {
+   "name": "E-CABL-TRAY",
+   "color": 211,
+   "ltype": "Continuous",
+   "flags": 0,
+   "frozen": false,
+   "locked": false,
+   "off": false
+  },
+  {
+   "name": "E-CABL-TRAY-CNTR",
+   "color": 211,
+   "ltype": "中心",
+   "flags": 0,
+   "frozen": false,
+   "locked": false,
+   "off": false
+  },
+  {
+   "name": "E-CABL-TRAY-IDEN",
+   "color": 211,
+   "ltype": "Continuous",
+   "flags": 0,
+   "frozen": false,
+   "locked": false,
+   "off": false
+  }
+ ],
+ "linetypes": [
+  {
+   "name": "ByBlock",
+   "description": "",
+   "pattern_len": 0.0,
+   "alignment": 65,
+   "dashes": []
+  },
+  {
+   "name": "ByLayer",
+   "description": "",
+   "pattern_len": 0.0,
+   "alignment": 65,
+   "dashes": []
+  },
+  {
+   "name": "Continuous",
+   "description": "Solid line",
+   "pattern_len": 0.0,
+   "alignment": 65,
+   "dashes": []
+  },
+  {
+   "name": "中心",
+   "description": "",
+   "pattern_len": 31.75,
+   "alignment": 65,
+   "dashes": [
+    {
+     "length": 6.349999999999998,
+     "flags": 0,
+     "shapecode": null,
+     "scale": null,
+     "rotation": null,
+     "x_offset": null,
+     "y_offset": null
+    },
+    {
+     "length": -4.759999999999999,
+     "flags": 0,
+     "shapecode": null,
+     "scale": null,
+     "rotation": null,
+     "x_offset": null,
+     "y_offset": null
+    },
+    {
+     "length": 15.88,
+     "flags": 0,
+     "shapecode": null,
+     "scale": null,
+     "rotation": null,
+     "x_offset": null,
+     "y_offset": null
+    },
+    {
+     "length": -4.759999999999999,
+     "flags": 0,
+     "shapecode": null,
+     "scale": null,
+     "rotation": null,
+     "x_offset": null,
+     "y_offset": null
+    }
+   ]
+  }
+ ],
+ "blocks": [
+  {
+   "name": "*Model_Space",
+   "base_point": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "anonymous": false,
+   "flags": 0
+  },
+  {
+   "name": "*Paper_Space",
+   "base_point": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "anonymous": false,
+   "flags": 0
+  },
+  {
+   "name": "*Paper_Space0",
+   "base_point": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "anonymous": false,
+   "flags": 0
+  },
+  {
+   "name": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "base_point": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "anonymous": false,
+   "flags": 0
+  },
+  {
+   "name": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "base_point": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "anonymous": false,
+   "flags": 0
+  },
+  {
+   "name": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "base_point": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "anonymous": false,
+   "flags": 0
+  },
+  {
+   "name": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "base_point": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "anonymous": false,
+   "flags": 0
+  },
+  {
+   "name": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "base_point": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "anonymous": false,
+   "flags": 0
+  }
+ ],
+ "styles": [
+  {
+   "name": "Standard",
+   "flags": 0,
+   "font": "txt",
+   "bigfont": "",
+   "height": 0.0,
+   "width": 1.0,
+   "oblique": 0.0
+  },
+  {
+   "name": "Annotative",
+   "flags": 0,
+   "font": "txt",
+   "bigfont": "",
+   "height": 0.0,
+   "width": 1.0,
+   "oblique": 0.0
+  },
+  {
+   "name": "仿宋",
+   "flags": 0,
+   "font": "",
+   "bigfont": "",
+   "height": 37.49999999999998,
+   "width": 1.0,
+   "oblique": 0.0
+  }
+ ],
+ "dimstyles": [
+  {
+   "name": "Standard",
+   "flags": 0
+  },
+  {
+   "name": "Annotative",
+   "flags": 0
+  }
+ ],
+ "appids": [
+  {
+   "name": "ACAD",
+   "flags": 0
+  },
+  {
+   "name": "AcadAnnotative",
+   "flags": 0
+  },
+  {
+   "name": "REVIT",
+   "flags": 0
+  },
+  {
+   "name": "ACAD_MLEADERVER",
+   "flags": 0
+  },
+  {
+   "name": "ACAD_NAV_VCDISPLAY",
+   "flags": 0
+  }
+ ],
+ "entities": [
+  {
+   "handle": "BE",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -149.9999999999924,
+     355.025253169409,
+     0.0
+    ],
+    "end": [
+     -355.0252531694094,
+     149.9999999999948,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "BF",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -355.0252531694094,
+     149.9999999999948,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     149.9999999999948,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C0",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     149.9999999999948,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     147.4600000101534,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C1",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     147.4600000101534,
+     0.0
+    ],
+    "end": [
+     -353.9731507251904,
+     147.4600000101534,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C2",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -353.9731507251904,
+     147.4600000101534,
+     0.0
+    ],
+    "end": [
+     -147.4600000101528,
+     353.9731507251889,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C3",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -147.4600000101528,
+     353.9731507251889,
+     0.0
+    ],
+    "end": [
+     -147.4600000101524,
+     499.9999999999892,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C4",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -147.4600000101524,
+     499.9999999999892,
+     0.0
+    ],
+    "end": [
+     -149.9999999999921,
+     499.9999999999899,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C5",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -149.9999999999921,
+     499.9999999999899,
+     0.0
+    ],
+    "end": [
+     -149.9999999999924,
+     355.025253169409,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C6",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     150.0000000000059,
+     -150.0000000000054,
+     0.0
+    ],
+    "end": [
+     150.0000000000074,
+     499.9999999999892,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C7",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     150.0000000000074,
+     499.9999999999892,
+     0.0
+    ],
+    "end": [
+     147.4600000101675,
+     499.999999999989,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C8",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     147.4600000101675,
+     499.999999999989,
+     0.0
+    ],
+    "end": [
+     147.4600000101659,
+     -147.4600000101668,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "C9",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     147.4600000101659,
+     -147.4600000101667,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     -147.4600000101667,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "CA",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     -147.4600000101667,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     -150.0000000000053,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "CB",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     -150.0000000000053,
+     0.0
+    ],
+    "end": [
+     150.0000000000059,
+     -150.0000000000054,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "CC",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -149.9999999999924,
+     355.025253169409,
+     0.0
+    ],
+    "end": [
+     -149.9999999999924,
+     355.025253169409,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "CD",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -355.0252531694094,
+     149.9999999999948,
+     0.0
+    ],
+    "end": [
+     -355.0252531694094,
+     149.9999999999948,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "CE",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     149.9999999999948,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     149.9999999999948,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "CF",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     -147.4600000101667,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     -147.4600000101667,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D0",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     147.4600000101534,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     147.4600000101534,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D1",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     147.4600000101534,
+     0.0
+    ],
+    "end": [
+     -353.9731507251904,
+     147.4600000101534,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D2",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -353.9731507251904,
+     147.4600000101534,
+     0.0
+    ],
+    "end": [
+     -353.9731507251904,
+     147.4600000101534,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D3",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -353.9731507251904,
+     147.4600000101534,
+     0.0
+    ],
+    "end": [
+     -147.4600000101528,
+     353.9731507251889,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D4",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -147.4600000101528,
+     353.9731507251889,
+     0.0
+    ],
+    "end": [
+     -147.4600000101528,
+     353.9731507251889,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D5",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -147.4600000101528,
+     353.9731507251889,
+     0.0
+    ],
+    "end": [
+     -147.4600000101524,
+     499.9999999999892,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D6",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -147.4600000101524,
+     499.9999999999892,
+     0.0
+    ],
+    "end": [
+     -147.4600000101524,
+     499.9999999999892,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D7",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     150.0000000000074,
+     499.9999999998941,
+     0.0
+    ],
+    "end": [
+     150.0000000000074,
+     499.9999999998941,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D8",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -149.9999999999921,
+     499.9999999999899,
+     0.0
+    ],
+    "end": [
+     -149.9999999999921,
+     499.9999999999899,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "D9",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     150.0000000000059,
+     -150.0000000000054,
+     0.0
+    ],
+    "end": [
+     150.0000000000059,
+     -150.0000000000053,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "DA",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     147.4600000101675,
+     499.999999999989,
+     0.0
+    ],
+    "end": [
+     147.4600000101675,
+     499.999999999989,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "DB",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     147.4600000101675,
+     499.999999999989,
+     0.0
+    ],
+    "end": [
+     147.4600000101658,
+     -147.4600000101668,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "DC",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     147.4600000101659,
+     -147.4600000101667,
+     0.0
+    ],
+    "end": [
+     147.4600000101659,
+     -147.4600000101667,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "DD",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     147.4600000101659,
+     -147.4600000101667,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     -147.4600000101667,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "DE",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     -150.0000000000053,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     -150.0000000000053,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "DF",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     -147.4600000101667,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     147.4600000101534,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "E0",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -147.4600000101524,
+     499.9999999999892,
+     0.0
+    ],
+    "end": [
+     147.4600000101674,
+     499.999999999989,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "E1",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -149.9999999999921,
+     499.9999999999899,
+     0.0
+    ],
+    "end": [
+     -149.9999999999924,
+     355.025253169409,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "E2",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     150.0000000000074,
+     499.9999999999892,
+     0.0
+    ],
+    "end": [
+     -149.9999999999921,
+     499.9999999999899,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "E3",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     150.0000000000059,
+     -150.0000000000053,
+     0.0
+    ],
+    "end": [
+     150.0000000000074,
+     499.9999999999892,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "E4",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     -150.0000000000053,
+     0.0
+    ],
+    "end": [
+     150.0000000000058,
+     -150.0000000000053,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "E5",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -499.9999999999901,
+     149.9999999999948,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     -150.0000000000053,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "E6",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -355.0252531694094,
+     149.9999999999948,
+     0.0
+    ],
+    "end": [
+     -499.9999999999901,
+     149.9999999999948,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "E7",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -149.9999999999924,
+     355.025253169409,
+     0.0
+    ],
+    "end": [
+     -355.0252531694094,
+     149.9999999999948,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "16B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "16C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "16D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "16E",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "16F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "170",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "171",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "172",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "173",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123385.4205837915,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123385.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "174",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123385.4205837915,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123286.6905837864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "175",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123286.6905837864,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123286.6905837864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "176",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123286.6905837864,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123385.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "177",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123385.4205837915,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123385.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "178",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123385.4205837915,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123285.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "179",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123285.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123285.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "17A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123285.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123385.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "17B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123222.9850184933,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "17C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123222.9850184933,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123385.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "17D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123101.2468325852,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "17E",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123101.2468325852,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123101.2468325852,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "17F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123101.2468325852,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "180",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123101.2468325852,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123228.4133801003,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "181",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123228.4133801003,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123285.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "182",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123222.9850184933,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "183",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123222.9850184933,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "184",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123222.9850184933,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123385.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "185",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123101.5812299277,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "186",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123101.5812299277,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123101.5812299277,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "187",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123101.5812299277,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "188",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123101.5812299277,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123229.3937835016,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "189",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123229.3937835016,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123286.6905837864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "18A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123222.9850184933,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "18B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123228.4133801003,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123101.2468325852,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "18C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123228.4133801003,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123228.4133801003,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "18D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123229.3937835016,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123101.5812299277,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "18E",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123229.3937835016,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123229.3937835016,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "18F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123285.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123228.4133801003,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "190",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123222.9850184933,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123222.9850184933,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "191",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123385.4205837915,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123222.9850184933,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "192",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123286.6905837864,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123229.3937835016,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "193",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123385.4205837915,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123222.9850184933,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "194",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123222.9850184933,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123222.9850184933,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "199",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123770.1846010491,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123897.3511485643,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "19A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123897.3511485643,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "19B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "19C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123775.6129626562,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "19D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123775.6129626562,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123613.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "19E",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123613.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123713.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "19F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123713.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123770.1846010491,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A0",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123770.1846010491,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123713.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A1",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123713.177397358,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123614.4473973529,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A2",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123614.4473973529,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123776.2935536022,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A3",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123776.2935536022,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A4",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A5",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123897.3511485643,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A6",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123897.3511485643,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123770.1846010491,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A7",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123770.1846010491,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123770.1846010491,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A8",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123897.3511485643,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123897.3511485643,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1A9",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1AA",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1AB",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1AC",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1AD",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123775.6129626562,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123775.6129626562,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1AE",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123613.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123613.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1AF",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123713.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123713.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B0",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123770.1846010491,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123897.3511485643,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B1",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123897.3511485643,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B2",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B3",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123776.2935536022,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B4",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123776.2935536022,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123614.4473973529,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B5",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123713.177397358,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123614.4473973529,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B6",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123713.177397358,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123770.1846010491,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B7",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123770.1846010491,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123713.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B8",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123613.177397358,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123713.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1B9",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123775.6129626562,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123613.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1BA",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123775.6129626562,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1BB",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1BC",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123897.3511485643,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1BD",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123897.3511485643,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123770.1846010491,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1BE",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123770.1846010491,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123770.1846010491,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1BF",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123897.3511485643,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123897.3511485643,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1C0",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123713.177397358,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123713.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1C1",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123776.2935536022,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123776.2935536022,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1C2",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123614.4473973529,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123614.4473973529,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "213",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "214",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "215",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "216",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "217",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "218",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "219",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "21A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "21B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184408.4179686813,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184408.4179686813,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "21C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184408.4179686813,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184548.0432737016,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "21D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184548.0432737016,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184548.0432737016,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "21E",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184548.0432737016,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184408.4179686813,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "21F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184408.4179686813,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184408.4179686813,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "220",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184408.4179686813,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184549.8393249186,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "221",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184549.8393249186,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184549.8393249186,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "222",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184549.8393249186,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184408.4179686813,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "223",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184613.4432218507,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "224",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184613.4432218507,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184408.4179686813,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "225",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184803.936531822,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "226",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184803.936531822,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184803.936531822,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "227",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184803.936531822,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "228",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184803.936531822,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184620.1654668366,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "229",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184620.1654668366,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184549.8393249186,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "22A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184613.4432218507,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "22B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184613.4432218507,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "22C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184613.4432218507,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184408.4179686813,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "22D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184803.4312944109,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "22E",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184803.4312944109,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184803.4312944109,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "22F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184803.4312944109,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "230",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184803.4312944109,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184618.7266724191,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "231",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184618.7266724191,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184548.0432737016,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "232",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184613.4432218507,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "233",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184620.1654668366,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184803.936531822,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "234",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184620.1654668366,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184620.1654668366,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "235",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184618.7266724191,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184803.4312944109,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "236",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184618.7266724191,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184618.7266724191,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "237",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184549.8393249186,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184620.1654668366,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "238",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184613.4432218507,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184613.4432218507,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "239",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184408.4179686813,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184613.4432218507,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "23A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184548.0432737016,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184618.7266724191,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "23B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184408.4179686813,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184613.4432218507,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "23C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184613.4432218507,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184613.4432218507,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "241",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184239.5636893394,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184055.792624354,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "242",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184055.792624354,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "243",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "244",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184246.2859343253,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "245",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184246.2859343253,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184451.3111874947,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "246",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184451.3111874947,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184309.8898312574,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "247",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184309.8898312574,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184239.5636893394,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "248",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184239.5636893394,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184309.8898312574,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "249",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184309.8898312574,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184449.5151362777,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "24A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184449.5151362777,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184245.2338318811,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "24B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184245.2338318811,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "24C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "24D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184055.792624354,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "24E",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184055.792624354,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184239.5636893394,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "24F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184239.5636893394,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184239.5636893394,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "250",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184055.792624354,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184055.792624354,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "251",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "252",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "253",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "254",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "255",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184246.2859343253,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184246.2859343253,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "256",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184451.3111874947,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184451.3111874947,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "257",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184309.8898312574,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184309.8898312574,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "258",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184239.5636893394,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184055.792624354,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "259",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184055.792624354,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "25A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "25B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184245.2338318811,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "25C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184245.2338318811,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184449.5151362777,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "25D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184309.8898312574,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184449.5151362777,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "25E",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184309.8898312574,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184239.5636893394,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "25F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184239.5636893394,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184309.8898312574,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "260",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184451.3111874947,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184309.8898312574,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "261",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184246.2859343253,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184451.3111874947,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "262",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184246.2859343253,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "263",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "264",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184055.792624354,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "265",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184055.792624354,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184239.5636893394,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "266",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184239.5636893394,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184239.5636893394,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "267",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184055.792624354,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184055.792624354,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "268",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184309.8898312574,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184309.8898312574,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "269",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184245.2338318811,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184245.2338318811,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "26A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "block",
+   "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+   "geometry": {
+    "start": [
+     -184449.5151362777,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184449.5151362777,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "EA",
+   "type": "INSERT",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+    "insertion": [
+     -185673.7828633947,
+     117551.2920646864,
+     0.0
+    ],
+    "scale_x": null,
+    "scale_y": null,
+    "rotation": 180.0,
+    "columns": null,
+    "rows": null
+   }
+  },
+  {
+   "handle": "ED",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY-CNTR",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185673.7828633947,
+     96405.74556156511,
+     0.0
+    ],
+    "end": [
+     -185673.7828633947,
+     117051.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "F1",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185523.7828633947,
+     96405.74556156511,
+     0.0
+    ],
+    "end": [
+     -185823.7828633947,
+     96405.74556156511,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "F6",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185523.7828633947,
+     117051.2920646864,
+     0.0
+    ],
+    "end": [
+     -185823.7828633947,
+     117051.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "FE",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185523.7828633947,
+     96405.74556156511,
+     0.0
+    ],
+    "end": [
+     -185523.7828633947,
+     117051.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "100",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185526.3228633845,
+     96405.74556156511,
+     0.0
+    ],
+    "end": [
+     -185526.3228633845,
+     117051.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "102",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185821.2428634049,
+     96405.74556156511,
+     0.0
+    ],
+    "end": [
+     -185821.2428634049,
+     117051.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "104",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185823.7828633947,
+     96405.74556156511,
+     0.0
+    ],
+    "end": [
+     -185823.7828633947,
+     117051.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "106",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY-CNTR",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117551.2920646864,
+     0.0
+    ],
+    "end": [
+     179709.4959018355,
+     117551.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "10A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -183956.3364406641,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "10F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     179709.4959018355,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     179709.4959018355,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "117",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     179709.4959018355,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "119",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     179709.4959018355,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "11B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     179709.4959018355,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "11D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -183956.3364406641,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     179709.4959018355,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "11F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY-CNTR",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180974.4430492808,
+     163800.6905724067,
+     0.0
+    ],
+    "end": [
+     180974.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "123",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     163800.6905724067,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     163800.6905724067,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "128",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123963.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "130",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     163800.6905724067,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "132",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     163800.6905724067,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "134",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181121.903049291,
+     163800.6905724067,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "136",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     163800.6905724067,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123963.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "138",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY-CNTR",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180974.4430492808,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     180974.4430492808,
+     119280.8764069069,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "13C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123035.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "141",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     119280.8764069069,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     119280.8764069069,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "149",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     119280.8764069069,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "14B",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     119280.8764069069,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "14D",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     119280.8764069069,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "14F",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123035.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     119280.8764069069,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "151",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY-CNTR",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180974.4430492808,
+     123335.4205837915,
+     0.0
+    ],
+    "end": [
+     180974.4430492808,
+     123663.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "153",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123285.4205837915,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123285.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "155",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123384.1505837966,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123384.1505837966,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "157",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123285.4205837915,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123285.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "159",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123385.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123385.4205837915,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "15A",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123713.177397358,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123713.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "15C",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123613.177397358,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123613.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "15E",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123711.9073973631,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123711.9073973631,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "160",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123613.177397358,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123613.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "162",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181124.4430492808,
+     123285.4205837915,
+     0.0
+    ],
+    "end": [
+     181124.4430492808,
+     123713.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "164",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181121.903049291,
+     123285.4205837915,
+     0.0
+    ],
+    "end": [
+     181121.903049291,
+     123711.9073973631,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "166",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180826.9830492707,
+     123285.4205837915,
+     0.0
+    ],
+    "end": [
+     180826.9830492707,
+     123711.9073973631,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "168",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     180824.4430492808,
+     123285.4205837915,
+     0.0
+    ],
+    "end": [
+     180824.4430492808,
+     123713.177397358,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "197",
+   "type": "INSERT",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "block": "槽式电缆桥架垂直等径上弯通 - 标准-1184918-10KV电缆桥架",
+    "insertion": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale_x": null,
+    "scale_y": null,
+    "rotation": null,
+    "columns": null,
+    "rows": null
+   }
+  },
+  {
+   "handle": "1C5",
+   "type": "INSERT",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "block": "槽式电缆桥架垂直等径下弯通 - 标准-1184914-10KV电缆桥架",
+    "insertion": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale_x": null,
+    "scale_y": null,
+    "rotation": null,
+    "columns": null,
+    "rows": null
+   }
+  },
+  {
+   "handle": "1C6",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY-CNTR",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181474.4430492808,
+     164300.6905724067,
+     0.0
+    ],
+    "end": [
+     200274.4430492809,
+     164300.6905724067,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1CA",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181474.4430492808,
+     164150.6905724067,
+     0.0
+    ],
+    "end": [
+     181474.4430492808,
+     164450.6905724067,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1CF",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     200274.4430492809,
+     164150.6905724067,
+     0.0
+    ],
+    "end": [
+     200274.4430492809,
+     164450.6905724067,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1D7",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181474.4430492808,
+     164150.6905724067,
+     0.0
+    ],
+    "end": [
+     200274.4430492809,
+     164150.6905724067,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1D9",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181474.4430492808,
+     164153.2305723966,
+     0.0
+    ],
+    "end": [
+     200274.4430492809,
+     164153.2305723965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1DB",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181474.4430492808,
+     164448.1505724169,
+     0.0
+    ],
+    "end": [
+     200274.4430492809,
+     164448.1505724168,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1DD",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     181474.4430492808,
+     164450.6905724067,
+     0.0
+    ],
+    "end": [
+     200274.4430492809,
+     164450.6905724067,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1DF",
+   "type": "INSERT",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "block": "槽式电缆桥架水平弯通 - 标准-833094-10KV电缆桥架",
+    "insertion": [
+     180974.4430492808,
+     164300.6905724067,
+     0.0
+    ],
+    "scale_x": null,
+    "scale_y": null,
+    "rotation": 180.0,
+    "columns": null,
+    "rows": null
+   }
+  },
+  {
+   "handle": "1E0",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY-CNTR",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185173.7828633947,
+     117551.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117551.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1E4",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185173.7828633947,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -185173.7828633947,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1E9",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184903.3927155119,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1F1",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185173.7828633947,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1F3",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185173.7828633947,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1F5",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185173.7828633947,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1F7",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -185173.7828633947,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184903.3927155119,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1F9",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY-CNTR",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184479.1286467999,
+     117551.2920646864,
+     0.0
+    ],
+    "end": [
+     -184380.6005093761,
+     117551.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1FA",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184309.8898312574,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184549.8393249186,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1FB",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184549.8393249186,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184549.8393249186,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1FC",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184549.8393249186,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184311.6858824745,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1FD",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184410.2140198983,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184410.2140198983,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1FE",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184311.6858824745,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184549.8393249186,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "1FF",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184549.8393249186,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184549.8393249186,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "200",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184549.8393249186,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184309.8898312574,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "201",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184408.4179686813,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184408.4179686813,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "202",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184309.8898312574,
+     117401.2920646864,
+     0.0
+    ],
+    "end": [
+     -184309.8898312574,
+     117701.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "204",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184451.3111874948,
+     117701.2920646864,
+     0.0
+    ],
+    "end": [
+     -184451.3111874948,
+     117698.7520646965,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "206",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184311.6858824745,
+     117698.7520646965,
+     0.0
+    ],
+    "end": [
+     -184311.6858824745,
+     117403.8320646762,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "208",
+   "type": "LINE",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "start": [
+     -184451.3111874948,
+     117403.8320646762,
+     0.0
+    ],
+    "end": [
+     -184451.3111874948,
+     117401.2920646864,
+     0.0
+    ]
+   }
+  },
+  {
+   "handle": "23F",
+   "type": "INSERT",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "block": "槽式电缆桥架垂直等径上弯通 - 标准-1029901-10KV电缆桥架",
+    "insertion": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale_x": null,
+    "scale_y": null,
+    "rotation": null,
+    "columns": null,
+    "rows": null
+   }
+  },
+  {
+   "handle": "26D",
+   "type": "INSERT",
+   "layer": "E-CABL-TRAY",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "block": "槽式电缆桥架垂直等径下弯通 - 标准-1029905-10KV电缆桥架",
+    "insertion": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "scale_x": null,
+    "scale_y": null,
+    "rotation": null,
+    "columns": null,
+    "rows": null
+   }
+  },
+  {
+   "handle": "273",
+   "type": "MTEXT",
+   "layer": "E-CABL-TRAY-IDEN",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "position": [
+     -185663.0362675973,
+     106733.4488319985,
+     0.0
+    ],
+    "text": "\\pt317.50012,634.99987,952.5,1270.00013,1587.49988,1905,2222.50013,2539.99988,2857.5,3175.00012,3492.49987,3810,4127.50012,4444.99987,4762.5,5080.00012,5397.49987,5715,6032.50012,6349.99987,6667.5,6985.00012,7302.49987,7620,7937.50012,8254.99987,8572.5,8890.00012,9207.49987,9525,9842.50012,10159.99988;10KV电缆桥架 300 mm x 200 mm 6100",
+    "height": 37.49999999999998,
+    "style": "仿宋",
+    "width": 983.9999999999995,
+    "rect_height": 74.49999999999994,
+    "attachment": 5,
+    "flow_dir": 1,
+    "linespace_factor": 0.8982728685004111
+   }
+  },
+  {
+   "handle": "274",
+   "type": "MTEXT",
+   "layer": "E-CABL-TRAY-IDEN",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "position": [
+     -190260.380871261,
+     117540.545468889,
+     0.0
+    ],
+    "text": "\\pt317.50012,634.99987,952.5,1270.00013,1587.49988,1905,2222.50013,2539.99988,2857.5,3175.00012,3492.49987,3810,4127.50012,4444.99987,4762.5,5080.00012,5397.49987,5715,6032.50012,6349.99987,6667.5,6985.00012,7302.49987,7620,7937.50012,8254.99987,8572.5,8890.00012,9207.49987,9525,9842.50012,10159.99988;10KV电缆桥架 300 mm x 200 mm 6550",
+    "height": 37.49999999999998,
+    "style": "仿宋",
+    "width": 983.9999999999995,
+    "rect_height": 74.49999999999994,
+    "attachment": 5,
+    "flow_dir": 1,
+    "linespace_factor": 0.8982728685004111
+   }
+  },
+  {
+   "handle": "275",
+   "type": "MTEXT",
+   "layer": "E-CABL-TRAY-IDEN",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "position": [
+     180985.1896450781,
+     143886.8640037551,
+     0.0
+    ],
+    "text": "\\pt317.50012,634.99987,952.5,1270.00013,1587.49988,1905,2222.50013,2539.99988,2857.5,3175.00012,3492.49987,3810,4127.50012,4444.99987,4762.5,5080.00012,5397.49987,5715,6032.50012,6349.99987,6667.5,6985.00012,7302.49987,7620,7937.50012,8254.99987,8572.5,8890.00012,9207.49987,9525,9842.50012,10159.99988;10KV电缆桥架 300 mm x 200 mm 6250",
+    "height": 37.49999999999998,
+    "style": "仿宋",
+    "width": 983.9999999999995,
+    "rect_height": 74.49999999999994,
+    "attachment": 5,
+    "flow_dir": 1,
+    "linespace_factor": 0.8982728685004111
+   }
+  },
+  {
+   "handle": "276",
+   "type": "MTEXT",
+   "layer": "E-CABL-TRAY-IDEN",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "position": [
+     180985.1896450781,
+     121163.0785142219,
+     0.0
+    ],
+    "text": "\\pt317.50012,634.99987,952.5,1270.00013,1587.49988,1905,2222.50013,2539.99988,2857.5,3175.00012,3492.49987,3810,4127.50012,4444.99987,4762.5,5080.00012,5397.49987,5715,6032.50012,6349.99987,6667.5,6985.00012,7302.49987,7620,7937.50012,8254.99987,8572.5,8890.00012,9207.49987,9525,9842.50012,10159.99988;10KV电缆桥架 300 mm x 200 mm 5900",
+    "height": 37.49999999999998,
+    "style": "仿宋",
+    "width": 983.9999999999995,
+    "rect_height": 74.49999999999994,
+    "attachment": 5,
+    "flow_dir": 1,
+    "linespace_factor": 0.8982728685004111
+   }
+  },
+  {
+   "handle": "277",
+   "type": "MTEXT",
+   "layer": "E-CABL-TRAY-IDEN",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "position": [
+     180985.1896450781,
+     123504.2290094475,
+     0.0
+    ],
+    "text": "\\pt317.50012,634.99987,952.5,1270.00013,1587.49988,1905,2222.50013,2539.99988,2857.5,3175.00012,3492.49987,3810,4127.50012,4444.99987,4762.5,5080.00012,5397.49987,5715,6032.50012,6349.99987,6667.5,6985.00012,7302.49987,7620,7937.50012,8254.99987,8572.5,8890.00012,9207.49987,9525,9842.50012,10159.99988;10KV电缆桥架 300 mm x 200 mm 5994",
+    "height": 37.49999999999998,
+    "style": "仿宋",
+    "width": 983.9999999999995,
+    "rect_height": 74.49999999999994,
+    "attachment": 5,
+    "flow_dir": 1,
+    "linespace_factor": 0.8982728685004111
+   }
+  },
+  {
+   "handle": "278",
+   "type": "MTEXT",
+   "layer": "E-CABL-TRAY-IDEN",
+   "color": null,
+   "ltype": null,
+   "space": "model_space",
+   "block": null,
+   "geometry": {
+    "position": [
+     190879.3730681535,
+     164289.9439766093,
+     0.0
+    ],
+    "text": "\\pt317.50012,634.99987,952.5,1270.00013,1587.49988,1905,2222.50013,2539.99988,2857.5,3175.00012,3492.49987,3810,4127.50012,4444.99987,4762.5,5080.00012,5397.49987,5715,6032.50012,6349.99987,6667.5,6985.00012,7302.49987,7620,7937.50012,8254.99987,8572.5,8890.00012,9207.49987,9525,9842.50012,10159.99988;10KV电缆桥架 300 mm x 200 mm 6250",
+    "height": 37.49999999999998,
+    "style": "仿宋",
+    "width": 983.9999999999995,
+    "rect_height": 74.49999999999994,
+    "attachment": 5,
+    "flow_dir": 1,
+    "linespace_factor": 0.8982728685004111
+   }
+  }
+ ]
+}

@@ -34,22 +34,22 @@ def main():
         for j, key in enumerate(('code', 'name', 'upstream', 'cable', 'loadKw', 'voltage', 'length')):
             cid = ROW_BASE + i * 8 + j
             text = pp_app.voltText(node.get('voltage')) if key == 'voltage' else str(node.get(key, ''))
-            w.addEdit(cid, text, x + 1, y, COLS_W[j] - 2, ROW_H - 1)
-            w.setControlFont(cid, 'Microsoft YaHei', 11, False)
+            w.add_edit(cid, text, x + 1, y, COLS_W[j] - 2, ROW_H - 1)
+            w.set_control_font(cid, 'Microsoft YaHei', 11, False)
             ids.append(cid)
             n += 1
             x += COLS_W[j]
         cid = ROW_BASE + i * 8 + 7
-        w.addButton(cid, '✕', x, y, DEL_W, ROW_H - 1)
-        w.setControlFont(cid, 'Microsoft YaHei', 11, False)
+        w.add_button(cid, '✕', x, y, DEL_W, ROW_H - 1)
+        w.set_control_font(cid, 'Microsoft YaHei', 11, False)
         ids.append(cid)
         n += 1
-    w.raiseMany(ids)
+    w.raise_many(ids)
     t1 = time.perf_counter()
     print('创建控件 %d 个，耗时 %.3f s' % (n, t1 - t0))
     M.pump(60)
     out = r'G:\PyArx\docs\_pp_probe_grid.png'
-    w.savePng(out)
+    w.save_png(out)
     print('png', os.path.getsize(out), 'B')
     t2 = time.perf_counter()
     print('首帧+截图 %.3f s' % (t2 - t1))

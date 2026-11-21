@@ -52,16 +52,16 @@ def main():
 
     lv = names.get("lv")
     if lv:
-        w.setListSelected(lv, 6)
+        w.set_list_selected(lv, 6)
         _log("[list] list count=%d sel=%d scroll=%d"
-             % (w.getListItemCount(lv), w.getListSelected(lv), w.getListScroll(lv)))
+             % (w.get_list_item_count(lv), w.get_list_selected(lv), w.get_list_scroll(lv)))
 
     tv = names.get("tv")
     if tv:
-        w.setTableColumns(tv, "零件\t数量\t单价")
+        w.set_table_columns(tv, "零件\t数量\t单价")
         for row in ("接头\t12\t3.50", "法兰\t8\t12.00", "垫片\t40\t0.80"):
-            w.addTableRow(tv, row)
-        w.setTableSelectedRow(tv, 1)
+            w.add_table_row(tv, row)
+        w.set_table_selected_row(tv, 1)
         _log("[list] table 已填 3 行")
 
     _log("[list] 完成")

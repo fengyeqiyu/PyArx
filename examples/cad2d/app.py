@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """app.py —— PyArx CAD 二维绘图应用入口
 
   cd G:\\PyArx\\X64\\Release
@@ -13,6 +13,11 @@
   6 交互核心     interact/    坐标换算 / 捕捉 / 命令状态机
   7 命令行       cmdline/     命令名、别名、坐标输入
   底层           MfcXmlCore + PyMfcXml（窗口、控件、结构化画布）
+
+测试（在 examples\\cad2d 下执行，PYTHONPATH 指向 X64\\Release）：
+  python tests\\test_ui_shell.py   界面层：控件齐备 / 工具条 14 个按钮真实点击 / 胶囊 / 特性行编辑
+  python app.py --batch           图元流程 17 用例（画/改/选/存盘读盘/DIM/HATCH/TEXT）
+  python app.py --selftest        端到端走查（命令→画布→提交→重画→存盘）
 """
 import ctypes
 import json
@@ -33,7 +38,6 @@ import geom                   # noqa: E402
 import history                # noqa: E402
 import interact               # noqa: E402
 import render                 # noqa: E402
-import ui                     # noqa: E402
 
 XML = os.path.join(HERE, "cad_shell.xml")
 SHOT = os.path.join(HERE, "cad_shot.png")
@@ -59,18 +63,22 @@ def demo_doc():
 
 
 class App(object):
-    # 功能区/工具条的按钮表在 ui/__init__.py 里（数据 + 绘制 + 命中一处定义），
-    # 这里只负责把命中结果派发成动作。
+    # 界面实体全在 cad_shell.xml（原生控件），这里只负责装配与刷新：
+    # 按钮 Name → Python 回调（_bind_buttons）、数据 → 控件文字（_refresh_*）。
 
     def __init__(self, initial_doc=None):
         self.names = {}
-        self.win = p.guiload(XML, names=self.names)
+        with open(XML, "r", encoding="utf-8-sig") as f:
+            shell = f.read()
+        # @@RES@@ → examples\cad2d\res 的绝对路径：外壳只写文件名，换机器不用改 XML
+        shell = shell.replace("@@RES@@", os.path.join(HERE, "res"))
+        self.win = p.guiload_text(shell, context=globals(), names=self.names)
         self.win.show()
         p.pump(200)
         # 首帧的控件位置还是布局前的兜底坐标，重排一次让控件落到 XML 声明的
         # 位置，并整窗重画 —— 否则旧的绘制位置会在左边缘留下一条残字。
         try:
-            self.win.reflowXml()
+            self.win.reflow_xml()
         except Exception:
             pass
         p.pump(120)
@@ -92,35 +100,24 @@ class App(object):
         self._base_dirty = True       # 底图场景是否需要重灌（图元/图层变化时置位）
         self.point_mode = True        # 默认左键选择/定点，中键平移（AutoCAD 习惯）
         self.tab = "DRAW"
-        self.tb_hits = []
-        self._hover = None
-        self._hover_ctl = None
-        self._press = None
         self.status = {"coord": "X 0.0  Y 0.0", "zoom": "100%"}
-        self._status_hits = []
         self._last_status = 0.0
 
-        # 右栏信息行（自绘画布渲染）：特性分组行 / 视图三行
-        self.prop_rows = [("图层", "—"), ("颜色", "—"), ("类型", "—"), ("几何", "—")]
+        # 右栏信息行：数据在 Python，控件是外壳里预置的 <XLabel> 槽位
+        # 形态 [(组名, [(键, 值[, 字段]), ...]), ...]（与 _show_props 一致）
+        self.prop_rows = [("常规", [("颜色", "—"), ("图层", "—"),
+                                  ("线型", "—"), ("线宽", "—")]),
+                          ("几何图形", [("类型", "—")])]
         self.view_rows = [("缩放", "100%"), ("光标", "0.0, 0.0"), ("图元", "0")]
-        self.prop_hits = []
         self.prop_field = None
 
         self._bind_buttons()
-        self._status()
-        self._paint_toolbar()
-        self._paint_prop_top()
-        self._paint_layer_title()
-        self._paint_prop_bottom()
-        self._paint_cmd_label()
-        self._paint_hint("就绪")
-        for key, handler in (("cvTools", self._on_toolbar),
-                             ("cvStatus", self._on_status),
-                             ("cvPropTop", self._on_prop)):
-            if key in self.names:
-                self.win.onCanvasEvent(self.names[key], handler)
+        self._refresh_props()
+        self._refresh_view()
+        self._refresh_status()
+        self._hint("就绪")
         cv = self.names["cvMain"]
-        self.win.onCanvasEvent(cv, self._on_canvas)
+        self.win.on_canvas_event(cv, self._on_canvas)
         self.redraw(fit=True)
         self._refresh_layers()
 
@@ -192,8 +189,8 @@ class App(object):
         now = time.time()
         if now - self._last_status > 0.05:
             self._last_status = now
-            self._paint_prop_bottom()
-            self._paint_status()
+            self._refresh_view()
+            self._refresh_status()
 
     # ---------------------------------------------------------- 预览与重绘
     def _preview(self, world):
@@ -206,7 +203,7 @@ class App(object):
         self._last_draw = now
         self.render(preview=prev)
         hint = (" 捕捉:%s" % snap.kind) if snap is not None else ""
-        self._paint_hint("左键定点" + hint)
+        self._hint("左键定点" + hint)
 
     def render(self, preview=None):
         """画一帧：底图只在图元真的变了才重灌，其余每帧只换叠加层 + 视图。"""
@@ -217,23 +214,23 @@ class App(object):
             step = 24.0 / (self.mapper.zoom * u)
             step = max(50.0, min(5000.0, step))
         self._ensure_base()
-        ovl = render.to_overlay_svg(
+        ovl = render.to_overlay_xml(
             self.doc.symbols, self.doc.view(), unit=u, zoom=self.mapper.zoom,
             absolute=True, grid=self.grid_on, grid_step=step,
             selection=self.selection, rubber=self.rubber, preview=preview,
             cursor=None if self._mbtn else self.cursor_world)
-        self.win.loadPlanOverlay(cv, ovl)
-        self.win.setPlanView(cv, *self._to_canvas())
+        self.win.load_dwg_overlay_xml(cv, ovl)
+        self.win.set_dwg_view(cv, *self._to_canvas())
 
     def _ensure_base(self):
         """整图场景只喂一次：坐标取世界绝对值，之后平移缩放全由画布自己算。
 
-        原来每帧都重序列化十几 MB SVG 再让画布重解析（0.53s/帧 ≈ 2fps），
-        现在只有图元/图层变化时才重灌，其余帧开销只剩一个几十 KB 的叠加层。
+        画布吃的是 <XScene> 声明式场景（XLine/XArc/XPolyline/XText…），不再是
+        拼好的 SVG 文本：省掉「Python 拼串 → C++ 当 SVG 再解析一遍」这条往返。
         """
         if not self._base_dirty:
             return
-        self.win.loadPowerSvg(self.names["cvMain"], render.to_svg(
+        self.win.load_dwg_xml(self.names["cvMain"], render.to_xml(
             self.doc.symbols, self.doc.visible_entities(), self.doc.view(),
             unit=self.doc.screen_unit, absolute=True, cull=False))
         self._base_dirty = False
@@ -254,13 +251,13 @@ class App(object):
         self.render()
         self.view_rows[2] = ("图元", str(self.doc.count()))
         self._zoom_label()
-        self._paint_prop_bottom()
-        self._paint_status()
+        self._refresh_view()
+        self._refresh_status()
 
     def fit(self):
         cv = self.names["cvMain"]
         try:
-            cw, ch = self.win.getSize(cv)
+            cw, ch = self.win.get_size(cv)
         except Exception:
             cw, ch = 820, 592
         x0, y0, x1, y1 = self.doc.view()
@@ -268,7 +265,7 @@ class App(object):
         w = max(1.0, (x1 - x0) * u)
         h = max(1.0, (y1 - y0) * u)
         z = min((cw - 40) / w, (ch - 40) / h)
-        self.win.setPlanView(cv, *self._to_canvas_z(z, 20.0, 20.0))
+        self.win.set_dwg_view(cv, *self._to_canvas_z(z, 20.0, 20.0))
         self._sync_view()
 
     def _to_canvas_z(self, z, ox, oy):
@@ -278,7 +275,7 @@ class App(object):
 
     def _sync_view(self):
         try:
-            z, ox, oy = self.win.getPlanView(self.names["cvMain"])
+            z, ox, oy = self.win.get_dwg_view(self.names["cvMain"])
             z, ox, oy = self._to_mapper(z, ox, oy)
             self.mapper.set_view(self.doc.view(), z, ox, oy)
         except Exception:
@@ -292,8 +289,8 @@ class App(object):
 
     # ---------------------------------------------------------- 命令
     def _prompt(self, text):
-        if text and "lblInfo" in self.names:
-            self.win.setText(self.names["lblInfo"], text)
+        if text:
+            self._hint(text)
         print("[cad2d]", text)
 
     def _commit(self, payload):
@@ -353,14 +350,13 @@ class App(object):
         self.info("已创建 %s" % payload.kind)
 
     def info(self, text):
-        if "lblInfo" in self.names:
-            self.win.setText(self.names["lblInfo"], text)
+        self._hint(text)
         print("[cad2d]", text)
 
     def _run_input(self):
         n = self.names
-        line = self.win.getText(n["txtCmd"]) if "txtCmd" in n else ""
-        self.win.setText(n["txtCmd"], "")
+        line = self.win.get_text(n["txtCmd"]) if "txtCmd" in n else ""
+        self.win.set_text(n["txtCmd"], "")
         if line.strip():
             self.run_text(line.strip())
 
@@ -369,7 +365,7 @@ class App(object):
             self.info("未知命令：%s" % name)
             return
         self.info("命令 %s：%s" % (name, self.cmds.active.prompt))
-        self._paint_hint("左键定点")
+        self._hint("左键定点")
 
     def run_text(self, line):
         """命令行输入：解析后派发。"""
@@ -403,106 +399,86 @@ class App(object):
         else:
             self.info("命令 %s 待接入" % res.action)
 
-    # ---------------------------------------------------------- 界面动作
-    def _paint_toolbar(self):
-        if "cvTools" not in self.names:
-            return
-        svg, hits = ui.toolbar(46, 640, self._hover, self._press)
-        self.tb_hits = hits
-        self.win.loadPowerSvg(self.names["cvTools"], svg)
+    # ---------------------------------------------------------- 界面刷新
+    # 界面全部是外壳里的原生控件：这里只把数据写进控件（setText / setVisible /
+    # setXmlValue），不再拼 SVG、不再维护坐标命中表 —— 点击由控件自身 onClick 回传。
+    _PROP_SLOTS = 4          # 常规行槽（颜色/图层/线型/线宽）
+    _GEO_SLOTS = 8           # 几何行槽（line 最多 8 行）
+
+    def _hint(self, text):
+        """命令提示行（原 cvHint 自绘窄条）。"""
+        if "lblHint" in self.names:
+            self.win.set_text(self.names["lblHint"], text or "")
+
+    def _set_row(self, prefix, idx, label, value):
+        """写一行键值：key 槽 + value 槽，槽位在外壳 XML 里预置。"""
+        kid = self.names.get("%s%dk" % (prefix, idx))
+        vid = self.names.get("%s%dv" % (prefix, idx))
+        if kid is not None:
+            self.win.set_text(kid, label or "")
+        if vid is not None:
+            self.win.set_text(vid, "" if value is None else str(value))
+
+    def _refresh_props(self):
+        """把 prop_rows（[(组名, [(键, 值[, 字段]), ...]), ...]）摊进固定行槽。"""
+        general, geo = [], []
+        for gname, grows in self.prop_rows:
+            if "几何" in gname:
+                geo.extend(grows)
+            else:
+                general.extend(grows)
+        self._row_fields = {}
+        for i in range(self._PROP_SLOTS):
+            row = general[i] if i < len(general) else ("", "")
+            self._row_fields[("pr", i)] = row[2] if len(row) > 2 else None
+            self._set_row("pr", i, row[0], row[1])
+        for i in range(self._GEO_SLOTS):
+            row = geo[i] if i < len(geo) else ("", "")
+            self._row_fields[("ge", i)] = row[2] if len(row) > 2 else None
+            self._set_row("ge", i, row[0], row[1])
+
+    def _refresh_view(self):
+        """右栏"视图"三行：缩放 / 光标 / 图元数。"""
+        for i, row in enumerate(self.view_rows[:3]):
+            self._set_row("vw", i, row[0], row[1])
+
+    def _accent(self, name, on):
+        """状态栏胶囊的开启态：文字走强调色，不做整块高亮（与深色主题一致）。"""
         try:
-            self.win.setPlanView(self.names["cvTools"], 1.0, 0.0, 0.0)
+            # setXmlValue 的第一个参数是控件名（外壳 XML 里的 Name），不是 id
+            self.win.set_xml_value(name, "ForeColor", "#FF4C9AFF" if on else "#FFE6EDF3")
         except Exception:
             pass
+
+    def _refresh_status(self):
+        """状态栏：左三格（模型 / 栅格 / 左键模式）+ 右三格（坐标 / 图元 / 缩放）。"""
+        n = self.names
+        if "stlCoord" in n:
+            self.win.set_text(n["stlCoord"], self.status["coord"])
+        if "stlCount" in n:
+            self.win.set_text(n["stlCount"], "图元 %d" % self.doc.count())
+        if "stlZoom" in n:
+            self.win.set_text(n["stlZoom"], self.status["zoom"])
+        if "btnGrid" in n:
+            self.win.set_text(n["btnGrid"], "栅格 " + ("开" if self.grid_on else "关"))
+            self._accent("btnGrid", self.grid_on)
+        if "btnMode" in n:
+            self.win.set_text(n["btnMode"], "左键 " + ("定点" if self.point_mode else "平移"))
+            self._accent("btnMode", self.point_mode)
+
+    def _on_row(self, prefix, idx):
+        """点特性行的键名 → 该字段进入编辑（下拉或输入框）。"""
+        field = (getattr(self, "_row_fields", None) or {}).get((prefix, idx))
+        if field:
+            self._edit_prop(field)
 
     def _on_ribbon(self, name):
         """原生 XRibbon 命中：回传按钮 Name，直接派发命令。"""
         if name:
             self._fire(name)
 
-    def _paint_prop_top(self):
-        if "cvPropTop" not in self.names:
-            return
-        self.prop_hits = []
-        svg = ui.props_panel(348, 360, "特性", self.prop_rows,
-                             hits_out=self.prop_hits)
-        self.win.loadPowerSvg(self.names["cvPropTop"], svg)
-        try:
-            self.win.setPlanView(self.names["cvPropTop"], 1.0, 0.0, 0.0)
-        except Exception:
-            pass
-
-    def _paint_layer_title(self):
-        if "cvLayerTitle" not in self.names:
-            return
-        svg = ui.text_bar(348, 26, "图层", ui.C_TXT, "start", 11.5)
-        self.win.loadPowerSvg(self.names["cvLayerTitle"], svg)
-        try:
-            self.win.setPlanView(self.names["cvLayerTitle"], 1.0, 0.0, 0.0)
-        except Exception:
-            pass
-
-    def _paint_prop_bottom(self):
-        if "cvPropBottom" not in self.names:
-            return
-        svg = ui.props_panel(348, 80, "视图", self.view_rows)
-        self.win.loadPowerSvg(self.names["cvPropBottom"], svg)
-        try:
-            self.win.setPlanView(self.names["cvPropBottom"], 1.0, 0.0, 0.0)
-        except Exception:
-            pass
-
-    def _paint_cmd_label(self):
-        if "cvCmdLabel" not in self.names:
-            return
-        svg = ui.text_bar(56, 26, "命令:", ui.C_TXT_DIM, "start",
-                          bg="#202327")
-        self.win.loadPowerSvg(self.names["cvCmdLabel"], svg)
-        try:
-            self.win.setPlanView(self.names["cvCmdLabel"], 1.0, 0.0, 0.0)
-        except Exception:
-            pass
-
-    def _paint_hint(self, text):
-        if "cvHint" not in self.names:
-            return
-        svg = ui.text_bar(480, 26, text or "", ui.C_TXT_DIM, "start",
-                          bg="#202327")
-        self.win.loadPowerSvg(self.names["cvHint"], svg)
-        try:
-            self.win.setPlanView(self.names["cvHint"], 1.0, 0.0, 0.0)
-        except Exception:
-            pass
-
-    def _on_toolbar(self, phase, x, y, flags):
-        if phase == "wheel":
-            return True
-        act = ui.hit(self.tb_hits, x, y)
-        if phase == "move":
-            if act != self._hover:
-                self._hover = act
-                self._hover_ctl = "cvTools"
-                self._paint_toolbar()
-            return True
-        if phase == "down":
-            self._press = act
-            if act:
-                self._paint_toolbar()
-            return True
-        if phase == "up":
-            pressed, self._press = self._press, None
-            self._paint_toolbar()
-            if act and act == pressed:
-                self._fire(act)
-            return True
-        return True
-
     def _fire(self, act):
         """功能区/工具条共用的动作派发。"""
-        if act.startswith("TAB:"):
-            self.tab = act[4:]
-            self._hover = None
-            return
         if act == "FIT":
             self.fit()
         elif act in ("ZOOM_IN", "ZOOM_OUT"):
@@ -530,57 +506,42 @@ class App(object):
 
     def _bind_buttons(self):
         w, n = self.win, self.names
+        # 左工具条：外壳里 14 个 XIconButton，按钮 Name 就是命令名
+        for key in ("LINE", "PLINE", "CIRCLE", "ARC", "RECT", "HATCH", "TEXT", "DIM",
+                    "MOVE", "COPY", "ROTATE", "ERASE", "SELECT", "FIT"):
+            cid = n.get("tb" + key)
+            if cid is not None:
+                w.on_click(cid, lambda _id=None, k=key: self._fire(k))
         # 命令行：底层还没有键盘事件，先用"执行"按钮把输入框内容取出来派发
         if "btnRun" in n:
-            w.onClick(n["btnRun"], lambda _id=None: self._run_input())
+            w.on_click(n["btnRun"], lambda _id=None: self._run_input())
         # 功能区：原生 XRibbon 命中后把按钮 Name 直接回传 Python 派发
         if "cvRibbon" in n:
-            w.onClick(n["cvRibbon"], self._on_ribbon)
+            w.on_click(n["cvRibbon"], self._on_ribbon)
+        # 状态栏两个可点胶囊
+        if "btnGrid" in n:
+            w.on_click(n["btnGrid"], lambda _id=None: self._toggle_grid())
+        if "btnMode" in n:
+            w.on_click(n["btnMode"], lambda _id=None: self._toggle_point())
         # 特性面板编辑区：应用按钮 + 下拉即时写回
         if "propApply" in n:
-            w.onClick(n["propApply"], lambda _id=None: self._apply_prop())
+            w.on_click(n["propApply"], lambda _id=None: self._apply_prop())
         if "propCombo" in n:
-            w.onSelect(n["propCombo"], lambda _id=None: self._apply_prop())
+            w.on_select(n["propCombo"], lambda _id=None: self._apply_prop())
         if "propCombo" in n and "propEdit" in n:
-            w.setVisible(n["propCombo"], False)
-            w.setVisible(n["propEdit"], False)
+            w.set_visible(n["propCombo"], False)
+            w.set_visible(n["propEdit"], False)
+            self._set_prop_visible(False, False)
+        # 特性行：点键名进入编辑（颜色/图层/线型走下拉，几何值走输入框）
+        for prefix, count in (("pr", self._PROP_SLOTS), ("ge", self._GEO_SLOTS)):
+            for i in range(count):
+                cid = n.get("%s%dk" % (prefix, i))
+                if cid is not None:
+                    w.on_click(cid, lambda _id=None, p=prefix, ix=i: self._on_row(p, ix))
 
     def _status(self):
-        self._paint_status()
-
-    def _paint_status(self):
-        """状态栏画布：左侧胶囊（模型 / 栅格 / 左键模式），右侧坐标·图元数·缩放。"""
-        if "cvStatus" not in self.names:
-            return
-        chips = [("模型", None, False),
-                 ("栅格 " + ("开" if self.grid_on else "关"), "GRID", self.grid_on),
-                 ("左键 " + ("定点" if self.point_mode else "平移"), "PANMODE", self.point_mode)]
-        rights = [self.status["coord"], "图元 %d" % self.doc.count(), self.status["zoom"]]
-        svg, hits = ui.status_bar(1344, 24, chips, rights, self._hover)
-        self._status_hits = hits
-        self.win.loadPowerSvg(self.names["cvStatus"], svg)
-        try:
-            self.win.setPlanView(self.names["cvStatus"], 1.0, 0.0, 0.0)
-        except Exception:
-            pass
-
-    def _on_status(self, phase, x, y, flags):
-        if phase == "wheel":
-            return True
-        act = ui.hit(self._status_hits, x, y)
-        if phase == "move":
-            if act != self._hover:
-                self._hover = act
-                self._hover_ctl = "cvStatus"
-                self._paint_status()
-            return True
-        if phase == "up" and act:
-            if act == "GRID":
-                self._toggle_grid()
-            elif act == "PANMODE":
-                self._toggle_point()
-            return True
-        return True
+        """兼容旧调用点：状态栏现在由原生控件刷新。"""
+        self._refresh_status()
 
     def _new_doc(self):
         self.doc.clear()
@@ -662,7 +623,7 @@ class App(object):
             return
         z = self.mapper.zoom
         z = z * 1.25 if act == "in" else (z / 1.25 if act == "out" else 1.0)
-        self.win.setPlanView(self.names["cvMain"], *self._to_canvas_z(z, self.mapper.ox, self.mapper.oy))
+        self.win.set_dwg_view(self.names["cvMain"], *self._to_canvas_z(z, self.mapper.ox, self.mapper.oy))
         self._sync_view()
         self.render()
 
@@ -686,7 +647,7 @@ class App(object):
                 lay.name, render.aci_color(lay.color), "%.1f" % lay.width,
                 "是" if lay.visible else "否", "是" if lay.locked else "否"]))
         # 底层契约：行间 \n、格间 \t（见 docs/_API_CHANGES.md 第 5 条）
-        self.win.setTableRows(self.names["tblLayers"], "\n".join(rows))
+        self.win.set_table_rows(self.names["tblLayers"], "\n".join(rows))
 
     def set_selected_layer(self, name):
         self.doc.layers.ensure(name)
@@ -801,7 +762,7 @@ class App(object):
             geo = [("类型", self._KIND_NAME.get(entity.kind, entity.kind), None)]
             geo += self._geo_rows(entity)
             self.prop_rows = [("常规", general), ("几何图形", geo)]
-        self._paint_prop_top()
+        self._refresh_props()
         if entity is None:
             self.prop_field = None
             self._set_prop_visible(False, False)
@@ -809,17 +770,20 @@ class App(object):
     # ------------------------------------------------ 面板可编辑
     def _set_prop_visible(self, combo, edit):
         if "propCombo" in self.names:
-            self.win.setVisible(self.names["propCombo"], combo)
+            self.win.set_visible(self.names["propCombo"], combo)
         if "propEdit" in self.names:
-            self.win.setVisible(self.names["propEdit"], edit)
+            self.win.set_visible(self.names["propEdit"], edit)
+        # 没进入编辑时不摆"应用"按钮：它在 SVG 时代是个常驻空块，看着像掉了控件
+        if "propApply" in self.names:
+            self.win.set_visible(self.names["propApply"], bool(combo or edit))
 
     def _fill_combo(self, items, sel_index=-1):
         cid = self.names["propCombo"]
-        self.win.clearStrings(cid)
+        self.win.clear_strings(cid)
         for it in items:
-            self.win.addString(cid, it)
+            self.win.add_string(cid, it)
         if sel_index >= 0:
-            self.win.setCurSel(cid, sel_index)
+            self.win.set_cur_sel(cid, sel_index)
 
     def _edit_prop(self, field):
         e = self.selection[0] if self.selection else None
@@ -843,15 +807,8 @@ class App(object):
         else:
             raw = getattr(e, field, "")
             if "propEdit" in self.names:
-                self.win.setText(self.names["propEdit"], "" if raw is None else str(raw))
+                self.win.set_text(self.names["propEdit"], "" if raw is None else str(raw))
             self._set_prop_visible(False, True)
-
-    def _on_prop(self, phase, x, y, flags):
-        if phase == "down":
-            f = ui.hit(self.prop_hits, x, y)
-            if f:
-                self._edit_prop(f)
-        return True
 
     def _apply_prop(self):
         e = self.selection[0] if self.selection else None
@@ -861,19 +818,19 @@ class App(object):
         before = e.snapshot()
         if f == "layer":
             cid = self.names["propCombo"]
-            idx = self.win.getCurSel(cid)
+            idx = self.win.get_cur_sel(cid)
             if idx >= 0:
-                e.layer = self.win.getString(cid, idx)
+                e.layer = self.win.get_string(cid, idx)
         elif f == "color":
             cid = self.names["propCombo"]
-            e.color = max(0, self.win.getCurSel(cid))
+            e.color = max(0, self.win.get_cur_sel(cid))
         elif f == "linetype":
             cid = self.names["propCombo"]
-            idx = self.win.getCurSel(cid)
+            idx = self.win.get_cur_sel(cid)
             if idx >= 0:
-                e.linetype = self.win.getString(cid, idx)
+                e.linetype = self.win.get_string(cid, idx)
         else:
-            raw = self.win.getText(self.names["propEdit"])
+            raw = self.win.get_text(self.names["propEdit"])
             if f == "text":
                 e.text = raw
             else:
@@ -891,7 +848,7 @@ class App(object):
     def save(self):
         self.save_json()
         self._bring_front()
-        self.win.savePng(SHOT)
+        self.win.save_png(SHOT)
         self._unfront()
         self.info("已保存图纸 %s 并截图" % os.path.basename(DRAWING))
 
@@ -978,7 +935,7 @@ def main():
         rows = batch_test(app)
         _print_batch(rows)
         app._bring_front()
-        app.win.savePng(os.path.join(HERE, "cad2d_batch.png"))
+        app.win.save_png(os.path.join(HERE, "cad2d_batch.png"))
         app._unfront()
         return
     app.info("就绪 · 滚轮缩放 · 中键平移 · 命令 LINE/CIRCLE/RECT/ARC/PLINE/ERASE")
@@ -1013,27 +970,22 @@ def selftest(app):
 
     # 命令行入口：输入 → 执行按钮 → 派发
     if "txtCmd" in app.names:
-        app.win.setText(app.names["txtCmd"], "ZE")
+        app.win.set_text(app.names["txtCmd"], "ZE")
         app._run_input()
-        app.win.setText(app.names["txtCmd"], "L")
+        app.win.set_text(app.names["txtCmd"], "L")
         app._run_input()
         assert app.cmds.active is not None, "命令行没能起命令"
         app.cmds.cancel()
-        app.win.setText(app.names["txtCmd"], "多段线")
+        app.win.set_text(app.names["txtCmd"], "多段线")
         app._run_input()
         assert app.cmds.active is not None, "中文命令名没认出来"
         app.cmds.cancel()
 
-    # 工具条：模拟一次真实点击（命中表 → down → up），必须起 LINE
-    if app.tb_hits:
-        app.cmds.cancel()
-        box = [h for h in app.tb_hits if h[4] == "LINE"][0]
-        cx, cy = box[0] + box[2] / 2.0, box[1] + box[3] / 2.0
-        app._on_toolbar("move", cx, cy, 0)
-        app._on_toolbar("down", cx, cy, 0)
-        app._on_toolbar("up", cx, cy, 0)
-        assert app.cmds.active is not None, "工具条点击没起 LINE"
-        app.cmds.cancel()
+    # 工具条：14 个原生 XIconButton 的派发口（真实点击见 tests/test_ui_shell.py）
+    app.cmds.cancel()
+    app._fire("LINE")
+    assert app.cmds.active is not None, "工具条动作派发没起 LINE"
+    app.cmds.cancel()
 
     # 功能区：原生 XRibbon 命中后回传按钮 Name，直接派发 ERASE 不应崩
     app.cmds.cancel()
@@ -1086,7 +1038,7 @@ def selftest(app):
         door = next((n for n in names if n != line.layer), None)
         if door is not None:
             app._edit_prop("layer")
-            app.win.setCurSel(app.names["propCombo"], names.index(door))
+            app.win.set_cur_sel(app.names["propCombo"], names.index(door))
             app._apply_prop()
             assert line.layer == door, "面板改图层没写回"
             app._undo()
@@ -1094,7 +1046,7 @@ def selftest(app):
 
     # 几何数值：输入框改起点 X → 写回 → 撤销
     app._edit_prop("x1")
-    app.win.setText(app.names["propEdit"], "1234.5")
+    app.win.set_text(app.names["propEdit"], "1234.5")
     app._apply_prop()
     assert abs(line.x1 - 1234.5) < 1e-6, "面板几何数值没写回"
     app._undo()
@@ -1102,7 +1054,7 @@ def selftest(app):
 
     # 颜色下拉：选色 → 写回 → 撤销
     app._edit_prop("color")
-    app.win.setCurSel(app.names["propCombo"], 3)
+    app.win.set_cur_sel(app.names["propCombo"], 3)
     app._apply_prop()
     assert line.color == 3, "面板颜色没写回"
     app._undo()
@@ -1110,14 +1062,14 @@ def selftest(app):
 
     # 线型下拉：选 Dashed → 写回 → 撤销
     app._edit_prop("linetype")
-    app.win.setCurSel(app.names["propCombo"], 1)
+    app.win.set_cur_sel(app.names["propCombo"], 1)
     app._apply_prop()
     assert line.linetype == "Dashed", "面板线型没写回"
     app._undo()
 
     # 线宽输入框：2.5mm → 写回 → 撤销
     app._edit_prop("width")
-    app.win.setText(app.names["propEdit"], "2.5")
+    app.win.set_text(app.names["propEdit"], "2.5")
     app._apply_prop()
     assert abs(line.width - 2.5) < 1e-6, "面板线宽没写回"
     app._undo()
@@ -1340,6 +1292,16 @@ def batch_test(app):
     else:
         rec("区域填充 HATCH", "闭合边界剖面填充", "无矩形边界", False,
             "前置矩形实体缺失")
+
+    # 17) 文字：单点 + 命令参数 → Text 实体（工具条/Ribbon 的 TEXT 按钮同一入口）
+    app.run_cmd("TEXT", "门厅说明")
+    wc((2000, 5000))
+    t = next((e for e in app.doc.entities if e.kind == "text" and e.text == "门厅说明"), None)
+    ok = t is not None and _close(t.x, 2000) and _close(t.y, 5000)
+    rec("文字 TEXT", "单点生成 text，内容取自命令参数",
+        "text=%s，位置=(%.0f,%.0f)" % (t.text if t else None, t.x if t else 0,
+                                    t.y if t else 0),
+        ok, "TEXT 命令未落位或内容丢失")
 
     try:
         os.remove(tmp)

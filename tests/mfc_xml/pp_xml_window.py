@@ -2,7 +2,7 @@
 """端到端：从 XML 文档开窗显示配电图（不写一行布局代码）。
 
 文档由 powerplan.build(...)['xml'] 生成，内容是
-  <XWindow ...><XPowerCanvas Name="Plan" Data="{...JSON...}"/></XWindow>
+  <XWindow ...><XDwgCanvas Name="Plan" Data="{...JSON...}"/></XWindow>
 """
 import os
 import sys
@@ -29,7 +29,7 @@ def main():
     print('窗口已创建，names=%r' % (win.names() if hasattr(win, 'names') else '-'))
     win.show()
     time.sleep(0.5)
-    win.savePng(r'G:\PyArx\docs\_pp_xml_window.png')
+    win.save_png(r'G:\PyArx\docs\_pp_xml_window.png')
     print('已抓 _pp_xml_window.png')
     time.sleep(0.5)
     win.close()

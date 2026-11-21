@@ -1,0 +1,119 @@
+{
+ "entities": {
+  "line": {
+   "ok": true,
+   "cand": 0,
+   "handle": "731",
+   "class": "PyDbLine",
+   "bbox": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     120.0,
+     0.0
+    ]
+   ]
+  }
+ },
+ "geometry": {
+  "mat3_rotate": {
+   "ok": true,
+   "got": [
+    2.6794896412773994e-08,
+    0.9999999999999997
+   ],
+   "expect": [
+    0.0,
+    1.0
+   ],
+   "task": "绕 Z 轴 90 度后 (1,0) -> (0,1)"
+  },
+  "mat3_translate": {
+   "ok": true,
+   "got": [
+    11.0,
+    22.0
+   ],
+   "expect": [
+    11.0,
+    22.0
+   ],
+   "task": "平移矩阵作用于点"
+  },
+  "seg3_length": {
+   "ok": true,
+   "got": 5.0,
+   "expect": 5.0,
+   "task": "线段长度"
+  },
+  "vec2_perp": {
+   "ok": true,
+   "got": [
+    1.0,
+    0.0
+   ],
+   "expect": [
+    1.0,
+    0.0
+   ],
+   "task": "二维向量垂直（旋转 90 度）"
+  },
+  "vec3_angle": {
+   "ok": true,
+   "got": 1.5707963267948966,
+   "expect": 1.5707963,
+   "task": "两向量夹角（度）"
+  },
+  "vec3_cross": {
+   "ok": true,
+   "got": 1.0,
+   "expect": 1.0,
+   "task": "叉积（z 分量）"
+  },
+  "vec3_dot": {
+   "ok": true,
+   "got": 12.0,
+   "expect": 12,
+   "task": "点积"
+  },
+  "vec3_len": {
+   "ok": true,
+   "got": 5.0,
+   "expect": 5.0,
+   "task": "向量的模"
+  },
+  "vec3_normalize": {
+   "ok": true,
+   "got": 1.0,
+   "expect": 1.0,
+   "task": "归一化后长度=1"
+  }
+ },
+ "select": {
+  "objectIds": {
+   "ok": true,
+   "count": 1
+  },
+  "by_handle": {
+   "ok": true,
+   "handle": "731",
+   "class": "AcDbLine",
+   "layer": "0"
+  },
+  "by_class": {
+   "ok": true,
+   "class": "AcDbLine",
+   "count": 1
+  }
+ },
+ "summary": {
+  "ent_ok": 1,
+  "ent_total": 1,
+  "geo_ok": 9,
+  "geo_total": 9,
+  "sel_ok": 3,
+  "sel_total": 3
+ }
+}

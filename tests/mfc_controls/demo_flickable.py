@@ -47,17 +47,17 @@ if __name__ == '__main__':
     p.pump(300)
     fid = names['fl']
     kids = [names['r%d' % i] for i in range(len(ROWS))]
-    w.setFlickContent(fid, kids, 340, CONTENT_H)
+    w.set_flick_content(fid, kids, 340, CONTENT_H)
     p.pump(150)
     print('flick id=%d kids=%s offset=%d,%d content=%dx%d'
-          % (fid, kids, w.getFlickOffsetX(fid), w.getFlickOffsetY(fid), 340, CONTENT_H),
+          % (fid, kids, w.get_flick_offset_x(fid), w.get_flick_offset_y(fid), 340, CONTENT_H),
           flush=True)
     # 状态条跟手刷新：窗口再放大也一眼能看出当前偏移，不至于被窗口下边界吃掉
     last = None
     while True:
-        cur = 'offset: %d, %d   content: 340x%d' % (w.getFlickOffsetX(fid),
-                                                     w.getFlickOffsetY(fid), CONTENT_H)
+        cur = 'offset: %d, %d   content: 340x%d' % (w.get_flick_offset_x(fid),
+                                                     w.get_flick_offset_y(fid), CONTENT_H)
         if cur != last:
-            w.setText(names['hint'], cur)
+            w.set_text(names['hint'], cur)
             last = cur
         p.pump(40)

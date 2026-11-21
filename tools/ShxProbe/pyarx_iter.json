@@ -1,0 +1,19 @@
+{
+ "space_type": "PyDbBlockTableRecord",
+ "has_iter": false,
+ "entityIds": "list len=0 first_type=empty",
+ "first_val": "",
+ "db.objectIds": "list len=0",
+ "PyDbEntity.members_open": [
+  "cast",
+  "castShadows",
+  "createExtensionDictionary"
+ ],
+ "PyDbText.members_open": [
+  "cast",
+  "castShadows",
+  "createExtensionDictionary"
+ ],
+ "PyDbObject.cast_sig": "cast(arg0: PyArxCore.Rx.PyRxObject) -> PyArxCore.Db.PyDbObject\n",
+ "iterate": "ERR Traceback (most recent call last):\n  File \"G:/PyArx/tools/ShxProbe/pyarx_iter.py\", line 53, in main\n    for e in space:\n             ^^^^^\nTypeError: 'PyArxCore.Db.PyDbBlockTableRecord' object is not iterable\n"
+}

@@ -4,10 +4,10 @@
 # 用法：
 #   w = PyMfc.Window("test", 420, 300)
 #   box = VBox(w, margin=12, spacing=8)
-#   box.addLabel("标题")
-#   box.addButton("绘制", onClick=...)
-#   box.addEdit("edit")
-#   box.addListBox(height=100)
+#   box.add_label("标题")
+#   box.add_button("绘制", onClick=...)
+#   box.add_edit("edit")
+#   box.add_list_box(height=100)
 #   w.show()
 
 
@@ -18,7 +18,7 @@ class VBox:
         self.spacing = spacing
         self.items = []
         self.next_id = 2000
-        window.onResize(self._on_resize)
+        window.on_resize(self._on_resize)
 
     def _on_resize(self, w, h):
         self.relayout(w, h)
@@ -29,27 +29,27 @@ class VBox:
 
     def addLabel(self, text, height=24):
         cid = self._new_id()
-        self.window.addLabel(cid, text, 0, 0, 1, height)
+        self.window.add_label(cid, text, 0, 0, 1, height)
         self.items.append({"id": cid, "height": height, "grow": False})
         return cid
 
     def addButton(self, text, onClick=None, height=32):
         cid = self._new_id()
-        self.window.addButton(cid, text, 0, 0, 1, height)
+        self.window.add_button(cid, text, 0, 0, 1, height)
         if onClick is not None:
-            self.window.onClick(cid, onClick)
+            self.window.on_click(cid, onClick)
         self.items.append({"id": cid, "height": height, "grow": False})
         return cid
 
     def addEdit(self, text="", height=28):
         cid = self._new_id()
-        self.window.addEdit(cid, text, 0, 0, 1, height)
+        self.window.add_edit(cid, text, 0, 0, 1, height)
         self.items.append({"id": cid, "height": height, "grow": False})
         return cid
 
     def addListBox(self, height=100, grow=True):
         cid = self._new_id()
-        self.window.addListBox(cid, 0, 0, 1, height)
+        self.window.add_list_box(cid, 0, 0, 1, height)
         self.items.append({"id": cid, "height": height, "grow": grow})
         return cid
 
@@ -72,4 +72,4 @@ class VBox:
 
     def add_string_list(self, list_id, values):
         for value in values:
-            self.window.addString(list_id, value)
+            self.window.add_string(list_id, value)

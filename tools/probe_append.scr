@@ -1,0 +1,5 @@
+(setvar "SECURELOAD" 0)
+(setvar "FILEDIA" 0)
+(arxload "G:/PyArx/X64/Release/PyArxEngine.crx" nil)
+PYRUN
+G:/PyArx/tools/probe_append.py

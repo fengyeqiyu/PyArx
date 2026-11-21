@@ -41,25 +41,25 @@ win = pm.guiload(path, names=names, context=globals())
 win.show()
 
 # 初始一行
-check("初始行 T0", win.getText(names["T0"]) == "占位", win.getText(names["T0"]))
+check("初始行 T0", win.get_text(names["T0"]) == "占位", win.get_text(names["T0"]))
 
 # 二维 list：3 行 × 3 字段
 rows = [["AT1-1", "回路一", "正常"], ["AT1-2", "回路二", "告警"], ["AT1-3", "回路三", "断开"]]
-win.setXmlValue("V1", "model", rows)
+win.set_xml_value("V1", "model", rows)
 
-check("二维 list 第1行 T0", win.getText(names["T0"]) == "AT1-1", win.getText(names["T0"]))
-check("二维 list 第1行 S0", win.getText(names["S0"]) == "回路一", win.getText(names["S0"]))
-check("二维 list 第2行 T1", win.getText(names["T1"]) == "AT1-2", win.getText(names["T1"]))
-check("二维 list 第2行 B1", win.getText(names["B1"]) == "告警", win.getText(names["B1"]))
-check("二维 list 第3行 S2", win.getText(names["S2"]) == "回路三", win.getText(names["S2"]))
+check("二维 list 第1行 T0", win.get_text(names["T0"]) == "AT1-1", win.get_text(names["T0"]))
+check("二维 list 第1行 S0", win.get_text(names["S0"]) == "回路一", win.get_text(names["S0"]))
+check("二维 list 第2行 T1", win.get_text(names["T1"]) == "AT1-2", win.get_text(names["T1"]))
+check("二维 list 第2行 B1", win.get_text(names["B1"]) == "告警", win.get_text(names["B1"]))
+check("二维 list 第3行 S2", win.get_text(names["S2"]) == "回路三", win.get_text(names["S2"]))
 
 # 一维 list：每行一个字段，{index} 跟着变
-win.setXmlValue("V1", "model", ["甲", "乙"])
-check("一维 list 第1行", win.getText(names["T0"]) == "甲", win.getText(names["T0"]))
-check("一维 list 第2行", win.getText(names["T1"]) == "乙", win.getText(names["T1"]))
+win.set_xml_value("V1", "model", ["甲", "乙"])
+check("一维 list 第1行", win.get_text(names["T0"]) == "甲", win.get_text(names["T0"]))
+check("一维 list 第2行", win.get_text(names["T1"]) == "乙", win.get_text(names["T1"]))
 
 # 空 list：行清空（不留旧行控件）
-win.setXmlValue("V1", "model", [])
+win.set_xml_value("V1", "model", [])
 check("空 list 无残留行", "T0" not in names, "T0 还在")
 
 win.close()

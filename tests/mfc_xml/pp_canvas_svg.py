@@ -28,19 +28,19 @@ def main():
              info['paths'], info['warnings']))
 
     win = M.Window('SVG 矢量化画布', 900, 640)
-    win.setTheme(False)
-    win.addPowerCanvas(3001, 0, 0, 900, 640)
-    win.loadPowerSvg(3001, svg)
+    win.set_theme(False)
+    win.add_dwg_canvas(3001, 0, 0, 900, 640)
+    win.load_dwg_svg(3001, svg)
     win.show()
     time.sleep(0.4)
 
-    print('fit zoom = %.4f' % win.getPlanZoom(3001))
-    win.savePng(r'G:\PyArx\docs\_pp_svg_canvas_fit.png')
+    print('fit zoom = %.4f' % win.get_dwg_zoom(3001))
+    win.save_png(r'G:\PyArx\docs\_pp_svg_canvas_fit.png')
 
     # 1:1 看细节
-    win.setPlanView(3001, 1.0, -40, -80)
+    win.set_dwg_view(3001, 1.0, -40, -80)
     time.sleep(0.2)
-    win.savePng(r'G:\PyArx\docs\_pp_svg_canvas_100.png')
+    win.save_png(r'G:\PyArx\docs\_pp_svg_canvas_100.png')
 
     win.close()
 

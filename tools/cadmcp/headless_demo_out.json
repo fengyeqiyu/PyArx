@@ -1,0 +1,91 @@
+{
+ "created": {
+  "line": {
+   "handle": "731",
+   "class": "AcDbLine"
+  },
+  "polyline": {
+   "handle": "732",
+   "class": "AcDbPolyline"
+  },
+  "circle": {
+   "handle": "733",
+   "class": "AcDbCircle"
+  },
+  "arc": {
+   "handle": "734",
+   "class": "AcDbArc"
+  },
+  "ellipse": {
+   "handle": "735",
+   "class": "AcDbEllipse"
+  },
+  "spline": {
+   "handle": "736",
+   "class": "AcDbSpline"
+  },
+  "point": {
+   "handle": "737",
+   "class": "AcDbPoint"
+  },
+  "ray": {
+   "handle": "738",
+   "class": "AcDbRay"
+  },
+  "xline": {
+   "handle": "739",
+   "class": "AcDbXline"
+  },
+  "solid": {
+   "handle": "740",
+   "class": "AcDbSolid"
+  },
+  "trace": {
+   "handle": "741",
+   "class": "AcDbTrace"
+  },
+  "hatch": {
+   "handle": "742",
+   "class": "AcDbHatch"
+  },
+  "text": {
+   "handle": "743",
+   "class": "AcDbText"
+  },
+  "mtext": {
+   "handle": "744",
+   "class": "AcDbMText"
+  },
+  "dim_rot": {
+   "handle": "745",
+   "class": "AcDbRotatedDimension"
+  },
+  "dim_align": {
+   "handle": "760",
+   "class": "AcDbAlignedDimension"
+  },
+  "leader": {
+   "handle": "773",
+   "class": "AcDbLeader"
+  },
+  "polyline3d": {
+   "handle": "774",
+   "class": "AcDb3dPolyline"
+  },
+  "table": {
+   "handle": "780",
+   "class": "AcDbTable"
+  },
+  "layer": {
+   "commanded": true,
+   "exists": false,
+   "layer": "PYARX_DEMO"
+  }
+ },
+ "failed": {},
+ "errors": {},
+ "entity_count_before": 0,
+ "entity_count_after": 19,
+ "file": "C:\\temp\\headless_1e631d.dwg",
+ "ok": true
+}

@@ -22,13 +22,13 @@ def main():
     w.show()
     time.sleep(0.6)
     M.pump(40)
-    w.savePng(OUT)
+    w.save_png(OUT)
     print('截图', OUT, os.path.getsize(OUT), 'B')
     # 改属性能否即时重排：把主按钮换成 HTML hover 色
     if names.get('btnSample'):
-        w.setXmlValue('btnSample', 'BackColor', '#F1F5F9')
+        w.set_xml_value('btnSample', 'BackColor', '#F1F5F9')
         M.pump(30)
-        w.savePng(OUT.replace('.png', '_hover.png'))
+        w.save_png(OUT.replace('.png', '_hover.png'))
         print('hover 版', os.path.getsize(OUT.replace('.png', '_hover.png')), 'B')
 
 

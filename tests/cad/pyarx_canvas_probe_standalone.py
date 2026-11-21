@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""独立进程 XPowerCanvas 1:1 探针：不依赖 CAD 父 HWND。"""
+"""独立进程 XDwgCanvas 1:1 探针：不依赖 CAD 父 HWND。"""
 import json
 import os
 import sys
@@ -23,14 +23,14 @@ try:
     win.show()
     p.pump(200)
     try:
-        win.reflowXml()
+        win.reflow_xml()
     except Exception:
         pass
     p.pump(120)
     cid = names["cv"]
-    win.loadPowerSvg(cid, SVG)
-    size = win.getSize(cid)
-    saved = win.saveControlPng(cid, PNG)
+    win.load_dwg_svg(cid, SVG)
+    size = win.get_size(cid)
+    saved = win.save_control_png(cid, PNG)
     R["names"] = names
     R["size"] = list(size)
     R["saved"] = bool(saved)

@@ -617,6 +617,25 @@ class HatchCmd(Command):
         self.doc_ctx = doc
 
 
+class TextCmd(Command):
+    """单点文字：点插入点后按命令参数生成文字（缺省"文字"）。
+
+    内容来源：`TEXT 门厅说明`（命令行参数），或点完再用特性面板改 text 字段。
+    """
+    name = "TEXT"
+    alias = ("T", "TEXT", "DT", "文字")
+    max_points = 1
+
+    @property
+    def prompt(self):
+        return "指定文字插入点"
+
+    def make(self, ctx):
+        text = (self.args or "").strip().strip('"').strip('\u201c\u201d') or "文字"
+        x, y = self.points[0]
+        return ent.Text(x, y, text, 420.0, layer=ctx.layer, color=ctx.color)
+
+
 COMMANDS = {}
 
 
@@ -629,7 +648,7 @@ def _register(cls):
 
 for _c in (LineCmd, CircleCmd, RectCmd, ArcCmd, PlineCmd, EraseCmd, SelectCmd,
             MoveCmd, CopyCmd, RotateCmd, ScaleCmd, BlockCmd, InsertCmd, DimCmd,
-            HatchCmd):
+            HatchCmd, TextCmd):
     _register(_c)
 
 

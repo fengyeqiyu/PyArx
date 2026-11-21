@@ -5,9 +5,9 @@
 
 ## 2026-11-15 cad2d 缺口登记
 
-### 1. XPowerCanvas 未派发键盘事件与右键事件
+### 1. XDwgCanvas 未派发键盘事件与右键事件
 - 现状：`onCanvasEvent(id, cb)` 仅回调 `down / move / up / dblclick / wheel`；
-  宿主 `PyMfcPlanCanvasMouse` 只处理 WM_LBUTTONDOWN/UP/DBLCLK、WM_MBUTTONDOWN、WM_MOUSEMOVE、WM_MOUSEWHEEL，
+  宿主 `PyMfcDwgCanvasMouse` 只处理 WM_LBUTTONDOWN/UP/DBLCLK、WM_MBUTTONDOWN、WM_MOUSEMOVE、WM_MOUSEWHEEL，
   WM_KEYDOWN / WM_KEYUP / WM_RBUTTONUP / WM_RBUTTONUP 没有走到 Python。
 - 期望签名（A 线后续补）：
   - `win.onCanvasEvent(id, cb)` 的 cb 支持 `phase in {"keydown","keyup"}`，载荷 `(phase, vKey, 0, 0)`；
@@ -101,7 +101,7 @@
 - 表现：深色主题下只读标签仍是浅色底板；标签底色/文字色/对齐不可逐控件定制。
 - 期望签名：创建 label/button 后统一 `host->setControlAppearance(id, AppearanceOf(el))`，
   与容器 backdrop 同一条外观链路。
-- Python 兜底：cad2d 右栏特性/视图行、命令标签/提示一律改用 `XPowerCanvas` 自绘 SVG
+- Python 兜底：cad2d 右栏特性/视图行、命令标签/提示一律改用 `XDwgCanvas` 自绘 SVG
   （`ui.props_panel / ui.text_bar`），配色与对齐在 Python 侧完全可控；仅 `XTextField`
   与可点的「执行」保留原生控件。
 

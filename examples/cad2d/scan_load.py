@@ -265,8 +265,8 @@ def load_scan(path):
 # ------------------------------------------------------------------ 端到端：console 取数
 def _cache_path(dwg_path):
     st = os.stat(dwg_path)
-    # 前戳是扫描格式版本：scan.py 新增字段（如块属性）时要递增，强制重扫
-    key = "v5|%s|%d|%d" % (os.path.abspath(dwg_path).lower(), st.st_size, int(st.st_mtime))
+    # 前戳是扫描格式版本：scan.py 新增字段（如块属性、线宽 lw/layer_lw）时要递增，强制重扫
+    key = "v6|%s|%d|%d" % (os.path.abspath(dwg_path).lower(), st.st_size, int(st.st_mtime))
     tag = hashlib.md5(key.encode("utf-8")).hexdigest()[:12]
     name = os.path.splitext(os.path.basename(dwg_path))[0]
     return os.path.join(_CACHE_DIR, "%s_%s.json" % (name, tag))

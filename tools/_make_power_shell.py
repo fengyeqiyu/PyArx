@@ -3,7 +3,7 @@
 
 分工（新底层逻辑）：
   这份 XML 只声明"界面长什么样"：Ribbon 页签/分组/按钮、画布位置、右侧信息板、状态行。
-  配电图的解析、排版、绘制、命中、缩放全在控件库（xmlctl::PowerCanvasView + xmlplan::drawPlan），
+  配电图的解析、排版、绘制、命中、缩放全在控件库（xmlctl::DwgCanvasView + xmlplan::drawPlan），
   设计器 / Viewer / 运行时读到的是同一份 XML、走的是同一份库代码，所以外观一致。
 """
 import io, json
@@ -79,7 +79,7 @@ def ribbon():
 
 xml = '''<?xml version="1.0" encoding="utf-8"?>
 <!-- 配电规划图 —— 完整的 XML 外壳（新底层逻辑）：
-     外观 = 这份 XML；能力 = 控件库（Ribbon / PowerCanvas / 面板 / 状态行）；
+     外观 = 这份 XML；能力 = 控件库（Ribbon / XDwgCanvas / 面板 / 状态行）；
      业务 = 运行时绑定的命令。设计器里打开、Viewer 里预览、Python 里运行是同一份文件。
      画布数据 Data 只用 nodes（不动坐标），排版/命中/缩放全部由控件库算。 -->
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
@@ -90,7 +90,7 @@ xml = '''<?xml version="1.0" encoding="utf-8"?>
 
     <!-- 主区：左画布 / 右信息板 -->
     <XStackPanel Orientation="Horizontal" Height="660">
-      <PowerCanvas Name="Plan" Width="978" Height="660" ShowCable="1" Data="%s"/>
+      <XDwgCanvas Name="Plan" Width="978" Height="660" ShowCable="1" Data="%s"/>
 
       <XStackPanel Width="336" Height="660">
         <XStackPanel Orientation="Horizontal" Height="34">

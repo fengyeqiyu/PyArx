@@ -1,0 +1,29 @@
+{
+ "version": "Ttf2Line 1.0",
+ "probe": {
+  "counts": [
+   16,
+   24,
+   28,
+   28,
+   24,
+   4,
+   5,
+   9,
+   4,
+   4,
+   34,
+   4
+  ],
+  "glyphs": 23,
+  "is_ttf": true
+ },
+ "explode": {
+  "texts": 1,
+  "polylines": 23,
+  "vertices": 361,
+  "skipped": 0,
+  "ttf": 1,
+  "shx": 0
+ }
+}

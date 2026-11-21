@@ -76,20 +76,20 @@ def main():
     vid = names['TV1']
 
     # S1：规范名 Text（原先的 Caption/Hint 等别名已全部删除）
-    v = win.getXmlValue(tid, 'text')
+    v = win.get_xml_value(tid, 'text')
     check(v == '初始', 'TextBox Text 生效', v)
-    v = win.getXmlValue(tid, 'readOnly')
+    v = win.get_xml_value(tid, 'readOnly')
     check(v == 'true', 'TextBox IsReadOnly 生效', v)
-    v = win.getXmlValue(bid, 'curSel')
+    v = win.get_xml_value(bid, 'curSel')
     check(v == '1', 'ComboBox SelectedIndex 生效', v)
-    v = win.getXmlValue(bid, 'text')
+    v = win.get_xml_value(bid, 'text')
     check(v == '乙', 'ComboBox 选中项回填为文字', v)
-    v = win.getXmlValue(vid, 'rowCount')
+    v = win.get_xml_value(vid, 'rowCount')
     check(v == '2', 'TableView Rows 生效', v)
 
     # S1：只读属性（RowCount 表项没有 Set）——直接从控件层写，必须被拒
     # （setXmlValue 走 runtime 模型，不经过控件表，这里不适用）
-    ok = win.setXmlValue('TV1', 'Rows', 'C\t3')
+    ok = win.set_xml_value('TV1', 'Rows', 'C\t3')
     check(ok is not False, 'TableView Rows 写入不报错', ok)
 
     # S2：事件绑定确实按契约表跑到了 Click 之外的种类——
@@ -133,7 +133,7 @@ def main():
     # S2：事件表绑定（TextChanged/DoubleClick/KeyDown/CheckedChanged/Scroll 都进绑定）
     print('HITS=%r' % HITS)
 
-    win.savePng(r'G:\PyArx\docs\_smoke_proptable.png')
+    win.save_png(r'G:\PyArx\docs\_smoke_proptable.png')
     win.close()
 
     print('\n结果：%d 项失败' % len(fails))

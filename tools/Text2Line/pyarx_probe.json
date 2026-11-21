@@ -1,0 +1,15 @@
+{
+ "isAvailable": "True",
+ "curDb repr": "<PyArxCore.Db.PyDbDatabase object at 0x0000022B5457A070>",
+ "curDb.filename": "G:\\PyArx\\tools\\ShxProbe\\t2l_title_lines.dwg",
+ "curDb.handleCount?": "n/a",
+ "entityIds len": "23",
+ "isDocumentLocked": "True",
+ "lockDocument": "0",
+ "isDocumentLocked2": "True",
+ "Ed.entlast": "<AdsName (87452E87,85E99710)>",
+ "Ed.handent B9": "<AdsName (87452D87,85E99410)>",
+ "Ed.ssget X": "<built-in method acdbEntGetX of PyCapsule object at 0x0000022B5C42FB50>",
+ "addToModelspace(locked)": "AcDbPolyline[wrapper] id=0  after=23",
+ "unlockDocument": "0"
+}

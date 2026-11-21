@@ -68,7 +68,7 @@ mark("PASS" if db is not None else "FAIL", "Db.workingDb 取当前数据库",
 print("[CAP] ---- 交互 ----")
 INTERACT = [
     "Ed.Editor.getPoint", "Ed.Editor.getCorner", "Ed.Editor.getInt", "Ed.Editor.getReal",
-    "Ed.Editor.getString", "Ed.Editor.getKeyword", "Ed.Editor.getObjects",
+    "Ed.Editor.get_string", "Ed.Editor.getKeyword", "Ed.Editor.getObjects",
     "Ed.Editor.selectImplied", "Ed.Editor.setImpliedSelection", "Ed.Editor.ssGet",
     "Ed.Editor.acedInitGet", "Ed.Editor.pointMonitorManager", "Ed.Editor.getAngle",
     "Ed.Jig", "Ed.DrawJig", "Ed.DragStyle", "Ed.DragEffect", "Ed.CursorType",

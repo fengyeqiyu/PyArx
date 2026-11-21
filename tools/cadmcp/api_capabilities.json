@@ -1,0 +1,1806 @@
+{
+ "source": {
+  "index": "api_index.jsonl",
+  "index_classes": 285,
+  "index_methods": 12156,
+  "verified_by": "proto_verify.py (accoreconsole 无头实跑)"
+ },
+ "verified": {
+  "entities": {
+   "arc": {
+    "class": "PyDbArc",
+    "handle": "731",
+    "bounds": [
+     [
+      100.0,
+      100.0
+     ],
+     [
+      150.0,
+      150.0
+     ]
+    ]
+   },
+   "circle": {
+    "class": "PyDbCircle",
+    "handle": "732",
+    "bounds": [
+     [
+      20.0,
+      20.0
+     ],
+     [
+      80.0,
+      80.0
+     ]
+    ]
+   },
+   "ellipse": {
+    "class": "PyDbEllipse",
+    "handle": "734",
+    "bounds": [
+     [
+      -1.0,
+      -1.0
+     ],
+     [
+      1.0,
+      1.0
+     ]
+    ]
+   },
+   "hatch": {
+    "class": "PyDbHatch",
+    "handle": "735",
+    "bounds": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      100.0,
+      60.0
+     ]
+    ]
+   },
+   "leader": {
+    "class": "PyDbLeader",
+    "handle": "736",
+    "bounds": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      200.0,
+      80.0
+     ]
+    ]
+   },
+   "line": {
+    "class": "PyDbLine",
+    "handle": "737",
+    "bounds": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      120.0,
+      0.0
+     ]
+    ]
+   },
+   "mline": {
+    "class": "PyDbMline",
+    "handle": "738",
+    "bounds": [
+     [
+      1e+20,
+      1e+20
+     ],
+     [
+      -1e+20,
+      -1e+20
+     ]
+    ]
+   },
+   "mtext": {
+    "class": "PyDbMText",
+    "handle": "739",
+    "bounds": [
+     [
+      10.0,
+      3.408
+     ],
+     [
+      110.0,
+      10.0
+     ]
+    ]
+   },
+   "point": {
+    "class": "PyDbPoint",
+    "handle": "742",
+    "bounds": [
+     [
+      40.0,
+      40.0
+     ],
+     [
+      40.0,
+      40.0
+     ]
+    ]
+   },
+   "polyline": {
+    "class": "PyDbPolyline",
+    "handle": "743",
+    "bounds": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      100.0,
+      60.0
+     ]
+    ]
+   },
+   "ray": {
+    "class": "PyDbRay",
+    "handle": "744",
+    "bounds": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0
+     ]
+    ]
+   },
+   "rotated_dim": {
+    "class": "PyDbRotatedDimension",
+    "handle": "745",
+    "bounds": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0
+     ]
+    ]
+   },
+   "solid": {
+    "class": "PyDbSolid",
+    "handle": "760",
+    "bounds": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      50.0,
+      40.0
+     ]
+    ]
+   },
+   "spline": {
+    "class": "PyDbSpline",
+    "handle": "761",
+    "bounds": [
+     [
+      -24.19,
+      -33.828
+     ],
+     [
+      195.402,
+      77.828
+     ]
+    ]
+   },
+   "table": {
+    "class": "PyDbTable",
+    "handle": "762",
+    "bounds": [
+     [
+      0.0,
+      100.0
+     ],
+     [
+      0.0,
+      100.0
+     ]
+    ]
+   },
+   "text": {
+    "class": "PyDbText",
+    "handle": "777",
+    "bounds": [
+     [
+      10.0,
+      9.318
+     ],
+     [
+      21.654,
+      15.757
+     ]
+    ]
+   },
+   "xline": {
+    "class": "PyDbXline",
+    "handle": "779",
+    "bounds": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0
+     ]
+    ]
+   }
+  },
+  "entities_failed": {
+   "wipeout": "RuntimeError('addEntity 返回 False')"
+  },
+  "geometry": {
+   "mat3_rotate": {
+    "task": "绕 Z 轴 90 度后 (1,0) -> (0,1)",
+    "got": [
+     2.6794896412773994e-08,
+     0.9999999999999997
+    ]
+   },
+   "mat3_translate": {
+    "task": "平移矩阵作用于点",
+    "got": [
+     11.0,
+     22.0
+    ]
+   },
+   "seg3_length": {
+    "task": "线段长度",
+    "got": 5.0
+   },
+   "vec2_perp": {
+    "task": "二维向量垂直（旋转 90 度）",
+    "got": [
+     1.0,
+     0.0
+    ]
+   },
+   "vec3_angle": {
+    "task": "两向量夹角（度）",
+    "got": 1.5707963267948966
+   },
+   "vec3_cross": {
+    "task": "叉积（z 分量）",
+    "got": 1.0
+   },
+   "vec3_dot": {
+    "task": "点积",
+    "got": 12.0
+   },
+   "vec3_len": {
+    "task": "向量的模",
+    "got": 5.0
+   },
+   "vec3_normalize": {
+    "task": "归一化后长度=1",
+    "got": 1.0
+   }
+  },
+  "select": {
+   "objectIds": {
+    "ok": true,
+    "count": 17
+   },
+   "by_handle": {
+    "ok": true,
+    "handle": "731",
+    "class": "AcDbArc",
+    "layer": "0"
+   },
+   "by_class": {
+    "ok": true,
+    "class": "AcDbLine",
+    "count": 1
+   }
+  },
+  "summary": {
+   "ent_ok": 17,
+   "ent_total": 18,
+   "geo_ok": 9,
+   "geo_total": 9,
+   "sel_ok": 3,
+   "sel_total": 3
+  }
+ },
+ "known_absent": [
+  {
+   "name": "PyDbEntity.getBoundingPoints",
+   "why": "61 个方法里不存在；包围盒用 bounds() -> (min,max) 或 getGeomExtents()"
+  },
+  {
+   "name": "PyDbEntity.openObjectByIdString",
+   "why": "不存在；按句柄读实物只能事务内 tr.openObject(eid,0) 遍历比对 handle()"
+  },
+  {
+   "name": "PyDbEntity.isA",
+   "why": "实体上没有 isA；类名用 className()"
+  },
+  {
+   "name": "Ge.AcGePoint3dArray",
+   "why": "Ge 子模块未导出该数组类型；样条改用 setFitPointAt/insertFitPointAt"
+  },
+  {
+   "name": "PyDbWipeout.appendLoopPoints",
+   "why": "11 个方法里只有 append；且按 list 传参仍 addEntity=False，遮挡图元构造未打通"
+  },
+  {
+   "name": "PyDbMline.appendSegments",
+   "why": "真名是 appendSeg（单词，不是复数）；但只 appendSeg 后 bounds 为空盒"
+  },
+  {
+   "name": "PyDbPoint(点)",
+   "why": "无带点构造；PyDbPoint() + setPosition(pt)"
+  },
+  {
+   "name": "PyDbSolid(四点)",
+   "why": "无四参构造；PyDbSolid() + setPointAt(i, pt) 四次"
+  },
+  {
+   "name": "PyDbXline/Ray(点+方向)",
+   "why": "无带参构造；() + setBasePoint + setUnitDir(AcGeVector3d)"
+  },
+  {
+   "name": "PyDbEllipse.setMajorAxis",
+   "why": "不存在；用 setCenter/setMajorRadius/setRadiusRatio"
+  },
+  {
+   "name": "PyDbEllipse 半径 setter",
+   "why": "入库前后各试一次，setMajorRadius/setRadiusRatio 均不生效，bounds 恒为默认单位圆 ±1 —— 疑绑定层 setter 缺陷，需查 C++ 侧 PyDbEllipse 的属性桥接"
+  }
+ ],
+ "pitfalls": [
+  "开对象必须显式给模式：tr.openObject(eid, 0)=kForRead / 1=kForWrite，不许省略",
+  "图元/表/符号表默认写模式；纯查询传读模式",
+  "符号表在一个进程里只能开一次且必须 close()，否则带写锁存盘会崩",
+  "addEntity 返回 bool，失败不抛异常——必须判返回值",
+  "新建实体先 addEntity 入模型空间再写属性（入库前未 setDatabaseDefaults）",
+  "图层要在事务外建：getLayerTable -> newRecord -> setName/setColor -> lt.add"
+ ],
+ "classes": {
+  "DocumentManager": {
+   "methods": 11,
+   "verified": false,
+   "parent": ""
+  },
+  "Document": {
+   "methods": 13,
+   "verified": false,
+   "parent": ""
+  },
+  "PyApp": {
+   "methods": 3,
+   "verified": false,
+   "parent": ""
+  },
+  "StatusBar": {
+   "methods": 3,
+   "verified": false,
+   "parent": ""
+  },
+  "Color": {
+   "methods": 7,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDb2LineAngularDimension": {
+   "methods": 12,
+   "verified": false,
+   "parent": "PyDbDimension"
+  },
+  "PyDbPolyline2d": {
+   "methods": 34,
+   "verified": false,
+   "parent": "PyDbCurve"
+  },
+  "PyDb2dVertex": {
+   "methods": 15,
+   "verified": false,
+   "parent": "PyDbVertex"
+  },
+  "PyDbAngularDimension": {
+   "methods": 10,
+   "verified": false,
+   "parent": "PyDbDimension"
+  },
+  "PyDbPolyline3d": {
+   "methods": 15,
+   "verified": false,
+   "parent": "PyDbCurve"
+  },
+  "PyDb3dPolylineVertex": {
+   "methods": 3,
+   "verified": false,
+   "parent": "PyDbVertex"
+  },
+  "PyDb3dProfile": {
+   "methods": 9,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDb3dSolid": {
+   "methods": 21,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbAlignedDimension": {
+   "methods": 12,
+   "verified": false,
+   "parent": "PyDbDimension"
+  },
+  "PyDbAnnotationScale": {
+   "methods": 12,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbArc": {
+   "methods": 14,
+   "verified": true,
+   "parent": "PyDbCurve"
+  },
+  "PyDbArcDimension": {
+   "methods": 22,
+   "verified": false,
+   "parent": "PyDbDimension"
+  },
+  "PyDbAttribute": {
+   "methods": 21,
+   "verified": false,
+   "parent": "PyDbText"
+  },
+  "PyDbAttributeDefinition": {
+   "methods": 24,
+   "verified": false,
+   "parent": "PyDbText"
+  },
+  "PyRxObject": {
+   "methods": 49,
+   "verified": false,
+   "parent": ""
+  },
+  "PyRxClass": {
+   "methods": 49,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "DxfValue": {
+   "methods": 49,
+   "verified": false,
+   "parent": ""
+  },
+  "TypedValue": {
+   "methods": 49,
+   "verified": false,
+   "parent": ""
+  },
+  "TvList": {
+   "methods": 49,
+   "verified": false,
+   "parent": ""
+  },
+  "Resbuf": {
+   "methods": 49,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbBlendOptions": {
+   "methods": 6,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbBlockChangeIterator": {
+   "methods": 2,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbBlockReference": {
+   "methods": 25,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbBlockReferenceIdIterator": {
+   "methods": 3,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbBlockTable": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbSymbolTable"
+  },
+  "PyDbBlockTableRecord": {
+   "methods": 43,
+   "verified": false,
+   "parent": "PyDbSymbolTableRecord"
+  },
+  "PyDbBody": {
+   "methods": 4,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbCircle": {
+   "methods": 12,
+   "verified": true,
+   "parent": "PyDbCurve"
+  },
+  "PyDbColor": {
+   "methods": 3,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbCompositeFilteredBlockIterator": {
+   "methods": 3,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbCurve": {
+   "methods": 31,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbDatabase": {
+   "methods": 176,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "DatabaseReactor": {
+   "methods": 11,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbDate": {
+   "methods": 29,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbDbLayerStateManager": {
+   "methods": 9,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbDeepCloneFiler": {
+   "methods": 56,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "PyDbDetailViewStyle": {
+   "methods": 16,
+   "verified": false,
+   "parent": "PyDbModelDocViewStyle"
+  },
+  "PyDbDgnDefinition": {
+   "methods": 6,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbDgnReference": {
+   "methods": 1,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbDiametricDimension": {
+   "methods": 10,
+   "verified": false,
+   "parent": "PyDbDimension"
+  },
+  "PyDbDictionary": {
+   "methods": 19,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbDictionaryWithDefault": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbDictionary"
+  },
+  "PyDbDimAssoc": {
+   "methods": 26,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbDimStyleTable": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbSymbolTable"
+  },
+  "PyDbDimStyleTableRecord": {
+   "methods": 73,
+   "verified": false,
+   "parent": "PyDbSymbolTableRecord"
+  },
+  "PyDbDimension": {
+   "methods": 61,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbDwfDefinition": {
+   "methods": 1,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "DynBlockReference": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "DynBlockReferenceProperty": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "DynBlockTableRecord": {
+   "methods": 4,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbEllipse": {
+   "methods": 22,
+   "verified": true,
+   "parent": "PyDbCurve"
+  },
+  "PyDbEntity": {
+   "methods": 61,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbEvalContextIterator": {
+   "methods": 2,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbEvalExpr": {
+   "methods": 3,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbEvalVariant": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbExtrudedSurface": {
+   "methods": 5,
+   "verified": false,
+   "parent": "PyDbSurface"
+  },
+  "PyDbFace": {
+   "methods": 5,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbFaceRecord": {
+   "methods": 5,
+   "verified": false,
+   "parent": "PyDbVertex"
+  },
+  "PyDbFcf": {
+   "methods": 22,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbFilter": {
+   "methods": 1,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbFilteredBlockIterator": {
+   "methods": 3,
+   "verified": false,
+   "parent": ""
+  },
+  "SubentId": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "FullSubentPath": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbGeoData": {
+   "methods": 8,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbGroup": {
+   "methods": 29,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbHatch": {
+   "methods": 62,
+   "verified": true,
+   "parent": "PyDbEntity"
+  },
+  "PyDbHelix": {
+   "methods": 23,
+   "verified": false,
+   "parent": "PyDbSpline"
+  },
+  "PyDbHyperlink": {
+   "methods": 11,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbHyperlinkCollection": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbIdMapping": {
+   "methods": 11,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbIdMappingIter": {
+   "methods": 2,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbIndexUpdateDataIterator": {
+   "methods": 2,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbLayerFilter": {
+   "methods": 5,
+   "verified": false,
+   "parent": "PyDbFilter"
+  },
+  "PyDbLayerIndexIterator": {
+   "methods": 2,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbLayerStateManager": {
+   "methods": 15,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "PyDbLayerTable": {
+   "methods": 5,
+   "verified": false,
+   "parent": "PyDbSymbolTable"
+  },
+  "PyDbLayerTableRecord": {
+   "methods": 41,
+   "verified": false,
+   "parent": "PyDbSymbolTableRecord"
+  },
+  "PyDbLayout": {
+   "methods": 13,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbLeader": {
+   "methods": 51,
+   "verified": true,
+   "parent": "PyDbCurve"
+  },
+  "PyDbLine": {
+   "methods": 12,
+   "verified": true,
+   "parent": "PyDbCurve"
+  },
+  "PyDbLinetypeTable": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbSymbolTable"
+  },
+  "PyDbLinetypeTableRecord": {
+   "methods": 26,
+   "verified": false,
+   "parent": "PyDbSymbolTableRecord"
+  },
+  "PyDbLoftOptions": {
+   "methods": 31,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbLoftProfile": {
+   "methods": 5,
+   "verified": false,
+   "parent": "PyDb3dProfile"
+  },
+  "PyDbLoftedSurface": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbSurface"
+  },
+  "PyDbLongTransWorkSetIterator": {
+   "methods": 2,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbLongTransaction": {
+   "methods": 11,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbMInsertBlock": {
+   "methods": 8,
+   "verified": false,
+   "parent": "PyDbBlockReference"
+  },
+  "PyDbMLeader": {
+   "methods": 45,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbMLeaderStyle": {
+   "methods": 64,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbMPolygon": {
+   "methods": 50,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbMTextFragment": {
+   "methods": 51,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbMText": {
+   "methods": 51,
+   "verified": true,
+   "parent": "PyDbEntity"
+  },
+  "PyDbMaterial": {
+   "methods": 39,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbMline": {
+   "methods": 25,
+   "verified": true,
+   "parent": "PyDbEntity"
+  },
+  "PyDbMlineStyle": {
+   "methods": 33,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbModelDocViewStyle": {
+   "methods": 9,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbNurbSurface": {
+   "methods": 38,
+   "verified": false,
+   "parent": "PyDbSurface"
+  },
+  "PyDbObject": {
+   "methods": 59,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "PyDbObjectContext": {
+   "methods": 4,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "PyDbObjectContextManager": {
+   "methods": 2,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbOle2Frame": {
+   "methods": 25,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbOleFrame": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbOrdinateDimension": {
+   "methods": 12,
+   "verified": false,
+   "parent": "PyDbDimension"
+  },
+  "PyDbPlaneSurface": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbSurface"
+  },
+  "PyDbPlotSettings": {
+   "methods": 41,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbPlotSettingsValidator": {
+   "methods": 24,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbPoint": {
+   "methods": 8,
+   "verified": true,
+   "parent": "PyDbEntity"
+  },
+  "PyDbPolyFaceMesh": {
+   "methods": 3,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbPolyFaceMeshVertex": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbVertex"
+  },
+  "PyDbPolygonMesh": {
+   "methods": 20,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbPolygonMeshVertex": {
+   "methods": 3,
+   "verified": false,
+   "parent": "PyDbVertex"
+  },
+  "PyDbPolyline": {
+   "methods": 33,
+   "verified": true,
+   "parent": "PyDbCurve"
+  },
+  "PyDbRadialDimension": {
+   "methods": 10,
+   "verified": false,
+   "parent": "PyDbDimension"
+  },
+  "PyDbRadialDimensionLarge": {
+   "methods": 17,
+   "verified": false,
+   "parent": "PyDbDimension"
+  },
+  "PyDbRasterImage": {
+   "methods": 32,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbRay": {
+   "methods": 6,
+   "verified": true,
+   "parent": "PyDbCurve"
+  },
+  "PyDbRegAppTable": {
+   "methods": 3,
+   "verified": false,
+   "parent": "PyDbSymbolTable"
+  },
+  "PyDbRegion": {
+   "methods": 9,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbRevolveOptions": {
+   "methods": 7,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbRevolvedSurface": {
+   "methods": 7,
+   "verified": false,
+   "parent": "PyDbSurface"
+  },
+  "PyDbRotatedDimension": {
+   "methods": 14,
+   "verified": true,
+   "parent": "PyDbDimension"
+  },
+  "PyDbSection": {
+   "methods": 16,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbSectionViewStyle": {
+   "methods": 15,
+   "verified": false,
+   "parent": "PyDbModelDocViewStyle"
+  },
+  "PyDbShape": {
+   "methods": 22,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbSolid": {
+   "methods": 6,
+   "verified": true,
+   "parent": "PyDbEntity"
+  },
+  "PyDbSpatialFilter": {
+   "methods": 9,
+   "verified": false,
+   "parent": "PyDbFilter"
+  },
+  "PyDbSpatialIndexIterator": {
+   "methods": 2,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbSpline": {
+   "methods": 30,
+   "verified": true,
+   "parent": "PyDbCurve"
+  },
+  "PyDbSubDMesh": {
+   "methods": 25,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbDatabaseSummaryInfo": {
+   "methods": 24,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbSweepOptions": {
+   "methods": 34,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbSweptSurface": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbSurface"
+  },
+  "PyDbSymbolTable": {
+   "methods": 12,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbSymbolTableRecord": {
+   "methods": 6,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbTable": {
+   "methods": 37,
+   "verified": true,
+   "parent": "PyDbBlockReference"
+  },
+  "PyDbTableStyle": {
+   "methods": 42,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbText": {
+   "methods": 40,
+   "verified": true,
+   "parent": "PyDbEntity"
+  },
+  "PyDbTextEditorParagraphIterator": {
+   "methods": 2,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbTextStyleTable": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbSymbolTable"
+  },
+  "PyDbTextStyleTableRecord": {
+   "methods": 20,
+   "verified": false,
+   "parent": "PyDbSymbolTableRecord"
+  },
+  "PyDbTrace": {
+   "methods": 6,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbTrans": {
+   "methods": 7,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbTransactionManager": {
+   "methods": 10,
+   "verified": false,
+   "parent": ""
+  },
+  "PyDbUCSTable": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbSymbolTable"
+  },
+  "PyDbUcsTableRecord": {
+   "methods": 8,
+   "verified": false,
+   "parent": "PyDbSymbolTableRecord"
+  },
+  "PyDbViewTable": {
+   "methods": 2,
+   "verified": false,
+   "parent": "PyDbSymbolTable"
+  },
+  "PyDbViewTableRecord": {
+   "methods": 49,
+   "verified": false,
+   "parent": "PyDbSymbolTableRecord"
+  },
+  "PyDbViewport": {
+   "methods": 84,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbViewportTable": {
+   "methods": 3,
+   "verified": false,
+   "parent": "PyDbSymbolTable"
+  },
+  "PyDbViewportTableRecord": {
+   "methods": 73,
+   "verified": false,
+   "parent": "PyDbSymbolTableRecord"
+  },
+  "PyDbVisualStyle": {
+   "methods": 7,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "PyDbWblockCloneFiler": {
+   "methods": 4,
+   "verified": false,
+   "parent": "PyDbDeepCloneFiler"
+  },
+  "PyDbWipeout": {
+   "methods": 11,
+   "verified": false,
+   "parent": "PyDbEntity"
+  },
+  "PyDbXline": {
+   "methods": 6,
+   "verified": true,
+   "parent": "PyDbCurve"
+  },
+  "PyDbXrecord": {
+   "methods": 7,
+   "verified": false,
+   "parent": "PyDbObject"
+  },
+  "AdsName": {
+   "methods": 147,
+   "verified": false,
+   "parent": ""
+  },
+  "SelectionSet": {
+   "methods": 147,
+   "verified": false,
+   "parent": ""
+  },
+  "PyEdResult": {
+   "methods": 147,
+   "verified": false,
+   "parent": ""
+  },
+  "PromptOptions": {
+   "methods": 147,
+   "verified": false,
+   "parent": ""
+  },
+  "EntityValue": {
+   "methods": 147,
+   "verified": false,
+   "parent": ""
+  },
+  "SubEntityValue": {
+   "methods": 147,
+   "verified": false,
+   "parent": ""
+  },
+  "AcEdDragStyle": {
+   "methods": 19,
+   "verified": false,
+   "parent": ""
+  },
+  "AcEdJig": {
+   "methods": 19,
+   "verified": false,
+   "parent": "PyEdJig"
+  },
+  "AcGeCircArc2d": {
+   "methods": 15,
+   "verified": false,
+   "parent": "AcGeCurve2d"
+  },
+  "AcGeCircArc3d": {
+   "methods": 18,
+   "verified": false,
+   "parent": "AcGeCurve3d"
+  },
+  "AcGeCompositeCurve2d": {
+   "methods": 5,
+   "verified": false,
+   "parent": "AcGeCurve2d"
+  },
+  "AcGeCompositeCurve3d": {
+   "methods": 5,
+   "verified": false,
+   "parent": "AcGeCurve3d"
+  },
+  "AcGeCone": {
+   "methods": 10,
+   "verified": false,
+   "parent": "AcGeSurface"
+  },
+  "AcGeCurve2d": {
+   "methods": 27,
+   "verified": false,
+   "parent": "AcGeEntity2d"
+  },
+  "AcGeCurve3d": {
+   "methods": 30,
+   "verified": false,
+   "parent": "AcGeEntity3d"
+  },
+  "AcGeCurveCurveInt2d": {
+   "methods": 16,
+   "verified": false,
+   "parent": "AcGeEntity2d"
+  },
+  "AcGeCurveCurveInt3d": {
+   "methods": 17,
+   "verified": false,
+   "parent": "AcGeEntity3d"
+  },
+  "AcGeCylinder": {
+   "methods": 9,
+   "verified": false,
+   "parent": "AcGeSurface"
+  },
+  "AcGeEllipArc2d": {
+   "methods": 18,
+   "verified": false,
+   "parent": "AcGeCurve2d"
+  },
+  "AcGeEllipArc3d": {
+   "methods": 21,
+   "verified": false,
+   "parent": "AcGeCurve3d"
+  },
+  "AcGeEntity2d": {
+   "methods": 10,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGeEntity3d": {
+   "methods": 10,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGeInterval": {
+   "methods": 30,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGeKnotVector": {
+   "methods": 32,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGeLine2d": {
+   "methods": 2,
+   "verified": false,
+   "parent": "AcGeLinearEnt2d"
+  },
+  "AcGeLine3d": {
+   "methods": 2,
+   "verified": false,
+   "parent": "AcGeLinearEnt3d"
+  },
+  "AcGeLineSeg2d": {
+   "methods": 8,
+   "verified": false,
+   "parent": "AcGeLinearEnt2d"
+  },
+  "AcGeLineSeg3d": {
+   "methods": 8,
+   "verified": true,
+   "parent": "AcGeLinearEnt3d"
+  },
+  "AcGeLinearEnt2d": {
+   "methods": 6,
+   "verified": false,
+   "parent": "AcGeCurve2d"
+  },
+  "AcGeLinearEnt3d": {
+   "methods": 6,
+   "verified": false,
+   "parent": "AcGeCurve3d"
+  },
+  "AcGeMatrix2d": {
+   "methods": 25,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGeMatrix3d": {
+   "methods": 35,
+   "verified": true,
+   "parent": ""
+  },
+  "AcGeNurbCurve2d": {
+   "methods": 28,
+   "verified": false,
+   "parent": "AcGeSplineEnt2d"
+  },
+  "AcGeNurbCurve3d": {
+   "methods": 28,
+   "verified": false,
+   "parent": "AcGeSplineEnt3d"
+  },
+  "AcGeOffsetCurve2d": {
+   "methods": 5,
+   "verified": false,
+   "parent": "AcGeCurve2d"
+  },
+  "AcGeOffsetCurve3d": {
+   "methods": 7,
+   "verified": false,
+   "parent": "AcGeCurve3d"
+  },
+  "AcGePlanarEnt": {
+   "methods": 8,
+   "verified": false,
+   "parent": "AcGeSurface"
+  },
+  "AcGePlane": {
+   "methods": 5,
+   "verified": false,
+   "parent": "AcGePlanarEnt"
+  },
+  "AcGePoint2d": {
+   "methods": 11,
+   "verified": true,
+   "parent": ""
+  },
+  "AcGePoint3d": {
+   "methods": 15,
+   "verified": true,
+   "parent": ""
+  },
+  "AcGePointOnCurve2d": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGePointOnCurve3d": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGePointOnSurface": {
+   "methods": 13,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGePolyline2d": {
+   "methods": 3,
+   "verified": false,
+   "parent": "AcGeSplineEnt2d"
+  },
+  "AcGePolyline3d": {
+   "methods": 3,
+   "verified": false,
+   "parent": "AcGeSplineEnt3d"
+  },
+  "AcGePosition2d": {
+   "methods": 3,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGePosition3d": {
+   "methods": 3,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGeRay2d": {
+   "methods": 4,
+   "verified": false,
+   "parent": "AcGeLinearEnt2d"
+  },
+  "AcGeRay3d": {
+   "methods": 4,
+   "verified": false,
+   "parent": "AcGeLinearEnt3d"
+  },
+  "AcGeScale2d": {
+   "methods": 12,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGeScale3d": {
+   "methods": 12,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGeSphere": {
+   "methods": 12,
+   "verified": false,
+   "parent": "AcGeSurface"
+  },
+  "AcGeSplineEnt2d": {
+   "methods": 16,
+   "verified": false,
+   "parent": "AcGeCurve2d"
+  },
+  "AcGeSplineEnt3d": {
+   "methods": 16,
+   "verified": false,
+   "parent": "AcGeCurve3d"
+  },
+  "AcGeSurface": {
+   "methods": 10,
+   "verified": false,
+   "parent": "AcGeEntity3d"
+  },
+  "AcGeTorus": {
+   "methods": 16,
+   "verified": false,
+   "parent": "AcGeSurface"
+  },
+  "AcGeVector2d": {
+   "methods": 23,
+   "verified": true,
+   "parent": ""
+  },
+  "AcGeVector3d": {
+   "methods": 30,
+   "verified": true,
+   "parent": ""
+  },
+  "PyGiSubEntityTraits": {
+   "methods": 145,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "PyGiDrawableTraits": {
+   "methods": 145,
+   "verified": false,
+   "parent": "PyGiSubEntityTraits"
+  },
+  "PyGiCommonDraw": {
+   "methods": 145,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "PyGiWorldDraw": {
+   "methods": 145,
+   "verified": false,
+   "parent": "PyGiCommonDraw"
+  },
+  "PyGiViewportDraw": {
+   "methods": 145,
+   "verified": false,
+   "parent": "PyGiCommonDraw"
+  },
+  "PyGiGeometry": {
+   "methods": 145,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "PyGiWorldGeometry": {
+   "methods": 145,
+   "verified": false,
+   "parent": "PyGiGeometry"
+  },
+  "PyGiViewportGeometry": {
+   "methods": 145,
+   "verified": false,
+   "parent": "PyGiGeometry"
+  },
+  "PyGiDrawable": {
+   "methods": 145,
+   "verified": false,
+   "parent": "PyRxObject"
+  },
+  "PyGiTextStyle": {
+   "methods": 145,
+   "verified": false,
+   "parent": ""
+  },
+  "PyGiTextEngine": {
+   "methods": 145,
+   "verified": false,
+   "parent": ""
+  },
+  "AcCmEntityColor": {
+   "methods": 71,
+   "verified": false,
+   "parent": ""
+  },
+  "AcCmTransparency": {
+   "methods": 71,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiVariant": {
+   "methods": 71,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiMapper": {
+   "methods": 71,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiContext": {
+   "methods": 17,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiGdiDrawObject": {
+   "methods": 17,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiFill": {
+   "methods": 10,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiHatchPattern": {
+   "methods": 10,
+   "verified": false,
+   "parent": "PyGiFill"
+  },
+  "AcGiGradientFill": {
+   "methods": 10,
+   "verified": false,
+   "parent": "PyGiFill"
+  },
+  "AcGiPixelBGRA32": {
+   "methods": 15,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiImageBGRA32": {
+   "methods": 15,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiMaterialColor": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiMaterialTexture": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiImageTexture": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiMaterialTexture"
+  },
+  "AcGiImageFileTexture": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiImageTexture"
+  },
+  "AcGiProceduralTexture": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiMaterialTexture"
+  },
+  "AcGiGenericTexture": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiProceduralTexture"
+  },
+  "AcGiWoodTexture": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiProceduralTexture"
+  },
+  "AcGiMarbleTexture": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiProceduralTexture"
+  },
+  "AcGiMaterialMap": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiMaterialTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiColorRGB": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiColorRGBA": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiShadowParameters": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiLightAttenuation": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiLightTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiStandardLightTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiLightTraits"
+  },
+  "AcGiPointLightTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiStandardLightTraits"
+  },
+  "AcGiSpotLightTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiStandardLightTraits"
+  },
+  "AcGiDistantLightTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiStandardLightTraits"
+  },
+  "AcGiWebLightTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiPointLightTraits"
+  },
+  "AcGiSolidBackgroundTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiGradientBackgroundTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiImageBackgroundTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiGroundPlaneBackgroundTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiSkyBackgroundTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiIBLBackgroundTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiRenderEnvironmentTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiRenderSettingsTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiMentalRayRenderSettingsTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiRenderSettingsTraits"
+  },
+  "AcGiRapidRTRenderSettingsTraits": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiToneOperatorParameters": {
+   "methods": 164,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiPhotographicExposureParameters": {
+   "methods": 164,
+   "verified": false,
+   "parent": "AcGiToneOperatorParameters"
+  },
+  "AcGiEdgeData": {
+   "methods": 38,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiFaceData": {
+   "methods": 38,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiVertexData": {
+   "methods": 38,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiPolyline": {
+   "methods": 31,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiDrawStream": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiVisualStyle": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiVisualStyleTraits": {
+   "methods": 8,
+   "verified": false,
+   "parent": ""
+  },
+  "GiPythonDrawable": {
+   "methods": 11,
+   "verified": false,
+   "parent": ""
+  },
+  "AcGiViewport": {
+   "methods": 20,
+   "verified": false,
+   "parent": ""
+  },
+  "PyObjectIdGraph": {
+   "methods": 7,
+   "verified": false,
+   "parent": ""
+  },
+  "Palette": {
+   "methods": 9,
+   "verified": false,
+   "parent": ""
+  },
+  "PaletteSet": {
+   "methods": 9,
+   "verified": false,
+   "parent": ""
+  }
+ }
+}

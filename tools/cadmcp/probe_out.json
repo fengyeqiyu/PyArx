@@ -1,0 +1,40 @@
+{
+ "P_injected": false,
+ "curDb": {
+  "ok": false,
+  "err": "AttributeError: 'NoneType' object has no attribute 'Db'"
+ },
+ "leader_append_sig": {
+  "ok": false,
+  "err": "AttributeError: 'NoneType' object has no attribute 'Db'"
+ },
+ "leader_make": {
+  "ok": false,
+  "err": "AttributeError: 'NoneType' object has no attribute 'Db'"
+ },
+ "nurb_ctor_sig": {
+  "ok": false,
+  "err": "AttributeError: 'NoneType' object has no attribute 'Ge'"
+ },
+ "nurb_ctor_empty": {
+  "ok": false,
+  "err": "AttributeError: 'NoneType' object has no attribute 'Ge'"
+ },
+ "spline_setfit_sig": {
+  "ok": false,
+  "err": "AttributeError: 'NoneType' object has no attribute 'Db'"
+ },
+ "spline_make": {
+  "ok": false,
+  "err": "AttributeError: 'NoneType' object has no attribute 'Db'"
+ },
+ "hatch_apis": {
+  "ok": false,
+  "err": "AttributeError: 'NoneType' object has no attribute 'Db'"
+ },
+ "hatch_make": {
+  "ok": false,
+  "err": "AttributeError: 'NoneType' object has no attribute 'Db'"
+ },
+ "done": true
+}

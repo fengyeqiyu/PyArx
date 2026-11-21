@@ -52,7 +52,7 @@ def draw_circle(radius=10.0):
         trans.flushScreen()
 
 
-    PyArxCore.Ap.PyApp.setFocus()
+    PyArxCore.Ap.PyApp.set_focus()
 
     _log("[circle] done idx=%d color=%d center=(%.1f,%.1f)"
          % (idx, color_index, offset, offset))

@@ -199,12 +199,12 @@ def main():
     # ---- Hyperlink：真点，是否有回调/是否真能当链接用 ----
     sec('Hyperlink')
     hits = {'click': 0}
-    w.onClick(names['lnk'], lambda *a: hits.__setitem__('click', hits['click'] + 1))
+    w.on_click(names['lnk'], lambda *a: hits.__setitem__('click', hits['click'] + 1))
     click(cmap['lnk'], 0.12, 0.5)   # 链接只响应文字那一小段，点太靠右等于点空白
     record('Hyperlink', '真点击触发 onClick', hits['click'] >= 1, f'onClick={hits["click"]}')
     record('Hyperlink', '可设置链接地址（URL）接口',
            any(n in dir(p.Window) for n in ('setUrl', 'setHref', 'setLink')),
-           f'setUrl={hasattr(w, "setUrl")} getUrl={w.getUrl(names["lnk"]) if hasattr(w, "getUrl") else "无"}')
+           f'setUrl={hasattr(w, "setUrl")} getUrl={w.get_url(names["lnk"]) if hasattr(w, "getUrl") else "无"}')
 
     # ---- Splitter：真拖，邻居是否跟随 ----
     sec('SplitView')
@@ -230,7 +230,7 @@ def main():
     style = user32.GetWindowLongPtrW(cmap['scr'], -16)
     has_vscroll = bool(style & WS_VSCROLL)
     record('ScrollView', '自绘滚动条（不挂系统滚动条）', not has_vscroll, f'style=0x{style:X}')
-    rng = w.getScrollRange(names['scr'])
+    rng = w.get_scroll_range(names['scr'])
     record('ScrollView', '存在可滚动范围', rng[1] > rng[0], f'min={rng[0]} max={rng[1]}')
 
     # ---- Calendar：真点某天，选中日期是否变 ----
@@ -252,7 +252,7 @@ def main():
 
     # ---- RichText：原生格式能力 vs 是否暴露 ----
     sec('TextArea')
-    w.setText(names['rtf'], '富文本格式测试')
+    w.set_text(names['rtf'], '富文本格式测试')
     p.pump(150)
     cf = CHARFORMATW()
     cf.cbSize = ctypes.sizeof(CHARFORMATW)
@@ -269,7 +269,7 @@ def main():
            hasattr(w, 'setRichFormat'),
            f'setRichFormat={hasattr(w, "setRichFormat")}')
     if hasattr(w, 'setRichFormat'):
-        w.setRichFormat(names['rtf'], 14, True, False, 0x1565C0)
+        w.set_rich_format(names['rtf'], 14, True, False, 0x1565C0)
         p.pump(150)
         got = CHARFORMATW()
         got.cbSize = ctypes.sizeof(CHARFORMATW)
@@ -282,21 +282,21 @@ def main():
     sec('IconButton')
     png = os.path.join(HERE, 'res', 'dot.png')
     if hasattr(w, 'setImage'):
-        loaded = w.setImage(names['bb'], png)
+        loaded = w.set_image(names['bb'], png)
         p.pump(200)
         img = user32.SendMessageW(cmap['bb'], BM_GETIMAGE, IMAGE_BITMAP, 0)
         record('IconButton', '真装载了位图', loaded and bool(img),
                f'setImage={loaded} BM_GETIMAGE={img}')
     else:
         record('IconButton', '真装载了位图', False, 'Python 侧无 setImage')
-    w.setText(names['bb'], '运行')
-    record('IconButton', 'setText 后能显示文字', w.getText(names['bb']) == '运行', w.getText(names['bb']))
+    w.set_text(names['bb'], '运行')
+    record('IconButton', 'setText 后能显示文字', w.get_text(names['bb']) == '运行', w.get_text(names['bb']))
 
     # ---- ComboBox 下拉回调 ----
     sec('ComboBox 回调')
     drops = {'d': 0}
     if hasattr(w, 'onDropDown'):
-        w.onDropDown(names['cmb'], lambda *a: drops.__setitem__('d', drops['d'] + 1))
+        w.on_drop_down(names['cmb'], lambda *a: drops.__setitem__('d', drops['d'] + 1))
         click(cmap['cmb'], 0.96, 0.5)
         record('ComboBox', '真展开下拉并触发 onDropDown', drops['d'] >= 1 or
                user32.SendMessageW(cmap['cmb'], CB_GETDROPPEDSTATE, 0, 0) == 1,
@@ -312,9 +312,9 @@ def main():
 
     # TabControl：加两个页签
     if all(hasattr(w, a) for a in ('addTab', 'addTabItem')):
-        w.addTab(content_id, 10, 10, 300, 120)
-        w.addTabItem(content_id, '常规')
-        w.addTabItem(content_id, '高级')
+        w.add_tab(content_id, 10, 10, 300, 120)
+        w.add_tab_item(content_id, '常规')
+        w.add_tab_item(content_id, '高级')
         p.pump(200)
         h = child_of(w.hwnd, content_id)
         cnt = user32.SendMessageW(h, TCM_GETITEMCOUNT, 0, 0)
@@ -325,9 +325,9 @@ def main():
 
     # TreeCtrl：父 + 子两个节点
     if all(hasattr(w, a) for a in ('addTree', 'addTreeNode')):
-        w.addTree(content_id, 10, 10, 300, 120)
-        w.addTreeNode(content_id, '根节点')
-        w.addTreeNode(content_id, '子节点', 0)
+        w.add_tree(content_id, 10, 10, 300, 120)
+        w.add_tree_node(content_id, '根节点')
+        w.add_tree_node(content_id, '子节点', 0)
         p.pump(200)
         h = child_of(w.hwnd, content_id)
         root = user32.SendMessageW(h, TVM_GETNEXTITEM, TVGN_ROOT, 0)
@@ -342,10 +342,10 @@ def main():
     for label, maker, adder in (('ListCtrl', 'addListCtrl', 'addColumn'), ('GridLayout', 'addGrid', 'addColumn')):
         if all(hasattr(w, a) for a in (maker, adder, 'addRow')):
             getattr(w, maker)(content_id, 10, 10, 320, 110)
-            w.addColumn(content_id, '名称', 150)
-            w.addColumn(content_id, '状态', 90)
-            w.addRow(content_id, '甲\t完成')
-            w.addRow(content_id, '乙\t待办')
+            w.add_column(content_id, '名称', 150)
+            w.add_column(content_id, '状态', 90)
+            w.add_row(content_id, '甲\t完成')
+            w.add_row(content_id, '乙\t待办')
             p.pump(200)
             h = child_of(w.hwnd, content_id)
             rows = user32.SendMessageW(h, LVM_GETITEMCOUNT, 0, 0)

@@ -49,13 +49,13 @@ def click(hw, cx=30, cy=15):
 win = M.Window('click-test', 700, 500)
 win.show()
 M.pump(250)
-win.setTheme(False)
+win.set_theme(False)
 app = App(win)
 
 # 1) 普通按钮：基线，确认消息路径本身没问题
 PLAIN = 9911
-win.addButton(PLAIN, u'普通', 20, 20, 120, 30)
-win.onClick(PLAIN, lambda i=None: hits.append(('plain', i)))
+win.add_button(PLAIN, u'普通', 20, 20, 120, 30)
+win.on_click(PLAIN, lambda i=None: hits.append(('plain', i)))
 M.pump(60)
 hp = E.find_control(win.hwnd, PLAIN)
 click(hp)

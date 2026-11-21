@@ -219,7 +219,7 @@ def create_table(pos, rows=3, cols=3, row_h=8.0, col_w=30.0, texts=None):
     t.setSize(int(rows), int(cols))
     t.setPosition(_p3(pos))
     for i in range(int(cols)):
-        t.setColumnWidth(i, float(col_w))
+        t.set_column_width(i, float(col_w))
     for i in range(int(rows)):
         t.setRowHeight(i, float(row_h))
     if texts:

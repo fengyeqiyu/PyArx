@@ -1,0 +1,24 @@
+{
+ "version": "ShxProbe 1.1",
+ "created": [
+  {
+   "text": "PyArx Text2Line 0123",
+   "ok": true
+  },
+  {
+   "text": "文字转线条 中工",
+   "ok": true
+  },
+  {
+   "text": "Rotated AOB0g",
+   "ok": true
+  }
+ ],
+ "errors": [],
+ "explode": {
+  "texts": 3,
+  "polylines": 99,
+  "vertices": 334,
+  "skipped": 0
+ }
+}

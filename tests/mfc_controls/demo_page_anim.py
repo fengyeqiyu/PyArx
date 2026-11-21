@@ -69,37 +69,37 @@ class PageAnim:
     def schedule(self, i):
         w = self.w
         if i == 0:
-            w.animateFrom(self.tgt[0], 'Width', 140, 320, SEG, 'linear', 0, False)
-            w.animateFrom(self.tgt[0], 'Width', 320, 140, SEG, 'linear', SEG, False)
-            w.animateFrom(self.prog, 'Value', 0, 100, SEG, 'linear', 0, False)
-            w.animateFrom(self.prog, 'Value', 100, 0, SEG, 'linear', SEG, False)
+            w.animate_from(self.tgt[0], 'Width', 140, 320, SEG, 'linear', 0, False)
+            w.animate_from(self.tgt[0], 'Width', 320, 140, SEG, 'linear', SEG, False)
+            w.animate_from(self.prog, 'Value', 0, 100, SEG, 'linear', 0, False)
+            w.animate_from(self.prog, 'Value', 100, 0, SEG, 'linear', SEG, False)
         elif i == 1:
-            w.animateFrom(self.tgt[1], 'Value', 0, 99, SEG, 'outCubic', 0, False)
-            w.animateFrom(self.tgt[1], 'Value', 99, 0, SEG, 'outCubic', SEG, False)
+            w.animate_from(self.tgt[1], 'Value', 0, 99, SEG, 'outCubic', 0, False)
+            w.animate_from(self.tgt[1], 'Value', 99, 0, SEG, 'outCubic', SEG, False)
         else:
-            w.animateFrom(self.tgt[2], 'Value', 0, 100, SEG, 'outCubic', 0, False)
-            w.animateFrom(self.tgt[2], 'Value', 100, 0, SEG, 'outCubic', SEG, False)
+            w.animate_from(self.tgt[2], 'Value', 0, 100, SEG, 'outCubic', 0, False)
+            w.animate_from(self.tgt[2], 'Value', 100, 0, SEG, 'outCubic', SEG, False)
 
     def start(self, i):
         if self.running[i]:
             return
         self.running[i] = True
-        self.w.setText(self.lbl[i], self.on_text[i])
+        self.w.set_text(self.lbl[i], self.on_text[i])
         self.schedule(i)
 
     def stop(self, i):
         if not self.running[i]:
             return
         self.running[i] = False
-        self.w.stopAnimations(self.tgt[i])
+        self.w.stop_animations(self.tgt[i])
         if i == 0:
-            self.w.stopAnimations(self.prog)
-        self.w.setText(self.lbl[i], self.off_text[i])
+            self.w.stop_animations(self.prog)
+        self.w.set_text(self.lbl[i], self.off_text[i])
 
     def tick(self):
         """每帧调用：读开关、读页号、到点续排。"""
         for i in range(3):
-            on = bool(self.w.getSwitch(self.sw[i]))
+            on = bool(self.w.get_switch(self.sw[i]))
             if on != self.want[i]:
                 self.want[i] = on
                 if not on:
@@ -107,7 +107,7 @@ class PageAnim:
                 elif i == self.page:
                     self.start(i)
 
-        page = self.w.getViewIndex(self.sv)
+        page = self.w.get_view_index(self.sv)
         if page != self.page:
             self.stop(self.page)          # 离开的页先停，别在后台空转
             self.page = page
@@ -126,9 +126,9 @@ def main():
     w = p.guiload(build(), names=names)
     w.show()
     p.pump(300)
-    w.addPage(names['sv'], [names['s1'], names['p1t'], names['p1b'], names['p1p']])
-    w.addPage(names['sv'], [names['s2'], names['p2t'], names['p2s']])
-    w.addPage(names['sv'], [names['s3'], names['p3t'], names['p3d']])
+    w.add_page(names['sv'], [names['s1'], names['p1t'], names['p1b'], names['p1p']])
+    w.add_page(names['sv'], [names['s2'], names['p2t'], names['p2s']])
+    w.add_page(names['sv'], [names['s3'], names['p3t'], names['p3d']])
     pa = PageAnim(w, names)
     while True:
         # 消息泵粒度直接决定动画帧率：40ms 等于把上限锁在 25fps，切页看着就"发滞"。

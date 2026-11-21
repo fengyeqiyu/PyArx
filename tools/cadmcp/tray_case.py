@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""对照实验：XPowerCanvas.Data 分别喂 小 SVG / 无 viewBox SVG / 带 viewBox SVG"""
+"""对照实验：XDwgCanvas.Data 分别喂 小 SVG / 无 viewBox SVG / 带 viewBox SVG"""
 import os
 import sys
 import time
@@ -19,7 +19,7 @@ def esc(s):
 def run(name, svg, w=900, h=400):
     xml = ('<?xml version="1.0" encoding="utf-8"?>\n'
            '<XWindow Name="Case" Width="%d" Height="%d" Title="%s">\n'
-           '  <XPowerCanvas Name="CV" Data="%s"/>\n'
+           '  <XDwgCanvas Name="CV" Data="%s"/>\n'
            '</XWindow>\n') % (w, h, name, esc(svg.replace("\n", " "))
                               )
     open(OUT, "w", encoding="utf-8").write(xml)
@@ -27,7 +27,7 @@ def run(name, svg, w=900, h=400):
     win.show()
     time.sleep(0.6)
     png = r'G:\PyArx\docs\_tray_case_%s.png' % name
-    win.savePng(png)
+    win.save_png(png)
     win.close()
     print(name, os.path.getsize(png))
 

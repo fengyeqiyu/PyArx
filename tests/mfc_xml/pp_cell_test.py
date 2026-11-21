@@ -72,15 +72,15 @@ if ce:
             abs(e_rc[0] - want_x) <= 2 and abs(e_rc[1] - want_y) <= 2,
             'EDIT=(%d,%d) 期望=(%d,%d)' % (e_rc[0], e_rc[1], want_x, want_y))
         chk('编辑框初值是该格原值',
-            (app.win.getText(eid) or '') == (name_before or ''),
-            '%r vs %r' % (app.win.getText(eid), name_before))
+            (app.win.get_text(eid) or '') == (name_before or ''),
+            '%r vs %r' % (app.win.get_text(eid), name_before))
 
         # 输入新值 + 回车提交
-        app.win.setText(eid, '')
+        app.win.set_text(eid, '')
         M.pump(60)
         E.type_text(eh, 'INPLACE-1')
         M.pump(120)
-        print('输入后 EDIT 文本 = %r' % (app.win.getText(eid),), flush=True)
+        print('输入后 EDIT 文本 = %r' % (app.win.get_text(eid),), flush=True)
         E.key(eh, 0x0D)             # VK_RETURN
         M.pump(200)
         chk('回车后退出编辑态', getattr(app, '_ce', None) is None, repr(app._ce))
@@ -100,7 +100,7 @@ if ce:
         if ce2:
             e2 = ce2[2]
             eh2 = E.find_control(app.win.hwnd, e2)
-            app.win.setText(e2, 'SHOULD-NOT-SAVE')
+            app.win.set_text(e2, 'SHOULD-NOT-SAVE')
             M.pump(80)
             E.key(eh2, 0x1B)        # VK_ESCAPE
             M.pump(200)
@@ -119,7 +119,7 @@ if ce:
         if ce3:
             e3 = ce3[2]
             eh3 = E.find_control(app.win.hwnd, e3)
-            app.win.setText(e3, 'YJV22-4x70')
+            app.win.set_text(e3, 'YJV22-4x70')
             M.pump(60)
             # 点表格另一行 → 失焦提交
             rc4 = app.tblCellRect(row + 1, 3)
@@ -134,7 +134,7 @@ if ce:
 print('=== %d/%d PASS ===' % (ok_n, ok_n + bad), flush=True)
 if bad == 0:
     try:
-        app.win.savePng(r'G:\PyArx\docs\_cell_edit.png')
+        app.win.save_png(r'G:\PyArx\docs\_cell_edit.png')
         print('截图 _cell_edit.png', flush=True)
     except Exception as e:
         print('截图失败 %s' % e, flush=True)

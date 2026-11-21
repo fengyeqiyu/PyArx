@@ -14,7 +14,7 @@
     CodeEditor          -> 落 TextArea，与 XTextArea 撞名
     TreeTable           -> 落 TreeView，与 XTreeView 撞名
     VirtualList         -> 落 ListView，撞名
-    DatePicker / Hyperlink / Arc / PowerCanvas / QCanvas
+    DatePicker / Hyperlink / Arc / DwgCanvas / QCanvas
                         -> QML 无对应类型；QCanvas 还要避开设计器画布宿主 XCanvas
 
 用法：python tools\\migrate_tags_qml_names2.py  [--dry]

@@ -260,9 +260,9 @@
 - 新 API：`win.getSize(id) -> (w, h)`；未找到控件返回 `(0, 0)`。
 - 用途：替代 125%/150% DPI 下的硬编码尺寸兜底；实现按 `findByIdDeep` 递归取控件 HWND 后 `GetClientRect`。
 
-### 3. XPowerCanvas SVG 1:1 铺满源码修正（本轮未取得像素复测）
+### 3. XDwgCanvas SVG 1:1 铺满源码修正（本轮未取得像素复测）
 
-- 源码修正：`PyMfcHost::fitPlanCanvas` 对 `mode=2`（SVG）不再套用 plan 场景的 8px 内边距、等比 fit 与居中偏移；固定 `zoom=1.0、ox=0、oy=0`，SVG 坐标直接映射控件客户区，超出部分由窗口裁切。
+- 源码修正：`PyMfcHost::fitDwgCanvas` 对 `mode=2`（SVG）不再套用 plan 场景的 8px 内边距、等比 fit 与居中偏移；固定 `zoom=1.0、ox=0、oy=0`，SVG 坐标直接映射控件客户区，超出部分由窗口裁切。
 - 实测状态：本轮宿主创建 `PyMfcWindow` 失败（`create_embedded(0, ...)` 无 CAD 父 HWND），未生成 PNG；未取得 `(0,0)-(1343,103)` 四边像素坐标，该项不判通过。
 
 ## 十、2026-11-15 二次根因复测与未通过项

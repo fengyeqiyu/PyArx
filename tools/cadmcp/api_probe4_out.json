@@ -1,0 +1,19 @@
+{
+ "acedCmd_sig": {
+  "ok": false,
+  "err": "TypeError: acedCmd(): incompatible function arguments. The following argument types are supported:\n    1. (args: PyArxCore.Db.TvList) -> bool\n\nInvoked with: 123"
+ },
+ "acedMenucmd_sig": {
+  "ok": false,
+  "err": "TypeError: acedMenucmd(): incompatible function arguments. The following argument types are supported:\n    1. (str: str) -> bool\n\nInvoked with: 123"
+ },
+ "layer_by_cmd": {
+  "ok": false,
+  "err": "TypeError: acedCmd(): incompatible function arguments. The following argument types are supported:\n    1. (args: PyArxCore.Db.TvList) -> bool\n\nInvoked with: ['_.-LAYER', '_N', 'PYX_L1', '']"
+ },
+ "layer_exists": {
+  "ok": true,
+  "val": "{'has': False, 'names': ['0']}"
+ },
+ "done": true
+}

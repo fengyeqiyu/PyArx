@@ -25,42 +25,42 @@ def main():
 
     # 1) 改第 2 行（AT1）的名称 -> 应用
     base = pp_app.GRID_BASE + 1 * 8
-    w.setText(base + 1, '1号配电柜-改名')
+    w.set_text(base + 1, '1号配电柜-改名')
     M.pump(10)
     app.onApplyAll()
     M.pump(30)
     print('改后 nodes[1] name =', app.nodes[1].get('name'))
 
     # 2) 校验：编号清空 -> 应拒绝且不重绘
-    w.setText(base + 0, '')
+    w.set_text(base + 0, '')
     M.pump(10)
     app.onApplyAll()
     M.pump(20)
-    print('空编号提示 =', repr(w.getText(pp_app.L_EDIT_COUNT)))
-    w.setText(base + 0, 'AT1')
+    print('空编号提示 =', repr(w.get_text(pp_app.L_EDIT_COUNT)))
+    w.set_text(base + 0, 'AT1')
     M.pump(10)
 
     # 3) 校验：负载填 abc
-    w.setText(base + 4, 'abc')
+    w.set_text(base + 4, 'abc')
     M.pump(10)
     app.onApplyAll()
-    print('非法负载提示 =', repr(w.getText(pp_app.L_EDIT_COUNT)))
-    w.setText(base + 4, '11')
+    print('非法负载提示 =', repr(w.get_text(pp_app.L_EDIT_COUNT)))
+    w.set_text(base + 4, '11')
 
     # 4) 删除一个末端节点（AT2-3-5 是最后一行）
     last_code = app.nodes[-1]['code']
     app.onGridDelete(last_code)
     M.pump(20)
     print('删 %s 后 节点数 %d 行数 %d 提示 %s'
-          % (last_code, len(app.nodes), app._grid_rows, repr(w.getText(pp_app.L_EDIT_COUNT))))
+          % (last_code, len(app.nodes), app._grid_rows, repr(w.get_text(pp_app.L_EDIT_COUNT))))
 
     app.onApplyAll()
     M.pump(40)
     out = os.path.join(DOC, '_pp_grid_applied.png')
-    w.savePng(out)
+    w.save_png(out)
     print('截图', out, os.path.getsize(out), 'B')
     print('画布', app.view['width'], 'x', app.view['height'], '节点', len(app.view['nodes']))
-    print('状态', w.getText(pp_app.L_STATUS))
+    print('状态', w.get_text(pp_app.L_STATUS))
 
 
 if __name__ == '__main__':

@@ -38,8 +38,8 @@ def main():
     gv = names.get("gv")
     if gv:
         for i in range(12):
-            w.addListItem(gv, "工程 %02d|子项 %d|%d" % (i + 1, i, i))
-        w.setListSelected(gv, 3)
+            w.add_list_item(gv, "工程 %02d|子项 %d|%d" % (i + 1, i, i))
+        w.set_list_selected(gv, 3)
     # ProgressBar 的值走 XML 的 Value 属性，运行期没有再暴露 setter（保持接口面最小）
     _log("[form] 完成，窗口已显示")
     print("[PyArx] 窗体方式已加载：%d 个控件" % len(names))

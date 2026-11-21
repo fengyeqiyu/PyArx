@@ -1,5 +1,5 @@
 # -*- utf-8 -*-
-"""sys.json → MfcXml 配电画布（loadPowerSvg），1:1 等比 / 整窗画布 / 可缩放平移"""
+"""sys.json → MfcXml 绘图画布（loadDwgSvg），1:1 等比 / 整窗画布 / 可缩放平移"""
 import json
 import os
 import time
@@ -43,11 +43,11 @@ SCR_W, SCR_H = _u.GetSystemMetrics(0), _u.GetSystemMetrics(1)
 WIN_W, WIN_H = int(SCR_W * 0.93), int(SCR_H * 0.84)
 
 win = M.Window("汇总图·母线干线系统图（A1 1:1）", WIN_W, WIN_H)
-win.setTheme(False)
-win.addPowerCanvas(7200, 0, 0, WIN_W, WIN_H)
+win.set_theme(False)
+win.add_dwg_canvas(7200, 0, 0, WIN_W, WIN_H)
 win.show()
 time.sleep(0.6)
-CW, CH = win.clientSize()
+CW, CH = win.client_size()
 print("client", CW, CH)
 
 k = min(CW / SPANX, CH / SPANY)
@@ -124,24 +124,24 @@ parts.append('</svg>')
 svg = "".join(parts)
 win.move(7200, 0, 0, CW, CH)
 t0 = time.time()
-win.loadPowerSvg(7200, svg)
+win.load_dwg_svg(7200, svg)
 print("svg %d chars load %.1fs texts=%d k=%.5f (1:%.0f)" % (len(svg), time.time() - t0, n_txt, k, 1.0 / k))
-win.setPlanView(7200, 1.0, 0, 0)
+win.set_dwg_view(7200, 1.0, 0, 0)
 
 with open(os.path.join(OUT, "sys_cad.svg"), "w", encoding="utf-8") as fp:
     fp.write(svg)
 
 time.sleep(0.8)
-win.saveControlPng(7200, os.path.join(OUT, "sys_cad.png"))
+win.save_control_png(7200, os.path.join(OUT, "sys_cad.png"))
 print("png", os.path.getsize(os.path.join(OUT, "sys_cad.png")))
 
 # 局部放大：取第一段母线的断路器组
 zx = px0 + (470000 - X0) * k
 zy = py0 + imgH - (-296000 - Y0) * k
 zoom = 3.0
-win.setPlanView(7200, zoom, int(zx - zx * zoom + 300), int(zy - zy * zoom + 200))
+win.set_dwg_view(7200, zoom, int(zx - zx * zoom + 300), int(zy - zy * zoom + 200))
 time.sleep(0.6)
-win.saveControlPng(7200, os.path.join(OUT, "sys_cad_zoom.png"))
+win.save_control_png(7200, os.path.join(OUT, "sys_cad_zoom.png"))
 print("zoom png", os.path.getsize(os.path.join(OUT, "sys_cad_zoom.png")))
 
 KEEP = float(os.environ.get("SYS_KEEP", "0"))

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- flex 布局示例：整个界面只用 flex 语义排版，没有任何手算坐标。
+     Display="flex" 开 flex；Flex 定方向；Gap 定间距；Justify 定主轴分布；
+     Align/Self 定交叉轴对齐；Grow 按权重吃掉剩余空间。 -->
+<XWindow Title="flex demo — XML 写法" Width="720" Height="420" Theme="dark"
+         Background="#FF1E2226">
+  <XStackPanel Name="page" Display="flex" Flex="column" Gap="12" Padding="16"
+               Width="100%" Height="100%">
+
+    <!-- 顶栏：左右两端（space-between），纵向居中 -->
+    <XStackPanel Name="bar" Display="flex" Flex="row" Justify="between" Align="center"
+                 Height="44">
+      <XLabel Name="title" Text="flex 布局 · 全部用 XML 属性排版" Width="360" Height="30"
+              ForeColor="#FFF2F4F6" FontSize="15" FontWeight="Bold" TextAlign="Left"/>
+      <XStackPanel Name="tools" Display="flex" Flex="row" Gap="8" Height="32">
+        <XButton Name="bNew" Text="新建" Width="76" Height="32" Background="#FF2B3036"
+                 ForeColor="#FFE6EDF3"/>
+        <XButton Name="bSave" Text="保存" Width="76" Height="32" Background="#FF2B3036"
+                 ForeColor="#FFE6EDF3"/>
+      </XStackPanel>
+    </XStackPanel>
+
+    <!-- 三栏卡片：Grow=1 平均分宽度，内部各自竖排 -->
+    <XStackPanel Name="cards" Display="flex" Flex="row" Gap="12" Grow="1" Height="190">
+      <XStackPanel Name="c1" Display="flex" Flex="column" Gap="8" Padding="12" Grow="1"
+                   Background="#FF262B31">
+        <XLabel Name="c1t" Text="图纸解析" Height="24" ForeColor="#FFF2F4F6" FontSize="12"
+                FontWeight="Bold" TextAlign="Left"/>
+        <XLabel Name="c1d" Text="DWG/DXF 走 PyArx 解析，输出显示列表。" Grow="1"
+                ForeColor="#FFA9B4BF" FontSize="10" TextAlign="Left" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <XButton Name="c1b" Text="打开" Height="30" Background="#FF2F353B"
+                 ForeColor="#FFE6EDF3"/>
+      </XStackPanel>
+      <XStackPanel Name="c2" Display="flex" Flex="column" Gap="8" Padding="12" Grow="1"
+                   Background="#FF262B31">
+        <XLabel Name="c2t" Text="场景渲染" Height="24" ForeColor="#FFF2F4F6" FontSize="12"
+                FontWeight="Bold" TextAlign="Left"/>
+        <XLabel Name="c2d" Text="XML 场景声明 XLine/XCircle/XText，走同一支绘制。" Grow="1"
+                ForeColor="#FFA9B4BF" FontSize="10" TextAlign="Left" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <XButton Name="c2b" Text="重绘" Height="30" Background="#FF2F353B"
+                 ForeColor="#FFE6EDF3"/>
+      </XStackPanel>
+      <XStackPanel Name="c3" Display="flex" Flex="column" Gap="8" Padding="12" Grow="1"
+                   Background="#FF262B31">
+        <XLabel Name="c3t" Text="模型内省" Height="24" ForeColor="#FFF2F4F6" FontSize="12"
+                FontWeight="Bold" TextAlign="Left"/>
+        <XLabel Name="c3d" Text="Python 读图元、改属性、绑定回调。" Grow="1"
+                ForeColor="#FFA9B4BF" FontSize="10" TextAlign="Left" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <XButton Name="c3b" Text="查看" Height="30" Background="#FF2F353B"
+                 ForeColor="#FFE6EDF3"/>
+      </XStackPanel>
+    </XStackPanel>
+
+    <!-- 表单行：标签自然宽，输入框 Grow=1 吸收剩余，按钮贴右 -->
+    <XStackPanel Name="form" Display="flex" Flex="row" Gap="10" Align="center" Height="34">
+      <XLabel Name="lab" Text="图层名" Width="64" Height="24" ForeColor="#FFE6EDF3"
+              FontSize="11" TextAlign="Left"/>
+      <XTextField Name="inp" Text="WALL" Grow="1" Height="30" Background="#FF2B3036"
+                  ForeColor="#FFE6EDF3"/>
+      <XButton Name="apply" Text="应用" Width="72" Height="30" Background="#FF2F353B"
+               ForeColor="#FFE6EDF3"/>
+    </XStackPanel>
+
+    <!-- 底部按钮条：靠右（Justify=end），间距 8 -->
+    <XStackPanel Name="foot" Display="flex" Flex="row" Justify="end" Gap="8" Height="34">
+      <XButton Name="ok" Text="确定" Width="84" Height="34" Background="#FF3B82F6"
+               ForeColor="#FFFFFFFF"/>
+      <XButton Name="cancel" Text="取消" Width="84" Height="34" Background="#FF2B3036"
+               ForeColor="#FFE6EDF3"/>
+    </XStackPanel>
+  </XStackPanel>
+</XWindow>
+
+

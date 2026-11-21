@@ -1,0 +1,15 @@
+{
+ "ed_cmd_methods": {
+  "ok": true,
+  "val": "['acedCmd', 'acedGetCommandVersion', 'acedMenucmd', 'acedPostCommandPrompt', 'acedRegCmdsPtr']"
+ },
+ "bt_cast": {
+  "ok": false,
+  "err": "TypeError: cast(): incompatible function arguments. The following argument types are supported:\n    1. (arg0: PyArxCore.Rx.PyRxObject) -> PyArxCore.Db.PyDbObject\n\nInvoked with: "
+ },
+ "block_def2": {
+  "ok": false,
+  "err": "TypeError: cast(): incompatible function arguments. The following argument types are supported:\n    1. (arg0: PyArxCore.Rx.PyRxObject) -> PyArxCore.Db.PyDbObject\n\nInvoked with: "
+ },
+ "done": true
+}

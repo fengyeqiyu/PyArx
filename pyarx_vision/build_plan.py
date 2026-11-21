@@ -1,5 +1,5 @@
 # -*- utf-8 -*-
-"""把 DRB018 系统图统计成 PowerPlan 模型（loadPowerPlan 可直接吃）。
+"""把 DRB018 系统图统计成 PowerPlan 模型（loadDwgLayout 可直接吃）。
 
 模型分层：
     root  101#中试车间 10kV 总进线
@@ -188,7 +188,7 @@ def main():
     io.open(PLAN, "w", encoding="utf-8").write(
         json.dumps(plan, ensure_ascii=False, indent=1))
     # 完整版（带 kind/sheet/omitted 等标记），供逐箱拆分用；
-    # 标准版给 loadPowerPlan，多带字段它不认。
+    # 标准版给 loadDwgLayout，多带字段它不认。
     io.open(OUT_PLAN_FULL, "w", encoding="utf-8").write(
         json.dumps({"dir": "v", "nodes": nodes}, ensure_ascii=False, indent=1))
 

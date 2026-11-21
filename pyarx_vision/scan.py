@@ -473,10 +473,15 @@ def run():
     out = {"file": "", "frame": None,
            "lines": [], "plines": [], "texts": [], "circles": [], "arcs": [],
            "blocks": [], "tables": [], "block_defs": {}, "styles": {},
-           "layers": {}, "layer_col": {}, "counts": {}, "err": [], "frame_cands": [],
-           "attrib": []}
+           "layers": {}, "layer_col": {}, "layer_lw": {}, "lwd": 0,
+           "counts": {}, "err": [], "frame_cands": [], "attrib": []}
     try:
         out["file"] = str(db.getFilename())
+    except Exception:
+        pass
+    # $LWDISPLAY：图纸里"显示线宽"总开关的初值（-1 则前端按关处理）
+    try:
+        out["lwd"] = 1 if db.lineWeightDisplay() else 0
     except Exception:
         pass
 
@@ -492,6 +497,10 @@ def run():
                     lr = tr.openObject(lid, 0)
                     nm = str(lr.getName())
                     out["layer_col"][nm] = _layer_color(lr)
+                    try:
+                        out["layer_lw"][nm] = int(lr.lineWeight())
+                    except Exception:
+                        out["layer_lw"][nm] = -3
                 except Exception:
                     pass
         except Exception as ex:
@@ -534,6 +543,22 @@ def run():
                 except Exception:
                     pass
 
+            # 线宽：AcDb::LineWeight 枚举（-3 Default/-2 ByBlock/-1 ByLayer，0..211 = 0.00~2.11mm）。
+            # 前端"线宽开关"开着时才用它换算像素宽度。
+            lw = -1
+            try:
+                lw = int(o.lineWeight())
+            except Exception:
+                pass
+            # 图层表 objectIds 恒 0（见上方 layer_col 注释），ByLayer 只能顺着实体反查：
+            # 走到哪个图层就记哪个图层的线宽，后续所有同层实体直接命中缓存。
+            if lw == -1 and ln not in out["layer_lw"]:
+                try:
+                    lr = tr.openObject(o.layerId(), 0)
+                    out["layer_lw"][ln] = int(lr.lineWeight())
+                except Exception:
+                    pass
+
             try:
                 cls = MAP.get(short, short)
 
@@ -542,7 +567,7 @@ def run():
                     b = _pt(o, ("endPoint", "getEndPoint"))
                     if a and b:
                         out["lines"].append([round(a[0], 2), round(a[1], 2),
-                                             round(b[0], 2), round(b[1], 2), ln, ci])
+                                             round(b[0], 2), round(b[1], 2), ln, ci, lw])
 
                 elif cls in ("AcDbPolyline", "AcDb2dPolyline"):
                     pts = []
@@ -560,13 +585,13 @@ def run():
                             pts.append([round(q.x, 2), round(q.y, 2)])
                     if len(pts) >= 2:
                         cl = bool(_num(o, ("isClosed",), False))
-                        out["plines"].append({"p": pts, "c": cl, "l": ln, "ci": ci})
+                        out["plines"].append({"p": pts, "c": cl, "l": ln, "ci": ci, "lw": lw})
 
                 elif cls == "AcDbCircle":
                     c0 = _pt(o, ("center", "getCenter"))
                     r = float(_num(o, ("radius",), 0.0) or 0.0)
                     if c0:
-                        out["circles"].append([round(c0[0], 2), round(c0[1], 2), round(r, 2), ln, ci])
+                        out["circles"].append([round(c0[0], 2), round(c0[1], 2), round(r, 2), ln, ci, lw])
 
                 elif cls == "AcDbArc":
                     c0 = _pt(o, ("center", "getCenter"))
@@ -574,7 +599,8 @@ def run():
                     if c0:
                         out["arcs"].append({"c": [round(c0[0], 2), round(c0[1], 2)], "r": round(r, 2),
                                             "a0": round(float(_num(o, ("startAngle",), 0.0)), 4),
-                                            "a1": round(float(_num(o, ("endAngle",), 0.0)), 4), "l": ln, "ci": ci})
+                                            "a1": round(float(_num(o, ("endAngle",), 0.0)), 4), "l": ln,
+                                            "ci": ci, "lw": lw})
 
                 elif cls in ("AcDbText", "AcDbMText"):
                     s = _clean(_str(o, ("textString", "contents", "text")))

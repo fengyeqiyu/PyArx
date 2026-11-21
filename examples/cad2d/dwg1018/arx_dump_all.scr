@@ -1,0 +1,5 @@
+(setvar "FILEDIA" 0)
+(setvar "CMDDIA" 0)
+(setvar "SECURELOAD" 0)
+(arxload "G:/PyArx/X64/Release/PyArxEngine.crx")
+(command "PYRUNFILE" "G:/PyArx/examples/cad2d/dwg1018/arx_dump_all.py")

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""把从 DWG 提取的桥架几何画成 SVG + XML 画布（XPowerCanvas.Data 内联 SVG）。
+"""把从 DWG 提取的桥架几何画成 SVG + XML 画布（XDwgCanvas.Data 内联 SVG）。
 
 输入：G:\PyArx\tools\cadmcp\tray_out.json（extract_tray.py 在 CAD 内导出）
 输出：G:\PyArx\docs\tray_plan.svg、tray_canvas.xml、tray_list.csv
@@ -175,8 +175,8 @@ with open(csv_path, "w", encoding="utf-8-sig", newline="") as f:
         w.writerow([r["code"], r["handle"], r["start"][0], r["start"][1], r["end"][0], r["end"][1],
                     round(r["length"] / 1000.0, 3), r["dir"], r["spec"], r["elev"], r["label_handle"]])
 
-# ---------------- XML 画布（scene JSON：XPowerCanvas 原生按坐标绘制）----------------
-# Data 里带 "layout" 走 setPowerCanvasScene；SVG 内联路径的自动 fit 在创建瞬间
+# ---------------- XML 画布（scene JSON：XDwgCanvas 原生按坐标绘制）----------------
+# Data 里带 "layout" 走 setDwgScene；SVG 内联路径的自动 fit 在创建瞬间
 # 画布尺寸为 0，实测 zoom=0（挤成一条），所以这里用 scene 格式。
 scene_nodes = []
 scene_links = []
@@ -208,11 +208,11 @@ scene = {
 
 xml = [
     '<?xml version="1.0" encoding="utf-8"?>',
-    '<!-- 10KV 电缆桥架平面：XML 画布（XPowerCanvas，Data 为 scene JSON，按坐标绘制）',
+    '<!-- 10KV 电缆桥架平面：XML 画布（XDwgCanvas，Data 为 scene JSON，按坐标绘制）',
     '     几何由 PyArx 从 楼层平面-10KV电缆桥架.dwg 提取（tools/cadmcp/tray_out.json） -->',
     '<XWindow Name="TrayPlan" Width="%d" Height="%d" Title="10KV 电缆桥架平面">'
     % (int(VW) + 40, int(VH) + 90),
-    '  <XPowerCanvas Name="CV" Width="%d" Height="%d" Data="%s"/>'
+    '  <XDwgCanvas Name="CV" Width="%d" Height="%d" Data="%s"/>'
     % (int(VW) + 20, int(VH) + 60, esc(json.dumps(scene, ensure_ascii=False).replace("\n", " ")),),
     '</XWindow>',
 ]

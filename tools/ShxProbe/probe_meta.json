@@ -1,0 +1,110 @@
+{
+ "python": "3.14.8 (main, Oct 11 2026, 01:02:04) [MSC v.1951 64 bit (AMD64)]",
+ "exe": "C:\\Program Files\\Autodesk\\AutoCAD 2024\\acad.exe",
+ "version": "ShxProbe 1.0",
+ "create": true,
+ "A": {
+  "stage": 0,
+  "call_count": 1,
+  "int_arg": 2,
+  "int_arg_max": 2,
+  "int_args": [
+   2,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "a2_addr": 2858618844752,
+  "pts_addr": 2859726189536,
+  "ints_head": [],
+  "ints_len": 0,
+  "non_zero_ints": 0,
+  "point_count": 0,
+  "extents": [
+   0.6666666666666666,
+   1.0
+  ]
+ },
+ "AOB0g": {
+  "stage": 0,
+  "call_count": 1,
+  "int_arg": 8,
+  "int_arg_max": 8,
+  "int_args": [
+   8,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "a2_addr": 2858618842352,
+  "pts_addr": 2858441364032,
+  "ints_head": [],
+  "ints_len": 0,
+  "non_zero_ints": 0,
+  "point_count": 0,
+  "extents": [
+   4.5,
+   1.3333333333333335
+  ]
+ },
+ "AOB0g_raw": {
+  "stage": 0,
+  "call_count": 1,
+  "int_arg": 8,
+  "int_arg_max": 8,
+  "int_args": [
+   8,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "a2_addr": 2858618844752,
+  "pts_addr": 2858441364032,
+  "ints_head": [],
+  "ints_len": 0,
+  "non_zero_ints": 0,
+  "point_count": 0,
+  "extents": [
+   4.5,
+   1.3333333333333335
+  ]
+ },
+ "cjk": {
+  "stage": 0,
+  "call_count": 1,
+  "int_arg": 8,
+  "int_arg_max": 8,
+  "int_args": [
+   8,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "a2_addr": 2858618843504,
+  "pts_addr": 2858433982848,
+  "ints_head": [],
+  "ints_len": 0,
+  "non_zero_ints": 0,
+  "point_count": 0,
+  "extents": [
+   1.2573529411764708,
+   0.9816176470588236
+  ]
+ }
+}

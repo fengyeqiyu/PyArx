@@ -19,7 +19,7 @@ DOCS = r'G:\PyArx\docs'
 
 
 def shot(app, name):
-    app.win.savePng(os.path.join(DOCS, name))
+    app.win.save_png(os.path.join(DOCS, name))
     print('  截图', name, os.path.getsize(os.path.join(DOCS, name)), 'B')
 
 
@@ -32,11 +32,11 @@ def main():
     r = app.view
     print('[初始] 三级示例 %dx%d 节点 %d 交叉 %d' %
           (r['width'], r['height'], len(r['nodes']), r['crossings']))
-    print('  状态栏:', app.win.getText(app.win.__class__ and pp_app.L_STATUS))
+    print('  状态栏:', app.win.get_text(app.win.__class__ and pp_app.L_STATUS))
     shot(app, '_pp_app_main.png')
 
     # 1) 横向布局
-    app.win.setCheck(pp_app.C_HORIZ, True)
+    app.win.set_check(pp_app.C_HORIZ, True)
     app.on_dir_toggle()
     time.sleep(0.2); M.pump(30)
     r = app.view
@@ -44,28 +44,28 @@ def main():
     shot(app, '_pp_app_horiz.png')
 
     # 2) 连线标注关
-    app.win.setCheck(pp_app.C_HORIZ, False)
+    app.win.set_check(pp_app.C_HORIZ, False)
     app.on_dir_toggle()
     time.sleep(0.2); M.pump(30)
-    app.win.setCheck(pp_app.C_CABLE, False)
+    app.win.set_check(pp_app.C_CABLE, False)
     app.onCableToggle()
     time.sleep(0.2); M.pump(30)
     shot(app, '_pp_app_nocable.png')
-    app.win.setCheck(pp_app.C_CABLE, True)
+    app.win.set_check(pp_app.C_CABLE, True)
     app.onCableToggle()
 
     # 3) 搜索定位
-    app.win.setText(pp_app.E_SEARCH, 'AT2-1-3')
+    app.win.set_text(pp_app.E_SEARCH, 'AT2-1-3')
     app.doSearch()
     time.sleep(0.3); M.pump(30)
     print('[搜索] 选中 = %r 视口 = %s' %
-          (app.win.getPlanSelection(pp_app.CV), app.win.getPlanView(pp_app.CV)))
+          (app.win.get_dwg_selection(pp_app.CV), app.win.get_dwg_view(pp_app.CV)))
     shot(app, '_pp_app_search.png')
 
     # 4) 折叠：双击 AT2-1 的判定靠 selection，这里直接驱动状态机
     sel = 'AT2-1'
     app.curSel = sel
-    app.win.selectPlan(pp_app.CV, sel)
+    app.win.select_dwg(pp_app.CV, sel)
     app.onCanvasDblclick()
     time.sleep(0.3); M.pump(30)
     nodes_now = [n['code'] for n in app.view['nodes']]
@@ -88,13 +88,13 @@ def main():
     # 6) 编辑面板
     app.onOpenEditor()
     time.sleep(0.3); M.pump(30)
-    print('[编辑面板] 表格行数 =', app.win.getTableRowCount(pp_app.TBL))
+    print('[编辑面板] 表格行数 =', app.win.get_table_row_count(pp_app.TBL))
     shot(app, '_pp_app_editor.png')
 
     # 6b) 编辑一行：把 AT1-1 的负载从 9 改 12
-    app.win.setTableSelectedRow(pp_app.TBL, 2)
+    app.win.set_table_selected_row(pp_app.TBL, 2)
     app.on_load_row()
-    app.win.setText(pp_app.E_F0 + 4, '12')
+    app.win.set_text(pp_app.E_F0 + 4, '12')
     app.on_apply_row()
     time.sleep(0.2); M.pump(30)
     print('[编辑一行] 改后 节点数 =', len(app.view['nodes']),
@@ -120,11 +120,11 @@ def main():
     print('[导出]', out)
 
     # 8) 小地图跳转
-    app.win.setPlanView(pp_app.CV, 1.0, -400, -100)
+    app.win.set_dwg_view(pp_app.CV, 1.0, -400, -100)
     app.curSel = 'TR1'
     app.centerOn('TR1')
     time.sleep(0.2); M.pump(30)
-    print('[小地图/居中] TR1 后 视口 =', app.win.getPlanView(pp_app.CV))
+    print('[小地图/居中] TR1 后 视口 =', app.win.get_dwg_view(pp_app.CV))
     shot(app, '_pp_app_mini.png')
 
     app.win.close()

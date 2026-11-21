@@ -102,7 +102,7 @@ new_tbl = bool(getattr(app, '_newTable', False))
 exp_cls = 'PyMfcTable' if new_tbl else 'SysListView32'
 ok('表格控件是原生 SysListView32' if not new_tbl else '表格控件是新自绘 PyMfcTable',
    cls.value == exp_cls, cls.value)
-row_count = app.win.getTableRowCount(pp_app.TBL)
+row_count = app.win.get_table_row_count(pp_app.TBL)
 ok('行数 = 节点数 39', row_count == 39, str(row_count))
 exp_cols = len(pp_app.FIELDS) if new_tbl else 8
 if new_tbl:
@@ -141,8 +141,8 @@ r0 = app._ce[0] if app._ce else 3
 eid0 = app._ce[2] if app._ce else pp_app.E_F0
 ce_col = app._ce[1] if app._ce else 0
 ce_field = pp_app.FIELDS[ce_col]
-oldCode = app.win.getText(eid0)
-app.win.setText(eid0, 'X1-TEST')
+oldCode = app.win.get_text(eid0)
+app.win.set_text(eid0, 'X1-TEST')
 app._cellEnd(commit=True)
 M.pump(80)
 ok('F2 改单元格后写回表格', app.tblGet(r0, ce_col) == 'X1-TEST',
@@ -150,16 +150,16 @@ ok('F2 改单元格后写回表格', app.tblGet(r0, ce_col) == 'X1-TEST',
 ok('节点数据同步更新', app.nodes[r0][ce_field] == 'X1-TEST',
    '%s=%r' % (ce_field, app.nodes[r0][ce_field]))
 app._cellBegin(r0, ce_col)
-app.win.setText(pp_app.E_F0, oldCode)
+app.win.set_text(pp_app.E_F0, oldCode)
 app._cellEnd(commit=True)
 M.pump(60)
 
 # --- Insert -------------------------------------------------------------
-n0 = app.win.getTableRowCount(pp_app.TBL)
+n0 = app.win.get_table_row_count(pp_app.TBL)
 user32.PostMessageW(lv, WM_KEYDOWN, VK_INSERT, 0)
 M.pump(120)
-ok('Insert 插入一行', app.win.getTableRowCount(pp_app.TBL) == n0 + 1,
-   '%d -> %d' % (n0, app.win.getTableRowCount(pp_app.TBL)))
+ok('Insert 插入一行', app.win.get_table_row_count(pp_app.TBL) == n0 + 1,
+   '%d -> %d' % (n0, app.win.get_table_row_count(pp_app.TBL)))
 app._rowEditClose()
 
 # --- Delete（删刚加的空叶子节点 N1） -------------------------------------
@@ -169,8 +169,8 @@ M.pump(40)
 app.tblSetSel(idx)
 app.onGridDelete(app.nodes[idx]['code'])
 M.pump(120)
-ok('Delete 删除一行', app.win.getTableRowCount(pp_app.TBL) == n0,
-   str(app.win.getTableRowCount(pp_app.TBL)))
+ok('Delete 删除一行', app.win.get_table_row_count(pp_app.TBL) == n0,
+   str(app.win.get_table_row_count(pp_app.TBL)))
 
 # --- 复制 / 粘贴 ---------------------------------------------------------
 user32.SetForegroundWindow(hwnd)
@@ -192,7 +192,7 @@ user32.SendMessageW(lv, WM_KEYDOWN, 0x56, 0x001D0001)   # V
 user32.SendMessageW(lv, WM_KEYUP, 0x56, 0xC01D0001)
 M.pump(150)
 ok('Ctrl+V 触发粘贴（重复编号被跳过）', len(app.nodes) == before,
-   '%d -> %d / %s' % (before, len(app.nodes), app.win.getText(pp_app.L_EDIT_COUNT)))
+   '%d -> %d / %s' % (before, len(app.nodes), app.win.get_text(pp_app.L_EDIT_COUNT)))
 
 # --- 列头排序 -----------------------------------------------------------
 old_first = app.nodes[0]['code']
@@ -206,7 +206,7 @@ ok('排序后表格与数据一致', first_code == app.nodes[0]['code'])
 
 # --- 窗口缩放 → 布局重算 -------------------------------------------------
 def client_size():
-    return app.win.clientSize()
+    return app.win.client_size()
 
 
 def cv_rect():
@@ -225,12 +225,12 @@ cvw1, cvh1 = cv_rect()
 ok('窗口放大后客户区变大', (cw1, ch1) != (cw0, ch0), '%s -> %s' % ((cw0, ch0), (cw1, ch1)))
 ok('画布跟着放大（不再固定 1308×755）', cvw1 > cvw0 + 100 and cvh1 > cvh0 + 40,
    '%s -> %s' % ((cvw0, cvh0), (cvw1, cvh1)))
-ok('状态栏/小地图仍贴底', app.clientSize()[1] - pp_app.MI_FRAME[3] > 0, '')
+ok('状态栏/小地图仍贴底', app.client_size()[1] - pp_app.MI_FRAME[3] > 0, '')
 
 # 恢复原尺寸截图
 user32.SetWindowPos(hwnd, wt.HWND(-1), 40, 30, 1360, 900, 0x0004 | 0x0040)
 M.pump(300)
-app.win.savePng(r'G:\PyArx\docs\_pp_grid_lv.png')
+app.win.save_png(r'G:\PyArx\docs\_pp_grid_lv.png')
 M.pump(200)
 
 pas = sum(1 for _, c in RESULT if c)

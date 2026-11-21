@@ -20,18 +20,18 @@ w = p.guiload(path, names=names)
 w.show()
 p.pump(300)
 sv = names['sv']
-w.addPage(sv, [names['b1']])
-w.addPage(sv, [names['t2']])
-w.addPage(sv, [names['tv3']])
-w.setTableColumns(names['tv3'], '零件	数量	单价')
+w.add_page(sv, [names['b1']])
+w.add_page(sv, [names['t2']])
+w.add_page(sv, [names['tv3']])
+w.set_table_columns(names['tv3'], '零件	数量	单价')
 for row in ('接头	12	3.50', '法兰	8	12.00', '垫片	40	0.80'):
-    w.addTableRow(names['tv3'], row)
-w.setTableSelectedRow(names['tv3'], 1)
+    w.add_table_row(names['tv3'], row)
+w.set_table_selected_row(names['tv3'], 1)
 idx = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 if idx:
-    w.setViewIndex(sv, idx)
+    w.set_view_index(sv, idx)
     p.pump(400)
-print('pages=%d index=%d' % (w.getViewCount(sv), w.getViewIndex(sv)), flush=True)
+print('pages=%d index=%d' % (w.get_view_count(sv), w.get_view_index(sv)), flush=True)
 p.pump(300)
 while True:
     p.pump(50)

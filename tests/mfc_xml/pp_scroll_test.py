@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """侧板滚动验收：真发 WM_MOUSEWHEEL 给宿主窗口，看行区是否跟着滚、数据是否还完整。"""
 import ctypes
 import ctypes.wintypes as wt
@@ -80,7 +80,7 @@ def main():
     M.pump(30)
     check('滚轮向下', app._scroll_row > 0, '起点 0 -> %d' % app._scroll_row)
     front(hwnd)
-    app.win.savePng(os.path.join(DOCS, '_pp_scroll_mid.png'))
+    app.win.save_png(os.path.join(DOCS, '_pp_scroll_mid.png'))
     print('  截图 _pp_scroll_mid.png', os.path.getsize(os.path.join(DOCS, '_pp_scroll_mid.png')), 'B')
 
     # 滚到底
@@ -90,7 +90,7 @@ def main():
     bottom = max(0, app._grid_rows - app._grid_vis)
     check('到底夹住', app._scroll_row == bottom, '起点 %d == %d' % (app._scroll_row, bottom))
     front(hwnd)
-    app.win.savePng(os.path.join(DOCS, '_pp_scroll_end.png'))
+    app.win.save_png(os.path.join(DOCS, '_pp_scroll_end.png'))
     print('  截图 _pp_scroll_end.png', os.path.getsize(os.path.join(DOCS, '_pp_scroll_end.png')), 'B')
 
     # 往上滚回顶
@@ -105,8 +105,8 @@ def main():
           '%s 条 / 期望 %d 条 %s' % (len(nodes) if nodes else 'None', app._grid_rows, err))
 
     # 滚轮只在侧板行区内有效：画布区域滚轮不应该动侧板
-    app.win.setPlanOptions(pp_app.CV, True, False, -1)
-    z0 = app.win.getPlanZoom(pp_app.CV)
+    app.win.set_dwg_options(pp_app.CV, True, False, -1)
+    z0 = app.win.get_dwg_zoom(pp_app.CV)
     for _ in range(3):
         wheel(hwnd, pp_app.CV_X + 400, pp_app.CV_Y + 300, up=False)
     M.pump(30)

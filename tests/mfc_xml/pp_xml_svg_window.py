@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""把 SVG 直接写进 XML 属性：<XPowerCanvas Data="&lt;svg ...&gt;"/>。
+"""把 SVG 直接写进 XML 属性：<XDwgCanvas Data="&lt;svg ...&gt;"/>。
 
 用户的要求是"在 xml 里面加入 svg 矢量化图"，路径必须成立：
 XML 文档里声明一块画布，属性值就是 SVG 全文，运行时自己解析并绘制。
@@ -29,7 +29,7 @@ def main():
     doc = ('<?xml version="1.0" encoding="utf-8"?>\r\n'
            '<XWindow Name="SvgDoc" Width="860" Height="620" Title="SVG 在 XML 里" '
            'Background="#FFFAFCFF">\r\n'
-           '  <XPowerCanvas Name="Board" Left="0" Top="0" Width="860" Height="620" Data="'
+           '  <XDwgCanvas Name="Board" Left="0" Top="0" Width="860" Height="620" Data="'
            + esc(svg) + '"/>\r\n'
            '</XWindow>\r\n')
     with open(XML, 'w', encoding='utf-8') as f:
@@ -39,7 +39,7 @@ def main():
     win = M.guiload(XML)
     win.show()
     time.sleep(0.4)
-    win.savePng(r'G:\PyArx\docs\_pp_xml_svg_window.png')
+    win.save_png(r'G:\PyArx\docs\_pp_xml_svg_window.png')
     print('已抓 _pp_xml_svg_window.png')
     time.sleep(0.3)
     win.close()

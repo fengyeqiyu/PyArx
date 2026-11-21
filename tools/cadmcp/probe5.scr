@@ -1,0 +1,3 @@
+(setvar "SECURELOAD" 0)
+(arxload "G:/PyArx/X64/Release/PyArxEngine.crx")
+(command "PYRUNFILE" "G:/PyArx/tools/cadmcp/probe_sig.py")

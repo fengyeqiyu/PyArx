@@ -61,8 +61,8 @@ def main():
     time.sleep(0.3); M.pump(30)
     print('[CSV]  节点 %d  尺寸 %dx%d  标题 %r' %
           (len(app.view['nodes']), app.view['width'], app.view['height'],
-           app.win.getText(pp_app.E_TITLE)))
-    app.win.savePng(os.path.join(DOCS, '_pp_app_csv.png'))
+           app.win.get_text(pp_app.E_TITLE)))
+    app.win.save_png(os.path.join(DOCS, '_pp_app_csv.png'))
 
     # 2) XLSX 导入
     xp = os.path.join(DOCS, '_pp_app_test.xlsx')
@@ -74,7 +74,7 @@ def main():
         time.sleep(0.3); M.pump(30)
         print('       节点 %d  尺寸 %dx%d' % (len(app.view['nodes']),
                                             app.view['width'], app.view['height']))
-        app.win.savePng(os.path.join(DOCS, '_pp_app_xlsx.png'))
+        app.win.save_png(os.path.join(DOCS, '_pp_app_xlsx.png'))
     except Exception as e:
         print('[XLSX] 失败：%s' % e)
 
@@ -85,20 +85,20 @@ def main():
                                        app.view['width'], app.view['height']))
 
     # 4) 标题改名 → rebuild
-    app.win.setText(pp_app.E_TITLE, '改过名的配电图')
+    app.win.set_text(pp_app.E_TITLE, '改过名的配电图')
     app.onTitleChange()
     time.sleep(0.2); M.pump(30)
     print('[改名] 标题 %r  节点 %d' % (app.title(), len(app.view['nodes'])))
 
     # 5) 缩放按钮（B_ZIN / B_ZOUT / B_Z100 / 适应窗口 的回调体）
-    before = app.win.getPlanView(pp_app.CV)[0]
+    before = app.win.get_dwg_view(pp_app.CV)[0]
     app.zoomAt(1.25)
-    after_in = app.win.getPlanView(pp_app.CV)[0]
+    after_in = app.win.get_dwg_view(pp_app.CV)[0]
     app.zoomAt(1.0 / 1.25)
     app.setZoom(1.0)
     app.fitView()
     print('[缩放] %.3f -> 放大 %.3f -> 100%% -> 适应 %.3f' %
-          (before, after_in, app.win.getPlanView(pp_app.CV)[0]))
+          (before, after_in, app.win.get_dwg_view(pp_app.CV)[0]))
 
     # 6) 剪贴板只读（不改用户剪贴板）
     txt = pp_app.clipboardText()
@@ -106,11 +106,11 @@ def main():
 
     # 7) 折叠位：折叠 TR9（全树）后应该只剩 1 个节点
     app.curSel = 'TR9'
-    app.win.selectPlan(pp_app.CV, 'TR9')
+    app.win.select_dwg(pp_app.CV, 'TR9')
     app.onCanvasDblclick()
     time.sleep(0.3); M.pump(30)
     print('[折叠根] 节点数 %d（应 1）' % len(app.view['nodes']))
-    app.win.savePng(os.path.join(DOCS, '_pp_app_collapse_root.png'))
+    app.win.save_png(os.path.join(DOCS, '_pp_app_collapse_root.png'))
     app.onCanvasDblclick()
     time.sleep(0.2); M.pump(30)
     print('[展开根] 节点数 %d' % len(app.view['nodes']))

@@ -1,0 +1,10 @@
+{
+ "blockTable_add_sig": {
+  "ok": false,
+  "err": "TypeError: add(): incompatible function arguments. The following argument types are supported:\n    1. (self: PyArxCore.Db.PyDbSymbolTable, rec: PyArxCore.Db.PyDbSymbolTableRecord) -> bool\n\nInvoked with: <PyArxCore.Db.PyDbBlockTable object at 0x000001B8A00C1C70>, 'x'"
+ },
+ "layerTable_add_sig": {
+  "ok": false,
+  "err": "TypeError: add(): incompatible function arguments. The following argument types are supported:\n    1. (self: PyArxCore.Db.PyDbSymbolTable, rec: PyArxCore.Db.PyDbSymbolTableRecord) -> bool\n\nInvoked with: <PyArxCore.Db.PyDbLayerTable object at 0x000001B8A01A1670>, 'x'"
+ }
+}

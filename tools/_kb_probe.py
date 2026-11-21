@@ -6,13 +6,13 @@ names = {}
 w = p.guiload(r"G:\PyArx\docs\_tb_probe.xml", names=names)
 w.show()
 p.pump(450)
-w.savePng(r"G:\PyArx\docs\_tb_new.png")
+w.save_png(r"G:\PyArx\docs\_tb_new.png")
 print("NAMES:", sorted(names.keys()))
 for key in ("tbH", "tbH2", "tbV"):
     if key in names:
         try:
-            print(key, "Items =", w.getXmlValue(names[key], "Items"),
-                  "| Selected =", w.getXmlValue(names[key], "SelectedIndex"))
+            print(key, "Items =", w.get_xml_value(names[key], "Items"),
+                  "| Selected =", w.get_xml_value(names[key], "SelectedIndex"))
         except Exception as exc:
             print(key, "ERR", exc)
 p.pump(300)

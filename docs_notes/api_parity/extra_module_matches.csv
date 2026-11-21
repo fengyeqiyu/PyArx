@@ -1,0 +1,8 @@
+﻿module,pyrx_class,pyarx_class,found_module,shared_members,verdict
+PySm,DbDatabase,PyDbDatabase,Db,2,同名字面冲突（非同一接口）
+PyAx,AcadDatabase,PyAcadDatabase,Db,0,真实雏形
+PyBr,Entity,PyDbEntity,Db,3,同名字面冲突（非同一接口）
+PyBr,ErrorStatus,ErrorStatus,Enum,10,同名字面冲突（非同一接口）
+PyBr,Face,PyDbFace,Db,3,同名字面冲突（非同一接口）
+PyBr,Vertex,PyDbVertex,Db,3,同名字面冲突（非同一接口）
+PyBrxCv,ArcType,AcGiArcType,Gi,0,同名字面冲突（非同一接口）

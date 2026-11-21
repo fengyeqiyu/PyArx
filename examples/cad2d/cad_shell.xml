@@ -1,0 +1,293 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- PyArx CAD —— 二维绘图应用外壳（全原生控件，AutoCAD 深色主题）
+
+     外观全部在这份 XML；功能由 Python 调用；底层是 MfcXmlCore / PyMfcXml。
+
+     形态（本次改造后）：
+       · 顶部功能区 <XRibbon>：原生控件，Tab/Group/Button 全在 XML 内声明。
+       · 左工具条：<XStackPanel> 竖排 + <XIconButton>（Icon 指向 res/ic_*.png），
+         点击走原生 BN_CLICKED 回传 Python，不再自绘 SVG / 命中表。
+       · 右栏特性面板：<XLabel> 行（组标题 + 键值两列），文本由 Python setText 刷新。
+       · 命令标签/提示、状态栏：<XLabel> + 可点 <XButton>。
+       · 只有真正要画图的 <XDwgCanvas Name="cvMain"> 保留画布。
+
+     约束（踩过的坑）：
+       · 每个控件必须有 Name，否则 guiload 报"需要 x:Name"
+       · 容器一律 Padding="0" Margin="0"，否则内边距逐层累加把右栏推出窗口
+       · @@RES@@ 由 app.py 在载入前替换成 examples\cad2d\res 的绝对路径
+       · XTableView 的 Columns 用 &#9; 分隔，Rows 用 | 分行、\t 分格
+-->
+<XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PyArx CAD — 二维绘图" Width="1360" Height="840" Theme="dark"
+        Background="#FF26292D">
+
+  <XRibbon Name="cvRibbon" Width="1360" Height="134">
+    <XRibbonTab Header="常用">
+      <XRibbonGroup Header="绘图">
+        <XRibbonButton Name="LINE" Icon="@@RES@@\ic_line.png" Text="直线"/>
+        <XRibbonButton Name="PLINE" Icon="@@RES@@\ic_pline.png" Text="多段线"/>
+        <XRibbonButton Name="CIRCLE" Icon="@@RES@@\ic_circle.png" Text="圆"/>
+        <XRibbonButton Name="ARC" Icon="@@RES@@\ic_arc.png" Text="圆弧"/>
+        <XRibbonButton Name="RECT" Icon="@@RES@@\ic_rect.png" Text="矩形"/>
+      </XRibbonGroup>
+      <XRibbonGroup Header="填充与注释">
+        <XRibbonButton Name="HATCH" Icon="@@RES@@\ic_hatch.png" Text="填充"/>
+        <XRibbonButton Name="TEXT" Icon="@@RES@@\ic_text.png" Text="文字"/>
+        <XRibbonButton Name="DIM" Icon="@@RES@@\ic_dim.png" Text="标注"/>
+      </XRibbonGroup>
+      <XRibbonGroup Header="块">
+        <XRibbonButton Name="BLOCK" Icon="@@RES@@\ic_rect.png" Text="定义块"/>
+        <XRibbonButton Name="INSERT" Icon="@@RES@@\ic_copy.png" Text="插入块"/>
+      </XRibbonGroup>
+    </XRibbonTab>
+    <XRibbonTab Header="修改">
+      <XRibbonGroup Header="修改">
+        <XRibbonButton Name="MOVE" Icon="@@RES@@\ic_move.png" Text="移动"/>
+        <XRibbonButton Name="COPY" Icon="@@RES@@\ic_copy.png" Text="复制"/>
+        <XRibbonButton Name="ROTATE" Icon="@@RES@@\ic_rotate.png" Text="旋转"/>
+        <XRibbonButton Name="ERASE" Icon="@@RES@@\ic_erase.png" Text="删除"/>
+      </XRibbonGroup>
+      <XRibbonGroup Header="选择">
+        <XRibbonButton Name="SELECT" Icon="@@RES@@\ic_select.png" Text="选择"/>
+      </XRibbonGroup>
+    </XRibbonTab>
+    <XRibbonTab Header="视图">
+      <XRibbonGroup Header="缩放">
+        <XRibbonButton Name="ZOOM_E" Icon="@@RES@@\ic_fit.png" Text="全图"/>
+        <XRibbonButton Name="ZOOM_IN" Icon="@@RES@@\ic_zin.png" Text="放大"/>
+        <XRibbonButton Name="ZOOM_OUT" Icon="@@RES@@\ic_zout.png" Text="缩小"/>
+      </XRibbonGroup>
+      <XRibbonGroup Header="显示">
+        <XRibbonButton Name="GRID" Icon="@@RES@@\ic_grid.png" Text="栅格"/>
+        <XRibbonButton Name="PANMODE" Icon="@@RES@@\ic_point.png" Text="平移模式"/>
+      </XRibbonGroup>
+    </XRibbonTab>
+    <XRibbonTab Header="图层">
+      <XRibbonGroup Header="图层">
+        <XRibbonButton Name="LAYER_NEW" Icon="@@RES@@\ic_layer.png" Text="新建"/>
+      </XRibbonGroup>
+    </XRibbonTab>
+    <XRibbonTab Header="文件">
+      <XRibbonGroup Header="文件">
+        <XRibbonButton Name="SAVE" Icon="@@RES@@\ic_save.png" Text="保存"/>
+        <XRibbonButton Name="EXPORT" Icon="@@RES@@\ic_export.png" Text="导出"/>
+      </XRibbonGroup>
+    </XRibbonTab>
+  </XRibbon>
+
+  <XStackPanel Name="mainRow" Orientation="Horizontal" Padding="0" Margin="0"
+               Spacing="0" Background="#FF26292D" Layout.fillHeight="true">
+
+    <XStackPanel Name="paneTools" Width="46" Orientation="Vertical" Padding="0" Margin="0"
+                 Spacing="0" Background="#FF23272C" Layout.fillHeight="true">
+      <XIconButton Name="tbLINE" Width="46" Height="40" Icon="@@RES@@\ic_line.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="直线"/>
+      <XIconButton Name="tbPLINE" Width="46" Height="40" Icon="@@RES@@\ic_pline.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="多段线"/>
+      <XIconButton Name="tbCIRCLE" Width="46" Height="40" Icon="@@RES@@\ic_circle.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="圆"/>
+      <XIconButton Name="tbARC" Width="46" Height="40" Icon="@@RES@@\ic_arc.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="圆弧"/>
+      <XIconButton Name="tbRECT" Width="46" Height="40" Icon="@@RES@@\ic_rect.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="矩形"/>
+      <XIconButton Name="tbHATCH" Width="46" Height="40" Icon="@@RES@@\ic_hatch.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="填充"/>
+      <XIconButton Name="tbTEXT" Width="46" Height="40" Icon="@@RES@@\ic_text.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="文字"/>
+      <XIconButton Name="tbDIM" Width="46" Height="40" Icon="@@RES@@\ic_dim.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="标注"/>
+      <XDivider Name="dvT1" Width="46" Height="9"/>
+      <XIconButton Name="tbMOVE" Width="46" Height="40" Icon="@@RES@@\ic_move.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="移动"/>
+      <XIconButton Name="tbCOPY" Width="46" Height="40" Icon="@@RES@@\ic_copy.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="复制"/>
+      <XIconButton Name="tbROTATE" Width="46" Height="40" Icon="@@RES@@\ic_rotate.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="旋转"/>
+      <XIconButton Name="tbERASE" Width="46" Height="40" Icon="@@RES@@\ic_erase.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="删除"/>
+      <XDivider Name="dvT2" Width="46" Height="9"/>
+      <XIconButton Name="tbSELECT" Width="46" Height="40" Icon="@@RES@@\ic_select.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="选择"/>
+      <XIconButton Name="tbFIT" Width="46" Height="40" Icon="@@RES@@\ic_fit.png"
+                   Background="#FF23272C" BorderStyle="None" ToolTip="缩放全图"/>
+    </XStackPanel>
+
+    <XDwgCanvas Name="cvMain" Layout.fillWidth="true" Layout.fillHeight="true"/>
+
+    <XStackPanel Name="props" Width="348" Orientation="Vertical" Padding="0" Margin="0"
+                 Spacing="0" Background="#FF2B3036" Layout.fillHeight="true">
+
+      <XLabel Name="lblPropTitle" Text="特性" Width="348" Height="26"
+              Background="#FF2B3036" ForeColor="#FFE6EDF3" FontSize="11"
+              FontWeight="Bold" TextAlign="Left"/>
+      <XLabel Name="grpGeneral" Text="常规" Width="348" Height="24"
+              Background="#FF23272C" ForeColor="#FFE6EDF3" FontSize="10"
+              FontWeight="Bold" TextAlign="Left"/>
+
+      <XStackPanel Name="prow0" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="pr0k" Text="颜色" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="pr0v" Text="—" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="prow1" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="pr1k" Text="图层" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="pr1v" Text="—" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="prow2" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="pr2k" Text="线型" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="pr2v" Text="—" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="prow3" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="pr3k" Text="线宽" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="pr3v" Text="—" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+
+      <XLabel Name="grpGeo" Text="几何图形" Width="348" Height="24"
+              Background="#FF23272C" ForeColor="#FFE6EDF3" FontSize="10"
+              FontWeight="Bold" TextAlign="Left"/>
+
+      <XStackPanel Name="grow0" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="ge0k" Text="" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="ge0v" Text="" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="grow1" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="ge1k" Text="" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="ge1v" Text="" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="grow2" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="ge2k" Text="" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="ge2v" Text="" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="grow3" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="ge3k" Text="" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="ge3v" Text="" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="grow4" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="ge4k" Text="" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="ge4v" Text="" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="grow5" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="ge5k" Text="" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="ge5v" Text="" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="grow6" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="ge6k" Text="" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="ge6v" Text="" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="grow7" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="ge7k" Text="" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="ge7v" Text="" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+
+      <XStackPanel Name="propEditRow" Orientation="Horizontal" Height="28" Width="348"
+                   Padding="0" Margin="0" Spacing="6" Background="#FF2B3036">
+        <XComboBox Name="propCombo" Width="170" Height="24" Items="" Background="#FF202327"
+                   ForeColor="#FFE6EDF3" FontSize="10"/>
+        <XTextField Name="propEdit" Width="112" Height="24" Text="" Background="#FF202327"
+                    ForeColor="#FFE6EDF3" FontSize="10"/>
+        <XButton Name="propApply" Text="应用" Width="52" Height="24" Background="#FF2F353B"
+                 ForeColor="#FFE6EDF3" FontSize="10" BorderStyle="None"/>
+      </XStackPanel>
+
+      <XDivider Name="dvE" Width="348" Height="1"/>
+      <XLabel Name="lblLayerTitle" Text="图层" Width="348" Height="26"
+              Background="#FF2B3036" ForeColor="#FFE6EDF3" FontSize="11"
+              FontWeight="Bold" TextAlign="Left"/>
+      <XTableView Name="tblLayers" Width="348" Height="110"
+                  Columns="名称&#9;颜色&#9;线宽&#9;显示&#9;锁定"
+                  Rows="0&#9;#F2F4F6&#9;1.0&#9;是&#9;否"/>
+      <XDivider Name="dvF" Width="348" Height="1"/>
+      <XLabel Name="grpView" Text="视图" Width="348" Height="24"
+              Background="#FF23272C" ForeColor="#FFE6EDF3" FontSize="10"
+              FontWeight="Bold" TextAlign="Left"/>
+
+      <XStackPanel Name="vrow0" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="vw0k" Text="缩放" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="vw0v" Text="100%" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="vrow1" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="vw1k" Text="光标" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="vw1v" Text="0.0, 0.0" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+      <XStackPanel Name="vrow2" Orientation="Horizontal" Width="348" Height="24"
+                   Padding="0" Margin="0" Spacing="0" Background="#FF2B3036">
+        <XButton Name="vw2k" Text="图元" Width="110" Height="24" Background="#FF2B3036"
+                ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+        <XLabel Name="vw2v" Text="0" Width="228" Height="24" Background="#FF2B3036"
+                ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Right"/>
+      </XStackPanel>
+    </XStackPanel>
+  </XStackPanel>
+
+  <XStackPanel Name="cmdRow" Orientation="Horizontal" Height="30" Padding="0" Margin="0"
+               Spacing="0" Background="#FF202327" Layout.fillWidth="true">
+    <XLabel Name="lblCmd" Text="命令:" Width="56" Height="26" Background="#FF202327"
+            ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left" BorderStyle="None"/>
+    <XTextField Name="txtCmd" Width="600" Height="24" Text="" Background="#FF202327"
+                ForeColor="#FFE6EDF3" FontSize="10"/>
+    <XButton Name="btnRun" Text="执行" Width="70" Height="24" Background="#FF2F353B"
+             ForeColor="#FFE6EDF3" FontSize="10" BorderStyle="None"/>
+    <XLabel Name="lblHint" Text="就绪" Height="26" Background="#FF202327"
+            ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Left"
+            Layout.fillWidth="true"/>
+  </XStackPanel>
+
+  <XStackPanel Name="statusBar" Orientation="Horizontal" Height="24" Padding="0" Margin="0"
+               Spacing="0" Background="#FF23272C" Layout.fillWidth="true">
+    <XLabel Name="stlModel" Text="模型" Width="52" Height="24" Background="#FF23272C"
+            ForeColor="#FFE6EDF3" FontSize="10" TextAlign="Center"/>
+    <XButton Name="btnGrid" Text="栅格 关" Width="76" Height="22" Background="#FF2F353B"
+             ForeColor="#FFE6EDF3" FontSize="10" BorderStyle="None"/>
+    <XButton Name="btnMode" Text="左键 定点" Width="88" Height="22" Background="#FF2F353B"
+             ForeColor="#FFE6EDF3" FontSize="10" BorderStyle="None"/>
+    <XLabel Name="stlSpacer" Text="" Height="24" Background="#FF23272C"
+            Layout.fillWidth="true"/>
+    <XLabel Name="stlCoord" Text="X 0.0  Y 0.0" Width="200" Height="24" Background="#FF23272C"
+            ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Right"/>
+    <XLabel Name="stlCount" Text="图元 0" Width="90" Height="24" Background="#FF23272C"
+            ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Right"/>
+    <XLabel Name="stlZoom" Text="100%" Width="60" Height="24" Background="#FF23272C"
+            ForeColor="#FF9AA4AE" FontSize="10" TextAlign="Right"/>
+  </XStackPanel>
+</XWindow>
