@@ -792,3 +792,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 12:18 PyArxCore 全量 防呆 通过 新口径2：std::cout/std::cerr/裸 printf/fprintf/wprintf —— std::cout=std::cerr=0；printf 族仅 3 处均为功能用途（PyDbTrans.cpp:31 事务跟踪文件、PyDbValueTypes.cpp:75/118 snprintf 拼 repr），无调试残留
 2026-11-21 12:18 PyArxCore 全量 防呆 通过 新口径3：Acad::eOk 判定处缺 PyWarnIfError 扫出 89 处，逐类核为枚举 case 标签、helper 自身（stdafx.h:221）、Overrule 回调返回值、已由 throw/continue 处理的对象打开失败；真缺陷仅 PyDbEntity 3 处（本轮已修）
 2026-11-21 12:18 PyDbIndexUpdateDataIterator.cpp:37 ② 通过 currentData 失败返回 0ULL 与「空 ObjectId 即 0」语义一致；PyDbBlockTableRecordIterator.cpp:37/44 同类通过；PyDbDatabase.cpp:3279 lockDocument 返回 es 整数为设计
+2026-11-21 13:18 PyArxCore 全量 防呆 通过 新口径4：全部 2517 个带 py::arg 的 .def 块逐一比对参数名，重复名 0（重复 py::arg 会在导入期崩溃，此路径安全）
+2026-11-21 13:18 PyArxCore 全量 ③ 通过 新口径5：Acad::ErrorStatus 局部变量赋值后 8 行内未被使用 0 处；赋值后直接 return true 而不判 es 0 处
+2026-11-21 13:18 PyArxCore 全量 ⑨ 通过 新口径6：python3/python3xx/python.dll/Py_Initialize/Py_Finalize 硬编码仅 stdafx.h:47-51 三行，且按 Py_GIL_DISABLED 条件选 python315t.lib / python315.lib，无单一 dll 名硬编码
+2026-11-21 13:18 PyArxCore 全量 ⑤ 通过 新口径7：lambda 返回引用的 19 处全为就地运算符 __iadd__/__isub__/__imul__/__itruediv__ 与 __iter__ 返回 self（Python 数据模型约定），PyDbBinder TvList.__getitem__ 用 reference_internal 绑定宿主，均非悬垂引用
