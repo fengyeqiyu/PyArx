@@ -796,3 +796,7 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 13:18 PyArxCore 全量 ③ 通过 新口径5：Acad::ErrorStatus 局部变量赋值后 8 行内未被使用 0 处；赋值后直接 return true 而不判 es 0 处
 2026-11-21 13:18 PyArxCore 全量 ⑨ 通过 新口径6：python3/python3xx/python.dll/Py_Initialize/Py_Finalize 硬编码仅 stdafx.h:47-51 三行，且按 Py_GIL_DISABLED 条件选 python315t.lib / python315.lib，无单一 dll 名硬编码
 2026-11-21 13:18 PyArxCore 全量 ⑤ 通过 新口径7：lambda 返回引用的 19 处全为就地运算符 __iadd__/__isub__/__imul__/__itruediv__ 与 __iter__ 返回 self（Python 数据模型约定），PyDbBinder TvList.__getitem__ 用 reference_internal 绑定宿主，均非悬垂引用
+2026-11-21 14:35 PyArxCore 全量 ⑥ 通过 目录重组后复核：602/602 个 .cpp/.h 全登记，vcxproj 内 Include 路径（db/ge/gi/ed/ap/ads/rx/framework/core 子目录）与实际文件逐一一致，missing=0 mismatch=0
+2026-11-21 14:35 PyArxCore 全量 ⑨ 通过 重组后复核：PYBIND11_MODULE 仍为唯一一处且带 py::mod_gil_not_used()（PyArxBinder.cpp:62）；PyGILState_ / python314 在 .cpp 中 0 处
+2026-11-21 14:35 PyArxCore 全量 ②④ 通过 新口径8：.def lambda 返回裸指针且未写 return_value_policy 的仅 PyDbCurve.cpp:154 getAcGeCurve 一处，SDK dbcurve.h 明确「调用方负责 delete 该 AcGeCurve3d」，pybind 默认 take_ownership 正确，非缺陷
+2026-11-21 14:35 PyArxCore 全量 ②④ 通过 新口径9：显式 take_ownership 的 8 处（PyGiBinder.cpp:283、PyGiContextGdi.cpp:143、PyDbObject.cpp:315、PyDbBlockTableRecord.cpp:340/349/353、PyDbFcf.cpp:62、PyDbLeader.cpp:129）逐一核为 new 出来的包装类指针或 SDK 交出的副本记录，无「对 SDK 自有对象 take_ownership」误用
