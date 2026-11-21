@@ -768,3 +768,6 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 09:18 PyArxCore 全部 .h ⑤ 通过 头文件内纯同名一行转发（return this->同名(...)） = 0
 2026-11-21 09:18 PyArxCore 全部 ⑨ 通过 gil_scoped_release / PyEval_SaveThread / PyEval_RestoreThread = 0，未按 GIL 释放假设编写；PyGILState_ = 0
 2026-11-21 09:18 PyArxCore 全部 ⑦ 通过 注释掉的调试输出（// acutPrintf|printf|cout|OutputDebugString）= 0
+2026-11-21 10:18 PyDbMPolygon.cpp:26/36/39/40/44/66/98/145/182 ② 已改 9 处补 impObj() 判空，PyDbMPolygon 全部 lambda 与成员函数现已无裸解引用（默认返回 AcGeVector2d()/kUserDefined/AcString()/0.0/-1/{0,0,0}/false/空 vector 与 PyDbHatch(nullptr)）
+2026-11-21 10:18 PyArxCore 全量 ② 通过 PyDbMPolygon.cpp 收口后，同口径（py::init<X*> 可传 None + lambda 裸解引用）剩余只报不改项为 PyDbNurbSurface.cpp:33-237 约 38 处与 PyDbObject.cpp:22-136 44 处默认错误码（均属 >20 行或语义变更）
+2026-11-21 10:18 PyArxCore 全量 ③ 通过 复核 SDK 同名 mypolygon 接口返回值：getChildLoops 为 void（出参 AcGeIntArray）、getClosestLoopTo 返回 int、getOffsetVector 返回 AcGeVector2d、patternType 返回 AcDbHatch::HatchPatternType(kUserDefined/kPreDefined/kCustomDefined)，均非 ErrorStatus，原代码无丢弃

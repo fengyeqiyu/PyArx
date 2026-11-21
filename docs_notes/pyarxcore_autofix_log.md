@@ -246,3 +246,9 @@
 2026-11-21 09:18 | PyDbMPolygon.cpp:25/27/30/31/33 | ② | elevation / normal / getPerimeter / isBalanced / includesTouchingLoops 五个 lambda 补 !s.impObj() 守卫，返回 0.0 / AcGeVector3d() / false
 2026-11-21 09:18 | PyDbMPolygon.cpp:42/44/46/49 | ② | patternSpace / patternScale / patternDouble / numLoops 四个 lambda 补 !s.impObj() 守卫，返回 0.0 / false / 0
 2026-11-21 09:18 | PyDbMPolygon.cpp:65/82 | ② | parentLoop 补守卫返回 -1；numPatternDefinitions 拆出 if (!s.impObj()) return 0;
+2026-11-21 10:18 | PyDbMPolygon.cpp:26 | ② | hatch lambda 补 !s.impObj() 守卫返回 PyDbHatch(nullptr)
+2026-11-21 10:18 | PyDbMPolygon.cpp:36/39/40/44 | ② | getOffsetVector / patternType / patternName / patternAngle 四个 lambda 补守卫，返回 AcGeVector2d() / kUserDefined / AcString() / 0.0
+2026-11-21 10:18 | PyDbMPolygon.cpp:66 | ② | closestLoopTo lambda 补守卫返回 -1（SDK getClosestLoopTo 返回 int 环索引）
+2026-11-21 10:18 | PyDbMPolygon.cpp:98 | ② | patternColor lambda 补守卫返回 { 0, 0, 0 }
+2026-11-21 10:18 | PyDbMPolygon.cpp:145 | ② | isPointOnLoopBoundary lambda 补守卫返回 false
+2026-11-21 10:18 | PyDbMPolygon.cpp:182 | ② | getChildLoops lambda 补守卫返回空 vector（SDK getChildLoops 为 void + AcGeIntArray 出参）

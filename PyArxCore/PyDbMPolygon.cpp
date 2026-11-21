@@ -22,6 +22,7 @@ void bind_PyDbMPolygon(pym& m) {
 		.def("getArea", &PyDbMPolygon::getArea)
 		// ---- hatch 成员 / 平面 ----
 		.def("hatch", [](PyDbMPolygon& s) -> PyDbHatch {
+			if (!s.impObj()) return PyDbHatch(nullptr);
 			auto* h = static_cast<AcDbMPolygon*>(s.impObj())->hatch();
 			return PyDbHatch(h);  // 内部成员，不接管内存
 		}, "内部 AcDbHatch 对象")
@@ -32,15 +33,15 @@ void bind_PyDbMPolygon(pym& m) {
 		// ---- 几何 ----
 		.def("getPerimeter", [](const PyDbMPolygon& s){ if (!s.impObj()) return 0.0; return static_cast<AcDbMPolygon*>(s.impObj())->getPerimeter(); })
 		.def("isBalanced", [](const PyDbMPolygon& s){ if (!s.impObj()) return false; return static_cast<AcDbMPolygon*>(s.impObj())->isBalanced(); })
-		.def("getOffsetVector", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->getOffsetVector(); })
+		.def("getOffsetVector", [](const PyDbMPolygon& s){ if (!s.impObj()) return AcGeVector2d(); return static_cast<AcDbMPolygon*>(s.impObj())->getOffsetVector(); })
 		.def("includesTouchingLoops", [](const PyDbMPolygon& s){ if (!s.impObj()) return false; return static_cast<AcDbMPolygon*>(s.impObj())->includesTouchingLoops(); })
 		// ---- 图案 ----
-		.def("patternType", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->patternType(); })
-		.def("patternName", [](const PyDbMPolygon& s) -> AcString { return static_cast<AcDbMPolygon*>(s.impObj())->patternName(); })
+		.def("patternType", [](const PyDbMPolygon& s){ if (!s.impObj()) return AcDbHatch::kUserDefined; return static_cast<AcDbMPolygon*>(s.impObj())->patternType(); })
+		.def("patternName", [](const PyDbMPolygon& s) -> AcString { if (!s.impObj()) return AcString(); return static_cast<AcDbMPolygon*>(s.impObj())->patternName(); })
 		.def("setPattern", [](PyDbMPolygon& s, int type, const AcString& name){
 			return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setPattern(static_cast<AcDbHatch::HatchPatternType>(type), name.kwszPtr()), L"setPattern");
 		}, py::arg("type"), py::arg("name"))
-		.def("patternAngle", [](const PyDbMPolygon& s){ return static_cast<AcDbMPolygon*>(s.impObj())->patternAngle(); })
+		.def("patternAngle", [](const PyDbMPolygon& s){ if (!s.impObj()) return 0.0; return static_cast<AcDbMPolygon*>(s.impObj())->patternAngle(); })
 		.def("setPatternAngle", [](PyDbMPolygon& s, double v){ return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setPatternAngle(v), L"setPatternAngle"); }, py::arg("v"))
 		.def("patternSpace", [](const PyDbMPolygon& s){ if (!s.impObj()) return 0.0; return static_cast<AcDbMPolygon*>(s.impObj())->patternSpace(); })
 		.def("setPatternSpace", [](PyDbMPolygon& s, double v){ return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->setPatternSpace(v), L"setPatternSpace"); }, py::arg("v"))
@@ -63,6 +64,7 @@ void bind_PyDbMPolygon(pym& m) {
 			return PyWarnIfError(p->balanceTree(), L"MPolygon.balanceTree");
 		}, "平衡环树（建环后调用）")
 		.def("closestLoopTo", [](const PyDbMPolygon& s, const AcGePoint3d& pt){
+			if (!s.impObj()) return -1;
 			return static_cast<AcDbMPolygon*>(s.impObj())->getClosestLoopTo(pt);
 		}, py::arg("world_pt"), "离世界点最近的环索引")
 		.def("parentLoop", [](const PyDbMPolygon& s, int cur){ if (!s.impObj()) return -1; return static_cast<AcDbMPolygon*>(s.impObj())->getParentLoop(cur); }, py::arg("current_loop"))
@@ -95,6 +97,7 @@ void bind_PyDbMPolygon(pym& m) {
 			return { angle, baseX, baseY, offX, offY, dashes };
 		}, py::arg("index"), "读取图案定义: (angle, baseX, baseY, offsetX, offsetY, dashes)")
 		.def("patternColor", [](const PyDbMPolygon& s) -> std::tuple<int, int, int> {
+			if (!s.impObj()) return { 0, 0, 0 };
 			AcCmColor c = static_cast<AcDbMPolygon*>(s.impObj())->patternColor();
 			return { (int)c.red(), (int)c.green(), (int)c.blue() };
 		}, "图案填充色 (r,g,b) 0-255")
@@ -141,6 +144,7 @@ void bind_PyDbMPolygon(pym& m) {
 			return { cnt, out };
 		}, py::arg("world_pt"), py::arg("tol") = AcDbMPolygonCrossingFuzz, "点是否在多边形内；返回 (命中环数, 环索引列表)")
 		.def("isPointOnLoopBoundary", [](const PyDbMPolygon& s, const AcGePoint3d& worldPt, int loop, double tol) -> bool {
+			if (!s.impObj()) return false;
 			return static_cast<AcDbMPolygon*>(s.impObj())->isPointOnLoopBoundary(worldPt, loop, tol) != Adesk::kFalse;
 		}, py::arg("world_pt"), py::arg("loop"), py::arg("tol") = AcDbMPolygonCrossingFuzz, "点是否在指定环边界上")
 		.def("createLoopsFromBoundaries", [](PyDbMPolygon& s, const AcDbObjectIdArray& ids, bool excludeCrossing, double tol) -> std::tuple<bool, std::vector<int>> {
@@ -178,6 +182,7 @@ void bind_PyDbMPolygon(pym& m) {
 			return PyWarnIfError(static_cast<AcDbMPolygon*>(s.impObj())->insertMPolygonLoopAt(index, verts, bulges, excludeCrossing, tol), L"MPolygon.insertMPolygonLoopAt");
 		}, py::arg("index"), py::arg("vertices"), py::arg("bulges"), py::arg("exclude_crossing") = true, py::arg("tol") = 1e-6, "在指定索引插入环")
 		.def("getChildLoops", [](const PyDbMPolygon& s, int curLoop) -> std::vector<int> {
+			if (!s.impObj()) return std::vector<int>();
 			AcGeIntArray arr;
 			static_cast<AcDbMPolygon*>(s.impObj())->getChildLoops(curLoop, arr);
 			std::vector<int> out;
