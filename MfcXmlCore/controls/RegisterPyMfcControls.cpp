@@ -5,7 +5,6 @@
 #include "XmlButton.h"
 #include "XmlTextBlock.h"
 #include "XmlTextBox.h"
-#include "XmlCodeEditor.h"
 #include "XmlListBox.h"
 #include "XmlCheckBox.h"
 #include "XmlRadioButton.h"
@@ -14,9 +13,9 @@
 #include "XmlProgressBar.h"
 #include "XmlSlider.h"
 #include "XmlExtraControls.h"
+#include "XmlFlexPanel.h"
 #include "XmlFrame.h"
 #include "XmlDialog.h"
-#include "XmlDrawer.h"
 #include "XmlRoundButton.h"
 #include "XmlDelayButton.h"
 #include "XmlToolButton.h"
@@ -28,6 +27,8 @@
 #include "XmlItemView.h"
 #include "XmlView3D.h"
 #include "XmlRibbon.h"
+#include "XmlFileTab.h"
+#include "XmlShxText.h"
 
 #include <functional>
 #include <vector>
@@ -57,9 +58,6 @@ void RegisterPyMfcControls()
                 {L"XTextField"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlListBox(); },
                 {L"XListBox"});
-    // 代码编辑器（独立控件）：Syntax 取 xml / python，带行号槽与语法着色
-    RegisterOne(reg, []() -> IXmlControl* { return new XmlCodeEditor(); },
-                {L"XCodeEditor"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlCheckBox(); },
                 {L"XCheckBox"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlRadioButton(); },
@@ -85,13 +83,17 @@ void RegisterPyMfcControls()
                 {L"XDatePicker"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlPanel(); },
                 {L"XPane"});
+    // Control-level flex container: it owns the child list and lays children out itself
+    // (flex-direction / flex-wrap / justify-content / align-items / gap / padding).
+    RegisterOne(reg, []() -> IXmlControl* { return new XmlFlexPanel(); },
+                {L"XFlexPanel", L"FlexPanel", L"FlexBox", L"Row", L"Column"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlSplitter(); },
                 {L"XSplitView"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlStaticLine(); },
                 {L"XDivider"});
-    // 配电规划图画布（自绘：缩放平移 + 卡片命中）
-    RegisterOne(reg, []() -> IXmlControl* { return new XmlPowerCanvas(); },
-                {L"XPowerCanvas"});
+    // 绘图画布（DWG 为主，兼容已算坐标的布局输入）（自绘：缩放平移 + 卡片命中）
+    RegisterOne(reg, []() -> IXmlControl* { return new XmlDwgCanvas(); },
+                {L"XDwgCanvas"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlHyperlink(); },
                 {L"XHyperlink"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlRichText(); },
@@ -109,39 +111,28 @@ void RegisterPyMfcControls()
                 {L"XScrollView"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlCalendarCtrl(); },
                 {L"XMonthGrid"});
-    // QML 对齐（第三批）：自建画布小控件
+    // HTML 对齐（第三批）：自建画布小控件
     RegisterOne(reg, []() -> IXmlControl* { return new XmlSwitch(); },
                 {L"XSwitch"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlSpinBox(); },
                 {L"XSpinBox"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlRangeSlider(); },
                 {L"XRangeSlider"});
-    RegisterOne(reg, []() -> IXmlControl* { return new XmlBusyIndicator(); },
-                {L"XBusyIndicator"});
-    RegisterOne(reg, []() -> IXmlControl* { return new XmlPageIndicator(); },
-                {L"XPageIndicator"});
-    // QML 对齐（第四批）：Dial / Tumbler / 独立 ScrollBar
+    // HTML 对齐（第四批）：Dial / Tumbler / 独立 ScrollBar
     RegisterOne(reg, []() -> IXmlControl* { return new XmlDial(); },
                 {L"XDial"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlTumbler(); },
                 {L"XTumbler"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlScrollBar(); },
                 {L"XScrollBar"});
-    // QML 对齐（第五批）：表格类控件 + 工具栏
+    // HTML 对齐（第五批）：表格类控件 + 工具栏
     RegisterOne(reg, []() -> IXmlControl* { return new XmlTableView(); },
                 {L"XTableView"});
-    // 注意：`TreeView` 已经是原生 SysTreeView32 的别名，`ToolBar`/`toolbar` 是布局容器，
-    // 所以这两个自绘控件用 TreeTable / ToolStrip 作主名，不去抢旧别名。
-    RegisterOne(reg, []() -> IXmlControl* { return new XmlTreeView(); },
-                {L"XTreeTable"});
     // 注意：`ToolBar` / `toolbar` 这个标签归布局层（工具栏容器，用来横向排子控件），
     // 所以自绘的工具条按钮条用 ToolStrip 这个名字，避免把布局容器顶掉。
     RegisterOne(reg, []() -> IXmlControl* { return new XmlToolBar(); },
                 {L"XToolBar"});
 
-    // QML 对齐（第六批）：浮层族
-    RegisterOne(reg, []() -> IXmlControl* { return new XmlToolTip(); },
-                {L"XToolTip"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlMenu(); },
                 {L"XMenu"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlMenuBar(); },
@@ -152,17 +143,15 @@ void RegisterPyMfcControls()
     RegisterOne(reg, []() -> IXmlControl* { return new XmlPopup(); },
                 {L"XDrawer"});
 
-    // QML 对齐（第七批）：虚拟化列表（ListModel + delegate）
+    // HTML 对齐（第七批）：虚拟化列表（ListModel + delegate）
     // 注意：`ListView` 已是原生 ListCtrl 的别名，这里用 VirtualList 作主名。
     RegisterOne(reg, []() -> IXmlControl* { return new XmlListView(); },
                 {L"XVirtualList"});
 
-    // QML 对齐（第八批）：页容器（Page / StackView / SwipeView）
+    // HTML 对齐（第八批）：页容器（Page / StackView / SwipeView）
     RegisterOne(reg, []() -> IXmlControl* { return new XmlStackView(); },
                 {L"XStackView"});
-    RegisterOne(reg, []() -> IXmlControl* { return new XmlSwipeView(); },
-                {L"XSwipeView"});
-    // QML 对齐（第九批）：网格委托 / 路径委托
+    // HTML 对齐（第九批）：网格委托 / 路径委托
     // 注意 GridView 不能用 "Grid" 当别名（Grid 是布局容器名，会被容器先吃掉）。
     RegisterOne(reg, []() -> IXmlControl* { return new XmlGridView(); },
                 {L"XGridView"});
@@ -174,17 +163,15 @@ void RegisterPyMfcControls()
                 {L"XQCanvas"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlPage(); },
                 {L"XPage"});
-    // QML 对齐（第十批）：可拖拽内容视口（惯性 + 触边回弹）
+    // HTML 对齐（第十批）：可拖拽内容视口（惯性 + 触边回弹）
     RegisterOne(reg, []() -> IXmlControl* { return new XmlFlickable(); },
                 {L"XFlickable"});
 
-    // ---- QML Controls 2 对齐补齐 ----
+    // ---- HTML Controls 2 对齐补齐 ----
     RegisterOne(reg, []() -> IXmlControl* { return new XmlFrame(); },
                 {L"XFrame"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlDialog(); },
                 {L"XDialog"});
-    RegisterOne(reg, []() -> IXmlControl* { return new XmlDrawer(); },
-                {L"XDrawer"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlRoundButton(); },
                 {L"XRoundButton"});
     RegisterOne(reg, []() -> IXmlControl* { return new XmlDelayButton(); },
@@ -209,4 +196,10 @@ void RegisterPyMfcControls()
     // 命令功能区（复用控件库 xmlctl::XRibbon：模型/布局/绘制/命中成套）
     RegisterOne(reg, []() -> IXmlControl* { return new XmlRibbon(); },
                 {L"XRibbon"});
+    // SHX 字体文字：C++ 自带解析器排版成折线，走 DwwCanvas 自绘通路（脱 CAD）
+    RegisterOne(reg, []() -> IXmlControl* { return new XmlShxText(); },
+                {L"XShxText", L"ShxText"});
+    // 多文档文件页签条（复用控件库 xmlctl::FileTab：模型/布局/绘制/命中成套）
+    RegisterOne(reg, []() -> IXmlControl* { return new XmlFileTab(); },
+                {L"XFileTab", L"filetab"});
 }

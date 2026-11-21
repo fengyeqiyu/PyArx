@@ -394,7 +394,10 @@ inline bool shellColor(const std::wstring& v, COLORREF& out)
 inline int shellInt(const XmlElement& el, const wchar_t* name, int def)
 {
     const std::wstring v = el.get(name);
-    return v.empty() ? def : _wtoi(v.c_str());
+    if (v.empty()) return def;
+    // 百分比尺寸不在控件层当 px 读（布局层按父尺寸换算），回落自然值
+    if (v.find(L'%') != std::wstring::npos) return def;
+    return _wtoi(v.c_str());
 }
 
 // 宽度 / 高度：先读 XML 的 Width/Height 属性，没有才用布局算出来的宽高

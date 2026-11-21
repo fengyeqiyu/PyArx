@@ -208,6 +208,7 @@ public:
         m_matrix = D2D1::Matrix3x2F::Identity();
         m_matrixStack.clear();
         m_layerStack.clear();
+        clearRoundClips();
         // 上一帧漏了 popOpacity 时这里兜底：目标交还给原目标，离屏位图放掉
         if (m_opacityRt != nullptr) { m_opacityRt->Release(); m_opacityRt = nullptr; }
         m_opacityPrev = nullptr;
@@ -321,6 +322,122 @@ public:
         m_rt->DrawRoundedRectangle(&pen, brush(border), 1.0f);
     }
 
+    // CSS 分角圆角：D2D 的 RoundedRect 只有一组半径，四角不同必须走路径几何。
+    ID2D1PathGeometry* roundRectGeo(const D2D1_RECT_F& rc, float tl, float tr, float br, float bl)
+    {
+        ID2D1Factory* f = d2dFactory();
+        if (f == nullptr) return nullptr;
+        ID2D1PathGeometry* geo = nullptr;
+        ID2D1GeometrySink* sink = nullptr;
+        if (FAILED(f->CreatePathGeometry(&geo)) || geo == nullptr) return nullptr;
+        if (FAILED(geo->Open(&sink)) || sink == nullptr) { geo->Release(); return nullptr; }
+        const float w = rc.right - rc.left;
+        const float h = rc.bottom - rc.top;
+        const float lim = (w < h ? w : h) / 2.0f;
+        tl = tl < 0 ? 0 : (tl > lim ? lim : tl);
+        tr = tr < 0 ? 0 : (tr > lim ? lim : tr);
+        br = br < 0 ? 0 : (br > lim ? lim : br);
+        bl = bl < 0 ? 0 : (bl > lim ? lim : bl);
+
+        sink->BeginFigure(D2D1::Point2F(rc.left + tl, rc.top), D2D1_FIGURE_BEGIN_FILLED);
+        if (tr > 0)
+        {
+            sink->AddLine(D2D1::Point2F(rc.right - tr, rc.top));
+            sink->AddArc(D2D1::ArcSegment(D2D1::Point2F(rc.right, rc.top + tr),
+                                          D2D1::SizeF(tr, tr), 0.0f,
+                                          D2D1_SWEEP_DIRECTION_CLOCKWISE, D2D1_ARC_SIZE_SMALL));
+        }
+        else
+            sink->AddLine(D2D1::Point2F(rc.right, rc.top));
+        if (br > 0)
+        {
+            sink->AddLine(D2D1::Point2F(rc.right, rc.bottom - br));
+            sink->AddArc(D2D1::ArcSegment(D2D1::Point2F(rc.right - br, rc.bottom),
+                                          D2D1::SizeF(br, br), 0.0f,
+                                          D2D1_SWEEP_DIRECTION_CLOCKWISE, D2D1_ARC_SIZE_SMALL));
+        }
+        else
+            sink->AddLine(D2D1::Point2F(rc.right, rc.bottom));
+        if (bl > 0)
+        {
+            sink->AddLine(D2D1::Point2F(rc.left + bl, rc.bottom));
+            sink->AddArc(D2D1::ArcSegment(D2D1::Point2F(rc.left, rc.bottom - bl),
+                                          D2D1::SizeF(bl, bl), 0.0f,
+                                          D2D1_SWEEP_DIRECTION_CLOCKWISE, D2D1_ARC_SIZE_SMALL));
+        }
+        else
+            sink->AddLine(D2D1::Point2F(rc.left, rc.bottom));
+        if (tl > 0)
+        {
+            sink->AddLine(D2D1::Point2F(rc.left, rc.top + tl));
+            sink->AddArc(D2D1::ArcSegment(D2D1::Point2F(rc.left + tl, rc.top),
+                                          D2D1::SizeF(tl, tl), 0.0f,
+                                          D2D1_SWEEP_DIRECTION_CLOCKWISE, D2D1_ARC_SIZE_SMALL));
+        }
+        else
+            sink->AddLine(D2D1::Point2F(rc.left, rc.top));
+        sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+        sink->Close();
+        sink->Release();
+        return geo;
+    }
+
+    void fillRoundRectCorners(const RECT& rc, COLORREF face, COLORREF border,
+                              int tl, int tr, int br, int bl) override
+    {
+        if (m_rt == nullptr) return;
+        ID2D1PathGeometry* g = roundRectGeo(rectf(rc), static_cast<float>(tl),
+                                            static_cast<float>(tr),
+                                            static_cast<float>(br),
+                                            static_cast<float>(bl));
+        if (g == nullptr)
+        {
+            int m = (std::max)((std::max)(tl, tr), (std::max)(br, bl));
+            fillRoundRect(rc, face, border, m);
+            return;
+        }
+        if (border == face)
+        {
+            m_rt->FillGeometry(g, brush(face));
+            g->Release();
+            return;
+        }
+        // 填充内缩 1px，描边路径内缩 0.5px（与统一圆角那条分支同一套像素对齐）
+        RECT in = rc;
+        ::InflateRect(&in, -1, -1);
+        if (in.right > in.left && in.bottom > in.top)
+        {
+            ID2D1PathGeometry* gi = roundRectGeo(rectf(in),
+                                                 static_cast<float>((std::max)(1, tl - 1)),
+                                                 static_cast<float>((std::max)(1, tr - 1)),
+                                                 static_cast<float>((std::max)(1, br - 1)),
+                                                 static_cast<float>((std::max)(1, bl - 1)));
+            if (gi != nullptr)
+            {
+                m_rt->FillGeometry(gi, brush(face));
+                gi->Release();
+            }
+            else
+                m_rt->FillGeometry(g, brush(face));
+        }
+        else
+            m_rt->FillGeometry(g, brush(face));
+
+        D2D1_RECT_F prc = rectf(rc);
+        prc.left += 0.5f; prc.top += 0.5f; prc.right -= 0.5f; prc.bottom -= 0.5f;
+        ID2D1PathGeometry* gp = roundRectGeo(prc,
+                                             static_cast<float>((std::max)(1, tl)),
+                                             static_cast<float>((std::max)(1, tr)),
+                                             static_cast<float>((std::max)(1, br)),
+                                             static_cast<float>((std::max)(1, bl)));
+        if (gp != nullptr)
+        {
+            m_rt->DrawGeometry(gp, brush(border), 1.0f);
+            gp->Release();
+        }
+        g->Release();
+    }
+
     void fillEllipse(const RECT& rc, COLORREF c, COLORREF border) override
     {
         if (m_rt == nullptr) return;
@@ -372,12 +489,31 @@ public:
         m_rt->DrawRoundedRectangle(&shape, brush(c), t);
     }
 
+    // 1px 细线的半像素对齐：D2D 把 1px 笔画落在整数坐标上时会跨两个像素各占 50%，
+    // 抗锯齿合成后人眼看到的是"2px 灰线"——CAD 图纸里表现为线条变粗、密集处糊成色块。
+    // 整体平移半像素让笔画正好落在像素中心，1px 就是实心 1px 锐线。
+    void pushHairlineAlign(bool on)
+    {
+        if (m_rt == nullptr) return;
+        if (!on)
+        {
+            m_rt->SetTransform(m_matrix);
+            return;
+        }
+        const float s = m_matrix._11 > 0.01f ? m_matrix._11 : 1.0f;
+        m_rt->SetTransform(D2D1::Matrix3x2F::Translation(0.5f / s, 0.5f / s) * m_matrix);
+    }
+
     void strokeLine(const POINT& a, const POINT& b, COLORREF c, int thickness) override
     {
         if (m_rt == nullptr) return;
+        const bool hair = thickness <= 1;
+        pushHairlineAlign(hair);
         m_rt->DrawLine(D2D1::Point2F(static_cast<float>(a.x), static_cast<float>(a.y)),
                        D2D1::Point2F(static_cast<float>(b.x), static_cast<float>(b.y)),
                        brush(c), static_cast<float>(thickness > 0 ? thickness : 1));
+        if (hair)
+            pushHairlineAlign(false);
     }
 
     void frame3d(const RECT& rc, COLORREF base, bool sunken, int thickness) override
@@ -402,7 +538,7 @@ public:
         }
     }
 
-    // WPF 对齐：字重 / 斜体 / 换行 / 垂直对齐
+    // HTML 对齐：字重 / 斜体 / 换行 / 垂直对齐
     void setTextStyle(const std::wstring& weight, const std::wstring& style,
                       const std::wstring& wrapping, const std::wstring& valign) override
     {
@@ -410,6 +546,27 @@ public:
         m_tsStyle = style;
         m_tsWrap = wrapping;
         m_tsVAlign = valign;
+    }
+
+    // CSS letter-spacing：TextFormat 不支持字符间距，必须走 TextLayout。
+    // 只在非 0 时才换路径，默认界面仍是原来的 DrawText（零回归成本）。
+    void setLetterSpacing(double px) override { m_letterSpacing = px; }
+    void setUnderline(bool on) override { m_underline = on; }
+    // CSS text-shadow：绘制 text() 时先按偏移画阴影层。blur<0 表示关闭。
+    void setTextShadow(int ox, int oy, int blur, COLORREF color) override
+    {
+        m_shadowOn = blur >= 0;
+        m_shadowOx = ox;
+        m_shadowOy = oy;
+        m_shadowBlur = (std::max)(0, blur);
+        m_shadowColor = color;
+    }
+    // CSS line-height：TextFormat 只有单一默认行距，要控制只能建 TextLayout 后
+    // SetLineSpacing。倍数按当前字号换算，像素直接用。
+    void setLineHeight(double px, bool isMultiplier) override
+    {
+        m_lineHeight = px;
+        m_lineHeightMul = isMultiplier;
     }
 
     DWRITE_FONT_WEIGHT textWeightOf() const
@@ -436,6 +593,7 @@ public:
         const DWRITE_TEXT_ALIGNMENT ta =
             ((align & DT_CENTER) != 0) ? DWRITE_TEXT_ALIGNMENT_CENTER :
             ((align & DT_RIGHT) != 0) ? DWRITE_TEXT_ALIGNMENT_TRAILING :
+            ((align & kXmlTextJustify) != 0) ? DWRITE_TEXT_ALIGNMENT_JUSTIFIED :
                                         DWRITE_TEXT_ALIGNMENT_LEADING;
         if (ta != m_align)
         {
@@ -466,8 +624,140 @@ public:
         }
 
         const D2D1_RECT_F r = rectf(rc);
-        m_rt->DrawText(s.c_str(), static_cast<UINT32>(s.length()), m_fmt, r, brush(fg),
-                       D2D1_DRAW_TEXT_OPTIONS_CLIP);
+        // CSS text-overflow:ellipsis：单行放不下时截断并补 "…"。
+        // DWrite 没有 DT_END_ELLIPSIS 这一档，只能自己量宽二分截断（textWidth 走同一套 TextFormat）。
+        std::wstring shown = s;
+        if ((align & DT_END_ELLIPSIS) != 0 && ww == DWRITE_WORD_WRAPPING_NO_WRAP)
+        {
+            const float avail = r.right - r.left;
+            if (avail > 0.0f && textWidth(s, ptSize, family) > avail)
+            {
+                const std::wstring dots = L"\u2026";
+                const float dotsW = textWidth(dots, ptSize, family);
+                size_t lo = 0, hi = s.size();
+                while (lo < hi)
+                {
+                    const size_t mid = (lo + hi + 1) / 2;
+                    if (textWidth(s.substr(0, mid), ptSize, family) + dotsW <= avail)
+                        lo = mid;
+                    else
+                        hi = mid - 1;
+                }
+                shown = s.substr(0, lo) + dots;
+            }
+        }
+        // 有 4×4 / 旋转变换时不能用 D2D1_DRAW_TEXT_OPTIONS_CLIP：那会把字形裁到"未变换的盒"，
+        // 缩放后字形整体跑到盒外 → 整段文字消失（rotate 时只剩盒内一小块）。
+        const D2D1_DRAW_TEXT_OPTIONS textOpt =
+            m_xfDepth > 0 ? D2D1_DRAW_TEXT_OPTIONS_NONE : D2D1_DRAW_TEXT_OPTIONS_CLIP;
+        // letter-spacing：TextFormat 没有字符间距设置，只能建 TextLayout 后逐个字符
+        // SetCharacterSpacing（trailing 用 0，否则行尾会多出一段空白）。
+        // text-decoration:underline 同样只能在 TextLayout 上设（TextFormat 没有下划线）。
+        IDWriteTextLayout* layout = nullptr;
+        if (m_letterSpacing != 0 || m_underline || m_lineHeight > 0)
+        {
+            if (SUCCEEDED(dwriteFactory()->CreateTextLayout(shown.c_str(),
+                                                            static_cast<UINT32>(shown.length()),
+                                                            m_fmt, r.right - r.left,
+                                                            r.bottom - r.top, &layout)) &&
+                layout != nullptr)
+            {
+                if (m_underline)
+                    layout->SetUnderline(TRUE, DWRITE_TEXT_RANGE{0, static_cast<UINT32>(shown.length())});
+                if (m_lineHeight > 0)
+                {
+                    // CSS 的 line-height 是"行盒高度"；DWrite 的 SetLineSpacing 也是行长，
+                    // baseline 取行高的 0.8（字面底部大致位置），多行文本才看得出差异。
+                    const FLOAT fs = m_fmt != nullptr ? m_fmt->GetFontSize() : 12.0f;
+                    const FLOAT linePx = m_lineHeightMul
+                                             ? static_cast<FLOAT>(m_lineHeight) * fs
+                                             : static_cast<FLOAT>(m_lineHeight);
+                    layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, linePx,
+                                           linePx * 0.8f);
+                }
+                // SetCharacterSpacing 在 IDWriteTextLayout1（Win8+）上，TextFormat 本身没有；
+                // 参数顺序是 (leadingSpacing, trailingSpacing, minimumAdvanceWidth, range)，
+                // 这里的字距是"每个字后面加"，所以给 leading、trailing 留 0。
+                IDWriteTextLayout1* tl1 = nullptr;
+                if (SUCCEEDED(layout->QueryInterface(IID_PPV_ARGS(&tl1))) && tl1 != nullptr)
+                {
+                    tl1->SetCharacterSpacing(static_cast<FLOAT>(m_letterSpacing), 0.0f, 0.0f,
+                                             DWRITE_TEXT_RANGE{0, static_cast<UINT32>(shown.length())});
+                    tl1->Release();
+                }
+            }
+            else
+                layout = nullptr;   // 建 layout 失败就退回 DrawText 快路径（不吞掉这段文字）
+        }
+
+        // 一处绘制入口：正文与阴影共用（偏移量由调用点给）。
+        auto drawAt = [&](COLORREF c, int dx, int dy) {
+            const D2D1_RECT_F rr = D2D1::RectF(r.left + dx, r.top + dy, r.right + dx, r.bottom + dy);
+            if (layout != nullptr)
+                m_rt->DrawTextLayout(D2D1::Point2F(rr.left, rr.top), layout, brush(c), textOpt);
+            else
+                m_rt->DrawText(shown.c_str(), static_cast<UINT32>(shown.length()), m_fmt, rr,
+                               brush(c), textOpt);
+        };
+
+        // CSS text-shadow：先按偏移画若干层阴影色文字，再画正文。
+        // blur 用 9 点抖动近似（半径 blur/2、1px 步长），够压住底色，不做真卷积。
+        if (m_shadowOn)
+        {
+            const int rad = m_shadowBlur > 0 ? (m_shadowBlur + 1) / 2 : 0;
+            for (int dy = -rad; dy <= rad; ++dy)
+                for (int dx = -rad; dx <= rad; ++dx)
+                {
+                    if (rad > 0 && (dx * dx + dy * dy) > rad * rad + 1)
+                        continue;
+                    drawAt(m_shadowColor, m_shadowOx + dx, m_shadowOy + dy);
+                }
+        }
+        drawAt(fg, 0, 0);
+        if (layout != nullptr)
+            layout->Release();
+    }
+
+    // 文字基线：DWrite 的 TextLayout 能给首行的 height/baseline；再按段落垂直对齐
+    // （近/中/远，与 text() 用的同一套 m_tsVAlign）补上顶部的空白，得到绝对 Y。
+    // 下划线要贴着基线，才能像浏览器那样在任意盒高下都紧跟文字。
+    bool textBaseline(const RECT& rc, const std::wstring& s, int ptSize,
+                      const std::wstring& family, double& baselineY) override
+    {
+        if (m_rt == nullptr || s.empty()) return false;
+        IDWriteFactory* dw = dwriteFactory();
+        if (dw == nullptr || !ensureTextFormat(ptSize, family)) return false;
+
+        const float w = static_cast<float>(rc.right - rc.left);
+        const float h = static_cast<float>(rc.bottom - rc.top);
+        if (w <= 0.0f || h <= 0.0f) return false;
+
+        IDWriteTextLayout* layout = nullptr;
+        if (FAILED(dw->CreateTextLayout(s.c_str(), static_cast<UINT32>(s.size()), m_fmt, w, h,
+                                        &layout)) ||
+            layout == nullptr)
+            return false;
+
+        DWRITE_LINE_METRICS lm[2] = {};
+        UINT32 n = 0;
+        const bool ok = SUCCEEDED(layout->GetLineMetrics(lm, 2, &n)) && n > 0;
+        const float lineH = lm[0].height;
+        const float base = lm[0].baseline;
+        layout->Release();
+        if (!ok || lineH <= 0.0f) return false;
+
+        // 段落垂直对齐：顶对齐不留白；居中居中；底对齐把整行顶到盒底。
+        float top = 0.0f;
+        if (_wcsicmp(m_tsVAlign.c_str(), L"Top") == 0)
+            top = 0.0f;
+        else if (_wcsicmp(m_tsVAlign.c_str(), L"Bottom") == 0)
+            top = h - lineH;
+        else
+            top = (h - lineH) * 0.5f;
+        if (top < 0.0f) top = 0.0f;
+
+        baselineY = static_cast<double>(rc.top) + static_cast<double>(top) + base;
+        return true;
     }
 
     // 文字量宽：和 text() 走同一个 DWrite TextFormat，量出来的宽度就是画出来的宽度。
@@ -507,6 +797,66 @@ public:
         if (m_rt == nullptr || m_depth <= 0) return;
         m_rt->PopAxisAlignedClip();
         --m_depth;
+    }
+
+    // 圆角裁剪：轴对齐裁剪切不出圆弧，只能走"图层 + 圆角几何遮罩"。
+    // 每个圆角裁剪自带一个 layer（复用 acquireLayer 的深度池）与一份几何，
+    // 出栈时按同一顺序释放；成对调用，不能和 clipPush 交叉嵌套。
+    void clipPushRound(const RECT& rc, int radius) override
+    {
+        if (m_rt == nullptr) { clipPush(rc); return; }
+        ID2D1Factory* f = d2dFactory();
+        ID2D1RoundedRectangleGeometry* geo = nullptr;
+        const int r = radius < 0 ? 0 : radius;
+        if (r <= 0 || f == nullptr)
+        {
+            clipPush(rc);
+            m_roundClips.push_back(nullptr);     // nullptr = 本次回退成了方角
+            return;
+        }
+        const D2D1_ROUNDED_RECT rr = D2D1::RoundedRect(
+            rectf(rc), static_cast<float>(r), static_cast<float>(r));
+        HRESULT hrGeo = f->CreateRoundedRectangleGeometry(rr, &geo);
+        if (FAILED(hrGeo) || geo == nullptr)
+        {
+            clipPush(rc);
+            m_roundClips.push_back(nullptr);
+            return;
+        }
+        ID2D1Layer* layer = acquireLayer(m_depth);
+        if (layer == nullptr)
+        {
+            geo->Release();
+            clipPush(rc);
+            m_roundClips.push_back(nullptr);
+            return;
+        }
+        D2D1_LAYER_PARAMETERS lp = D2D1::LayerParameters();
+        lp.geometricMask = geo;
+        lp.maskAntialiasMode = D2D1_ANTIALIAS_MODE_PER_PRIMITIVE;
+        lp.contentBounds = rectf(rc);
+        m_rt->PushLayer(lp, layer);
+        m_roundClips.push_back(geo);             // 交出所有权，出栈时释放
+        ++m_depth;
+    }
+
+    void clipPopRound() override
+    {
+        if (m_roundClips.empty())
+        {
+            clipPop();
+            return;
+        }
+        ID2D1RoundedRectangleGeometry* geo = m_roundClips.back();
+        m_roundClips.pop_back();
+        if (m_rt == nullptr)
+        {
+            if (geo != nullptr) geo->Release();
+            return;
+        }
+        m_rt->PopLayer();
+        if (m_depth > 0) --m_depth;
+        if (geo != nullptr) geo->Release();
     }
 
     // =======================================================================
@@ -554,9 +904,13 @@ public:
         if (m_rt == nullptr || pts.size() < 2) return;
         ID2D1PathGeometry* geo = pathOf(pts, closed);
         if (geo == nullptr) return;
+        const bool hair = thickness <= 1;
+        pushHairlineAlign(hair);
         // HTML 的 .link 是 stroke-linecap: round：D2D 默认平头，必须显式给圆头笔帽
         m_rt->DrawGeometry(geo, brush(c), static_cast<float>(thickness > 0 ? thickness : 1),
                            roundStrokeStyle());
+        if (hair)
+            pushHairlineAlign(false);
         geo->Release();
     }
 
@@ -679,6 +1033,7 @@ public:
     {
         if (m_rt == nullptr) return;
         m_matrixStack.push_back(m_matrix);
+        ++m_xfDepth;
         m_matrix = D2D1::Matrix3x2F::Rotation(
             static_cast<float>(angleDeg % 360),
             D2D1::Point2F(static_cast<float>(center.x), static_cast<float>(center.y)))
@@ -689,8 +1044,24 @@ public:
     void popTransform() override
     {
         if (m_rt == nullptr) return;
+        if (m_xfDepth > 0) --m_xfDepth;
         m_matrix = m_matrixStack.empty() ? D2D1::Matrix3x2F::Identity() : m_matrixStack.back();
         if (!m_matrixStack.empty()) m_matrixStack.pop_back();
+        m_rt->SetTransform(m_matrix);
+    }
+
+    void pushTransform4(const xmlgeo::XmlMatrix4& mat) override
+    {
+        if (m_rt == nullptr) return;
+        // 4×4 → 2×3 投影：D2D 只认二维仿射，取 M 的 x/y 两行 + 平移列。
+        // 列向量约定 p'=M·p 与 D2D 的行向量约定正好互为转置，所以 _12/_21 要交换。
+        D2D1_MATRIX_3X2_F proj = D2D1::Matrix3x2F(
+            mat.m[0], mat.m[4],     // x' = x*m0 + y*m4 + m3
+            mat.m[1], mat.m[5],     // y' = x*m1 + y*m5 + m7
+            mat.m[3], mat.m[7]);
+        m_matrixStack.push_back(m_matrix);
+        ++m_xfDepth;            // 变换生效期间文字不能按原盒裁剪（否则缩放/旋转后的字被裁没）
+        m_matrix = proj * m_matrix;
         m_rt->SetTransform(m_matrix);
     }
 
@@ -700,6 +1071,82 @@ public:
         ID2D1Bitmap* bmp = image(path);
         if (bmp == nullptr || m_rt == nullptr) return;
         m_rt->DrawBitmap(bmp, rectf(rc), 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+    }
+
+    // 圆角裁图。PushLayer 的几何遮罩在 DC 绑定目标上实测不裁（PushLayer 成功、像素仍是方角），
+    // 所以走"逐行轴对齐裁剪"拼圆弧：PushAxisAlignedClip 是这后端上唯一确认生效的裁剪，
+    // 按 1/4 像素步进逐行推进，每行按圆的 x 弦收缩左右边界。
+    void drawImageClippedRound(const RECT& mask, int rx, int ry, const RECT& dst,
+                               const std::wstring& path) override
+    {
+        ID2D1Bitmap* bmp = image(path);
+        if (bmp == nullptr || m_rt == nullptr) return;
+        const int w = static_cast<int>(mask.right - mask.left);
+        const int h = static_cast<int>(mask.bottom - mask.top);
+        int ax = rx, ay = ry;
+        if (ax > w / 2) ax = w / 2;
+        if (ay > h / 2) ay = h / 2;
+        if (ax <= 0 || ay <= 0 || w <= 0 || h <= 0)
+        {
+            clipPush(mask);
+            m_rt->DrawBitmap(bmp, rectf(dst), 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+            clipPop();
+            return;
+        }
+        // 每像素行一条裁剪带：轴对齐裁剪只认像素行，再细分会被吸附合并成"平顶"
+        const float step = 1.0f;
+        const float top = static_cast<float>(mask.top);
+        const float bottom = static_cast<float>(mask.bottom);
+        const float left = static_cast<float>(mask.left);
+        const float right = static_cast<float>(mask.right);
+        const float rxf = static_cast<float>(ax);
+        const float ryf = static_cast<float>(ay);
+        const float bandTop = top + ryf;
+        const float bandBottom = bottom - ryf;
+        const auto blit = [&]() {
+            m_rt->DrawBitmap(bmp, rectf(dst), 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+        };
+        // 中间直边段一次画完，只上下两个圆角带按行收缩（椭圆：x 收缩量按 rx*sqrt(1-(dy/ry)^2)）
+        if (bandBottom > bandTop)
+        {
+            RECT mid = { mask.left, static_cast<LONG>(bandTop), mask.right,
+                         static_cast<LONG>(bandBottom) };
+            clipPush(mid);
+            blit();
+            clipPop();
+        }
+        for (float y = top; y < bottom; y += step)
+        {
+            const float yc = y + step * 0.5f;
+            float inset = 0.0f;
+            const float der = static_cast<float>(bandTop) - yc;
+            const float der2 = yc - static_cast<float>(bandBottom);
+            const float dy = (yc < bandTop) ? der : ((yc > bandBottom) ? der2 : 0.0f);
+            if (dy > 0.0f)
+            {
+                const float k = dy / ryf;
+                const float s = k >= 1.0f ? 0.0f : std::sqrt(1.0f - k * k);
+                inset = rxf * (1.0f - s);
+            }
+            if (inset <= 0.0f) continue;                 // 已由中间段画过
+            RECT cr = { static_cast<LONG>(std::floor(left + inset)), static_cast<LONG>(std::floor(y)),
+                        static_cast<LONG>(std::ceil(right - inset)), static_cast<LONG>(std::ceil(y + step)) };
+            if (cr.right <= cr.left) continue;
+            clipPush(cr);
+            blit();
+            clipPop();
+        }
+    }
+
+    bool imageSize(const std::wstring& path, int& w, int& h) override
+    {
+        w = 0; h = 0;
+        ID2D1Bitmap* bmp = image(path);
+        if (bmp == nullptr) return false;
+        const D2D1_SIZE_U sz = bmp->GetPixelSize();
+        w = static_cast<int>(sz.width);
+        h = static_cast<int>(sz.height);
+        return w > 0 && h > 0;
     }
 
 protected:
@@ -914,6 +1361,15 @@ protected:
         return bmp;
     }
 
+    // 一帧开始时/状态复位时必须清空圆角裁剪栈：上一帧漏了 clipPopRound 的话，
+    // 几何会一直挂着，且渲染目标的图层没 Pop 干净。这里只释放，不再 Pop。
+    void clearRoundClips()
+    {
+        for (auto& g : m_roundClips)
+            if (g != nullptr) g->Release();
+        m_roundClips.clear();
+    }
+
     bool ensureTextFormat(int ptSize, const std::wstring& family)
     {
         IDWriteFactory* dw = dwriteFactory();
@@ -986,6 +1442,7 @@ protected:
             if (l != nullptr) l->Release();
         m_layers.clear();
         m_layerStack.clear();
+        clearRoundClips();
         m_matrixStack.clear();
         m_matrix = D2D1::Matrix3x2F::Identity();
         // 位图绑定在渲染目标上，目标销毁前必须先放掉
@@ -1020,11 +1477,15 @@ protected:
     std::vector<ID2D1Layer*> m_layerStack;
     D2D1_MATRIX_3X2_F m_matrix = D2D1::Matrix3x2F::Identity();
     std::vector<D2D1_MATRIX_3X2_F> m_matrixStack;
+    int m_xfDepth = 0;      // 当前嵌套的变换层数（>0 时文字不按未变换盒裁剪）
     std::vector<std::pair<std::wstring, ID2D1Bitmap*>> m_images;
     IDWriteTextFormat* m_fmt = nullptr;
     int m_width = 0;
     int m_height = 0;
     int m_depth = 0;
+    // 圆角裁剪栈：元素是本次 push 的几何（nullptr 表示回退成了方角裁剪）。
+    // 与 m_depth 同步增长，出栈时逐个 Release，避免每帧漏几何。
+    std::vector<ID2D1RoundedRectangleGeometry*> m_roundClips;
     int m_fmtSize = -1;
     DWRITE_TEXT_ALIGNMENT m_align = static_cast<DWRITE_TEXT_ALIGNMENT>(-1);
     std::wstring m_fmtFace;
@@ -1033,6 +1494,15 @@ protected:
     std::wstring m_tsStyle;
     std::wstring m_tsWrap;
     std::wstring m_tsVAlign;
+    double m_letterSpacing = 0.0;  // CSS letter-spacing（支持小数/负值）；0 = 走 DrawText 快路径
+    bool m_underline = false;     // CSS text-decoration:underline
+    bool m_shadowOn = false;      // CSS text-shadow 是否生效
+    int m_shadowOx = 0;
+    int m_shadowOy = 0;
+    int m_shadowBlur = 0;
+    COLORREF m_shadowColor = RGB(0, 0, 0);
+    double m_lineHeight = 0.0;    // CSS line-height（0 = 自动）；>0 时走 TextLayout
+    bool m_lineHeightMul = false; // true = m_lineHeight 是倍数，否则是像素
     int m_fmtWeight = -1;
     int m_fmtStyle = -1;
     DWRITE_WORD_WRAPPING m_wrap = static_cast<DWRITE_WORD_WRAPPING>(-1);
@@ -1207,6 +1677,7 @@ public:
         m_matrix = D2D1::Matrix3x2F::Identity();
         m_matrixStack.clear();
         m_layerStack.clear();
+        clearRoundClips();
         if (m_opacityRt != nullptr) { m_opacityRt->Release(); m_opacityRt = nullptr; }
         m_opacityPrev = nullptr;
         m_opacityDepth = 0;

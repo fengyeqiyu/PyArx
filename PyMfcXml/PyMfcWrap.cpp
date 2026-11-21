@@ -1,32 +1,12 @@
-// PyMfcWrap.cpp —— PyMfcTopWnd / PyMfcWindow / PyMfcPanel 的实现。
+// PyMfcWrap.cpp —— PyMfcWindow / PyMfcPanel 的实现（PyMfcTopWnd 实现见 PyMfcTopWnd.cpp）。
 
 #include "PyMfcWrap.h"
-
-BEGIN_MESSAGE_MAP(PyMfcTopWnd, CWnd)
-    ON_WM_SIZE()
-END_MESSAGE_MAP()
-
-void PyMfcTopWnd::OnSize(UINT nType, int cx, int cy)
-{
-    CWnd::OnSize(nType, cx, cy);
-    if (host != nullptr && host->GetSafeHwnd() != nullptr)
-    {
-        host->MoveWindow(0, 0, cx, cy, TRUE);
-        host->reflowXml();   // 客户区尺寸变化后按新宽高重排 XML 控件
-    }
-    if (resize)
-        resize(cx, cy);
-}
-
-
+#include "PyMfcPerf.h"
 
 
 // ---------------------------------------------------------------------------
 // 进程级登记表：原生对象归 C++ 所有，Python 只持引用
 // ---------------------------------------------------------------------------
-
-void PyMfcTopWnd::PostNcDestroy()
-{}
 
 
 PyMfcWindow::~PyMfcWindow()
@@ -72,6 +52,13 @@ bool PyMfcWindow::create(const std::wstring& title, int width, int height)
         installWheelHost(hwnd, &m_host);
         m_wnd.host = &m_host;
         m_wnd.resize = [this](int w, int h) { notifyResize(w, h); };
+        m_wnd.relayout = [this](int cx, int cy) {
+            if (m_host.GetSafeHwnd() != nullptr)
+            {
+                m_host.MoveWindow(0, 0, cx, cy, TRUE);
+                m_host.reflowXml();
+            }
+        };
         applyWindowIcon(hwnd);
         const BOOL darkTitle = TRUE;
         ::DwmSetWindowAttribute(hwnd, 20, &darkTitle, sizeof(darkTitle));
@@ -101,9 +88,13 @@ bool PyMfcWindow::savePng(const std::wstring& path)
         ::SetForegroundWindow(hwnd);
         ::RedrawWindow(hwnd, nullptr, nullptr,
                        RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
-        // 泵 600ms 的消息：D2D 出帧、光标/动画就位，否则抓到的是半张空壳
+        // 泵一段消息：D2D 出帧、光标/动画就位，否则抓到的是半张空壳。
+        // 这里原先固定泵 600ms —— 截图因此至少要 0.6s，examples/cad2d --batch 与
+        // 所有截图测试都被它拖住。实际上只有"还有动画在跑"时才需要等画面稳定：
+        // 没有动画轨道时多泵两帧就够，静态界面下 600ms 纯属空等。
+        const int settleFrames = m_host.hasActiveAnimations() ? 60 : 3;
         MSG msg = {};
-        for (int i = 0; i < 60; ++i)
+        for (int i = 0; i < settleFrames; ++i)
         {
             while (::PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
             {
@@ -136,19 +127,25 @@ bool PyMfcWindow::savePng(const std::wstring& path)
         HBITMAP dib = ::CreateDIBSection(screen, &bi, DIB_RGB_COLORS, &bits, nullptr, 0);
         HDC mem = ::CreateCompatibleDC(screen);
         bool ok = false;
-        if (dib != nullptr && mem != nullptr && bits != nullptr)
         {
-            HGDIOBJ old = ::SelectObject(mem, dib);
-            // 先试 PrintWindow：直接让窗口把自己的内容画进来，被别的浮窗遮住也照样
-            // 是干净的一帧；不支持时（老控件/某些 D2D 表面）退回屏幕 BitBlt。
-            ok = ::PrintWindow(hwnd, mem, 2 /*PW_RENDERFULLCONTENT*/) != FALSE;
-            if (!ok)
-                ok = ::BitBlt(mem, 0, 0, w, h, screen, rc.left, rc.top,
-                              SRCCOPY | CAPTUREBLT) != FALSE;
-            ::SelectObject(mem, old);
+            PyMfcPerfScope _p(&pyMfcPerf().shotMs, &pyMfcPerf().nShot);
+            if (dib != nullptr && mem != nullptr && bits != nullptr)
+            {
+                HGDIOBJ old = ::SelectObject(mem, dib);
+                // 先试 PrintWindow：直接让窗口把自己的内容画进来，被别的浮窗遮住也照样
+                // 是干净的一帧；不支持时（老控件/某些 D2D 表面）退回屏幕 BitBlt。
+                ok = ::PrintWindow(hwnd, mem, 2 /*PW_RENDERFULLCONTENT*/) != FALSE;
+                if (!ok)
+                    ok = ::BitBlt(mem, 0, 0, w, h, screen, rc.left, rc.top,
+                                  SRCCOPY | CAPTUREBLT) != FALSE;
+                ::SelectObject(mem, old);
+            }
         }
         if (ok)
+        {
+            PyMfcPerfScope _p(&pyMfcPerf().encMs, &pyMfcPerf().nEnc);
             ok = wicWritePng(path, w, h, bits);
+        }
         if (mem != nullptr)
             ::DeleteDC(mem);
         if (dib != nullptr)
@@ -184,6 +181,13 @@ bool PyMfcWindow::CreateEmbedded(HWND parent, const std::wstring& title, int wid
         m_wnd.SubclassWindow(hwnd);
         m_wnd.host = &m_host;
         m_wnd.resize = [this](int w, int h) { notifyResize(w, h); };
+        m_wnd.relayout = [this](int cx, int cy) {
+            if (m_host.GetSafeHwnd() != nullptr)
+            {
+                m_host.MoveWindow(0, 0, cx, cy, TRUE);
+                m_host.reflowXml();
+            }
+        };
         applyWindowIcon(hwnd);
         if (!m_host.create(hwnd, CRect(0, 0, width, height)))
             return false;
@@ -223,6 +227,13 @@ void PyMfcWindow::setBackground(int r, int g, int b)
 std::pair<int, int> PyMfcWindow::getSize(int id) const
 {
     return m_host.controlClientSize(id);
+}
+
+py::tuple PyMfcWindow::getRect(int id) const
+{
+    int x = 0, y = 0, w = 0, h = 0;
+    m_host.getControlRect(id, x, y, w, h);
+    return py::make_tuple(x, y, w, h);
 }
 
 void PyMfcWindow::notifyResize(int w, int h)
@@ -757,6 +768,9 @@ void PyMfcWindow::onDrag(int id, py::object cb)
 py::object PyMfcWindow::cellRect(int id, int row, int col)
 { return m_host.cellRect(id, row, col); }
 
+py::dict PyMfcWindow::perfStats(bool reset)
+{ return m_host.perfStats(reset); }
+
 
 void PyMfcWindow::onGridAction(py::object cb)
 { m_host.onGridAction(std::move(cb)); }
@@ -972,35 +986,46 @@ std::wstring PyMfcWindow::getCanvasCommands(int id) const
 { return m_host.getCanvasCommands(id); }
 
 
-void PyMfcWindow::addPowerCanvas(int id, int x, int y, int w, int h)
-{ m_host.addPowerCanvas(id, x, y, w, h); }
+void PyMfcWindow::addDwgCanvas(int id, int x, int y, int w, int h)
+{ m_host.addDwgCanvas(id, x, y, w, h); }
 
 
-void PyMfcWindow::loadPowerPlan(int id, const std::wstring& json)
-{ m_host.setPowerCanvasPlan(id, json); }
+void PyMfcWindow::loadDwgLayout(int id, const std::wstring& json)
+{ m_host.setDwgLayout(id, json); }
 
 
-void PyMfcWindow::loadPowerScene(int id, const std::wstring& json)
-{ m_host.setPowerCanvasScene(id, json); }
+void PyMfcWindow::loadDwgScene(int id, const std::wstring& json)
+{ m_host.setDwgScene(id, json); }
 
-void PyMfcWindow::copyPowerScene(int toId, int fromId)
-{ m_host.copyPowerCanvasScene(toId, fromId); }
-
-
-void PyMfcWindow::loadPowerSvg(int id, const std::wstring& svg)
-{ m_host.setPowerCanvasSvg(id, svg); }
+void PyMfcWindow::copyDwgScene(int toId, int fromId)
+{ m_host.copyDwgScene(toId, fromId); }
 
 
-void PyMfcWindow::loadPlanOverlay(int id, const std::wstring& svg)
-{ m_host.setPowerCanvasOverlay(id, svg); }
+void PyMfcWindow::loadDwgSvg(int id, const std::wstring& svg)
+{ m_host.setDwgSvg(id, svg); }
 
 
-void PyMfcWindow::setPlanView(int id, float zoom, int ox, int oy)
-{ m_host.setPowerCanvasView(id, zoom, ox, oy); }
+void PyMfcWindow::loadDwgXml(int id, const std::wstring& sceneXml)
+{ m_host.setDwgXml(id, sceneXml); }
 
 
-float PyMfcWindow::getPlanZoom(int id) const
-{ return m_host.getPowerCanvasZoom(id); }
+void PyMfcWindow::loadDwgOverlay(int id, const std::wstring& svg)
+{ m_host.setDwgOverlay(id, svg); }
+
+
+void PyMfcWindow::loadDwgOverlayXml(int id, const std::wstring& sceneXml)
+{ m_host.setDwgOverlayXml(id, sceneXml); }
+
+
+void PyMfcWindow::setDwgView(int id, float zoom, int ox, int oy)
+{ m_host.setDwgView(id, zoom, ox, oy); }
+
+
+float PyMfcWindow::getDwgZoom(int id) const
+{ return m_host.getDwgZoom(id); }
+
+std::wstring PyMfcWindow::getFileTabInfo(int id) const
+{ return m_host.getFileTabInfo(id); }
 
 // ---- 三维视图画布（Window 版）----
 void PyMfcWindow::addView3D(int id, int x, int y, int w, int h)
@@ -1045,44 +1070,44 @@ void PyMfcWindow::view3DSetStyle(int id, unsigned bg, bool axes, bool grid)
 { m_host.setView3DStyle(id, RGB((bg >> 16) & 0xFF, (bg >> 8) & 0xFF, bg & 0xFF), axes, grid); }
 
 
-std::wstring PyMfcWindow::getPlanSelection(int id) const
-{ return m_host.getPowerCanvasSelection(id); }
+std::wstring PyMfcWindow::getDwgSelection(int id) const
+{ return m_host.getDwgSelection(id); }
 
 
-void PyMfcWindow::setPlanOptions(int id, bool showCable, bool mini, int miniOf)
-{ m_host.setPowerCanvasOptions(id, showCable, mini, miniOf); }
+void PyMfcWindow::setDwgOptions(int id, bool showCable, bool mini, int miniOf)
+{ m_host.setDwgOptions(id, showCable, mini, miniOf); }
 
 
-py::object PyMfcWindow::getPlanView(int id) const
+py::object PyMfcWindow::getDwgView(int id) const
 {
         float zoom = 0.0f;
         int ox = 0, oy = 0;
-        m_host.getPowerCanvasView(id, zoom, ox, oy);
+        m_host.getDwgView(id, zoom, ox, oy);
         return py::make_tuple(zoom, ox, oy);
     }
 
-py::object PyMfcWindow::planProbe(int id)
+py::object PyMfcWindow::dwgProbe(int id)
 {
-        auto it = m_host.m_planCv.find(id);
-        if (it == m_host.m_planCv.end())
+        auto it = m_host.m_dwgCv.find(id);
+        if (it == m_host.m_dwgCv.end())
             return py::none();
-        const PyMfcHost::PlanCanvasState& st = it->second;
+        const PyMfcHost::DwgCanvasState& st = it->second;
         return py::make_tuple(st.lastMsg, st.upX, st.upY,
                               st.upWasDrag ? 1 : 0, st.moved ? 1 : 0, st.lastHit);
     }
 
-std::wstring PyMfcWindow::hitPlan(int id, int x, int y)
-{ return m_host.planHit(id, x, y); }
+std::wstring PyMfcWindow::hitDwg(int id, int x, int y)
+{ return m_host.dwgHit(id, x, y); }
 
 
-bool PyMfcWindow::selectPlan(int id, const std::wstring& code)
-{ return m_host.selectPlanItem(id, code); }
+bool PyMfcWindow::selectDwg(int id, const std::wstring& code)
+{ return m_host.selectDwgItem(id, code); }
 
 
-py::object PyMfcWindow::cardRectPlan(int id, const std::wstring& code)
+py::object PyMfcWindow::cardRectDwg(int id, const std::wstring& code)
 {
         RECT rc = {};
-        if (!m_host.planCardRect(id, code, rc))
+        if (!m_host.dwgCardRect(id, code, rc))
             return py::none();
         return py::make_tuple(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
     }
@@ -1107,6 +1132,26 @@ int PyMfcWindow::getLevel(int id) const
 
 void PyMfcWindow::setLevel(int id, int level)
 { m_host.setLevel(id, level); }
+
+
+std::wstring PyMfcWindow::getCursor(int id) const
+{ return m_host.getControlCursor(id); }
+
+
+void PyMfcWindow::setCursor(int id, const std::wstring& keyword)
+{ m_host.setControlCursor(id, keyword); }
+
+
+std::wstring PyMfcWindow::getPointerEvents(int id) const
+{ return m_host.getControlPointerEvents(id); }
+
+
+void PyMfcWindow::setPointerEvents(int id, const std::wstring& keyword)
+{ m_host.setControlPointerEvents(id, keyword); }
+
+
+bool PyMfcWindow::isMouseTransparent(int id) const
+{ return m_host.isControlMouseTransparent(id); }
 
 
 void PyMfcWindow::bringToFront(int id)
@@ -1980,43 +2025,51 @@ std::wstring PyMfcPanel::getCanvasCommands(int id) const
 { return m_host->getCanvasCommands(id); }
 
 
-void PyMfcPanel::addPowerCanvas(int id, int x, int y, int w, int h)
-{ m_host->addPowerCanvas(id, x, y, w, h); }
+void PyMfcPanel::addDwgCanvas(int id, int x, int y, int w, int h)
+{ m_host->addDwgCanvas(id, x, y, w, h); }
 
 
-void PyMfcPanel::loadPowerPlan(int id, const std::wstring& json)
-{ m_host->setPowerCanvasPlan(id, json); }
+void PyMfcPanel::loadDwgLayout(int id, const std::wstring& json)
+{ m_host->setDwgLayout(id, json); }
 
 
-void PyMfcPanel::loadPowerScene(int id, const std::wstring& json)
-{ m_host->setPowerCanvasScene(id, json); }
+void PyMfcPanel::loadDwgScene(int id, const std::wstring& json)
+{ m_host->setDwgScene(id, json); }
 
-void PyMfcPanel::copyPowerScene(int toId, int fromId)
-{ m_host->copyPowerCanvasScene(toId, fromId); }
-
-
-void PyMfcPanel::loadPowerSvg(int id, const std::wstring& svg)
-{ m_host->setPowerCanvasSvg(id, svg); }
+void PyMfcPanel::copyDwgScene(int toId, int fromId)
+{ m_host->copyDwgScene(toId, fromId); }
 
 
-void PyMfcPanel::loadPlanOverlay(int id, const std::wstring& svg)
-{ m_host->setPowerCanvasOverlay(id, svg); }
+void PyMfcPanel::loadDwgSvg(int id, const std::wstring& svg)
+{ m_host->setDwgSvg(id, svg); }
 
 
-void PyMfcPanel::setPlanView(int id, float zoom, int ox, int oy)
-{ m_host->setPowerCanvasView(id, zoom, ox, oy); }
+void PyMfcPanel::loadDwgXml(int id, const std::wstring& sceneXml)
+{ m_host->setDwgXml(id, sceneXml); }
 
 
-float PyMfcPanel::getPlanZoom(int id) const
-{ return m_host->getPowerCanvasZoom(id); }
+void PyMfcPanel::loadDwgOverlay(int id, const std::wstring& svg)
+{ m_host->setDwgOverlay(id, svg); }
 
 
-std::wstring PyMfcPanel::getPlanSelection(int id) const
-{ return m_host->getPowerCanvasSelection(id); }
+void PyMfcPanel::loadDwgOverlayXml(int id, const std::wstring& sceneXml)
+{ m_host->setDwgOverlayXml(id, sceneXml); }
 
 
-void PyMfcPanel::setPlanOptions(int id, bool showCable, bool mini, int miniOf)
-{ m_host->setPowerCanvasOptions(id, showCable, mini, miniOf); }
+void PyMfcPanel::setDwgView(int id, float zoom, int ox, int oy)
+{ m_host->setDwgView(id, zoom, ox, oy); }
+
+
+float PyMfcPanel::getDwgZoom(int id) const
+{ return m_host->getDwgZoom(id); }
+
+
+std::wstring PyMfcPanel::getDwgSelection(int id) const
+{ return m_host->getDwgSelection(id); }
+
+
+void PyMfcPanel::setDwgOptions(int id, bool showCable, bool mini, int miniOf)
+{ m_host->setDwgOptions(id, showCable, mini, miniOf); }
 
 // ---- 三维视图画布（Panel 版）----
 void PyMfcPanel::addView3D(int id, int x, int y, int w, int h)
@@ -2061,20 +2114,20 @@ void PyMfcPanel::view3DSetStyle(int id, unsigned bg, bool axes, bool grid)
 { m_host->setView3DStyle(id, RGB((bg >> 16) & 0xFF, (bg >> 8) & 0xFF, bg & 0xFF), axes, grid); }
 
 
-py::object PyMfcPanel::getPlanView(int id) const
+py::object PyMfcPanel::getDwgView(int id) const
 {
         float zoom = 0.0f;
         int ox = 0, oy = 0;
-        m_host->getPowerCanvasView(id, zoom, ox, oy);
+        m_host->getDwgView(id, zoom, ox, oy);
         return py::make_tuple(zoom, ox, oy);
     }
 
-std::wstring PyMfcPanel::hitPlan(int id, int x, int y)
-{ return m_host->planHit(id, x, y); }
+std::wstring PyMfcPanel::hitDwg(int id, int x, int y)
+{ return m_host->dwgHit(id, x, y); }
 
 
-bool PyMfcPanel::selectPlan(int id, const std::wstring& code)
-{ return m_host->selectPlanItem(id, code); }
+bool PyMfcPanel::selectDwg(int id, const std::wstring& code)
+{ return m_host->selectDwgItem(id, code); }
 
 void PyMfcPanel::setDetailCard(int id, py::list rect, py::list texts)
 { m_host->setDetailCard(id, std::move(rect), std::move(texts)); }
@@ -2096,6 +2149,26 @@ int PyMfcPanel::getLevel(int id) const
 
 void PyMfcPanel::setLevel(int id, int level)
 { m_host->setLevel(id, level); }
+
+
+std::wstring PyMfcPanel::getCursor(int id) const
+{ return m_host->getControlCursor(id); }
+
+
+void PyMfcPanel::setCursor(int id, const std::wstring& keyword)
+{ m_host->setControlCursor(id, keyword); }
+
+
+std::wstring PyMfcPanel::getPointerEvents(int id) const
+{ return m_host->getControlPointerEvents(id); }
+
+
+void PyMfcPanel::setPointerEvents(int id, const std::wstring& keyword)
+{ m_host->setControlPointerEvents(id, keyword); }
+
+
+bool PyMfcPanel::isMouseTransparent(int id) const
+{ return m_host->isControlMouseTransparent(id); }
 
 
 void PyMfcPanel::bringToFront(int id)
@@ -2243,4 +2316,5 @@ int PyMfcPanel::getFlickOffsetX(int id) const
 
 int PyMfcPanel::getFlickOffsetY(int id) const
 { return m_host->getFlickOffsetY(id); }
+
 

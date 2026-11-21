@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  复合控件：竖向绘图工具条（DrawToolBar）
+  对照 AutoCAD 经典左侧绘图工具条：一列 32x32 图标按钮，按功能分组用 8px 空隙分开。
+  这里只声明结构与尺寸，图标与事件由 draw_toolbar.py 绑定：
+      rects    ← M.xmlLayout(本文件, 44, H)
+      setImage ← plugins/icons/<name>.png
+      click    ← Python 回调（cmd 名即图纸命令）
+-->
+<XWindow Name="DrawToolBar" Width="44" Height="764">
+  <XStackPanel Name="Stack" Margin="4" Spacing="2">
+
+    <XImage Name="I_snap"    Height="32" Cmd="osnap"/>
+    <XImage Name="Sep1"      Height="8"  Cmd=""/>
+
+    <XImage Name="I_line"    Height="32" Cmd="line"/>
+    <XImage Name="I_pline"   Height="32" Cmd="pline"/>
+    <XImage Name="I_arc"     Height="32" Cmd="arc"/>
+    <XImage Name="I_polygon" Height="32" Cmd="polygon"/>
+    <XImage Name="I_rect"    Height="32" Cmd="rect"/>
+    <XImage Name="I_arc2"    Height="32" Cmd="arc3p"/>
+    <XImage Name="I_circle"  Height="32" Cmd="circle"/>
+    <XImage Name="I_cloud"   Height="32" Cmd="revcloud"/>
+    <XImage Name="I_spline"  Height="32" Cmd="spline"/>
+    <XImage Name="I_ellipse" Height="32" Cmd="ellipse"/>
+    <XImage Name="I_ring"    Height="32" Cmd="donut"/>
+
+    <XImage Name="Sep2"      Height="8"  Cmd=""/>
+
+    <XImage Name="I_copy"    Height="32" Cmd="copy"/>
+    <XImage Name="I_move"    Height="32" Cmd="move"/>
+    <XImage Name="I_point"   Height="32" Cmd="point"/>
+
+    <XImage Name="Sep3"      Height="8"  Cmd=""/>
+
+    <XImage Name="I_hatch"   Height="32" Cmd="hatch"/>
+    <XImage Name="I_image"   Height="32" Cmd="imageattach"/>
+    <XImage Name="I_block"   Height="32" Cmd="insert"/>
+    <XImage Name="I_table"   Height="32" Cmd="table"/>
+
+    <XImage Name="Sep4"      Height="8"  Cmd=""/>
+
+    <XImage Name="I_text"    Height="32" Cmd="text"/>
+    <XImage Name="I_color"   Height="32" Cmd="color"/>
+  </XStackPanel>
+</XWindow>

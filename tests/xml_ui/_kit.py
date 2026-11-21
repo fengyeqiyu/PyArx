@@ -12,7 +12,7 @@ import sys
 from ctypes import wintypes
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
-BIN = os.path.join(ROOT, 'X64', 'Release')
+BIN = os.environ.get('PYARX_BIN') or os.path.join(ROOT, 'X64', 'Release')
 
 sys.path.insert(0, BIN)
 os.add_dll_directory(BIN)
@@ -87,3 +87,19 @@ def click(win, cid):
     ctl = (kids.get(cid) or (0, ''))[0]
     user32.SendMessageW(host_hwnd(win), WM_COMMAND, (BN_CLICKED << 16) | (cid & 0xFFFF),
                         ctl or 0)
+
+
+user32.GetWindowRect.argtypes = [wintypes.HWND, ctypes.c_void_p]
+
+
+def rect_of(win, cid):
+    """真实窗口矩形 (x, y, w, h)，相对窗口左上角——布局对不对只能这么量。"""
+    kids = children(hwnd_of(win))
+    hwnd = (kids.get(cid) or (0, ''))[0]
+    if not hwnd:
+        return None
+    r = wintypes.RECT()
+    user32.GetWindowRect(hwnd, ctypes.byref(r))
+    base = wintypes.RECT()
+    user32.GetWindowRect(hwnd_of(win), ctypes.byref(base))
+    return r.left - base.left, r.top - base.top, r.right - r.left, r.bottom - r.top

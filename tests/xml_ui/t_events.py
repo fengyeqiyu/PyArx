@@ -43,7 +43,7 @@ def main():
     # 4) HTML 层没有死绑定：整个加载过程零诊断
     check(M.event_warnings() == [], 'HTML 层无事件诊断', M.event_warnings())
 
-    win.savePng(r'G:\PyArx\log\after\t_events.png')
+    win.save_png(r'G:\PyArx\log\after\t_events.png')
     win.close()
     return finish('t_events')
 

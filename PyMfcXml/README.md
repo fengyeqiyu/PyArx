@@ -7,7 +7,7 @@
 | 文件 | 行数 | 职责 |
 |---|---|---|
 | `PyMfcHost.cpp` | 5456 | `class PyMfcHost` 全部成员函数实现（312 个）：控件创建 / 皮肤 / 事件 / 画布 / XML 桥 |
-| `PyMfcProcs.cpp` | 2137 | 窗口过程：全控件自绘、配电画布鼠标状态机、可编辑表格 Grid、滚轮安装 |
+| `PyMfcProcs.cpp` | 2137 | 窗口过程：全控件自绘、绘图画布鼠标状态机、可编辑表格 Grid、滚轮安装 |
 | `PyMfcWrap.cpp` | 1969 | `PyMfcTopWnd` / `PyMfcWindow` / `PyMfcPanel` 的实现（423 个成员函数） |
 | `PyMfcLoad.cpp` | 1598 | `guiload`：XML 文件 → 控件树（布局运行时 + 控件工厂） |
 | `PyMfcBind.cpp` | 601 | `PYBIND11_MODULE(PyMfcXml)`：全部 Python 接口。**全工程只此一处** |
@@ -19,8 +19,8 @@
 
 | 文件 | 行数 | 内容 |
 |---|---|---|
-| `PyMfcCommon.h` | 451 | 公共头 / 宏 / 辅助函数 / 前向声明；跨 TU 导出声明（`wicWritePng`、`installWheelHost`、`PyMfcGridProc`、`PyMfcPlanCanvasMouse`） |
-| `PyMfcHost.h` | 1066 | `class PyMfcHost` 只留声明、嵌套类型（`Item` / `PlanCanvasState` / `AnimTrack`）、数据成员、类内 `static constexpr` 与宏 |
+| `PyMfcCommon.h` | 451 | 公共头 / 宏 / 辅助函数 / 前向声明；跨 TU 导出声明（`wicWritePng`、`installWheelHost`、`PyMfcGridProc`、`PyMfcDwgCanvasMouse`） |
+| `PyMfcHost.h` | 1066 | `class PyMfcHost` 只留声明、嵌套类型（`Item` / `DwgCanvasState` / `AnimTrack`）、数据成员、类内 `static constexpr` 与宏 |
 | `PyMfcWrap.h` | 571 | `PyMfcNoDelete` / `PyMfcHandle` / `PyMfcTopWnd` / `PyMfcWindow` / `PyMfcPanel` / `PyMfcStore` 的声明与 `PyMfcStore` 内联单例 |
 | `PyMfcParts.h` | 19 | 跨 TU 内部入口：`Guiload`、`XmlLayoutRects`、`RegisterPythonControl` |
 | `XmlBindings.h` | — | `RegisterXmlBindings(py::module&)` |
@@ -32,7 +32,7 @@
    只有 `Guiload` / `XmlLayoutRects` / `RegisterPythonControl` 三个是外部链接，声明在 `PyMfcParts.h`；
    做法是把这三个函数的定义**移出匿名 namespace、放到文件末尾**（在所有辅助函数之后），
    这样既不用给每个辅助函数加 `static`，也不会污染全局符号。
-3. **类内 static 过程去 `static`**：`PyMfcGridProc` / `PyMfcPlanCanvasMouse` 声明与定义一起去掉 `static`，
+3. **类内 static 过程去 `static`**：`PyMfcGridProc` / `PyMfcDwgCanvasMouse` 声明与定义一起去掉 `static`，
    否则别的 TU 报 `C2129 已声明但未定义`。
 
 ## 构建与验证

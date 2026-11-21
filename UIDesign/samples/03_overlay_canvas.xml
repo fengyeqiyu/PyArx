@@ -14,14 +14,13 @@
                SelectionChanged="on_tool"/>
     <XMenu x:Name="Ctx" Items="复制|粘贴|删除" Height="56"/>
 
-    <XLabel x:Name="Hdr1" Text="配电规划画布" Height="26" FontSize="14" FontWeight="Bold"/>
-    <XPowerCanvas x:Name="Plan" Data="{}" Height="260" Click="on_plan_click"/>
+    <XLabel x:Name="Hdr1" Text="绘图画布" Height="26" FontSize="14" FontWeight="Bold"/>
+    <XDwgCanvas x:Name="Plan" Data="{}" Height="260" Click="on_plan_click"/>
     <XQCanvas x:Name="Draw" Height="140"/>
 
     <XLabel x:Name="Hdr2" Text="日期与浮层" Height="26" FontSize="14" FontWeight="Bold"/>
     <XDatePicker x:Name="Day" Value="2026-11-13" Height="30" ValueChanged="on_day"/>
     <XMonthGrid x:Name="Cal" Value="2026-11-13" Height="170"/>
-    <XToolTip x:Name="Hint" Text="鼠标停留提示" Height="24"/>
     <XPopup x:Name="Sheet" Title="确认" Content="保存后关闭？" Height="90"/>
 
     <XLabel x:Name="Hdr3" Text="滚动与拖拽容器" Height="26" FontSize="14" FontWeight="Bold"/>

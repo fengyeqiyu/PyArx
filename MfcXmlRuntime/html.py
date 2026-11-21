@@ -277,7 +277,7 @@ class Ui(Composite):
             return self.rects
         for name, cid in self.ids.items():
             try:
-                cw, ch = self.win.getSize(cid)
+                cw, ch = self.win.get_size(cid)
                 self.rects[name] = (0, 0, int(cw), int(ch))
             except Exception:
                 self.rects[name] = None

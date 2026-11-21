@@ -27,7 +27,6 @@
              TextChanged="on_code"/>
     <XTextField x:Name="Note" Text="多行备注：可用于记录现场条件" Multiline="true" Height="64"/>
     <XTextField x:Name="ReadOnly" Text="只读内容" IsReadOnly="true" Height="30"/>
-    <XCodeEditor x:Name="Src" Syntax="xml" Text="&lt;Button Text=&quot;运行&quot;/&gt;" Height="70"/>
     <XTextArea x:Name="Rtf" Text="富文本段落，字号与前景色走统一外观。" Bold="true" FontSize="11"
               Foreground="#1F2937" Height="70"/>
     <XHyperlink x:Name="Help" Text="查看规范" Url="https://example.com/doc" Height="26"/>
@@ -48,8 +47,6 @@
     <XScrollBar x:Name="Bar" Minimum="0" Maximum="200" Value="35" PageSize="20"
                Orientation="Vertical" Height="40"/>
     <XSwitch x:Name="Power" Checked="true" Height="28"/>
-    <XBusyIndicator x:Name="Busy" Height="48"/>
-    <XPageIndicator x:Name="Dots" Count="3" SelectedIndex="1" Height="20"/>
 
   </XStackPanel>
 </XWindow>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -55,7 +55,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="XmlCore.cpp" />
+    <ClCompile Include="XmlCore.Element.cpp" />
+    <ClCompile Include="XmlCore.Util.cpp" />
+    <ClCompile Include="XmlCore.Text.cpp" />
+    <ClCompile Include="XmlCore.Layout.cpp" />
+    <ClCompile Include="XmlCore.Api.cpp" />
+    <ClCompile Include="XmlCore.Html.cpp" />
+    <ClCompile Include="XmlCore.Registry.cpp" />
+    <ClCompile Include="XmlCore.Runtime.cpp" />
+    <ClCompile Include="XmlCore.Style.cpp" />
+    <ClCompile Include="XmlCore.Expr.cpp" />
+    <ClCompile Include="XmlCore.Schema.cpp" />
     <ClCompile Include="XmlSurface.cpp" />
     <ClCompile Include="XmlGeometry.cpp" />
     <ClCompile Include="XmlPowerPlan.cpp" />
@@ -63,12 +73,12 @@
     <ClCompile Include="controls\XmlMfcControlBase.cpp" />
     <ClCompile Include="controls\RegisterPyMfcControls.cpp" />
     <ClCompile Include="controls\XmlBitmapButton.cpp" />
-    <ClCompile Include="controls\XmlBusyIndicator.cpp" />
     <ClCompile Include="controls\XmlCalendarCtrl.cpp" />
     <ClCompile Include="controls\XmlChoice.cpp" />
     <ClCompile Include="controls\XmlDatePicker.cpp" />
     <ClCompile Include="controls\XmlDial.cpp" />
     <ClCompile Include="controls\XmlFlickable.cpp" />
+    <ClCompile Include="controls\XmlFlexPanel.cpp" />
     <ClCompile Include="controls\XmlGrid.cpp" />
     <ClCompile Include="controls\XmlGridView.cpp" />
     <ClCompile Include="controls\XmlHyperlink.cpp" />
@@ -77,14 +87,16 @@
     <ClCompile Include="controls\XmlMenu.cpp" />
     <ClCompile Include="controls\XmlMenuBar.cpp" />
     <ClCompile Include="controls\XmlPage.cpp" />
-    <ClCompile Include="controls\XmlPageIndicator.cpp" />
     <ClCompile Include="controls\XmlPageView.cpp" />
     <ClCompile Include="controls\XmlPanel.cpp" />
     <ClCompile Include="controls\XmlPathView.cpp" />
     <ClCompile Include="controls\XmlPopup.cpp" />
-    <ClCompile Include="controls\XmlPowerCanvas.cpp" />
+    <ClCompile Include="controls\XmlDwgCanvas.cpp" />
     <ClCompile Include="controls\XmlRibbon.cpp" />
+    <ClCompile Include="controls\XmlFileTab.cpp" />
     <ClCompile Include="controls\XmlQCanvas.cpp" />
+    <ClCompile Include="controls\ShxFontCore.cpp" />
+    <ClCompile Include="controls\XmlShxText.cpp" />
     <ClCompile Include="controls\XmlRangeSlider.cpp" />
     <ClCompile Include="controls\XmlRichText.cpp" />
     <ClCompile Include="controls\XmlScrollBar.cpp" />
@@ -94,13 +106,11 @@
     <ClCompile Include="controls\XmlStackView.cpp" />
     <ClCompile Include="controls\XmlStaticBitmap.cpp" />
     <ClCompile Include="controls\XmlStaticLine.cpp" />
-    <ClCompile Include="controls\XmlSwipeView.cpp" />
     <ClCompile Include="controls\XmlSwitch.cpp" />
     <ClCompile Include="controls\XmlItemView.cpp" />
     <ClCompile Include="controls\XmlView3D.cpp" />
     <ClCompile Include="controls\XmlFrame.cpp" />
     <ClCompile Include="controls\XmlDialog.cpp" />
-    <ClCompile Include="controls\XmlDrawer.cpp" />
     <ClCompile Include="controls\XmlRoundButton.cpp" />
     <ClCompile Include="controls\XmlDelayButton.cpp" />
     <ClCompile Include="controls\XmlToolButton.cpp" />
@@ -113,13 +123,10 @@
     <ClCompile Include="controls\XmlTableView.cpp" />
     <ClCompile Include="controls\XmlToggleButton.cpp" />
     <ClCompile Include="controls\XmlToolBar.cpp" />
-    <ClCompile Include="controls\XmlToolTip.cpp" />
     <ClCompile Include="controls\XmlTreeCtrl.cpp" />
-    <ClCompile Include="controls\XmlTreeView.cpp" />
     <ClCompile Include="controls\XmlTumbler.cpp" />
     <ClCompile Include="controls\XmlButton.cpp" />
     <ClCompile Include="controls\XmlCheckBox.cpp" />
-    <ClCompile Include="controls\XmlCodeEditor.cpp" />
     <ClCompile Include="controls\XmlComboBox.cpp" />
     <ClCompile Include="controls\XmlGroupBox.cpp" />
     <ClCompile Include="controls\XmlListBox.cpp" />
@@ -131,6 +138,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="XmlCore.h" />
+    <ClInclude Include="XmlCoreCommon.h" />
+    <ClInclude Include="XmlCoreInternal.h" />
     <ClInclude Include="XmlSurface.h" />
     <ClInclude Include="XmlGeometry.h" />
     <ClInclude Include="XmlAppearance.h" />
@@ -140,12 +149,10 @@
     <ClInclude Include="controls\CodeEditor.h" />
     <ClInclude Include="controls\RegisterPyMfcControls.h" />
     <ClInclude Include="controls\XmlBitmapButton.h" />
-    <ClInclude Include="controls\XmlBusyIndicator.h" />
     <ClInclude Include="controls\XmlButton.h" />
     <ClInclude Include="controls\XmlCalendarCtrl.h" />
     <ClInclude Include="controls\XmlCheckBox.h" />
     <ClInclude Include="controls\XmlChoice.h" />
-    <ClInclude Include="controls\XmlCodeEditor.h" />
     <ClInclude Include="controls\XmlComboBox.h" />
     <ClInclude Include="controls\XmlContentParse.h" />
     <ClInclude Include="controls\XmlDatePicker.h" />
@@ -153,6 +160,7 @@
     <ClInclude Include="controls\XmlEvents.h" />
     <ClInclude Include="controls\XmlExtraControls.h" />
     <ClInclude Include="controls\XmlFlickable.h" />
+    <ClInclude Include="controls\XmlFlexPanel.h" />
     <ClInclude Include="controls\XmlGrid.h" />
     <ClInclude Include="controls\XmlGridView.h" />
     <ClInclude Include="controls\XmlGroupBox.h" />
@@ -167,16 +175,18 @@
     <ClInclude Include="controls\XmlMfcOrder.h" />
     <ClInclude Include="controls\XmlMfcTags.h" />
     <ClInclude Include="controls\XmlPage.h" />
-    <ClInclude Include="controls\XmlPageIndicator.h" />
     <ClInclude Include="controls\XmlPageView.h" />
     <ClInclude Include="controls\XmlPanel.h" />
     <ClInclude Include="controls\XmlPathView.h" />
     <ClInclude Include="controls\XmlPopup.h" />
-    <ClInclude Include="controls\XmlPowerCanvas.h" />
+    <ClInclude Include="controls\XmlDwgCanvas.h" />
     <ClInclude Include="controls\XmlRibbon.h" />
+    <ClInclude Include="controls\XmlFileTab.h" />
     <ClInclude Include="controls\XmlProgressBar.h" />
     <ClInclude Include="controls\XmlPropUtil.h" />
     <ClInclude Include="controls\XmlQCanvas.h" />
+    <ClInclude Include="controls\ShxFontCore.h" />
+    <ClInclude Include="controls\XmlShxText.h" />
     <ClInclude Include="controls\XmlRadioButton.h" />
     <ClInclude Include="controls\XmlRangeSlider.h" />
     <ClInclude Include="controls\XmlRichText.h" />
@@ -188,19 +198,16 @@
     <ClInclude Include="controls\XmlStackView.h" />
     <ClInclude Include="controls\XmlStaticBitmap.h" />
     <ClInclude Include="controls\XmlStaticLine.h" />
-    <ClInclude Include="controls\XmlSwipeView.h" />
     <ClInclude Include="controls\XmlSwitch.h" />
     <ClInclude Include="controls\XmlTabControl.h" />
     <ClInclude Include="controls\XmlTableView.h" />
     <ClInclude Include="controls\XmlTextBlock.h" />
     <ClInclude Include="controls\XmlTextBox.h" />
     <ClInclude Include="controls\XmlToggleButton.h" />
+    <ClInclude Include="controls\XmlPropAliases.h" />
     <ClInclude Include="controls\XmlToolBar.h" />
-    <ClInclude Include="controls\XmlToolTip.h" />
     <ClInclude Include="controls\XmlTreeCtrl.h" />
-    <ClInclude Include="controls\XmlTreeView.h" />
     <ClInclude Include="controls\XmlTumbler.h" />
-    <ClInclude Include="controls\XmlExtraControls.orig.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

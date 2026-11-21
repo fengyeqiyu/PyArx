@@ -1,8 +1,10 @@
-// PyMfcProcs.cpp —— 窗口过程：全控件自绘/皮肤绘制、配电画布鼠标状态机、可编辑表格 Grid。
+﻿// PyMfcProcs.cpp —— 窗口过程：全控件自绘/皮肤绘制、绘图画布（DWG 为主，兼容已算坐标的布局输入）鼠标状态机、可编辑表格 Grid。
 // 独立编译单元：依赖 PyMfcHost.h（类内静态过程与宿主方法均已在头里）。
 
 #include "PyMfcHost.h"
+#include "PyMfcPerf.h"
 #include "XmlSurface.h"
+#include "PyMfcCommon.h"
 
 // 窗口过程与离屏渲染等自由函数（skin / wheel / grid / D2D）  （从 PyMfcXml.cpp 按类/职责切出，行 6263-8587）
 
@@ -24,6 +26,7 @@ BEGIN_MESSAGE_MAP(PyMfcHost, CWnd)
     ON_WM_ERASEBKGND()
     ON_WM_SIZE()
     ON_WM_MOUSEMOVE()
+    ON_WM_MOUSELEAVE()
     ON_WM_LBUTTONDOWN()
     ON_WM_LBUTTONUP()
     ON_WM_CTLCOLOR()
@@ -196,8 +199,34 @@ BOOL PyMfcHost::OnEraseBkgnd(CDC* pDC)
         if (clipped.IsRectEmpty())
             continue;
         ::SaveDC(hdc);
+        // box-shadow 要画到盒子之外，clip 只按盒子裁会把它整条裁掉；
+        // 放宽一圈后再和客户区相交，既不越界又留出投影空间。
+        clipped.InflateRect(80, 80);
+        clipped.IntersectRect(&clipped, &rc);
         ::IntersectClipRect(hdc, clipped.left, clipped.top, clipped.right, clipped.bottom);
         xmlapp::DrawBackplate(hdc, bd.first, bd.second, m_bg, m_border);
+        ::RestoreDC(hdc, -1);
+    }
+    // 容器（div）自己的 Background：同一套宿主 DC 出图，空 STATIC 窗口不覆盖它
+    // 暂缓启用（原因见 OnPaint 里同一处注释）。
+    drawContainerBackdrops(hdc, rc);
+    // CSS box-shadow：只画"盒外"那圈投影就够 —— div 是不透明 STATIC，盒子内部
+    // 本来就会被它自己的窗口盖住，宿主 DC 在盒内画什么都看不见，所以不必等容器自绘。
+    for (const auto& kv : m_containerBackdrops)
+    {
+        if (kv.second.second.boxShadow.empty())
+            continue;
+        CRect box = kv.second.first;
+        CRect shClip;
+        shClip.IntersectRect(box, rc);
+        if (shClip.IsRectEmpty())
+            continue;
+        shClip.InflateRect(80, 80);
+        shClip.IntersectRect(&shClip, &rc);
+        ::SaveDC(hdc);
+        ::IntersectClipRect(hdc, shClip.left, shClip.top, shClip.right, shClip.bottom);
+        xmlapp::DrawBoxShadow(hdc, box, kv.second.second.boxShadow,
+                              m_hasPageBg ? m_pageBg : m_bg);
         ::RestoreDC(hdc, -1);
     }
     // 父表面装饰矩形（白卡/状态栏底/小地图框/详情卡/分割条）：画在窗口底色之上、
@@ -231,9 +260,16 @@ void PyMfcHost::drawSkinControl(XmlCanvas& cv, HWND child)
     const int cid = ::GetDlgCtrlID(child);
     const xmlapp::XmlAppearance* ap = findAppearance(cid);
     const bool styled = ap != nullptr && !ap->empty();
+    wchar_t cls[64] = {};
+    ::GetClassNameW(child, cls, 64);
+    const bool isEditCls = (_wcsicmp(cls, L"Edit") == 0) ||
+                           (_wcsicmp(cls, L"RICHEDIT50W") == 0);
 
-    // 配色：声明了就用声明，没声明就跟主题走 —— 这一层是唯一配色来源
-    COLORREF back = m_bg;
+    // 配色：声明了就用声明，没声明就跟主题走 —— 这一层是唯一配色来源。
+    // HTML <input> 有独立字段底色：无样式 Edit/RICHEDIT50W 不取页面底 m_bg，
+    // 改取主题字段色 m_btn（深 (62,70,80) / 浅 (240,242,245)）；显式 backColor
+    // 仍走下面的声明优先级，pal.back 纯色语义不变。
+    COLORREF back = isEditCls ? m_btn : m_bg;
     COLORREF fore = m_text;
     COLORREF border = m_border;
     if (styled && !ap->backColor.empty())
@@ -260,6 +296,35 @@ void PyMfcHost::drawSkinControl(XmlCanvas& cv, HWND child)
         if (it != m_ctrlBack.end())
             back = it->second;
     }
+    // CSS :focus 的底色/字色。Edit 走 drawEdit 的 Palette 这条路（不经过 OnDrawItem），
+    // 所以焦点态要在这里换色，否则 `<input style="focus-color:#f00">` 写了看不见。
+    {
+        const bool hasFocusHere = styled && ::GetFocus() == child;
+        if (hasFocusHere && !ap->focusBackColor.empty())
+        {
+            COLORREF c = 0;
+            if (xmlapp::ParseColor(ap->focusBackColor, c))
+                back = xmlapp::Blend(c, m_bg, ap->opacity);
+        }
+        if (hasFocusHere && !ap->focusForeColor.empty())
+        {
+            COLORREF c = 0;
+            if (xmlapp::ParseColor(ap->focusForeColor, c))
+                fore = c;
+        }
+    }
+
+    // CSS :disabled —— 浏览器的禁用态是"整块降对比"：底色和文字一起向页面底色靠，
+    // 而不是只把字变灰（只灰字时底色还是原色，看上去仍像个可点的按钮）。
+    // 自绘路径不走系统那套 WS_DISABLED 的灰化，所以必须在这里自己压淡。
+    if (!::IsWindowEnabled(child))
+    {
+        const COLORREF pageBg = m_hasPageBg ? m_pageBg : m_bg;
+        const int kDim = 150;                   // 原色权重 ≈ 六成，剩下四成让给页面底
+        back = xmlapp::Blend(back, pageBg, kDim);
+        fore = xmlapp::Blend(fore, pageBg, kDim);
+        border = xmlapp::Blend(border, pageBg, kDim);
+    }
 
     pymfcskin::Palette pal;
     pal.back = back;
@@ -271,8 +336,29 @@ void PyMfcHost::drawSkinControl(XmlCanvas& cv, HWND child)
     if (styled && !ap->fontFamily.empty())
         pal.face = ap->fontFamily;
 
-    wchar_t cls[64] = {};
-    ::GetClassNameW(child, cls, 64);
+    // CSS linear-gradient 铺底：解析进调色板渐变字段（不覆盖 back 纯色语义）。
+    // 角度换算同 xmlDrawBackplate：画布契约 0=左→右、90=上→下，CSS 0=下→上、
+    // 90=右→左、180=上→下，需要交换首尾色而不是硬套。
+    if (styled && !ap->bgImage.empty())
+    {
+        COLORREF g1 = 0, g2 = 0;
+        int gCss = 180;
+        if (xmlapp::ParseLinearGradient(ap->bgImage, g1, g2, gCss))
+        {
+            const int css = ((gCss % 360) + 360) % 360;
+            COLORREF from = g1, to = g2;
+            int apiAngle = 90;
+            if (css == 90) { apiAngle = 0; }
+            else if (css == 270) { apiAngle = 0; from = g2; to = g1; }
+            else if (css == 0) { apiAngle = 90; from = g2; to = g1; }
+            else if (css > 45 && css <= 135) { apiAngle = 0; }
+            else if (css > 225 && css < 315) { apiAngle = 0; from = g2; to = g1; }
+            pal.hasGradient = true;
+            pal.gFrom = xmlapp::Blend(from, m_bg, ap->opacity);
+            pal.gTo   = xmlapp::Blend(to, m_bg, ap->opacity);
+            pal.gAngle = apiAngle;
+        }
+    }
 
     // PyMfcSkinBox：本仓库自己的"复合小控件"宿主窗口（Switch / SpinBox / RangeSlider /
     // BusyIndicator / PageIndicator）。它们没有系统类可用，窗口只是个画布，状态在宿主里。
@@ -575,6 +661,131 @@ void PyMfcHost::drawSkinControl(XmlCanvas& cv, HWND child)
             cv.fillRect(wr, pal.back);
             return;
         }
+    }
+
+    // <img>/<XImage> 的 object-fit：控件自己把图缩放进盒子。
+    // 自绘而不是 SS_BITMAP，是因为原生位图 Static 只按原图尺寸居中/裁剪，
+    // CSS 的 width/height + object-fit（HTML 里 <img> 的默认行为就是随盒子缩放）落不了地。
+    if (m_imageBoxes.count(cid) != 0)
+    {
+        // CSS border-radius 的"内容裁剪"：HTML 里 <img style="border-radius:50%"> 画成圆形头像，
+        // 早先只有背板圆了、图还是方的（四角露在弧外）。这里按解析出的半径裁掉四角，
+        // 填充也一起裁，否则方角底色仍会露出来。
+        int imgRx = 0, imgRy = 0;
+        if (styled)
+            xmlapp::ResolveRadiusXY(wr, *ap, imgRx, imgRy);
+        const bool imgRound = imgRx > 0 && imgRy > 0;
+        // 先按盒子铺一层底色把四角刷干净（自绘 Static 不清背景，上一帧的方角像素会留下来），
+        // 再按圆角轮廓裁图；圆角背板在外层已经画过，这里只负责"擦掉旧像素"。
+        cv.fillRect(wr, pal.back);
+        const auto im = m_images.find(cid);
+        const std::wstring src = im != m_images.end() ? im->second : std::wstring();
+        if (!src.empty())
+        {
+            const std::wstring& fit = m_imageBoxes[cid];
+            const int bw = static_cast<int>(wr.right - wr.left);
+            const int bh = static_cast<int>(wr.bottom - wr.top);
+            int iw = 0, ih = 0;
+            if (!cv.imageSize(src, iw, ih) || iw <= 0 || ih <= 0 || fit.empty() || fit == L"fill")
+            {
+                cv.drawImageClippedRound(wr, imgRx, imgRy, wr, src);   // fill（也是拿不到原图尺寸时的退路）
+            }
+            else
+            {
+                const double wf = static_cast<double>(bw) / iw;
+                const double hf = static_cast<double>(bh) / ih;
+                double f = 1.0;
+                if (fit == L"contain" || fit == L"scale-down")
+                    f = wf < hf ? wf : hf;
+                else if (fit == L"cover")
+                    f = wf > hf ? wf : hf;
+                if (fit == L"scale-down" && f > 1.0)
+                    f = 1.0;                    // scale-down = min(none, contain)
+                if (fit == L"none")
+                    f = 1.0;                    // 原尺寸，不缩放
+                const int dw = static_cast<int>(iw * f + 0.5);
+                const int dh = static_cast<int>(ih * f + 0.5);
+                // CSS object-position：默认居中；关键字/百分比决定余量的分配比例，
+                // 长度值（px）是"图片边缘距盒子左/上边的绝对偏移"——HTML 里两种写法混用很常见
+                double fx = 0.5, fy = 0.5;
+                bool lxLen = false, lyLen = false;
+                double pxX = 0.0, pxY = 0.0;
+                const auto pit = m_imagePos.find(cid);
+                if (pit != m_imagePos.end() && !pit->second.empty())
+                {
+                    // 长度值：带 px 或纯数字（CSS 里无单位只允许 0）
+                    auto asLen = [](const std::wstring& t, double& out) -> bool {
+                        std::wstring s = t;
+                        while (!s.empty() && (s.back() == L' ' || s.back() == L';')) s.pop_back();
+                        if (s.empty()) return false;
+                        if (s.find(L'%') != std::wstring::npos) return false;
+                        if (s.size() > 2 && (s.compare(s.size() - 2, 2, L"px") == 0 ||
+                                             s.compare(s.size() - 2, 2, L"PX") == 0))
+                            s.resize(s.size() - 2);
+                        size_t i = 0;
+                        if (i < s.size() && (s[i] == L'-' || s[i] == L'+')) ++i;
+                        if (i >= s.size()) return false;
+                        for (size_t j = i; j < s.size(); ++j)
+                            if (!iswdigit(s[j]) && s[j] != L'.') return false;
+                        try { out = std::stod(s); } catch (...) { return false; }
+                        return true;
+                    };
+                    auto frac = [](std::wstring t) -> double {
+                        while (!t.empty() && (t.back() == L' ' || t.back() == L';')) t.pop_back();
+                        if (t.empty()) return 0.5;
+                        const wchar_t c0 = static_cast<wchar_t>(t[0] | 0x20);
+                        if (c0 == L'l') return 0.0;                   // left
+                        if (c0 == L'r') return 1.0;                   // right
+                        if (c0 == L't') return 0.0;                   // top
+                        if (c0 == L'b') return 1.0;                   // bottom
+                        if (c0 == L'c') return 0.5;                   // center
+                        const size_t pc = t.find(L'%');
+                        if (pc != std::wstring::npos)
+                        {
+                            double v = 0.0;
+                            try { v = std::stod(t.substr(0, pc)); } catch (...) { return 0.5; }
+                            v /= 100.0;
+                            return v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v);
+                        }
+                        return 0.5;
+                    };
+                    std::vector<std::wstring> tok;
+                    std::wstring cur;
+                    for (wchar_t ch : pit->second)
+                    {
+                        if (ch == L' ' || ch == L',') { if (!cur.empty()) tok.push_back(cur); cur.clear(); }
+                        else cur.push_back(ch);
+                    }
+                    if (!cur.empty()) tok.push_back(cur);
+                    if (tok.size() == 1)
+                    {
+                        // 单值：CSS 规则是"第二个值取 center"，但长度单值只作用于 x
+                        if (asLen(tok[0], pxX)) { lxLen = true; tok.push_back(L"center"); }
+                        else tok.push_back(tok[0]);
+                    }
+                    if (!tok.empty())
+                    {
+                        if (asLen(tok[0], pxX)) lxLen = true;
+                        else fx = frac(tok[0]);
+                    }
+                    if (tok.size() > 1)
+                    {
+                        if (asLen(tok[1], pxY)) lyLen = true;
+                        else fy = frac(tok[1]);
+                    }
+                }
+                RECT d = {0, 0, dw, dh};
+                ::OffsetRect(&d,
+                             lxLen ? static_cast<int>(pxX + 0.5) : static_cast<int>((bw - dw) * fx),
+                             lyLen ? static_cast<int>(pxY + 0.5) : static_cast<int>((bh - dh) * fy));
+                if (fit == L"cover" || fit == L"none")
+                    cv.clipPush(wr);            // 溢出盒子的部分必须裁掉（contain 不会溢出）
+                cv.drawImageClippedRound(wr, imgRx, imgRy, d, src);
+                if (fit == L"cover" || fit == L"none")
+                    cv.clipPop();
+            }
+        }
+        return;
     }
 
     // ScrolledWindow：自绘滚动区域（滚动条也是自己画的，不再挂系统滚动条）
@@ -1118,6 +1329,7 @@ void PyMfcHost::drawSkinControl(XmlCanvas& cv, HWND child)
 
 void PyMfcHost::OnPaint()
 {
+    PyMfcPerfScope _perf(&pyMfcPerf().hostPaintMs, &pyMfcPerf().nHostPaint);
     CPaintDC dc(this);
     CRect rc;
     GetClientRect(&rc);
@@ -1126,6 +1338,13 @@ void PyMfcHost::OnPaint()
 
     // 新表面路径：BeginFrame 不透明清屏 → 留空给 S2 绘制节点 → EndFrame Present。
     // S1 阶段表面只承担宿主客户区底衬；原生子 HWND 仍按各自 WM_PAINT 覆盖在上层。
+    // 容器（div/面板）的背景补登记必须放在 m_surface 判断**之前**：
+    // flex_demo / cad2d 这条路径 m_surface == nullptr（纯 GDI），放在分支里永远不执行。
+    if (m_backdropSyncDirty)
+    {
+        syncContainerBackdrops();
+        m_backdropSyncDirty = false;
+    }
     if (m_surface)
     {
         const COLORREF bg = m_hasPageBg ? m_pageBg : m_bg;
@@ -1170,8 +1389,33 @@ void PyMfcHost::OnPaint()
         if (clipped.IsRectEmpty())
             continue;
         ::SaveDC(hdc);
+        // box-shadow 要画到盒子之外，clip 只按盒子裁会把它整条裁掉；
+        // 放宽一圈后再和客户区相交，既不越界又留出投影空间。
+        clipped.InflateRect(80, 80);
+        clipped.IntersectRect(&clipped, &rc);
         ::IntersectClipRect(hdc, clipped.left, clipped.top, clipped.right, clipped.bottom);
         xmlapp::DrawBackplate(hdc, bd.first, bd.second, m_bg, m_border);
+        ::RestoreDC(hdc, -1);
+    }
+    // 容器（div）自己的 Background：同一套宿主 DC 出图，空 STATIC 窗口不覆盖它
+    // 暂缓启用：drawContainerBackdrops 会把 page 级整页容器也铺一层 fallback 底色，
+    // 在老界面上表现为"内容被整页底色盖住"。等按 id 白名单收敛后再打开。
+    drawContainerBackdrops(hdc, rc);
+    // CSS box-shadow：与 OnEraseBkgnd 同一套逻辑，只画盒外那圈投影
+    for (const auto& kv : m_containerBackdrops)
+    {
+        if (kv.second.second.boxShadow.empty())
+            continue;
+        CRect box = kv.second.first;
+        CRect shClip;
+        shClip.IntersectRect(box, rc);
+        if (shClip.IsRectEmpty())
+            continue;
+        shClip.InflateRect(80, 80);
+        shClip.IntersectRect(&shClip, &rc);
+        ::SaveDC(hdc);
+        ::IntersectClipRect(hdc, shClip.left, shClip.top, shClip.right, shClip.bottom);
+        xmlapp::DrawBoxShadow(hdc, box, kv.second.second.boxShadow, m_bg);
         ::RestoreDC(hdc, -1);
     }
 }
@@ -1182,15 +1426,19 @@ void PyMfcHost::OnSize(UINT nType, int cx, int cy)
     // 新骨架：真实客户区到位 / Resize 后补一次 fit；=0 保持旧 OnSize 行为。
     if (m_newSurface)
     {
-        for (auto& kv : m_planCv)
+        for (auto& kv : m_dwgCv)
         {
             if (kv.second.mode != 0)
-                fitPlanCanvas(kv.first);
+                fitDwgCanvas(kv.first);
         }
     }
     // 新表面路径：尺寸变化走 ResizeBuffers（释放 target → ResizeBuffers → 重建后台 target）。
     if (m_surface)
         m_surface->Resize(cx, cy);
+    // XML 通道自己响应尺寸变化：重新算一遍布局并移动已有控件，
+    // 用户不必再在 onResize 里重建界面（HTML 里 resize 本来就是免费的）。
+    if (m_xml && cx > 0 && cy > 0)
+        reflowXml();
 }
 
 LRESULT PyMfcHost::onSurfaceProbe(WPARAM wParam, LPARAM /*lParam*/)
@@ -1220,6 +1468,7 @@ LRESULT PyMfcHost::onSurfaceProbe(WPARAM wParam, LPARAM /*lParam*/)
 // 自绘控件在自己窗口里画：绑定到它自己的 HDC，画完即结束
 void PyMfcHost::paintSkinControl(HDC hdc, HWND child)
 {
+    PyMfcPerfScope _perf(&pyMfcPerf().paintMs, &pyMfcPerf().nPaint);
     RECT cr = {0, 0, 0, 0};
     ::GetClientRect(child, &cr);
     if (cr.right <= 0 || cr.bottom <= 0)
@@ -1306,7 +1555,8 @@ void PyMfcHost::paintSkinControl(HDC hdc, HWND child)
         ::GetClassNameW(child, clsName, 32);
         const xmlapp::XmlAppearance* fap = findAppearance(::GetDlgCtrlID(child));
         if (_wcsicmp(clsName, L"Static") == 0 && fap != nullptr && !fap->backColor.empty()
-            && fap->borderStyle.empty() && fap->opacity >= 255)
+            && fap->borderStyle.empty() && fap->opacity >= 255
+            && m_imageBoxes.count(::GetDlgCtrlID(child)) == 0)   // 图片盒子要画图，不能走纯色快路径
         {
             COLORREF fc = m_bg;
             xmlapp::ParseColor(fap->backColor, fc);
@@ -1485,6 +1735,9 @@ bool PyMfcHost::wheelOnHoveredWindow(HWND w, POINT screenPt, int notches)
             return true;
         }
     }
+    // CSS overflow:scroll/auto 容器：光标在容器（或它的子控件）里就滚内容
+    if (!m_scrollContainers.empty() && scrollOverflowFrom(w, notches))
+        return true;
     return false;
 }
 
@@ -1749,16 +2002,16 @@ LRESULT CALLBACK PyMfcHost::PyMfcSkinWindowProc(HWND hwnd, UINT msg, WPARAM wPar
     // 就不再走到那里，于是最大化后画布变大而 zoom 不动，看着像"缩成全局视图"。
     if (msg == WM_SIZE)
     {
-        HANDLE ph = ::GetPropW(hwnd, kPlanHostProp);
+        HANDLE ph = ::GetPropW(hwnd, kDwgHostProp);
         if (ph != nullptr)
         {
             PyMfcHost* host = reinterpret_cast<PyMfcHost*>(ph);
             const int cid = ::GetDlgCtrlID(hwnd);
-            auto it = host->m_planCv.find(cid);
+            auto it = host->m_dwgCv.find(cid);
             // 仅 plan 卡片画布(mode1)随尺寸 fit；SVG 图纸场景(mode2)保留用户平移/缩放，
             // 不能在重排时把 ox/oy/zoom 清零，否则拖完/缩放后视图跳回原位。
-            if (it != host->m_planCv.end() && it->second.mode == 1)
-                host->fitPlanCanvas(cid);
+            if (it != host->m_dwgCv.end() && it->second.mode == 1)
+                host->fitDwgCanvas(cid);
             ::InvalidateRect(hwnd, nullptr, FALSE);
         }
     }
@@ -1929,7 +2182,7 @@ LRESULT CALLBACK PyMfcHost::PyMfcSkinWindowProc(HWND hwnd, UINT msg, WPARAM wPar
     if (host != nullptr && msg == WM_KEYDOWN && wParam == VK_ESCAPE)
     {
         const int kid = ::GetDlgCtrlID(hwnd);
-        if (host->m_planCv.find(kid) != host->m_planCv.end())
+        if (host->m_dwgCv.find(kid) != host->m_dwgCv.end())
         {
             host->fireCanvasEvent(kid, "key", 0, 0, static_cast<int>(wParam));
             return 0;
@@ -1971,7 +2224,125 @@ LRESULT CALLBACK PyMfcHost::PyMfcSkinWindowProc(HWND hwnd, UINT msg, WPARAM wPar
     return result;
 }
 
+HBRUSH PyMfcHost::brushFor(int id, COLORREF c, CDC* pDC)
+{
+    // 纯色刷子按 id 缓存，颜色变了才重建（HTML 里同一个 div 改 background 必须立刻生效）
+    const auto bit = m_apBrush.find(id);
+    if (bit == m_apBrush.end() || bit->second == nullptr || m_apBrushColor[id] != c)
+    {
+        if (bit != m_apBrush.end() && bit->second != nullptr)
+            ::DeleteObject(bit->second);
+        m_apBrush[id] = ::CreateSolidBrush(c);
+        m_apBrushColor[id] = c;
+    }
+    pDC->SetBkMode(OPAQUE);
+    pDC->SetBkColor(c);
+    return m_apBrush[id];
+}
+
 HBRUSH PyMfcHost::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor){
+    // 首帧惰性补登记：OnCtlColor 早于 OnPaint 的 dirty 同步，此时 m_containerBackdrops 还是空的，
+    // 所有容器都会退回"页面底色"，卡片 background 就永远出不来。
+    // 判据必须是 dirty 位而不是"表为空"：界面上一个容器都没有时（全是 label/button），
+    // 表永远是空的，用空判据就会在**每次 CTLCOLOR**都跑一遍全窗口同步 ——
+    // 实测 1600 个带背景的 label 整窗重绘 1.64s（不写背景只要 0.18s），就是这个 O(N²)。
+    if (m_backdropSyncDirty && !m_ap.empty() && m_hWnd != nullptr)
+    {
+        syncContainerBackdrops();
+        m_backdropSyncDirty = false;
+    }
+
+    if (pWnd != nullptr && nCtlColor == CTLCOLOR_STATIC)
+    {
+        const int cid = pWnd->GetDlgCtrlID();
+        // ① 容器自己：用自身 background；没写背景 → 页面底色（HTML 里 div 默认透明）
+        auto ci = m_containerBackdrops.find(cid);
+        if (ci != m_containerBackdrops.end() &&
+            ::GetWindowTextLengthW(pWnd->m_hWnd) == 0)
+        {
+            // CSS `div:hover{background:#333}`：容器盒内的可见落点就是这里返回的纯色刷子，
+            // 命中态必须换成 hover 声明，否则 div 永远不变色（按钮能变、容器不能）。
+            xmlapp::XmlAppearance apa = ci->second.second;
+            const bool hovNow = containerHovered(cid);
+            if (hovNow)
+            {
+                if (!apa.hoverBackColor.empty())   apa.backColor   = apa.hoverBackColor;
+                if (!apa.hoverBorderColor.empty()) apa.borderColor = apa.hoverBorderColor;
+                if (apa.hoverOpacity >= 0)         apa.opacity     = apa.hoverOpacity;
+            }
+            const xmlapp::XmlAppearance& ap = apa;
+            const COLORREF fallbackBack = m_hasPageBg ? m_pageBg : m_bg;
+            // 渐变 / 盒内 inset 阴影：容器 STATIC 自己不 WM_PAINT，
+            // 宿主 DC 画在盒内也会被窗口盖住，CTLCOLOR 返回的位图刷是盒内唯一可见落点。
+            CRect cr;
+            pWnd->GetClientRect(&cr);
+            if (HBRUSH pattern = containerBackdropBrush(cid, cr, ap, fallbackBack))
+            {
+                pDC->SetBkMode(OPAQUE);
+                pDC->SetBkColor(fallbackBack);
+                return pattern;
+            }
+            COLORREF c = 0;
+            if (!ap.backColor.empty() &&
+                xmlapp::ParseColor(ap.backColor, c))
+                return brushFor(cid, c, pDC);
+            return brushFor(cid, fallbackBack, pDC);
+        }
+        // ②-a 真父子层级：控件的父窗口就是容器本身，直接沿真实父链取容器背板色。
+        //      几何近似那套（下面 ②）用的是"相对宿主客户区"的矩形，换父之后就整体错位，
+        //      表现为真父子下"卡片有背景、但子盒子一片页面底色"。
+        if (pWnd->m_hWnd != nullptr)
+        {
+            HWND realParent = ::GetParent(pWnd->m_hWnd);
+            if (realParent != nullptr && realParent != m_hWnd)
+            {
+                for (HWND p = realParent; p != nullptr && p != m_hWnd; p = ::GetParent(p))
+                {
+                    const int pid = ::GetDlgCtrlID(p);
+                    auto it = m_containerBackdrops.find(pid);
+                    if (it == m_containerBackdrops.end())
+                        continue;
+                    COLORREF c = 0;
+                    if (!it->second.second.backColor.empty() &&
+                        xmlapp::ParseColor(it->second.second.backColor, c))
+                        return brushFor(cid, c, pDC);
+                    break;      // 最近的容器没写背景 → 透明，继续往上找就是页面底色
+                }
+            }
+        }
+        // ② 容器内的文字/透明子盒子：露出**最近祖先容器**的底色，而不是页面底色。
+        //    这是"透明 div / label 叠在有背景的卡片上"的 GDI 等价实现：
+        //    div 嵌套时内层矩形更小，取包含控件中心的最小容器即等价于最近祖先。
+        RECT wr = {};
+        ::GetWindowRect(pWnd->m_hWnd, &wr);
+        ::MapWindowPoints(nullptr, m_hWnd, reinterpret_cast<POINT*>(&wr), 2);
+        const int cx = (wr.left + wr.right) / 2;
+        const int cy = (wr.top + wr.bottom) / 2;
+        COLORREF anc = 0;
+        bool hasAnc = false;
+        long bestArea = 0;
+        for (const auto& kv : m_containerBackdrops)
+        {
+            if (kv.first == cid || kv.second.second.backColor.empty())
+                continue;
+            COLORREF c = 0;
+            if (!xmlapp::ParseColor(kv.second.second.backColor, c))
+                continue;
+            const CRect& r = kv.second.first;
+            if (cx < r.left || cx >= r.right || cy < r.top || cy >= r.bottom)
+                continue;
+            const long area = static_cast<long>(r.Width()) * r.Height();
+            if (!hasAnc || area < bestArea)
+            {
+                bestArea = area;
+                anc = c;
+                hasAnc = true;
+            }
+        }
+        if (hasAnc)
+            return brushFor(cid, anc, pDC);
+    }
+
     // XML 声明了外观的控件优先按声明渲染（所有控件共用同一套外观契约）
     if (pWnd != nullptr)
     {
@@ -1983,7 +2354,10 @@ HBRUSH PyMfcHost::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor){
             {
                 COLORREF c = 0;
                 if (xmlapp::ParseColor(ap->backColor, c))
-                    bg = xmlapp::Blend(c, m_bg, ap->opacity);
+                    // rgba()/#RRGGBBAA 的 alpha 只作用背景：与主题底色混合得到近似半透明；
+                    // 文字色仍按不透明背景算对比度，避免半透明导致文字发灰。
+                    bg = xmlapp::Blend(c, m_bg,
+                                       (std::min)(ap->opacity, ap->bgAlpha));
             }
             COLORREF fg = contrastText(bg);
             if (!ap->foreColor.empty())
@@ -1991,6 +2365,23 @@ HBRUSH PyMfcHost::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor){
                 COLORREF c = 0;
                 if (xmlapp::ParseColor(ap->foreColor, c))
                     fg = c;
+            }
+            // CSS linear-gradient 输入框：EDIT 是真窗口，底色只能靠 WM_CTLCOLOREDIT
+            // 返回的刷子铺面；复用容器背板的 DIB 位图刷工厂（按 id+样式+几何签名缓存，
+            // 外观/尺寸变化时签名失效重建，外观变更与宿主销毁时释放）。无渐变仍走下面
+            // 的纯色刷子，既有 EDIT 配色不变。
+            if (nCtlColor == CTLCOLOR_EDIT && !ap->bgImage.empty())
+            {
+                CRect ecr;
+                pWnd->GetClientRect(&ecr);
+                const COLORREF fallbackBack = m_hasPageBg ? m_pageBg : m_bg;
+                if (HBRUSH pattern = containerBackdropBrush(cid, ecr, *ap, fallbackBack))
+                {
+                    pDC->SetBkMode(OPAQUE);
+                    pDC->SetBkColor(bg);
+                    pDC->SetTextColor(fg);
+                    return pattern;
+                }
             }
             pDC->SetBkMode(nCtlColor == CTLCOLOR_STATIC ? OPAQUE : TRANSPARENT);
             pDC->SetBkColor(bg);
@@ -2035,13 +2426,18 @@ void PyMfcHost::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lp)
     ::GetWindowRect(lp->hwndItem, &wr);
     ::GetClientRect(lp->hwndItem, &cr);
     const LONG_PTR wst = ::GetWindowLongPtrW(lp->hwndItem, GWL_STYLE);
-    debugLogf(L"[drawitem] id=%d styled=%d raw=%dx%d client=%dx%d style=0x%llX bs='%ls' bc='%ls'",
+    debugLogf(L"[drawitem] id=%d styled=%d raw=%dx%d client=%dx%d item=%d,%d,%d,%d style=0x%llX bs='%ls' bc='%ls'",
               cid, styled ? 1 : 0, static_cast<int>(wr.right - wr.left), static_cast<int>(wr.bottom - wr.top),
               static_cast<int>(cr.right), static_cast<int>(cr.bottom),
+              static_cast<int>(rc.left), static_cast<int>(rc.top),
+              static_cast<int>(rc.right), static_cast<int>(rc.bottom),
               static_cast<unsigned long long>(wst),
               ap ? ap->borderStyle.c_str() : L"-", ap ? ap->borderColor.c_str() : L"-");
     const bool pressed = (lp->itemState & ODS_SELECTED) != 0;
-    const bool disabled = (lp->itemState & ODS_DISABLED) != 0;
+    // ODS_DISABLED 由宿主填，但少数绘制路径（例如某些自绘链的 DRAWITEM 合成）没带上，
+    // 再查一次窗口自身状态兜底：HTML 的 :disabled 观感不该依赖调用者是否填了 itemState。
+    const bool disabled = (lp->itemState & ODS_DISABLED) != 0 ||
+                          (lp->hwndItem != nullptr && !::IsWindowEnabled(lp->hwndItem));
     // CtlType 对 SS_OWNERDRAW 的 Static 并不总是回 ODT_STATIC（实测会回 ODT_STATBAR），
     // 一旦判错就会把 Static 当按钮、用深色笔画圆角边框，白底页上就是"每个标签都有黑框"。
     // 所以按窗口类名判定，比 CtlType 可靠。
@@ -2093,10 +2489,10 @@ void PyMfcHost::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lp)
     }
 
     const RECT itemRc = rc;
-    // 配电画布：数据在宿主里，按 zoom/offset 每帧重画，与其它控件的"声明式外观"无关
-    if (m_planCv.find(cid) != m_planCv.end())
+    // 绘图画布（DWG 为主，兼容已算坐标的布局输入）：数据在宿主里，按 zoom/offset 每帧重画，与其它控件的"声明式外观"无关
+    if (m_dwgCv.find(cid) != m_dwgCv.end())
     {
-        drawPlanCanvas(*cv, cid, itemRc);
+        drawDwgCanvas(*cv, cid, itemRc);
         cv->end();
         dc.Detach();
         return;
@@ -2113,6 +2509,14 @@ void PyMfcHost::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lp)
     if (ribbonHas(cid))
     {
         drawRibbon(*cv, cid, itemRc);
+        cv->end();
+        dc.Detach();
+        return;
+    }
+    // FileTab：模型/布局/绘制/命中全走控件库 xmlctl，宿主只按矩形把整条页签条画上去
+    if (filetabHas(cid))
+    {
+        drawFileTab(*cv, cid, itemRc);
         cv->end();
         dc.Detach();
         return;
@@ -2164,29 +2568,157 @@ void PyMfcHost::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lp)
     auto accentIt = m_accent.find(cid);
     const bool hasAccent = (accentIt != m_accent.end()) && !isStatic;
     const COLORREF accent = hasAccent ? accentIt->second : m_border;
+    // CSS :hover 的命中态（事件子类化在进入/离开时已触发过重绘，这里只是现查一次集合）
+    const bool hovered = PyMfcHovered(lp->hwndItem);
+    // CSS :focus 的命中态（ODS_FOCUS 在某些绘制链会缺失，和 disabled 一样再查 GetFocus 兜底）
+    const bool focused = (lp->hwndItem != nullptr) &&
+                         (((lp->itemState & ODS_FOCUS) != 0) || ::GetFocus() == lp->hwndItem);
     if (styled)
     {
         debugLogf(L"[styled] id=%d cls='%ls' bs='%ls' bc='%ls' shape='%ls'",
                   cid, clsName, ap->borderStyle.c_str(), ap->borderColor.c_str(), ap->shape.c_str());
-        xmlDrawBackplate(*cv, itemRc, *ap, surface, m_border);
+        // 只在真的声明了底色/前置底/边框时才铺背板。否则（典型的纯文字标签）
+        // 背板填色 = 父表面色，肉眼看不见，但圆角的抗锯齿边会在深色背景上
+        // 留出一圈比底色略亮的细线，四个角尤其明显，看起来像凭空多了四角装饰。
+        // HTML 里 label 默认就是透明，这里对齐同一语义。
+        // 只有真的声明了"底色/边框"才需要背板。以前的判据把 frontColor（文字色）也算进来，
+        // 于是 `<label style="color:#fff">` 会平白多出一整块 surface 色带 —— HTML 的 label
+        // 是透明的，写了字色不该长出卖板。
+        const bool paintBack = !ap->backColor.empty() ||
+                               !ap->borderColor.empty() || !ap->borderStyle.empty() ||
+                               // CSS linear-gradient 只声明了背景图时同样要铺背板：
+                               // 渐变分支在 xmlDrawBackplate 内优先于纯色，判据漏掉 bgImage
+                               // 会导致渐变按钮整面留空（背板被跳过，只露出页面底色）。
+                               !ap->bgImage.empty() ||
+                               // CSS :hover/:focus/:active 只声明了底色时，常态透明、按下/移入/获焦才铺底
+                               (hovered && !ap->hoverBackColor.empty()) ||
+                               (focused && !ap->focusBackColor.empty()) ||
+                               (pressed && !ap->activeBackColor.empty()) ||
+                               // CSS `:hover/:focus/:active{border-color:…}`：常态只声明了边框、
+                               // 状态换线色时同样得铺背板（否则只有线色变了却没有画的机会）
+                               (hovered && !ap->hoverBorderColor.empty()) ||
+                               (focused && !ap->focusBorderColor.empty()) ||
+                               (pressed && !ap->activeBorderColor.empty()) ||
+                               // CSS `:disabled{background-color:…}`：禁用态只声明了配色时同样要铺背板
+                               (disabled && (!ap->disabledBackColor.empty() ||
+                                             !ap->disabledBorderColor.empty()));
+        if (paintBack)
+        {
+            // 容器背板为什么看不出色：把"画的那一刻"的实参落日志（itemRc 尺寸 / 解析出的
+            // 底色 / 最终混合色 / 父表面色）。日志上看"都做了"、像素上看"什么都没有"，
+            // 只能靠这四个数字分辨是空矩形、解析失败还是被 Blend 降成父色。
+            COLORREF bc = 0;
+            // hover/focus 时用 Hover/Focus Background 顶掉常态底色（只在声明了才换）
+            const std::wstring& backRaw =
+                (focused && !ap->focusBackColor.empty())
+                    ? ap->focusBackColor
+                    : ((pressed && !ap->activeBackColor.empty())
+                           ? ap->activeBackColor
+                           : ((hovered && !ap->hoverBackColor.empty()) ? ap->hoverBackColor
+                                                                      : ap->backColor));
+            // CSS `:disabled{background-color:…}`：禁用态不响应 hover，配色直接顶掉所有状态
+            std::wstring backEff = (disabled && !ap->disabledBackColor.empty())
+                                       ? ap->disabledBackColor : backRaw;
+            const bool ok = !backEff.empty() && xmlapp::ParseColor(backEff, bc);
+            // ColorAnimation / CSS transition 的落点：动画期间宿主逐帧写 m_ctrlBack，
+            // 这里必须让覆盖色优先，否则插值只算数字、屏幕上一帧都不动。
+            const bool animOn = (m_ctrlBack.count(cid) != 0);
+            if (animOn)
+                bc = m_ctrlBack[cid];
+            const COLORREF mixed = ok || animOn ? xmlapp::Blend(bc, surface, ap->opacity) : surface;
+            debugLogf(L"[backplate] id=%d rc=%d,%d,%d,%d raw='%ls' ok=%d bc=#%02X%02X%02X"
+                      L" mixed=#%02X%02X%02X surface=#%02X%02X%02X opacity=%d hover=%d",
+                      cid, itemRc.left, itemRc.top, itemRc.right, itemRc.bottom,
+                      backRaw.c_str(), ok ? 1 : 0,
+                      GetRValue(bc), GetGValue(bc), GetBValue(bc),
+                      GetRValue(mixed), GetGValue(mixed), GetBValue(mixed),
+                      GetRValue(surface), GetGValue(surface), GetBValue(surface), ap->opacity,
+                      hovered ? 1 : 0);
+            xmlapp::XmlAppearance apDraw = *ap;
+            if (animOn)
+            {
+                // 覆盖色转成 backColor 原串交给背板（渐变/圆角/边框仍按原声明走）
+                wchar_t hex[16] = {0};
+                swprintf_s(hex, L"#%02X%02X%02X", GetRValue(bc), GetGValue(bc), GetBValue(bc));
+                apDraw.backColor = hex;
+            }
+            else if (!backEff.empty())
+                apDraw.backColor = backEff;
+            // CSS 状态换边框色：`:hover{border-color}` / `:focus{border-color}` 一行就有的
+            // 视觉反馈（与底色同优先级：focus → active → hover）。
+            const std::wstring& bordRaw =
+                (focused && !ap->focusBorderColor.empty())
+                    ? ap->focusBorderColor
+                    : ((pressed && !ap->activeBorderColor.empty())
+                           ? ap->activeBorderColor
+                           : ((hovered && !ap->hoverBorderColor.empty()) ? ap->hoverBorderColor
+                                                                         : std::wstring()));
+            if (!bordRaw.empty())
+                apDraw.borderColor = bordRaw;
+            // CSS `:disabled{border-color:…}`（禁用态的弱化描边）
+            if (disabled && !ap->disabledBorderColor.empty())
+                apDraw.borderColor = ap->disabledBorderColor;
+            // CSS 状态不透明度：`:hover{opacity:.85}`（priority focus → active → hover）
+            const int stateOpacity =
+                (focused && ap->focusOpacity >= 0)
+                    ? ap->focusOpacity
+                    : ((pressed && ap->activeOpacity >= 0)
+                           ? ap->activeOpacity
+                           : ((hovered && ap->hoverOpacity >= 0) ? ap->hoverOpacity : -1));
+            if (stateOpacity >= 0)
+                apDraw.opacity = stateOpacity;
+            // CSS `:disabled{opacity:.5}`：禁用态自己指定浓度（优先级最高）
+            if (disabled && ap->disabledOpacity >= 0)
+                apDraw.opacity = ap->disabledOpacity;
+            // CSS `:disabled` 的观感是"降对比"：底色仍保持原色，只向页面底轻微靠一点，
+            // 文字由下面的 fg 分支转灰。早先把 opacity 直接压到 60，底几乎等于页面色，
+            // 按钮在视觉上"消失"，反而不像 HTML 里那个还能看见轮廓的禁用按钮。
+            if (disabled && ap->disabledOpacity < 0 && apDraw.opacity > 220)
+                apDraw.opacity = 220;
+            xmlDrawBackplate(*cv, itemRc, apDraw, surface, m_border);
+        }
     }
     else
     {
         debugLogf(L"[else] id=%d cls='%ls' isStatic=%d", cid, clsName, isStatic ? 1 : 0);
-        cv->fillRect(itemRc, surface);
+        // label/static 在 HTML 里是透明的：不写 background 时不应自己铺一层 surface 色。
+        // 早先无条件 fillRect，一旦 surface 取到浅色，label 区域就长出一条明显色带。
+        if (!isStatic)
+            cv->fillRect(itemRc, surface);
         // primary 按钮：白底（对应 HTML .btn 的 background:#fff）
         const COLORREF face = isStatic ? surface
                                        : (hasAccent ? RGB(255, 255, 255)
                                                     : (pressed ? RGB(80, 90, 104) : m_btn));
-        cv->fillRoundRect(itemRc, face, isStatic ? surface : (hasAccent ? accent : m_border), 8);
+        if (!isStatic)
+            cv->fillRoundRect(itemRc, face, hasAccent ? accent : m_border, 8);
     }
 
     COLORREF back = surface;
-    if (styled && !ap->backColor.empty())
+    if (m_ctrlBack.count(cid) != 0)
+        back = m_ctrlBack[cid];
+    if (styled)
     {
-        COLORREF c = 0;
-        if (xmlapp::ParseColor(ap->backColor, c))
-            back = xmlapp::Blend(c, surface, ap->opacity);
+        // focus 声明的底色优先于 hover（CSS 里 :focus 通常写在 :hover 之后生效）
+        const std::wstring& backRaw =
+            (focused && !ap->focusBackColor.empty())
+                ? ap->focusBackColor
+                : ((pressed && !ap->activeBackColor.empty())
+                       ? ap->activeBackColor
+                       : ((hovered && !ap->hoverBackColor.empty()) ? ap->hoverBackColor : ap->backColor));
+        if (!backRaw.empty())
+        {
+            COLORREF c = 0;
+            if (xmlapp::ParseColor(backRaw, c))
+                back = xmlapp::Blend(c, surface, ap->opacity);
+        }
+        // CSS `:disabled{background-color:…}`：禁用态的定制底色（文案色下面同源覆盖）
+        if (disabled && !ap->disabledBackColor.empty())
+        {
+            COLORREF c = 0;
+            if (xmlapp::ParseColor(ap->disabledBackColor, c))
+                back = xmlapp::Blend(c, surface, ap->disabledOpacity >= 0 ? ap->disabledOpacity
+                                                                         : ap->opacity);
+        }
     }
     COLORREF fg = disabled ? RGB(140, 140, 140) : contrastText(back);
     if (styled && !ap->foreColor.empty())
@@ -2195,19 +2727,56 @@ void PyMfcHost::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lp)
         if (xmlapp::ParseColor(ap->foreColor, c))
             fg = disabled ? RGB(140, 140, 140) : c;
     }
+    // CSS :hover 的文字色（disabled 优先：置灰的按钮不该因悬停变回亮色）
+    if (styled && hovered && !ap->hoverForeColor.empty())
+    {
+        COLORREF c = 0;
+        if (xmlapp::ParseColor(ap->hoverForeColor, c))
+            fg = disabled ? RGB(140, 140, 140) : c;
+    }
+    // CSS :active 的文字色（按下态优先于 hover；:focus 仍最高，同浏览器层叠顺序）
+    if (styled && pressed && !ap->activeForeColor.empty())
+    {
+        COLORREF c = 0;
+        if (xmlapp::ParseColor(ap->activeForeColor, c))
+            fg = disabled ? RGB(140, 140, 140) : c;
+    }
+    // CSS :focus 的文字色（优先级高于 hover，同浏览器里 :focus 覆盖 :hover）
+    if (styled && focused && !ap->focusForeColor.empty())
+    {
+        COLORREF c = 0;
+        if (xmlapp::ParseColor(ap->focusForeColor, c))
+            fg = disabled ? RGB(140, 140, 140) : c;
+    }
+    // CSS :disabled 的定制文字色（`:disabled{color:#999}`）；写在所有状态之后，
+    // 因为浏览器里禁用态也是"最后着色"，hover 不该把置灰的字点亮回来
+    if (styled && disabled && !ap->disabledForeColor.empty())
+    {
+        COLORREF c = 0;
+        if (xmlapp::ParseColor(ap->disabledForeColor, c))
+            fg = c;
+    }
+    // CSS `:disabled{border-color:…}` 已在上面的背板分支（apDraw.borderColor）落地
     if (hasAccent)
         fg = disabled ? RGB(140, 140, 140) : accent;
     auto labelIt = m_labelFg.find(cid);
     if (labelIt != m_labelFg.end() && !disabled)
         fg = labelIt->second;
 
-    UINT align = isStatic ? DT_LEFT : DT_CENTER;
-    if (styled)
+    // HTML 的 <input> 文字是左对齐、且自带约 1~2px 内边距（不贴边）；
+    // 早先非 Static 一律 DT_CENTER，输入框里的字被拉到正中，观感和浏览器差很远。
+    const bool isEdit = (_wcsicmp(clsName, L"Edit") == 0);
+    UINT align = (isStatic || isEdit) ? DT_LEFT : DT_CENTER;
+    // 只在 XML 真写了 TextAlign 时才改对齐：TextFlag 对空值返回 DT_LEFT，
+    // 无条件用它会把按钮文字从默认居中拉成左对齐（HTML 里 button 是居中）。
+    if (styled && !ap->textAlign.empty())
         align = xmlapp::TextFlag(*ap);
 
     RECT trc = itemRc;
     if (styled && align == DT_LEFT)
         trc.left += 6;
+    else if (isEdit && align == DT_LEFT)
+        trc.left += 6;   // input 的默认内边距（HTML 的 input 也不贴边）
 
     // 有 Icon 时：左侧方形图标，文字右移；只有图标时图标居中
     if (const std::wstring* iconPath = findIcon(cid))
@@ -2274,9 +2843,126 @@ void PyMfcHost::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lp)
 
     const int ptSize = (styled && ap->fontSize > 0) ? ap->fontSize : 0;
     const std::wstring family = (styled && !ap->fontFamily.empty()) ? ap->fontFamily : std::wstring();
-    const std::wstring sText(text.GetString(), static_cast<size_t>(text.GetLength()));
+    std::wstring sText(text.GetString(), static_cast<size_t>(text.GetLength()));
+    // CSS text-transform：只改渲染、不改数据（HTML 语义）。声明了才转，否则原样。
+    if (styled && !ap->textTransform.empty())
+        sText = xmlapp::TransformText(sText, ap->textTransform);
+    // CSS text-indent：首行缩进（中文段落 `text-indent:2em` 是最常见写法）。
+    // DWrite 没有"只缩进首行"的接口，按 indent/字号 换算成若干全角空格前置：
+    // 换行后后续行不受影响，观感与浏览器一致。
+    if (styled && !ap->textIndent.empty())
+    {
+        const int fs = ptSize > 0 ? ptSize : 12;
+        const double indPx = xmlapp::ResolveTextIndent(ap->textIndent, fs);
+        const int n = static_cast<int>((indPx + fs / 2.0) / fs);
+        if (n > 0)
+            sText.insert(0, std::wstring(static_cast<size_t>(n), L'\u3000'));
+    }
+    // 文字样式：owner-draw 这条路径此前只把字号/字体名交给 text()，
+    // XML 声明的 FontWeight(Bold/SemiBold)、FontStyle、TextWrapping="Wrap"、
+    // VerticalAlignment 全部被丢掉（标签写字号却仍是常规字重、长文本永远单行截断）。
+    // 非 styled 时传空串 = 回到默认（Normal / NoWrap / 居中），与旧行为一致。
+    // text-align:justify 是"两端对齐"——只有折行后才有中间行可撑，HTML 里块级元素本来就
+    // 自动折行，所以这里对 justify 自动开 Wrap，让 XML 也只写一行 text-align 就能得到两端对齐。
+    std::wstring wrapOf = styled ? ap->textWrapping : std::wstring();
+    if ((align & kXmlTextJustify) != 0 && wrapOf.empty())
+        wrapOf = L"Wrap";
+    cv->setTextStyle(styled ? ap->fontWeight : std::wstring(),
+                     styled ? ap->fontStyle : std::wstring(),
+                     wrapOf,
+                     styled ? ap->verticalAlign : std::wstring());
+    // CSS letter-spacing：宿主这条 owner-draw 文字路径是最常走的一条（label/button 的文字
+    // 都在这里画），不在这里设就等于"XML 写了字距但只有设计器预览生效"。
+    cv->setLetterSpacing(styled ? ap->letterSpacing : 0.0);
+    // CSS text-decoration:underline（HTML 的 <a>、下划线文本）：DWrite 只能在 TextLayout 上设，
+    // 这条 owner-draw 路径是 label/button 文字的真实装配点，不在这里设就等于"写了看不见"。
+    cv->setUnderline(styled && ap->underline);
+    // CSS line-height：正文多行的行距。此前 `LineHeight` 只被 XmlCore 写进属性、
+    // 全仓无人消费（写了等于没写）；这里接到绘制端才和浏览器的段落观感一致。
+    {
+        double lhVal = 0.0;
+        bool lhMul = false;
+        if (styled && xmlapp::ResolveLineHeight(ap->lineHeight, lhVal, lhMul))
+            cv->setLineHeight(lhVal, lhMul);
+        else
+            cv->setLineHeight(0.0, false);
+    }
+    // CSS text-overflow:ellipsis：单行溢出打点。此前溢出是被 DrawText/DirectWrite 硬裁
+    // （半个字被切在边界上），浏览器会换成 "…"。这里量宽后二分找最长前缀再补省略号。
+    if (styled && _wcsicmp(ap->textOverflow.c_str(), L"ellipsis") == 0)
+    {
+        const LONG avail = (trc.right - trc.left) - 2;
+        if (avail > 0 && !sText.empty())
+        {
+            const float tw = cv->textWidth(sText, ptSize, family);
+            if (tw > static_cast<float>(avail))
+            {
+                int lo = 0;
+                int hi = static_cast<int>(sText.size());
+                while (lo < hi)
+                {
+                    const int mid = (lo + hi + 1) / 2;
+                    const float w = cv->textWidth(
+                        sText.substr(0, static_cast<size_t>(mid)) + L"\u2026", ptSize, family);
+                    if (w >= 0.0f && w <= static_cast<float>(avail))
+                        lo = mid;
+                    else
+                        hi = mid - 1;
+                }
+                debugLogf(L"[ellip] avail=%ld tw=%.1f len=%d tail=%d", avail, tw,
+                          static_cast<int>(sText.size()), lo);
+                sText = sText.substr(0, static_cast<size_t>(lo)) + L"\u2026";
+            }
+        }
+    }
+    // CSS text-shadow：label/button 的实际文字绘制就在这条 owner-draw 通路里
+    // （D2DDcCanvas），阴影必须在 cv->text 之前交给画布才生效。
+    {
+        xmlapp::TextShadowSpec ts;
+        if (styled && !ap->textShadow.empty() && xmlapp::ParseTextShadow(ap->textShadow, ts))
+            cv->setTextShadow(ts.ox, ts.oy, ts.blur, ts.color);
+        else
+            cv->setTextShadow(0, 0, -1, 0);
+    }
     cv->text(trc, sText, fg, align, ptSize, family);
 
+    // CSS text-decoration：DWrite 的 TextLayout::SetUnderline/SetStrikethrough 在本后端
+    // 不出像素，所以自己画 1px 线（颜色=文字色）。两条线都按 HTML 语义贴文字：
+    // 下划线在基线下 1px，删除线在文字中部（基线往上约 0.32 字高）。
+    // 基线向后端查，拿不到才退回"盒底内缩 3px"。宽度与水平对齐跟随文字本身。
+    if (styled && (ap->underline || ap->lineThrough))
+    {
+        const float tw = cv->textWidth(sText, ptSize, family);
+        const LONG avail = trc.right - trc.left;
+        LONG lw = (tw > 0.0f && tw < static_cast<float>(avail)) ? static_cast<LONG>(tw) : avail;
+        LONG x0 = trc.left;
+        if (align == DT_CENTER)
+            x0 = trc.left + (avail - lw) / 2;
+        else if (align == DT_RIGHT)
+            x0 = trc.right - lw;
+
+        double baseY = 0.0;
+        LONG base = trc.bottom - 3;
+        if (cv->textBaseline(trc, sText, ptSize, family, baseY))
+            base = static_cast<LONG>(baseY);
+
+        auto clampY = [&](LONG y) {
+            if (y < trc.top + 1) y = trc.top + 1;   // 不许跑到盒子外
+            if (y >= trc.bottom) y = trc.bottom - 1;
+            return y;
+        };
+        if (ap->underline)
+        {
+            const LONG y = clampY(base + 1);
+            cv->fillRect(RECT{ x0, y, x0 + lw, y + 1 }, fg);
+        }
+        if (ap->lineThrough)
+        {
+            // 删除线穿过字面中部：24px 字约在基线上方 8px，与浏览器视觉一致。
+            const LONG y = clampY(base - static_cast<LONG>(ptSize * 0.32f + 0.5f));
+            cv->fillRect(RECT{ x0, y, x0 + lw, y + 1 }, fg);
+        }
+    }
     // 焦点环：不用 DrawFocusRect —— 它是 XOR 虚线，深色底上又碎又刺眼，还会和圆角边缘错位。
     // 改成 1px 强调色圆角描边，跟皮肤同一套视觉。
     if ((lp->itemState & ODS_FOCUS) != 0 && !styled)
@@ -2289,7 +2975,7 @@ void PyMfcHost::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lp)
 
 
 // ---------------------------------------------------------------------------
-// 配电画布的鼠标状态机：滚轮围绕光标缩放、左键拖动平移、单击命中卡片选中。
+// 绘图画布（DWG 为主，兼容已算坐标的布局输入）的鼠标状态机：滚轮围绕光标缩放、左键拖动平移、单击命中卡片选中。
 // 缩放不重新排版，只改 zoom/offset —— 文字与曲线都是每帧按新比例重画的，
 // 所以放大后依然是矢量，不会像"放大一张位图"那样变糊。
 // ---------------------------------------------------------------------------
@@ -2553,24 +3239,24 @@ LRESULT PyMfcView3DMouse(PyMfcHost* host, HWND hwnd, UINT msg,
 }
 
 
-LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
+LRESULT PyMfcDwgCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
                                     WPARAM wParam, LPARAM lParam, bool& handled)
 {
     handled = false;
     if (host == nullptr)
         return 0;
     const int id = ::GetDlgCtrlID(hwnd);
-    auto it = host->m_planCv.find(id);
-    if (it == host->m_planCv.end())
+    auto it = host->m_dwgCv.find(id);
+    if (it == host->m_dwgCv.end())
     {
-        debugLogf(L"[plan-mouse] id=%d 未注册 planCv, msg=0x%04X", id, msg);
+        debugLogf(L"[dwg-mouse] id=%d 未注册 dwgCv, msg=0x%04X", id, msg);
         return 0;
     }
-    PyMfcHost::PlanCanvasState& st = it->second;
+    PyMfcHost::DwgCanvasState& st = it->second;
 
     if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_MOUSEWHEEL ||
         msg == WM_MBUTTONDOWN || msg == WM_MBUTTONUP || msg == WM_MOUSEMOVE)
-        debugLogf(L"[plan-mouse] id=%d msg=0x%04X pt=(%d,%d) wp=0x%04X drag=%d btn=%d moved=%d",
+        debugLogf(L"[dwg-mouse] id=%d msg=0x%04X pt=(%d,%d) wp=0x%04X drag=%d btn=%d moved=%d",
                   id, msg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),
                   static_cast<unsigned>(wParam), st.drag ? 1 : 0, st.dragBtn, st.moved ? 1 : 0);
 
@@ -2737,10 +3423,10 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
             // 小地图：点哪就把它当模型坐标，主画布居中到该点（视口红框随之更新）
             if (st.mini && st.miniOf >= 0 && st.plan.width > 0 && st.plan.height > 0)
             {
-                auto mit = host->m_planCv.find(st.miniOf);
-                if (mit != host->m_planCv.end())
+                auto mit = host->m_dwgCv.find(st.miniOf);
+                if (mit != host->m_dwgCv.end())
                 {
-                    PyMfcHost::PlanCanvasState& ms = mit->second;
+                    PyMfcHost::DwgCanvasState& ms = mit->second;
                     RECT mrc = { 0, 0, 1, 1 };
                     ::GetClientRect(hwnd, &mrc);
                     const float w = static_cast<float>(st.plan.width);
@@ -2767,13 +3453,13 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
                 handled = true;
                 return 0;
             }
-            const std::wstring code = host->planHit(id, x, y);
+            const std::wstring code = host->dwgHit(id, x, y);
             st.lastHit = code;
             if (code != st.sel)
             {
                 st.sel = code;
                 ::InvalidateRect(hwnd, nullptr, FALSE);
-                host->firePlanSelect(id, code);
+                host->fireDwgSelect(id, code);
             }
         }
         handled = true;
@@ -2788,7 +3474,7 @@ LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
             handled = true;
             return 0;
         }
-        const std::wstring code = host->planHit(id, x, y);
+        const std::wstring code = host->dwgHit(id, x, y);
         if (!code.empty())
             host->firePlanDoubleClick(id, code);
         handled = true;

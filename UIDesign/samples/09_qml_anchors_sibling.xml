@@ -1,25 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
-  示例 09：QML anchors 锚到兄弟对象
+  示例 09：兄弟锚定的 CSS 等价写法
 
-  QML 里：
-      anchors.left: A.right ; anchors.top: A.top
-      anchors.top: A.bottom ; anchors.left: A.left
-      anchors.left: B.right ; anchors.right: parent.right   // 左右两点拉宽
-  这里照写；锚兄弟时用兄弟的 x:Name。
+  旧写法 anchors.left="A.right" / anchors.top="A.bottom" 已删除 —— CSS 没有兄弟锚定，
+  这类"贴着隔壁控件排"的布局用 flex 表达：
+      A、C 一列（C 贴 A 下方）  -> Flex="column"
+      B、D 一列（B 贴 A 右侧）  -> 第二个 Flex="column"，Grow="1" 吃掉剩余宽度
+      D 吃掉剩余高度            -> Grow="1"
 -->
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
-        Title="09 兄弟锚定" Width="520" Height="320" Background="#F4F6F8">
+        Title="09 flex 相对排布" Width="520" Height="320" Background="#F4F6F8">
 
   <XPane x:Name="Host">
-    <XButton x:Name="A" text="A 左上固定" anchors.left="parent" anchors.top="parent"
-             width="140" height="32"/>
-    <XButton x:Name="B" text="B 贴 A 右侧" anchors.left="A.right" anchors.top="A.top"
-             anchors.margins="8" width="140" height="32"/>
-    <XButton x:Name="C" text="C 贴 A 下方同宽" anchors.left="A.left" anchors.top="A.bottom"
-             anchors.margins="8" width="140" height="32"/>
-    <XLabel x:Name="D" text="D 从 B 右侧一直接到父容器右边（上下贴边）"
-           anchors.left="B.right" anchors.right="parent" anchors.top="parent"
-           anchors.bottom="parent" anchors.margins="8"/>
+    <XStackPanel Display="flex" Flex="row" Gap="8" width="100%" height="100%">
+      <XStackPanel Display="flex" Flex="column" Gap="8" width="140">
+        <XButton x:Name="A" text="A 左上固定" width="140" height="32"/>
+        <XButton x:Name="C" text="C 贴 A 下方同宽" width="140" height="32"/>
+      </XStackPanel>
+      <XStackPanel Display="flex" Flex="column" Gap="8" Grow="1">
+        <XButton x:Name="B" text="B 贴 A 右侧" width="140" height="32"/>
+        <XLabel x:Name="D" text="D 从 B 下方一直铺到右侧与底部" Grow="1"/>
+      </XStackPanel>
+    </XStackPanel>
   </XPane>
 </XWindow>

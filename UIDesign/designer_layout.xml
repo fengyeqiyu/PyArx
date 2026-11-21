@@ -238,7 +238,7 @@
           <TreeRow Text="DelayButton" Level="1"/>
           <TreeRow Text="ToolButton" Level="1"/>
           <TreeRow Text="Canvas" Level="0" HasChildren="True" Expanded="True"/>
-          <TreeRow Text="PowerCanvas" Level="1"/>
+          <TreeRow Text="绘图画布" Level="1"/>
           <TreeRow Text="QCanvas" Level="1"/>
           <TreeRow Text="Containers" Level="0" HasChildren="True" Expanded="True"/>
           <TreeRow Text="GroupBox" Level="1"/>

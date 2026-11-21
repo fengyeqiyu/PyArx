@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -38,7 +38,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;_AFXEXT;Py_ENABLE_SHARED;Py_GIL_DISABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);G:\PyArx\MfcXmlCore;G:\PyArx\third_party\python315t\Include;G:\PyArx\third_party\python315t\PC;G:\PyArx\third_party\pybind11\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);G:\PyArx\MfcXmlCore;G:\PyArx\third_party\boost186;G:\PyArx\third_party\python315t\Include;G:\PyArx\third_party\python315t\PC;G:\PyArx\third_party\pybind11\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4244;4267;4305;4838</DisableSpecificWarnings>
@@ -58,14 +58,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="PyMfcPlanGL.cpp" />
+    <ClCompile Include="PyMfcDwgGL.cpp" />
     <ClCompile Include="PyMfcOffscreen.cpp" />
     <ClCompile Include="Table.cpp" />
     <ClCompile Include="PyMfcProcs.cpp" />
     <ClCompile Include="PyMfcWrap.cpp" />
+    <ClCompile Include="PyMfcTopWnd.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile />
+    </ClCompile>
     <ClCompile Include="PyMfcLoad.cpp" />
     <ClCompile Include="PyMfcBind.cpp" />
     <ClCompile Include="PyMfcHost.cpp" />
+    <ClCompile Include="PyMfcHost.Base.cpp" />
+    <ClCompile Include="PyMfcHost.HostBase.cpp" />
+    <ClCompile Include="PyMfcHost.Procs.cpp" />
+    <ClCompile Include="PyMfcHost.Paint.cpp" />
+    <ClCompile Include="PyMfcHost.Layout.cpp" />
+    <ClCompile Include="PyMfcHost.Controls.cpp" />
+    <ClCompile Include="PyMfcHost.Dwg.cpp" />
+    <ClCompile Include="PyMfcHost.Anim.cpp" />
+    <ClCompile Include="PyMfcHost.Interop.cpp" />
     <ClCompile Include="XmlBindings.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="..\MfcXmlCore\controls\RegisterPyMfcControls.cpp" />
@@ -79,10 +92,13 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="PyMfcCommon.h" />
-    <ClInclude Include="PyMfcPlanGL.h" />
+    <ClInclude Include="PyMfcDwgGL.h" />
     <ClInclude Include="PyMfcHost.h" />
+    <ClInclude Include="PyMfcHostInternal.h" />
+    <ClInclude Include="PyMfcHostApi.h" />
     <ClInclude Include="PyMfcParts.h" />
     <ClInclude Include="PyMfcWrap.h" />
+    <ClInclude Include="PyMfcTopWnd.h" />
     <ClInclude Include="XmlBindings.h" />
   </ItemGroup>
 </Project>

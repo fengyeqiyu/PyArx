@@ -25,8 +25,27 @@ namespace
         }
     }
 
-    // XML 事件属性名 -> 统一 kind（小写）
-    // 全部来自 XmlEvents 的契约表，不在本文件另立一份，避免两处漂移。
+    // 属性值 -> bool：true/1/yes/on 为真，false/0/no/off 为假，其它退回默认值
+    bool propBoolOf(const std::wstring& value, bool fallback)
+    {
+        std::wstring text = value;
+        const size_t b = text.find_first_not_of(L" \t\r\n");
+        if (b == std::wstring::npos)
+            return fallback;
+        const size_t e = text.find_last_not_of(L" \t\r\n");
+        text = (e == std::wstring::npos) ? text.substr(b) : text.substr(b, e - b + 1);
+        for (wchar_t& c : text)
+            c = (wchar_t)towlower(c);
+        if (text.empty() || text == L"true" || text == L"1" || text == L"yes" ||
+            text == L"on" || text == L"checked")
+            return true;
+        if (text == L"false" || text == L"0" || text == L"no" || text == L"off" ||
+            text == L"none")
+            return false;
+        return fallback;
+    }
+
+    // XML 事件属性名 -> 统一 kind（小写）    // 全部来自 XmlEvents 的契约表，不在本文件另立一份，避免两处漂移。
     std::wstring EventKind(const std::wstring& name)
     {
         XmlEventKind k = XmlEventKind::Click;
@@ -72,7 +91,8 @@ void XmlMfcControlBase::attach(IXmlMfcHost* host, int id, int minValue, int maxV
     if (host == nullptr)
         return;
     createNative(host, id, minValue, maxValue, x, y, w, h);
-    pushAppearance();
+    pushAppearance();     // 内含 pushBackdrop（容器背板）
+    applyEnableState();   // Enabled/Visible 可能写在创建之前，这里补推
 }
 
 void XmlMfcControlBase::pushAppearance()
@@ -80,13 +100,36 @@ void XmlMfcControlBase::pushAppearance()
     // 先让子类把外观字段同步到自己的内部格式（无宿主的纯声明阶段也要生效）
     onAppearanceChanged();
     if (m_host != nullptr && m_id >= 1000 && m_id <= 65000 && !m_ap.empty())
+    {
         m_host->setControlAppearance(m_id, m_ap);
+        // 原生输入框（EDIT/RICHEDIT）的文字是系统用 WM_SETFONT 那把 HFONT 画的，
+        // 外观表的字号/字体名只作用于自绘件 → 输入框恒为宿主默认 10pt，
+        // 表现出来就是"点进输入框字形变了"。这里把字号/字体名/字重一并落到原生控件。
+        if (m_ap.fontSize > 0 || !m_ap.fontFamily.empty())
+        {
+            bool bold = false;
+            if (!m_ap.fontWeight.empty())
+            {
+                if (_wcsicmp(m_ap.fontWeight.c_str(), L"bold") == 0 ||
+                    _wcsicmp(m_ap.fontWeight.c_str(), L"bolder") == 0)
+                    bold = true;
+                else if (_wtoi(m_ap.fontWeight.c_str()) >= 600)
+                    bold = true;
+            }
+            m_host->setControlFont(m_id,
+                                   m_ap.fontFamily.empty() ? L"Segoe UI" : m_ap.fontFamily,
+                                   m_ap.fontSize > 0 ? m_ap.fontSize : 10, bold);
+        }
+    }
+    // 容器类：Background 不归 owner-draw 管，得单独交给宿主的绘制节点（放在这里
+    // 是因为 XML 加载走的是逐属性 setProperty → pushAppearance，不是 setAppearance）
+    pushBackdrop();
 }
 
 void XmlMfcControlBase::setAppearance(const xmlapp::XmlAppearance& ap)
 {
     m_ap = ap;
-    pushAppearance();
+    pushAppearance();     // 内含 pushBackdrop
 }
 
 void XmlMfcControlBase::setLevel(int v)
@@ -120,6 +163,15 @@ void XmlMfcControlBase::pushOrder()
         return;
     m_host->setControlLevel(m_id, m_level);
     m_host->setControlTabIndex(m_id, m_tabIndex);
+}
+
+// 可用/可见：属性可能在 attach 之前就写好，所以 attach 之后也要补推一次
+void XmlMfcControlBase::applyEnableState()
+{
+    if (m_host == nullptr || m_id < 1000 || m_id > 65000)
+        return;
+    m_host->setEnabled(m_id, m_enabled);
+    m_host->setVisible(m_id, m_visible);
 }
 
 bool XmlMfcControlBase::create(void* /*parentHandle*/)
@@ -176,6 +228,8 @@ std::vector<XmlProperty> XmlMfcControlBase::properties() const
         {L"Level", XmlPropType::Int, true, true, nullptr},
         {L"TabIndex", XmlPropType::Int, true, true, nullptr},
         {L"Theme", XmlPropType::String, true, true, nullptr},
+        {L"Enabled", XmlPropType::Bool, true, true, nullptr},
+        {L"Visible", XmlPropType::Bool, true, true, nullptr},
     };
     std::vector<XmlProperty> out = xmlapp::Properties();
     for (const XmlProperty& p : kOrderProps)
@@ -204,8 +258,8 @@ bool XmlMfcControlBase::setProperty(const wchar_t* name, const std::wstring& val
     if (name == nullptr)
         return false;
 
-    // 0) QML 写法归一：text / color / font.pixelSize / currentIndex …
-    const std::wstring key = xmlmfc::QmlPropName(name);
+    // 0) 属性名归一：text / color / radius …（大小写与简写）
+    const std::wstring key = xmlmfc::PropAlias(name);
 
     // 1) 统一外观：任何控件都认
     if (xmlapp::SetProperty(m_ap, key, value))
@@ -229,6 +283,21 @@ bool XmlMfcControlBase::setProperty(const wchar_t* name, const std::wstring& val
     if (_wcsicmp(key.c_str(), L"theme") == 0)
     {
         setTheme(value);
+        return true;
+    }
+
+    // 2b) 可见/可用：XML 里 Enabled="False" / Visible="False" 一直只被"认名字"没被应用，
+    //     宿主的 setEnabled / setVisible 明明存在。HTML 的 disabled/hidden 要落到这里。
+    if (_wcsicmp(key.c_str(), L"enabled") == 0 || _wcsicmp(key.c_str(), L"isenabled") == 0)
+    {
+        m_enabled = propBoolOf(value, true);
+        applyEnableState();
+        return true;
+    }
+    if (_wcsicmp(key.c_str(), L"visible") == 0 || _wcsicmp(key.c_str(), L"isvisible") == 0)
+    {
+        m_visible = propBoolOf(value, true);
+        applyEnableState();
         return true;
     }
 
@@ -275,7 +344,7 @@ std::wstring XmlMfcControlBase::getProperty(const wchar_t* name) const
 {
     if (name == nullptr)
         return {};
-    const std::wstring key = xmlmfc::QmlPropName(name);
+    const std::wstring key = xmlmfc::PropAlias(name);
 
     std::wstring ap = xmlapp::GetProperty(m_ap, key);
     if (!ap.empty())
@@ -290,6 +359,10 @@ std::wstring XmlMfcControlBase::getProperty(const wchar_t* name) const
         return std::to_wstring(m_tabIndex);
     if (_wcsicmp(key.c_str(), L"theme") == 0)
         return m_theme;
+    if (_wcsicmp(key.c_str(), L"enabled") == 0 || _wcsicmp(key.c_str(), L"isenabled") == 0)
+        return m_enabled ? L"True" : L"False";
+    if (_wcsicmp(key.c_str(), L"visible") == 0 || _wcsicmp(key.c_str(), L"isvisible") == 0)
+        return m_visible ? L"True" : L"False";
 
     const std::wstring kind = EventKind(key);
     if (!kind.empty())
@@ -351,14 +424,11 @@ bool XmlMfcControlBase::IsLayoutAttribute(const std::wstring& key)
         L"margin", L"padding", L"dock", L"row", L"column", L"rowspan", L"columnspan",
         L"align", L"halign", L"valign", L"visible", L"enabled", L"opacity",
         L"style", L"template", L"tag", L"tooltip", L"cursor", L"zindex",
-        // QML 布局写法（对齐 QML 的 Layout 附加属性与 anchors）
+        // CSS 布局写法（display/flex 等）
         L"layout.row", L"layout.column", L"layout.rowspan", L"layout.columnspan",
         L"layout.preferredwidth", L"layout.preferredheight",
         L"layout.fillwidth", L"layout.fillheight", L"layout.alignment",
         L"layout.margins", L"layout.minimumwidth", L"layout.minimumheight",
-        L"anchors.fill", L"anchors.left", L"anchors.right", L"anchors.top",
-        L"anchors.bottom", L"anchors.centering", L"anchors.centerin",
-        L"anchors.margins", L"anchors.horizontalcenter", L"anchors.verticalcenter",
         L"name", L"x:name"    // 节点名由加载器消费，控件不认识属正常
     };
     if (key.find(L'.') != std::wstring::npos)   // Grid.Row / Panel.ZIndex 等附加属性

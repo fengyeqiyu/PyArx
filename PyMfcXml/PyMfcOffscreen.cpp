@@ -14,7 +14,7 @@
 // 1 DIP = 1 px（渲染目标固定 96 DPI）；scale 放大目标位图并按比例放大字号，
 // 得到的是"同一构图的高分辨率版"，用来判断字符轮廓和曲线是否真的锐利。
 // ---------------------------------------------------------------------------
-bool RenderPowerPlanPng(const std::wstring& path, const xmlplan::PowerPlan& plan, int scale)
+bool RenderDwgPlanPng(const std::wstring& path, const xmlplan::PowerPlan& plan, int scale)
 {
     if (scale < 1) scale = 1;
 
@@ -61,7 +61,7 @@ bool RenderPowerPlanPng(const std::wstring& path, const xmlplan::PowerPlan& plan
                   static_cast<unsigned>(canvas.lastError()));
         if (began)
         {
-            ::drawPowerPlanContent(canvas, plan, static_cast<float>(scale), 0, 0,
+            ::drawDwgPlanContent(canvas, plan, static_cast<float>(scale), 0, 0,
                                    std::wstring());
 
             canvas.end();
@@ -198,7 +198,6 @@ bool wicWritePng(const std::wstring& path, int w, int h, void* bgra)
         SUCCEEDED(frame->Commit()) &&
         SUCCEEDED(enc->Commit()))
         ok = true;
-
     if (props) props->Release();
     if (frame) frame->Release();
     if (enc) enc->Release();

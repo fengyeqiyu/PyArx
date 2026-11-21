@@ -2,7 +2,7 @@
 """复合控件：竖向绘图工具条（DrawToolBar）。
 
 XML 声明结构与尺寸，本文件只做三件事：
-  1. M.xmlLayout 取每个图标单元的位置；
+  1. M.xml_layout 取每个图标单元的位置；
   2. addStaticBitmap + setImage 装 plugins/icons/<name>.png；
   3. onClick / onControlEvent(mousemove) 收起事件，派发给 Python 与 CAD 两条通道。
 
@@ -51,7 +51,7 @@ class ToolBar(object):
         self.x, self.y = x, y
         self.height = height or H
         self.items = read_items()
-        self.rects = M.xmlLayout(XML, W, self.height)
+        self.rects = M.xml_layout(XML, W, self.height)
         self.ids = {}
         self.cmds = {}
         self.names = {}          # cid -> 单元名
@@ -72,16 +72,16 @@ class ToolBar(object):
                 continue
             cid = ID_BASE + idx
             idx += 1
-            self.app.addStaticBitmap(cid, self.x + r[0], self.y + r[1], r[2], r[3])
+            self.app.add_static_bitmap(cid, self.x + r[0], self.y + r[1], r[2], r[3])
             self.ids[name] = cid
             self.names[cid] = name
             self.cmds[cid] = cmd
             if name.startswith('I_'):
                 self._paint(cid, '')
-            self.app.onClick(cid, lambda *a, c=cid: self._clicked(c))
+            self.app.on_click(cid, lambda *a, c=cid: self._clicked(c))
             if self.hot:
                 try:
-                    self.app.onControlEvent(
+                    self.app.on_control_event(
                         cid, 'mousemove', lambda *a, c=cid: self._hover(c))
                 except Exception:
                     self.hot = False
@@ -94,7 +94,7 @@ class ToolBar(object):
         png = os.path.join(folder, name[2:] + '.png')
         if os.path.exists(png):
             try:
-                self.app.setImage(cid, png)
+                self.app.set_image(cid, png)
             except Exception:
                 pass
 
@@ -148,5 +148,5 @@ class ToolBar(object):
         for name, cid in self.ids.items():
             r = self.rects.get(name)
             if r:
-                self.app.setPos(cid, x + r[0], y + r[1])
+                self.app.set_pos(cid, x + r[0], y + r[1])
         self.x, self.y = x, y

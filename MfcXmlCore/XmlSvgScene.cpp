@@ -1,6 +1,7 @@
 #include "XmlSvgScene.h"
 
 #include <windows.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -447,6 +448,13 @@ namespace xmlsvg
                 sh.hasStroke = true;
                 sh.stroke = colorOf(s->stroke.color);
                 sh.strokeWidth = s->strokeWidth > 0.0f ? s->strokeWidth : 1.0f;
+                if (s->strokeDashArray != nullptr && s->strokeDashCount > 0)
+                {
+                    sh.dashOn = (s->strokeDashArray[0] > 0.0f) ? s->strokeDashArray[0] : 1.0f;
+                    sh.dashOff = (s->strokeDashCount > 1 && s->strokeDashArray[1] > 0.0f)
+                                     ? s->strokeDashArray[1]
+                                     : sh.dashOn;
+                }
             }
 
             if (!sh.hasFill && !sh.hasStroke)
@@ -525,6 +533,55 @@ namespace xmlsvg
         return parseSvgText(text, out, err);
     }
 
+    // 虚线：画布没有 dash 样式，按弧长把折线切成实线段（与配电图虚线的做法一致）
+    static void strokeDashedPath(XmlCanvas& canvas, const std::vector<POINT>& pts,
+                                 COLORREF color, int thickness, bool closed,
+                                 float dashOn, float dashOff)
+    {
+        if (dashOn <= 0.0f || dashOff <= 0.0f || pts.size() < 2)
+            return;
+        // 像素级下限：dash 太密时不能把一条线切成上千段（那是"卡死"而不是"虚线"）
+        if (dashOn < 1.0f) dashOn = 1.0f;
+        if (dashOff < 0.5f) dashOff = 0.5f;
+        const float period = dashOn + dashOff;
+        float phase = 0.0f;                        // 当前在 dash 周期里的位置
+        std::vector<POINT> poly = pts;
+        if (closed && pts.size() >= 3)
+            poly.push_back(pts[0]);
+
+        for (size_t i = 1; i < poly.size(); ++i)
+        {
+            const POINT a = poly[i - 1];
+            const POINT b = poly[i];
+            const float dx = static_cast<float>(b.x - a.x);
+            const float dy = static_cast<float>(b.y - a.y);
+            const float len = sqrtf(dx * dx + dy * dy);
+            if (len <= 0.0f)
+                continue;
+
+            float t = 0.0f;
+            while (t < len)
+            {
+                const float remain = period - fmodf(phase, period);
+                float t2 = t + remain;
+                if (t2 > len)
+                    t2 = len;
+                if (t2 < t + 1e-4f)            // 浮点兜底：保证每轮都前进，绝不死循环
+                    t2 = t + 1e-4f;
+                if (fmodf(phase, period) < dashOn)
+                {
+                    POINT pa = { static_cast<LONG>(lroundf(a.x + dx * (t / len))),
+                                 static_cast<LONG>(lroundf(a.y + dy * (t / len))) };
+                    POINT pb = { static_cast<LONG>(lroundf(a.x + dx * (t2 / len))),
+                                 static_cast<LONG>(lroundf(a.y + dy * (t2 / len))) };
+                    canvas.strokeLine(pa, pb, color, thickness);
+                }
+                phase += (t2 - t);
+                t = t2;
+            }
+        }
+    }
+
     void drawSvgScene(XmlCanvas& canvas, const SvgScene& scene,
                       float scale, int offsetX, int offsetY)
     {
@@ -569,7 +626,11 @@ namespace xmlsvg
                     if (w < 1) w = 1;
                     if (fade)
                         canvas.pushOpacity(alpha);
-                    canvas.strokePath(pts, sh.stroke, w, ct.closed);
+                    if (sh.dashOn > 0.0f && sh.dashOff > 0.0f)
+                        strokeDashedPath(canvas, pts, sh.stroke, w, ct.closed,
+                                         sh.dashOn * scale, sh.dashOff * scale);
+                    else
+                        canvas.strokePath(pts, sh.stroke, w, ct.closed);
                     if (fade)
                         canvas.popOpacity();
                 }
@@ -625,4 +686,937 @@ namespace xmlsvg
                 canvas.popOpacity();
         }
     }
+
+    // ======================== XML 场景（<XScene> 声明式显示列表）========================
+    //
+    // 和 SVG 那条路共用 SvgScene / drawSvgScene，只是换前端描述语言：
+    //     <XScene Width="950" Height="613">
+    //       <XLine X1="10" Y1="20" X2="300" Y2="20" Stroke="#F2F4F6" Width="1"/>
+    //       <XPolyline Points="10,10 200,10 200,80" Closed="1" Stroke="#F2F4F6"/>
+    //       <XCircle Cx="100" Cy="100" R="40" Stroke="#FF0000"/>
+    //       <XArc Cx="100" Cy="100" R="40" Start="0" End="90" Stroke="#FF0000"/>
+    //       <XRect X="10" Y="10" W="80" H="40" Stroke="#F2F4F6"/>
+    //       <XGroup Transform="translate(300 200) rotate(-30) scale(0.5 0.5)">
+    //         <XCircle .../>
+    //       </XGroup>
+    //       <XText X="10" Y="30" Size="14" Color="#F2F4F6" Anchor="start">门厅说明</XText>
+    //     </XScene>
+    //
+    // 为什么不是"把 XML 转成 SVG 再喂 nanosvg"：那样等于在同一份内容上做两次词法
+    // 解析 + 一次字符串重写；万级图元时这段开销比绘制本身还大。
+    namespace
+    {
+        struct Xf
+        {
+            float a = 1.0f, b = 0.0f, c = 0.0f, d = 1.0f, e = 0.0f, f = 0.0f;
+        };
+
+        inline Xf xfMul(const Xf& m, const Xf& n)   // m * n（n 后应用，即先 n 再 m）
+        {
+            Xf r;
+            r.a = m.a * n.a + m.c * n.b;
+            r.b = m.b * n.a + m.d * n.b;
+            r.c = m.a * n.c + m.c * n.d;
+            r.d = m.b * n.c + m.d * n.d;
+            r.e = m.a * n.e + m.c * n.f + m.e;
+            r.f = m.b * n.e + m.d * n.f + m.f;
+            return r;
+        }
+
+        inline SvgPoint xfApply(const Xf& m, float x, float y)
+        {
+            return SvgPoint{ m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f };
+        }
+
+        inline float xfScale(const Xf& m)
+        {
+            const float sx = sqrtf(m.a * m.a + m.b * m.b);
+            return sx > 1e-6f ? sx : 1.0f;
+        }
+
+        inline char lowerAscii(char ch)
+        {
+            return (ch >= 'A' && ch <= 'Z') ? static_cast<char>(ch - 'A' + 'a') : ch;
+        }
+
+        inline bool startsWithNoCase(const std::string& s, const char* p)
+        {
+            size_t i = 0;
+            while (*p != 0)
+            {
+                if (i >= s.size() || lowerAscii(s[i]) != lowerAscii(*p))
+                    return false;
+                ++i;
+                ++p;
+            }
+            return i == s.size();
+        }
+
+        // XML 实体解码（&amp; &lt; &gt; &quot; &apos; &#xNN; &#NN;）
+        std::string xmlDecodeEntities(const std::string& s);
+
+        std::wstring utf8ToW(const std::string& s)
+        {
+            if (s.empty())
+                return std::wstring();
+            const int n = ::MultiByteToWideChar(CP_UTF8, 0, s.c_str(),
+                                                static_cast<int>(s.size()), nullptr, 0);
+            std::wstring w(static_cast<size_t>(n), L'\0');
+            if (n > 0)
+                ::MultiByteToWideChar(CP_UTF8, 0, s.c_str(), static_cast<int>(s.size()),
+                                      w.data(), n);
+            return w;
+        }
+
+        // 属性取值：tag 形如 `<XLine X1="1" X2="2"`，名字大小写不敏感
+        bool xAttr(const std::string& tag, const char* name, std::string& out)
+        {
+            out.clear();
+            size_t i = 0;
+            while (i < tag.size() && tag[i] != ' ' && tag[i] != '\t' && tag[i] != '\n' &&
+                   tag[i] != '\r')
+                ++i;                                    // 跳过标签名
+            while (i < tag.size())
+            {
+                while (i < tag.size() && (tag[i] == ' ' || tag[i] == '\t' || tag[i] == '\n' ||
+                                          tag[i] == '\r' || tag[i] == '/'))
+                    ++i;
+                if (i >= tag.size())
+                    break;
+                const size_t ns = i;
+                while (i < tag.size() && tag[i] != '=' && tag[i] != ' ' && tag[i] != '/' &&
+                       tag[i] != '>')
+                    ++i;
+                const std::string key = tag.substr(ns, i - ns);
+                while (i < tag.size() && (tag[i] == ' ' || tag[i] == '\t'))
+                    ++i;
+                if (i >= tag.size() || tag[i] != '=')
+                    continue;
+                ++i;
+                while (i < tag.size() && (tag[i] == ' ' || tag[i] == '\t'))
+                    ++i;
+                if (i >= tag.size())
+                    break;
+                const char quote = tag[i];
+                if (quote != '"' && quote != '\'')
+                    continue;
+                ++i;
+                const size_t vs = i;
+                while (i < tag.size() && tag[i] != quote)
+                    ++i;
+                const std::string val = tag.substr(vs, i < tag.size() ? i - vs : 0);
+                if (i < tag.size())
+                    ++i;
+                if (key.size() == strlen(name) && startsWithNoCase(key, name))
+                {
+                    out = xmlDecodeEntities(val);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // XML 实体解码（&amp; &lt; &gt; &quot; &apos; &#xNN; &#NN;）
+        std::string xmlDecodeEntities(const std::string& s)
+        {
+            if (s.find('&') == std::string::npos)
+                return s;
+            std::string out;
+            out.reserve(s.size());
+            for (size_t i = 0; i < s.size(); ++i)
+            {
+                if (s[i] != '&')
+                {
+                    out.push_back(s[i]);
+                    continue;
+                }
+                const size_t semi = s.find(';', i);
+                if (semi == std::string::npos || semi - i > 12)
+                {
+                    out.push_back(s[i]);
+                    continue;
+                }
+                const std::string ent = s.substr(i + 1, semi - i - 1);
+                if (ent == "amp") out.push_back('&');
+                else if (ent == "lt") out.push_back('<');
+                else if (ent == "gt") out.push_back('>');
+                else if (ent == "quot") out.push_back('"');
+                else if (ent == "apos") out.push_back('\'');
+                else if (!ent.empty() && (ent[0] == '#'))
+                {
+                    const bool hex = ent.size() > 1 && (ent[1] == 'x' || ent[1] == 'X');
+                    const unsigned long cp = hex ? strtoul(ent.c_str() + 2, nullptr, 16)
+                                                 : strtoul(ent.c_str() + 1, nullptr, 10);
+                    if (cp < 0x80)
+                        out.push_back(static_cast<char>(cp));
+                    else
+                    {
+                        char buf[8] = {};
+                        const int n = ::WideCharToMultiByte(
+                            CP_UTF8, 0, reinterpret_cast<const wchar_t*>(&cp), 1, buf,
+                            static_cast<int>(sizeof(buf)), nullptr, nullptr);
+                        if (n > 0)
+                            out.append(buf, n);
+                    }
+                }
+                else
+                {
+                    out.push_back(s[i]);
+                    continue;
+                }
+                i = semi;
+            }
+            return out;
+        }
+
+        bool numOf(const std::string& tag, const char* name, float& out)
+        {
+            std::string v;
+            if (!xAttr(tag, name, v) || v.empty())
+                return false;
+            out = static_cast<float>(atof(v.c_str()));
+            return true;
+        }
+
+        // 颜色：#RRGGBB（不透明）/ #AARRGGBB（带 alpha，与 XAML 的 Background/ForeColor
+        // 同一套写法）/ #RGB。alpha 在前，因为本项目 XML 侧一律是 AARRGGBB。
+        bool colorOf(const std::string& v, COLORREF& out, float& opacity)
+        {
+            opacity = 1.0f;
+            if (v.empty() || v == "none")
+                return false;
+            if (v[0] != '#')
+                return false;
+            const std::string hx = v.substr(1);
+            unsigned long rgb = 0, alpha = 255;
+            if (hx.size() >= 8)
+            {
+                alpha = strtoul(hx.substr(0, 2).c_str(), nullptr, 16);
+                rgb = strtoul(hx.substr(2, 6).c_str(), nullptr, 16);
+            }
+            else if (hx.size() >= 6)
+                rgb = strtoul(hx.substr(0, 6).c_str(), nullptr, 16);
+            else if (hx.size() == 3)
+            {
+                const unsigned long r = strtoul(hx.substr(0, 1).c_str(), nullptr, 16);
+                const unsigned long g = strtoul(hx.substr(1, 1).c_str(), nullptr, 16);
+                const unsigned long b = strtoul(hx.substr(2, 1).c_str(), nullptr, 16);
+                rgb = (r * 17u << 16) | (g * 17u << 8) | (b * 17u);
+            }
+            else
+                return false;
+            out = RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
+            opacity = static_cast<float>(alpha) / 255.0f;
+            return true;
+        }
+
+        // Transform="translate(x y) rotate(deg) scale(sx sy)"，按 SVG 顺序左乘
+        Xf parseTransform(const std::string& s)
+        {
+            Xf m;
+            size_t i = 0;
+            while (i < s.size())
+            {
+                while (i < s.size() && (s[i] == ' ' || s[i] == ',' || s[i] == '\t' || s[i] == ';'))
+                    ++i;
+                const size_t ns = i;
+                while (i < s.size() && ((s[i] >= 'a' && s[i] <= 'z') ||
+                                        (s[i] >= 'A' && s[i] <= 'Z')))
+                    ++i;
+                if (i == ns)
+                    break;
+                const std::string fn = s.substr(ns, i - ns);
+                while (i < s.size() && (s[i] == ' ' || s[i] == '\t'))
+                    ++i;
+                if (i >= s.size() || s[i] != '(')
+                    break;
+                ++i;
+                const size_t as = i;
+                while (i < s.size() && s[i] != ')')
+                    ++i;
+                const std::string args = s.substr(as, i < s.size() ? i - as : 0);
+                if (i < s.size())
+                    ++i;
+                float a[6] = { 0, 0, 0, 0, 0, 0 };
+                int cnt = 0;
+                {
+                    size_t k = 0;
+                    while (k < args.size() && cnt < 6)
+                    {
+                        while (k < args.size() && (args[k] == ' ' || args[k] == ',' || args[k] == '\t'))
+                            ++k;
+                        if (k >= args.size())
+                            break;
+                        a[cnt++] = static_cast<float>(atof(args.c_str() + k));
+                        while (k < args.size() && args[k] != ' ' && args[k] != ',' && args[k] != '\t')
+                            ++k;
+                    }
+                }
+                Xf n;
+                if (fn == "translate")
+                {
+                    n.e = a[0];
+                    n.f = cnt > 1 ? a[1] : 0.0f;
+                }
+                else if (fn == "scale")
+                {
+                    n.a = a[0];
+                    n.d = cnt > 1 ? a[1] : a[0];
+                }
+                else if (fn == "rotate")
+                {
+                    const float rad = static_cast<float>(a[0] * 3.14159265358979 / 180.0);
+                    n.a = cosf(rad);
+                    n.b = sinf(rad);
+                    n.c = -sinf(rad);
+                    n.d = cosf(rad);
+                    if (cnt >= 3)        // rotate(a cx cy) = T(cx,cy) R T(-cx,-cy)
+                    {
+                        Xf t1; t1.e = a[1]; t1.f = a[2];
+                        Xf t2; t2.e = -a[1]; t2.f = -a[2];
+                        n = xfMul(xfMul(t1, n), t2);
+                    }
+                }
+                else
+                    continue;
+                m = xfMul(m, n);
+            }
+            return m;
+        }
+
+        // 圆弧拍平（度，逆时针；画布 y 向下，所以角度取反再采样）
+        void flattenArc(float cx, float cy, float r, float a1deg, float a2deg,
+                        const Xf& m, std::vector<SvgPoint>& out)
+        {
+            float sweep = a2deg - a1deg;
+            while (sweep <= -360.0f) sweep += 360.0f;
+            while (sweep > 360.0f) sweep -= 360.0f;   // 整圆 = 360，不能归一成 0
+            if (sweep < 0.0f)
+                sweep += 360.0f;                       // CAD 的起止角按逆时针走
+            if (sweep < 0.5f)
+                sweep = 360.0f;                        // start==end 视为整圆
+            const int segs = static_cast<int>(ceilf(fabsf(sweep) / 4.0f));
+            const int n = segs < 2 ? 2 : (segs > 180 ? 180 : segs);
+            for (int i = 0; i <= n; ++i)
+            {
+                const float t = a1deg + sweep * (static_cast<float>(i) / n);
+                const float rad = static_cast<float>(t * 3.14159265358979 / 180.0);
+                out.push_back(xfApply(m, cx + r * cosf(rad), cy - r * sinf(rad)));
+            }
+        }
+
+        // 点列 "x,y x,y" 或 "x y x y"
+        void parsePoints(const std::string& s, std::vector<SvgPoint>& out)
+        {
+            std::vector<float> nums;
+            size_t i = 0;
+            while (i < s.size())
+            {
+                while (i < s.size() && (s[i] == ' ' || s[i] == ',' || s[i] == '\t' ||
+                                        s[i] == '\n' || s[i] == '\r'))
+                    ++i;
+                if (i >= s.size())
+                    break;
+                nums.push_back(static_cast<float>(atof(s.c_str() + i)));
+                while (i < s.size() && s[i] != ' ' && s[i] != ',' && s[i] != '\t' &&
+                       s[i] != '\n' && s[i] != '\r')
+                    ++i;
+            }
+            for (size_t k = 0; k + 1 < nums.size(); k += 2)
+                out.push_back(SvgPoint{ nums[k], nums[k + 1] });
+        }
+
+
+        // 虚线：Dash="实线段,空档"（也接受 DashArray / dasharray）
+        void readDash(const std::string& tag, SvgShape& sh)
+        {
+            std::string v;
+            if (!xAttr(tag, "dash", v) && !xAttr(tag, "dasharray", v))
+                return;
+            std::vector<SvgPoint> nums;
+            parsePoints(v, nums);
+            if (nums.empty())
+                return;
+            sh.dashOn = nums[0].x;
+            sh.dashOff = nums.size() > 1 ? nums[1].x : nums[0].x;
+            if (sh.dashOn < 0.5f) sh.dashOn = 0.5f;
+            if (sh.dashOff < 0.5f) sh.dashOff = 0.5f;
+        }
+
+        bool truthy(const std::string& v)
+        {
+            return v == "1" || v == "true" || v == "True" || v == "yes";
+        }
+    }
+
+    bool parseXmlSceneText(const std::string& utf8, SvgScene& out, std::wstring& err)
+    {
+        err.clear();
+        out.shapes.clear();
+        out.texts.clear();
+        out.warnings.clear();
+        out.width = 0.0f;
+        out.height = 0.0f;
+        out.pathCount = 0;
+
+        if (utf8.empty())
+        {
+            err = L"XML 场景内容为空";
+            return false;
+        }
+
+        Xf stack[16];
+        int depth = 0;
+        stack[0] = Xf();
+
+        size_t i = 0;
+        while (i < utf8.size())
+        {
+            const size_t lt = utf8.find('<', i);
+            if (lt == std::string::npos)
+                break;
+
+            // 注释 / 声明 / DOCTYPE 跳过
+            if (utf8.compare(lt, 4, "<!--") == 0)
+            {
+                const size_t end = utf8.find("-->", lt + 4);
+                i = (end == std::string::npos) ? utf8.size() : end + 3;
+                continue;
+            }
+            if (utf8.compare(lt, 2, "<?") == 0 || utf8.compare(lt, 2, "<!") == 0)
+            {
+                const size_t end = utf8.find('>', lt + 2);
+                i = (end == std::string::npos) ? utf8.size() : end + 1;
+                continue;
+            }
+
+            // 结束标签：</XGroup> 之类，弹一层变换
+            if (lt + 1 < utf8.size() && utf8[lt + 1] == '/')
+            {
+                size_t end = utf8.find('>', lt + 2);
+                if (end == std::string::npos)
+                    end = utf8.size() - 1;
+                std::string name;
+                size_t k = lt + 2;
+                while (k < utf8.size() && (isalnum(static_cast<unsigned char>(utf8[k]))))
+                {
+                    name.push_back(lowerAscii(utf8[k]));
+                    ++k;
+                }
+                if (depth > 0 && (name == "xgroup" || name == "group"))
+                    --depth;
+                i = end + 1;
+                continue;
+            }
+
+            // 起标签：读到 '>'，注意属性值里可能有 '>'（用引号状态机）
+            size_t end = lt + 1;
+            bool inQuote = false;
+            char qch = 0;
+            while (end < utf8.size())
+            {
+                const char ch = utf8[end];
+                if (inQuote)
+                {
+                    if (ch == qch)
+                        inQuote = false;
+                }
+                else if (ch == '"' || ch == '\'')
+                {
+                    inQuote = true;
+                    qch = ch;
+                }
+                else if (ch == '>')
+                    break;
+                ++end;
+            }
+            if (end >= utf8.size())
+                break;
+            const std::string tag = utf8.substr(lt + 1, end - lt - 1);
+            const bool selfClose = tag.find_last_not_of(" \t\r\n") != std::string::npos &&
+                                   tag[tag.find_last_not_of(" \t\r\n")] == '/';
+
+            size_t ns = 0;
+            while (ns < tag.size() && (tag[ns] == ' ' || tag[ns] == '\t' || tag[ns] == '\n'))
+                ++ns;
+            std::string name;
+            size_t k = ns;
+            while (k < tag.size() && (isalnum(static_cast<unsigned char>(tag[k])) ||
+                                      tag[k] == '_' || tag[k] == '-'))
+            {
+                name.push_back(lowerAscii(tag[k]));
+                ++k;
+            }
+
+            // 去掉 X 前缀：XLine -> line，XScene -> scene
+            std::string kind = name;
+            if (kind.size() > 1 && kind[0] == 'x')
+            {
+                const std::string rest = kind.substr(1);
+                if (rest == "scene" || rest == "line" || rest == "circle" || rest == "arc" ||
+                    rest == "rect" || rest == "polyline" || rest == "polygon" ||
+                    rest == "text" || rest == "path" || rest == "group")
+                    kind = rest;
+            }
+
+            const Xf cur = stack[depth];
+
+            if (kind == "scene")
+            {
+                float w = 0.0f, h = 0.0f;
+                if (numOf(tag, "width", w))
+                    out.width = w;
+                if (numOf(tag, "height", h))
+                    out.height = h;
+            }
+            else if (kind == "group")
+            {
+                std::string tf;
+                if (xAttr(tag, "transform", tf))
+                {
+                    const Xf m = xfMul(cur, parseTransform(tf));
+                    if (depth + 1 < 16)
+                    {
+                        stack[depth + 1] = m;
+                        ++depth;
+                    }
+                }
+                else if (depth + 1 < 16)
+                {
+                    stack[depth + 1] = cur;
+                    ++depth;
+                }
+            }
+            else if (kind == "line")
+            {
+                float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+                if (numOf(tag, "x1", x1) && numOf(tag, "y1", y1) && numOf(tag, "x2", x2) &&
+                    numOf(tag, "y2", y2))
+                {
+                    SvgShape sh;
+                    sh.opacity = 1.0f;
+                    std::string col;
+                    if (xAttr(tag, "stroke", col) || xAttr(tag, "color", col))
+                    {
+                        COLORREF c = 0;
+                        float op = 1.0f;
+                        if (colorOf(col, c, op))
+                        {
+                            sh.hasStroke = true;
+                            sh.stroke = c;
+                            sh.opacity = op;
+                        }
+                    }
+                    float w = 1.0f;
+                    if (!numOf(tag, "width", w))
+                        numOf(tag, "strokewidth", w);
+                    sh.strokeWidth = w > 0.0f ? w : 1.0f;
+                    readDash(tag, sh);
+                    if (sh.hasStroke)
+                    {
+                        SvgContour ct;
+                        ct.pts.push_back(xfApply(cur, x1, y1));
+                        ct.pts.push_back(xfApply(cur, x2, y2));
+                        sh.contours.push_back(std::move(ct));
+                        out.shapes.push_back(std::move(sh));
+                        out.pathCount++;
+                    }
+                }
+            }
+            else if (kind == "circle")
+            {
+                float cx = 0, cy = 0, r = 0;
+                if (numOf(tag, "cx", cx) && numOf(tag, "cy", cy) && numOf(tag, "r", r) && r > 0)
+                {
+                    SvgShape sh;
+                    sh.opacity = 1.0f;
+                    std::string col;
+                    if (xAttr(tag, "stroke", col) || xAttr(tag, "color", col))
+                    {
+                        COLORREF c = 0;
+                        float op = 1.0f;
+                        if (colorOf(col, c, op))
+                        {
+                            sh.hasStroke = true;
+                            sh.stroke = c;
+                            sh.opacity = op;
+                        }
+                    }
+                    float w = 1.0f;
+                    if (!numOf(tag, "width", w))
+                        numOf(tag, "strokewidth", w);
+                    sh.strokeWidth = w > 0.0f ? w : 1.0f;
+                    readDash(tag, sh);
+                    if (sh.hasStroke)
+                    {
+                        SvgContour ct;
+                        ct.closed = true;
+                        flattenArc(cx, cy, r, 0.0f, 360.0f, cur, ct.pts);
+                        sh.contours.push_back(std::move(ct));
+                        out.shapes.push_back(std::move(sh));
+                        out.pathCount++;
+                    }
+                }
+            }
+            else if (kind == "arc")
+            {
+                float cx = 0, cy = 0, r = 0, a1 = 0, a2 = 0;
+                if (numOf(tag, "cx", cx) && numOf(tag, "cy", cy) && numOf(tag, "r", r) &&
+                    numOf(tag, "start", a1) && numOf(tag, "end", a2) && r > 0)
+                {
+                    SvgShape sh;
+                    sh.opacity = 1.0f;
+                    std::string col;
+                    if (xAttr(tag, "stroke", col) || xAttr(tag, "color", col))
+                    {
+                        COLORREF c = 0;
+                        float op = 1.0f;
+                        if (colorOf(col, c, op))
+                        {
+                            sh.hasStroke = true;
+                            sh.stroke = c;
+                            sh.opacity = op;
+                        }
+                    }
+                    float w = 1.0f;
+                    if (!numOf(tag, "width", w))
+                        numOf(tag, "strokewidth", w);
+                    sh.strokeWidth = w > 0.0f ? w : 1.0f;
+                    readDash(tag, sh);
+                    if (sh.hasStroke)
+                    {
+                        SvgContour ct;
+                        flattenArc(cx, cy, r, a1, a2, cur, ct.pts);
+                        sh.contours.push_back(std::move(ct));
+                        out.shapes.push_back(std::move(sh));
+                        out.pathCount++;
+                    }
+                }
+            }
+            else if (kind == "rect")
+            {
+                float x = 0, y = 0, w = 0, h = 0;
+                const bool bySize = numOf(tag, "x", x) && numOf(tag, "y", y) &&
+                                    numOf(tag, "w", w) && numOf(tag, "h", h);
+                if (!bySize)
+                {
+                    float x2 = 0, y2 = 0;
+                    if (numOf(tag, "x1", x) && numOf(tag, "y1", y) && numOf(tag, "x2", x2) &&
+                        numOf(tag, "y2", y2))
+                    {
+                        w = x2 - x;
+                        h = y2 - y;
+                    }
+                }
+                if (w > 0.0f || h > 0.0f)
+                {
+                    SvgShape sh;
+                    sh.opacity = 1.0f;
+                    std::string col;
+                    if (xAttr(tag, "stroke", col) || xAttr(tag, "color", col))
+                    {
+                        COLORREF c = 0;
+                        float op = 1.0f;
+                        if (colorOf(col, c, op))
+                        {
+                            sh.hasStroke = true;
+                            sh.stroke = c;
+                            sh.opacity = op;
+                        }
+                    }
+                    float sw = 1.0f;
+                    if (!numOf(tag, "width", sw))
+                        numOf(tag, "strokewidth", sw);
+                    sh.strokeWidth = sw > 0.0f ? sw : 1.0f;
+                    readDash(tag, sh);
+
+                    std::string fcol;
+                    if (xAttr(tag, "fill", fcol))
+                    {
+                        COLORREF fc = 0;
+                        float fo = 1.0f;
+                        if (colorOf(fcol, fc, fo))
+                        {
+                            sh.hasFill = true;
+                            sh.fill = fc;
+                            if (fo < sh.opacity)
+                                sh.opacity = fo;
+                        }
+                    }
+                    if (sh.hasStroke || sh.hasFill)
+                    {
+                        SvgContour ct;
+                        ct.closed = true;
+                        ct.pts.push_back(xfApply(cur, x, y));
+                        ct.pts.push_back(xfApply(cur, x + w, y));
+                        ct.pts.push_back(xfApply(cur, x + w, y + h));
+                        ct.pts.push_back(xfApply(cur, x, y + h));
+                        sh.contours.push_back(std::move(ct));
+                        out.shapes.push_back(std::move(sh));
+                        out.pathCount++;
+                    }
+                }
+            }
+            else if (kind == "polyline" || kind == "polygon")
+            {
+                std::string pts;
+                if (xAttr(tag, "points", pts) || xAttr(tag, "d", pts))
+                {
+                    std::vector<SvgPoint> raw;
+                    parsePoints(pts, raw);
+                    if (raw.size() >= 2)
+                    {
+                        SvgShape sh;
+                        sh.opacity = 1.0f;
+                        std::string col;
+                        if (xAttr(tag, "stroke", col) || xAttr(tag, "color", col))
+                        {
+                            COLORREF c = 0;
+                            float op = 1.0f;
+                            if (colorOf(col, c, op))
+                            {
+                                sh.hasStroke = true;
+                                sh.stroke = c;
+                                sh.opacity = op;
+                            }
+                        }
+                        float w = 1.0f;
+                        if (!numOf(tag, "width", w))
+                            numOf(tag, "strokewidth", w);
+                        sh.strokeWidth = w > 0.0f ? w : 1.0f;
+                        readDash(tag, sh);
+
+                        std::string fcol;
+                        if (xAttr(tag, "fill", fcol))
+                        {
+                            COLORREF fc = 0;
+                            float fo = 1.0f;
+                            if (colorOf(fcol, fc, fo))
+                            {
+                                sh.hasFill = true;
+                                sh.fill = fc;
+                                if (fo < sh.opacity)
+                                    sh.opacity = fo;
+                            }
+                        }
+                        std::string closed;
+                        SvgContour ct;
+                        ct.closed = (kind == "polygon") ||
+                                    (xAttr(tag, "closed", closed) && truthy(closed));
+                        for (const SvgPoint& p : raw)
+                            ct.pts.push_back(xfApply(cur, p.x, p.y));
+                        if (sh.hasStroke || sh.hasFill)
+                        {
+                            sh.contours.push_back(std::move(ct));
+                            out.shapes.push_back(std::move(sh));
+                        }
+                        else
+                        {
+                            sh.hasStroke = false;
+                        }
+                        out.pathCount++;
+                    }
+                }
+            }
+            else if (kind == "path")
+            {
+                std::string d;
+                if (xAttr(tag, "d", d))
+                {
+                    // 只吃机器生成的 M/L/Z：CAD 侧的圆弧改走 <XArc>，这里不做 A 拟合
+                    std::vector<SvgContour> contours;
+                    SvgContour cur2;
+                    std::vector<float> nums;
+                    char cmd = 0;
+                    size_t k2 = 0;
+                    bool bad = false;
+                    while (k2 < d.size() && !bad)
+                    {
+                        while (k2 < d.size() && (d[k2] == ' ' || d[k2] == ',' || d[k2] == '\t'))
+                            ++k2;
+                        if (k2 >= d.size())
+                            break;
+                        const char ch = d[k2];
+                        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
+                        {
+                            cmd = ch;
+                            ++k2;
+                            if (cmd == 'Z' || cmd == 'z')
+                            {
+                                cur2.closed = true;
+                                if (cur2.pts.size() >= 2)
+                                    contours.push_back(cur2);
+                                cur2 = SvgContour();
+                            }
+                            else if (cmd == 'A' || cmd == 'a')
+                                bad = true;             // 不支持弧命令（见上）
+                            continue;
+                        }
+                        nums.clear();
+                        while (k2 < d.size() && ((d[k2] >= '0' && d[k2] <= '9') || d[k2] == '.' ||
+                                                 d[k2] == '-' || d[k2] == '+' || d[k2] == 'e' ||
+                                                 d[k2] == 'E'))
+                        {
+                            nums.push_back(static_cast<float>(atof(d.c_str() + k2)));
+                            while (k2 < d.size() && ((d[k2] >= '0' && d[k2] <= '9') ||
+                                                     d[k2] == '.' || d[k2] == '-' ||
+                                                     d[k2] == '+' || d[k2] == 'e' ||
+                                                     d[k2] == 'E'))
+                                ++k2;
+                            while (k2 < d.size() && (d[k2] == ' ' || d[k2] == ',' || d[k2] == '\t'))
+                                ++k2;
+                        }
+                        if (nums.size() >= 2)
+                        {
+                            if (cmd == 'M' || cmd == 'm' || cmd == 'L' || cmd == 'l' || cmd == 0)
+                            {
+                                cur2.pts.push_back(xfApply(cur, nums[0], nums[1]));
+                                cmd = 'L';
+                            }
+                        }
+                    }
+                    if (cur2.pts.size() >= 2)
+                        contours.push_back(cur2);
+
+                    SvgShape sh;
+                    sh.opacity = 1.0f;
+                    std::string col;
+                    if (xAttr(tag, "stroke", col) || xAttr(tag, "color", col))
+                    {
+                        COLORREF c = 0;
+                        float op = 1.0f;
+                        if (colorOf(col, c, op))
+                        {
+                            sh.hasStroke = true;
+                            sh.stroke = c;
+                            sh.opacity = op;
+                        }
+                    }
+                    float w = 1.0f;
+                    if (!numOf(tag, "width", w))
+                        numOf(tag, "strokewidth", w);
+                    sh.strokeWidth = w > 0.0f ? w : 1.0f;
+                    readDash(tag, sh);
+                    std::string fcol;
+                    if (xAttr(tag, "fill", fcol))
+                    {
+                        COLORREF fc = 0;
+                        float fo = 1.0f;
+                        if (colorOf(fcol, fc, fo))
+                        {
+                            sh.hasFill = true;
+                            sh.fill = fc;
+                            if (fo < sh.opacity)
+                                sh.opacity = fo;
+                        }
+                    }
+                    if ((sh.hasStroke || sh.hasFill) && !contours.empty())
+                    {
+                        sh.contours = std::move(contours);
+                        out.shapes.push_back(std::move(sh));
+                        out.pathCount++;
+                    }
+                    if (bad)
+                        out.warnings.push_back(L"<XPath> 含 A 命令，已跳过该段（圆弧请用 <XArc>）");
+                }
+            }
+            else if (kind == "text")
+            {
+                float x = 0, y = 0, size = 0;
+                if (numOf(tag, "x", x) && numOf(tag, "y", y))
+                {
+                    if (!numOf(tag, "size", size))
+                        numOf(tag, "fontsize", size);
+                    if (size <= 0.0f)
+                        size = 12.0f;
+
+                    SvgText t;
+                    t.sizePx = size;
+                    t.weight = 400;
+                    t.family = L"Microsoft YaHei";
+                    t.opacity = 1.0f;
+                    const SvgPoint p = xfApply(cur, x, y);
+                    t.x = p.x;
+                    t.y = p.y;
+
+                    std::string col;
+                    if (xAttr(tag, "color", col) || xAttr(tag, "fill", col))
+                    {
+                        COLORREF c = 0;
+                        float op = 1.0f;
+                        if (colorOf(col, c, op))
+                        {
+                            t.color = c;
+                            t.opacity = op;
+                        }
+                    }
+                    std::string anchor;
+                    if (xAttr(tag, "anchor", anchor))
+                        t.anchor = (anchor == "middle") ? 1 : (anchor == "end") ? 2 : 0;
+                    std::string rotate;
+                    if (xAttr(tag, "rotate", rotate))
+                        t.rotate = static_cast<float>(atof(rotate.c_str()));
+                    std::string fam;
+                    if (xAttr(tag, "family", fam) || xAttr(tag, "fontfamily", fam))
+                        t.family = utf8ToW(fam);
+                    std::string weight;
+                    if (xAttr(tag, "weight", weight))
+                        t.weight = atoi(weight.c_str());
+
+                    // 文字内容：优先 Text 属性，其次标签内文本
+                    std::string text;
+                    if (xAttr(tag, "text", text) && !text.empty())
+                        t.text = utf8ToW(text);
+                    else if (!selfClose)
+                    {
+                        const size_t gt = end + 1;
+                        const size_t close = utf8.find("</", gt);
+                        if (close != std::string::npos && close > gt)
+                        {
+                            text = xmlDecodeEntities(utf8.substr(gt, close - gt));
+                            t.text = utf8ToW(text);
+                            end = utf8.find('>', close);
+                            if (end == std::string::npos)
+                                end = close + 1;
+                        }
+                    }
+                    if (!t.text.empty() && t.color != 0)
+                        out.texts.push_back(std::move(t));
+                    else if (!t.text.empty())
+                    {
+                        t.color = RGB(255, 255, 255);
+                        out.texts.push_back(std::move(t));
+                    }
+                }
+            }
+
+            i = end + 1;
+        }
+
+        if (out.shapes.empty() && out.texts.empty())
+        {
+            err = L"XML 场景里没有可绘制的图元";
+            return false;
+        }
+        if (out.width <= 0.0f || out.height <= 0.0f)
+        {
+            float mx = 0.0f, my = 0.0f;
+            for (const SvgShape& sh : out.shapes)
+                for (const SvgContour& ct : sh.contours)
+                    for (const SvgPoint& pt : ct.pts)
+                    {
+                        if (pt.x > mx) mx = pt.x;
+                        if (pt.y > my) my = pt.y;
+                    }
+            for (const SvgText& t : out.texts)
+            {
+                if (t.x > mx) mx = t.x;
+                if (t.y > my) my = t.y;
+            }
+            out.width = mx + 1.0f;
+            out.height = my + 1.0f;
+        }
+        return true;
+    }
 }
+

@@ -22,28 +22,28 @@ def main():
     M.pump(100)
 
     check(sorted(ui.ids) == ['c', 'n', 'ok', 'sep', 't'], '控件全建出来（4 个 + hr）', ui.ids)
-    check(win.getXmlValue(ui.ids['t'], 'text') == '标题', '文本内容 -> Text',
-          win.getXmlValue(ui.ids['t'], 'text'))
-    check(win.getXmlValue(ui.ids['c'], 'text') == '启用', 'checkbox 文本')
+    check(win.get_xml_value(ui.ids['t'], 'text') == '标题', '文本内容 -> Text',
+          win.get_xml_value(ui.ids['t'], 'text'))
+    check(win.get_xml_value(ui.ids['c'], 'text') == '启用', 'checkbox 文本')
     # Placeholder 没有 getXmlValue 通道（宿主只回 text/checked/index/value 等少量键），
     # 改从最终 XML 校验属性确实透传给了 XTextField 的 Placeholder 属性
     check('Placeholder="名称"' in ui.xml, 'placeholder 透传', ui.xml[:120])
 
-    sz_ok = tuple(win.getSize(ui.ids['ok']))
-    sz_n = tuple(win.getSize(ui.ids['n']))
+    sz_ok = tuple(win.get_size(ui.ids['ok']))
+    sz_n = tuple(win.get_size(ui.ids['n']))
     check(sz_ok[1] == DEFAULT_HEIGHT['XButton'], 'button 默认高 32', sz_ok)
     check(sz_n == (180, DEFAULT_HEIGHT['XTextField']), '横排里 input 用自然宽 180', sz_n)
-    check(tuple(win.getSize(ui.ids['t'])) == (336, 22), '块级 label 撑满内容宽 336',
-          tuple(win.getSize(ui.ids['t'])))
-    check(tuple(win.getSize(ui.ids['sep'])) == (336, 1), 'hr 撑满且高 1',
-          tuple(win.getSize(ui.ids['sep'])))
+    check(tuple(win.get_size(ui.ids['t'])) == (336, 22), '块级 label 撑满内容宽 336',
+          tuple(win.get_size(ui.ids['t'])))
+    check(tuple(win.get_size(ui.ids['sep'])) == (336, 1), 'hr 撑满且高 1',
+          tuple(win.get_size(ui.ids['sep'])))
 
     # 2) 显式 width/height 压过默认
     ui2 = html('<div><button id="wide" width="200" height="48">宽</button></div>',
                app=win, w=360)
     M.pump(60)
-    check(tuple(win.getSize(ui2.ids['wide'])) == (200, 48), '显式宽高压过默认',
-          tuple(win.getSize(ui2.ids['wide'])))
+    check(tuple(win.get_size(ui2.ids['wide'])) == (200, 48), '显式宽高压过默认',
+          tuple(win.get_size(ui2.ids['wide'])))
 
     # 3) 自动 id：没写 id 也要能拿到
     ui3 = html('<div><label>一</label><label>二</label></div>', app=win, w=300)
@@ -67,7 +67,7 @@ def main():
     ui4 = html('<div><button id="b">x</button></div>', w=200)
     check(ui4.ids == {} and '<XButton' in ui4.xml, '不传宿主只算结构', ui4.xml[:60])
 
-    win.savePng(r'G:\PyArx\log\after\t_html_api.png')
+    win.save_png(r'G:\PyArx\log\after\t_html_api.png')
     win.close()
     return finish('t_html_api')
 

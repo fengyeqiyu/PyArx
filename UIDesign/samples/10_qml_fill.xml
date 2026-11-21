@@ -1,21 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
-  示例 10：Layout.fillWidth / Layout.fillHeight
+  示例 10：剩余空间分配（CSS flex 写法）
 
-  QML 写法：
-      Button { Layout.fillWidth: true }
-      Label  { Layout.fillWidth: true; Layout.fillHeight: true }   // 吃掉剩下的高度
-  和 RowLayout / ColumnLayout 一样：固定尺寸的项先占位，fill 项分剩下的空间。
+  QML 写法 Layout.fillWidth / Layout.fillHeight 已不再推荐，CSS 对应：
+      宽度填满          -> 父容器 Flex="column"（竖排子项默认撑满一行）
+      吃掉剩余高度      -> Grow="1"
+      固定高            -> Height="40" / Height="36"
 -->
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
         Title="10 剩余空间分配" Width="520" Height="320" Background="#F4F6F8">
 
   <XPane x:Name="Host">
-    <XButton x:Name="Head" text="Head 高 40，宽度填满"
-             height="40" Layout.fillWidth="true"/>
-    <XLabel x:Name="Body" text="Body 吃掉剩余高度，同时宽度填满"
-            Layout.fillWidth="true" Layout.fillHeight="true"/>
-    <XButton x:Name="Foot" text="Foot 高 36，宽度填满"
-             height="36" Layout.fillWidth="true"/>
+    <XStackPanel Display="flex" Flex="column" Gap="0" width="100%" height="100%">
+      <XButton x:Name="Head" text="Head 高 40，宽度填满" height="40"/>
+      <XLabel x:Name="Body" text="Body 吃掉剩余高度，同时宽度填满" Grow="1"/>
+      <XButton x:Name="Foot" text="Foot 高 36，宽度填满" height="36"/>
+    </XStackPanel>
   </XPane>
 </XWindow>

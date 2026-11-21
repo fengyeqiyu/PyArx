@@ -34,6 +34,12 @@ struct Palette
     COLORREF muted  = RGB(62, 70, 80);    // 轨道、空槽、次要底
     int ptSize      = 9;
     std::wstring face = L"Segoe UI";
+    // CSS linear-gradient 铺底（仅声明了 bgImage 的控件置位）；不覆盖 back 纯色语义，
+    // 无渐变时各绘制器仍回落 fillRect(back)。角度契约同 XmlCanvas：0=左→右、90=上→下。
+    bool hasGradient = false;
+    COLORREF gFrom   = 0;
+    COLORREF gTo     = 0;
+    int gAngle       = 90;
 };
 
 // 列表 / 表格的一行
@@ -507,7 +513,12 @@ inline void drawEdit(XmlCanvas& cv, const RECT& rc, const std::vector<EditLine>&
                      const Palette& pal, bool hasFocus, bool readonly, int lineH,
                      UINT align = DT_LEFT, bool showCaret = true)
 {
-    cv.fillRect(rc, pal.back);
+    // 渐变优先：声明了 bgImage 走线性渐变铺底；否则回落原纯色 fillRect(back)，
+    // 纯色路径逐像素不变。Edit 为直角矩形，走 fillRectGradient（非圆角原语）。
+    if (pal.hasGradient)
+        cv.fillRectGradient(rc, pal.gFrom, pal.gTo, pal.gAngle);
+    else
+        cv.fillRect(rc, pal.back);
     cv.strokeRect(rc, hasFocus ? pal.accent : pal.border, 1);
 
     // 焦点内发光：贴着边框的一圈半透明强调色。这条同时是 alpha 管线的探针 ——
@@ -569,7 +580,7 @@ inline void drawEdit(XmlCanvas& cv, const RECT& rc, const std::vector<EditLine>&
     }
 }
 
-// ---------------------------------------------------------------- QML 对齐：Switch
+// ---------------------------------------------------------------- HTML 对齐：Switch
 // 轨道 + 滑块，开=强调色实心轨道，关=muted 轨道。整块重画，不做动画（后续接 AnimationHost）。
 inline void drawSwitch(XmlCanvas& cv, const RECT& rc, bool on, const Palette& pal, bool focus)
 {
@@ -594,7 +605,7 @@ inline void drawSwitch(XmlCanvas& cv, const RECT& rc, bool on, const Palette& pa
         cv.strokeRoundRect(rc, pal.accent, 3, 1);
 }
 
-// ---------------------------------------------------------------- QML 对齐：SpinBox
+// ---------------------------------------------------------------- HTML 对齐：SpinBox
 // 左侧数字、右侧上下两个小三角按钮，点三角或滚轮改值。
 inline void drawSpinBox(XmlCanvas& cv, const RECT& rc, int value, const Palette& pal, bool focus,
                         bool readOnly = false)
@@ -629,7 +640,7 @@ inline void drawSpinBox(XmlCanvas& cv, const RECT& rc, int value, const Palette&
     }
 }
 
-// ---------------------------------------------------------------- QML 对齐：RangeSlider
+// ---------------------------------------------------------------- HTML 对齐：RangeSlider
 // 双拇指：中间区间用强调色，两端 muted。两个拇指都带描边。
 inline void drawRangeSlider(XmlCanvas& cv, const RECT& rc, int lo, int hi, int vmin, int vmax,
                             const Palette& pal)
@@ -667,7 +678,7 @@ inline void drawRangeSlider(XmlCanvas& cv, const RECT& rc, int lo, int hi, int v
     }
 }
 
-// ---------------------------------------------------------------- QML 对齐：BusyIndicator
+// ---------------------------------------------------------------- HTML 对齐：BusyIndicator
 // 12 段的旋转环：亮段集中在一处，phase 每次重画 +1。
 inline void drawBusyRing(XmlCanvas& cv, const RECT& rc, int phase, const Palette& pal)
 {
@@ -695,7 +706,7 @@ inline void drawBusyRing(XmlCanvas& cv, const RECT& rc, int phase, const Palette
     }
 }
 
-// ---------------------------------------------------------------- QML 对齐：PageIndicator
+// ---------------------------------------------------------------- HTML 对齐：PageIndicator
 // 一排小圆点，当前页是长条。
 inline void drawPageDots(XmlCanvas& cv, const RECT& rc, int count, int cur, const Palette& pal)
 {
@@ -721,7 +732,7 @@ inline void drawPageDots(XmlCanvas& cv, const RECT& rc, int count, int cur, cons
     }
 }
 
-// ---------------------------------------------------------------- QML 对齐：Dial
+// ---------------------------------------------------------------- HTML 对齐：Dial
 // 270° 圆弧（135° 起、405° 止）+ 指针 + 中心数值。点/拖都按角度取值。
 inline void drawDial(XmlCanvas& cv, const RECT& rc, int value, int vmin, int vmax,
                      const Palette& pal, bool focus)
@@ -774,7 +785,7 @@ inline void drawDial(XmlCanvas& cv, const RECT& rc, int value, int vmin, int vma
         cv.strokeRoundRect(rc, pal.accent, 4, 1);
 }
 
-// ---------------------------------------------------------------- QML 对齐：Tumbler
+// ---------------------------------------------------------------- HTML 对齐：Tumbler
 // 三行滚动选择：中间是高亮当前项，上下各一行相邻项（淡）。
 inline void drawTumbler(XmlCanvas& cv, const RECT& rc, int index, int count,
                         const Palette& pal, bool focus)
@@ -811,7 +822,7 @@ inline void drawTumbler(XmlCanvas& cv, const RECT& rc, int index, int count,
             pal.ptSize, pal.face);
 }
 
-// ---------------------------------------------------------------- QML 对齐：独立 ScrollBar
+// ---------------------------------------------------------------- HTML 对齐：独立 ScrollBar
 // 可单独摆放的滚动条：轨道 + 拇指，拇指长度按 page/span 算。
 inline void drawScrollBar(XmlCanvas& cv, const RECT& rc, int pos, int vmin, int vmax, int page,
                           bool vertical, const Palette& pal, bool focus)
@@ -863,7 +874,7 @@ inline void drawScrollBar(XmlCanvas& cv, const RECT& rc, int pos, int vmin, int 
         cv.strokeRoundRect(rc, pal.accent, 3, 1);
 }
 
-// ---------------------------------------------------------------- QML 对齐：TableView
+// ---------------------------------------------------------------- HTML 对齐：TableView
 // 表头 + 数据行 + 选中行 + 斑马纹 + 滚动，列宽平均分。点表头排序由宿主改变数据顺序。
 inline void drawTable(XmlCanvas& cv, const RECT& rc,
                       const std::vector<std::wstring>& cols,
@@ -930,7 +941,7 @@ inline void drawTable(XmlCanvas& cv, const RECT& rc,
         cv.strokeRoundRect(rc, pal.accent, 3, 1);
 }
 
-// ---------------------------------------------------------------- QML 对齐：TreeView
+// ---------------------------------------------------------------- HTML 对齐：TreeView
 // 层级表格：缩进 + 展开箭头 + 选中行；visible 由宿主按折叠状态算好传进来。
 inline void drawTreeTable(XmlCanvas& cv, const RECT& rc,
                           const std::vector<std::wstring>& texts,
@@ -985,7 +996,7 @@ inline void drawTreeTable(XmlCanvas& cv, const RECT& rc,
         cv.strokeRoundRect(rc, pal.accent, 3, 1);
 }
 
-// ---------------------------------------------------------------- QML 对齐：ToolBar
+// ---------------------------------------------------------------- HTML 对齐：ToolBar
 // 一排工具按钮：选中/悬停用强调色底，条目之间一条细竖线分隔。
 inline void drawToolBar(XmlCanvas& cv, const RECT& rc, const std::vector<std::wstring>& items,
                         int sel, int hover, const Palette& pal, bool focus)

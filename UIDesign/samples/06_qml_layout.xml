@@ -1,35 +1,32 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
-  示例 06：QML 布局写法（Grid 的附加属性按 QML 习惯写）
+  示例 06：CSS Grid 写法（HTML 口径）
 
-  QML 里写：
-      Layout.row: 0; Layout.column: 1; Layout.columnSpan: 2
-      Layout.preferredWidth: 200; Layout.preferredHeight: 32
-  这里直接照写，底层仍落到 Grid 行/列与 Width/Height，渲染是原生布局。
+  HTML 里最省事的网格：
+      .root { display:grid;
+              grid-template-rows: 32px 1fr 32px;
+              grid-template-columns: 1fr 1fr; }
+      .title { grid-column: 1 / span 2 }
+  对应 XML 侧同名字段（大小写不敏感）：
+      style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:32px 1fr 32px"
+      style="grid-column:1 / span 2;grid-row:1"
+  没写 grid-column / grid-row 的子项按 HTML 的 grid-auto-flow:row 顺次落格；
+  子项默认拉伸到单元格（autoTextW 的伪宽度不再算作者宽度）。
+  （XAML 的 <XGrid> + Grid.Row/Grid.Column 写法仍然有效。）
 -->
 <XWindow xmlns:x="http://schemas.microsoft.com/winfx/2006/xml"
-        Title="06 QML 布局" Width="560" Height="360" Background="#F4F6F8">
+        Title="06 CSS Grid" Width="560" Height="360" Background="#F4F6F8">
 
-  <XGrid x:Name="RootGrid" Margin="16" Padding="8">
-    <XGrid.RowDefinitions>
-      <RowDefinition Height="32"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="32"/>
-    </XGrid.RowDefinitions>
-    <XGrid.ColumnDefinitions>
-      <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="*"/>
-    </XGrid.ColumnDefinitions>
+  <div x:Name="Root"
+       style="display:grid;grid-template-rows:32px 1fr 32px;grid-template-columns:1fr 1fr;margin:16;padding:8;gap:8;height:328">
 
-    <XLabel x:Name="Title" text="QML 布局写法" font.pixelSize="14" color="#1F2937"
-           Layout.row="0" Layout.column="0" Layout.columnSpan="2"/>
+    <label x:Name="Title" text="CSS Grid 写法" style="grid-row:1;grid-column:1 / span 2;font-size:14;color:#1F2937"/>
 
-    <XTextField x:Name="Left" text="左边" Layout.row="1" Layout.column="0"
-               Layout.margins="6"/>
-    <XListBox x:Name="Right" Layout.row="1" Layout.column="1" Layout.margins="6"/>
+    <input x:Name="Left" type="text" value="左边格子（原生 input）" style="grid-row:2;grid-column:1;margin:6"/>
 
-    <XButton x:Name="Bar" text="底部按钮（跨两列）" Layout.row="2" Layout.column="0"
-             Layout.columnSpan="2" Layout.preferredHeight="30" Layout.margins="6"/>
+    <XListBox x:Name="Right" style="grid-row:2;grid-column:2;margin:6"/>
 
-  </XGrid>
+    <button x:Name="Bar" text="确定（跨两列的原生 button）" style="grid-row:3;grid-column:1 / span 2;margin:6"/>
+
+  </div>
 </XWindow>

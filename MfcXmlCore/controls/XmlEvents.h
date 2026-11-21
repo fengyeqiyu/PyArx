@@ -169,7 +169,7 @@ inline const std::map<std::wstring, std::vector<XmlEventKind>>& xmlEventTable()
         {L"radiobutton", {XmlEventKind::Click, XmlEventKind::CheckedChanged,
                           XmlEventKind::GotFocus, XmlEventKind::LostFocus}},
         // 文本族
-        {L"textfield", kText}, {L"textarea", kText}, {L"codeeditor", kText},
+        {L"textfield", kText}, {L"textarea", kText},
         // 选择族
         {L"combobox", {XmlEventKind::SelectionChanged, XmlEventKind::TextChanged,
                        XmlEventKind::DropDown, XmlEventKind::DoubleClick,
@@ -180,10 +180,10 @@ inline const std::map<std::wstring, std::vector<XmlEventKind>>& xmlEventTable()
                      XmlEventKind::KeyUp, XmlEventKind::GotFocus,
                      XmlEventKind::LostFocus}},
         {L"listbox", kSelect}, {L"listctrl", kSelect}, {L"treeview", kSelect},
-        {L"tabbar", kFairly}, {L"tableview", kSelect}, {L"treetable", kSelect},
+        {L"tabbar", kFairly}, {L"tableview", kSelect},
         {L"gridlayout", kSelect}, {L"gridview", kSelect}, {L"pathview", kSelect},
-        {L"virtuallist", kSelect}, {L"stackview", kFairly}, {L"swipeview", kFairly},
-        {L"page", kFairly}, {L"pageindicator", kFairly},
+        {L"virtuallist", kSelect}, {L"stackview", kFairly},
+        {L"page", kFairly},
         // 取值族
         {L"slider", kValue}, {L"rangeslider", kValue}, {L"progressbar", kValue},
         {L"dial", kValue}, {L"tumbler", kValue}, {L"spinbox", kValue},
@@ -208,13 +208,12 @@ inline const std::map<std::wstring, std::vector<XmlEventKind>>& xmlEventTable()
                         XmlEventKind::MouseDown, XmlEventKind::MouseUp,
                         XmlEventKind::MouseMove}},
         // 画布
-        {L"powercanvas", kCanvas}, {L"qcanvas", kCanvas},
+        {L"dwgcanvas", kCanvas}, {L"qcanvas", kCanvas},
         // 浮层/菜单/工具栏
         {L"menu", {XmlEventKind::Click, XmlEventKind::SelectionChanged}},
         {L"menubar", {XmlEventKind::Click, XmlEventKind::SelectionChanged}},
         {L"toolbar", {XmlEventKind::Click, XmlEventKind::SelectionChanged,
                         XmlEventKind::DropDown}},
-        {L"tooltip", {XmlEventKind::Click}},
         {L"popup", {XmlEventKind::Click, XmlEventKind::GotFocus,
                     XmlEventKind::LostFocus}},
         // 日期
@@ -225,10 +224,8 @@ inline const std::map<std::wstring, std::vector<XmlEventKind>>& xmlEventTable()
                          XmlEventKind::DoubleClick, XmlEventKind::GotFocus,
                          XmlEventKind::LostFocus}},
         // 指示
-        {L"busyindicator", {XmlEventKind::Click, XmlEventKind::GotFocus,
-                            XmlEventKind::LostFocus}},
-        // QML Controls 2 对齐补齐
-        {L"frame", kPointer}, {L"dialog", kPointer}, {L"drawer", kPointer},
+        // HTML Controls 2 对齐补齐
+        {L"frame", kPointer}, {L"dialog", kPointer},
         {L"roundbutton", kPointer}, {L"delaybutton", kCheck}, {L"toolbutton", kPointer},
         {L"toolseparator", kPointer}, {L"tabbutton", kCheck},
         {L"scrollindicator", {XmlEventKind::Scroll, XmlEventKind::Click}},

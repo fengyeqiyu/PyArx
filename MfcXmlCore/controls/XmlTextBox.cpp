@@ -5,6 +5,7 @@ void XmlTextBox::createNative(IXmlMfcHost* host, int id, int /*min*/, int /*max*
 {
     host->addEditAdvanced(id, m_text, m_multiline, m_readOnly, m_maxLength,
                           m_placeholder, x, y, w, h);
+    applyPassword();
 }
 
 // 属性表：一个属性一行，别名用 '|' 分隔，读写直接落到本类成员/宿主。
@@ -15,7 +16,8 @@ const std::vector<XmlPropEntry>& XmlTextBox::PropTableData()
         {L"Text", nullptr, XmlPropType::String, nullptr,
          [](XmlMfcControlBase& b, const std::wstring& v) { return static_cast<XmlTextBox&>(b).SetTextProp(v); },
          [](const XmlMfcControlBase& b) { return static_cast<const XmlTextBox&>(b).GetTextProp(); }},
-        {L"IsReadOnly", nullptr, XmlPropType::Bool, nullptr,
+        // 别名必须放 Aliases 字段（'|' 分隔）；塞进 Name 会让逐字比对把整串当名字，永不命中
+        {L"IsReadOnly", L"ReadOnly|readonly", XmlPropType::Bool, nullptr,
          [](XmlMfcControlBase& b, const std::wstring& v) { return static_cast<XmlTextBox&>(b).SetReadOnlyProp(v); },
          [](const XmlMfcControlBase& b) {
              return xmlprop2::FromBool(static_cast<const XmlTextBox&>(b).m_readOnly); }},
@@ -30,8 +32,23 @@ const std::vector<XmlPropEntry>& XmlTextBox::PropTableData()
         {L"Placeholder", nullptr, XmlPropType::String, nullptr,
          [](XmlMfcControlBase& b, const std::wstring& v) { return static_cast<XmlTextBox&>(b).SetPlaceholderProp(v); },
          [](const XmlMfcControlBase& b) { return static_cast<const XmlTextBox&>(b).m_placeholder; }},
+        {L"Password", nullptr, XmlPropType::Bool, nullptr,
+         [](XmlMfcControlBase& b, const std::wstring& v) { return static_cast<XmlTextBox&>(b).SetPasswordProp(v); },
+         [](const XmlMfcControlBase& b) {
+             return xmlprop2::FromBool(static_cast<const XmlTextBox&>(b).m_password); }},
     };
     return kTable;
+}
+
+bool XmlTextBox::SetPasswordProp(const std::wstring& v)
+{
+    const bool v2 = xmlprop2::ToBool(v);
+    if (v2 != m_password)
+    {
+        m_password = v2;
+        applyPassword();
+    }
+    return true;
 }
 
 bool XmlTextBox::SetTextProp(const std::wstring& v)

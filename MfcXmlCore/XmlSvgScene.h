@@ -33,6 +33,8 @@ namespace xmlsvg
         bool hasStroke = false;
         COLORREF stroke = 0;
         float strokeWidth = 1.0f;    // SVG 用户单位
+        float dashOn = 0.0f;         // >0 时按虚线画：实线段长度（场景单位）
+        float dashOff = 0.0f;        // 空档长度
         float opacity = 1.0f;
         std::wstring id;             // 原 SVG 的 id（用于命中测试/按元素高亮）
     };
@@ -64,6 +66,12 @@ namespace xmlsvg
     // text 按 UTF-8 传入；失败时 err 说明原因（空文档、没有可用图元等）
     XML_CORE_API bool parseSvgText(const std::string& utf8, SvgScene& out, std::wstring& err);
     XML_CORE_API bool loadSvgFile(const std::wstring& path, SvgScene& out, std::wstring& err);
+
+    // 同一套 SvgScene 的第二种前端语言：<XScene> 里的 <XLine>/<XCircle>/<XArc>/<XRect>/
+    // <XPolyline>/<XPolygon>/<XPath>/<XText>/<XGroup Transform="…">。
+    // 直接扫标签建场景，不经 SVG 文本和 nanosvg，万级图元省掉一次序列化 + 解析。
+    XML_CORE_API bool parseXmlSceneText(const std::string& utf8, SvgScene& out,
+                                        std::wstring& err);
 
     // 把场景画到画布：模型坐标 -> 屏幕 = p * scale + (offsetX, offsetY)
     XML_CORE_API void drawSvgScene(XmlCanvas& canvas, const SvgScene& scene,

@@ -20,7 +20,7 @@
 namespace py = pybind11;
 
 // 由 PyMfcXml.cpp 提供：配电规划图 Direct2D 离屏渲染 → PNG
-bool RenderPowerPlanPng(const std::wstring& path, const xmlplan::PowerPlan& plan, int scale);
+bool RenderDwgPlanPng(const std::wstring& path, const xmlplan::PowerPlan& plan, int scale);
 bool RenderSvgPng(const std::wstring& svgPath, const std::wstring& pngPath, int scale,
                   COLORREF background, int& outW, int& outH);
 
@@ -437,7 +437,7 @@ void RegisterXmlBindings(py::module_& m)
         if (!xmlplan::parseScene(wideOf(scene), plan, err))
             throw std::runtime_error("powerplan.renderScenePng: " + utf8Of(err));
         const int s = scale < 1 ? 1 : scale;
-        if (!RenderPowerPlanPng(wideOf(path), plan, s))
+        if (!RenderDwgPlanPng(wideOf(path), plan, s))
             throw std::runtime_error("powerplan.renderScenePng: 写 PNG 失败");
         return py::make_tuple(plan.width * s, plan.height * s);
     }, py::arg("path"), py::arg("scene"), py::arg("scale") = 2,
@@ -510,7 +510,7 @@ void RegisterXmlBindings(py::module_& m)
         std::wstring err;
         if (!xmlplan::buildPlan(in, plan, style, err, horizontal))
             throw std::runtime_error("powerplan.renderPng: " + utf8Of(err));
-        if (!RenderPowerPlanPng(wideOf(path), plan, scale))
+        if (!RenderDwgPlanPng(wideOf(path), plan, scale))
             throw std::runtime_error("powerplan.renderPng: 写 PNG 失败");
         return py::make_tuple(plan.width * (scale < 1 ? 1 : scale),
                               plan.height * (scale < 1 ? 1 : scale));

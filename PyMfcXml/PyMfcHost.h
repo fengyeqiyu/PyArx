@@ -7,6 +7,9 @@
 #include "Table.h"
 #include "controls/XmlTypes.h"   // XmlSkinKind：自绘件种类号的唯一定义（控件侧也用它）
 #include "XmlRibbon.h"          // 控件库 Ribbon 模型/布局/绘制/命中（xmlctl 命名空间）
+#include "XmlFileTab.h"         // 控件库 FileTab 模型/布局/绘制/命中（xmlctl 命名空间）
+#include "XmlMatrix4.h"         // 4×4 变换矩阵（容器/控件 transform 的统一载体）
+#include "PyMfcHostApi.h"       // 跨世界 POD 接口（IPyMfcHostApi）；本类实现该接口
 
 // S1 渲染表面抽象（MfcXmlCore）：这里只前向声明，d3d11/dxgi/d2d1 类型不进宿主头。
 class IXmlSurface;
@@ -14,9 +17,10 @@ class IXmlSurface;
 // 表面探针消息（wParam: 1=模拟设备丢失, 2=强制重建, 3=写诊断到日志/成员串）
 constexpr UINT kPyMfcSurfaceProbeMsg = WM_USER + 0x521;
 
-class PyMfcHost : public CWnd, public IXmlMfcHost
+class PyMfcHost : public CWnd, public IXmlMfcHost, public IPyMfcHostApi
 {
     DECLARE_DYNAMIC(PyMfcHost)
+
 public:
     PyMfcHost() = default;
 ~PyMfcHost() override;
@@ -24,6 +28,9 @@ public:
     // 同上：宿主是 PyMfcWindow / PyMfcPanel 的成员，SubclassWindow 绑定，
     // 窗口销毁时不能被 MFC 默认的 PostNcDestroy 删掉。
 void PostNcDestroy() override;
+
+// IPyMfcHostApi 跨世界 POD 入口（实现见 PyMfcHost.cpp）。
+HWND hostHwnd() const override;
 
 BOOL create(HWND parent, const CRect& rect);
 
@@ -111,9 +118,9 @@ static void requestSkinRepaint(HWND hwnd);
 // BM_CLICK 语义，不能被丢弃。这里只接管擦除与绘制，其余消息转发回原类过程。
 static constexpr const wchar_t* kOldProcProp = L"PyMfcOldWndProc";
 
-// 配电画布：窗口属性里存宿主指针，鼠标消息交给宿主自己的状态机处理。
+// 绘图画布（DWG 为主，兼容已算坐标的布局输入）：窗口属性里存宿主指针，鼠标消息交给宿主自己的状态机处理。
 // owner-draw 过程定义在 PyMfcHost 之前，拿不到成员函数，所以走"属性 + 自由函数"。
-static constexpr const wchar_t* kPlanHostProp = L"PyMfcPlanHost";
+static constexpr const wchar_t* kDwgHostProp = L"PyMfcDwgHost";
 // 三维视图画布：同一套"属性 + 自由函数"转发（左键旋转、滚轮缩放、中键平移）
 static constexpr const wchar_t* kView3DHostProp = L"PyMfcView3DHost";
 
@@ -209,6 +216,8 @@ void setLimitText(int id, int n) override;
 
 void setCueBanner(int id, const std::wstring& text) override;
 
+void setPasswordChar(int id, wchar_t ch) override;
+
 void addProgress(int id, int x, int y, int w, int h);
 
 void addSlider(int id, int minValue, int maxValue, int x, int y, int w, int h);
@@ -265,7 +274,7 @@ std::wstring getCalendarDate(int id) const override;
 bool setCalendarDate(int id, const std::wstring& value) override;
 
 
-    // ---- PyMfcSkinBox：QML 对齐的几个"小控件"，共用一个自建画布窗口 ----
+    // ---- PyMfcSkinBox：HTML 对齐的几个"小控件"，共用一个自建画布窗口 ----
     // 只有一块画布 + 宿主里的状态，没有系统类可用（Switch/RangeSlider/SpinBox/Busy/PageDots
     // 在 Win32 里都没有对应控件，硬套 TrackBar/Edit 反而更难对齐观感）。
 void addSkinBox(int id, int kind, int x, int y, int w, int h) override;
@@ -388,6 +397,9 @@ std::wstring getText(int id) const;
 
 void setVisible(int id, bool visible);
 
+    // 显式隐藏集合的查询（布局层要据此压住"重新 SHOW"）
+bool isControlHidden(int id) const;
+
 void setEnabled(int id, bool enabled);
 
 void moveControl(int id, int x, int y, int w, int h);
@@ -427,6 +439,9 @@ void moveMany(py::list items);
         RECT rc = { 0, 0, 0, 0 };
         int layer = NodeLayerControl;
         int order = 0;
+        // CSS z-index（属性 ZIndex / Level）。HTML 里同层元素靠它决定谁压谁；
+        // 节点帧此前只认 layer + 注册次序，导致 style="z-index:N" 对自绘件完全无效。
+        int zLevel = 0;
         bool visible = true;
         bool dirty = true;
         int kind = 0;            // 1=whiteRect 2=shadowBox 3=staticLine；4=label 5=button（S2-B）
@@ -438,6 +453,23 @@ void moveMany(py::list items);
     };
     std::map<int, XmlPaintNode> m_nodes;
     std::vector<int> m_nodeOrder;
+    // 是否已登记 TME_LEAVE（宿主只在自己客户区收 WM_MOUSEMOVE，光标甩出窗口需这次收尾）
+    bool m_trackLeave = false;
+    // 最近一次 WM_MOUSEMOVE 是否来自客户区内的真光标（合成消息不认，避免假离开清掉 hover）
+    bool m_realHover = false;
+
+    // 节点在"祖先容器 transform × 自身 transform"下的累计 4×4 矩阵（列向量约定 p'=M·p）。
+    // underContainer 为真表示该节点在某个声明了 transform 的容器子树里，
+    // 这类节点必须由节点帧绘制（窗口被容器隐藏，WM_DRAWITEM 收不到）。
+    struct NodeXf
+    {
+        xmlgeo::XmlMatrix4 m;
+        bool underContainer = false;
+        bool self = false;
+    };
+    NodeXf nodeXfOf(const XmlPaintNode& n) const;
+    // 祖先容器链上最近的声明了 transform 的窗口矩阵（不含自身），没有则单位矩阵。
+    bool ancestorTransformOf(HWND hw, xmlgeo::XmlMatrix4& out) const;
 
     // 注册/更新/取出节点；注册返回节点引用。draw 闭包在节点帧里由表面画布调用。
     void registerPaintNode(int id, int kind, int layer, int x, int y, int w, int h);
@@ -451,10 +483,18 @@ void moveMany(py::list items);
     void drawNodeStaticLine(XmlCanvas& cv, const XmlPaintNode& n) const;
     void drawNodeLabel(XmlCanvas& cv, const XmlPaintNode& n) const;
     void drawNodeButton(XmlCanvas& cv, const XmlPaintNode& n) const;
+    // kind=6 容器背板：div/面板的 background 由节点管线画（圆角/边框/透明度同一套实现），
+    // 与 owner-draw 控件共用 drawPaintNodes 的 z 序，无需容器自己 WM_PAINT。
+    void drawNodeContainer(XmlCanvas& cv, const XmlPaintNode& n) const;
 
     // S2-B 按钮宿主状态机：命中/悬停/按下/焦点；命中释放后走 OnCommandRange（与 BN_CLICKED 同一分发）。
     int hitNode(const CPoint& pt) const;
     void OnMouseMove(UINT nFlags, CPoint pt);
+    // HTML 的 :hover 在光标离开元素（含离开窗口）那一刻失效。宿主只在客户区内收
+    // WM_MOUSEMOVE，光标甩出窗口就没有后续消息，必须靠 TME_LEAVE 补一次收尾。
+    void OnMouseLeave();
+    // pt 为空表示"光标已在窗口外"：清掉全部 kind 5/6 节点 hover（唯一判定入口）
+    void updateNodeHover(const CPoint* pt);
     void OnLButtonDown(UINT nFlags, CPoint pt);
     void OnLButtonUp(UINT nFlags, CPoint pt);
     // 复用 OnDrawItem 的外观/底色/图标/文字/焦点环分支，节点帧直接喂表面画布。
@@ -581,7 +621,7 @@ void lvClampScroll(int id);
     std::map<int, RECT> m_cvBand;          // 框选橡皮筋
     std::map<UINT, py::object> m_cvSelCb;  // 选中变化回调
 
-    // ---- 配电规划图画布（PowerCanvas）----
+    // ---- 绘图画布（DWG 为主，兼容已算坐标的布局输入）（DwgCanvas）----
     // 与 m_cvCmd 那套命令串画布不同：这里存结构化数据（布局结果或 SVG 场景），
     // 每帧按 zoom/offset 重新画，所以任意缩放都清晰；命令串方案会把图元坐标写死，
     // 放大就糊。
@@ -594,14 +634,14 @@ void lvClampScroll(int id);
         COLORREF color = RGB(32, 36, 42);
     };
 
-    static constexpr float kPlanZoomMin = 1e-6f;   // 仅防除零，不限制放大上限
-    static constexpr float kPlanZoomMax = 1e9f;
-    static float clampPlanZoom(float zoom)
+    static constexpr float kDwgZoomMin = 1e-6f;   // 仅防除零，不限制放大上限
+    static constexpr float kDwgZoomMax = 1e9f;
+    static float clampDwgZoom(float zoom)
     {
-        return zoom < kPlanZoomMin ? kPlanZoomMin : zoom;
+        return zoom < kDwgZoomMin ? kDwgZoomMin : zoom;
     }
 
-    struct PlanCanvasState
+    struct DwgCanvasState
     {
         xmlplan::PowerPlan plan;
         xmlsvg::SvgScene svg;
@@ -629,39 +669,45 @@ void lvClampScroll(int id);
         RECT detailRc = { 0, 0, 0, 0 };
         std::vector<DetailText> detailTexts;
     };
-    std::map<int, PlanCanvasState> m_planCv;
+    std::map<int, DwgCanvasState> m_dwgCv;
 
     // fit：整图居中铺满，最多 100%（放大到 1 以上就是"看不清全貌"）
-void fitPlanCanvas(int id);
+void fitDwgCanvas(int id);
 
-void addPowerCanvas(int id, int x, int y, int w, int h) override;
+void addDwgCanvas(int id, int x, int y, int w, int h) override;
 
-void setPowerCanvasPlan(int id, const std::wstring& json) override;
+void setDwgLayout(int id, const std::wstring& json) override;
 
-void setPowerCanvasScene(int id, const std::wstring& json) override;
+void setDwgScene(int id, const std::wstring& json) override;
 // 同一份场景复制给另一个画布：4.8 MB JSON 再解析一遍约 60 ms，直接拷已解析的结构
-void copyPowerCanvasScene(int toId, int fromId);
+void copyDwgScene(int toId, int fromId);
 
-void setPowerCanvasSvg(int id, const std::wstring& svgText) override;
+void setDwgSvg(int id, const std::wstring& svgText) override;
+
+// 同一个画布的第二种前端语言：<XScene> 声明式显示列表（XLine/XCircle/XArc/XRect/
+// XPolyline/XPolygon/XText/XGroup）。落点和 SVG 一样，只是不走 SVG 文本 + nanosvg。
+void setDwgXml(int id, const std::wstring& sceneXml) override;
 
     // 叠加层：只换选中框/橡皮筋/十字光标这类每帧都变的小场景，
     // 底图（st.svg）保持不动，避免每帧重新解析十几 MB 的整图 SVG。
-void setPowerCanvasOverlay(int id, const std::wstring& svgText) override;
+void setDwgOverlay(int id, const std::wstring& svgText) override;
 
-void setPowerCanvasView(int id, float zoom, int offsetX, int offsetY) override;
+void setDwgOverlayXml(int id, const std::wstring& sceneXml) override;
 
-float getPowerCanvasZoom(int id) const override;
+void setDwgView(int id, float zoom, int offsetX, int offsetY) override;
 
-std::wstring getPowerCanvasSelection(int id) const override;
+float getDwgZoom(int id) const override;
+
+std::wstring getDwgSelection(int id) const override;
 
     // 画布选项：电缆标注开关、小地图模式（mini=true 时本画布只做缩略图 + 视口红框）
-void setPowerCanvasOptions(int id, bool showCable, bool mini, int miniOf) override;
+void setDwgOptions(int id, bool showCable, bool mini, int miniOf) override;
 
     // 视口参数（缩放 + 偏移）：Python 侧居中定位、小地图联动都要用
-void getPowerCanvasView(int id, float& zoom, int& ox, int& oy) const override;
+void getDwgView(int id, float& zoom, int& ox, int& oy) const override;
 
     // 命中测试：模型坐标下的卡片矩形
-std::wstring planHit(int id, int clientX, int clientY);
+std::wstring dwgHit(int id, int clientX, int clientY);
 
 void setDetailCard(int id, py::list rect, py::list texts);
 void clearDetailCard(int id);
@@ -669,7 +715,7 @@ bool detailHit(int id, int clientX, int clientY) const;
 
     // 卡片在客户端坐标系里的矩形（缩放/平移后）。返回 false = 没有这张卡。
     // 用途：外部脚本定位、编辑表格"点行高亮图表"、自动化测试里的点击坐标。
-bool planCardRect(int id, const std::wstring& code, RECT& out) const;
+bool dwgCardRect(int id, const std::wstring& code, RECT& out) const;
 
     // ---- 三维视图画布（View3D）----
     // 几何按图元存（box/line/tri），每帧做一次旋转 + 透视投影 + 画家算法排序后画。
@@ -737,6 +783,29 @@ bool view3DHit(int id) const { return m_view3D.find(id) != m_view3D.end(); }
     bool ribbonMouse(int id, UINT msg, int x, int y, WPARAM flags);
     void fireRibbonButton(int id, const std::wstring& name);
 
+    // ---- FileTab（复用控件库 xmlctl::FileTab，宿主只建自绘窗口 + 持有模型/布局状态）----
+    struct FileTabState
+    {
+        xmlctl::FileTabModel model;
+        xmlctl::FileTabLayout lay;
+        int  hotTab    = -1;
+        int  hotClose  = -1;
+        bool hotAdd    = false;
+        bool pressed   = false;
+        int  scrollX   = 0;
+    };
+    std::map<int, FileTabState> m_fileTabs;
+
+    void addFileTab(int id, int x, int y, int w, int h) override;
+    void setFileTabElement(int id, const XmlElement* el) override;
+    void drawFileTab(XmlCanvas& cv, int id, const RECT& rc);
+    bool filetabHas(int id) const { return m_fileTabs.find(id) != m_fileTabs.end(); }
+    // 鼠标：返回是否消费；activate/close/add 经 fireFileTab 派发单字符串
+    bool fileTabMouse(int id, UINT msg, int x, int y, WPARAM flags);
+    void fireFileTab(int id, const std::wstring& msg);
+    // 测试/诊断：回读当前模型与布局几何（控件客户区坐标），JSON 字符串
+    std::wstring getFileTabInfo(int id) const;
+
 
 
     // ---- 控件级导出（基类能力，任意控件都能调）----
@@ -747,10 +816,10 @@ bool saveControlPng(int id, const std::wstring& path);
 
     // 按编号选中并把该卡片移到视口中央（搜索定位用；也方便外部脚本/测试驱动）。
     // 返回是否找到。缩放不动，只改 offset —— 用户当前的缩放偏好不该被搜索重置。
-bool selectPlanItem(int id, const std::wstring& code);
+bool selectDwgItem(int id, const std::wstring& code);
 
     // 选中/双击都走既有的回调表：Python 侧注册 onClick / onDoubleClick 即可收到
-void firePlanSelect(int id, const std::wstring& /*code*/);
+void fireDwgSelect(int id, const std::wstring& /*code*/);
 
 void firePlanDoubleClick(int id, const std::wstring& /*code*/);
 
@@ -758,7 +827,7 @@ void firePlanDoubleClick(int id, const std::wstring& /*code*/);
 void fireToolBarItem(int id, int index);
 
     // 画整体内容：页面底 → （SVG 场景 | 配电图）全部交给同一套绘制函数
-void drawPlanCanvas(XmlCanvas& cv, int id, const RECT& rc);
+void drawDwgCanvas(XmlCanvas& cv, int id, const RECT& rc);
 
 
     // GridView 格子尺寸覆盖（0 = 自适应：宽度按客户区均分、高度 96/92 比例）
@@ -776,6 +845,42 @@ std::wstring getCanvasCommands(int id) const;
     std::map<int, int> m_tabIndex;
     std::map<int, int> m_createSeq;   // 控件创建序（= XML 声明顺序），Tab 同级兜底用
     std::map<int, std::wstring> m_theme;   // Theme="Dark"/"Light"…（颜色分配规则待定）
+    // CSS cursor 的关键字（小写），只在 WM_SETCURSOR 里翻译成 HCURSOR；
+    // 存字符串而不存句柄：系统光标由 LoadCursor(NULL, IDC_*) 提供，不需要销毁，也不怕跨线程。
+    std::map<int, std::wstring> m_cssCursor;
+    // CSS pointer-events 原文（只有 none 有意义）：none 的控件挂 WS_EX_TRANSPARENT，
+    // 鼠标命中直接穿到下面的兄弟/父窗，等价 HTML 的点击穿透。
+    std::map<int, std::wstring> m_cssPointerEvents;
+    // CSS transition-duration / timing-function（毫秒 / 缓动名），按控件 id
+    std::map<int, int> m_cssTransitionMs;
+    std::map<int, std::wstring> m_cssTransitionEase;
+    // CSS animation / keyframes：帧表由 Keyframes="0:#f00;50:#0f0;100:#f00" 给出，
+    // 播放按整条时间线 fmod，所以循环能回到第一帧（AnimTrack 的 loop 只能重复单段）。
+    struct CssKeyframeAnim
+    {
+        int id = 0;
+        std::vector<std::pair<double, COLORREF>> frames;
+        int durMs = 300;
+        bool loop = true;
+        DWORD startMs = 0;
+    };
+    std::vector<CssKeyframeAnim> m_cssAnims;
+    void startCssKeyframes(int id, const std::wstring& spec, int durMs, bool loop) override;
+    void startHoverTransition(int id, bool entering);
+    // CSS overflow:scroll/auto —— 容器 id → 当前纵向滚动偏移；滚轮到达时整体平移子窗口
+    std::set<int> m_scrollContainers;
+    std::set<int> m_fixedChildren;
+    std::map<int, int> m_scrollContainerY;
+    // CSS position:sticky —— 控件 id → (吸顶距离, 未滚动时的基准 y)
+    std::map<int, std::pair<int, int>> m_stickyChildren;
+    void registerScrollContainer(int id) override { m_scrollContainers.insert(id); }
+    void markFixedChild(int id) override { m_fixedChildren.insert(id); }
+    void registerStickyChild(int id, int topPx) override;
+    bool scrollOverflowFrom(HWND hwnd, int notches);
+    bool scrollOverflowContainer(int id, int dy);
+    // 显式隐藏的控件（Visible=False / display:none / visibility:hidden）。
+    // 布局层重排时会重新下发可见性，必须在这里记一份"用户说了要藏"，否则下一次重排就放回来。
+    std::set<int> m_hidden;
     int m_seqNext = 0;
 
 int levelOf(int id) const;
@@ -803,6 +908,8 @@ void sendToBack(int id);
 void setTabIndex(int id, int n);
 
 int getTabIndex(int id) const;
+
+    // CSS cursor 的实现见下方 override（虚函数只在 IXmlMfcHost 里声明一次）
 
     // Tab 序挂在窗口属性上：Tab 钩子读不到 C++ 成员，只能按属性排序。
     // 创建序 PyMfcSeq 在控件落地时就写死（= XML 声明顺序），
@@ -962,6 +1069,7 @@ int pageTick(int id);
         COLORREF c0 = 0, c1 = 0;
         bool color = false;
         int t0 = 0;             // 相对整条时间线的起点（ms）
+        DWORD startMs = 0;      // 本条轨道的绝对起点（GetTickCount）；0 = 沿用全局时间线
         int dur = 300;
         std::string ease = "outCubic";
         bool loop = false;
@@ -987,6 +1095,9 @@ static COLORREF lerpColor(COLORREF a, COLORREF b, double p);
 void ensureAnimWnd();
 
 void animAdd(const AnimTrack& tr);
+
+    // 是否有未跑完的动画/过渡轨道（savePng 用它决定"要不要等画面稳定"）
+    bool hasActiveAnimations() const { return !m_anims.empty(); }
 
     // 把某一帧的数值真正落到控件上。m_animApplying 用来在 setter 里抑制 Behavior 递归。
     // 兄弟窗口不能互相覆盖（每个控件一个 HWND）：某个控件改了几何后，
@@ -1050,6 +1161,9 @@ bool getReadOnly(int id) const;
 
 void* getDlgItemHandle(int id) const override;
 
+    // 宿主客户区坐标系的原点窗口：容器重排时子项要落到这套绝对坐标里
+void* getHostWindow() const override;
+
 
     // 外观由控件类解析 XML 后推过来：存一份、重建背景刷、让控件重绘
     // ---- 通用基础属性（控件基类 XmlMfcControlBase 解析后推过来）----
@@ -1057,6 +1171,11 @@ void setControlLevel(int id, int level) override;
 int getControlLevel(int id) const override;
 void setControlTabIndex(int id, int index) override;
 int getControlTabIndex(int id) const override;
+void setControlCursor(int id, const std::wstring& keyword) override;
+std::wstring getControlCursor(int id) const override;
+void setControlPointerEvents(int id, const std::wstring& keyword) override;
+std::wstring getControlPointerEvents(int id) const override;
+bool isControlMouseTransparent(int id) const;
 
     // 主题：颜色分配规则未定，先把声明存下来（后续按 Theme 分色时从这里读）
 void setControlTheme(int id, const std::wstring& theme) override;
@@ -1064,11 +1183,26 @@ std::wstring getControlTheme(int id) const override;
 
 void setControlAppearance(int id, const xmlapp::XmlAppearance& ap) override;
 
+// 容器背板（div 的 background）：按 id 注册成绘制节点，moveControl 时自动跟随几何；
+// 外观里没有背景色/边框时摘掉节点，露出父表面色（HTML div 默认透明）。
+void applyContainerBackdrop(int id, int x, int y, int w, int h,
+                            const xmlapp::XmlAppearance& ap) override;
+
+// 布局收尾时按 m_ap 里已登记的容器统一补登记背板节点（外观推送早于控件创建）
+void syncContainerBackdrops();
+// 单个控件：若它是"容器"（空 STATIC、非 owner-draw 节点）且外观有背景，登记背板节点
+void syncOneContainerBackdrop(int id, int x, int y, int w, int h);
+
     // 原生控件的配色桥：外观契约（也就是 D2D 那套主题）给什么颜色，
     // 这里就按控件类灌进原生绘制路径。
     // 不做这一步的话，D2D 深色界面里会夹着一串系统白块（Edit/ListView/日历），
     // 主题层再怎么统一也压不住 —— 因为它们是控件自己拿系统色画的。
 void applyNativeThemeColors(HWND h, COLORREF bg, COLORREF fg);
+
+    // 文本输入框（Edit / RichEdit）判断与去边框：
+    // client edge 与 1px 边框是系统按浅色主题画的，深色界面上是一道刺眼白边。
+bool isTextInput(HWND h);
+void stripEditFrame(HWND h);
 
     // 控件图标：XML 的 Icon 已由加载层解析成绝对路径，这里只存表 + 触发重绘
 void setControlIcon(int id, const std::wstring& path) override;
@@ -1086,6 +1220,12 @@ static COLORREF contrastText(COLORREF bg);
 void setPageBackdrop(COLORREF c, bool valid);
 void setBackgroundColor(COLORREF c);
 std::pair<int, int> controlClientSize(int id) const;
+// 控件在宿主客户区里的矩形（控件层 flex 容器排子项需要）
+void getControlRect(int id, int& x, int& y, int& w, int& h) const override;
+
+// 任意子窗口 → 宿主客户区矩形。屏幕坐标一次换算到位，嵌套几层都成立；
+// 布局、绘制节点、命中判定共用这一个换算入口，避免各自 MapWindowPoints 少算一层。
+CRect hostRectOfWindow(HWND hw) const;
 
     // 容器铺底：容器不建原生控件，由其宿主在 OnEraseBkgnd 里按声明画底色
 void addContainerBackdrop(int x, int y, int w, int h,
@@ -1134,7 +1274,7 @@ void fireDrag(int id, const char* phase, int x);
     // 画布原始鼠标事件：cb(phase, x, y, flags) -> bool
     //   phase: "down" / "move" / "up" / "dblclick" / "wheel"
     //   返回 True = Python 已消费（例如正在定点画线），宿主不再把它当平移。
-    // 这是绘图命令的前提：PowerCanvas 原本把左键独占成平移，Python 永远拿不到点击。
+    // 这是绘图命令的前提：DwgCanvas 原本把左键独占成平移，Python 永远拿不到点击。
     std::map<int, py::object> m_canvasEvt;
 void onCanvasEvent(int id, py::object cb);
 bool fireCanvasEvent(int id, const char* phase, int x, int y, int flags);
@@ -1147,6 +1287,14 @@ void fireBlur(int id);
     // 递归按 id 找子窗口：表格可能挂在侧板里，不是主窗的直接子窗口，
     // 只 GetDlgItem(m_hWnd, id) 会拿不到句柄（拿到别的控件时 LVM_* 全部无效）
 static HWND findByIdDeep(HWND parent, int id);
+    // 真正走树的版本（findByIdDeep 只在缓存未命中/校验失败时调它）
+static HWND findByIdTree(HWND parent, int id);
+    // id 直查缓存（见 cpp 里的 idCacheStore）：控件创建时登记，宿主重建时清空
+static void registerChildId(HWND hostRoot, int id, HWND child);
+static void clearIdCache();
+
+    // 性能计数（PYARX_PERF=1 生效）：返回各热路径累计耗时/次数，便于定位瓶颈
+py::dict perfStats(bool reset);
 
     // 单元格矩形（ListView 客户区坐标）：原地编辑要把 EDIT 精确盖到那一格上
 py::object cellRect(int id, int row, int col);
@@ -1171,6 +1319,8 @@ std::wstring getUrl(int id) const;
 
     // ---- 图片：StaticBitmap / BitmapButton ---------------------------------
 bool setImage(int id, const std::wstring& path);
+void setImageFit(int id, const std::wstring& fit);
+void setImagePosition(int id, const std::wstring& pos);
 
     // ---- 富文本格式 --------------------------------------------------------
     // RichText 原生支持 Bold/字号/颜色，但 Python 侧一直没有设置入口，
@@ -1260,6 +1410,27 @@ bool m_anyCtlEvent = false;                          // 有控件级事件登记
     // 统一外观：XML 声明的形状/颜色/风格/前后置背景（按控件 id 存）
     std::map<int, xmlapp::XmlAppearance> m_ap;
     std::map<int, HBRUSH> m_apBrush;
+    // 画刷随容器 background 变化时的判重键
+    std::map<int, COLORREF> m_apBrushColor;
+    // 主题代次：m_bg 一变就 +1。控件外观里 backColor 为空时底色取 m_bg，
+    // 所以"外观串相同"不足以判定无需重刷，必须同代次才算幂等。
+    int m_themeGen = 0;
+    std::map<int, int> m_apGen;
+    HBRUSH brushFor(int id, COLORREF c, CDC* pDC);
+    // 容器自身背板刷子（WM_CTLCOLORSTATIC 通道）：纯色无 inset 仍走 brushFor 快路径；
+    // 线性渐变 / 盒内 inset 阴影合成进一张与客户区同尺寸的 DIB 位图刷，按 id 缓存，
+    // 样式或几何变化时按签名失效重建，宿主销毁时统一释放。
+    HBRUSH containerBackdropBrush(int id, const CRect& rect,
+                                  const xmlapp::XmlAppearance& ap, COLORREF fallbackBack);
+    void releaseContainerPatternBrush(int id);
+    struct ContainerPatternBrush {
+        HBRUSH brush = nullptr;
+        HBITMAP bitmap = nullptr;
+        int width = 0;
+        int height = 0;
+        std::wstring signature;
+    };
+    std::map<int, ContainerPatternBrush> m_containerPatternBrush;
     // 控件图标：Icon="res/xxx.png" 已解析成绝对路径，owner-draw 时画在控件左侧
     std::map<int, std::wstring> m_icons;
     // TreeCtrl 已插入节点的句柄（按控件 id），addTreeNode 的 parentIndex 靠它定位父节点
@@ -1270,12 +1441,21 @@ bool m_anyCtlEvent = false;                          // 有控件级事件登记
     // 已装载的图片路径与 HBITMAP（自绘画布与原生控件两条通路都要）
     std::map<int, std::wstring> m_images;
     std::map<int, HBITMAP> m_ownedBitmaps;
+    // 图片盒子（StaticBitmap / XImage）：登记后该控件改成自绘，按 object-fit 缩放图片。
+    // 键=控件 id，值=fit 模式（fill/contain/cover/none/scale-down，空=fill）。
+    std::map<int, std::wstring> m_imageBoxes;
+    // 图片盒子的 object-position（left/center/right/top/bottom/百分比，空格分隔 XY）
+    std::map<int, std::wstring> m_imagePos;
     // ScrolledWindow 的滚动范围
     std::map<int, std::pair<int, int>> m_scroll;
     // ScrolledWindow 的当前滚动位置（自绘滚动条，不走系统滚动条）
     std::map<int, int> m_scrollPos;
     // 分隔线（StaticLine）：owner-draw 时按"一条横线"画，而不是当普通标签
     std::set<int> m_lines;
+// 因为声明了 CSS transform 而被"节点单通路"接管、主动隐藏的控件 id。
+// 必须单独记：标签/分割线平时就是隐藏的（节点绘制），不能凭"当前不可见"去反向显示，
+// 否则会把原本该隐的控件又放出来（画两遍，甚至自绘过程里再进 OnDrawItem）。
+std::set<int> m_xfHidden;
     // ScrolledWindow 控件 id（自绘滚动区域）
     std::set<int> m_scrollAreas;
     // 拖动滚动条拇指时记住"抓取偏移"
@@ -1327,6 +1507,16 @@ bool m_anyCtlEvent = false;                          // 有控件级事件登记
     void* m_xmlOwnerPage = nullptr;         // 加载时用的 PyMfcPanel*（无则空）
     // 容器（Canvas/Grid 等）声明的底色：按矩形存，OnEraseBkgnd 里先铺窗口底色再逐块覆盖
     std::vector<std::pair<CRect, xmlapp::XmlAppearance>> m_backdrops;
+    // 容器（div / XFlexPanel）的背板，按控件 id 存一份：布局每次移动都会刷新同一格，
+    // 不会像 m_backdrops 那样按 rect 累积残影。绘制端与 m_backdrops 一起在宿主 DC 上出图。
+    std::map<int, std::pair<CRect, xmlapp::XmlAppearance>> m_containerBackdrops;
+    // 容器（div）的命中态：容器窗口被上层画面窗口盖住、收不到 WM_MOUSEMOVE，
+    // 命中只能在宿主 OnMouseMove 里按矩形判定，存在 XmlPaintNode::hover 上。
+    bool containerHovered(int id) const;
+    // 走 addPanel 建出来的 id 就是容器本身。判断"谁是容器"只能靠这张表：
+    // XML 老写法的面板 STATIC 会带上 Text（textLen 非 0），按"空 STATIC 才是容器"判会整批漏登记。
+    std::set<int> m_containerIds;
+    void drawContainerBackdrops(HDC hdc, const CRect& client) const;
     bool m_dark = true;
     COLORREF m_bg = RGB(49, 56, 66);
     COLORREF m_pageBg = RGB(49, 56, 66);
@@ -1344,4 +1534,14 @@ bool m_anyCtlEvent = false;                          // 有控件级事件登记
     IXmlSurface* m_surface = nullptr;
     bool m_newSurface = false;
     std::wstring m_surfaceDiag;   // 最近一次表面诊断串（探针/日志取证用）
+    bool m_backdropSyncDirty = true;   // 容器背板还没登记 → 出帧前补一次
 };
+
+// CSS :hover 的命中态：直接存成窗口属性（kPyMfcHoverProp）。
+// 不能用"头文件 inline 函数 + static 局部集合"：inline 的 static 局部变量在 MSVC 下
+// 可能每个编译单元各一份，Host 侧标了、Procs 侧查不到（"永远 hover=0"的坑）。
+// 窗口属性是进程级 Win32 状态，跨编译单元、跨绘制路径都必然一致。
+static constexpr const wchar_t* kPyMfcHoverProp = L"PyMfcHoverOn";
+bool PyMfcHoverMark(HWND h);
+bool PyMfcHoverUnmark(HWND h);
+bool PyMfcHovered(HWND h);

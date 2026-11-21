@@ -78,19 +78,64 @@ public:
     int x = 0, y = 0, w = 0, h = 0;
     bool hasW = false, hasH = false;
     bool hasX = false, hasY = false;    // 是否显式写了 Left/Top（决定绝对坐标 vs 流式）
+    // 行内文本标签（<label>/<span>/<p>…）按内容测出来的宽：不是作者声明。
+    // 父是 flex 容器时应当剥掉（CSS 里 flex item 的尺寸由容器定，align-items:stretch 拉满整行）。
+    bool autoTextW = false;
+    // 按钮/输入框未写 Width，宽度是按内容/控件默认给的自然宽：不是作者声明。
+    // 网格单元格应当把它拉满（grid item 默认拉伸），只有显式 Width 才参与 cell 上限截断。
+    bool autoW = false;
     int marginL = 0, marginT = 0, marginR = 0, marginB = 0;
     int spacing = 0;                                    // 容器子元素间距（XML Spacing，缺省 0）
     int padL = 0, padT = 0, padR = 0, padB = 0;         // 容器内边距（XML Padding，缺省 0）
     int row = 0, col = 0, rowSpan = 1, colSpan = 1;
+    // CSS Grid：作者显式写了 grid-column / grid-row（含 XAML 的 Grid.Column / Grid.Row）。
+    // 为 false 时按 HTML 的 auto-placement 规则顺次落格。
+    bool hasGridCol = false, hasGridRow = false;
     bool horizontal = false;
     bool hasOrientation = false;                        // 是否显式声明了 Orientation（决定容器排列方向）
+    bool autoH = false;                                 // 高度由内容算得（HTML 块容器），重算几何时保留
+    // 糖化/默认值表给出的"伪尺寸"标记，跨几何重算保留（autoW/autoH 会在重算时被清掉）：
+    // 网格项默认拉伸到单元格，只有作者显式写的宽/高才参与上限截断。
+    bool sugarW = false;
+    bool sugarH = false;
+    // CSS box-sizing:border-box —— Width/Height 指的是"含 padding 的外框"，
+    // 解析时已把 padding 从 w/h 里扣掉，二次解析不能重复扣（否则越算越窄）
+    bool boxSizingBorder = false;
 
-    // QML anchors：锚到父容器内框（v1 只支持 parent）
-    bool hasAnchors = false;
-    bool anchorFill = false, anchorLeft = false, anchorRight = false;
-    bool anchorTop = false, anchorBottom = false;
-    bool anchorHCenter = false, anchorVCenter = false, anchorCenterIn = false;
-    int anchorMargin = 0;
+    // ---- CSS flex（HTML 的“默认排版方式”，在 XML 里用 Display="flex" + 短属性表达）----
+    // 容器：Display="flex" / Flex="row|column|row-reverse|column-reverse"
+    //       Gap="8" 或 "8 4"、Justify="start|center|end|between|around|evenly"
+    //       Align="start|center|end|stretch"、Wrap="0|1"
+    // 子项：Grow="1"（按权重吃掉剩余主轴空间）、Self="start|center|end|stretch"
+    bool flex = false;
+    int flexDir = 0;                                    // 0 row 1 row-reverse 2 column 3 column-reverse
+    int flexGapX = 0, flexGapY = 0;                     // 主轴/交叉轴间距
+    int flexJustify = 0;                                // 0 start 1 center 2 end 3 between 4 around 5 evenly
+    int flexAlign = 3;                                  // 0 start 1 center 2 end 3 stretch
+    bool flexWrap = false;
+    float flexGrow = 0.0f;                              // 子项 flex-grow
+    float flexShrink = 1.0f;                            // 子项 flex-shrink（CSS 默认 1）
+    int flexBasis = -1;                                 // 子项 flex-basis，-1 = auto（用自然尺寸）
+    // flex-basis 的百分比写法（CSS `flex:0 0 50%` / `flex-basis:50%`），-1 = 未写。
+    // 早先这里直接 wcstol，把 "50%" 读成 50px —— 和 width:100% 被误读是同一类真 bug。
+    float flexBasisPct = -1.0f;
+    int flexSelf = -1;                                  // 子项 align-self，-1 = 跟随容器
+    // CSS `margin:0 auto` / `margin-left:auto`：auto 不是数值，必须单独记。
+    // 早先 auto 被 wcstol 读成 0，等于整条声明被静默忽略（HTML 里最常见的"水平居中"写不出来）。
+    bool marginLAuto = false, marginTAuto = false, marginRAuto = false, marginBAuto = false;
+    // style="width:50%" / "height:33%" 的百分比（0~100，-1 = 未写）。100% 仍沿用 fillW/fillH 老语义。
+    float pctW = -1.0f, pctH = -1.0f;
+    // CSS `position:sticky`：元素随内容滚动，但滚动到距容器顶 stickyTop 处就吸住。
+    // XML 侧此前只有 fixed/absolute 的隐式效果，sticky 完全没有。
+    bool sticky = false;
+    int stickyTop = 0;
+    // 这个元素实例化出来的控件（instantiate 时回填）：flex 容器若已实例化成控件层
+    // 容器（XmlFlexPanel），排版就交给控件自己的算法，XmlCore 只做参数翻译。
+    void* control = nullptr;
+
+    // CSS `position:absolute; inset:0`：撑满父内框（inset:0 翻译层写入，不暴露 XML 属性）
+    bool fillParent = false;
+    int fillMargin = 0;
     // Layout.fillWidth / Layout.fillHeight：占满容器，或在同类项之间均分剩余空间
     bool fillW = false, fillH = false;
     // Layout.alignment：0=左/上（默认） 1=右/下 2=居中 3=填满 4=基线(Qt.AlignBaseline)
@@ -98,14 +143,12 @@ public:
     // delegate 行模板（XItemView）：模板节点留一份拷贝，children 里是按行实例化出来的副本
     bool delegateRow = false;
     std::vector<XmlElement> delegateTemplate;
-    // 原始写法（支持锚到兄弟对象："A.right" / "A"）；值为 parent 时用上面几个 bool 快判
-    std::wstring anchorFillRaw, anchorLeftRaw, anchorRightRaw, anchorTopRaw, anchorBottomRaw;
-    std::wstring anchorHCenterRaw, anchorVCenterRaw;
-    // anchors.baseline：对齐文字基线（"A" / "parent"）；anchors.top="A.baseline" 也认这条边
-    std::wstring anchorBaselineRaw;
 
     // 布局结果（运行时计算）
     int previewX = 0, previewY = 0, previewW = 0, previewH = 0;
+    // flex 子项的「相对容器」矩形：LayoutFlex 只算这一组，绝对坐标 = 容器原点 + rel。
+    // 规则（P0）：flex 里谁排子项只有一个决策者 —— 控件层容器；XmlCore 只产出相对值。
+    int relX = 0, relY = 0, relW = 0, relH = 0;
 
     // 由控件模板实例化出来的装饰子元素（布局按容器对待，但本身不算文档结构）
     bool templateChild = false;
@@ -273,6 +316,9 @@ public:
 
     // 按 x:Name 取节点（空 name = 根），找不到返回 nullptr
     XML_CORE_API XmlElement* elementByName(const std::wstring& name);
+    // 控件层 flex：宿主把控件挂到元素之后调用，容器即接管自己的子项并重排一次。
+    // 只在宿主创建完该元素的整棵子树后调用才有效（子项 id 这时才齐）。
+    XML_CORE_API bool attachFlexContainer(XmlElement& el);
     // 节点标签归一后的本意名（小写，如 button / itemview）
     XML_CORE_API std::wstring kindOfElement(const std::wstring& name);
     // QML delegate 重展开：Model 改变后按新行数重建行元素。
@@ -326,6 +372,12 @@ XML_CORE_API void xmlLayoutSubtree(XmlElement& root, int rootX, int rootY, int r
 // 内容自然高：容器没写 Height 时"按子项排出来"有多高（横排取最高，竖排累加 + 间距 + 内边距）。
 // 片段根自动定窗口高度、横排容器不纵向撑满，都走这一个量法。
 XML_CORE_API int xmlNaturalHeight(const XmlElement& el);
+
+// HTML 词汇糖：把 <div>/<p>/<input type="…">/<select><option>/<table><tr><td> 这类
+// HTML 标签就地改写成对应的 X 控件（div→XStackPanel、p→XLabel、input→XTextField…
+// select 的 option 汇成 Items、table 的行列汇成 Grid 定义 + 单元格）。
+// 解析后、布局前调用一次；XAML 写法（X 前缀 / 大写原名）不受影响。
+XML_CORE_API void xmlApplyHtmlSugar(XmlElement& root);
 
 // ---------------------------------------------------------------------------
 // 布局缺省值（由 control_catalog.xml 注入，避免 C++ 里硬编码控件尺寸等常量）

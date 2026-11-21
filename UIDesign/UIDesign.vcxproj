@@ -66,7 +66,10 @@
     <ClCompile Include="DesignerPaneSurface.cpp" />
     <ClCompile Include="DesignerPaneSurfaceInput.cpp" />
     <ClCompile Include="DesignerPaneFeature.cpp" />
-    <ClCompile Include="DesignCanvas.cpp" />
+    <ClCompile Include="DesignCanvas.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile />
+    </ClCompile>
     <ClCompile Include="ControlCatalog.cpp" />
   <ClCompile Include="DesignerShell.cpp" />
 

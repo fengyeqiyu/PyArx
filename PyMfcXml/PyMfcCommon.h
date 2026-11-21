@@ -1,4 +1,4 @@
-﻿// PyMfcCommon.h —— 公共头/宏/辅助函数/前向声明（PyMfcXml 各编译单元共享）
+// PyMfcCommon.h —— 公共头/宏/辅助函数/前向声明（PyMfcXml 各编译单元共享）
 #pragma once
 
 // PyMfcCore.cpp — MFC 原生控件的最小 Python 接口。
@@ -71,7 +71,7 @@
 // -----------------------------------------------------------------------------
 // 画法本体已下沉到控件库（MfcXmlCore\XmlPowerPlanDraw.h）：
 // 屏幕自绘画布 / Viewer 预览 / 设计器表面 / 离屏出图共用同一份实现，三端不会再各画一套。
-static void drawPowerPlanContent(XmlCanvas& cv, const xmlplan::PowerPlan& plan,
+static void drawDwgPlanContent(XmlCanvas& cv, const xmlplan::PowerPlan& plan,
                                  float k, int ox, int oy, const std::wstring& sel,
                                  bool showCable = true, const RECT* clip = nullptr)
 {
@@ -263,17 +263,17 @@ namespace
     }
 }
 
-// 配电画布鼠标状态机：定义在 PyMfcHost 之后（要用到宿主里的画布状态），
+// 绘图画布（DWG 为主，兼容已算坐标的布局输入）鼠标状态机：定义在 PyMfcHost 之后（要用到宿主里的画布状态），
 // 这里先给前向声明，供 owner-draw 窗口过程调用。
 class PyMfcHost;
 bool wicWritePng(const std::wstring& path, int w, int h, void* bgra);
 static constexpr const wchar_t* kGridHostProp = L"PyMfcGridHost";
 static constexpr const wchar_t* kGridOldProp = L"PyMfcGridOldProc";
 
-// 可编辑表格钩子（定义见 PyMfcPlanCanvasMouse 之前）
+// 可编辑表格钩子（定义见 PyMfcDwgCanvasMouse 之前）
 LRESULT CALLBACK PyMfcGridProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-LRESULT PyMfcPlanCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
+LRESULT PyMfcDwgCanvasMouse(PyMfcHost* host, HWND hwnd, UINT msg,
                                     WPARAM wParam, LPARAM lParam, bool& handled);
 
 // 三维视图画布的鼠标状态机（左键旋转 / 滚轮缩放 / 中键平移 / 双击复位）

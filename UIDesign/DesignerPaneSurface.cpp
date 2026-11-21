@@ -497,8 +497,8 @@ void DesignerPaneView::paintSurfaceNode(XmlCanvas& cv, XmlElement* node)
         return;
     }
 
-    // 配电规划画布（XPowerCanvas）不在这里画：整棵文档由画布子窗口（DesignCanvas.drawNode）
-    // 用控件库 PowerCanvasView 渲染，父表面这一路带 WS_CLIPCHILDREN，画了也看不见。
+    // 绘图画布（XDwgCanvas）不在这里画：整棵文档由画布子窗口（DesignCanvas.drawNode）
+    // 用控件库 DwgCanvasView 渲染，父表面这一路带 WS_CLIPCHILDREN，画了也看不见。
     int rowH = 24;                     // 行高可被 XML 的 LineHeight 覆盖
 
     // ---- 菜单条（单表面自绘：顶层 MenuItem 横排，点击弹系统下拉菜单）----

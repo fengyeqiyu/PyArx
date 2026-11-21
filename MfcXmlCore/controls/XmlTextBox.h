@@ -41,6 +41,14 @@ private:
     bool SetMultilineProp(const std::wstring& v);
     bool SetMaxLengthProp(const std::wstring& v);
     bool SetPlaceholderProp(const std::wstring& v);
+    bool SetPasswordProp(const std::wstring& v);
+
+    // 密码样式同样属于创建期样式：缓存在这里，建完控件再补设口令字符
+    void applyPassword()
+    {
+        if (m_host != nullptr)
+            m_host->setPasswordChar(m_id, m_password ? L'\u25CF' : L'\0');
+    }
 
     // 多行/只读样式变了：按当前矩形重建原生控件，再推外观
     void rebuild()
@@ -51,11 +59,13 @@ private:
         if (w <= 0 || h <= 0) return;
         m_host->addEditAdvanced(m_id, m_text, m_multiline, m_readOnly, m_maxLength,
                                 m_placeholder, x, y, w, h);
+        applyPassword();
         pushAppearance();
     }
 
     bool m_multiline = false;
     bool m_readOnly = false;
+    bool m_password = false;
     int m_maxLength = 0;
     std::wstring m_text;
     std::wstring m_placeholder;

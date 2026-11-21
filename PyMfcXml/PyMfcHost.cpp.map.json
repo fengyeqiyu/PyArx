@@ -1,0 +1,2490 @@
+{
+"file": "PyMfcXml\\PyMfcHost.cpp",
+"lines": 9447,
+"funcs": [
+{
+"name": "PyMfcHoverMark",
+"start": 4,
+"end": 22
+},
+{
+"name": "PyMfcHoverUnmark",
+"start": 23,
+"end": 29
+},
+{
+"name": "PyMfcHovered",
+"start": 30,
+"end": 30
+},
+{
+"name": "PyMfcHost::~PyMfcHost",
+"start": 32,
+"end": 47
+},
+{
+"name": "PyMfcHost::PostNcDestroy",
+"start": 49,
+"end": 50
+},
+{
+"name": "PyMfcHost::hostHwnd",
+"start": 52,
+"end": 55
+},
+{
+"name": "pyMfcPerf",
+"start": 58,
+"end": 64
+},
+{
+"name": "PyMfcHost::create",
+"start": 66,
+"end": 86
+},
+{
+"name": "PyMfcHost::ensureSurface",
+"start": 88,
+"end": 116
+},
+{
+"name": "PyMfcHost::setTheme",
+"start": 118,
+"end": 149
+},
+{
+"name": "PyMfcHost::applyFont",
+"start": 151,
+"end": 155
+},
+{
+"name": "PyMfcHost::PyMfcTabBodyProc",
+"start": 157,
+"end": 191
+},
+{
+"name": "PyMfcHost::caretBlinkStates",
+"start": 193,
+"end": 197
+},
+{
+"name": "PyMfcHost::caretBlinkOn",
+"start": 199,
+"end": 203
+},
+{
+"name": "PyMfcHost::ensureSkinBoxClass",
+"start": 205,
+"end": 219
+},
+{
+"name": "PyMfcHost::skinOldProcs",
+"start": 221,
+"end": 225
+},
+{
+"name": "PyMfcHost::isSkinPaintClass",
+"start": 227,
+"end": 252
+},
+{
+"name": "PyMfcHost::requestSkinRepaint",
+"start": 254,
+"end": 258
+},
+{
+"name": "PyMfcHost::isNativePaintClass",
+"start": 260,
+"end": 277
+},
+{
+"name": "dragBarState",
+"start": 295,
+"end": 299
+},
+{
+"name": "DragBarTargetLeft",
+"start": 302,
+"end": 313
+},
+{
+"name": "PyMfcHost::PyMfcDragBarProc",
+"start": 315,
+"end": 383
+},
+{
+"name": "PyMfcHost::PyMfcOwnerDrawProc",
+"start": 385,
+"end": 681
+},
+{
+"name": "PyMfcHost::ensureWicCom",
+"start": 683,
+"end": 690
+},
+{
+"name": "pyMfcImagePixelSize",
+"start": 694,
+"end": 731
+},
+{
+"name": "PyMfcHost::loadBitmapFromFile",
+"start": 733,
+"end": 792
+},
+{
+"name": "PyMfcHost::propInt",
+"start": 794,
+"end": 798
+},
+{
+"name": "PyMfcHost::pyMfcNextTabItem",
+"start": 800
+},
+{
+"name": "GetWindow",
+"start": 814,
+"end": 826
+},
+{
+"name": "std::sort",
+"start": 829,
+"end": 844
+},
+{
+"name": "PyMfcHost::PyMfcTabMsgHook",
+"start": 846,
+"end": 901
+},
+{
+"name": "PyMfcHost::ensureTabHook",
+"start": 903,
+"end": 908
+},
+{
+"name": "PyMfcHost::splitterNeighbors",
+"start": 910
+},
+{
+"name": "GetWindow",
+"start": 925,
+"end": 947
+},
+{
+"name": "PyMfcHost::PyMfcSplitterProc",
+"start": 949,
+"end": 1056
+},
+{
+"name": "PyMfcEventSubProc",
+"start": 1060,
+"end": 1098
+},
+{
+"name": "PyMfcHost::createControl",
+"start": 1100,
+"end": 1244
+},
+{
+"name": "PyMfcHost::addButton",
+"start": 1246,
+"end": 1255
+},
+{
+"name": "PyMfcHost::addLabel",
+"start": 1257,
+"end": 1266
+},
+{
+"name": "PyMfcHost::addEdit",
+"start": 1268,
+"end": 1271
+},
+{
+"name": "PyMfcHost::addListBox",
+"start": 1273,
+"end": 1276
+},
+{
+"name": "PyMfcHost::addCheckBox",
+"start": 1278,
+"end": 1281
+},
+{
+"name": "PyMfcHost::addRadio",
+"start": 1283
+},
+{
+"name": "GetWindow",
+"start": 1290,
+"end": 1302
+},
+{
+"name": "PyMfcHost::addGroup",
+"start": 1304,
+"end": 1307
+},
+{
+"name": "PyMfcHost::addCombo",
+"start": 1309,
+"end": 1313
+},
+{
+"name": "PyMfcHost::addEditAdvanced",
+"start": 1315,
+"end": 1329
+},
+{
+"name": "PyMfcHost::addComboAdvanced",
+"start": 1331,
+"end": 1337
+},
+{
+"name": "PyMfcHost::addListBoxAdvanced",
+"start": 1339,
+"end": 1344
+},
+{
+"name": "PyMfcHost::setLimitText",
+"start": 1346,
+"end": 1350
+},
+{
+"name": "PyMfcHost::setCueBanner",
+"start": 1352,
+"end": 1356
+},
+{
+"name": "PyMfcHost::setPasswordChar",
+"start": 1358,
+"end": 1362
+},
+{
+"name": "PyMfcHost::addProgress",
+"start": 1364,
+"end": 1369
+},
+{
+"name": "PyMfcHost::addSlider",
+"start": 1371,
+"end": 1376
+},
+{
+"name": "PyMfcHost::addTab",
+"start": 1378,
+"end": 1381
+},
+{
+"name": "PyMfcHost::addTree",
+"start": 1383,
+"end": 1388
+},
+{
+"name": "PyMfcHost::addListCtrl",
+"start": 1390,
+"end": 1424
+},
+{
+"name": "PyMfcHost::findNewTable",
+"start": 1427,
+"end": 1431
+},
+{
+"name": "hostClipboardText",
+"start": 1435,
+"end": 1449
+},
+{
+"name": "PyMfcHost::tableEventCb",
+"start": 1458,
+"end": 1479
+},
+{
+"name": "PyMfcHost::addTable",
+"start": 1481,
+"end": 1495
+},
+{
+"name": "PyMfcHost::tableClear",
+"start": 1497,
+"end": 1500
+},
+{
+"name": "PyMfcHost::tableRowCount",
+"start": 1502,
+"end": 1506
+},
+{
+"name": "PyMfcHost::tableSetColumns",
+"start": 1508,
+"end": 1512
+},
+{
+"name": "PyMfcHost::tableSetColTypes",
+"start": 1514,
+"end": 1517
+},
+{
+"name": "PyMfcHost::tableAppendRow",
+"start": 1519,
+"end": 1522
+},
+{
+"name": "PyMfcHost::tableSetCell",
+"start": 1524,
+"end": 1527
+},
+{
+"name": "PyMfcHost::tableGetCell",
+"start": 1529,
+"end": 1533
+},
+{
+"name": "PyMfcHost::tableCellRect",
+"start": 1535,
+"end": 1543
+},
+{
+"name": "PyMfcHost::tableSelectedRow",
+"start": 1545,
+"end": 1549
+},
+{
+"name": "PyMfcHost::tableSelectRow",
+"start": 1551,
+"end": 1554
+},
+{
+"name": "PyMfcHost::tableEnsureVisible",
+"start": 1556,
+"end": 1559
+},
+{
+"name": "PyMfcHost::tableSetFilter",
+"start": 1561,
+"end": 1564
+},
+{
+"name": "PyMfcHost::tableClearFilters",
+"start": 1566,
+"end": 1569
+},
+{
+"name": "PyMfcHost::tableSort",
+"start": 1571,
+"end": 1574
+},
+{
+"name": "PyMfcHost::tableViewRows",
+"start": 1576,
+"end": 1580
+},
+{
+"name": "PyMfcHost::addChoice",
+"start": 1582,
+"end": 1585
+},
+{
+"name": "PyMfcHost::addDatePicker",
+"start": 1587,
+"end": 1590
+},
+{
+"name": "PyMfcHost::addPanel",
+"start": 1592,
+"end": 1606
+},
+{
+"name": "PyMfcHost::addWhiteRect",
+"start": 1608,
+"end": 1617
+},
+{
+"name": "PyMfcHost::setControlFont",
+"start": 1619,
+"end": 1641
+},
+{
+"name": "PyMfcHost::setControlAccent",
+"start": 1643,
+"end": 1647
+},
+{
+"name": "PyMfcHost::setLabelColor",
+"start": 1649,
+"end": 1653
+},
+{
+"name": "PyMfcHost::addSplitter",
+"start": 1655,
+"end": 1663
+},
+{
+"name": "PyMfcHost::addStaticLine",
+"start": 1665,
+"end": 1678
+},
+{
+"name": "PyMfcHost::addHyperlink",
+"start": 1680,
+"end": 1683
+},
+{
+"name": "PyMfcHost::addRichText",
+"start": 1685,
+"end": 1688
+},
+{
+"name": "PyMfcHost::addToggle",
+"start": 1690,
+"end": 1693
+},
+{
+"name": "PyMfcHost::addBitmapButton",
+"start": 1695,
+"end": 1698
+},
+{
+"name": "PyMfcHost::addStaticBitmap",
+"start": 1700,
+"end": 1707
+},
+{
+"name": "PyMfcHost::addGrid",
+"start": 1709,
+"end": 1712
+},
+{
+"name": "PyMfcHost::addScrolledWindow",
+"start": 1714,
+"end": 1719
+},
+{
+"name": "PyMfcHost::addCalendar",
+"start": 1721,
+"end": 1724
+},
+{
+"name": "MonthCalDateText",
+"start": 1728,
+"end": 1733
+},
+{
+"name": "PyMfcHost::getCalendarDate",
+"start": 1735,
+"end": 1744
+},
+{
+"name": "PyMfcHost::setCalendarDate",
+"start": 1746,
+"end": 1762
+},
+{
+"name": "PyMfcHost::addSkinBox",
+"start": 1764,
+"end": 1778
+},
+{
+"name": "PyMfcHost::addShadowBox",
+"start": 1780,
+"end": 1826
+},
+{
+"name": "cursorOfCss",
+"start": 1832
+},
+{
+"name": "?",
+"start": 1837,
+"end": 1851
+},
+{
+"name": "PyMfcHost::setControlCursor",
+"start": 1853,
+"end": 1861
+},
+{
+"name": "PyMfcHost::getControlCursor",
+"start": 1863,
+"end": 1867
+},
+{
+"name": "PyMfcHost::setControlPointerEvents",
+"start": 1869,
+"end": 1892
+},
+{
+"name": "PyMfcHost::getControlPointerEvents",
+"start": 1894,
+"end": 1898
+},
+{
+"name": "PyMfcHost::isControlMouseTransparent",
+"start": 1900,
+"end": 1907
+},
+{
+"name": "PyMfcHost::hoverCursor",
+"start": 1909,
+"end": 1979
+},
+{
+"name": "PyMfcHost::skinBoxMouse",
+"start": 1981
+},
+{
+"name": "setCanvasSelection",
+"start": 2016,
+"end": 2016
+},
+{
+"name": "?",
+"start": 2119,
+"end": 2124
+},
+{
+"name": "?",
+"start": 2125,
+"end": 2129
+},
+{
+"name": "?",
+"start": 2202,
+"end": 2220
+},
+{
+"name": "?",
+"start": 2377,
+"end": 2388
+},
+{
+"name": "count",
+"start": 2444,
+"end": 2444
+},
+{
+"name": "count",
+"start": 2468,
+"end": 2468
+},
+{
+"name": "?",
+"start": 2521,
+"end": 2524
+},
+{
+"name": "?",
+"start": 2588,
+"end": 2595
+},
+{
+"name": "?",
+"start": 2652,
+"end": 2662
+},
+{
+"name": "?",
+"start": 2707,
+"end": 2712
+},
+{
+"name": "?",
+"start": 2756,
+"end": 2789
+},
+{
+"name": "PyMfcHost::cwOf",
+"start": 2791,
+"end": 2801
+},
+{
+"name": "PyMfcHost::rangeMinOf",
+"start": 2803,
+"end": 2807
+},
+{
+"name": "PyMfcHost::rangeMaxOf",
+"start": 2809,
+"end": 2813
+},
+{
+"name": "PyMfcHost::getRangeLow",
+"start": 2815,
+"end": 2819
+},
+{
+"name": "PyMfcHost::getRangeHigh",
+"start": 2821,
+"end": 2825
+},
+{
+"name": "PyMfcHost::setRangeValues",
+"start": 2827,
+"end": 2831
+},
+{
+"name": "PyMfcHost::getSwitchValue",
+"start": 2833,
+"end": 2837
+},
+{
+"name": "PyMfcHost::setSwitchValue",
+"start": 2839,
+"end": 2844
+},
+{
+"name": "PyMfcHost::getSpinValue",
+"start": 2846,
+"end": 2850
+},
+{
+"name": "PyMfcHost::setSpinValue",
+"start": 2852,
+"end": 2869
+},
+{
+"name": "PyMfcHost::setSpinRange",
+"start": 2871,
+"end": 2877
+},
+{
+"name": "PyMfcHost::stepSpin",
+"start": 2879,
+"end": 2882
+},
+{
+"name": "PyMfcHost::bumpBusyPhase",
+"start": 2884,
+"end": 2888
+},
+{
+"name": "PyMfcHost::setPageCount",
+"start": 2890,
+"end": 2891
+},
+{
+"name": "PyMfcHost::getPageCount",
+"start": 2894,
+"end": 2898
+},
+{
+"name": "PyMfcHost::setPageIndex",
+"start": 2900,
+"end": 2906
+},
+{
+"name": "PyMfcHost::getPageIndex",
+"start": 2908,
+"end": 2912
+},
+{
+"name": "PyMfcHost::getDial",
+"start": 2914,
+"end": 2918
+},
+{
+"name": "PyMfcHost::setDial",
+"start": 2920,
+"end": 2937
+},
+{
+"name": "PyMfcHost::stepDial",
+"start": 2939,
+"end": 2942
+},
+{
+"name": "PyMfcHost::getTumblerCount",
+"start": 2944,
+"end": 2948
+},
+{
+"name": "PyMfcHost::setTumblerCount",
+"start": 2950,
+"end": 2958
+},
+{
+"name": "PyMfcHost::getTumblerValue",
+"start": 2960,
+"end": 2964
+},
+{
+"name": "PyMfcHost::setTumblerValue",
+"start": 2966,
+"end": 2973
+},
+{
+"name": "PyMfcHost::stepTumbler",
+"start": 2975,
+"end": 2986
+},
+{
+"name": "PyMfcHost::setScrollBarRange",
+"start": 2988,
+"end": 2999
+},
+{
+"name": "PyMfcHost::getScrollBarValue",
+"start": 3001,
+"end": 3005
+},
+{
+"name": "PyMfcHost::setScrollBarValue",
+"start": 3007,
+"end": 3012
+},
+{
+"name": "PyMfcHost::setScrollValueInternal",
+"start": 3014,
+"end": 3019
+},
+{
+"name": "PyMfcHost::setScrollValueUser",
+"start": 3021,
+"end": 3034
+},
+{
+"name": "PyMfcHost::setColumnWidth",
+"start": 3036,
+"end": 3047
+},
+{
+"name": "PyMfcHost::setColumnWidths",
+"start": 3049,
+"end": 3065
+},
+{
+"name": "PyMfcHost::tableMetrics",
+"start": 3067,
+"end": 3082
+},
+{
+"name": "PyMfcHost::setTableColumns",
+"start": 3084,
+"end": 3089
+},
+{
+"name": "PyMfcHost::addTableRow",
+"start": 3091,
+"end": 3119
+},
+{
+"name": "PyMfcHost::setTableRows",
+"start": 3121
+},
+{
+"name": "?",
+"start": 3128,
+"end": 3176
+},
+{
+"name": "PyMfcHost::clearTableRows",
+"start": 3178,
+"end": 3192
+},
+{
+"name": "PyMfcHost::getTableRowCount",
+"start": 3194,
+"end": 3199
+},
+{
+"name": "PyMfcHost::isTreeItemCollapsed",
+"start": 3201,
+"end": 3207
+},
+{
+"name": "PyMfcHost::setTreeItemCollapsed",
+"start": 3209,
+"end": 3217
+},
+{
+"name": "PyMfcHost::getTableCell",
+"start": 3219,
+"end": 3229
+},
+{
+"name": "PyMfcHost::setTableCell",
+"start": 3231,
+"end": 3243
+},
+{
+"name": "PyMfcHost::getTableSelectedRow",
+"start": 3245,
+"end": 3263
+},
+{
+"name": "PyMfcHost::setTableSelectedRow",
+"start": 3265,
+"end": 3304
+},
+{
+"name": "PyMfcHost::sortTable",
+"start": 3306
+},
+{
+"name": "?",
+"start": 3321,
+"end": 3323
+},
+{
+"name": "std::stable_sort",
+"start": 3324,
+"end": 3337
+},
+{
+"name": "PyMfcHost::addTreeItem",
+"start": 3339,
+"end": 3347
+},
+{
+"name": "PyMfcHost::clearTreeItems",
+"start": 3349,
+"end": 3359
+},
+{
+"name": "PyMfcHost::getTreeSelectedRow",
+"start": 3361,
+"end": 3365
+},
+{
+"name": "PyMfcHost::setTreeSelectedRow",
+"start": 3367,
+"end": 3372
+},
+{
+"name": "PyMfcHost::isTreeRowHidden",
+"start": 3374,
+"end": 3395
+},
+{
+"name": "PyMfcHost::toggleTreeRow",
+"start": 3397,
+"end": 3405
+},
+{
+"name": "PyMfcHost::addToolBarItem",
+"start": 3407,
+"end": 3412
+},
+{
+"name": "PyMfcHost::clearToolBarItems",
+"start": 3414,
+"end": 3420
+},
+{
+"name": "PyMfcHost::getToolBarSelected",
+"start": 3422,
+"end": 3426
+},
+{
+"name": "PyMfcHost::setToolBarSelected",
+"start": 3428,
+"end": 3433
+},
+{
+"name": "PyMfcHost::splitTabs",
+"start": 3435,
+"end": 3453
+},
+{
+"name": "PyMfcHost::parseNum",
+"start": 3455,
+"end": 3463
+},
+{
+"name": "PyMfcHost::ensureVisible",
+"start": 3465,
+"end": 3490
+},
+{
+"name": "PyMfcHost::addTabItem",
+"start": 3492,
+"end": 3508
+},
+{
+"name": "PyMfcHost::addTreeNode",
+"start": 3510,
+"end": 3540
+},
+{
+"name": "PyMfcHost::addColumn",
+"start": 3542,
+"end": 3560
+},
+{
+"name": "PyMfcHost::addRow",
+"start": 3562,
+"end": 3597
+},
+{
+"name": "PyMfcHost::setText",
+"start": 3599,
+"end": 3611
+},
+{
+"name": "PyMfcHost::applyLinkText",
+"start": 3613,
+"end": 3625
+},
+{
+"name": "PyMfcHost::getText",
+"start": 3627,
+"end": 3637
+},
+{
+"name": "PyMfcHost::setVisible",
+"start": 3639
+},
+{
+"name": "end",
+"start": 3648,
+"end": 3657
+},
+{
+"name": "PyMfcHost::isControlHidden",
+"start": 3659,
+"end": 3662
+},
+{
+"name": "PyMfcHost::setEnabled",
+"start": 3664,
+"end": 3668
+},
+{
+"name": "PyMfcHost::moveControl",
+"start": 3670,
+"end": 3705
+},
+{
+"name": "PyMfcHost::moveMany",
+"start": 3707,
+"end": 3797
+},
+{
+"name": "PyMfcHost::setSurface",
+"start": 3799,
+"end": 3809
+},
+{
+"name": "PyMfcHost::moveSurfaces",
+"start": 3811,
+"end": 3834
+},
+{
+"name": "PyMfcHost::getSurfaceRect",
+"start": 3836,
+"end": 3843
+},
+{
+"name": "PyMfcHost::registerPaintNode",
+"start": 3849
+},
+{
+"name": "?",
+"start": 3870,
+"end": 3874
+},
+{
+"name": "?",
+"start": 3876,
+"end": 3880
+},
+{
+"name": "?",
+"start": 3882,
+"end": 3886
+},
+{
+"name": "?",
+"start": 3888,
+"end": 3892
+},
+{
+"name": "?",
+"start": 3894,
+"end": 3898
+},
+{
+"name": "?",
+"start": 3900,
+"end": 3909
+},
+{
+"name": "PyMfcHost::updatePaintNodeRect",
+"start": 3911,
+"end": 3918
+},
+{
+"name": "PyMfcHost::findPaintNode",
+"start": 3920,
+"end": 3924
+},
+{
+"name": "PyMfcHost::ancestorTransformOf",
+"start": 3929,
+"end": 3956
+},
+{
+"name": "PyMfcHost::nodeXfOf",
+"start": 3958,
+"end": 3978
+},
+{
+"name": "PyMfcHost::applyContainerBackdrop",
+"start": 3980,
+"end": 4027
+},
+{
+"name": "PyMfcHost::drawNodeContainer",
+"start": 4029,
+"end": 4046
+},
+{
+"name": "PyMfcHost::drawNodeWhiteRect",
+"start": 4048,
+"end": 4061
+},
+{
+"name": "PyMfcHost::drawNodeShadowBox",
+"start": 4063,
+"end": 4068
+},
+{
+"name": "PyMfcHost::drawNodeStaticLine",
+"start": 4070
+},
+{
+"name": "fillRect",
+"start": 4082,
+"end": 4082
+},
+{
+"name": "fillRect",
+"start": 4087,
+"end": 4087
+},
+{
+"name": "fillRect",
+"start": 4093,
+"end": 4095
+},
+{
+"name": "PyMfcHost::drawOwnerNode",
+"start": 4097,
+"end": 4268
+},
+{
+"name": "PyMfcHost::drawNodeLabel",
+"start": 4270,
+"end": 4273
+},
+{
+"name": "PyMfcHost::drawNodeButton",
+"start": 4275,
+"end": 4278
+},
+{
+"name": "PyMfcHost::hitNode",
+"start": 4280,
+"end": 4304
+},
+{
+"name": "PyMfcHost::OnMouseMove",
+"start": 4306,
+"end": 4320
+},
+{
+"name": "PyMfcHost::OnLButtonDown",
+"start": 4322,
+"end": 4331
+},
+{
+"name": "PyMfcHost::OnLButtonUp",
+"start": 4333,
+"end": 4349
+},
+{
+"name": "PyMfcHost::drawPaintNodes",
+"start": 4351
+},
+{
+"name": "std::stable_sort",
+"start": 4367,
+"end": 4511
+},
+{
+"name": "PyMfcHost::attachXml",
+"start": 4513,
+"end": 4524
+},
+{
+"name": "PyMfcHost::removeControlById",
+"start": 4526,
+"end": 4543
+},
+{
+"name": "PyMfcHost::reflowXml",
+"start": 4545
+},
+{
+"name": "void",
+"start": 4568,
+"end": 4614
+},
+{
+"name": "PyMfcHost::syncOneContainerBackdrop",
+"start": 4616,
+"end": 4655
+},
+{
+"name": "PyMfcHost::syncContainerBackdrops",
+"start": 4657,
+"end": 4700
+},
+{
+"name": "PyMfcHost::setXmlProperty",
+"start": 4702
+},
+{
+"name": "?",
+"start": 4731,
+"end": 4751
+},
+{
+"name": "PyMfcHost::ensureOverlay",
+"start": 4753,
+"end": 4759
+},
+{
+"name": "PyMfcHost::hideOverlay",
+"start": 4761,
+"end": 4765
+},
+{
+"name": "PyMfcHost::isOverlayVisible",
+"start": 4767,
+"end": 4771
+},
+{
+"name": "PyMfcHost::placeOverlay",
+"start": 4773,
+"end": 4788
+},
+{
+"name": "PyMfcHost::showToolTip",
+"start": 4790,
+"end": 4818
+},
+{
+"name": "PyMfcHost::hideToolTip",
+"start": 4820,
+"end": 4823
+},
+{
+"name": "PyMfcHost::showMenu",
+"start": 4825,
+"end": 4843
+},
+{
+"name": "PyMfcHost::hideMenu",
+"start": 4845,
+"end": 4848
+},
+{
+"name": "PyMfcHost::menuRowAt",
+"start": 4850,
+"end": 4864
+},
+{
+"name": "PyMfcHost::getMenuSelected",
+"start": 4866,
+"end": 4870
+},
+{
+"name": "PyMfcHost::setMenuItems",
+"start": 4872,
+"end": 4878
+},
+{
+"name": "PyMfcHost::addMenuBarItem",
+"start": 4880,
+"end": 4883
+},
+{
+"name": "PyMfcHost::clearMenuBarItems",
+"start": 4885,
+"end": 4890
+},
+{
+"name": "PyMfcHost::getMenuBarSelected",
+"start": 4892,
+"end": 4896
+},
+{
+"name": "PyMfcHost::setMenuBarSelected",
+"start": 4898,
+"end": 4902
+},
+{
+"name": "PyMfcHost::showPopup",
+"start": 4904,
+"end": 4911
+},
+{
+"name": "PyMfcHost::hidePopup",
+"start": 4913,
+"end": 4916
+},
+{
+"name": "PyMfcHost::isPopupVisible",
+"start": 4918,
+"end": 4921
+},
+{
+"name": "PyMfcHost::gvMetrics",
+"start": 4923,
+"end": 4938
+},
+{
+"name": "PyMfcHost::lvRowH",
+"start": 4940,
+"end": 4953
+},
+{
+"name": "PyMfcHost::lvMaxScroll",
+"start": 4955,
+"end": 4976
+},
+{
+"name": "PyMfcHost::lvClampScroll",
+"start": 4978,
+"end": 4985
+},
+{
+"name": "PyMfcHost::fitDwgCanvas",
+"start": 4987,
+"end": 5039
+},
+{
+"name": "PyMfcHost::addDwgCanvas",
+"start": 5041,
+"end": 5057
+},
+{
+"name": "PyMfcHost::addRibbon",
+"start": 5059,
+"end": 5066
+},
+{
+"name": "PyMfcHost::setRibbonElement",
+"start": 5068,
+"end": 5076
+},
+{
+"name": "PyMfcHost::drawRibbon",
+"start": 5078,
+"end": 5092
+},
+{
+"name": "PyMfcHost::addFileTab",
+"start": 5094,
+"end": 5101
+},
+{
+"name": "PyMfcHost::setFileTabElement",
+"start": 5103,
+"end": 5109
+},
+{
+"name": "PyMfcHost::drawFileTab",
+"start": 5111,
+"end": 5120
+},
+{
+"name": "PyMfcHost::setDwgLayout",
+"start": 5122,
+"end": 5148
+},
+{
+"name": "PyMfcHost::setDwgScene",
+"start": 5150,
+"end": 5171
+},
+{
+"name": "PyMfcHost::copyDwgScene",
+"start": 5173,
+"end": 5186
+},
+{
+"name": "wideToUtf8Text",
+"start": 5189,
+"end": 5201
+},
+{
+"name": "PyMfcHost::setDwgSvg",
+"start": 5203,
+"end": 5225
+},
+{
+"name": "PyMfcHost::setDwgXml",
+"start": 5230,
+"end": 5249
+},
+{
+"name": "PyMfcHost::setDwgOverlay",
+"start": 5251,
+"end": 5276
+},
+{
+"name": "PyMfcHost::setDwgOverlayXml",
+"start": 5279,
+"end": 5303
+},
+{
+"name": "PyMfcHost::setDwgView",
+"start": 5305,
+"end": 5312
+},
+{
+"name": "PyMfcHost::getDwgZoom",
+"start": 5314,
+"end": 5318
+},
+{
+"name": "PyMfcHost::getDwgSelection",
+"start": 5320,
+"end": 5324
+},
+{
+"name": "PyMfcHost::setDwgOptions",
+"start": 5326,
+"end": 5335
+},
+{
+"name": "PyMfcHost::getDwgView",
+"start": 5337,
+"end": 5346
+},
+{
+"name": "PyMfcHost::setDetailCard",
+"start": 5348,
+"end": 5385
+},
+{
+"name": "PyMfcHost::clearDetailCard",
+"start": 5387,
+"end": 5397
+},
+{
+"name": "PyMfcHost::detailHit",
+"start": 5399,
+"end": 5405
+},
+{
+"name": "PyMfcHost::dwgHit",
+"start": 5407,
+"end": 5465
+},
+{
+"name": "PyMfcHost::dwgCardRect",
+"start": 5467,
+"end": 5485
+},
+{
+"name": "PyMfcHost::saveControlPng",
+"start": 5487,
+"end": 5533
+},
+{
+"name": "PyMfcHost::selectDwgItem",
+"start": 5535,
+"end": 5565
+},
+{
+"name": "PyMfcHost::fireRibbonButton",
+"start": 5567,
+"end": 5598
+},
+{
+"name": "PyMfcHost::ribbonMouse",
+"start": 5600
+},
+{
+"name": "?",
+"start": 5609,
+"end": 5659
+},
+{
+"name": "PyMfcHost::getFileTabInfo",
+"start": 5661,
+"end": 5695
+},
+{
+"name": "PyMfcHost::fireFileTab",
+"start": 5697,
+"end": 5728
+},
+{
+"name": "PyMfcHost::fileTabMouse",
+"start": 5730,
+"end": 5793
+},
+{
+"name": "PyMfcHost::fireDwgSelect",
+"start": 5795,
+"end": 5800
+},
+{
+"name": "PyMfcHost::firePlanDoubleClick",
+"start": 5802,
+"end": 5807
+},
+{
+"name": "PyMfcHost::fireToolBarItem",
+"start": 5809,
+"end": 5829
+},
+{
+"name": "v3Shade",
+"start": 5837,
+"end": 5845
+},
+{
+"name": "v3ParseColor",
+"start": 5847,
+"end": 5862
+},
+{
+"name": "PyMfcHost::addView3D",
+"start": 5865,
+"end": 5879
+},
+{
+"name": "PyMfcHost::setView3DModel",
+"start": 5881
+},
+{
+"name": "?",
+"start": 5948,
+"end": 5984
+},
+{
+"name": "PyMfcHost::view3DAddRecord",
+"start": 5986,
+"end": 5993
+},
+{
+"name": "PyMfcHost::view3DFit",
+"start": 5995,
+"end": 6006
+},
+{
+"name": "PyMfcHost::setView3DCamera",
+"start": 6008,
+"end": 6018
+},
+{
+"name": "PyMfcHost::getView3DCamera",
+"start": 6020,
+"end": 6031
+},
+{
+"name": "PyMfcHost::setView3DStyle",
+"start": 6033,
+"end": 6040
+},
+{
+"name": "PyMfcHost::drawView3D",
+"start": 6042
+},
+{
+"name": "?",
+"start": 6089,
+"end": 6101
+},
+{
+"name": "?",
+"start": 6107,
+"end": 6123
+},
+{
+"name": "?",
+"start": 6125,
+"end": 6129
+},
+{
+"name": "push_back",
+"start": 6141,
+"end": 6141
+},
+{
+"name": "std::sort",
+"start": 6166,
+"end": 6207
+},
+{
+"name": "PyMfcHost::drawDwgCanvas",
+"start": 6209,
+"end": 6318
+},
+{
+"name": "PyMfcHost::setGridCellSize",
+"start": 6320,
+"end": 6327
+},
+{
+"name": "PyMfcHost::setCanvasCommands",
+"start": 6329,
+"end": 6333
+},
+{
+"name": "PyMfcHost::getCanvasCommands",
+"start": 6335,
+"end": 6339
+},
+{
+"name": "PyMfcHost::levelOf",
+"start": 6341,
+"end": 6345
+},
+{
+"name": "PyMfcHost::tabIndexOf",
+"start": 6347,
+"end": 6351
+},
+{
+"name": "PyMfcHost::noteLevel",
+"start": 6353,
+"end": 6369
+},
+{
+"name": "PyMfcHost::noteTabIndex",
+"start": 6371,
+"end": 6377
+},
+{
+"name": "PyMfcHost::raiseMany",
+"start": 6379,
+"end": 6385
+},
+{
+"name": "PyMfcHost::setLevel",
+"start": 6387,
+"end": 6391
+},
+{
+"name": "PyMfcHost::getLevel",
+"start": 6393,
+"end": 6394
+},
+{
+"name": "PyMfcHost::maxLevel",
+"start": 6397,
+"end": 6403
+},
+{
+"name": "PyMfcHost::minLevel",
+"start": 6405,
+"end": 6411
+},
+{
+"name": "PyMfcHost::bringToFront",
+"start": 6413,
+"end": 6414
+},
+{
+"name": "PyMfcHost::bringToFrontMany",
+"start": 6416,
+"end": 6424
+},
+{
+"name": "PyMfcHost::sendToBack",
+"start": 6427,
+"end": 6428
+},
+{
+"name": "PyMfcHost::setTabIndex",
+"start": 6431,
+"end": 6435
+},
+{
+"name": "PyMfcHost::getTabIndex",
+"start": 6437,
+"end": 6438
+},
+{
+"name": "PyMfcHost::noteCreated",
+"start": 6441,
+"end": 6447
+},
+{
+"name": "PyMfcHost::applyTabProps",
+"start": 6449
+},
+{
+"name": "GetWindow",
+"start": 6452,
+"end": 6461
+},
+{
+"name": "PyMfcHost::applyZOrder",
+"start": 6463
+},
+{
+"name": "GetWindow",
+"start": 6474,
+"end": 6481
+},
+{
+"name": "?",
+"start": 6482,
+"end": 6487
+},
+{
+"name": "std::sort",
+"start": 6488,
+"end": 6509
+},
+{
+"name": "PyMfcHost::applyLevelsAndTabs",
+"start": 6511,
+"end": 6515
+},
+{
+"name": "PyMfcHost::repaintCanvas",
+"start": 6517,
+"end": 6543
+},
+{
+"name": "PyMfcHost::setCanvasEditable",
+"start": 6545,
+"end": 6552
+},
+{
+"name": "PyMfcHost::getCanvasEditable",
+"start": 6554,
+"end": 6557
+},
+{
+"name": "PyMfcHost::canvasItemCount",
+"start": 6559,
+"end": 6563
+},
+{
+"name": "PyMfcHost::canvasItem",
+"start": 6565,
+"end": 6574
+},
+{
+"name": "PyMfcHost::canvasItemOp",
+"start": 6576,
+"end": 6582
+},
+{
+"name": "PyMfcHost::canvasHitTest",
+"start": 6584,
+"end": 6600
+},
+{
+"name": "PyMfcHost::getCanvasSelection",
+"start": 6602,
+"end": 6606
+},
+{
+"name": "PyMfcHost::fireCanvasSelect",
+"start": 6608,
+"end": 6613
+},
+{
+"name": "PyMfcHost::setCanvasSelection",
+"start": 6615,
+"end": 6627
+},
+{
+"name": "PyMfcHost::clearCanvasSelection",
+"start": 6629,
+"end": 6634
+},
+{
+"name": "PyMfcHost::onCanvasSelect",
+"start": 6636,
+"end": 6637
+},
+{
+"name": "PyMfcHost::removeCanvasItems",
+"start": 6640,
+"end": 6682
+},
+{
+"name": "PyMfcHost::removeCanvasSelection",
+"start": 6684,
+"end": 6688
+},
+{
+"name": "PyMfcHost::setLayerOpacity",
+"start": 6690,
+"end": 6700
+},
+{
+"name": "PyMfcHost::getLayerOpacity",
+"start": 6702,
+"end": 6706
+},
+{
+"name": "PyMfcHost::addListItem",
+"start": 6708,
+"end": 6725
+},
+{
+"name": "PyMfcHost::clearListItems",
+"start": 6727,
+"end": 6736
+},
+{
+"name": "PyMfcHost::getListItemCount",
+"start": 6738,
+"end": 6742
+},
+{
+"name": "PyMfcHost::getListItem",
+"start": 6744,
+"end": 6757
+},
+{
+"name": "PyMfcHost::getListSelected",
+"start": 6759,
+"end": 6763
+},
+{
+"name": "PyMfcHost::setListSelected",
+"start": 6765,
+"end": 6803
+},
+{
+"name": "PyMfcHost::getListScroll",
+"start": 6805,
+"end": 6809
+},
+{
+"name": "PyMfcHost::setListScroll",
+"start": 6811,
+"end": 6816
+},
+{
+"name": "PyMfcHost::flickTick",
+"start": 6818,
+"end": 6874
+},
+{
+"name": "PyMfcHost::flickMetrics",
+"start": 6876,
+"end": 6903
+},
+{
+"name": "PyMfcHost::flickApply",
+"start": 6905
+},
+{
+"name": "count",
+"start": 6910,
+"end": 6924
+},
+{
+"name": "PyMfcHost::setFlickContent",
+"start": 6926,
+"end": 6957
+},
+{
+"name": "PyMfcHost::clearFlickContent",
+"start": 6959,
+"end": 6978
+},
+{
+"name": "PyMfcHost::setFlickOffset",
+"start": 6980,
+"end": 6992
+},
+{
+"name": "PyMfcHost::getFlickOffsetX",
+"start": 6994,
+"end": 6998
+},
+{
+"name": "PyMfcHost::getFlickOffsetY",
+"start": 7000,
+"end": 7004
+},
+{
+"name": "PyMfcHost::flickTickFlickable",
+"start": 7006,
+"end": 7065
+},
+{
+"name": "PyMfcHost::pageRegister",
+"start": 7067,
+"end": 7071
+},
+{
+"name": "PyMfcHost::clearPages",
+"start": 7073,
+"end": 7098
+},
+{
+"name": "PyMfcHost::pageHostRect",
+"start": 7100,
+"end": 7110
+},
+{
+"name": "PyMfcHost::pageLayout",
+"start": 7112
+},
+{
+"name": "std::sort",
+"start": 7125,
+"end": 7160
+},
+{
+"name": "PyMfcHost::addPage",
+"start": 7162,
+"end": 7180
+},
+{
+"name": "PyMfcHost::viewCount",
+"start": 7182,
+"end": 7186
+},
+{
+"name": "PyMfcHost::viewIndex",
+"start": 7188,
+"end": 7192
+},
+{
+"name": "PyMfcHost::viewSetIndex",
+"start": 7194,
+"end": 7211
+},
+{
+"name": "PyMfcHost::pageSlide",
+"start": 7213,
+"end": 7251
+},
+{
+"name": "PyMfcHost::viewAnimate",
+"start": 7253,
+"end": 7279
+},
+{
+"name": "PyMfcHost::pageTick",
+"start": 7281,
+"end": 7307
+},
+{
+"name": "PyMfcHost::easeAt",
+"start": 7309
+},
+{
+"name": "?",
+"start": 7313,
+"end": 7313
+},
+{
+"name": "?",
+"start": 7314,
+"end": 7314
+},
+{
+"name": "?",
+"start": 7346,
+"end": 7360
+},
+{
+"name": "PyMfcHost::lerpColor",
+"start": 7362
+},
+{
+"name": "?",
+"start": 7364,
+"end": 7364
+},
+{
+"name": "?",
+"start": 7365,
+"end": 7370
+},
+{
+"name": "PyMfcHost::ensureAnimWnd",
+"start": 7372,
+"end": 7384
+},
+{
+"name": "PyMfcHost::animAdd",
+"start": 7386,
+"end": 7401
+},
+{
+"name": "PyMfcHost::repairSiblingsOf",
+"start": 7403
+},
+{
+"name": "EnumChildWindows",
+"start": 7417,
+"end": 7433
+},
+{
+"name": "PyMfcHost::applyAnimValue",
+"start": 7435,
+"end": 7498
+},
+{
+"name": "PyMfcHost::currentPropValue",
+"start": 7500,
+"end": 7537
+},
+{
+"name": "PyMfcHost::animate",
+"start": 7539,
+"end": 7543
+},
+{
+"name": "PyMfcHost::animateFrom",
+"start": 7545,
+"end": 7558
+},
+{
+"name": "PyMfcHost::animateColor",
+"start": 7560,
+"end": 7585
+},
+{
+"name": "PyMfcHost::animateState",
+"start": 7587,
+"end": 7591
+},
+{
+"name": "PyMfcHost::scrollOverflowContainer",
+"start": 7593
+},
+{
+"name": "EnumChildWindows",
+"start": 7609,
+"end": 7624
+},
+{
+"name": "EnumChildWindows",
+"start": 7650,
+"end": 7690
+},
+{
+"name": "PyMfcHost::registerStickyChild",
+"start": 7695,
+"end": 7700
+},
+{
+"name": "PyMfcHost::scrollOverflowFrom",
+"start": 7702,
+"end": 7716
+},
+{
+"name": "PyMfcHost::startCssKeyframes",
+"start": 7718
+},
+{
+"name": "std::sort",
+"start": 7748,
+"end": 7768
+},
+{
+"name": "PyMfcHost::startHoverTransition",
+"start": 7770
+},
+{
+"name": "erase",
+"start": 7795,
+"end": 7817
+},
+{
+"name": "PyMfcHost::stopAnimations",
+"start": 7819
+},
+{
+"name": "erase",
+"start": 7823,
+"end": 7832
+},
+{
+"name": "PyMfcHost::setBehavior",
+"start": 7834
+},
+{
+"name": "std::to_wstring",
+"start": 7836,
+"end": 7837
+},
+{
+"name": "PyMfcHost::behaviorFor",
+"start": 7839,
+"end": 7847
+},
+{
+"name": "PyMfcHost::animTick",
+"start": 7849,
+"end": 7943
+},
+{
+"name": "PyMfcHost::addString",
+"start": 7945,
+"end": 7950
+},
+{
+"name": "PyMfcHost::clearStrings",
+"start": 7952,
+"end": 7956
+},
+{
+"name": "PyMfcHost::countStrings",
+"start": 7958,
+"end": 7962
+},
+{
+"name": "PyMfcHost::getString",
+"start": 7964,
+"end": 7978
+},
+{
+"name": "PyMfcHost::deleteString",
+"start": 7980,
+"end": 7987
+},
+{
+"name": "PyMfcHost::getCurSel",
+"start": 7989,
+"end": 7993
+},
+{
+"name": "PyMfcHost::setCurSel",
+"start": 7995,
+"end": 8000
+},
+{
+"name": "PyMfcHost::getCheck",
+"start": 8002,
+"end": 8006
+},
+{
+"name": "PyMfcHost::setCheck",
+"start": 8008,
+"end": 8017
+},
+{
+"name": "PyMfcHost::setRange",
+"start": 8019,
+"end": 8051
+},
+{
+"name": "PyMfcHost::setPos",
+"start": 8053,
+"end": 8071
+},
+{
+"name": "PyMfcHost::getPos",
+"start": 8073,
+"end": 8083
+},
+{
+"name": "PyMfcHost::setReadOnly",
+"start": 8085,
+"end": 8089
+},
+{
+"name": "PyMfcHost::getReadOnly",
+"start": 8091,
+"end": 8095
+},
+{
+"name": "PyMfcHost::getDlgItemHandle",
+"start": 8097,
+"end": 8103
+},
+{
+"name": "PyMfcHost::getHostWindow",
+"start": 8105,
+"end": 8108
+},
+{
+"name": "PyMfcHost::setControlLevel",
+"start": 8110,
+"end": 8111
+},
+{
+"name": "PyMfcHost::getControlLevel",
+"start": 8112,
+"end": 8113
+},
+{
+"name": "PyMfcHost::setControlTabIndex",
+"start": 8116,
+"end": 8117
+},
+{
+"name": "PyMfcHost::getControlTabIndex",
+"start": 8120,
+"end": 8121
+},
+{
+"name": "PyMfcHost::setControlTheme",
+"start": 8124,
+"end": 8125
+},
+{
+"name": "PyMfcHost::getControlTheme",
+"start": 8128,
+"end": 8132
+},
+{
+"name": "PyMfcHost::setControlAppearance",
+"start": 8134,
+"end": 8237
+},
+{
+"name": "PyMfcHost::isTextInput",
+"start": 8239,
+"end": 8247
+},
+{
+"name": "PyMfcHost::stripEditFrame",
+"start": 8249,
+"end": 8278
+},
+{
+"name": "PyMfcHost::applyNativeThemeColors",
+"start": 8280,
+"end": 8316
+},
+{
+"name": "PyMfcHost::setControlIcon",
+"start": 8318,
+"end": 8328
+},
+{
+"name": "PyMfcHost::findIcon",
+"start": 8330,
+"end": 8334
+},
+{
+"name": "PyMfcHost::findAppearance",
+"start": 8336,
+"end": 8340
+},
+{
+"name": "PyMfcHost::contrastText",
+"start": 8342,
+"end": 8346
+},
+{
+"name": "PyMfcHost::setPageBackdrop",
+"start": 8348,
+"end": 8362
+},
+{
+"name": "PyMfcHost::setBackgroundColor",
+"start": 8364,
+"end": 8373
+},
+{
+"name": "PyMfcHost::controlClientSize",
+"start": 8375,
+"end": 8383
+},
+{
+"name": "PyMfcHost::getControlRect",
+"start": 8385,
+"end": 8397
+},
+{
+"name": "PyMfcHost::hostRectOfWindow",
+"start": 8399,
+"end": 8409
+},
+{
+"name": "PyMfcHost::drawContainerBackdrops",
+"start": 8411,
+"end": 8435
+},
+{
+"name": "PyMfcHost::releaseContainerPatternBrush",
+"start": 8437,
+"end": 8445
+},
+{
+"name": "borderLinePixelCode",
+"start": 8455,
+"end": 8482
+},
+{
+"name": "borderPixelCodeCorners",
+"start": 8486,
+"end": 8520
+},
+{
+"name": "borderPixelCode",
+"start": 8522,
+"end": 8553
+},
+{
+"name": "PyMfcHost::containerBackdropBrush",
+"start": 8555
+},
+{
+"name": "?",
+"start": 8738,
+"end": 8823
+},
+{
+"name": "PyMfcHost::addContainerBackdrop",
+"start": 8825,
+"end": 8831
+},
+{
+"name": "PyMfcHost::clearContainerBackdrops",
+"start": 8833,
+"end": 8836
+},
+{
+"name": "PyMfcHost::surfaceColorAt",
+"start": 8838,
+"end": 8858
+},
+{
+"name": "PyMfcHost::setFocusTo",
+"start": 8860,
+"end": 8864
+},
+{
+"name": "PyMfcHost::getVisible",
+"start": 8866,
+"end": 8870
+},
+{
+"name": "PyMfcHost::getEnabled",
+"start": 8872,
+"end": 8876
+},
+{
+"name": "PyMfcHost::onClick",
+"start": 8878,
+"end": 8879
+},
+{
+"name": "PyMfcHost::onControlEvent",
+"start": 8881
+},
+{
+"name": "EnumChildWindows",
+"start": 8891,
+"end": 8905
+},
+{
+"name": "PyMfcHost::fireControlEvent",
+"start": 8907,
+"end": 8915
+},
+{
+"name": "PyMfcHost::onGridAction",
+"start": 8918,
+"end": 8919
+},
+{
+"name": "PyMfcHost::fireGridAction",
+"start": 8922,
+"end": 8944
+},
+{
+"name": "PyMfcHost::onGridActionFor",
+"start": 8946,
+"end": 8947
+},
+{
+"name": "PyMfcHost::getXmlValue",
+"start": 8949,
+"end": 8972
+},
+{
+"name": "PyMfcHost::onDrag",
+"start": 8974,
+"end": 8975
+},
+{
+"name": "PyMfcHost::fireDrag",
+"start": 8978,
+"end": 8986
+},
+{
+"name": "PyMfcHost::onBlur",
+"start": 8988,
+"end": 8989
+},
+{
+"name": "PyMfcHost::onCanvasEvent",
+"start": 8992,
+"end": 8993
+},
+{
+"name": "PyMfcHost::fireCanvasEvent",
+"start": 8996,
+"end": 9014
+},
+{
+"name": "PyMfcHost::fireBlur",
+"start": 9017,
+"end": 9025
+},
+{
+"name": "idCacheStore",
+"start": 9031,
+"end": 9035
+},
+{
+"name": "PyMfcHost::clearIdCache",
+"start": 9038,
+"end": 9041
+},
+{
+"name": "PyMfcHost::registerChildId",
+"start": 9043,
+"end": 9047
+},
+{
+"name": "PyMfcHost::perfStats",
+"start": 9049,
+"end": 9091
+},
+{
+"name": "PyMfcHost::findByIdTree",
+"start": 9093
+},
+{
+"name": "GetWindow",
+"start": 9099,
+"end": 9105
+},
+{
+"name": "PyMfcHost::findByIdDeep",
+"start": 9107,
+"end": 9125
+},
+{
+"name": "PyMfcHost::cellRect",
+"start": 9127,
+"end": 9164
+},
+{
+"name": "PyMfcHost::installDragBar",
+"start": 9166,
+"end": 9180
+},
+{
+"name": "PyMfcHost::setWheelRegion",
+"start": 9182,
+"end": 9188
+},
+{
+"name": "PyMfcHost::onWheel",
+"start": 9190,
+"end": 9191
+},
+{
+"name": "PyMfcHost::fireWheelMessage",
+"start": 9194,
+"end": 9217
+},
+{
+"name": "PyMfcHost::setUrl",
+"start": 9219,
+"end": 9223
+},
+{
+"name": "PyMfcHost::getUrl",
+"start": 9225,
+"end": 9237
+},
+{
+"name": "PyMfcHost::setImage",
+"start": 9239,
+"end": 9290
+},
+{
+"name": "PyMfcHost::setImageFit",
+"start": 9292,
+"end": 9302
+},
+{
+"name": "PyMfcHost::setImagePosition",
+"start": 9304,
+"end": 9310
+},
+{
+"name": "PyMfcHost::setRichFormat",
+"start": 9312,
+"end": 9325
+},
+{
+"name": "PyMfcHost::setScrollRange",
+"start": 9327,
+"end": 9350
+},
+{
+"name": "PyMfcHost::getScrollRange",
+"start": 9352,
+"end": 9365
+},
+{
+"name": "PyMfcHost::getSelection",
+"start": 9367,
+"end": 9384
+},
+{
+"name": "PyMfcHost::setSelection",
+"start": 9386,
+"end": 9397
+},
+{
+"name": "PyMfcHost::getScrollPos",
+"start": 9399,
+"end": 9411
+},
+{
+"name": "PyMfcHost::onChange",
+"start": 9413,
+"end": 9414
+},
+{
+"name": "PyMfcHost::onSelect",
+"start": 9417,
+"end": 9418
+},
+{
+"name": "PyMfcHost::onDoubleClick",
+"start": 9421,
+"end": 9422
+},
+{
+"name": "PyMfcHost::onDropDown",
+"start": 9425,
+"end": 9426
+},
+{
+"name": "PyMfcHost::onValue",
+"start": 9429,
+"end": 9430
+},
+{
+"name": "PyMfcHost::onChecked",
+"start": 9433,
+"end": 9434
+},
+{
+"name": "PyMfcHost::clearCallbacks",
+"start": 9437,
+"end": 9447
+}
+]
+}

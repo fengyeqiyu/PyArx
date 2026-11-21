@@ -1,0 +1,990 @@
+{
+"file": "MfcXmlCore\\XmlCore.cpp",
+"lines": 7540,
+"funcs": [
+{
+"name": "IsBindingExpression",
+"start": 30
+},
+{
+"name": "_wcsnicmp",
+"start": 35,
+"end": 45
+},
+{
+"name": "HasLocal",
+"start": 47,
+"end": 53
+},
+{
+"name": "SetEffective",
+"start": 55,
+"end": 64
+},
+{
+"name": "ClearEffective",
+"start": 66,
+"end": 70
+},
+{
+"name": "XmlElement::has",
+"start": 73,
+"end": 82
+},
+{
+"name": "XmlElement::get",
+"start": 84,
+"end": 100
+},
+{
+"name": "XmlElement::set",
+"start": 102,
+"end": 113
+},
+{
+"name": "XmlEscape",
+"start": 120,
+"end": 136
+},
+{
+"name": "Attr",
+"start": 138,
+"end": 150
+},
+{
+"name": "IntAttr",
+"start": 152,
+"end": 157
+},
+{
+"name": "CssEdgePx",
+"start": 161,
+"end": 168
+},
+{
+"name": "WpfAlias",
+"start": 173,
+"end": 188
+},
+{
+"name": "AttrIsAuto",
+"start": 190,
+"end": 193
+},
+{
+"name": "layoutDefaults",
+"start": 206,
+"end": 210
+},
+{
+"name": "defaultSizeFor",
+"start": 212,
+"end": 226
+},
+{
+"name": "LocalName",
+"start": 229,
+"end": 231
+},
+{
+"name": "ParseThickness",
+"start": 235,
+"end": 272
+},
+{
+"name": "ThicknessValues",
+"start": 275,
+"end": 297
+},
+{
+"name": "ParsePadding",
+"start": 300,
+"end": 338
+},
+{
+"name": "TagOf",
+"start": 340,
+"end": 349
+},
+{
+"name": "NameTail",
+"start": 351,
+"end": 358
+},
+{
+"name": "AttrByName",
+"start": 361,
+"end": 396
+},
+{
+"name": "ParseDefs",
+"start": 398,
+"end": 466
+},
+{
+"name": "PathDirOf",
+"start": 471,
+"end": 475
+},
+{
+"name": "NormPath",
+"start": 478,
+"end": 490
+},
+{
+"name": "ResolveRefPath",
+"start": 493,
+"end": 518
+},
+{
+"name": "IsResourceContainerTag",
+"start": 520,
+"end": 524
+},
+{
+"name": "CollectStyle",
+"start": 526
+},
+{
+"name": "?",
+"start": 538,
+"end": 642
+},
+{
+"name": "SubstAll",
+"start": 646,
+"end": 655
+},
+{
+"name": "SubstDom",
+"start": 657
+},
+{
+"name": "SubstAll",
+"start": 684,
+"end": 684
+},
+{
+"name": "SubstAll",
+"start": 685,
+"end": 685
+},
+{
+"name": "SubstAll",
+"start": 686,
+"end": 686
+},
+{
+"name": "SubstAll",
+"start": 687,
+"end": 687
+},
+{
+"name": "SubstAll",
+"start": 688,
+"end": 725
+},
+{
+"name": "ParseElement",
+"start": 726
+},
+{
+"name": "void",
+"start": 779,
+"end": 860
+},
+{
+"name": "?",
+"start": 864,
+"end": 936
+},
+{
+"name": "?",
+"start": 1429,
+"end": 1615
+},
+{
+"name": "Sum",
+"start": 1624,
+"end": 1630
+},
+{
+"name": "KindOf",
+"start": 1633,
+"end": 1636
+},
+{
+"name": "IsKnownControl",
+"start": 1665,
+"end": 1670
+},
+{
+"name": "AnchorIsParent",
+"start": 1673,
+"end": 1676
+},
+{
+"name": "HasSiblingAnchor",
+"start": 1678,
+"end": 1684
+},
+{
+"name": "SplitAnchor",
+"start": 1687,
+"end": 1700
+},
+{
+"name": "ReplaceToken",
+"start": 1702,
+"end": 1712
+},
+{
+"name": "ApplyRowFields",
+"start": 1715
+},
+{
+"name": "ReplaceToken",
+"start": 1722,
+"end": 1722
+},
+{
+"name": "ReplaceToken",
+"start": 1723,
+"end": 1723
+},
+{
+"name": "ReplaceToken",
+"start": 1724,
+"end": 1725
+},
+{
+"name": "ReplaceToken",
+"start": 1731,
+"end": 1731
+},
+{
+"name": "ReplaceToken",
+"start": 1732,
+"end": 1732
+},
+{
+"name": "ReplaceToken",
+"start": 1733,
+"end": 1739
+},
+{
+"name": "MarkDelegateRow",
+"start": 1741,
+"end": 1746
+},
+{
+"name": "IsContainer",
+"start": 1748,
+"end": 1763
+},
+{
+"name": "DefaultHeight",
+"start": 1765,
+"end": 1781
+},
+{
+"name": "NaturalWidth",
+"start": 1785,
+"end": 1801
+},
+{
+"name": "ResolveTracks",
+"start": 1803,
+"end": 1880
+},
+{
+"name": "TextMetricsOf",
+"start": 1915,
+"end": 1970
+},
+{
+"name": "TextVerticallyCentered",
+"start": 1974,
+"end": 1985
+},
+{
+"name": "BaselineFromTop",
+"start": 1988,
+"end": 2001
+},
+{
+"name": "FlexContentWidth",
+"start": 2014,
+"end": 2050
+},
+{
+"name": "IsFlexPanelElement",
+"start": 2055,
+"end": 2060
+},
+{
+"name": "ElHidden",
+"start": 2064,
+"end": 2079
+},
+{
+"name": "LayoutFlex",
+"start": 2081
+},
+{
+"name": "?",
+"start": 2135,
+"end": 2199
+},
+{
+"name": "?",
+"start": 2203,
+"end": 2206
+},
+{
+"name": "std::stable_sort",
+"start": 2211,
+"end": 2214
+},
+{
+"name": "?",
+"start": 2296,
+"end": 2302
+},
+{
+"name": "?",
+"start": 2373,
+"end": 2603
+},
+{
+"name": "FlexLayoutChild",
+"start": 2606,
+"end": 2629
+},
+{
+"name": "LayoutNode",
+"start": 2631
+},
+{
+"name": "?",
+"start": 3035,
+"end": 3042
+},
+{
+"name": "?",
+"start": 3113,
+"end": 3117
+},
+{
+"name": "?",
+"start": 3337,
+"end": 3344
+},
+{
+"name": "?",
+"start": 3358,
+"end": 3388
+},
+{
+"name": "?",
+"start": 3415,
+"end": 3492
+},
+{
+"name": "LayoutNodeAt",
+"start": 3501,
+"end": 3532
+},
+{
+"name": "xmlLayoutSubtree",
+"start": 3535,
+"end": 3538
+},
+{
+"name": "xmlNaturalHeight",
+"start": 3540,
+"end": 3583
+},
+{
+"name": "xmlSetDefaultSize",
+"start": 3585,
+"end": 3602
+},
+{
+"name": "xmlGetDefaultSize",
+"start": 3604,
+"end": 3617
+},
+{
+"name": "xmlSetStarMinPx",
+"start": 3619,
+"end": 3622
+},
+{
+"name": "xmlSetGroupInset",
+"start": 3624,
+"end": 3628
+},
+{
+"name": "xmlColorToString",
+"start": 3630,
+"end": 3635
+},
+{
+"name": "xmlParseColor",
+"start": 3637,
+"end": 3667
+},
+{
+"name": "xmlSplit",
+"start": 3669,
+"end": 3684
+},
+{
+"name": "Lower",
+"start": 3713,
+"end": 3718
+},
+{
+"name": "Trim",
+"start": 3720,
+"end": 3726
+},
+{
+"name": "AttrOf",
+"start": 3728,
+"end": 3731
+},
+{
+"name": "Flag",
+"start": 3735,
+"end": 3742
+},
+{
+"name": "Put",
+"start": 3744,
+"end": 3744
+},
+{
+"name": "Drop",
+"start": 3746,
+"end": 3756
+},
+{
+"name": "PutSize",
+"start": 3759,
+"end": 3763
+},
+{
+"name": "TakeAttr",
+"start": 3768,
+"end": 3778
+},
+{
+"name": "TakeFlag",
+"start": 3780,
+"end": 3788
+},
+{
+"name": "HasClass",
+"start": 3791,
+"end": 3810
+},
+{
+"name": "IsDroppedTag",
+"start": 3814,
+"end": 3825
+},
+{
+"name": "IsBlockContainer",
+"start": 3827,
+"end": 3836
+},
+{
+"name": "IsTextNode",
+"start": 3838,
+"end": 3850
+},
+{
+"name": "IsHtmlTag",
+"start": 3852,
+"end": 3867
+},
+{
+"name": "DropHtmlOnly",
+"start": 3871,
+"end": 3899
+},
+{
+"name": "IsInlineTextTag",
+"start": 3902,
+"end": 3910
+},
+{
+"name": "ApproxTextWidth",
+"start": 3915,
+"end": 3934
+},
+{
+"name": "ApplyInlineStyle",
+"start": 3939
+},
+{
+"name": "?",
+"start": 4282,
+"end": 4296
+},
+{
+"name": "?",
+"start": 4480,
+"end": 4493
+},
+{
+"name": "?",
+"start": 4494,
+"end": 4501
+},
+{
+"name": "?",
+"start": 4503,
+"end": 4513
+},
+{
+"name": "?",
+"start": 4897,
+"end": 4972
+},
+{
+"name": "ApplyStyleFlexProps",
+"start": 4978,
+"end": 5054
+},
+{
+"name": "CommonAliases",
+"start": 5056,
+"end": 5098
+},
+{
+"name": "ConvertChildren",
+"start": 5102,
+"end": 5138
+},
+{
+"name": "CollectItems",
+"start": 5141,
+"end": 5170
+},
+{
+"name": "ConvertTable",
+"start": 5173,
+"end": 5278
+},
+{
+"name": "ConvertInput",
+"start": 5280,
+"end": 5371
+},
+{
+"name": "ConvertNode",
+"start": 5373
+},
+{
+"name": "?",
+"start": 5692,
+"end": 5800
+},
+{
+"name": "ApplyTextInheritance",
+"start": 5818
+},
+{
+"name": "erase",
+"start": 5829,
+"end": 5881
+},
+{
+"name": "NormalizeFlexTags",
+"start": 5886,
+"end": 5895
+},
+{
+"name": "xmlApplyHtmlSugar",
+"start": 5898,
+"end": 5916
+},
+{
+"name": "XmlControlRegistry::instance",
+"start": 5921,
+"end": 5925
+},
+{
+"name": "XmlControlRegistry::registerFactory",
+"start": 5927,
+"end": 5939
+},
+{
+"name": "XmlControlRegistry::isKnown",
+"start": 5941,
+"end": 5948
+},
+{
+"name": "XmlControlRegistry::create",
+"start": 5950,
+"end": 5957
+},
+{
+"name": "XmlControlRegistry::tags",
+"start": 5959,
+"end": 5965
+},
+{
+"name": "XmlRuntime::~XmlRuntime",
+"start": 5970,
+"end": 5974
+},
+{
+"name": "XmlRuntime::loadFile",
+"start": 5976,
+"end": 6020
+},
+{
+"name": "XmlRuntime::loadString",
+"start": 6022,
+"end": 6069
+},
+{
+"name": "XmlRuntime::layout",
+"start": 6071,
+"end": 6076
+},
+{
+"name": "XmlRuntime::setControlCallback",
+"start": 6078,
+"end": 6081
+},
+{
+"name": "AttachPanel",
+"start": 6087,
+"end": 6113
+},
+{
+"name": "BuildPanelItems",
+"start": 6115
+},
+{
+"name": "?",
+"start": 6150,
+"end": 6173
+},
+{
+"name": "XmlRuntime::instantiate",
+"start": 6175
+},
+{
+"name": "?",
+"start": 6182,
+"end": 6244
+},
+{
+"name": "XmlRuntime::root",
+"start": 6246,
+"end": 6246
+},
+{
+"name": "XmlRuntime::root",
+"start": 6247,
+"end": 6247
+},
+{
+"name": "XmlRuntime::toXml",
+"start": 6249
+},
+{
+"name": "void",
+"start": 6255,
+"end": 6300
+},
+{
+"name": "XmlRuntime::save",
+"start": 6302,
+"end": 6332
+},
+{
+"name": "XmlRuntime::reset",
+"start": 6334,
+"end": 6338
+},
+{
+"name": "TrimWs",
+"start": 6345,
+"end": 6352
+},
+{
+"name": "StartsNoCase",
+"start": 6354,
+"end": 6358
+},
+{
+"name": "FindByName",
+"start": 6360,
+"end": 6368
+},
+{
+"name": "SyncText",
+"start": 6371,
+"end": 6380
+},
+{
+"name": "StampTemplate",
+"start": 6383
+},
+{
+"name": "StartsNoCase",
+"start": 6391
+},
+{
+"name": "TrimWs",
+"start": 6393,
+"end": 6399
+},
+{
+"name": "xmlIsResourceRef",
+"start": 6406,
+"end": 6416
+},
+{
+"name": "xmlIsBindingExpr",
+"start": 6418,
+"end": 6479
+},
+{
+"name": "XmlRuntime::clearStyles",
+"start": 6481,
+"end": 6486
+},
+{
+"name": "XmlRuntime::addStyle",
+"start": 6488,
+"end": 6491
+},
+{
+"name": "XmlRuntime::getStyle",
+"start": 6493,
+"end": 6505
+},
+{
+"name": "XmlRuntime::styles",
+"start": 6507,
+"end": 6510
+},
+{
+"name": "XmlRuntime::addTemplate",
+"start": 6512,
+"end": 6523
+},
+{
+"name": "XmlRuntime::getTemplate",
+"start": 6525,
+"end": 6535
+},
+{
+"name": "XmlRuntime::templateKeys",
+"start": 6537,
+"end": 6544
+},
+{
+"name": "XmlRuntime::bindings",
+"start": 6546,
+"end": 6549
+},
+{
+"name": "XmlRuntime::applyStyles",
+"start": 6551
+},
+{
+"name": "void",
+"start": 6556,
+"end": 6571
+},
+{
+"name": "void",
+"start": 6573,
+"end": 6633
+},
+{
+"name": "ExpandDelegate",
+"start": 6640
+},
+{
+"name": "erase",
+"start": 6663,
+"end": 6665
+},
+{
+"name": "?",
+"start": 6673,
+"end": 6717
+},
+{
+"name": "XmlRuntime::applyTemplates",
+"start": 6719
+},
+{
+"name": "void",
+"start": 6724
+},
+{
+"name": "erase",
+"start": 6729,
+"end": 6749
+},
+{
+"name": "IsDataExpression",
+"start": 6763,
+"end": 6776
+},
+{
+"name": "DataExpressionInner",
+"start": 6778,
+"end": 6789
+},
+{
+"name": "IsIdentStart",
+"start": 6798,
+"end": 6798
+},
+{
+"name": "IsIdentChar",
+"start": 6799,
+"end": 6799
+},
+{
+"name": "ResolveIdent",
+"start": 6805,
+"end": 6854
+},
+{
+"name": "ExprParser",
+"start": 6865,
+"end": 6865
+},
+{
+"name": "skipWs",
+"start": 6867,
+"end": 6871
+},
+{
+"name": "parse",
+"start": 6873,
+"end": 6880
+},
+{
+"name": "parseAdd",
+"start": 6882,
+"end": 6907
+},
+{
+"name": "parseMul",
+"start": 6909,
+"end": 6929
+},
+{
+"name": "parseUnary",
+"start": 6931,
+"end": 6948
+},
+{
+"name": "parsePrimary",
+"start": 6950,
+"end": 7031
+},
+{
+"name": "callFunction",
+"start": 7033,
+"end": 7084
+},
+{
+"name": "format",
+"start": 7086,
+"end": 7103
+},
+{
+"name": "EvalDataExpression",
+"start": 7106,
+"end": 7124
+},
+{
+"name": "RecomputeGeometry",
+"start": 7128,
+"end": 7262
+},
+{
+"name": "xmlIsExpression",
+"start": 7265,
+"end": 7268
+},
+{
+"name": "XmlRuntime::applyExpressions",
+"start": 7270
+},
+{
+"name": "void",
+"start": 7274,
+"end": 7288
+},
+{
+"name": "XmlRuntime::applyBindings",
+"start": 7290
+},
+{
+"name": "void",
+"start": 7303,
+"end": 7341
+},
+{
+"name": "XmlRuntime::setProperty",
+"start": 7343,
+"end": 7383
+},
+{
+"name": "XmlRuntime::elementByName",
+"start": 7385,
+"end": 7392
+},
+{
+"name": "XmlRuntime::attachFlexContainer",
+"start": 7394,
+"end": 7410
+},
+{
+"name": "XmlRuntime::kindOfElement",
+"start": 7412,
+"end": 7416
+},
+{
+"name": "XmlRuntime::refreshItemView",
+"start": 7418,
+"end": 7427
+},
+{
+"name": "XmlRuntime::applyDeclarations",
+"start": 7429,
+"end": 7434
+},
+{
+"name": "PropTypeName",
+"start": 7441,
+"end": 7461
+},
+{
+"name": "JsonAscii",
+"start": 7464,
+"end": 7489
+},
+{
+"name": "XmlPropertySchemaJson",
+"start": 7492,
+"end": 7539
+}
+]
+}

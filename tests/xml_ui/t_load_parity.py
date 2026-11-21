@@ -16,7 +16,7 @@ def sizes(win, names, keys):
     out = {}
     for k in keys:
         cid = names.get(k)
-        out[k] = None if cid is None else tuple(win.getSize(cid))
+        out[k] = None if cid is None else tuple(win.get_size(cid))
     return out
 
 

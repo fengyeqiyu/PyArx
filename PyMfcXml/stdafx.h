@@ -6,11 +6,13 @@
 #include <afxwin.h>
 #include <afxext.h>
 #include <afxcmn.h>
+#include <richedit.h>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include <map>
+#include <unordered_map>
 #include <string>
 
 namespace py = pybind11;

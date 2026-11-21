@@ -91,7 +91,7 @@ namespace xmlplan
                                  const PowerPlanStyle& style, std::wstring& err,
                                  bool horizontal = false);
 
-    // XML（设计器文档）：Window + 一张 PowerCanvas（Data = 布局 JSON）
+    // XML（设计器文档）：Window + 一张 XDwgCanvas（Data = 布局 JSON）
     XML_CORE_API std::wstring toXml(const PowerPlan& plan, const std::wstring& title);
 
     // JSON：nodes（原始数据）+ layout（坐标），便于外部工具复现同一张图

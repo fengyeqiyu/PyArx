@@ -191,6 +191,18 @@ class Child(object):
         return '<Child %s id=%s rect=%s>' % (self._name, self.id, self.rect)
 
 
+def _host_name(host, snake):
+    """宿主方法探测：以 snake_case 为准，同时认旧 camelCase 写法。
+    返回真正可调用的名字，没有则 None（认错名字会让事件静默不触发）。"""
+    if host is None:
+        return None
+    if hasattr(host, snake):
+        return snake
+    head, _, tail = snake.partition('_')
+    camel = head + ''.join(p[:1].upper() + p[1:] for p in tail.split('_') if p)
+    return camel if hasattr(host, camel) else None
+
+
 class Composite(object):
     """一个 XML 定义的复合控件实例。"""
 
@@ -228,7 +240,7 @@ class Composite(object):
 
     # ---------- 建控件：几何全部来自 xmlLayout ----------
     def _build(self, x, y, w, h):
-        rel = M.xmlLayout(self.xml, w, h)
+        rel = M.xml_layout(self.xml, w, h)
         root = self._root if self._root is not None else ET.parse(self.xml).getroot()
 
         idx = 0
@@ -292,14 +304,16 @@ class Composite(object):
                 self.on(name, ev, None)
 
     # ---------- 事件：一律回 Python ----------
+    # 宿主方法名统一 snake_case（Python 封面的对外口径）；同时兼容旧 camel 写法，
+    # 谁在就调谁。认错名字会让 child.click 静默不触发，所以两条都试。
     _HOST_METHOD = {
-        'click': 'onClick',
-        'doubleclick': 'onDoubleClick',
-        'change': 'onChange',          # 实时文本变化（不是失焦）
-        'select': 'onSelect',
-        'value': 'onValue',
-        'checked': 'onChecked',
-        'dropdown': 'onDropDown',
+        'click': ('on_click', 'onClick'),
+        'doubleclick': ('on_double_click', 'onDoubleClick'),
+        'change': ('on_change', 'onChange'),          # 实时文本变化（不是失焦）
+        'select': ('on_select', 'onSelect'),
+        'value': ('on_value', 'onValue'),
+        'checked': ('on_checked', 'onChecked'),
+        'dropdown': ('on_drop_down', 'onDropDown'),
     }
 
     def on(self, name, event, cb):
@@ -314,30 +328,43 @@ class Composite(object):
 
         if event == 'grid':
             route = lambda *a, **k: self._dispatch(name, 'grid', a)
-            if hasattr(self.win, 'onGridActionFor'):
-                self.win.onGridActionFor(cid, route)   # 按控件过滤，多表并存不串台
-            elif hasattr(self.win, 'onGridAction'):
-                self.win.onGridAction(route)
+            m = _host_name(self.win, 'on_grid_action_for')
+            if m:                                       # 按控件过滤，多表并存不串台
+                getattr(self.win, m)(cid, route)
+            else:
+                m = _host_name(self.win, 'on_grid_action')
+                if m:
+                    getattr(self.win, m)(route)
             return self
 
         if event == 'commit':                       # 失焦才提交
-            if hasattr(self.win, 'onBlur'):
-                self.win.onBlur(cid, lambda *a, **k: self._dispatch(name, 'commit', a[1] if len(a) > 1 else None))
+            m = _host_name(self.win, 'on_blur')
+            if m:
+                getattr(self.win, m)(cid, lambda *a, **k: self._dispatch(name, 'commit', a[1] if len(a) > 1 else None))
             return self
 
         ctl = CTL_EVENTS.get(event)
         if ctl is not None:
-            if not hasattr(self.win, 'onControlEvent'):
+            m = _host_name(self.win, 'on_control_event')
+            if not m:
                 if event not in self._missing_evt:
                     self._missing_evt.add(event)
                     print('[MfcXmlRuntime] 事件 %s 在当前宿主上不可用，已忽略（%s）'
                           % (event, self.name), file=sys.stderr)
                 return self
-            self.win.onControlEvent(cid, ctl, lambda *a, _n=name, _e=event: self._dispatch(_n, _e, None))
+            getattr(self.win, m)(cid, ctl, lambda *a, _n=name, _e=event: self._dispatch(_n, _e, None))
             return self
 
-        method = self._HOST_METHOD.get(event)
-        if method is None or not hasattr(self.win, method):
+        candidates = self._HOST_METHOD.get(event)
+        if isinstance(candidates, str):        # 老代码可能还在用字符串表
+            candidates = (candidates,)
+        method = None
+        if candidates:
+            for cand in candidates:
+                if hasattr(self.win, cand):
+                    method = cand
+                    break
+        if method is None:
             if event not in self._missing_evt:
                 self._missing_evt.add(event)
                 print('[MfcXmlRuntime] 事件 %s 在当前宿主上不可用，已忽略（%s）'
@@ -417,18 +444,18 @@ class Composite(object):
     def set_text(self, name, text):
         cid = self.ids.get(name)
         if cid is not None:
-            self.win.setText(cid, text)
+            self.win.set_text(cid, text)
 
     def set_rows(self, name, rows):
         """rows: [ [第1格, 第2格, ...], ... ]  一次灌满。"""
         cid = self.ids.get(name)
         if cid is None:
             return
-        self.win.setTableRows(cid, '\n'.join('\t'.join(r) for r in rows))
+        self.win.set_table_rows(cid, '\n'.join('\t'.join(r) for r in rows))
 
     def move(self, x, y, w, h):
         """窗口尺寸变了：整块重排，仍然交给 XML 算矩形。"""
-        rel = M.xmlLayout(self.xml, w, h)
+        rel = M.xml_layout(self.xml, w, h)
         batch = []
         for name, (rx, ry, rw, rh) in rel.items():
             cid = self.ids.get(name)
@@ -437,7 +464,7 @@ class Composite(object):
                 batch.append((cid, ax, ay, int(rw), int(rh)))
                 self.rects[name] = (ax, ay, int(rw), int(rh))
         if batch:
-            self.win.moveMany(batch)      # 一次搬完，不逐个 move（40 个逐个 move 会掉帧）
+            self.win.move_many(batch)      # 一次搬完，不逐个 move（40 个逐个 move 会掉帧）
 
     def destroy(self):
         for cid in self.ids.values():

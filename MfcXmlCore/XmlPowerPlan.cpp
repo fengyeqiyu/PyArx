@@ -684,12 +684,12 @@ namespace xmlplan
         const int winW = (plan.width + 48 > 1140) ? 1140 : (plan.width + 48);
         const int winH = (plan.height + 48 > 480) ? 480 : (plan.height + 48);
         ss << L"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
-        ss << L"<!-- 由配电规划图自动生成：一张 PowerCanvas 承载全部卡片与回路，"
+        ss << L"<!-- 由配电规划图自动生成：一张 XDwgCanvas 承载全部卡片与回路，"
            << L"滚轮缩放 / 拖动平移 / 单击卡片可命中 -->\r\n";
         ss << L"<Window xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xml\"\r\n";
         ss << L"        Name=\"PowerPlan\" Width=\"" << winW << L"\" Height=\""
            << winH << L"\" Title=\"" << xmlEscape(t) << L"\" Background=\"#FFF3F5F8\">\r\n";
-        ss << L"  <PowerCanvas Name=\"Plan\" Left=\"0\" Top=\"0\" Width=\"" << winW
+        ss << L"  <XDwgCanvas Name=\"Plan\" Left=\"0\" Top=\"0\" Width=\"" << winW
            << L"\" Height=\"" << winH << L"\" Data=\""
            << data << L"\"/>\r\n";
         ss << L"</Window>\r\n";

@@ -19,7 +19,7 @@
 #include "XmlEvents.h"       // 事件契约唯一来源（前端声明 ↔ 后端派发）
 #include "XmlTypes.h"        // 属性表（S1）：一个属性只定义一次
 #include "XmlAppearance.h"   // 外观基元在运行时核心（PyMfcXml），三端共用
-#include "XmlQmlNames.h"      // QML 属性名 -> 内部属性名
+#include "XmlPropAliases.h"   // 小写属性名 -> 内部属性名
 
 #include <string>
 #include <utility>
@@ -65,6 +65,11 @@ public:
     void setAppearance(const xmlapp::XmlAppearance& ap);
 
     int Id() const { return m_id; }
+
+    // 本控件是不是 flex 容器（XmlFlexPanel）。
+    // 加载层据此决定"子控件要不要 SetParent 到容器上"（真实父子层级），
+    // 不去 dynamic_cast 具体类型，免得 PyMfcXml 依赖 MfcXmlCore 的控件类头文件。
+    virtual bool isFlexContainer() const { return false; }
 
     // ---- 所有控件共有的基础属性 ----
     // Level：绘图层次，越大越靠上（改它只动 z 序，不动键盘顺序）
@@ -112,6 +117,11 @@ protected:
     // 默认什么都不做。调用点在 pushAppearance 里，setProperty 写外观后必然经过。
     virtual void onAppearanceChanged() {}
 
+    // 容器类的背景背板钩子：容器本身是原生 HWND、宿主不做 owner-draw，
+    // 所以 <div style="background:..."> 的底色必须交给宿主的绘制节点管线来画。
+    // 默认空实现（普通控件没有背板），容器控件 override 后按自身 rect 登记。
+    virtual void pushBackdrop() {}
+
     std::wstring m_type;       // 短名（button/label/...）
     IXmlMfcHost* m_host = nullptr;
     int m_id = 0;
@@ -121,8 +131,11 @@ protected:
     int m_level = 0;           // 绘图层次（越大越上）
     int m_tabIndex = -1;       // Tab 序号（-1 = 未声明，按创建序）
     std::wstring m_theme;      // 主题名（空 = 用宿主默认）
+    bool m_enabled = true;     // Enabled="False"（HTML disabled）
+    bool m_visible = true;     // Visible="False"（HTML hidden）
     void pushOrder();          // 层次/序号变化后推给宿主
     void pushTheme();          // 主题变化后推给宿主
+    void applyEnableState();   // 可用/可见状态变化后推给宿主
 
     xmlapp::XmlAppearance m_ap;                                 // 外观声明
     std::vector<std::pair<std::wstring, std::wstring>> m_eventNames; // kind -> XML 函数名

@@ -23,4 +23,6 @@ private:
     static const std::vector<XmlPropEntry>& PropTableData();
 
     std::wstring m_image;
+    std::wstring m_objectFit;   // CSS object-fit：fill（默认）/ contain / cover / none / scale-down
+    std::wstring m_objectPos;   // CSS object-position：图片在盒子里的对齐位置
 };

@@ -5,20 +5,7 @@
 
 #include "PyMfcCommon.h"
 #include "PyMfcHost.h"
-
-class PyMfcTopWnd : public CWnd
-{
-public:
-    PyMfcHost* host = nullptr;
-    std::function<void(int, int)> resize;
-
-    // 本对象是 PyMfcWindow 的成员，且窗口由 SubclassWindow 绑定：
-    // 窗口销毁时 MFC 默认 PostNcDestroy 会 delete this，会删掉一块成员子对象 → 堆损坏。
-void PostNcDestroy() override;
-protected:
-    afx_msg void OnSize(UINT nType, int cx, int cy);
-    DECLARE_MESSAGE_MAP()
-};
+#include "PyMfcTopWnd.h"
 
     // Python 侧的 holder deleter：不做任何事。
     // 原生对象由 PyMfcStore 持有到进程结束，Python 引用计数归零时不能 delete。
@@ -66,6 +53,8 @@ void setResizeCallback(py::object cb);
 std::pair<int, int> ClientSize() const;
 void setBackground(int r, int g, int b);
 std::pair<int, int> getSize(int id) const;
+// 控件矩形（宿主客户区坐标）：用来核对布局结果，含控件层 flex 容器排出来的子项位置
+py::tuple getRect(int id) const;
 void notifyResize(int w, int h);
 
 void show();
@@ -170,7 +159,7 @@ bool getReadOnly(int id) const;
 void setFocusTo(int id);
 bool getVisible(int id) const;
 bool getEnabled(int id) const;
-    // QML 对齐小控件
+    // HTML 对齐小控件
 bool getSwitch(int id) const;
 void setSwitch(int id, bool on);
 int getSpin(int id) const;
@@ -203,6 +192,7 @@ void onBlur(int id, py::object cb);
 void onDrag(int id, py::object cb);
 void onCanvasEvent(int id, py::object cb);
 py::object cellRect(int id, int row, int col);
+py::dict perfStats(bool reset);
 void onGridAction(py::object cb);
     void onGridActionFor(int id, py::object cb);
     void onControlEvent(int id, const std::wstring& ev, py::object cb);
@@ -269,23 +259,27 @@ bool isPopupVisible(int id) const;
 
 void setCanvasCommands(int id, const std::wstring& cmds);
 std::wstring getCanvasCommands(int id) const;
-    // 配电画布：建窗 + 喂数据（JSON / SVG）+ 读写视图
-void addPowerCanvas(int id, int x, int y, int w, int h);
-void loadPowerPlan(int id, const std::wstring& json);
-void loadPowerScene(int id, const std::wstring& json);
-    void copyPowerScene(int toId, int fromId);
-void loadPowerSvg(int id, const std::wstring& svg);
+    // 绘图画布（DWG 为主，兼容已算坐标的布局输入）：建窗 + 喂数据（JSON / SVG）+ 读写视图
+void addDwgCanvas(int id, int x, int y, int w, int h);
+void loadDwgLayout(int id, const std::wstring& json);
+void loadDwgScene(int id, const std::wstring& json);
+    void copyDwgScene(int toId, int fromId);
+void loadDwgSvg(int id, const std::wstring& svg);
+void loadDwgXml(int id, const std::wstring& sceneXml);
     // 叠加层（选中框/橡皮筋/光标）：底图不动，只换这一层
-void loadPlanOverlay(int id, const std::wstring& svg);
-void setPlanView(int id, float zoom, int ox, int oy);
-float getPlanZoom(int id) const;
-std::wstring getPlanSelection(int id) const;
+void loadDwgOverlay(int id, const std::wstring& svg);
+void loadDwgOverlayXml(int id, const std::wstring& sceneXml);
+void setDwgView(int id, float zoom, int ox, int oy);
+float getDwgZoom(int id) const;
+std::wstring getDwgSelection(int id) const;
+// FileTab 诊断：回读模型/布局几何 JSON（控件客户区坐标）
+std::wstring getFileTabInfo(int id) const;
     // 画布选项：连线标注电缆 / 小地图模式（mini 的画布画主画布 miniOf 的视口红框）
-void setPlanOptions(int id, bool showCable, bool mini, int miniOf);
+void setDwgOptions(int id, bool showCable, bool mini, int miniOf);
     // 视口参数 (zoom, ox, oy)：居中定位、小地图联动都要用
-py::object getPlanView(int id) const;
+py::object getDwgView(int id) const;
     // 画布鼠标诊断：返回 (lastMsg, upX, upY, wasDrag, moved_now, lastHit)
-py::object planProbe(int id);
+py::object dwgProbe(int id);
 
     // ---- 三维视图画布 ----
     // 建窗 + 喂几何（box/line/tri 文本记录）+ 读写相机（yaw/pitch/zoom/pan）
@@ -299,16 +293,21 @@ py::object view3DGetCamera(int id) const;
 void view3DFitView(int id);
 void view3DSetStyle(int id, unsigned bg, bool axes, bool grid);
     // 命中测试（客户端坐标）：返回卡片编号，空 = 没命中。搜索/外部联动用
-std::wstring hitPlan(int id, int x, int y);
-bool selectPlan(int id, const std::wstring& code);
+std::wstring hitDwg(int id, int x, int y);
+bool selectDwg(int id, const std::wstring& code);
     // 卡片客户端矩形（x, y, w, h）；没有这张卡返回 None
-py::object cardRectPlan(int id, const std::wstring& code);
+py::object cardRectDwg(int id, const std::wstring& code);
 void setDetailCard(int id, py::list rect, py::list texts);
 void clearDetailCard(int id);
 void setCanvasEditable(int id, bool on);
 bool getCanvasEditable(int id) const;
 int getLevel(int id) const;
 void setLevel(int id, int level);
+std::wstring getCursor(int id) const;
+void setCursor(int id, const std::wstring& keyword);
+std::wstring getPointerEvents(int id) const;
+void setPointerEvents(int id, const std::wstring& keyword);
+bool isMouseTransparent(int id) const;
 void bringToFront(int id);
 void raiseMany(const std::vector<int>& ids);
 void bringToFrontMany(const std::vector<int>& ids);
@@ -457,7 +456,7 @@ bool getReadOnly(int id) const;
 void setFocusTo(int id);
 bool getVisible(int id) const;
 bool getEnabled(int id) const;
-    // QML 对齐小控件
+    // HTML 对齐小控件
 bool getSwitch(int id) const;
 void setSwitch(int id, bool on);
 int getSpin(int id) const;
@@ -490,6 +489,7 @@ void onBlur(int id, py::object cb);
 void onDrag(int id, py::object cb);
 void onCanvasEvent(int id, py::object cb);
 py::object cellRect(int id, int row, int col);
+py::dict perfStats(bool reset);
 void onGridAction(py::object cb);
     void onGridActionFor(int id, py::object cb);
     void onControlEvent(int id, const std::wstring& ev, py::object cb);
@@ -556,26 +556,33 @@ bool isPopupVisible(int id) const;
 
 void setCanvasCommands(int id, const std::wstring& cmds);
 std::wstring getCanvasCommands(int id) const;
-void addPowerCanvas(int id, int x, int y, int w, int h);
-void loadPowerPlan(int id, const std::wstring& json);
-void loadPowerScene(int id, const std::wstring& json);
-    void copyPowerScene(int toId, int fromId);
-void loadPowerSvg(int id, const std::wstring& svg);
+void addDwgCanvas(int id, int x, int y, int w, int h);
+void loadDwgLayout(int id, const std::wstring& json);
+void loadDwgScene(int id, const std::wstring& json);
+    void copyDwgScene(int toId, int fromId);
+void loadDwgSvg(int id, const std::wstring& svg);
+void loadDwgXml(int id, const std::wstring& sceneXml);
     // 叠加层（选中框/橡皮筋/光标）：底图不动，只换这一层
-void loadPlanOverlay(int id, const std::wstring& svg);
-void setPlanView(int id, float zoom, int ox, int oy);
-float getPlanZoom(int id) const;
-std::wstring getPlanSelection(int id) const;
-void setPlanOptions(int id, bool showCable, bool mini, int miniOf);
-py::object getPlanView(int id) const;
-std::wstring hitPlan(int id, int x, int y);
-bool selectPlan(int id, const std::wstring& code);
+void loadDwgOverlay(int id, const std::wstring& svg);
+void loadDwgOverlayXml(int id, const std::wstring& sceneXml);
+void setDwgView(int id, float zoom, int ox, int oy);
+float getDwgZoom(int id) const;
+std::wstring getDwgSelection(int id) const;
+void setDwgOptions(int id, bool showCable, bool mini, int miniOf);
+py::object getDwgView(int id) const;
+std::wstring hitDwg(int id, int x, int y);
+bool selectDwg(int id, const std::wstring& code);
 void setDetailCard(int id, py::list rect, py::list texts);
 void clearDetailCard(int id);
 void setCanvasEditable(int id, bool on);
 bool getCanvasEditable(int id) const;
 int getLevel(int id) const;
 void setLevel(int id, int level);
+std::wstring getCursor(int id) const;
+void setCursor(int id, const std::wstring& keyword);
+std::wstring getPointerEvents(int id) const;
+void setPointerEvents(int id, const std::wstring& keyword);
+bool isMouseTransparent(int id) const;
 void bringToFront(int id);
 void raiseMany(const std::vector<int>& ids);
 void bringToFrontMany(const std::vector<int>& ids);
@@ -654,3 +661,4 @@ struct PyMfcStore
         return panel;
     }
 };
+

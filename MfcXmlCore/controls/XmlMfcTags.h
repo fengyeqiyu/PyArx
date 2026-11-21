@@ -75,14 +75,14 @@ namespace xmlmfc
             L"Button", L"Label", L"TextField", L"ListBox", L"CodeEditor", L"CheckBox",
             L"RadioButton", L"GroupBox", L"ComboBox", L"ProgressBar", L"Slider",
             L"TabBar", L"TreeView", L"ListCtrl", L"Choice", L"DatePicker", L"Pane",
-            L"SplitView", L"Divider", L"PowerCanvas", L"Hyperlink", L"TextArea",
+            L"SplitView", L"Divider", L"DwgCanvas", L"Hyperlink", L"TextArea",
             L"ToggleButton", L"IconButton", L"Image", L"GridLayout", L"ScrollView",
             L"MonthGrid", L"Switch", L"SpinBox", L"RangeSlider", L"BusyIndicator",
             L"PageIndicator", L"Dial", L"Tumbler", L"ScrollBar", L"TableView", L"TreeTable",
             L"ToolBar", L"ToolTip", L"Menu", L"MenuBar", L"Popup", L"VirtualList",
             L"StackView", L"SwipeView", L"GridView", L"PathView", L"QCanvas", L"Page",
             L"Flickable",
-            // QML Controls 2 对齐补齐
+            // HTML Controls 2 对齐补齐
             L"Frame", L"Dialog", L"Drawer", L"RoundButton", L"DelayButton", L"ToolButton", L"ToolSeparator", L"TabButton", L"ScrollIndicator", L"MenuItem", L"MenuSeparator",
             L"ItemView", L"Delegate",
             // 绘制图元

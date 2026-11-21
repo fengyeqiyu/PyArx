@@ -87,6 +87,8 @@ struct IXmlMfcHost
     // 编辑框的输入长度上限与空内容占位提示
     virtual void setLimitText(int, int) {}
     virtual void setCueBanner(int, const std::wstring&) {}
+    // 口令字符：0 = 明文。默认实现不做事（设计器自绘侧不关心）
+    virtual void setPasswordChar(int /*id*/, wchar_t /*ch*/) {}
 
     // 属性操作
     virtual void setText(int id, const std::wstring& text) = 0;
@@ -94,6 +96,14 @@ struct IXmlMfcHost
     virtual void setVisible(int id, bool visible) = 0;
     virtual void setEnabled(int id, bool enabled) = 0;
     virtual void moveControl(int id, int x, int y, int w, int h) = 0;
+    // 控件在宿主客户区里的矩形：控件层容器自己排子项时要用（拿子控件当前尺寸当 flex-basis 回退）
+    virtual void getControlRect(int /*id*/, int& x, int& y, int& w, int& h) const
+    {
+        x = 0;
+        y = 0;
+        w = 0;
+        h = 0;
+    }
     virtual void addString(int id, const std::wstring& text) = 0;
     virtual void clearStrings(int id) = 0;
     virtual int countStrings(int id) const = 0;
@@ -120,35 +130,50 @@ struct IXmlMfcHost
     // 默认实现什么都不做，让只关心外观的实现（设计器自绘侧）不必实现它们。
     virtual void setUrl(int, const std::wstring&) {}
     virtual bool setImage(int, const std::wstring&) { return false; }
+    // CSS object-fit：图片盒子怎么把图塞进自己的矩形（fill/contain/cover/none/scale-down）。
+    // 默认空实现即可，只有真能自绘图片的宿主需要。
+    virtual void setImageFit(int, const std::wstring&) {}
+    // CSS object-position：图片在盒子里的对齐位置（left/center/right/top/bottom/百分比）。
+    virtual void setImagePosition(int, const std::wstring&) {}
     virtual void setRichFormat(int, int /*sizePt*/, bool /*bold*/, bool /*italic*/, unsigned long /*rgb*/) {}
     virtual void setScrollRange(int, int /*minValue*/, int /*maxValue*/) {}
 
-    // QML 对齐的一批"自建画布"小控件（Switch / SpinBox / RangeSlider / BusyIndicator /
+    // HTML 对齐的一批"自建画布"小控件（Switch / SpinBox / RangeSlider / BusyIndicator /
     // PageIndicator）。Win32 没有对应系统类，宿主单独建一个画布窗口，状态留在宿主里。
     virtual void addSkinBox(int /*id*/, int /*kind*/, int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
 
-    // 配电规划图画布：同样没有系统类，宿主建一个自绘窗口，把布局结果画上去。
+    // 绘图画布（DWG 为主，兼容已算坐标的布局输入）：同样没有系统类，宿主建一个自绘窗口，把布局结果画上去。
     // 缩放/平移状态也留在宿主里，因为重绘是宿主发起的（InvalidateRect）。
-    virtual void addPowerCanvas(int /*id*/, int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
+    virtual void addDwgCanvas(int /*id*/, int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
     // 传 JSON（= powerplan.toJson 的输出）。宿主解析后自己重排、自己算 fit 视图。
-    virtual void setPowerCanvasPlan(int /*id*/, const std::wstring& /*json*/) {}
+    virtual void setDwgLayout(int /*id*/, const std::wstring& /*json*/) {}
     // 传"坐标已算好"的场景 JSON（powerplan.toJson 同构）。宿主只按坐标画，不排版。
-    virtual void setPowerCanvasScene(int /*id*/, const std::wstring& /*json*/) {}
+    virtual void setDwgScene(int /*id*/, const std::wstring& /*json*/) {}
     // 传 SVG 文本，走同一条绘制路径（几何 + 文字都已解析成场景）。
-    virtual void setPowerCanvasSvg(int /*id*/, const std::wstring& /*svgText*/) {}
+    virtual void setDwgSvg(int /*id*/, const std::wstring& /*svgText*/) {}
+    // 传 <XScene> 声明式显示列表（XLine/XCircle/XArc/XRect/XPolyline/XPolygon/XText/XGroup），
+    // 与 setDwgSvg 同一场景、同一绘制路径，只是不做 SVG 序列化 + 二次解析。
+    virtual void setDwgXml(int /*id*/, const std::wstring& /*sceneXml*/) {}
     // 叠加层 SVG：只重解析这一层（选中框/橡皮筋/光标），底图保持不变。
-    virtual void setPowerCanvasOverlay(int /*id*/, const std::wstring& /*svgText*/) {}
-    virtual void setPowerCanvasView(int /*id*/, float /*zoom*/, int /*offsetX*/, int /*offsetY*/) {}
-    virtual float getPowerCanvasZoom(int /*id*/) const { return 1.0f; }
-    virtual std::wstring getPowerCanvasSelection(int /*id*/) const { return {}; }
+    virtual void setDwgOverlay(int /*id*/, const std::wstring& /*svgText*/) {}
+    // 叠加层的 XML 场景版本（<XScene>…），语义同上。
+    virtual void setDwgOverlayXml(int /*id*/, const std::wstring& /*sceneXml*/) {}
+    virtual void setDwgView(int /*id*/, float /*zoom*/, int /*offsetX*/, int /*offsetY*/) {}
+    virtual float getDwgZoom(int /*id*/) const { return 1.0f; }
+    virtual std::wstring getDwgSelection(int /*id*/) const { return {}; }
     // 画布选项：电缆标注开关 / 小地图模式（mini 时本画布只做缩略图并画主画布的视口红框）
-    virtual void setPowerCanvasOptions(int /*id*/, bool /*showCable*/, bool /*mini*/, int /*miniOf*/) {}
+    virtual void setDwgOptions(int /*id*/, bool /*showCable*/, bool /*mini*/, int /*miniOf*/) {}
 
     // ---- Ribbon（控件库 xmlctl::XRibbon 模型 + 布局 + 绘制 + 命中，宿主只建自绘窗口）----
     virtual void addRibbon(int /*id*/, int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
     // 把 Ribbon 的 XML 子树（Tab/Group/Button）交给宿主解析成模型；el 为 XmlElement*
     virtual void setRibbonElement(int /*id*/, const XmlElement* /*el*/) {}
-    virtual void getPowerCanvasView(int /*id*/, float& zoom, int& ox, int& oy) const
+
+    // ---- FileTab（控件库 xmlctl::FileTab 模型 + 布局 + 绘制 + 命中，宿主只建自绘窗口）----
+    virtual void addFileTab(int /*id*/, int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
+    // 把 FileTab 的 XML 子树（FileTabItem）交给宿主解析成模型；el 为 XmlElement*
+    virtual void setFileTabElement(int /*id*/, const XmlElement* /*el*/) {}
+    virtual void getDwgView(int /*id*/, float& zoom, int& ox, int& oy) const
     {
         zoom = 1.0f;
         ox = oy = 0;
@@ -277,6 +302,26 @@ struct IXmlMfcHost
     virtual void setControlTabIndex(int /*id*/, int /*index*/) {}
     virtual int getControlTabIndex(int /*id*/) const { return -1; }
 
+    // ---- 通用基础属性：鼠标光标（CSS cursor） ----
+    // 值按 CSS 关键字存（pointer / default / text / move / not-allowed …），
+    // 由宿主在 WM_SETCURSOR 时翻译成 HCURSOR，控件层不持有 Win32 句柄。
+    virtual void setControlCursor(int /*id*/, const std::wstring& /*keyword*/) {}
+    virtual std::wstring getControlCursor(int /*id*/) const { return {}; }
+
+    // ---- CSS pointer-events：HTML 里"这层不接鼠标、点击穿透到下面"的标准写法 ----
+    // none = 该控件对鼠标完全透明（擦掉命中），auto/空 = 正常接收。
+    virtual void setControlPointerEvents(int /*id*/, const std::wstring& /*keyword*/) {}
+    // CSS overflow:scroll/auto 的容器登记（滚动量由宿主持有，控件层只上报"我能滚"）
+    virtual void registerScrollContainer(int /*id*/) {}
+    // CSS position:fixed —— 容器滚动时不跟着动的子控件
+    virtual void markFixedChild(int /*id*/) {}
+    // CSS position:sticky —— 跟着滚，但滚到距容器顶 topPx 处吸住（topPx 为 CSS 的 top 值）
+    virtual void registerStickyChild(int /*id*/, int /*topPx*/) {}
+    // CSS animation / keyframes：帧表播放交给宿主（与 transition 同一分工）
+    virtual void startCssKeyframes(int /*id*/, const std::wstring& /*spec*/,
+                                   int /*durMs*/, bool /*loop*/) {}
+    virtual std::wstring getControlPointerEvents(int /*id*/) const { return {}; }
+
     // ---- 通用基础属性：主题 ----
     // 主题名（如 "Dark" / "Light" / 自定义皮肤名）。颜色分配规则还没定，
     // 所以先只做"属性可声明、可回读、能推到宿主"这条通路，宿主可以暂不消费。
@@ -286,9 +331,29 @@ struct IXmlMfcHost
     // 取控件 HWND（供 IXmlControl::nativeHandle 返回）
     virtual void* getDlgItemHandle(int id) const = 0;
 
+    // 宿主窗口 HWND = 「宿主客户区绝对坐标」的原点。
+    // 容器的子项最终要落到宿主客户区坐标（宿主绘制/命中/节点缓存全用这套），而容器自己
+    // 可能又嵌在另一个容器里：只 MapWindowPoints 到直接父窗口会少算一层，子项就会跑到
+    // 页面左上角、互相叠住（HTML 里这一幕不存在，因为子元素坐标天然相对已定位的父盒子）。
+    virtual void* getHostWindow() const { return nullptr; }
+
     // 外观（形状/颜色/风格/前置背景/后置背景）：控件类解析 XML 后推给宿主，
     // 宿主在绘制（WM_DRAWITEM / WM_CTLCOLOR）时按此渲染。
     virtual void setControlAppearance(int id, const xmlapp::XmlAppearance& ap) = 0;
+
+    // XML 的 font-family / font-size 落到**原生文本控件**（EDIT/RICHEDIT/COMBOBOX/LISTBOX）。
+    // 自绘（owner-draw）控件本来就按外观表画字，但输入框是真窗口：它的文字由系统用
+    // WM_SETFONT 的那把 HFONT 画。此前 XML 写了字号也只会影响自绘件，输入框永远 10pt，
+    // 于是"不聚焦时看着是 12px、点进去变成另一套字形"这种不一致无从修。默认空实现。
+    virtual void setControlFont(int /*id*/, const std::wstring& /*face*/, int /*px*/,
+                                bool /*bold*/ = false) {}
+
+    // 原生容器的背景背板：按 id 登记，宿主 moveControl 时自动跟随几何。
+    // HTML 里 div 的背景就是一块矩形（含圆角/边框/opacity），交给宿主的绘制节点管线
+    // 统一画，而不是让每个容器自己 WM_PAINT。外观无背景（如 div 默认 transparent）时
+    // 传空 backColor，宿主据此摘掉背板，露出父表面色。
+    virtual void applyContainerBackdrop(int /*id*/, int /*x*/, int /*y*/, int /*w*/, int /*h*/,
+                                        const xmlapp::XmlAppearance& /*ap*/) {}
 
     // 控件图标（Icon="res/xxx.png"，相对 exe 目录）：owner-draw 时画在控件左侧，
     // 有文字时文字右移。与设计器、预览器共用同一条 XmlCanvas::drawImage 通路。

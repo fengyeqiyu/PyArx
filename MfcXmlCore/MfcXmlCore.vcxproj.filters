@@ -91,10 +91,13 @@
     <ClCompile Include="controls\XmlPopup.cpp">
       <Filter>controls</Filter>
     </ClCompile>
-    <ClCompile Include="controls\XmlPowerCanvas.cpp">
+    <ClCompile Include="controls\XmlDwgCanvas.cpp">
       <Filter>controls</Filter>
     </ClCompile>
     <ClCompile Include="controls\XmlRibbon.cpp">
+      <Filter>controls</Filter>
+    </ClCompile>
+    <ClCompile Include="controls\XmlFileTab.cpp">
       <Filter>controls</Filter>
     </ClCompile>
     <ClCompile Include="controls\XmlProgressBar.cpp">
@@ -283,10 +286,13 @@
     <ClInclude Include="controls\XmlPopup.h">
       <Filter>controls</Filter>
     </ClInclude>
-    <ClInclude Include="controls\XmlPowerCanvas.h">
+    <ClInclude Include="controls\XmlDwgCanvas.h">
       <Filter>controls</Filter>
     </ClInclude>
     <ClInclude Include="controls\XmlRibbon.h">
+      <Filter>controls</Filter>
+    </ClInclude>
+    <ClInclude Include="controls\XmlFileTab.h">
       <Filter>controls</Filter>
     </ClInclude>
     <ClInclude Include="controls\XmlProgressBar.h">

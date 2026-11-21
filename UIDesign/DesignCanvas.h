@@ -18,7 +18,7 @@
 #include "XmlControls.h"
 #include "DesignerTools.h"
 #include "../MfcXmlCore/controls/XmlMfcOrder.h"   // Level 排序与运行时/预览器同源
-#include "../MfcXmlCore/XmlPowerCanvasView.h"     // 配电规划画布（解析/排版/绘制/命中，三端共用）
+#include "../MfcXmlCore/XmlDwgCanvasView.h"     // 绘图画布（DWG 为主，兼容已算坐标的布局输入；解析/排版/绘制/命中，三端共用）
 #include "../MfcXmlCore/XmlRibbon.h"              // Ribbon 控件库（文档里的 XRibbon 真实绘制）
 
 namespace uidesign
@@ -188,6 +188,9 @@ namespace uidesign
             if (m_bgD2DBmp != nullptr) { m_bgD2DBmp->Release(); m_bgD2DBmp = nullptr; }
             if (m_docBmp != nullptr) { m_docBmp->Release(); m_docBmp = nullptr; }
             delete m_d2dCv; m_d2dCv = nullptr;
+            // POD 句柄：原 CDC/CBitmap 析构内部回收的 GDI 对象，这里显式释放
+            if (m_memBmp != nullptr) { ::DeleteObject(m_memBmp); m_memBmp = nullptr; }
+            if (m_memDC != nullptr) { ::DeleteDC(m_memDC); m_memDC = nullptr; }
         }
 
         void setShowGrid(bool on) { m_showGrid = on; m_bgD2DW = 0; Invalidate(); }
@@ -380,7 +383,7 @@ namespace uidesign
 
             // 画布是独立子窗口，内容由自己这套 D2D 路径上屏（父表面那块只是兜底）。
             // 中键平移/滚轮缩放的每帧重绘就落在这里，父表面不参与 —— 这就是"丝滑"的关键。
-            if (!paintD2D(dc, W, H))
+            if (!paintD2D(dc.GetSafeHdc(), W, H))
                 dc.FillSolidRect(client, RGB(160, 160, 160));
         }
 
@@ -515,7 +518,7 @@ namespace uidesign
             m_docBmpDirty = false;
         }
 
-        bool paintD2D(CDC& dc, int W, int H)
+        bool paintD2D(HDC hdc, int W, int H)
         {
             // 画布是停靠面板里的子窗口：实测 HwndRenderTarget 直呈在本窗口上 EndDraw 返回 S_OK
             // 但内容不上屏（同一窗口的 GDI 双缓冲路径却能正常显示），
@@ -523,18 +526,19 @@ namespace uidesign
             // 呈现方式与已验证可靠的 GDI 双缓冲一致，不再有"画了但看不见"的静默失败。
             if (m_d2dCv == nullptr) m_d2dCv = new D2DDcCanvas();
 
-            if (m_memDC.GetSafeHdc() == nullptr)
-                m_memDC.CreateCompatibleDC(&dc);
-            if (m_memBmp.GetSafeHandle() == nullptr || m_memW != W || m_memH != H)
+            if (m_memDC == nullptr)
+                m_memDC = ::CreateCompatibleDC(hdc);
+            if (m_memBmp == nullptr || m_memW != W || m_memH != H)
             {
-                if (m_memBmp.GetSafeHandle() != nullptr) m_memBmp.DeleteObject();
-                if (!m_memBmp.CreateCompatibleBitmap(&dc, W, H)) return false;
+                if (m_memBmp != nullptr) ::DeleteObject(m_memBmp);
+                m_memBmp = ::CreateCompatibleBitmap(hdc, W, H);
+                if (m_memBmp == nullptr) return false;
                 m_memW = W; m_memH = H;
             }
 
-            CBitmap* oldBmp = m_memDC.SelectObject(&m_memBmp);
+            HGDIOBJ oldBmp = ::SelectObject(m_memDC, m_memBmp);
             RECT bindRc = {0, 0, W, H};
-            const bool bindOk = m_d2dCv->bind(m_memDC.GetSafeHdc(), bindRc);
+            const bool bindOk = m_d2dCv->bind(m_memDC, bindRc);
             const bool began = bindOk && m_d2dCv->begin(W, H);
             XmlElement* root = m_doc ? m_doc->root() : nullptr;
             {
@@ -549,7 +553,7 @@ namespace uidesign
             }
             if (!began)
             {
-                m_memDC.SelectObject(oldBmp);
+                ::SelectObject(m_memDC, oldBmp);
                 return false;
             }
 
@@ -562,7 +566,7 @@ namespace uidesign
             // 缩放 + 平移：背景位图已经画过（不缩放/不平移），
             // 从这里开始文档树与装饰层统一乘倍率并跟随 m_panX/m_panY 走。
             // 不能直接 rt->SetTransform：XmlCanvas 内部的 pushRotate / popTransform
-            // 会按自己的矩阵栈恢复，绕过后就被重置成 Identity（配电画布的卡片会跑位）。
+            // 会按自己的矩阵栈恢复，绕过后就被重置成 Identity（绘图画布的卡片会跑位）。
             if (rt != nullptr)
                 m_d2dCv->setViewTransform(m_zoom, m_panX, m_panY);
 
@@ -601,12 +605,12 @@ namespace uidesign
             const HRESULT hr = m_d2dCv->lastError();
             if (FAILED(hr))
             {
-                m_memDC.SelectObject(oldBmp);
+                ::SelectObject(m_memDC, oldBmp);
                 return false;
             }
             // 必须先 BitBlt 再换回原位图：换回后内存 DC 已不是这张画好内容的位图，拷出来是空的
-            dc.BitBlt(0, 0, W, H, &m_memDC, 0, 0, SRCCOPY);
-            m_memDC.SelectObject(oldBmp);
+            ::BitBlt(hdc, 0, 0, W, H, m_memDC, 0, 0, SRCCOPY);
+            ::SelectObject(m_memDC, oldBmp);
             if (FAILED(hr)) diagLog("[paintD2D] end hr=0x%08X\n", static_cast<unsigned int>(hr));
             return true;
         }
@@ -1667,12 +1671,12 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                                    std::wstring(), 10, 9);
                 return;
             }
-            else if (tagIs(node, L"PowerCanvas"))
+            else if (tagIs(node, L"DwgCanvas"))
             {
-                // 配电规划画布：解析/排版/绘制全在控件库（xmlctl::PowerCanvasView），
+                // 绘图画布：解析/排版/绘制全在控件库（xmlctl::DwgCanvasView），
                 // 设计器画布只传文档坐标下的矩形，与 Viewer / 运行时同一份画法。
-                static std::map<XmlElement*, xmlctl::PowerCanvasView> s_powerCvs;
-                xmlctl::PowerCanvasView& v = s_powerCvs[node];
+                static std::map<XmlElement*, xmlctl::DwgCanvasView> s_dwgCvs;
+                xmlctl::DwgCanvasView& v = s_dwgCvs[node];
                 const bool isMini = node->get(L"Mini") == L"1";
                 if (isMini)
                 {
@@ -1680,7 +1684,7 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                     // 同一张表里（父容器先画），这里只挂个引用，不复制 plan。
                     XmlElement* hostEl = findByName(s_docRoot, node->get(L"MiniOf"));
                     if (hostEl == nullptr || hostEl == node) return;
-                    auto& hv = s_powerCvs[hostEl];
+                    auto& hv = s_dwgCvs[hostEl];
                     v.mini = true;
                     v.viewRef = &hv;
                     v.loaded = hv.loaded;
@@ -2397,7 +2401,7 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
                 drawTextCv(cv, body, node->get(L"Content"), cvdoc::kInk,
                            DT_LEFT | DT_TOP | DT_WORDBREAK, pt, fam);
             }
-            else if (tagIs(node, L"PowerCanvas") || tagIs(node, L"QCanvas"))
+            else if (tagIs(node, L"DwgCanvas") || tagIs(node, L"QCanvas"))
             {
                 cv.fillRect(rc, RGB(255, 255, 255));
                 cv.strokeRect(rc, cvdoc::kBorder, 1);
@@ -3176,8 +3180,8 @@ void drawNode(XmlCanvas& cv, XmlElement* node, CPoint origin, bool isRoot = fals
         int m_docBmpW = 0, m_docBmpH = 0;
         bool m_docBmpDirty = true;
         D2DDcCanvas* m_d2dCv = nullptr;      // D2D 绘制目标（DCRenderTarget，画到内存 DC）
-        CDC m_memDC;                         // 双缓冲内存 DC（D2D 画完后 BitBlt 上屏）
-        CBitmap m_memBmp;
+        HDC m_memDC = nullptr;               // 双缓冲内存 DC（POD 句柄；D2D 画完后 BitBlt 上屏）
+        HBITMAP m_memBmp = nullptr;          // 双缓冲离屏位图（POD 句柄）
         int m_memW = 0, m_memH = 0;
     };
 }

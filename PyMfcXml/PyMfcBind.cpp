@@ -1,4 +1,4 @@
-// PyMfcBind.cpp —— PYBIND11_MODULE(PyMfcXml)：全部 Python 接口定义。
+﻿// PyMfcBind.cpp —— PYBIND11_MODULE(PyMfcXml)：全部 Python 接口定义。
 // 原名 parts\06-bind.inc。整个工程只有这一处模块定义。
 
 #include "PyMfcCommon.h"
@@ -88,6 +88,298 @@ static std::wstring xmlPyPropValueFor(PyMfcHost* host, const std::wstring& name,
 }
 
 // 第三参数声明本模块不使用 GIL：3.15t(free-threaded) 下 import 不再回开 GIL。
+
+template <class C, class Cls>
+static void RegisterSurfaceApi(Cls& cls)
+{
+    cls.def("add_button", &C::addButton);
+    cls.def("add_label", &C::addLabel);
+    cls.def("add_edit", &C::addEdit);
+    cls.def("add_list_box", &C::addListBox);
+    cls.def("add_check_box", &C::addCheckBox);
+    cls.def("add_radio", &C::addRadio);
+    cls.def("add_group", &C::addGroup);
+    cls.def("add_combo", &C::addCombo);
+    cls.def("add_progress", &C::addProgress);
+    cls.def("add_slider", &C::addSlider);
+    cls.def("add_tab", &C::addTab);
+    cls.def("add_tree", &C::addTree);
+    cls.def("add_list_ctrl", &C::addListCtrl);
+    cls.def("add_choice", &C::addChoice);
+    cls.def("add_date_picker", &C::addDatePicker);
+    cls.def("add_panel", &C::addPanel);
+    cls.def("add_white_rect", &C::addWhiteRect);
+    cls.def("add_shadow_box", &C::addShadowBox);
+    cls.def("set_control_font", &C::setControlFont,
+             py::arg("id"), py::arg("face"), py::arg("px"), py::arg("bold") = false);
+    cls.def("add_splitter", &C::addSplitter);
+    cls.def("add_static_line", &C::addStaticLine);
+    cls.def("add_hyperlink", &C::addHyperlink);
+    cls.def("add_rich_text", &C::addRichText);
+    cls.def("add_toggle", &C::addToggle);
+    cls.def("add_bitmap_button", &C::addBitmapButton);
+    cls.def("add_static_bitmap", &C::addStaticBitmap);
+    cls.def("add_grid", &C::addGrid);
+    cls.def("add_scrolled_window", &C::addScrolledWindow);
+    cls.def("add_calendar", &C::addCalendar);
+    cls.def("add_tab_item", &C::addTabItem, py::arg("id"), py::arg("text"));
+    cls.def("add_tree_node", &C::addTreeNode, py::arg("id"), py::arg("text"),
+             py::arg("parent_index") = -1);
+    cls.def("add_column", &C::addColumn, py::arg("id"), py::arg("text"),
+             py::arg("width") = 120);
+    cls.def("add_row", &C::addRow, py::arg("id"), py::arg("text"));
+    cls.def("set_url", &C::setUrl, py::arg("id"), py::arg("url"));
+    cls.def("get_url", &C::getUrl);
+    cls.def("set_image", &C::setImage, py::arg("id"), py::arg("path"),
+             "给 StaticBitmap / BitmapButton 装图片（png/jpg 均可）");
+    cls.def("set_rich_format", &C::setRichFormat, py::arg("id"),
+             py::arg("size_pt") = 9, py::arg("bold") = false, py::arg("italic") = false,
+             py::arg("rgb") = 0xFFFFFF, "设置 RichText 的字号/粗体/斜体/颜色");
+    cls.def("set_scroll_range", &C::setScrollRange, py::arg("id"),
+             py::arg("min_value"), py::arg("max_value"), "设置 ScrolledWindow 的滚动范围");
+    cls.def("get_scroll_range", &C::getScrollRange);
+    cls.def("get_scroll_pos", &C::getScrollPos, py::arg("id"),
+             "读 ScrolledWindow 当前的滚动位置");
+    cls.def("get_selection", &C::getSelection, py::arg("id"),
+             "读文本控件当前的选区，返回 (起点, 终点)");
+    cls.def("set_selection", &C::setSelection, py::arg("id"), py::arg("from"),
+             py::arg("to"), "设置文本控件选区");
+    cls.def("on_click", &C::onClick);
+    cls.def("set_wheel_region", &C::setWheelRegion, py::arg("x"), py::arg("y"),
+             py::arg("w"), py::arg("h"), py::arg("step") = 3,
+             "注册收滚轮的区域（客户区坐标）：鼠标在里面滚动就回调 onWheel(±step)");
+    cls.def("on_wheel", &C::onWheel, py::arg("cb"),
+             "cb(delta)，delta 为“往下为正”的行增量；MFCXml 不替子控件滚动，行位置自己算");
+    cls.def("on_change", &C::onChange);
+    cls.def("on_select", &C::onSelect);
+    cls.def("on_double_click", &C::onDoubleClick);
+    cls.def("on_drop_down", &C::onDropDown);
+    cls.def("on_value", &C::onValue);
+    cls.def("on_checked", &C::onChecked);
+    cls.def("set_text", &C::setText);
+    cls.def("get_text", &C::getText);
+    cls.def("set_visible", &C::setVisible);
+    cls.def("get_visible", &C::getVisible);
+    cls.def("set_enabled", &C::setEnabled);
+    cls.def("get_enabled", &C::getEnabled);
+    cls.def("reflow_xml", &C::reflowXml);
+    cls.def("add_string", &C::addString);
+    cls.def("clear_strings", &C::clearStrings);
+    cls.def("count_strings", &C::countStrings);
+    cls.def("get_string", &C::getString);
+    cls.def("delete_string", &C::deleteString);
+    cls.def("get_cur_sel", &C::getCurSel);
+    cls.def("set_cur_sel", &C::setCurSel);
+    cls.def("get_check", &C::getCheck);
+    cls.def("set_check", &C::setCheck);
+    cls.def("set_range", &C::setRange);
+    cls.def("set_pos", &C::setPos);
+    cls.def("get_pos", &C::getPos);
+    cls.def("set_read_only", &C::setReadOnly);
+    cls.def("get_read_only", &C::getReadOnly);
+    cls.def("get_switch", &C::getSwitch);
+    cls.def("set_switch", &C::setSwitch);
+    cls.def("get_spin", &C::getSpin);
+    cls.def("set_spin", &C::setSpin);
+    cls.def("set_spin_range", &C::setSpinRange);
+    cls.def("set_range_values", &C::setRangeValues);
+    cls.def("get_range_low", &C::getRangeLow);
+    cls.def("get_range_high", &C::getRangeHigh);
+    cls.def("set_page_count", &C::setPageCount);
+    cls.def("get_page_count", &C::getPageCount);
+    cls.def("get_page_index", &C::getPageIndex);
+    cls.def("get_dial", &C::getDial);
+    cls.def("set_dial", &C::setDial);
+    cls.def("get_tumbler_count", &C::getTumblerCount);
+    cls.def("set_tumbler_count", &C::setTumblerCount);
+    cls.def("get_tumbler_value", &C::getTumblerValue);
+    cls.def("set_tumbler_value", &C::setTumblerValue);
+    cls.def("set_scroll_bar_range", &C::setScrollBarRange);
+    cls.def("get_scroll_bar_value", &C::getScrollBarValue);
+    cls.def("set_scroll_bar_value", &C::setScrollBarValue);
+    cls.def("set_table_columns", &C::setTableColumns);
+    cls.def("add_table_row", &C::addTableRow);
+    cls.def("set_table_rows", &C::setTableRows,
+                 "整表一次灌入：行间\\n、格间\\t");
+    cls.def("on_grid_action", &C::onGridAction,
+             "表格按键/排序回调 cb(action, row, col, text)");
+    cls.def("on_grid_action_for", &C::onGridActionFor, py::arg("id"), py::arg("callback"),
+             "按表格控件 id 登记回调：多张表并存时按 id 分流，不串台");
+    cls.def("on_control_event", &C::onControlEvent, py::arg("id"), py::arg("event"), py::arg("callback"),
+             "控件级原始事件：mousedown/mouseup/mousemove/keydown/keyup/gotfocus/lostfocus");
+    cls.def("set_column_width", &C::setColumnWidth, "设置某列宽度 px");
+    cls.def("get_table_metrics", &C::getTableMetrics, py::arg("id"),
+             "表格度量：(行高, 表头高)，用于把表格高度对齐整行");
+    cls.def("on_blur", &C::onBlur, py::arg("id"), py::arg("callback"),
+             "EDIT 失焦回调（原地单元格编辑提交用）");
+    cls.def("on_drag", &C::onDrag, py::arg("id"), py::arg("callback"),
+             "可拖分割条：回调 (phase, x)，phase=down/move/up");
+    cls.def("cell_rect", &C::cellRect, py::arg("id"), py::arg("row"), py::arg("col"),
+             "单元格矩形 (x, y, w, h)，ListView 客户区坐标");
+    cls.def("clear_table_rows", &C::clearTableRows);
+    cls.def("get_table_row_count", &C::getTableRowCount);
+    cls.def("get_table_cell", &C::getTableCell);
+    cls.def("set_table_cell", &C::setTableCell);
+    cls.def("get_table_selected_row", &C::getTableSelectedRow);
+    cls.def("set_table_selected_row", &C::setTableSelectedRow);
+    cls.def("sort_table", &C::sortTable);
+    cls.def("add_table", &C::addTable, py::arg("id"), py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"),
+             "创建新自绘表格 PyMfcTable");
+    cls.def("table_clear", &C::tableClear);
+    cls.def("table_row_count", &C::tableRowCount);
+    cls.def("set_table_columns", &C::tableSetColumns, py::arg("id"), py::arg("widths"), py::arg("titles"),
+             "新表：列宽 + 列标题");
+    cls.def("set_table_col_types", &C::tableSetColTypes, py::arg("id"), py::arg("types"),
+             "新表：列类型 0 Text/1 Int/2 Double/3 Bool");
+    cls.def("append_table_row", &C::appendTableRow, py::arg("id"), py::arg("cells"));
+    cls.def("table_set_cell", &C::tableSetCell);
+    cls.def("table_get_cell", &C::tableGetCell);
+    cls.def("table_cell_rect", &C::tableCellRect, py::arg("id"), py::arg("row"), py::arg("col"));
+    cls.def("table_selected_row", &C::tableSelectedRow);
+    cls.def("table_set_selected_row", &C::tableSetSelectedRow);
+    cls.def("table_ensure_visible", &C::tableEnsureVisible);
+    cls.def("table_set_filter", &C::tableSetFilter);
+    cls.def("table_clear_filters", &C::tableClearFilters);
+    cls.def("table_sort", &C::tableSort, py::arg("id"), py::arg("col"), py::arg("desc"));
+    cls.def("table_view_rows", &C::tableViewRows);
+    cls.def("add_tree_item", &C::addTreeItem);
+    cls.def("clear_tree_items", &C::clearTreeItems);
+    cls.def("get_tree_selected_row", &C::getTreeSelectedRow);
+    cls.def("is_tree_item_collapsed", &C::isTreeItemCollapsed);
+    cls.def("set_tree_item_collapsed", &C::setTreeItemCollapsed);
+    cls.def("set_tree_selected_row", &C::setTreeSelectedRow);
+    cls.def("add_tool_bar_item", &C::addToolBarItem);
+    cls.def("clear_tool_bar_items", &C::clearToolBarItems);
+    cls.def("get_tool_bar_selected", &C::getToolBarSelected);
+    cls.def("set_tool_bar_selected", &C::setToolBarSelected);
+    cls.def("animate", &C::animate, py::arg("id"), py::arg("prop"), py::arg("to"),
+             py::arg("duration") = 300, py::arg("easing") = "outCubic",
+             py::arg("delay") = 0, py::arg("loop") = false);
+    cls.def("animate_from", &C::animateFrom, py::arg("id"), py::arg("prop"),
+             py::arg("from"), py::arg("to"), py::arg("duration") = 300,
+             py::arg("easing") = "outCubic", py::arg("delay") = 0, py::arg("loop") = false);
+    cls.def("animate_color", &C::animateColor, py::arg("id"), py::arg("color"),
+             py::arg("duration") = 300, py::arg("easing") = "outCubic", py::arg("delay") = 0);
+    cls.def("stop_animations", &C::stopAnimations, py::arg("id") = 0);
+    cls.def("set_behavior", &C::setBehavior, py::arg("id"), py::arg("prop"),
+             py::arg("duration"), py::arg("easing") = "outCubic");
+    cls.def("show_tool_tip", &C::showToolTip, py::arg("ownerId"), py::arg("text"),
+             py::arg("durationMs") = 3000);
+    cls.def("hide_tool_tip", &C::hideToolTip);
+    cls.def("show_menu", &C::showMenu, py::arg("id"), py::arg("items"),
+             py::arg("x"), py::arg("y"));
+    cls.def("hide_menu", &C::hideMenu);
+    cls.def("get_menu_selected", &C::getMenuSelected);
+    cls.def("set_menu_items", &C::setMenuItems);
+    cls.def("add_menu_bar_item", &C::addMenuBarItem);
+    cls.def("clear_menu_bar_items", &C::clearMenuBarItems);
+    cls.def("get_menu_bar_selected", &C::getMenuBarSelected);
+    cls.def("set_menu_bar_selected", &C::setMenuBarSelected);
+    cls.def("show_popup", &C::showPopup, py::arg("id"), py::arg("title"),
+             py::arg("lines"), py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"));
+    cls.def("hide_popup", &C::hidePopup);
+    cls.def("is_popup_visible", &C::isPopupVisible);
+    cls.def("set_canvas_commands", &C::setCanvasCommands);
+    cls.def("get_canvas_commands", &C::getCanvasCommands);
+    cls.def("set_canvas_editable", &C::setCanvasEditable, py::arg("id"), py::arg("on") = true);
+    cls.def("get_canvas_editable", &C::getCanvasEditable);
+    cls.def("add_dwg_canvas", &C::addDwgCanvas, py::arg("id"),
+             py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"),
+             "建一块绘图画布（DWG 为主，兼容已算坐标的布局输入）（自绘窗口，滚轮缩放 / 拖动平移 / 单击选中卡片）");
+    cls.def("load_dwg_scene", &C::loadDwgScene, py::arg("id"), py::arg("scene"),
+             "喂已算好坐标的场景 JSON（nodes + layout），不重排、只按坐标画");
+    cls.def("load_dwg_layout", &C::loadDwgLayout, py::arg("id"), py::arg("json"),
+             "喂布局结果（powerplan.toJson 的 JSON 文本），自动重排并按窗口大小 fit");
+    cls.def("load_dwg_svg", &C::loadDwgSvg, py::arg("id"), py::arg("svg"),
+             "喂 SVG 文本，走同一条绘制路径");
+    cls.def("load_dwg_xml", &C::loadDwgXml, py::arg("id"), py::arg("scene_xml"),
+             "喂 <XScene> 声明式场景（XLine/XCircle/XArc/XRect/XPolyline/XText/XGroup），"
+             "与 loadDwgSvg 同一条绘制路径，但不做 SVG 序列化 + 二次解析");
+    cls.def("load_dwg_overlay", &C::loadDwgOverlay, py::arg("id"), py::arg("svg"),
+             "叠加层 SVG（选中框/橡皮筋/光标）：底图不重解析，只换这一层");
+    cls.def("load_dwg_overlay_xml", &C::loadDwgOverlayXml, py::arg("id"),
+             py::arg("scene_xml"),
+             "叠加层的 XML 场景版本（同上语义）");
+    cls.def("set_dwg_view", &C::setDwgView, py::arg("id"), py::arg("zoom"),
+             py::arg("offset_x"), py::arg("offset_y"));
+    cls.def("get_dwg_zoom", &C::getDwgZoom);
+    cls.def("add_view3d", &C::addView3D, py::arg("id"),
+             py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"),
+             "建一块三维画布（box/line/tri 图元，左键旋转、滚轮缩放、中键平移）");
+    cls.def("view3d_load", &C::view3DLoad, py::arg("id"), py::arg("geom"),
+             "喂几何文本：box x0 y0 z0 x1 y1 z1 rrggbb; line ...; 用 ; 或换行分隔");
+    cls.def("view3d_append_box", &C::view3DAppendBox, py::arg("id"),
+             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
+             py::arg("z1"), py::arg("color") = 0xA8C6E2, "追加一个轴对齐盒子");
+    cls.def("view3d_append_line", &C::view3DAppendLine, py::arg("id"),
+             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
+             py::arg("z1"), py::arg("color") = 0x30507A, py::arg("width") = 1.0f);
+    cls.def("view3d_set_camera", &C::view3DSetCamera, py::arg("id"),
+             py::arg("yaw") = 35.0f, py::arg("pitch") = 22.0f, py::arg("zoom") = 1.0f,
+             py::arg("pan_x") = 0, py::arg("pan_y") = 0);
+    cls.def("view3d_get_camera", &C::view3DGetCamera,
+             "返回 (yaw, pitch, zoom, pan_x, pan_y)");
+    cls.def("view3d_fit", &C::view3DFitView, py::arg("id"), "复位相机并重新适配");
+    cls.def("view3d_set_style", &C::view3DSetStyle, py::arg("id"),
+             py::arg("bg") = 0xF7FAFD, py::arg("axes") = true, py::arg("grid") = false);
+    cls.def("get_dwg_selection", &C::getDwgSelection,
+             "当前选中的卡片编号（未选中返回空串）");
+    cls.def("save_control_png", &C::saveControlPng,
+             "把控件按当前外观导出成 PNG（截图取证）");
+    cls.def("set_dwg_options", &C::setDwgOptions, py::arg("id"),
+             py::arg("show_cable") = true, py::arg("mini") = false, py::arg("mini_of") = -1,
+             "画布选项：连线标注电缆 / 小地图模式（mini=True 时画主画布 mini_of 的视口红框）");
+    cls.def("get_dwg_view", &C::getDwgView,
+             "视口参数 (zoom, ox, oy)");
+    cls.def("set_detail_card", &C::setDetailCard, py::arg("id"), py::arg("rect"), py::arg("texts"),
+             "画布层详情卡：本地矩形 + 纯展示文本行");
+    cls.def("clear_detail_card", &C::clearDetailCard, py::arg("id"),
+             "清除画布层详情卡");
+    cls.def("set_level", &C::setLevel, py::arg("id"), py::arg("level"));
+    cls.def("get_level", &C::getLevel);
+    cls.def("set_cursor", &C::setCursor, py::arg("id"), py::arg("keyword"),
+             "CSS cursor：pointer/text/move/not-allowed/col-resize…，空串或 auto 表示不接管");
+    cls.def("get_cursor", &C::getCursor);
+    cls.def("get_pointer_events", &C::getPointerEvents);
+    cls.def("set_pointer_events", &C::setPointerEvents);
+    cls.def("is_mouse_transparent", &C::isMouseTransparent);
+    cls.def("bring_to_front", &C::bringToFront);
+    cls.def("raise_many", &C::raiseMany, py::arg("ids"), "批量置顶：一次重排 z 序（逐个 bringToFront 是 O(n^2)，312 个控件要 36 秒）");
+    cls.def("send_to_back", &C::sendToBack);
+    cls.def("set_tab_index", &C::setTabIndex, py::arg("id"), py::arg("index"));
+    cls.def("get_tab_index", &C::getTabIndex);
+    cls.def("get_canvas_item_count", &C::getCanvasItemCount);
+    cls.def("get_canvas_item_op", &C::getCanvasItemOp);
+    cls.def("get_canvas_item_box", &C::getCanvasItemBox);
+    cls.def("get_canvas_selection", &C::getCanvasSelection);
+    cls.def("set_canvas_selection", &C::setCanvasSelection);
+    cls.def("clear_canvas_selection", &C::clearCanvasSelection);
+    cls.def("remove_canvas_items", &C::removeCanvasItems);
+    cls.def("remove_canvas_selection", &C::removeCanvasSelection);
+    cls.def("on_canvas_select", &C::onCanvasSelect);
+    cls.def("set_layer_opacity", &C::setLayerOpacity);
+    cls.def("get_layer_opacity", &C::getLayerOpacity);
+    cls.def("add_list_item", &C::addListItem);
+    cls.def("clear_list_items", &C::clearListItems);
+    cls.def("get_list_item_count", &C::getListItemCount);
+    cls.def("get_list_item", &C::getListItem);
+    cls.def("get_list_selected", &C::getListSelected);
+    cls.def("set_list_selected", &C::setListSelected);
+    cls.def("get_list_scroll", &C::getListScroll);
+    cls.def("set_list_scroll", &C::setListScroll);
+    cls.def("add_page", &C::addPage);
+    cls.def("clear_pages", &C::clearPages);
+    cls.def("get_view_count", &C::getViewCount);
+    cls.def("get_view_index", &C::getViewIndex);
+    cls.def("set_view_index", &C::setViewIndex);
+    cls.def("animate_page", &C::animatePage);
+    cls.def("set_page_index", &C::setPageIndex);
+    cls.def("get_xml_value", &C::getXmlValue, py::arg("id"), py::arg("prop"),
+             "按控件 id + 属性名读值（text/checked/index/value/visible/enabled/外观属性）");
+    cls.def("set_focus", &C::setFocusTo);
+}
+
+
 PYBIND11_MODULE(PyMfcXml, m, py::mod_gil_not_used())
 {
     m.doc() = "PyMfcCore — MFC 原生控件最小 Python 接口";
@@ -100,629 +392,81 @@ PYBIND11_MODULE(PyMfcXml, m, py::mod_gil_not_used())
 
     // PyMfcCore.xml：PyMfcXml 加载器（解析/遍历/布局/序列化），不建窗口
     RegisterXmlBindings(m);
-
-    py::class_<PyMfcWindow, PyMfcHandle<PyMfcWindow>>(m, "Window")
-        .def(py::init([](const std::wstring& title, int width, int height) -> PyMfcHandle<PyMfcWindow> {
+    auto clsWin = py::class_<PyMfcWindow, PyMfcHandle<PyMfcWindow>>(m, "Window");
+    RegisterSurfaceApi<PyMfcWindow>(clsWin);
+    clsWin.def(py::init([](const std::wstring& title, int width, int height) -> PyMfcHandle<PyMfcWindow> {
             auto* window = PyMfcStore::Get().NewWindow();
             if (!window->create(title, width, height))
                 throw std::runtime_error("PyMfc Window create failed");
             return PyMfcHandle<PyMfcWindow>(window);
-        }), py::arg("title"), py::arg("width"), py::arg("height"))
-        .def_property_readonly("hwnd", [](PyMfcWindow& w) {
+        }), py::arg("title"), py::arg("width"), py::arg("height"));
+    clsWin.def_property_readonly("hwnd", [](PyMfcWindow& w) {
             return static_cast<long long>(reinterpret_cast<std::intptr_t>(w.hwnd()));
-        }, "窗口句柄（本地 Python 下可交给 pump 之外的 Win32 API 使用）")
-        .def("setTheme", &PyMfcWindow::setTheme, py::arg("dark"))
-        .def("onResize", &PyMfcWindow::setResizeCallback)
-        .def("clientSize", &PyMfcWindow::ClientSize)
-        .def("setBackground", &PyMfcWindow::setBackground, py::arg("r"), py::arg("g"), py::arg("b"))
-        .def("getSize", &PyMfcWindow::getSize, py::arg("id"))
-        .def("getRect", &PyMfcWindow::getRect, py::arg("id"))
-        .def("show", &PyMfcWindow::show)
-        .def("close", &PyMfcWindow::close)
-        .def("addButton", &PyMfcWindow::addButton)
-        .def("addLabel", &PyMfcWindow::addLabel)
-        .def("addEdit", &PyMfcWindow::addEdit)
-        .def("addListBox", &PyMfcWindow::addListBox)
-        .def("addCheckBox", &PyMfcWindow::addCheckBox)
-        .def("addRadio", &PyMfcWindow::addRadio)
-        .def("addGroup", &PyMfcWindow::addGroup)
-        .def("addCombo", &PyMfcWindow::addCombo)
-        .def("addProgress", &PyMfcWindow::addProgress)
-        .def("addSlider", &PyMfcWindow::addSlider)
-        // 扩展控件：以前这 16 类只在 XML 里能用，Python 侧根本没有对应方法，
-        // 于是"Python 能不能用这些控件"这件事一直没答案
-        .def("addTab", &PyMfcWindow::addTab)
-        .def("addTree", &PyMfcWindow::addTree)
-        .def("addListCtrl", &PyMfcWindow::addListCtrl)
-        .def("addChoice", &PyMfcWindow::addChoice)
-        .def("addDatePicker", &PyMfcWindow::addDatePicker)
-        .def("addPanel", &PyMfcWindow::addPanel)
-        .def("addWhiteRect", &PyMfcWindow::addWhiteRect)
-    .def("addShadowBox", &PyMfcWindow::addShadowBox)
-        .def("setControlFont", &PyMfcWindow::setControlFont,
-             py::arg("id"), py::arg("face"), py::arg("px"), py::arg("bold") = false)
-        .def("addSplitter", &PyMfcWindow::addSplitter)
-        .def("addStaticLine", &PyMfcWindow::addStaticLine)
-        .def("addHyperlink", &PyMfcWindow::addHyperlink)
-        .def("addRichText", &PyMfcWindow::addRichText)
-        .def("addToggle", &PyMfcWindow::addToggle)
-        .def("addBitmapButton", &PyMfcWindow::addBitmapButton)
-        .def("addStaticBitmap", &PyMfcWindow::addStaticBitmap)
-        .def("addGrid", &PyMfcWindow::addGrid)
-        .def("addScrolledWindow", &PyMfcWindow::addScrolledWindow)
-        .def("addCalendar", &PyMfcWindow::addCalendar)
-        // 内容填充：只有窗口没有内容的控件就是空壳，这几条是"能装东西"的入口
-        .def("addTabItem", &PyMfcWindow::addTabItem, py::arg("id"), py::arg("text"))
-        .def("addTreeNode", &PyMfcWindow::addTreeNode, py::arg("id"), py::arg("text"),
-             py::arg("parent_index") = -1)
-        .def("addColumn", &PyMfcWindow::addColumn, py::arg("id"), py::arg("text"),
-             py::arg("width") = 120)
-        .def("addRow", &PyMfcWindow::addRow, py::arg("id"), py::arg("text"))
-        // 第二批：链接地址、图片装载、富文本格式、滚动范围
-        .def("setUrl", &PyMfcWindow::setUrl, py::arg("id"), py::arg("url"))
-        .def("getUrl", &PyMfcWindow::getUrl)
-        .def("setImage", &PyMfcWindow::setImage, py::arg("id"), py::arg("path"),
-             "给 StaticBitmap / BitmapButton 装图片（png/jpg 均可）")
-        .def("setRichFormat", &PyMfcWindow::setRichFormat, py::arg("id"),
-             py::arg("size_pt") = 9, py::arg("bold") = false, py::arg("italic") = false,
-             py::arg("rgb") = 0xFFFFFF, "设置 RichText 的字号/粗体/斜体/颜色")
-        .def("setScrollRange", &PyMfcWindow::setScrollRange, py::arg("id"),
-             py::arg("min_value"), py::arg("max_value"), "设置 ScrolledWindow 的滚动范围")
-        .def("getScrollRange", &PyMfcWindow::getScrollRange)
-        .def("getScrollPos", &PyMfcWindow::getScrollPos, py::arg("id"),
-             "读 ScrolledWindow 当前的滚动位置")
-        .def("getSelection", &PyMfcWindow::getSelection, py::arg("id"),
-             "读文本控件当前的选区，返回 (起点, 终点)")
-        .def("savePng", &PyMfcWindow::savePng, py::arg("path"),
-             "把整个窗口（含 D2D 自绘子窗）存成 PNG：验收取证用，抓的是真屏幕")
-        .def("setSelection", &PyMfcWindow::setSelection, py::arg("id"), py::arg("from"),
-             py::arg("to"), "设置文本控件选区")
-        .def("onClick", &PyMfcWindow::onClick)
-        .def("onCanvasEvent", &PyMfcWindow::onCanvasEvent, py::arg("id"), py::arg("cb"),
+        }, "窗口句柄（本地 Python 下可交给 pump 之外的 Win32 API 使用）");
+    clsWin.def("set_theme", &PyMfcWindow::setTheme, py::arg("dark"));
+    clsWin.def("on_resize", &PyMfcWindow::setResizeCallback);
+    clsWin.def("client_size", &PyMfcWindow::ClientSize);
+    clsWin.def("set_background", &PyMfcWindow::setBackground, py::arg("r"), py::arg("g"), py::arg("b"));
+    clsWin.def("get_size", &PyMfcWindow::getSize, py::arg("id"));
+    clsWin.def("get_rect", &PyMfcWindow::getRect, py::arg("id"));
+    clsWin.def("show", &PyMfcWindow::show);
+    clsWin.def("close", &PyMfcWindow::close);
+    clsWin.def("save_png", &PyMfcWindow::savePng, py::arg("path"),
+             "把整个窗口（含 D2D 自绘子窗）存成 PNG：验收取证用，抓的是真屏幕");
+    clsWin.def("on_canvas_event", &PyMfcWindow::onCanvasEvent, py::arg("id"), py::arg("cb"),
              "画布原始鼠标事件：cb(phase, x, y, flags) -> bool；"
              "phase 为 down/move/up/dblclick/wheel，x,y 是画布客户区坐标，"
-             "返回 True 表示已消费（正在定点画图），宿主就不再当平移处理")
-        .def("setWheelRegion", &PyMfcWindow::setWheelRegion, py::arg("x"), py::arg("y"),
-             py::arg("w"), py::arg("h"), py::arg("step") = 3,
-             "注册收滚轮的区域（客户区坐标）：鼠标在里面滚动就回调 onWheel(±step)")
-        .def("onWheel", &PyMfcWindow::onWheel, py::arg("cb"),
-             "cb(delta)，delta 为“往下为正”的行增量；MFCXml 不替子控件滚动，行位置自己算")
-        .def("onChange", &PyMfcWindow::onChange)
-        .def("onSelect", &PyMfcWindow::onSelect)
-        .def("onDoubleClick", &PyMfcWindow::onDoubleClick)
-        .def("onDropDown", &PyMfcWindow::onDropDown)
-        .def("onValue", &PyMfcWindow::onValue)
-        .def("onChecked", &PyMfcWindow::onChecked)
-        .def("setText", &PyMfcWindow::setText)
-        .def("getText", &PyMfcWindow::getText)
-        .def("setVisible", &PyMfcWindow::setVisible)
-        .def("getVisible", &PyMfcWindow::getVisible)
-        .def("setEnabled", &PyMfcWindow::setEnabled)
-        .def("getEnabled", &PyMfcWindow::getEnabled)
-        .def("move", &PyMfcWindow::moveControl)
-        .def("moveMany", &PyMfcWindow::moveMany, py::arg("items"),
-             "items=[(id,x,y,w,h,visible)]，一次 DeferWindowPos 原子提交，滚动时不再一次一重绘")
-        // XML 表达式：改一个属性值，依赖它的控件按表达式重算并重排
-        .def("setXmlValue", [](PyMfcWindow& w, const std::wstring& name,
+             "返回 True 表示已消费（正在定点画图），宿主就不再当平移处理");
+    clsWin.def("move", &PyMfcWindow::moveControl);
+    clsWin.def("move_many", &PyMfcWindow::moveMany, py::arg("items"),
+             "items=[(id,x,y,w,h,visible)]，一次 DeferWindowPos 原子提交，滚动时不再一次一重绘");
+    clsWin.def("set_xml_value", [](PyMfcWindow& w, const std::wstring& name,
                                 const std::wstring& prop, py::object value) {
             return w.setXmlValue(name, prop, xmlPyPropValueFor(w.Host(), name, prop, value));
         }, py::arg("name"), py::arg("prop"), py::arg("value"),
-             "value 可为 str，也可为 list（一维 -> model/items，二维 -> 表格行）")
-        .def("reflowXml", &PyMfcWindow::reflowXml)
-        .def("addString", &PyMfcWindow::addString)
-        .def("clearStrings", &PyMfcWindow::clearStrings)
-        .def("countStrings", &PyMfcWindow::countStrings)
-        .def("getString", &PyMfcWindow::getString)
-        .def("deleteString", &PyMfcWindow::deleteString)
-        .def("getCurSel", &PyMfcWindow::getCurSel)
-        .def("setCurSel", &PyMfcWindow::setCurSel)
-        .def("getCheck", &PyMfcWindow::getCheck)
-        .def("setCheck", &PyMfcWindow::setCheck)
-        .def("setRange", &PyMfcWindow::setRange)
-        .def("setPos", &PyMfcWindow::setPos)
-        .def("getPos", &PyMfcWindow::getPos)
-        .def("setReadOnly", &PyMfcWindow::setReadOnly)
-        .def("getReadOnly", &PyMfcWindow::getReadOnly)
-        // QML 对齐小控件
-        .def("getSwitch", &PyMfcWindow::getSwitch)
-        .def("setSwitch", &PyMfcWindow::setSwitch)
-        .def("getSpin", &PyMfcWindow::getSpin)
-        .def("setSpin", &PyMfcWindow::setSpin)
-        .def("setSpinRange", &PyMfcWindow::setSpinRange)
-        .def("setRangeValues", &PyMfcWindow::setRangeValues)
-        .def("getRangeLow", &PyMfcWindow::getRangeLow)
-        .def("getRangeHigh", &PyMfcWindow::getRangeHigh)
-        .def("setPageCount", &PyMfcWindow::setPageCount)
-        .def("getPageCount", &PyMfcWindow::getPageCount)
-        .def("getPageIndex", &PyMfcWindow::getPageIndex)
-        .def("getDial", &PyMfcWindow::getDial)
-        .def("setDial", &PyMfcWindow::setDial)
-        .def("getTumblerCount", &PyMfcWindow::getTumblerCount)
-        .def("setTumblerCount", &PyMfcWindow::setTumblerCount)
-        .def("getTumblerValue", &PyMfcWindow::getTumblerValue)
-        .def("setTumblerValue", &PyMfcWindow::setTumblerValue)
-        .def("setScrollBarRange", &PyMfcWindow::setScrollBarRange)
-        .def("getScrollBarValue", &PyMfcWindow::getScrollBarValue)
-        .def("setScrollBarValue", &PyMfcWindow::setScrollBarValue)
-        .def("setTableColumns", &PyMfcWindow::setTableColumns)
-        .def("addTableRow", &PyMfcWindow::addTableRow)
-            .def("setTableRows", &PyMfcWindow::setTableRows,
-                 "整表一次灌入：行间\\n、格间\\t")
-        .def("onGridAction", &PyMfcWindow::onGridAction,
-             "表格按键/排序回调 cb(action, row, col, text)")
-
-        .def("onGridActionFor", &PyMfcWindow::onGridActionFor, py::arg("id"), py::arg("callback"),
-             "按表格控件 id 登记回调：多张表并存时按 id 分流，不串台")
-        .def("onControlEvent", &PyMfcWindow::onControlEvent, py::arg("id"), py::arg("event"), py::arg("callback"),
-             "控件级原始事件：mousedown/mouseup/mousemove/keydown/keyup/gotfocus/lostfocus")
-        .def("setColumnWidth", &PyMfcWindow::setColumnWidth, "设置某列宽度 px")
-        .def("setColumnWidths", &PyMfcWindow::setColumnWidths, "批量设列宽（关重绘包一轮，结尾单次失效）")
-        .def("getTableMetrics", &PyMfcWindow::getTableMetrics, py::arg("id"),
-             "表格度量：(行高, 表头高)，用于把表格高度对齐整行")
-        .def("onBlur", &PyMfcWindow::onBlur, py::arg("id"), py::arg("callback"),
-             "EDIT 失焦回调（原地单元格编辑提交用）")
-        .def("onDrag", &PyMfcWindow::onDrag, py::arg("id"), py::arg("callback"),
-             "可拖分割条：回调 (phase, x)，phase=down/move/up")
-        .def("cellRect", &PyMfcWindow::cellRect, py::arg("id"), py::arg("row"), py::arg("col"),
-             "单元格矩形 (x, y, w, h)，ListView 客户区坐标")
-        .def("clearTableRows", &PyMfcWindow::clearTableRows)
-        .def("getTableRowCount", &PyMfcWindow::getTableRowCount)
-        .def("getTableCell", &PyMfcWindow::getTableCell)
-        .def("setTableCell", &PyMfcWindow::setTableCell)
-        .def("getTableSelectedRow", &PyMfcWindow::getTableSelectedRow)
-        .def("setTableSelectedRow", &PyMfcWindow::setTableSelectedRow)
-        .def("sortTable", &PyMfcWindow::sortTable)
-        .def("addTable", &PyMfcWindow::addTable, py::arg("id"), py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"),
-             "创建新自绘表格 PyMfcTable")
-        .def("tableClear", &PyMfcWindow::tableClear)
-        .def("tableRowCount", &PyMfcWindow::tableRowCount)
-        .def("setTableColumns", &PyMfcWindow::tableSetColumns, py::arg("id"), py::arg("widths"), py::arg("titles"),
-             "新表：列宽 + 列标题")
-        .def("setTableColTypes", &PyMfcWindow::tableSetColTypes, py::arg("id"), py::arg("types"),
-             "新表：列类型 0 Text/1 Int/2 Double/3 Bool")
-        .def("appendTableRow", &PyMfcWindow::appendTableRow, py::arg("id"), py::arg("cells"))
-        .def("tableSetCell", &PyMfcWindow::tableSetCell)
-        .def("tableGetCell", &PyMfcWindow::tableGetCell)
-        .def("tableCellRect", &PyMfcWindow::tableCellRect, py::arg("id"), py::arg("row"), py::arg("col"))
-        .def("tableSelectedRow", &PyMfcWindow::tableSelectedRow)
-        .def("tableSetSelectedRow", &PyMfcWindow::tableSetSelectedRow)
-        .def("tableEnsureVisible", &PyMfcWindow::tableEnsureVisible)
-        .def("tableSetFilter", &PyMfcWindow::tableSetFilter)
-        .def("tableClearFilters", &PyMfcWindow::tableClearFilters)
-        .def("tableSort", &PyMfcWindow::tableSort, py::arg("id"), py::arg("col"), py::arg("desc"))
-        .def("tableViewRows", &PyMfcWindow::tableViewRows)
-        .def("addTreeItem", &PyMfcWindow::addTreeItem)
-        .def("clearTreeItems", &PyMfcWindow::clearTreeItems)
-        .def("getTreeSelectedRow", &PyMfcWindow::getTreeSelectedRow)
-        .def("isTreeItemCollapsed", &PyMfcWindow::isTreeItemCollapsed)
-        .def("setTreeItemCollapsed", &PyMfcWindow::setTreeItemCollapsed)
-        .def("setTreeSelectedRow", &PyMfcWindow::setTreeSelectedRow)
-        .def("addToolBarItem", &PyMfcWindow::addToolBarItem)
-        .def("clearToolBarItems", &PyMfcWindow::clearToolBarItems)
-        .def("getToolBarSelected", &PyMfcWindow::getToolBarSelected)
-        .def("setToolBarSelected", &PyMfcWindow::setToolBarSelected)
-        .def("animate", &PyMfcWindow::animate, py::arg("id"), py::arg("prop"), py::arg("to"),
-             py::arg("duration") = 300, py::arg("easing") = "outCubic",
-             py::arg("delay") = 0, py::arg("loop") = false)
-        .def("animateFrom", &PyMfcWindow::animateFrom, py::arg("id"), py::arg("prop"),
-             py::arg("from"), py::arg("to"), py::arg("duration") = 300,
-             py::arg("easing") = "outCubic", py::arg("delay") = 0, py::arg("loop") = false)
-        .def("animateColor", &PyMfcWindow::animateColor, py::arg("id"), py::arg("color"),
-             py::arg("duration") = 300, py::arg("easing") = "outCubic", py::arg("delay") = 0)
-        .def("stopAnimations", &PyMfcWindow::stopAnimations, py::arg("id") = 0)
-        .def("setBehavior", &PyMfcWindow::setBehavior, py::arg("id"), py::arg("prop"),
-             py::arg("duration"), py::arg("easing") = "outCubic")
-        .def("showToolTip", &PyMfcWindow::showToolTip, py::arg("ownerId"), py::arg("text"),
-             py::arg("durationMs") = 3000)
-        .def("hideToolTip", &PyMfcWindow::hideToolTip)
-        .def("showMenu", &PyMfcWindow::showMenu, py::arg("id"), py::arg("items"),
-             py::arg("x"), py::arg("y"))
-        .def("hideMenu", &PyMfcWindow::hideMenu)
-        .def("getMenuSelected", &PyMfcWindow::getMenuSelected)
-        .def("setMenuItems", &PyMfcWindow::setMenuItems)
-        .def("addMenuBarItem", &PyMfcWindow::addMenuBarItem)
-        .def("clearMenuBarItems", &PyMfcWindow::clearMenuBarItems)
-        .def("getMenuBarSelected", &PyMfcWindow::getMenuBarSelected)
-        .def("setMenuBarSelected", &PyMfcWindow::setMenuBarSelected)
-        .def("showPopup", &PyMfcWindow::showPopup, py::arg("id"), py::arg("title"),
-             py::arg("lines"), py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"))
-        .def("hidePopup", &PyMfcWindow::hidePopup)
-        .def("isPopupVisible", &PyMfcWindow::isPopupVisible)
-        .def("setCanvasCommands", &PyMfcWindow::setCanvasCommands)
-        .def("getCanvasCommands", &PyMfcWindow::getCanvasCommands)
-        .def("setCanvasEditable", &PyMfcWindow::setCanvasEditable, py::arg("id"), py::arg("on") = true)
-        .def("getCanvasEditable", &PyMfcWindow::getCanvasEditable)
-        // 配电规划图画布：自绘窗口 + 缩放平移 + 卡片命中
-        .def("addPowerCanvas", &PyMfcWindow::addPowerCanvas, py::arg("id"),
-             py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"),
-             "建一块配电画布（自绘窗口，滚轮缩放 / 拖动平移 / 单击选中卡片）")
-        .def("loadPowerScene", &PyMfcWindow::loadPowerScene, py::arg("id"), py::arg("scene"),
-             "喂已算好坐标的场景 JSON（nodes + layout），不重排、只按坐标画")
-        .def("copyPowerScene", &PyMfcWindow::copyPowerScene, py::arg("to_id"), py::arg("from_id"),
-             "把已解析好的场景直接复制给另一个画布（省一次 60 ms 解析）")
-        .def("loadPowerPlan", &PyMfcWindow::loadPowerPlan, py::arg("id"), py::arg("json"),
-             "喂布局结果（powerplan.toJson 的 JSON 文本），自动重排并按窗口大小 fit")
-        .def("loadPowerSvg", &PyMfcWindow::loadPowerSvg, py::arg("id"), py::arg("svg"),
-             "喂 SVG 文本，走同一条绘制路径")
-        .def("loadPowerXml", &PyMfcWindow::loadPowerXml, py::arg("id"), py::arg("scene_xml"),
-             "喂 <XScene> 声明式场景（XLine/XCircle/XArc/XRect/XPolyline/XText/XGroup），"
-             "与 loadPowerSvg 同一条绘制路径，但不做 SVG 序列化 + 二次解析")
-        .def("loadPlanOverlay", &PyMfcWindow::loadPlanOverlay, py::arg("id"), py::arg("svg"),
-             "叠加层 SVG（选中框/橡皮筋/光标）：底图不重解析，只换这一层")
-        .def("loadPlanOverlayXml", &PyMfcWindow::loadPlanOverlayXml, py::arg("id"),
-             py::arg("scene_xml"),
-             "叠加层的 XML 场景版本（同上语义）")
-        .def("setPlanView", &PyMfcWindow::setPlanView, py::arg("id"), py::arg("zoom"),
-             py::arg("offset_x"), py::arg("offset_y"))
-        .def("getPlanZoom", &PyMfcWindow::getPlanZoom)
-        // 三维视图画布：透视投影 + 左键拖动旋转 + 滚轮缩放 + 中键平移 + 双击复位
-        .def("addView3D", &PyMfcWindow::addView3D, py::arg("id"),
-             py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"),
-             "建一块三维画布（box/line/tri 图元，左键旋转、滚轮缩放、中键平移）")
-        .def("view3DLoad", &PyMfcWindow::view3DLoad, py::arg("id"), py::arg("geom"),
-             "喂几何文本：box x0 y0 z0 x1 y1 z1 rrggbb; line ...; 用 ; 或换行分隔")
-        .def("view3DAppendBox", &PyMfcWindow::view3DAppendBox, py::arg("id"),
-             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
-             py::arg("z1"), py::arg("color") = 0xA8C6E2, "追加一个轴对齐盒子")
-        .def("view3DAppendLine", &PyMfcWindow::view3DAppendLine, py::arg("id"),
-             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
-             py::arg("z1"), py::arg("color") = 0x30507A, py::arg("width") = 1.0f)
-        .def("view3DSetCamera", &PyMfcWindow::view3DSetCamera, py::arg("id"),
-             py::arg("yaw") = 35.0f, py::arg("pitch") = 22.0f, py::arg("zoom") = 1.0f,
-             py::arg("pan_x") = 0, py::arg("pan_y") = 0)
-        .def("view3DGetCamera", &PyMfcWindow::view3DGetCamera,
-             "返回 (yaw, pitch, zoom, pan_x, pan_y)")
-        .def("view3DFit", &PyMfcWindow::view3DFitView, py::arg("id"), "复位相机并重新适配")
-        .def("view3DSetStyle", &PyMfcWindow::view3DSetStyle, py::arg("id"),
-             py::arg("bg") = 0xF7FAFD, py::arg("axes") = true, py::arg("grid") = false)
-        .def("getPlanSelection", &PyMfcWindow::getPlanSelection,
-             "当前选中的卡片编号（未选中返回空串）")
-        .def("saveControlPng", &PyMfcWindow::saveControlPng,
-             "把控件按当前外观导出成 PNG（截图取证）")
-        .def("setPlanOptions", &PyMfcWindow::setPlanOptions, py::arg("id"),
-             py::arg("show_cable") = true, py::arg("mini") = false, py::arg("mini_of") = -1,
-             "画布选项：连线标注电缆 / 小地图模式（mini=True 时画主画布 mini_of 的视口红框）")
-        .def("getPlanView", &PyMfcWindow::getPlanView,
-             "视口参数 (zoom, ox, oy)")
-        .def("planProbe", &PyMfcWindow::planProbe, py::arg("id"),
-             "画布鼠标诊断：(lastMsg, upX, upY, wasDrag, moved, lastHit)")
-        .def("hitPlan", &PyMfcWindow::hitPlan, py::arg("id"), py::arg("x"), py::arg("y"),
-             "命中测试（客户端坐标）：返回卡片编号，空 = 没命中")
-        .def("selectPlan", &PyMfcWindow::selectPlan, py::arg("id"), py::arg("code"),
-             "按编号选中并把卡片移到视口中央（搜索定位），返回是否找到")
-        .def("cardRectPlan", &PyMfcWindow::cardRectPlan, py::arg("id"), py::arg("code"),
-             "卡片在客户端坐标里的矩形 (x, y, w, h)；没有这张卡返回 None")
-        .def("setDetailCard", &PyMfcWindow::setDetailCard, py::arg("id"), py::arg("rect"), py::arg("texts"),
-             "画布层详情卡：本地矩形 + 纯展示文本行")
-        .def("clearDetailCard", &PyMfcWindow::clearDetailCard, py::arg("id"),
-             "清除画布层详情卡")
-        // 通用基础属性：绘图层次（Level）与 Tab 序号（TabIndex）
-        .def("setLevel", &PyMfcWindow::setLevel, py::arg("id"), py::arg("level"))
-        .def("getLevel", &PyMfcWindow::getLevel)
-        .def("bringToFront", &PyMfcWindow::bringToFront)
-        .def("bringToFrontMany", &PyMfcWindow::bringToFrontMany, py::arg("ids"))
-        .def("repaint", &PyMfcWindow::repaint, py::arg("id"))
-        .def("raiseMany", &PyMfcWindow::raiseMany, py::arg("ids"), "批量置顶：一次重排 z 序（逐个 bringToFront 是 O(n^2)，312 个控件要 36 秒）")
-        .def("sendToBack", &PyMfcWindow::sendToBack)
-        .def("setTabIndex", &PyMfcWindow::setTabIndex, py::arg("id"), py::arg("index"))
-        .def("getTabIndex", &PyMfcWindow::getTabIndex)
-        .def("getCanvasItemCount", &PyMfcWindow::getCanvasItemCount)
-        .def("getCanvasItemOp", &PyMfcWindow::getCanvasItemOp)
-        .def("getCanvasItemBox", &PyMfcWindow::getCanvasItemBox)
-        .def("getCanvasSelection", &PyMfcWindow::getCanvasSelection)
-        .def("setCanvasSelection", &PyMfcWindow::setCanvasSelection)
-        .def("clearCanvasSelection", &PyMfcWindow::clearCanvasSelection)
-        .def("removeCanvasItems", &PyMfcWindow::removeCanvasItems)
-        .def("removeCanvasSelection", &PyMfcWindow::removeCanvasSelection)
-        .def("onCanvasSelect", &PyMfcWindow::onCanvasSelect)
-        .def("setLayerOpacity", &PyMfcWindow::setLayerOpacity)
-        .def("getLayerOpacity", &PyMfcWindow::getLayerOpacity)
-        .def("addListItem", &PyMfcWindow::addListItem)
-        .def("clearListItems", &PyMfcWindow::clearListItems)
-        .def("getListItemCount", &PyMfcWindow::getListItemCount)
-        .def("getListItem", &PyMfcWindow::getListItem)
-        .def("getListSelected", &PyMfcWindow::getListSelected)
-        .def("setListSelected", &PyMfcWindow::setListSelected)
-        .def("getListScroll", &PyMfcWindow::getListScroll)
-        .def("setListScroll", &PyMfcWindow::setListScroll)
-        .def("addPage", &PyMfcWindow::addPage)
-        .def("clearPages", &PyMfcWindow::clearPages)
-        .def("getViewCount", &PyMfcWindow::getViewCount)
-        .def("getViewIndex", &PyMfcWindow::getViewIndex)
-        .def("setViewIndex", &PyMfcWindow::setViewIndex)
-        .def("animatePage", &PyMfcWindow::animatePage)
-        .def("setPageIndex", &PyMfcWindow::setPageIndex)
-        .def("setFlickContent", &PyMfcWindow::setFlickContent)
-        .def("clearFlickContent", &PyMfcWindow::clearFlickContent)
-        .def("setFlickOffset", &PyMfcWindow::setFlickOffset)
-        .def("getFlickOffsetX", &PyMfcWindow::getFlickOffsetX)
-        .def("getFlickOffsetY", &PyMfcWindow::getFlickOffsetY)
-        .def("getXmlValue", &PyMfcWindow::getXmlValue, py::arg("id"), py::arg("prop"),
-             "按控件 id + 属性名读值（text/checked/index/value/visible/enabled/外观属性）")
-        .def("setFocus", &PyMfcWindow::setFocusTo);
-
-    py::class_<PyMfcPanel, PyMfcHandle<PyMfcPanel>>(m, "Pane")
-        .def(py::init([](long long parentHwnd) -> PyMfcHandle<PyMfcPanel> {
+             "value 可为 str，也可为 list（一维 -> model/items，二维 -> 表格行）");
+    clsWin.def("set_column_widths", &PyMfcWindow::setColumnWidths, "批量设列宽（关重绘包一轮，结尾单次失效）");
+    clsWin.def("perf_stats", &PyMfcWindow::perfStats, py::arg("reset") = true, "性能计数：create/ap/paint 的累计耗时与次数（PYARX_PERF=1 才有值）");
+    clsWin.def("copy_dwg_scene", &PyMfcWindow::copyDwgScene, py::arg("to_id"), py::arg("from_id"),
+             "把已解析好的场景直接复制给另一个画布（省一次 60 ms 解析）");
+    clsWin.def("get_file_tab_info", &PyMfcWindow::getFileTabInfo, py::arg("id"),
+             "FileTab 诊断：回读 active/tabs/close/add 几何 JSON");
+    clsWin.def("dwg_probe", &PyMfcWindow::dwgProbe, py::arg("id"),
+             "画布鼠标诊断：(lastMsg, upX, upY, wasDrag, moved, lastHit)");
+    clsWin.def("hit_dwg", &PyMfcWindow::hitDwg, py::arg("id"), py::arg("x"), py::arg("y"),
+             "命中测试（客户端坐标）：返回卡片编号，空 = 没命中");
+    clsWin.def("select_dwg", &PyMfcWindow::selectDwg, py::arg("id"), py::arg("code"),
+             "按编号选中并把卡片移到视口中央（搜索定位），返回是否找到");
+    clsWin.def("card_rect_dwg", &PyMfcWindow::cardRectDwg, py::arg("id"), py::arg("code"),
+             "卡片在客户端坐标里的矩形 (x, y, w, h)；没有这张卡返回 None");
+    clsWin.def("bring_to_front_many", &PyMfcWindow::bringToFrontMany, py::arg("ids"));
+    clsWin.def("repaint", &PyMfcWindow::repaint, py::arg("id"));
+    clsWin.def("set_flick_content", &PyMfcWindow::setFlickContent);
+    clsWin.def("clear_flick_content", &PyMfcWindow::clearFlickContent);
+    clsWin.def("set_flick_offset", &PyMfcWindow::setFlickOffset);
+    clsWin.def("get_flick_offset_x", &PyMfcWindow::getFlickOffsetX);
+    clsWin.def("get_flick_offset_y", &PyMfcWindow::getFlickOffsetY);
+    auto clsPane = py::class_<PyMfcPanel, PyMfcHandle<PyMfcPanel>>(m, "Pane");
+    RegisterSurfaceApi<PyMfcPanel>(clsPane);
+    clsPane.def(py::init([](long long parentHwnd) -> PyMfcHandle<PyMfcPanel> {
             HWND parent = reinterpret_cast<HWND>(static_cast<std::intptr_t>(parentHwnd));
             if (parent == nullptr || !::IsWindow(parent))
                 throw std::runtime_error("PyMfcCore.Panel: 父窗口无效");
             return PyMfcHandle<PyMfcPanel>(PyMfcStore::Get().NewPanel(parent));
-        }), py::arg("parent_hwnd"))
-        .def_property_readonly("hwnd", [](PyMfcPanel& p) {
+        }), py::arg("parent_hwnd"));
+    clsPane.def_property_readonly("hwnd", [](PyMfcPanel& p) {
             return static_cast<long long>(static_cast<std::intptr_t>(
                 reinterpret_cast<std::intptr_t>(p.hwnd())));
-        })
-        .def("resize", &PyMfcPanel::resize)
-        .def("addLabel", &PyMfcPanel::addLabel)
-        .def("addButton", &PyMfcPanel::addButton)
-        .def("addEdit", &PyMfcPanel::addEdit)
-        .def("addListBox", &PyMfcPanel::addListBox)
-        .def("addCheckBox", &PyMfcPanel::addCheckBox)
-        .def("addRadio", &PyMfcPanel::addRadio)
-        .def("addGroup", &PyMfcPanel::addGroup)
-        .def("addCombo", &PyMfcPanel::addCombo)
-        .def("addProgress", &PyMfcPanel::addProgress)
-        .def("addSlider", &PyMfcPanel::addSlider)
-        .def("addTab", &PyMfcPanel::addTab)
-        .def("addTree", &PyMfcPanel::addTree)
-        .def("addListCtrl", &PyMfcPanel::addListCtrl)
-        .def("addChoice", &PyMfcPanel::addChoice)
-        .def("addDatePicker", &PyMfcPanel::addDatePicker)
-        .def("addPanel", &PyMfcPanel::addPanel)
-        .def("addWhiteRect", &PyMfcPanel::addWhiteRect)
-    .def("addShadowBox", &PyMfcPanel::addShadowBox)
-        .def("setControlFont", &PyMfcPanel::setControlFont,
-             py::arg("id"), py::arg("face"), py::arg("px"), py::arg("bold") = false)
-        .def("addSplitter", &PyMfcPanel::addSplitter)
-        .def("addStaticLine", &PyMfcPanel::addStaticLine)
-        .def("addHyperlink", &PyMfcPanel::addHyperlink)
-        .def("addRichText", &PyMfcPanel::addRichText)
-        .def("addToggle", &PyMfcPanel::addToggle)
-        .def("addBitmapButton", &PyMfcPanel::addBitmapButton)
-        .def("addStaticBitmap", &PyMfcPanel::addStaticBitmap)
-        .def("addGrid", &PyMfcPanel::addGrid)
-        .def("addScrolledWindow", &PyMfcPanel::addScrolledWindow)
-        .def("addCalendar", &PyMfcPanel::addCalendar)
-        .def("addTabItem", &PyMfcPanel::addTabItem, py::arg("id"), py::arg("text"))
-        .def("addTreeNode", &PyMfcPanel::addTreeNode, py::arg("id"), py::arg("text"),
-             py::arg("parent_index") = -1)
-        .def("addColumn", &PyMfcPanel::addColumn, py::arg("id"), py::arg("text"),
-             py::arg("width") = 120)
-        .def("addRow", &PyMfcPanel::addRow, py::arg("id"), py::arg("text"))
-        .def("setUrl", &PyMfcPanel::setUrl, py::arg("id"), py::arg("url"))
-        .def("getUrl", &PyMfcPanel::getUrl)
-        .def("setImage", &PyMfcPanel::setImage, py::arg("id"), py::arg("path"))
-        .def("setRichFormat", &PyMfcPanel::setRichFormat, py::arg("id"),
-             py::arg("size_pt") = 9, py::arg("bold") = false, py::arg("italic") = false,
-             py::arg("rgb") = 0xFFFFFF)
-        .def("setScrollRange", &PyMfcPanel::setScrollRange, py::arg("id"),
-             py::arg("min_value"), py::arg("max_value"))
-        .def("getScrollRange", &PyMfcPanel::getScrollRange)
-        .def("getScrollPos", &PyMfcPanel::getScrollPos, py::arg("id"))
-        .def("getSelection", &PyMfcPanel::getSelection, py::arg("id"))
-        .def("setSelection", &PyMfcPanel::setSelection, py::arg("id"), py::arg("from"),
-             py::arg("to"))
-        .def("onClick", &PyMfcPanel::onClick)
-        .def("setWheelRegion", &PyMfcPanel::setWheelRegion, py::arg("x"), py::arg("y"),
-             py::arg("w"), py::arg("h"), py::arg("step") = 3)
-        .def("onWheel", &PyMfcPanel::onWheel, py::arg("cb"))
-        .def("onChange", &PyMfcPanel::onChange)
-        .def("onSelect", &PyMfcPanel::onSelect)
-        .def("onDoubleClick", &PyMfcPanel::onDoubleClick)
-        .def("onDropDown", &PyMfcPanel::onDropDown)
-        .def("onValue", &PyMfcPanel::onValue)
-        .def("onChecked", &PyMfcPanel::onChecked)
-        .def("setText", &PyMfcPanel::setText)
-        .def("getText", &PyMfcPanel::getText)
-        .def("move", &PyMfcPanel::move)
-        .def("moveMany", &PyMfcPanel::moveMany, py::arg("items"))
-        .def("setXmlValue", [](PyMfcPanel& p, const std::wstring& name,
+        });
+    clsPane.def("resize", &PyMfcPanel::resize);
+    clsPane.def("move", &PyMfcPanel::move);
+    clsPane.def("move_many", &PyMfcPanel::moveMany, py::arg("items"));
+    clsPane.def("set_xml_value", [](PyMfcPanel& p, const std::wstring& name,
                                 const std::wstring& prop, py::object value) {
             return p.setXmlValue(name, prop, xmlPyPropValueFor(p.Host(), name, prop, value));
         }, py::arg("name"), py::arg("prop"), py::arg("value"),
-             "value 可为 str，也可为 list（一维 -> model/items，二维 -> 表格行）")
-        .def("reflowXml", &PyMfcPanel::reflowXml)
-        .def("addString", &PyMfcPanel::addString)
-        .def("clearStrings", &PyMfcPanel::clearStrings)
-        .def("countStrings", &PyMfcPanel::countStrings)
-        .def("getString", &PyMfcPanel::getString)
-        .def("deleteString", &PyMfcPanel::deleteString)
-        .def("getCurSel", &PyMfcPanel::getCurSel)
-        .def("setCurSel", &PyMfcPanel::setCurSel)
-        .def("getCheck", &PyMfcPanel::getCheck)
-        .def("setCheck", &PyMfcPanel::setCheck)
-        .def("setRange", &PyMfcPanel::setRange)
-        .def("setPos", &PyMfcPanel::setPos)
-        .def("getPos", &PyMfcPanel::getPos)
-        .def("setReadOnly", &PyMfcPanel::setReadOnly)
-        .def("getReadOnly", &PyMfcPanel::getReadOnly)
-        .def("setFocus", &PyMfcPanel::setFocusTo)
-        .def("setVisible", &PyMfcPanel::setVisible)
-        .def("getVisible", &PyMfcPanel::getVisible)
-        .def("setEnabled", &PyMfcPanel::setEnabled)
-        .def("getEnabled", &PyMfcPanel::getEnabled)
-        // QML 对齐小控件
-        .def("getSwitch", &PyMfcPanel::getSwitch)
-        .def("setSwitch", &PyMfcPanel::setSwitch)
-        .def("getSpin", &PyMfcPanel::getSpin)
-        .def("setSpin", &PyMfcPanel::setSpin)
-        .def("setSpinRange", &PyMfcPanel::setSpinRange)
-        .def("setRangeValues", &PyMfcPanel::setRangeValues)
-        .def("getRangeLow", &PyMfcPanel::getRangeLow)
-        .def("getRangeHigh", &PyMfcPanel::getRangeHigh)
-        .def("setPageCount", &PyMfcPanel::setPageCount)
-        .def("getPageCount", &PyMfcPanel::getPageCount)
-        .def("getPageIndex", &PyMfcPanel::getPageIndex)
-        .def("getDial", &PyMfcPanel::getDial)
-        .def("setDial", &PyMfcPanel::setDial)
-        .def("getTumblerCount", &PyMfcPanel::getTumblerCount)
-        .def("setTumblerCount", &PyMfcPanel::setTumblerCount)
-        .def("getTumblerValue", &PyMfcPanel::getTumblerValue)
-        .def("setTumblerValue", &PyMfcPanel::setTumblerValue)
-        .def("setScrollBarRange", &PyMfcPanel::setScrollBarRange)
-        .def("getScrollBarValue", &PyMfcPanel::getScrollBarValue)
-        .def("setScrollBarValue", &PyMfcPanel::setScrollBarValue)
-        .def("setTableColumns", &PyMfcPanel::setTableColumns)
-        .def("addTableRow", &PyMfcPanel::addTableRow)
-            .def("setTableRows", &PyMfcPanel::setTableRows,
-                 "整表一次灌入：行间\\n、格间\\t")
-        .def("onGridAction", &PyMfcPanel::onGridAction,
-             "表格按键/排序回调 cb(action, row, col, text)")
-
-        .def("onGridActionFor", &PyMfcPanel::onGridActionFor, py::arg("id"), py::arg("callback"),
-             "按表格控件 id 登记回调：多张表并存时按 id 分流，不串台")
-        .def("onControlEvent", &PyMfcPanel::onControlEvent, py::arg("id"), py::arg("event"), py::arg("callback"),
-             "控件级原始事件：mousedown/mouseup/mousemove/keydown/keyup/gotfocus/lostfocus")
-        .def("setColumnWidth", &PyMfcPanel::setColumnWidth, "设置某列宽度 px")
-        .def("getTableMetrics", &PyMfcPanel::getTableMetrics, py::arg("id"),
-             "表格度量：(行高, 表头高)，用于把表格高度对齐整行")
-        .def("onBlur", &PyMfcPanel::onBlur, py::arg("id"), py::arg("callback"),
-             "EDIT 失焦回调（原地单元格编辑提交用）")
-        .def("onDrag", &PyMfcPanel::onDrag, py::arg("id"), py::arg("callback"),
-             "可拖分割条：回调 (phase, x)，phase=down/move/up")
-        .def("cellRect", &PyMfcPanel::cellRect, py::arg("id"), py::arg("row"), py::arg("col"),
-             "单元格矩形 (x, y, w, h)，ListView 客户区坐标")
-        .def("clearTableRows", &PyMfcPanel::clearTableRows)
-        .def("getTableRowCount", &PyMfcPanel::getTableRowCount)
-        .def("getTableCell", &PyMfcPanel::getTableCell)
-        .def("setTableCell", &PyMfcPanel::setTableCell)
-        .def("getTableSelectedRow", &PyMfcPanel::getTableSelectedRow)
-        .def("setTableSelectedRow", &PyMfcPanel::setTableSelectedRow)
-        .def("sortTable", &PyMfcPanel::sortTable)
-        .def("addTable", &PyMfcPanel::addTable, py::arg("id"), py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"))
-        .def("tableClear", &PyMfcPanel::tableClear)
-        .def("tableRowCount", &PyMfcPanel::tableRowCount)
-        .def("setTableColumns", &PyMfcPanel::tableSetColumns, py::arg("id"), py::arg("widths"), py::arg("titles"))
-        .def("setTableColTypes", &PyMfcPanel::tableSetColTypes, py::arg("id"), py::arg("types"))
-        .def("appendTableRow", &PyMfcPanel::appendTableRow, py::arg("id"), py::arg("cells"))
-        .def("tableSetCell", &PyMfcPanel::tableSetCell)
-        .def("tableGetCell", &PyMfcPanel::tableGetCell)
-        .def("tableCellRect", &PyMfcPanel::tableCellRect, py::arg("id"), py::arg("row"), py::arg("col"))
-        .def("tableSelectedRow", &PyMfcPanel::tableSelectedRow)
-        .def("tableSetSelectedRow", &PyMfcPanel::tableSetSelectedRow)
-        .def("tableEnsureVisible", &PyMfcPanel::tableEnsureVisible)
-        .def("tableSetFilter", &PyMfcPanel::tableSetFilter)
-        .def("tableClearFilters", &PyMfcPanel::tableClearFilters)
-        .def("tableSort", &PyMfcPanel::tableSort, py::arg("id"), py::arg("col"), py::arg("desc"))
-        .def("tableViewRows", &PyMfcPanel::tableViewRows)
-        .def("addTreeItem", &PyMfcPanel::addTreeItem)
-        .def("clearTreeItems", &PyMfcPanel::clearTreeItems)
-        .def("getTreeSelectedRow", &PyMfcPanel::getTreeSelectedRow)
-        .def("isTreeItemCollapsed", &PyMfcPanel::isTreeItemCollapsed)
-        .def("setTreeItemCollapsed", &PyMfcPanel::setTreeItemCollapsed)
-        .def("setTreeSelectedRow", &PyMfcPanel::setTreeSelectedRow)
-        .def("addToolBarItem", &PyMfcPanel::addToolBarItem)
-        .def("clearToolBarItems", &PyMfcPanel::clearToolBarItems)
-        .def("getToolBarSelected", &PyMfcPanel::getToolBarSelected)
-        .def("setToolBarSelected", &PyMfcPanel::setToolBarSelected)
-        .def("animate", &PyMfcPanel::animate, py::arg("id"), py::arg("prop"), py::arg("to"),
-             py::arg("duration") = 300, py::arg("easing") = "outCubic",
-             py::arg("delay") = 0, py::arg("loop") = false)
-        .def("animateFrom", &PyMfcPanel::animateFrom, py::arg("id"), py::arg("prop"),
-             py::arg("from"), py::arg("to"), py::arg("duration") = 300,
-             py::arg("easing") = "outCubic", py::arg("delay") = 0, py::arg("loop") = false)
-        .def("animateColor", &PyMfcPanel::animateColor, py::arg("id"), py::arg("color"),
-             py::arg("duration") = 300, py::arg("easing") = "outCubic", py::arg("delay") = 0)
-        .def("stopAnimations", &PyMfcPanel::stopAnimations, py::arg("id") = 0)
-        .def("setBehavior", &PyMfcPanel::setBehavior, py::arg("id"), py::arg("prop"),
-             py::arg("duration"), py::arg("easing") = "outCubic")
-        .def("showToolTip", &PyMfcPanel::showToolTip, py::arg("ownerId"), py::arg("text"),
-             py::arg("durationMs") = 3000)
-        .def("hideToolTip", &PyMfcPanel::hideToolTip)
-        .def("showMenu", &PyMfcPanel::showMenu, py::arg("id"), py::arg("items"),
-             py::arg("x"), py::arg("y"))
-        .def("hideMenu", &PyMfcPanel::hideMenu)
-        .def("getMenuSelected", &PyMfcPanel::getMenuSelected)
-        .def("setMenuItems", &PyMfcPanel::setMenuItems)
-        .def("addMenuBarItem", &PyMfcPanel::addMenuBarItem)
-        .def("clearMenuBarItems", &PyMfcPanel::clearMenuBarItems)
-        .def("getMenuBarSelected", &PyMfcPanel::getMenuBarSelected)
-        .def("setMenuBarSelected", &PyMfcPanel::setMenuBarSelected)
-        .def("showPopup", &PyMfcPanel::showPopup, py::arg("id"), py::arg("title"),
-             py::arg("lines"), py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"))
-        .def("hidePopup", &PyMfcPanel::hidePopup)
-        .def("isPopupVisible", &PyMfcPanel::isPopupVisible)
-        .def("setCanvasCommands", &PyMfcPanel::setCanvasCommands)
-        .def("getCanvasCommands", &PyMfcPanel::getCanvasCommands)
-        .def("setCanvasEditable", &PyMfcPanel::setCanvasEditable, py::arg("id"), py::arg("on") = true)
-        .def("getCanvasEditable", &PyMfcPanel::getCanvasEditable)
-        .def("addPowerCanvas", &PyMfcPanel::addPowerCanvas, py::arg("id"),
-             py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"))
-        .def("loadPowerPlan", &PyMfcPanel::loadPowerPlan, py::arg("id"), py::arg("json"))
-        .def("loadPowerScene", &PyMfcPanel::loadPowerScene, py::arg("id"), py::arg("scene"))
-        .def("loadPowerSvg", &PyMfcPanel::loadPowerSvg, py::arg("id"), py::arg("svg"))
-        .def("loadPowerXml", &PyMfcPanel::loadPowerXml, py::arg("id"), py::arg("scene_xml"))
-        .def("loadPlanOverlay", &PyMfcPanel::loadPlanOverlay, py::arg("id"), py::arg("svg"))
-        .def("loadPlanOverlayXml", &PyMfcPanel::loadPlanOverlayXml, py::arg("id"),
-             py::arg("scene_xml"))
-        .def("setPlanView", &PyMfcPanel::setPlanView, py::arg("id"), py::arg("zoom"),
-             py::arg("offset_x"), py::arg("offset_y"))
-        .def("getPlanZoom", &PyMfcPanel::getPlanZoom)
-        // 三维视图画布：透视投影 + 左键拖动旋转 + 滚轮缩放 + 中键平移 + 双击复位
-        .def("addView3D", &PyMfcPanel::addView3D, py::arg("id"),
-             py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"),
-             "建一块三维画布（box/line/tri 图元，左键旋转、滚轮缩放、中键平移）")
-        .def("view3DLoad", &PyMfcPanel::view3DLoad, py::arg("id"), py::arg("geom"),
-             "喂几何文本：box x0 y0 z0 x1 y1 z1 rrggbb; line ...; 用 ; 或换行分隔")
-        .def("view3DAppendBox", &PyMfcPanel::view3DAppendBox, py::arg("id"),
-             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
-             py::arg("z1"), py::arg("color") = 0xA8C6E2, "追加一个轴对齐盒子")
-        .def("view3DAppendLine", &PyMfcPanel::view3DAppendLine, py::arg("id"),
-             py::arg("x0"), py::arg("y0"), py::arg("z0"), py::arg("x1"), py::arg("y1"),
-             py::arg("z1"), py::arg("color") = 0x30507A, py::arg("width") = 1.0f)
-        .def("view3DSetCamera", &PyMfcPanel::view3DSetCamera, py::arg("id"),
-             py::arg("yaw") = 35.0f, py::arg("pitch") = 22.0f, py::arg("zoom") = 1.0f,
-             py::arg("pan_x") = 0, py::arg("pan_y") = 0)
-        .def("view3DGetCamera", &PyMfcPanel::view3DGetCamera,
-             "返回 (yaw, pitch, zoom, pan_x, pan_y)")
-        .def("view3DFit", &PyMfcPanel::view3DFitView, py::arg("id"), "复位相机并重新适配")
-        .def("view3DSetStyle", &PyMfcPanel::view3DSetStyle, py::arg("id"),
-             py::arg("bg") = 0xF7FAFD, py::arg("axes") = true, py::arg("grid") = false)
-        .def("getPlanSelection", &PyMfcPanel::getPlanSelection)
-        .def("saveControlPng", &PyMfcPanel::saveControlPng,
-             "把控件按当前外观导出成 PNG（截图取证）")
-        .def("setPlanOptions", &PyMfcPanel::setPlanOptions, py::arg("id"),
-             py::arg("show_cable") = true, py::arg("mini") = false, py::arg("mini_of") = -1)
-        .def("setDetailCard", &PyMfcPanel::setDetailCard, py::arg("id"), py::arg("rect"), py::arg("texts"))
-        .def("clearDetailCard", &PyMfcPanel::clearDetailCard, py::arg("id"))
-        .def("getPlanView", &PyMfcPanel::getPlanView)
-        .def("setLevel", &PyMfcPanel::setLevel, py::arg("id"), py::arg("level"))
-        .def("getLevel", &PyMfcPanel::getLevel)
-        .def("bringToFront", &PyMfcPanel::bringToFront)
-        .def("raiseMany", &PyMfcPanel::raiseMany, py::arg("ids"))
-        .def("sendToBack", &PyMfcPanel::sendToBack)
-        .def("setTabIndex", &PyMfcPanel::setTabIndex, py::arg("id"), py::arg("index"))
-        .def("getTabIndex", &PyMfcPanel::getTabIndex)
-        .def("getCanvasItemCount", &PyMfcPanel::getCanvasItemCount)
-        .def("getCanvasItemOp", &PyMfcPanel::getCanvasItemOp)
-        .def("getCanvasItemBox", &PyMfcPanel::getCanvasItemBox)
-        .def("getCanvasSelection", &PyMfcPanel::getCanvasSelection)
-        .def("setCanvasSelection", &PyMfcPanel::setCanvasSelection)
-        .def("clearCanvasSelection", &PyMfcPanel::clearCanvasSelection)
-        .def("removeCanvasItems", &PyMfcPanel::removeCanvasItems)
-        .def("removeCanvasSelection", &PyMfcPanel::removeCanvasSelection)
-        .def("onCanvasSelect", &PyMfcPanel::onCanvasSelect)
-        .def("setLayerOpacity", &PyMfcPanel::setLayerOpacity)
-        .def("getLayerOpacity", &PyMfcPanel::getLayerOpacity)
-        .def("addListItem", &PyMfcPanel::addListItem)
-        .def("clearListItems", &PyMfcPanel::clearListItems)
-        .def("getListItemCount", &PyMfcPanel::getListItemCount)
-        .def("getListItem", &PyMfcPanel::getListItem)
-        .def("getListSelected", &PyMfcPanel::getListSelected)
-        .def("setListSelected", &PyMfcPanel::setListSelected)
-        .def("getListScroll", &PyMfcPanel::getListScroll)
-        .def("setListScroll", &PyMfcPanel::setListScroll)
-        .def("addPage", &PyMfcPanel::addPage)
-        .def("clearPages", &PyMfcPanel::clearPages)
-        .def("getViewCount", &PyMfcPanel::getViewCount)
-        .def("getViewIndex", &PyMfcPanel::getViewIndex)
-        .def("setViewIndex", &PyMfcPanel::setViewIndex)
-        .def("animatePage", &PyMfcPanel::animatePage)
-        .def("getXmlValue", &PyMfcPanel::getXmlValue, py::arg("id"), py::arg("prop"),
-             "按控件 id + 属性名读值")
-        .def("setPageIndex", &PyMfcPanel::setPageIndex);
-
-    m.def("easingValue", [](const std::string& ease, double tt) {
+             "value 可为 str，也可为 list（一维 -> model/items，二维 -> 表格行）");
+    m.def("easing_value", [](const std::string& ease, double tt) {
         return PyMfcHost::easeAt(ease, tt);
     }, py::arg("easing"), py::arg("t"),
         "缓动求值：linear / inQuad / outQuad / inOutQuad / inCubic / outCubic / inOutCubic / outBack / outElastic / spring / bezier(x1,y1,x2,y2)");
@@ -752,7 +496,7 @@ PYBIND11_MODULE(PyMfcXml, m, py::mod_gil_not_used())
           "  M.guiload_text('<XWindow Width=300 Height=120><XButton x:Name=\"Ok\" Text=\"确定\"/></XWindow>')\n"
           "  字符串入口没有文件基准目录，ResourceDictionary 的 Source 相对路径不可用"
           "（需要跨文件样式时用 guiload(path)）");
-    m.def("xmlLayout", &XmlLayoutRects, py::arg("path"), py::arg("width"), py::arg("height"),
+    m.def("xml_layout", &XmlLayoutRects, py::arg("path"), py::arg("width"), py::arg("height"),
           py::arg("overrides") = py::none(),
           "读 XML 按客户区尺寸算布局，返回 {x:Name: (x, y, w, h)}；overrides 可运行时改行列尺寸");
     m.def("prop_schema", &XmlPropertySchemaJson,
@@ -880,4 +624,5 @@ PYBIND11_MODULE(PyMfcXml, m, py::mod_gil_not_used())
         }
     }, "关闭所有 PyMfcCore 窗口（侧栏由 PyArxCore.Ap 负责，ARX 卸载前调用）");
 }
+
 
