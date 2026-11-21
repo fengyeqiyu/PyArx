@@ -6,7 +6,10 @@ AutoCAD（ObjectArx）+ MFC/XML 的 Python 绑定与控件库。C++ 侧用 pybin
 
 **关键词**：AutoCAD 二次开发 · ObjectArx · pybind11 · Python 3.15 · free-threaded · 无 GIL · MFC · XML · 可视化 UI 设计器 · 自绘控件库 · 声明式界面 · 桌面 GUI 框架 · AutoCAD plugin · CAD automation
 
-仓库地址：https://gitee.com/fengyeqiyu/PyArx
+仓库地址：
+
+- GitHub（主镜像）：https://github.com/fengyeqiyu/PyArx
+- Gitee（国内镜像）：https://gitee.com/fengyeqiyu/PyArx
 
 ## 这个项目能做什么
 
