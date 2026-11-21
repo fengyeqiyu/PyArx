@@ -231,8 +231,9 @@ void bind_PyRx(pym& m)
 			py::arg("other"), "Copy properties from another object")
 		.def("queryX", &PyRxObject::queryX,
 			py::arg("protocolClass"), "Query extended protocol interface")
-		.def("comparedTo", &PyRxObject::comparedTo,
-			py::arg("other"), "Compare ordering with another object")
+		.def("comparedTo", [](const PyRxObject& self, const PyRxObject& other) -> int {
+			return (int)self.comparedTo(other);
+		}, py::arg("other"), "Compare ordering with another object: -1 less, 0 equal, 1 greater, 2 not orderable")
 			// Type checks are done natively in Python via isinstance/issubclass/type;
 			// isKindOf/isDerivedFrom are intentionally not exposed.
 			// queryX is the ARX protocol-extension interface query and stays.
