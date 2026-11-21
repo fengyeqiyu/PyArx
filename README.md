@@ -10,6 +10,7 @@ AutoCAD（ObjectArx）+ MFC/XML 的 Python 绑定与控件库。C++ 侧用 pybin
 
 - GitHub（主镜像）：https://github.com/fengyeqiyu/PyArx
 - Gitee（国内镜像）：https://gitee.com/fengyeqiyu/PyArx
+- 项目介绍文章（CSDN）：https://blog.csdn.net/qq_35731898/article/details/171158850
 
 ## 这个项目能做什么
 
