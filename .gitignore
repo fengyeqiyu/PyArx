@@ -113,3 +113,13 @@ viewer/_*.jpg
 CAD快速看图/
 tests/*.html
 tests/*.png
+
+# examples 下的生成物（大体积，本地保留不入库）
+examples/**/*.bin
+examples/**/dwg_scene.xml
+examples/**/dwg_out.svg
+examples/**/ref_map.txt
+examples/**/dwgread_out.txt
+examples/**/dump_*.txt
+tools/shxtext/out/
+tools/cadview/out/
