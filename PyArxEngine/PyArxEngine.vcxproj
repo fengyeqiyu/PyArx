@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -60,9 +60,9 @@
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(OutDir)PyArxEngine.dll" "$(OutDir)PyArxEngine.arx"
+rem crx copy below is for headless (accoreconsole) testing only
 copy /Y "$(OutDir)PyArxEngine.dll" "$(OutDir)PyArxEngine.crx"
 copy /Y "G:\PyArx\third_party\python315t\PCbuild\amd64t\python315t.dll" "$(OutDir)"
-copy /Y "G:\PyArx\third_party\python315t\PCbuild\amd64t\python3.dll" "$(OutDir)"
 if not exist "$(OutDir)DLLs" mkdir "$(OutDir)DLLs"
 xcopy /Y /D "G:\PyArx\third_party\python315t\PCbuild\amd64t\*.pyd" "$(OutDir)DLLs\"
 xcopy /Y /D "G:\PyArx\third_party\python315t\PCbuild\amd64t\*.dll" "$(OutDir)DLLs\"</Command>
@@ -96,6 +96,7 @@ xcopy /Y /D "G:\PyArx\third_party\python315t\PCbuild\amd64t\*.dll" "$(OutDir)DLL
     <ClInclude Include="PyEngine.h" />
     <ClInclude Include="PyEngineC.h" />
     <ClInclude Include="PyRedir.h" />
+    <ClInclude Include="PyThreadScope.h" />
     <ClInclude Include="PyRxCmd.h" />
     <ClInclude Include="singleinstance.h" />
     <ClInclude Include="stdafx.h" />

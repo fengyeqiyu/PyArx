@@ -1,8 +1,9 @@
-﻿// PyAppDispatcher.cpp — 把 Python callable 投递到 AutoCAD command/application context
+// PyAppDispatcher.cpp — 把 Python callable 投递到 AutoCAD command/application context
 // 执行（PyRx AcApDocManager 同款机制）。归属 PyArxEngine。
 // 编码：UTF-8 带 BOM。
 #include "stdafx.h"
 #include "PyAppDispatcher.h"
+#include "PyThreadScope.h"
 #include "logPath.h"
 #include <acdocman.h>   // acDocManager 全局（AcApDocManager*），executeIn*Context API
 #include <aced.h>
@@ -87,10 +88,12 @@ void PyAppDispatcher::PushAndRequest(Task&& t, DispatchContext ctx) {
 }
 
 void PyAppDispatcher::RunOneTrampoline(void* /*pv*/) {
-    // CAD 回调进到这里：application context 或 command context，主线程。
-    // 此时 GIL 可能未被本线程持有（idle 泵的 gil_scoped_acquire 在 Yield 返回后
-    // 已析构），必须显式 Ensure。
-    PyGILState_STATE gstate = PyGILState_Ensure();
+    // free-threaded：没有 GIL 可取。本回调与 Python 执行同在主线程，线程状态已挂接；
+    // 缺失就直接拒绝，绝不无状态进 Python。
+    if (!PyThreadScope::Ready()) {
+        dispatchLog(L"[DISPATCH] 当前线程无 Python 线程状态，跳过本次任务");
+        return;
+    }
     try {
         Task t;
         {
@@ -98,7 +101,6 @@ void PyAppDispatcher::RunOneTrampoline(void* /*pv*/) {
             auto& self = PyAppDispatcher::Instance();
             std::lock_guard<std::mutex> lk(self.m_mutex);
             if (self.m_queue.empty()) {
-                PyGILState_Release(gstate);
                 return;
             }
             t = std::move(self.m_queue.front());
@@ -127,12 +129,11 @@ void PyAppDispatcher::RunOneTrampoline(void* /*pv*/) {
     catch (...) {
         dispatchLog(L"[DISPATCH] RunOneTrampoline 外层异常");
     }
-    PyGILState_Release(gstate);
 }
 
 void PyAppDispatcher::Clear() {
-    // 必须在 GIL 持有期间调用（PyArxEngine 卸载路径：unloadRelease 里
-    // PyGILState_Ensure 之后、PyEngine_Release 之前）。清空队列使 py::object
+    // free-threaded：无 GIL。必须在解释器终结前调用（unloadRelease 里
+    // PyEngine_Release / 卸载清理之前）。清空队列使 py::object
     // 引用被释放，避免解释器终结后访问悬挂对象。
     std::lock_guard<std::mutex> lk(m_mutex);
     m_queue.clear();

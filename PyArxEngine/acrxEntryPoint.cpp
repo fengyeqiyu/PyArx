@@ -1,4 +1,4 @@
-﻿// acrxEntryPoint.cpp — PyArxEngine ARX 宿主入口（acad.exe=arx / accoreconsole.exe=crx）。
+// acrxEntryPoint.cpp — PyArxEngine ARX 宿主入口（acad.exe=arx / accoreconsole.exe=crx）。
 // kInitAppMsg 只注册命令（加载期零重量），Python 引擎延后到首次命令懒初始化。
 // 卸载：先清 palette → 清 sys.modules → Py_FinalizeEx → FreeLibrary pyd 句柄。
 // 编码：UTF-8 带 BOM。
@@ -9,6 +9,7 @@
 #include <acedCmdNF.h>
 #include "PyEngineC.h"
 #include "PyEngine.h"
+#include "PyThreadScope.h"
 #include "logPath.h"
 
 // ---------------------------------------------------------------------------
@@ -241,7 +242,12 @@ static void unloadRelease() {
 	palLog(L"[UNLOAD] 进入 unloadRelease");
 
 	if (g_pyEngineReady) {
-		PyGILState_STATE gstate = PyGILState_Ensure();
+		// free-threaded：没有 GIL 可取；只要求线程状态已挂接
+		if (!PyThreadScope::Ready()) {
+			palLog(L"[UNLOAD] 当前线程无 Python 线程状态，跳过 Python 侧清理");
+			g_pyEngineReady = false;
+		}
+		else {
 		try {
 			try {
 				py::module_::import("PyMfcCore").attr("shutdown")();
@@ -281,11 +287,9 @@ static void unloadRelease() {
 				catch (...) { palLog(L"[UNLOAD] sys.modules 清理 PyArxCore 失败（已忽略）"); }
 			}
 
-			PyGILState_Release(gstate);
 		}
 		catch (...) {
-			palLog(L"[UNLOAD] 卸载过程出现意外异常（已忽略，强制释放 GIL）");
-			PyGILState_Release(gstate);
+			palLog(L"[UNLOAD] 卸载过程出现意外异常（已忽略）");
 		}
 
 		g_pyEngineReady = false;
@@ -319,6 +323,7 @@ static void unloadRelease() {
 				}
 				CloseHandle(hSnap);
 			}
+		}
 		}
 	}
 

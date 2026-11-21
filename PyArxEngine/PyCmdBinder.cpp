@@ -1,5 +1,6 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "PyCmdBinder.h"
+#include "PyThreadScope.h"
 #include "PyRxCmd.h"
 #include "PyString.h"   // type_caster<AcString>：命令名 name:AcString ↔ Python str 自动转换
 #include "logPath.h"
@@ -76,7 +77,7 @@ void bind_PyCmd(pym& m) {
 						try {
 							std::ofstream df(pyarxLogFile(L"exec_sp.txt"), std::ios::app);
 							df << "sp=[" << sp.utf8Ptr() << "] fn=[" << fName.utf8Ptr() << "]\n";
-							py::gil_scoped_acquire gil{};                       // 命令回调来自 CAD 命令线程，需取 GIL
+							PyThreadScope gil{};                                 // free-threaded：无 GIL，仅确认线程状态
 							if (sp.isEmpty())
 								throw std::runtime_error("scriptPath 为空，无法运行脚本（装饰器未捕获 co_filename）");
 							// 运行对应脚本到独立命名空间（顶层代码 + 函数定义），避免污染 __main__

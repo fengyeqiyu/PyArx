@@ -800,3 +800,10 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 14:35 PyArxCore 全量 ⑨ 通过 重组后复核：PYBIND11_MODULE 仍为唯一一处且带 py::mod_gil_not_used()（PyArxBinder.cpp:62）；PyGILState_ / python314 在 .cpp 中 0 处
 2026-11-21 14:35 PyArxCore 全量 ②④ 通过 新口径8：.def lambda 返回裸指针且未写 return_value_policy 的仅 PyDbCurve.cpp:154 getAcGeCurve 一处，SDK dbcurve.h 明确「调用方负责 delete 该 AcGeCurve3d」，pybind 默认 take_ownership 正确，非缺陷
 2026-11-21 14:35 PyArxCore 全量 ②④ 通过 新口径9：显式 take_ownership 的 8 处（PyGiBinder.cpp:283、PyGiContextGdi.cpp:143、PyDbObject.cpp:315、PyDbBlockTableRecord.cpp:340/349/353、PyDbFcf.cpp:62、PyDbLeader.cpp:129）逐一核为 new 出来的包装类指针或 SDK 交出的副本记录，无「对 SDK 自有对象 take_ownership」误用
+
+2026-11-21 15:05 PyArxEngine:②已修-去掉全部 GIL 使用（Py_GIL_DISABLED/python315t 无 GIL）
+2026-11-21 15:05 PyEngine.cpp:5处 py::gil_scoped_acquire + PyEval_InitThreads + 析构 PyGILState_Ensure 已删,改 PyThreadScope
+2026-11-21 15:05 acrxEntryPoint.cpp:卸载 PyGILState_Ensure/Release 已删,改 PyThreadScope::Ready() 前置检查(无状态则跳过 Python 清理)
+2026-11-21 15:05 PyAppDispatcher.cpp:回调 PyGILState_Ensure/Release 已删,改 Ready() 检查(无状态直接跳过任务)
+2026-11-21 15:05 PyCmdBinder.cpp:命令回调 gil_scoped_acquire 改 PyThreadScope
+2026-11-21 15:05 无头回归 accoreconsole(crx=dll同hash 7150EA0C):通过-8/8 exit=0 entity_count 0->6,日志 [RUNSCRIPT 2] free-threaded: no GIL
