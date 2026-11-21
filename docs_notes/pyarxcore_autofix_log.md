@@ -257,3 +257,6 @@
 2026-11-21 10:38 | PyDbSpatialFilter.cpp:72 | 编译失败 | queryBounds 守卫由 !ext.impObj() 改为只判 s.isNull()（SDK 为 AcDbExtents& 出参，PyDbExtents3d::impObj() 返回引用不可取反）
 2026-11-21 11:03 | PyDbMPolygon.cpp:40 | ③④ | patternType 改为显式 -> int 并返回 (int)enum，修掉 enum 未注册导致的 TypeError（旧 pyd 该 API 完全不可用），附中文 docstring
 2026-11-21 11:19 | PyDbBinder.cpp:234 | ③④ | comparedTo 绑定改 lambda 显式 -> int 并注释取值，修掉 AcRx::Ordering 未注册导致的 TypeError（旧 pyd 该 API 不可用）
+2026-11-21 12:18 | PyDbEntity.cpp:379 | ④ | intersectWith(带投影面) 失败时补 PyWarnIfError，不再静默返回空数组
+2026-11-21 12:18 | PyDbEntity.cpp:390 | ④ | boundingBoxIntersectWith(带投影面) 失败时补 PyWarnIfError
+2026-11-21 12:18 | PyDbEntity.cpp:399 | ④ | boundingBoxIntersectWith(无投影面) 失败时补 PyWarnIfError

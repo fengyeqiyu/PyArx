@@ -375,8 +375,9 @@ void bind_PyDbEntity(pym& m) {
 			std::vector<AcGePoint3d> out;
 			AcGePoint3dArray pts;
 			if (!self.impObj() || !other.impObj()) return out;
-			if (self.impObj()->intersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), projPlane, pts,
-					static_cast<Adesk::GsMarker>(thisGsMarker), static_cast<Adesk::GsMarker>(otherGsMarker)) != Acad::eOk) return out;
+			Acad::ErrorStatus es = self.impObj()->intersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), projPlane, pts,
+					static_cast<Adesk::GsMarker>(thisGsMarker), static_cast<Adesk::GsMarker>(otherGsMarker));
+			if (es != Acad::eOk) { PyWarnIfError(es, L"AcDbEntity::intersectWith"); return out; }
 			for (int i = 0; i < pts.length(); ++i) out.push_back(pts[i]);
 			return out;
 		}, py::arg("other"), py::arg("intType"), py::arg("proj_plane"), py::arg("thisGsMarker") = 0, py::arg("otherGsMarker") = 0)
@@ -386,8 +387,9 @@ void bind_PyDbEntity(pym& m) {
 			std::vector<AcGePoint3d> out;
 			AcGePoint3dArray pts;
 			if (!self.impObj() || !other.impObj()) return out;
-			if (self.impObj()->boundingBoxIntersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), projPlane, pts,
-					static_cast<Adesk::GsMarker>(thisGsMarker), static_cast<Adesk::GsMarker>(otherGsMarker)) != Acad::eOk) return out;
+			Acad::ErrorStatus es = self.impObj()->boundingBoxIntersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), projPlane, pts,
+					static_cast<Adesk::GsMarker>(thisGsMarker), static_cast<Adesk::GsMarker>(otherGsMarker));
+			if (es != Acad::eOk) { PyWarnIfError(es, L"AcDbEntity::boundingBoxIntersectWith"); return out; }
 			for (int i = 0; i < pts.length(); ++i) out.push_back(pts[i]);
 			return out;
 		}, py::arg("other"), py::arg("intType"), py::arg("proj_plane"), py::arg("thisGsMarker") = 0, py::arg("otherGsMarker") = 0)
@@ -396,8 +398,9 @@ void bind_PyDbEntity(pym& m) {
 			std::vector<AcGePoint3d> out;
 			AcGePoint3dArray pts;
 			if (!self.impObj() || !other.impObj()) return out;
-			if (self.impObj()->boundingBoxIntersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), pts,
-					static_cast<Adesk::GsMarker>(thisGsMarker), static_cast<Adesk::GsMarker>(otherGsMarker)) != Acad::eOk) return out;
+			Acad::ErrorStatus es = self.impObj()->boundingBoxIntersectWith(other.impObj(), static_cast<AcDb::Intersect>(intType), pts,
+					static_cast<Adesk::GsMarker>(thisGsMarker), static_cast<Adesk::GsMarker>(otherGsMarker));
+			if (es != Acad::eOk) { PyWarnIfError(es, L"AcDbEntity::boundingBoxIntersectWith"); return out; }
 			for (int i = 0; i < pts.length(); ++i) out.push_back(pts[i]);
 			return out;
 		}, py::arg("other"), py::arg("intType"), py::arg("thisGsMarker") = 0, py::arg("otherGsMarker") = 0)

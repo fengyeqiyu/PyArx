@@ -785,3 +785,10 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 11:19 PyArxCore 全量 防呆 通过 新口径扫全部 3042 条 &Class::method 直绑 + 38 条显式返回类型 lambda，比对 76 个已注册 py::enum_：除 patternType（已修）与本轮 comparedTo（已修）外无其它未注册枚举返回，未发现第二类同类缺陷
 2026-11-21 11:19 PyRxObject.cpp:118 ② 更正 实跑证明 comparedTo(None) 抛 TypeError（绑定要求 PyRxObject 实例），第 32 轮补的 kNotOrderable 守卫属预防性；空对象 comparedTo 返回 2 属 SDK 语义
 2026-11-21 11:19 PyArxCore 全量 构建 通过 第三/四次 Release x64 重编（11:01 与 11:18），pyd 与源码同步，dumpbin 依赖仍只有 python315t.dll
+2026-11-21 12:18 PyDbEntity.cpp:379 ④ 已改 intersectWith 带投影面重载：es 捕获后 PyWarnIfError 再返回空数组（公共签名不变）
+2026-11-21 12:18 PyDbEntity.cpp:390 ④ 已改 boundingBoxIntersectWith 带投影面重载：同上补 PyWarnIfError
+2026-11-21 12:18 PyDbEntity.cpp:399 ④ 已改 boundingBoxIntersectWith 无投影面重载：同上补 PyWarnIfError
+2026-11-21 12:18 PyArxCore 全量 防呆 通过 新口径1：全项目 impObj() 先存局部变量再 -> 解引用，仅 1 处命中 PyDbPolyline.cpp:64，已在前一行 line62 判空，非缺陷
+2026-11-21 12:18 PyArxCore 全量 防呆 通过 新口径2：std::cout/std::cerr/裸 printf/fprintf/wprintf —— std::cout=std::cerr=0；printf 族仅 3 处均为功能用途（PyDbTrans.cpp:31 事务跟踪文件、PyDbValueTypes.cpp:75/118 snprintf 拼 repr），无调试残留
+2026-11-21 12:18 PyArxCore 全量 防呆 通过 新口径3：Acad::eOk 判定处缺 PyWarnIfError 扫出 89 处，逐类核为枚举 case 标签、helper 自身（stdafx.h:221）、Overrule 回调返回值、已由 throw/continue 处理的对象打开失败；真缺陷仅 PyDbEntity 3 处（本轮已修）
+2026-11-21 12:18 PyDbIndexUpdateDataIterator.cpp:37 ② 通过 currentData 失败返回 0ULL 与「空 ObjectId 即 0」语义一致；PyDbBlockTableRecordIterator.cpp:37/44 同类通过；PyDbDatabase.cpp:3279 lockDocument 返回 es 整数为设计
