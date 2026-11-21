@@ -34,11 +34,7 @@ PyArx 是一个将 AutoCAD 的 ObjectArx 框架与 MFC/XML UI 技术桥接到 Py
 
 ![UIDesign 设计器](docs/screenshots/designer.png)
 
-同一套布局用 XML 写与用 HTML/CSS 写，渲染结果一致：
-
-| XML 写法 | HTML 写法 |
-|---|---|
-| ![XML 布局](docs/screenshots/xml-layout.png) | ![HTML 布局](docs/screenshots/html-layout.png) |
+同一套布局可以用 XML 标签写，也可以用 HTML/CSS 写，两条路径走同一批 C++ 绘制函数，渲染结果一致（一致性由 `tests/xml_ui` 回归保证）。
 
 ## 目录结构
 
