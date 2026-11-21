@@ -820,3 +820,6 @@ PyDbDeepCloneFiler.cpp:31:③setFilerStatus经SDK确认返回void-通过
 2026-11-21 17:18 db\PyDbColor.cpp:38 ③ 已改 setColorByRgb lambda 内 AcCmColor::setRGB 返回的 es 原被丢弃，改为存 es + PyWarnIfError，失败返回 False
 2026-11-21 17:18 db\PyDbColor.cpp:29,39 ④ 通过 AcDbColor::getColor/setColor 在 SDK dbmain.h:1739-1740 声明为 void，无 es 可判，非静默失败
 2026-11-21 17:18 PyArxCore 全量 ③ 通过 新口径13：36 处「setter lambda 直接 return true 且块内无 es」逐一对 SDK 头核实，全部是返回 void 的 setter（dbLoftOptions/dbSweepOptions/dbRevolveOptions 的 set*、dbunderlaydef 的 setUseMasterUnits/setXrefDepth/setShowRasterRef、dbsymtb 的 setFlagBits/setIsShapeFile/setIsVertical/setIsScaledToFit），无缺陷
+2026-11-21 18:18 PyArxCore 全量 ⑧ 通过 新口径14：空 catch 体扫描（catch(...){} 与仅注释的多行空体）全项目共 6 处，逐一核为合理：core\PyArxBinder.cpp:133 日志写入自身兜底（外层已 acutPrintf）、core\PyUt.cpp:189,213 __doc__ 读取 best-effort、core\PyUt.cpp:334 失败详情写 logs 后仍有 acutPrintf 提示、db\PyDbTrans.cpp:50,266 逐层 myParent 尝试 cast（注释说明该层类型未注册即继续）
+2026-11-21 18:18 db\PyDbTrans.cpp:50,266 ⑧ 通过 py::error_already_set 被 catch(...) 捕获时 pybind11 已 PyErr_Fetch 清空错误指示器，不会残留 SystemError；后续 py::cast(PyDbObject(p)) 仍能正常返回兜底对象
+2026-11-21 18:18 PyArxCore 全量 ⑦ 通过 复扫 TEMP-DIAG/_diagAppend/OutputDebugString/#if 0 均为 0，ofstream 3 处仍为 functional（事务跟踪日志、失败详情日志）
